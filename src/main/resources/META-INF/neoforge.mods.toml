@@ -1,0 +1,10 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="nourished"
+version="1.0.0"
+displayName="Nourished"
+authors="Marie"
+description="A dynamic nutrition and diet tracking mod with native compatibility for Farmer's Delight and Pam's HarvestCraft."

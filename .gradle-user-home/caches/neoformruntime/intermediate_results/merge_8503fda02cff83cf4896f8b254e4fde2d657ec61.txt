@@ -1,0 +1,23 @@
+{
+  "type": "merge",
+  "hashValue": "8503fda02cff83cf4896f8b254e4fde2d657ec61",
+  "components": {
+    "server": {
+      "value": "26e9f3fcbe6f27c4bca0682805f08583f57f574e",
+      "annotation": "~/RiderProjects/NutritionalBalance/.gradle-user-home/caches/neoformruntime/intermediate_results/stripServer_85eae7f5ea8979afd85ede5adaf27ef3035f665b_output.jar"
+    },
+    "client": {
+      "value": "d9aeec28241bc9bd71e9c7dc5d35e6f17d4e8cb1",
+      "annotation": "~/RiderProjects/NutritionalBalance/.gradle-user-home/caches/neoformruntime/intermediate_results/stripClient_5366ba7cadb79a79e1f1777bdebc8f7fc800c417_output.jar"
+    },
+    "external tool classpath[0]": {
+      "value": "net.neoforged:mergetool:2.0.3:fatjar"
+    },
+    "command line arg": {
+      "value": "--client {client} --server {server} --ann 1.21.1 --output {output} --inject false"
+    },
+    "jvm args": {
+      "value": ""
+    }
+  }
+}

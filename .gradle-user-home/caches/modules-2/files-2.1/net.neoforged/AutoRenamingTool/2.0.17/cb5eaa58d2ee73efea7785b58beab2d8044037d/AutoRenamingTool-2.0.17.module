@@ -1,0 +1,187 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "net.neoforged",
+    "module": "AutoRenamingTool",
+    "version": "2.0.17",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.11.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "dependencies": [
+        {
+          "group": "net.neoforged",
+          "module": "srgutils",
+          "version": {
+            "requires": "1.0.0"
+          }
+        },
+        {
+          "group": "net.neoforged.installertools",
+          "module": "cli-utils",
+          "version": {
+            "requires": "2.1.4"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "AutoRenamingTool-2.0.17.jar",
+          "url": "AutoRenamingTool-2.0.17.jar",
+          "size": 107707,
+          "sha512": "fe4e9130c17a5478d93b8bfc15d79a02a72d4e9525061c70c6fbb1d731b5404b4b75dea07e911417cf23e897428642bc0dafff34fb01309220e0ea7e868fa95f",
+          "sha256": "db39a2c95f8299d23bf3bc81b7c17fcd2693081b7d3fe68f2c7d11ab1ff3cdde",
+          "sha1": "453980338983da2c30a37774d625fd2dac7cea4f",
+          "md5": "fc2be7ee5ebee58cef95ad35b75ad626"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "net.sf.jopt-simple",
+          "module": "jopt-simple",
+          "version": {
+            "requires": "6.0-alpha-3"
+          }
+        },
+        {
+          "group": "org.ow2.asm",
+          "module": "asm",
+          "version": {
+            "requires": "9.5"
+          }
+        },
+        {
+          "group": "org.ow2.asm",
+          "module": "asm-commons",
+          "version": {
+            "requires": "9.5"
+          }
+        },
+        {
+          "group": "org.ow2.asm",
+          "module": "asm-tree",
+          "version": {
+            "requires": "9.5"
+          }
+        },
+        {
+          "group": "net.neoforged.javadoctor",
+          "module": "gson-io",
+          "version": {
+            "requires": "2.0.17"
+          }
+        },
+        {
+          "group": "net.neoforged",
+          "module": "srgutils",
+          "version": {
+            "requires": "1.0.0"
+          }
+        },
+        {
+          "group": "net.neoforged.installertools",
+          "module": "cli-utils",
+          "version": {
+            "requires": "2.1.4"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "AutoRenamingTool-2.0.17.jar",
+          "url": "AutoRenamingTool-2.0.17.jar",
+          "size": 107707,
+          "sha512": "fe4e9130c17a5478d93b8bfc15d79a02a72d4e9525061c70c6fbb1d731b5404b4b75dea07e911417cf23e897428642bc0dafff34fb01309220e0ea7e868fa95f",
+          "sha256": "db39a2c95f8299d23bf3bc81b7c17fcd2693081b7d3fe68f2c7d11ab1ff3cdde",
+          "sha1": "453980338983da2c30a37774d625fd2dac7cea4f",
+          "md5": "fc2be7ee5ebee58cef95ad35b75ad626"
+        }
+      ]
+    },
+    {
+      "name": "shadowRuntimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "shadowed",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "AutoRenamingTool-2.0.17-all.jar",
+          "url": "AutoRenamingTool-2.0.17-all.jar",
+          "size": 751270,
+          "sha512": "0c476d11fabb0f0f8569c07840baf8004f8dcec1a5494b0d4a79163f8c941940d6d98dd01b97653e9c7a199ca49213d24f3bd23a19f3107e19ef6622e682c91c",
+          "sha256": "e977ee4422efb51eb54cc99f939833cef769de8b4aa1043294ce5400c60f3b1f",
+          "sha1": "9388df4c3589faf10c35d9154cfb2451c83bd717",
+          "md5": "bc7533c9ae4e7e62dbdb7c2ee3fccaae"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "AutoRenamingTool-2.0.17-sources.jar",
+          "url": "AutoRenamingTool-2.0.17-sources.jar",
+          "size": 45059,
+          "sha512": "a8d785abc6eb6888785102d795e374f70be50eef2d384052bc14ca99a7aa37c19a9b0c2af11e2eae9199deefc7d7813040eed36bb4f7b33548f4ed646a35d967",
+          "sha256": "17bca054f1ced44ed773e4dc1a94e9f59d0b1d23a06186b4c2c1255072324359",
+          "sha1": "b8023195a4bed2a5b1c4340950d701a2fd1d6951",
+          "md5": "2e99c5e4a1a36b091ac4b7001c2962a2"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "AutoRenamingTool-2.0.17-javadoc.jar",
+          "url": "AutoRenamingTool-2.0.17-javadoc.jar",
+          "size": 138862,
+          "sha512": "3467d1a3fdb05d2eee5c0d549b3430d3b8d8cf4b94c153d4d2e6b3392c32e9b3c9c651014d3e0e156883db81ac1e1862bb53d95c12defc574d8fb098d0d4f3fe",
+          "sha256": "fd1c5949cd78783871d247364ff2dd4ed68fb401dedeec81018e1150e80ccf52",
+          "sha1": "534c9cc2b643c1577870ef3a2a25c40c2c597e84",
+          "md5": "3179cbf9e468a3d006fb48d36ea69f81"
+        }
+      ]
+    }
+  ]
+}

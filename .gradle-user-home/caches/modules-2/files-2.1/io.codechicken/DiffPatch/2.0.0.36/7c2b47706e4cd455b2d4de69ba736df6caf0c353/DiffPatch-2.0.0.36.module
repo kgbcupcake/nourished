@@ -1,0 +1,208 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "io.codechicken",
+    "module": "DiffPatch",
+    "version": "2.0.0.36",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.7"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "dependencies": [
+        {
+          "group": "net.covers1624",
+          "module": "Quack",
+          "version": {
+            "requires": "0.4.10.101"
+          }
+        },
+        {
+          "group": "it.unimi.dsi",
+          "module": "fastutil",
+          "version": {
+            "requires": "8.3.1"
+          }
+        },
+        {
+          "group": "org.apache.commons",
+          "module": "commons-lang3",
+          "version": {
+            "requires": "3.9"
+          }
+        },
+        {
+          "group": "org.apache.commons",
+          "module": "commons-compress",
+          "version": {
+            "requires": "1.18"
+          }
+        },
+        {
+          "group": "org.tukaani",
+          "module": "xz",
+          "version": {
+            "requires": "1.8"
+          }
+        },
+        {
+          "group": "net.sf.jopt-simple",
+          "module": "jopt-simple",
+          "version": {
+            "requires": "5.0.4"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "DiffPatch-2.0.0.36.jar",
+          "url": "DiffPatch-2.0.0.36.jar",
+          "size": 136050,
+          "sha512": "dd87b27772bb45d84b501f25b10ac09858a235b11d18449f5b055cdc4be84eb91b181ad492dc5c443480122f335bf2db3564f37899aee484ce7c5e928ee2c872",
+          "sha256": "33494fd6480733ae3d4e1c10294c0a006ba92871d65d5142dd353064482ff849",
+          "sha1": "7a02233ac96f640b7688aea420ae6713988273da",
+          "md5": "6a3965311faef8029affa81acbbc1242"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "net.covers1624",
+          "module": "Quack",
+          "version": {
+            "requires": "0.4.10.101"
+          }
+        },
+        {
+          "group": "it.unimi.dsi",
+          "module": "fastutil",
+          "version": {
+            "requires": "8.3.1"
+          }
+        },
+        {
+          "group": "org.apache.commons",
+          "module": "commons-lang3",
+          "version": {
+            "requires": "3.9"
+          }
+        },
+        {
+          "group": "org.apache.commons",
+          "module": "commons-compress",
+          "version": {
+            "requires": "1.18"
+          }
+        },
+        {
+          "group": "org.tukaani",
+          "module": "xz",
+          "version": {
+            "requires": "1.8"
+          }
+        },
+        {
+          "group": "net.sf.jopt-simple",
+          "module": "jopt-simple",
+          "version": {
+            "requires": "5.0.4"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "DiffPatch-2.0.0.36.jar",
+          "url": "DiffPatch-2.0.0.36.jar",
+          "size": 136050,
+          "sha512": "dd87b27772bb45d84b501f25b10ac09858a235b11d18449f5b055cdc4be84eb91b181ad492dc5c443480122f335bf2db3564f37899aee484ce7c5e928ee2c872",
+          "sha256": "33494fd6480733ae3d4e1c10294c0a006ba92871d65d5142dd353064482ff849",
+          "sha1": "7a02233ac96f640b7688aea420ae6713988273da",
+          "md5": "6a3965311faef8029affa81acbbc1242"
+        }
+      ]
+    },
+    {
+      "name": "shadowRuntimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "shadowed",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "DiffPatch-2.0.0.36-all.jar",
+          "url": "DiffPatch-2.0.0.36-all.jar",
+          "size": 22580704,
+          "sha512": "b865bc3f48020e9786cc3cc5ea6b78652d21ba3d29e32e17af87bd3a3d6cb4909ecdfe5bb9292958842f12c4c8411a3218d5fcbf9859146488f2c56fb4151cd5",
+          "sha256": "30d1ff26c112bf3a488e1e5a32a345f75ff0ef985c3315b2d987d607e7038580",
+          "sha1": "5b32f9baa0c0371c0dc80a3b88794960af0c6b44",
+          "md5": "8463fdc7e7e4c18d9148b8e8d1bb3f75"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "DiffPatch-2.0.0.36-sources.jar",
+          "url": "DiffPatch-2.0.0.36-sources.jar",
+          "size": 49106,
+          "sha512": "99fc6cc45f3dfa7dbc970bdc14bcc79ca737def3e413ee2926be5260d2107f6c6702fbd07c1b64aac231fa921f3271bdb72e3dfc927e2e2814d1dd3807680a68",
+          "sha256": "b47ab8f208d4bcdda5871d45e5f9e7decd532d0d36d841ce53fa3d02b94ba7dd",
+          "sha1": "3c1018a4b9de700d207bf4d462c786c80c5bdd2f",
+          "md5": "f47f6c8194a0246daa8673295ab1dec7"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "DiffPatch-2.0.0.36-javadoc.jar",
+          "url": "DiffPatch-2.0.0.36-javadoc.jar",
+          "size": 230640,
+          "sha512": "e5a8461068287cf77de5f7fb95d724bc16c2ee67a6c4075718bf827d30769923a3cc0b44821434453a0efe80f1df98e39f4f5dde4ff1848dffa5f797d0808101",
+          "sha256": "c1ae39c3cadbaf60440f5fac66ef6632be8f72adedf346b0443c7cb69af86b25",
+          "sha1": "145a4c148793b3f78fb77fc1cfd34ac59c0ff39c",
+          "md5": "164c0d495b27fc22e9d82e8ad57281b4"
+        }
+      ]
+    }
+  ]
+}
