@@ -12,6 +12,9 @@ Added screenshots section to README.
 - Clean up README by removing screenshots section
 
 Removed old screenshots section and placeholder.
+- Fix Hud-Gui image reference in README
+
+Corrected the image reference for Hud-Gui in the README.
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -19,6 +22,7 @@ Removed old screenshots section and placeholder.
 - Update changelog workflow for improved formatting and token usage
 - Update changelog [skip ci]
 - Refine changelog formatting and update entries
+- Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
 ## [0.1.0] - 2026-04-30
