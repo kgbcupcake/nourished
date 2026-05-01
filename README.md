@@ -54,11 +54,9 @@ Rough guide to what the numbers do to your character:
 
 ## Screenshots
 
-Placeholder for now. When you have captures, drop them here (for example under `docs/screenshots/`) and wire them up like:
-
 | Main Gui                                                 | Hud-Gui                                                |
 |:---------------------------------------------------------:|:-------------------------------------------------------:|
-| ![Main Gui](Assets/MainGui.png) | ![Hud-Gui](Assets/HubGui.png) |
+| ![Main Gui](Assets/MainGui.png) | ![Hud-Gui](Assets/HudGui.png) |
 
 ```markdown
 ![Diet screen overview](docs/screenshots/diet-overview.png)
