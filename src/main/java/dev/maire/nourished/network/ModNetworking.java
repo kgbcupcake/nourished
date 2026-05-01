@@ -1,7 +1,11 @@
 package dev.maire.nourished.network;
 
 import dev.maire.nourished.Nourished;
+import dev.maire.nourished.client.ClientDietCache;
+import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -30,7 +34,12 @@ public class ModNetworking {
 
     private static void handleSyncDiet(SyncDietPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            dev.maire.nourished.client.ClientDietCache.set(payload.diet());
+            DietData next = payload.diet();
+            ClientDietCache.set(next);
+            LocalPlayer player = Minecraft.getInstance().player;
+            if (player != null) {
+                player.setData(DietAttachment.DIET.get(), next);
+            }
         });
     }
 

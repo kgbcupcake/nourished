@@ -3,6 +3,9 @@ package dev.maire.nourished;
 import com.mojang.logging.LogUtils;
 import dev.maire.nourished.attachment.NutritionAttachment;
 import dev.maire.nourished.compat.ModCompat;
+import dev.maire.nourished.config.NourishedClientConfig;
+import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.config.NourishedConfigScreen;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.handler.ConfigReloadHandler;
 import dev.maire.nourished.handler.DietPlayerEvents;
@@ -14,6 +17,8 @@ import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
@@ -25,9 +30,14 @@ public class Nourished {
 
     public Nourished(IEventBus modEventBus, ModContainer modContainer) {
         NutrientRegistry.load();
+        NourishedConfig.register(modContainer);
+        NourishedClientConfig.register(modContainer);
+        modEventBus.addListener(NourishedClientConfig::onModConfigLoading);
+        modEventBus.addListener(NourishedClientConfig::onModConfigReloading);
         FoodNutritionRegistry.init();
         NutritionAttachment.register(modEventBus);
         DietAttachment.register(modEventBus);
+        modContainer.registerExtensionPoint(IConfigScreenFactory.class, (client, parent) -> NourishedConfigScreen.create(parent));
         modEventBus.addListener(ModNetworking::register);
         NeoForge.EVENT_BUS.register(new FoodEatenHandler());
         if (!ModCompat.LSO_LOADED) {

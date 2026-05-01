@@ -53,13 +53,13 @@ neoForge {
 }
 
 repositories {
+    maven { url = 'https://maven.architectury.dev/' }
     maven { url = 'https://maven.blamejared.com' }
     maven { url = 'https://www.cursemaven.com' }
 }
 
 dependencies {
-    // Add mod dependencies here if needed, e.g.:
-    // compileOnly "mezz.jei:jei-1.21.1-neoforge-api:${jei_version}"
+    implementation "me.shedaniel.cloth:cloth-config-neoforge:21.11.153"
 }
 
 tasks.withType(JavaCompile).configureEach {

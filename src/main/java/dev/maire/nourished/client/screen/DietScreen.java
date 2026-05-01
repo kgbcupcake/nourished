@@ -6,9 +6,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import dev.maire.nourished.client.ClientDietCache;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
+import dev.maire.nourished.config.NourishedClientConfig;
+import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.nutrition.NutrientRegistry;
+import com.mojang.blaze3d.systems.RenderSystem;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -30,6 +35,9 @@ public class DietScreen extends Screen {
     // ── Right panel row geometry ─────────────────────────────────────────────
     private static final int ROW_STEP    = 22;
 
+    private static final float FADE_DURATION_SEC = 0.15f;
+    private static final float FADE_TOOLTIP_THRESHOLD = 0.9f;
+
 
     // ── Colors ───────────────────────────────────────────────────────────────
     private static final int COL_BG         = 0xF01A1A1A;
@@ -48,15 +56,32 @@ public class DietScreen extends Screen {
     private static final int COL_RED        = 0xFFFF5555;
     private static final int COL_PURPLE     = 0xFFA95FFF;
     private static final int COL_ROW_BG     = 0xFF1D1D1D;
+    /** Warm white/yellow (RGB) for nutrient bar flash overlay; alpha applied at draw time. */
+    private static final int COL_FLASH_RGB  = 0xFFFFE0;
 
     // ── State ────────────────────────────────────────────────────────────────
     private int leftPos, topPos;
     private final Map<String, Float>     display = new LinkedHashMap<>();
     private final Map<String, ItemStack> icons   = new LinkedHashMap<>();
     private final List<String> visibleBars        = new ArrayList<>();
+    /** Index of nutrient row whose icon is being dragged; null when not dragging. */
+    private Integer dragBarFromIndex;
+
+    /** 0..1 fade-in over {@link #FADE_DURATION_SEC}; updated each render from frame delta. */
+    private float fadeAlpha;
+    private long fadeLastFrameNanos;
+    private boolean fadeClockStarted;
 
     public DietScreen() {
         super(Component.translatable("nourished.screen.diet"));
+        fadeAlpha = 0f;
+        fadeClockStarted = false;
+    }
+
+    @Override
+    public void onClose() {
+        dragBarFromIndex = null;
+        super.onClose();
     }
 
     // ── Init ─────────────────────────────────────────────────────────────────
@@ -67,7 +92,8 @@ public class DietScreen extends Screen {
         topPos  = (height - HEIGHT) / 2;
 
         visibleBars.clear();
-        for (String key : DietData.barOrder()) {
+        dragBarFromIndex = null;
+        for (String key : NourishedClientConfig.get().effectiveDietBarOrder()) {
             display.putIfAbsent(key, 0f);
             icons.put(key, new ItemStack(
                     BuiltInRegistries.ITEM.get(ResourceLocation.parse(NutrientRegistry.getIcon(key)))));
@@ -83,10 +109,64 @@ public class DietScreen extends Screen {
         );
     }
 
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0 && NourishedClientConfig.get().dietBarDragEnabled()) {
+            int rx = leftPos + SPLIT + PAD;
+            int y0 = topPos + 44;
+            for (int i = 0; i < visibleBars.size(); i++) {
+                int by = y0 + i * ROW_STEP;
+                if (mouseX >= rx && mouseX <= rx + 20 && mouseY >= by && mouseY <= by + 20) {
+                    dragBarFromIndex = i;
+                    return true;
+                }
+            }
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (dragBarFromIndex != null && button == 0 && NourishedClientConfig.get().dietBarDragEnabled()) {
+            int y0 = topPos + 44;
+            int to = Mth.clamp((int) ((mouseY - y0 + ROW_STEP / 2) / ROW_STEP), 0, visibleBars.size() - 1);
+            int from = dragBarFromIndex;
+            dragBarFromIndex = null;
+            if (from >= 0 && from < visibleBars.size() && from != to) {
+                String moved = visibleBars.remove(from);
+                visibleBars.add(to, moved);
+                NourishedClientConfig.get().setDietBarOrder(new ArrayList<>(visibleBars));
+                NourishedClientConfig.saveNow();
+            }
+            return true;
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (dragBarFromIndex != null && button == 0) {
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
     // ── Render ───────────────────────────────────────────────────────────────
 
     @Override
     public void render(GuiGraphics g, int mx, int my, float pt) {
+        long now = System.nanoTime();
+        if (!fadeClockStarted) {
+            fadeLastFrameNanos = now;
+            fadeClockStarted = true;
+        }
+        float dt = (now - fadeLastFrameNanos) / 1_000_000_000f;
+        fadeLastFrameNanos = now;
+        fadeAlpha = Mth.clamp(fadeAlpha + dt / FADE_DURATION_SEC, 0f, 1f);
+
+        boolean showIconTooltips = fadeAlpha > FADE_TOOLTIP_THRESHOLD;
+
+        RenderSystem.setShaderColor(1f, 1f, 1f, fadeAlpha);
         renderBackground(g, mx, my, pt);
 
         DietData data = getClientData();
@@ -117,9 +197,13 @@ public class DietScreen extends Screen {
                 leftPos + WIDTH / 2, topPos + HEIGHT / 2, COL_GRAY);
         } else {
             drawLeftPanel(g, data);
-            drawRightPanel(g, data, mx, my);
+            drawRightPanel(g, data, fadeAlpha);
         }
 
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        if (showIconTooltips && data != null) {
+            drawDietIconTooltips(g, mx, my);
+        }
         super.render(g, mx, my, pt);
     }
 
@@ -195,7 +279,7 @@ public class DietScreen extends Screen {
 
     // ── Right panel ──────────────────────────────────────────────────────────
 
-    private void drawRightPanel(GuiGraphics g, DietData data, int mx, int my) {
+    private void drawRightPanel(GuiGraphics g, DietData data, float panelFadeAlpha) {
         int rx = leftPos + SPLIT + PAD;   // right panel left edge
         int y  = topPos + 30;
 
@@ -241,6 +325,12 @@ public class DietScreen extends Screen {
             // ── Segmented bar ─────────────────────────────────────────────
             drawSegmentedBar(g, rx + 24, y + 12, barW, 5, disp, color);
 
+            float flashA = ClientDietCache.flashAlpha(key);
+            if (flashA > 0f) {
+                int aByte = Mth.clamp(Mth.floor(flashA * panelFadeAlpha * 255f), 1, 255);
+                g.fill(rx + 24, y + 12, rx + 24 + barW, y + 12 + 5, (aByte << 24) | COL_FLASH_RGB);
+            }
+
             // ── Percentage ────────────────────────────────────────────────
             String pctStr = (int)(disp * 100) + "%";
             g.drawString(font, pctStr, leftPos + WIDTH - PAD - 30, y + 2, pctColor, false);
@@ -251,17 +341,27 @@ public class DietScreen extends Screen {
             else if (real < prev - 0.005f)
                 g.drawString(font, "↓", leftPos + WIDTH - PAD - 10, y + 2, COL_RED, false);
 
-            // ── Tooltip — only when hovering the icon box ─────────────────
-            if (mx >= bx && mx <= bx + 20 && my >= by && my <= by + 20) {
-                g.renderTooltip(font,
-                        Component.translatable("nourished.screen.diet.tooltip." + key),
-                        mx, my);
-            }
-
             y += ROW_STEP;
         }
 
         drawLegendBar(g, rx, topPos + HEIGHT - 66, leftPos + WIDTH - PAD - rx, 34);
+    }
+
+    /** Icon tooltips at full opacity after fade-in (see {@link #FADE_TOOLTIP_THRESHOLD}). */
+    private void drawDietIconTooltips(GuiGraphics g, int mx, int my) {
+        int rx = leftPos + SPLIT + PAD;
+        int y = topPos + 30 + 14;
+        for (String key : visibleBars) {
+            int bx = rx;
+            int by = y;
+            if (mx >= bx && mx <= bx + 20 && my >= by && my <= by + 20) {
+                g.renderTooltip(font,
+                        Component.translatable("nourished.screen.diet.tooltip." + key),
+                        mx, my);
+                return;
+            }
+            y += ROW_STEP;
+        }
     }
 
     // ── Drawing helpers ──────────────────────────────────────────────────────
@@ -360,16 +460,22 @@ public class DietScreen extends Screen {
     }
 
     private static String getBalanceKey(DietData data) {
-        boolean low    = data.nutrients.values().stream().anyMatch(v -> v < 0.25f);
-        boolean excess = data.nutrients.values().stream().anyMatch(v -> v > 0.90f);
+        NourishedConfig config = NourishedConfig.get();
+        float critical = (float) config.criticalThreshold();
+        float excessThreshold = (float) config.excessThreshold();
+        boolean low = data.nutrients.values().stream().anyMatch(v -> v < critical);
+        boolean excess = data.nutrients.values().stream().anyMatch(v -> v > excessThreshold);
         if (low)    return "low";
         if (excess) return "excess";
         return "balanced";
     }
 
     private static int barColor(String key, float v) {
-        if (v < 0.25f) return COL_RED;
-        if (v < 0.40f) return COL_ORANGE;
+        NourishedConfig config = NourishedConfig.get();
+        float critical = (float) config.criticalThresholdFor(key);
+        float low = (float) config.lowThreshold();
+        if (v < critical) return COL_RED;
+        if (v < low) return COL_ORANGE;
         return nutrientBaseColor(key);
     }
 
