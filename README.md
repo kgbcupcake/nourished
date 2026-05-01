@@ -56,6 +56,10 @@ Rough guide to what the numbers do to your character:
 
 Placeholder for now. When you have captures, drop them here (for example under `docs/screenshots/`) and wire them up like:
 
+| Main Gui                                                 | Hud-Gui                                                |
+|:---------------------------------------------------------:|:-------------------------------------------------------:|
+| ![Main Gui](Assets/MainGui.png) | ![Hud-Gui](Assets/HubGui.png) |
+
 ```markdown
 ![Diet screen overview](docs/screenshots/diet-overview.png)
 ```
@@ -73,15 +77,6 @@ Placeholder for now. When you have captures, drop them here (for example under `
 ```
 
 The built jar lands in `build/libs/` as `nourished-<version>.jar` (see `version` in `build.gradle`).
-
-
-
-## Screenshots
-
-| Main Gui                                                 | Hud-Gui                                                |
-|:---------------------------------------------------------:|:-------------------------------------------------------:|
-| ![Main Gui](Assets/Screenshot_From_MainGui.png) | ![Hud-Gui](Assets/Screenshot_From_HubGui.png) |
-
 
 
 ## License
