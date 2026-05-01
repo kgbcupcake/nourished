@@ -3,6 +3,7 @@
 ### 🚀 Features
 
 - HUD edit mode, drag-and-drop icons, and config expansion
+- Enhance HUD edit mode and diet screen functionality
 
 ### 💼 Other
 
@@ -22,6 +23,7 @@ Corrected the image reference for Hud-Gui in the README.
 - Update changelog workflow for improved formatting and token usage
 - Update changelog [skip ci]
 - Refine changelog formatting and update entries
+- Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
