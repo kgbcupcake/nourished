@@ -8,6 +8,8 @@
 
 - Remove gradle cache from repo
 - Update changelog workflow for improved formatting and token usage
+- Update changelog [skip ci]
+- Refine changelog formatting and update entries
 ## [0.1.0] - 2026-04-30
 
 ### 🚀 Features
