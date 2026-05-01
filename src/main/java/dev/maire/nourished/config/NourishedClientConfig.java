@@ -29,6 +29,7 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.IntValue hudReservedBottom;
     private final ModConfigSpec.BooleanValue hudDraggable;
     private final ModConfigSpec.BooleanValue dietBarDragEnabled;
+    private final ModConfigSpec.BooleanValue hideZeroNutrients;
     private final ModConfigSpec.ConfigValue<List<? extends String>> dietBarOrder;
 
     private NourishedClientConfig(ModConfigSpec.Builder builder) {
@@ -45,6 +46,7 @@ public final class NourishedClientConfig {
         hudReservedBottom = builder.defineInRange("hudReservedBottom", 52, 30, 100);
         hudDraggable = builder.define("hudDraggable", true);
         dietBarDragEnabled = builder.define("dietBarDragEnabled", true);
+        hideZeroNutrients = builder.define("hideZeroNutrients", true);
         dietBarOrder = builder.defineListAllowEmpty(
                 "dietBarOrder",
                 List::of,
@@ -166,6 +168,14 @@ public final class NourishedClientConfig {
 
     public void setDietBarDragEnabled(boolean value) {
         dietBarDragEnabled.set(value);
+    }
+
+    public boolean hideZeroNutrients() {
+        return hideZeroNutrients.get();
+    }
+
+    public void setHideZeroNutrients(boolean value) {
+        hideZeroNutrients.set(value);
     }
 
     /**
