@@ -2,6 +2,7 @@ package dev.maire.nourished.network;
 
 import dev.maire.nourished.Nourished;
 import dev.maire.nourished.client.ClientDietCache;
+import dev.maire.nourished.client.NourishedToastManager;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
 import net.minecraft.client.Minecraft;
@@ -35,6 +36,7 @@ public class ModNetworking {
     private static void handleSyncDiet(SyncDietPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             DietData next = payload.diet();
+            NourishedToastManager.onClientDietUpdated(next);
             ClientDietCache.set(next);
             LocalPlayer player = Minecraft.getInstance().player;
             if (player != null) {

@@ -17,6 +17,7 @@ public final class NourishedConfig {
     private final ModConfigSpec.IntValue decayIntervalTicks;
     private final ModConfigSpec.BooleanValue enableEffects;
     private final ModConfigSpec.BooleanValue enableHUD;
+    private final ModConfigSpec.BooleanValue showFoodTooltips;
 
     private final ModConfigSpec.DoubleValue criticalThreshold;
     private final ModConfigSpec.DoubleValue lowThreshold;
@@ -34,6 +35,7 @@ public final class NourishedConfig {
         decayIntervalTicks = builder.defineInRange("decayIntervalTicks", 1200, 1, Integer.MAX_VALUE);
         enableEffects = builder.define("enableEffects", true);
         enableHUD = builder.define("enableHUD", true);
+        showFoodTooltips = builder.define("showFoodTooltips", true);
         builder.pop();
 
         builder.push("thresholds");
@@ -114,6 +116,14 @@ public final class NourishedConfig {
 
     public void setEnableHUD(boolean value) {
         enableHUD.set(value);
+    }
+
+    public boolean showFoodTooltips() {
+        return showFoodTooltips.get();
+    }
+
+    public void setShowFoodTooltips(boolean value) {
+        showFoodTooltips.set(value);
     }
 
     public double criticalThreshold() {

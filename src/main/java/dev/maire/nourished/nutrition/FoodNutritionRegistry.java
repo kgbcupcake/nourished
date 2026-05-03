@@ -86,15 +86,24 @@ public class FoodNutritionRegistry {
         return "grains";
     }
 
-    public static NutrientValues getNutrients(ItemStack stack, Level level) {
+    /**
+     * @param silent when {@code true}, skips {@link #resolveNutrientBar} unmatched-item warnings (use on client
+     *               tooltips / JEI where tags may not be committed yet).
+     */
+    public static NutrientValues getNutrients(ItemStack stack, Level level, boolean silent) {
         FoodProperties food = stack.getItem().components().get(DataComponents.FOOD);
         if (food == null) {
             return new NutrientValues(0.2f, 0.2f, 0.2f, 0.2f, 0.2f);
         }
 
-        String bar = resolveNutrientBar(stack, true);
+        String bar = resolveNutrientBar(stack, !silent);
         float totalPoints = Math.max(1.0f, food.nutrition() + Math.max(0f, food.saturation()) * 0.5f);
         return nutrientValuesForBar(bar, totalPoints);
+    }
+
+    /** Same as {@link #getNutrients(ItemStack, Level, boolean)} with {@code silent == false}. */
+    public static NutrientValues getNutrients(ItemStack stack, Level level) {
+        return getNutrients(stack, level, false);
     }
 
     /** NutrientValues with primary macro weighting for the given diet bar. */

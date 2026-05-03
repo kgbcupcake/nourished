@@ -38,6 +38,12 @@
     { "id": "bakery:braided_bread_block", "required": false },
     { "id": "bakery:bun_block", "required": false },
     { "id": "farm_and_charm:oat_pancake_block", "required": false },
-    { "id": "farm_and_charm:farmers_breakfast_block", "required": false }
+    { "id": "farm_and_charm:farmers_breakfast_block", "required": false },
+    { "id": "croptopia:barley", "required": false },
+    { "id": "croptopia:oat", "required": false },
+    { "id": "croptopia:rice", "required": false },
+    { "id": "croptopia:oatmeal", "required": false },
+    { "id": "croptopia:blackbean", "required": false },
+    { "id": "croptopia:soybean", "required": false }
   ]
 }

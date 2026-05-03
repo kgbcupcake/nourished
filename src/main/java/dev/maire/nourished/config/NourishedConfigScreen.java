@@ -89,6 +89,13 @@ public final class NourishedConfigScreen {
                         .setSaveConsumer(config::setEnableEffects)
                         .build()
         );
+        category.addEntry(
+                eb.startBooleanToggle(Component.translatable("config.nourished.showFoodTooltips"), config.showFoodTooltips())
+                        .setDefaultValue(true)
+                        .setTooltip(Component.translatable("config.nourished.showFoodTooltips.desc"))
+                        .setSaveConsumer(config::setShowFoodTooltips)
+                        .build()
+        );
     }
 
     private static void addGuiTweaksCategory(NourishedConfig config, NourishedClientConfig client, ConfigBuilder builder, ConfigEntryBuilder eb) {
@@ -159,6 +166,13 @@ public final class NourishedConfigScreen {
                         .setDefaultValue(true)
                         .setTooltip(Component.translatable("config.nourished.dietBarDragEnabled.desc"))
                         .setSaveConsumer(client::setDietBarDragEnabled)
+                        .build()
+        );
+        category.addEntry(
+                eb.startBooleanToggle(Component.translatable("config.nourished.hideZeroNutrients"), client.hideZeroNutrients())
+                        .setDefaultValue(true)
+                        .setTooltip(Component.translatable("config.nourished.hideZeroNutrients.desc"))
+                        .setSaveConsumer(client::setHideZeroNutrients)
                         .build()
         );
         category.addEntry(

@@ -1,0 +1,262 @@
+Give Cursor this prompt:
+
+Add all missing food items to the nutrient tag JSON files in
+src/main/resources/data/nourished/tags/item/nutrients/
+
+## fruits.json — add to values array:
+"pamhc2foodcore:applejuiceitem",
+"pamhc2foodcore:applesmoothieitem",
+"pamhc2foodcore:applepopsicleitem",
+"pamhc2foodcore:applejellyitem",
+"pamhc2foodcore:applejellytoastitem",
+"pamhc2foodcore:chorusjuiceitem",
+"pamhc2foodcore:chorussmoothieitem",
+"pamhc2foodcore:choruspopsicleitem",
+"pamhc2foodcore:chorusjellyitem",
+"pamhc2foodcore:chorusjellytoastitem",
+"pamhc2foodcore:melonjuiceitem",
+"pamhc2foodcore:melonsmoothieitem",
+"pamhc2foodcore:melonpopsicleitem",
+"pamhc2foodcore:melonjellyitem",
+"pamhc2foodcore:melonjellytoastitem",
+"pamhc2foodcore:sweetberryjuiceitem",
+"pamhc2foodcore:sweetberrysmoothieitem",
+"pamhc2foodcore:sweetberrypopsicleitem",
+"pamhc2foodcore:sweetberryjellyitem",
+"pamhc2foodcore:sweetberryjellytoastitem",
+"pamhc2foodcore:glowberryjuiceitem",
+"pamhc2foodcore:glowberrysmoothieitem",
+"pamhc2foodcore:glowberrypopsicleitem",
+"pamhc2foodcore:glowberryjellyitem",
+"pamhc2foodcore:glowberryjellytoastitem",
+"pamhc2foodcore:caramelappleitem",
+"pamhc2foodcore:fruitsaladitem",
+"pamhc2foodcore:fruitpunchitem",
+"pamhc2foodcore:p8juiceitem",
+"pamhc2foodcore:carrotjuiceitem",
+"farm_and_charm:strawberry",
+"bakery:strawberry_cake_slice",
+"bakery:sweetberry_cake_slice",
+"bakery:apple_pie_slice",
+"bakery:glowberry_pie_slice",
+"bakery:strawberry_glazed_cookie",
+"bakery:sweetberry_glazed_cookie",
+"bakery:strawberry_cupcake",
+"bakery:sweetberry_cupcake",
+"bakery:apple_cupcake",
+"bakery:jam_roll",
+"bakery:bread_with_jam"
+
+## vegetables.json — add to values array:
+"pamhc2foodcore:glazedcarrotsitem",
+"pamhc2foodcore:carrotsoupitem",
+"pamhc2foodcore:pickledbeetsitem",
+"pamhc2foodcore:pumpkinsoupitem",
+"pamhc2foodcore:potatosoupitem",
+"pamhc2foodcore:bakedvegetablemedlyitem",
+"pamhc2foodcore:basicveggieburgeritem",
+"pamhc2foodcore:veggiepotpieitem",
+"pamhc2foodcore:grilledveggieskeweritem",
+"pamhc2foodcore:vegetablenoodlesoupitem",
+"pamhc2foodcore:stewitem",
+"farm_and_charm:lettuce",
+"farm_and_charm:onion",
+"farm_and_charm:tomato",
+"farm_and_charm:farmer_salad",
+"farm_and_charm:simple_tomato_soup",
+"farm_and_charm:onion_soup",
+"farm_and_charm:potato_soup",
+"farm_and_charm:barley_soup",
+"farm_and_charm:nettle_tea_cup",
+"farm_and_charm:ribwort_tea_cup",
+"farm_and_charm:strawberry_tea_cup"
+
+## proteins.json — add to values array:
+"pamhc2foodcore:boiledeggitem",
+"pamhc2foodcore:friedeggitem",
+"pamhc2foodcore:scrambledeggitem",
+"pamhc2foodcore:friedchickenitem",
+"pamhc2foodcore:groundchickenitem",
+"pamhc2foodcore:cookedgroundchickenitem",
+"pamhc2foodcore:chickennuggetitem",
+"pamhc2foodcore:basicchickensandwichitem",
+"pamhc2foodcore:chickenjerkyitem",
+"pamhc2foodcore:chickendinneritem",
+"pamhc2foodcore:chickenpotpieitem",
+"pamhc2foodcore:grilledchickenskeweritem",
+"pamhc2foodcore:chickennoodlesoupitem",
+"pamhc2foodcore:potroastitem",
+"pamhc2foodcore:groundbeefitem",
+"pamhc2foodcore:cookedgroundbeefitem",
+"pamhc2foodcore:basiccheeseburgeritem",
+"pamhc2foodcore:baconcheeseburgeritem",
+"pamhc2foodcore:beefjerkyitem",
+"pamhc2foodcore:beefpotpieitem",
+"pamhc2foodcore:grilledbeefskeweritem",
+"pamhc2foodcore:beefnoodlesoupitem",
+"pamhc2foodcore:groundporkitem",
+"pamhc2foodcore:cookedgroundporkitem",
+"pamhc2foodcore:basicporksandwichitem",
+"pamhc2foodcore:porkjerkyitem",
+"pamhc2foodcore:hotdogitem",
+"pamhc2foodcore:baconandeggsitem",
+"pamhc2foodcore:epicbaconitem",
+"pamhc2foodcore:porkpotpieitem",
+"pamhc2foodcore:grilledporkskeweritem",
+"pamhc2foodcore:porknoodlesoupitem",
+"pamhc2foodcore:groundfishitem",
+"pamhc2foodcore:cookedgroundfishitem",
+"pamhc2foodcore:fishsticksitem",
+"pamhc2foodcore:basicfishsandwichitem",
+"pamhc2foodcore:fishjerkyitem",
+"pamhc2foodcore:fishandchipsitem",
+"pamhc2foodcore:fishpotpieitem",
+"pamhc2foodcore:grilledfishskeweritem",
+"pamhc2foodcore:fishnoodlesoupitem",
+"pamhc2foodcore:groundmuttonitem",
+"pamhc2foodcore:cookedgroundmuttonitem",
+"pamhc2foodcore:basicmuttonsandwichitem",
+"pamhc2foodcore:muttonjerkyitem",
+"pamhc2foodcore:muttonpotpieitem",
+"pamhc2foodcore:grilledmuttonskeweritem",
+"pamhc2foodcore:muttonnoodlesoupitem",
+"pamhc2foodcore:groundrabbititem",
+"pamhc2foodcore:cookedgroundrabbititem",
+"pamhc2foodcore:basicrabbitsandwichitem",
+"pamhc2foodcore:rabbitjerkyitem",
+"pamhc2foodcore:rabbitpotpieitem",
+"pamhc2foodcore:grilledrabbitskeweritem",
+"pamhc2foodcore:rabbitnoodlesoupitem",
+"pamhc2foodcore:meatloafitem",
+"pamhc2foodcore:chocolatebaconitem",
+"pamhc2foodcore:mayonaiseitem",
+"farm_and_charm:minced_beef",
+"farm_and_charm:lamb_ham",
+"farm_and_charm:chicken_parts",
+"farm_and_charm:bacon",
+"farm_and_charm:roasted_chicken",
+"farm_and_charm:cooked_salmon",
+"farm_and_charm:cooked_cod",
+"farm_and_charm:chicken_wrapped_in_bacon",
+"farm_and_charm:lamb_with_corn",
+"farm_and_charm:bacon_with_eggs",
+"farm_and_charm:goulash",
+"farm_and_charm:beef_patty_with_vegetables",
+"farm_and_charm:sausage_with_oat_patty",
+"farm_and_charm:barley_patties_with_potatoes",
+"brewery:sausage",
+"bakery:grilled_salmon_sandwich",
+"bakery:grilled_bacon_sandwich",
+"bakery:sandwich",
+"farmersdelight:steak_and_potatoes"
+
+## grains.json — add to values array:
+"pamhc2foodcore:butteredbakedpotatoitem",
+"pamhc2foodcore:mashedpotatoesitem",
+"pamhc2foodcore:friesitem",
+"pamhc2foodcore:potatochipsitem",
+"pamhc2foodcore:sunflowerseedsitem",
+"pamhc2foodcore:roastedsunflowerseedsitem",
+"pamhc2foodcore:trailmixitem",
+"farm_and_charm:corn",
+"farm_and_charm:dough",
+"farm_and_charm:raw_pasta",
+"farm_and_charm:corn_grits",
+"farm_and_charm:pasta_with_onion_sauce",
+"farm_and_charm:oatmeal_with_strawberries",
+"brewery:pretzel",
+"bakery:cake_dough",
+"bakery:sweet_dough",
+"bakery:croissant",
+"bakery:misslilitu_biscuit",
+"bakery:cornet",
+"bakery:vegetable_sandwich"
+
+## sugars.json — add to values array:
+"pamhc2foodcore:chorusyogurtitem",
+"pamhc2foodcore:icecreamitem",
+"pamhc2foodcore:chocolateicecreamitem",
+"pamhc2foodcore:caramelicecreamitem",
+"pamhc2foodcore:cookiesandmilkitem",
+"pamhc2foodcore:chocolatebaritem",
+"pamhc2foodcore:hotchocolateitem",
+"pamhc2foodcore:chocolaterollitem",
+"pamhc2foodcore:chocolatecaramelfudgeitem",
+"pamhc2foodcore:smoresitem",
+"pamhc2foodcore:chocolatemilkitem",
+"pamhc2foodcore:fudgesicleitem",
+"pamhc2foodcore:caramelitem",
+"pamhc2foodcore:marshmellowsitem",
+"pamhc2foodcore:cottoncandyitem",
+"pamhc2foodcore:gummycreepersitem",
+"pamhc2foodcore:jellybeansitem",
+"pamhc2foodcore:melonpieitem",
+"pamhc2foodcore:honeymuffinitem",
+"farm_and_charm:grandmothers_strawberry_cake_block",
+"bakery:chocolate_cake_slice",
+"bakery:chocolate_gateau_slice",
+"bakery:bundt_cake_slice",
+"bakery:linzer_tart_slice",
+"bakery:chocolate_tart_slice",
+"bakery:pudding_slice",
+"bakery:chocolate_glazed_cookie",
+"bakery:chocolate_truffle",
+"bakery:jam_roll"
+
+## dairy.json — add to values array:
+"pamhc2foodcore:freshmilkitem",
+"pamhc2foodcore:cocoapowderitem",
+"farm_and_charm:butter"
+
+## Items to SKIP (not food, ingredients only — do not add to any tag):
+- pamhc2foodcore:cookingoilitem
+- pamhc2foodcore:vinegaritem
+- pamhc2foodcore:freshwateritem
+- pamhc2foodcore:saltitem
+- pamhc2foodcore:stockitem
+- farm_and_charm:rotten_tomato
+- farm_and_charm:chicken_feed
+- brewery:beer_wheat (raw ingredient)
+- brewery:beer_barley (raw ingredient)
+- brewery:beer_hops (raw ingredient)
+- brewery:beer_nettle (raw ingredient)
+- brewery:beer_oat (raw ingredient)
+- brewery:beer_haley (raw ingredient)
+- brewery:whiskey_* (alcohol — skip or add to sugars if they are food items)
+
+## Block items (farm_and_charm and brewery serve foods as blocks):
+These need to go in the tag files using their block item form.
+Add to proteins.json:
+"farm_and_charm:baked_lamb_ham_block",
+"farm_and_charm:potato_with_roast_meat_block",
+"farm_and_charm:stuffed_chicken_block",
+"farm_and_charm:stuffed_rabbit_block",
+"brewery:pork_knuckle",
+"brewery:fried_chicken",
+"brewery:half_chicken"
+
+Add to grains.json:
+"farm_and_charm:farmers_bread_block",
+"farm_and_charm:roasted_corn_block",
+"brewery:dumplings",
+"brewery:mashed_potatoes",
+"brewery:potato_salad",
+"bakery:crusty_bread_block",
+"bakery:bread_block",
+"bakery:baguette_block",
+"bakery:toast_block",
+"bakery:braided_bread_block",
+"bakery:bun_block",
+"farm_and_charm:oat_pancake_block",
+"farm_and_charm:farmers_breakfast_block"
+
+Add to sugars.json:
+"bakery:waffle_block"
+
+Add to fruits.json:
+"farm_and_charm:strawberry_tea",
+"farm_and_charm:nettle_tea",
+"farm_and_charm:ribwort_tea"
+
+Do not change "replace" field — keep it false.
+Do not remove any existing entries.

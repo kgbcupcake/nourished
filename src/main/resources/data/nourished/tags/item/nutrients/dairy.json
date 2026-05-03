@@ -5,6 +5,7 @@
     "minecraft:milk_bucket",
     "pamhc2foodcore:freshmilkitem",
     "pamhc2foodcore:cocoapowderitem",
-    "farm_and_charm:butter"
+    "farm_and_charm:butter",
+    { "id": "croptopia:cheese_cake", "required": false }
   ]
 }

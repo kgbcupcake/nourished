@@ -22,7 +22,9 @@ public class NutritionData {
     public float vitamins;
     public float hydration;
 
-    public NutritionData() {}
+    public NutritionData() {
+        this(0.5f, 0.5f, 0.5f, 0.5f, 0.5f);
+    }
 
     public NutritionData(float protein, float carbs, float fats, float vitamins, float hydration) {
         this.protein = protein;

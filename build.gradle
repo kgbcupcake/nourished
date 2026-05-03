@@ -59,7 +59,7 @@ repositories {
 }
 
 dependencies {
-    implementation "me.shedaniel.cloth:cloth-config-neoforge:21.11.153"
+    implementation "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
 }
 
 tasks.withType(JavaCompile).configureEach {

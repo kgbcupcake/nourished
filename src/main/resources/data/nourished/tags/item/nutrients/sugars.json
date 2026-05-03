@@ -34,6 +34,8 @@
     "bakery:chocolate_glazed_cookie",
     "bakery:chocolate_truffle",
     "bakery:jam_roll",
-    { "id": "bakery:waffle_block", "required": false }
+    { "id": "bakery:waffle_block", "required": false },
+    { "id": "croptopia:cheese_cake", "required": false },
+    { "id": "croptopia:rhubarb_crisp", "required": false }
   ]
 }

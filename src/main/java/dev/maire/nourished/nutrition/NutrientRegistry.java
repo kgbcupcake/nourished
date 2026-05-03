@@ -6,7 +6,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.maire.nourished.Nourished;
-import net.minecraft.client.Minecraft;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
@@ -36,35 +35,12 @@ public class NutrientRegistry {
     // ── Default definitions ───────────────────────────────────────────────────
 
     private static final List<NutrientDef> DEFAULTS = List.of(
-        new NutrientDef("fruits",     "minecraft:golden_apple", List.of(
-            "c:foods/fruits", "c:foods/berries", "c:foods/juice",
-            "pamhc2food:fruititem", "pamhc2food:juiceitem", "pamhc2food:smoothieitem"
-        )),
-        new NutrientDef("vegetables", "minecraft:carrot", List.of(
-            "c:foods/vegetables", "c:foods/salad",
-            "farmersdelight:vegetables",
-            "pamhc2food:veggiefooditem", "pamhc2food:herbitem", "pamhc2food:saladitem"
-        )),
-        new NutrientDef("proteins",   "minecraft:cooked_beef", List.of(
-            "c:foods/cooked_meat", "c:foods/cooked_fish",
-            "c:foods/raw_meat", "c:foods/raw_fish", "c:foods/eggs",
-            "pamhc2food:proteinitem", "pamhc2food:fishitem"
-        )),
-        new NutrientDef("grains",     "minecraft:bread", List.of(
-            "c:foods/bread", "c:foods/grain", "c:foods/crops",
-            "c:foods/pasta", "c:foods/sandwich",
-            "pamhc2food:grainitem", "pamhc2food:toasteditem",
-            "farmersdelight:foods/pasta"
-        )),
-        new NutrientDef("sugars",     "minecraft:sugar", List.of(
-            "c:foods/sweets", "c:foods/candy", "c:foods/cookies",
-            "c:foods/cake", "c:foods/pie",
-            "pamhc2food:sweetitem", "pamhc2food:cakeitem", "pamhc2food:pieitem"
-        )),
-        new NutrientDef("dairy",      "minecraft:milk_bucket", List.of(
-            "c:foods/dairy",
-            "pamhc2food:cheeseitem", "pamhc2food:dairyitem", "pamhc2food:milkitem"
-        ))
+        new NutrientDef("fruits",     "minecraft:golden_apple", List.of("nourished:nutrients/fruits")),
+        new NutrientDef("vegetables", "minecraft:carrot", List.of("nourished:nutrients/vegetables")),
+        new NutrientDef("proteins",   "minecraft:cooked_beef", List.of("nourished:nutrients/proteins")),
+        new NutrientDef("grains",     "minecraft:bread", List.of("nourished:nutrients/grains")),
+        new NutrientDef("sugars",     "minecraft:sugar", List.of("nourished:nutrients/sugars")),
+        new NutrientDef("dairy",      "minecraft:milk_bucket", List.of("nourished:nutrients/dairy"))
     );
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -112,7 +88,7 @@ public class NutrientRegistry {
     }
 
     /**
-     * Re-reads nutrients.json from disk and rebuilds FoodNutritionRegistry's tag map.
+     * Re-reads nutrients.json from disk and re-runs {@link FoodNutritionRegistry#init()}.
      * Safe to call at runtime; dependent systems are updated immediately after.
      */
     public static void reload() {

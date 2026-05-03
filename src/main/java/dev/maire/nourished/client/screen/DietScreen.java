@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import dev.maire.nourished.client.ClientDietCache;
-import dev.maire.nourished.diet.DietAttachment;
+import dev.maire.nourished.client.NutrientUiColors;
 import dev.maire.nourished.diet.DietData;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
@@ -35,16 +35,17 @@ public class DietScreen extends Screen {
 
     // ── Right panel row geometry ─────────────────────────────────────────────
     private static final int ROW_STEP    = 22;
-    private static final int BAR_H       = 7;      // nutrient bar height
+    private static final int BAR_H       = 9;      // nutrient bar height (+2px)
 
     private static final float FADE_DURATION_SEC = 0.15f;
     private static final float FADE_TOOLTIP_THRESHOLD = 0.9f;
+    /** Bar fill display lerps toward server values over this duration (seconds). */
     private static final float ANIM_DURATION_SEC = 0.3f;
 
 
     // ── Colors ───────────────────────────────────────────────────────────────
-    private static final int COL_BG         = 0xF0141414;  // outer background panel
-    private static final int COL_PANEL      = 0xFF1E1E1E;  // inner card areas
+    private static final int COL_BG         = 0xFF141414;  // outer background #141414
+    private static final int COL_PANEL      = 0xFF1E1E1E;  // inner panel #1E1E1E
     private static final int COL_BORDER     = 0xFF3A3A3A;
     private static final int COL_BORDER_LT  = 0xFF555555;
     private static final int COL_SEG_EMPTY  = 0xFF2A2A2A;  // empty bar bg
@@ -59,7 +60,7 @@ public class DietScreen extends Screen {
     private static final int COL_RED        = 0xFFFF5555;
     private static final int COL_PURPLE     = 0xFFA95FFF;
     private static final int COL_ROW_BG     = 0xFF1E1E1E;  // matches inner card
-    private static final int COL_LEGEND_TEXT = 0xFFE0E0E0; // ~12% dimmer than white
+    private static final int COL_LEGEND_TEXT = 0xFFE0E0E0; // base; legend uses dimLegend() ~12% darker
     /** Warm white/yellow (RGB) for nutrient bar flash overlay; alpha applied at draw time. */
     private static final int COL_FLASH_RGB  = 0xFFFFE0;
 
@@ -261,17 +262,17 @@ public class DietScreen extends Screen {
         int    balColor = balanceColor(balKey);
         String balText  = Component.translatable("nourished.screen.diet.balance_state." + balKey).getString();
 
-        // Colored bg at ~20% alpha behind balance state text
-        float balTextW = font.width(balText) * 1.2f;
-        int bgAlpha = 51; // 0x33, ~20% of 255
+        // ~+1pt over prior 1.2x scale; subtle colored bg at ~20% alpha matching state
+        float balanceScale = 1.2f * (10f / 9f);
+        float balTextW = font.width(balText) * balanceScale;
+        int bgAlpha = 51; // ~20% of 255
         int bgColor = (bgAlpha << 24) | (balColor & 0x00FFFFFF);
         g.fill(x + 22 - 2, y + 14, x + 22 + (int) balTextW + 3, y + 25, bgColor);
 
-        // Scale text ~1.2x for emphasis
         PoseStack pose = g.pose();
         pose.pushPose();
         pose.translate(x + 22, y + 15, 0);
-        pose.scale(1.2f, 1.2f, 1f);
+        pose.scale(balanceScale, balanceScale, 1f);
         g.drawString(font, balText, 0, 0, balColor, false);
         pose.popPose();
 
@@ -295,8 +296,7 @@ public class DietScreen extends Screen {
 
     private void drawDynamicTip(GuiGraphics g, DietData data, int x, int y, int bw) {
         NourishedConfig config = NourishedConfig.get();
-        float critical = (float) config.criticalThreshold();
-        float low      = (float) config.lowThreshold();
+        float low = (float) config.lowThreshold();
 
         // Find the nutrient with the lowest value
         String worstKey = null;
@@ -311,7 +311,7 @@ public class DietScreen extends Screen {
         String line1, line2 = null;
         int color;
 
-        if (worstKey != null && worstVal < critical) {
+        if (worstKey != null && worstVal < (float) config.criticalThresholdFor(worstKey)) {
             String name = Component.translatable("nourished.screen.diet.bar." + worstKey).getString();
             line1 = "Low " + name;
             line2 = "Eat more " + name + " foods";
@@ -324,15 +324,16 @@ public class DietScreen extends Screen {
             boolean allGreat = data.nutrients.values().stream().allMatch(v -> v >= 0.8f);
             if (allGreat) {
                 line1 = "Diet looking great!";
+                color = COL_GREEN;
             } else {
                 line1 = "Diet is balanced";
+                color = COL_GRAY;
             }
-            color = COL_GREEN;
         }
 
         g.drawString(font, line1, x, y, color, false);
         if (line2 != null) {
-            g.drawWordWrap(font, Component.literal(line2), x, y + 11, bw, COL_GRAY);
+            g.drawWordWrap(font, Component.literal(line2), x, y + 11, bw, COL_RED);
         }
     }
 
@@ -354,9 +355,13 @@ public class DietScreen extends Screen {
         g.fill(hdrCX + hdrW / 2 + 3,     lineY, leftPos + WIDTH - PAD, lineY + 1, COL_BORDER_LT);
         y += 14;
 
-        // Right edge for right-aligned pct column; last ~14px reserved for trend arrow
-        int pctRightEdge = leftPos + WIDTH - PAD - 14;
-        int barW = pctRightEdge - 4 - (rx + 24);   // 4px gap between bar end and pct column
+        // Trend arrow slot; percentages share a fixed-width column with 4px gap after bar end
+        int arrowSlot = 10;
+        int arrowLeft = leftPos + WIDTH - PAD - arrowSlot;
+        int pctColumnRight = arrowLeft - 4;
+        int maxPctW = font.width("100%");
+        int barLeft = rx + 24;
+        int barW = Math.max(0, pctColumnRight - maxPctW - 4 - barLeft);
 
         for (String key : visibleBars) {
             float disp  = display.getOrDefault(key, 0f);
@@ -368,7 +373,8 @@ public class DietScreen extends Screen {
             // ── Row hover highlight ────────────────────────────────────────
             int rowRight = leftPos + WIDTH - PAD;
             if (my >= y - 2 && my < y - 2 + ROW_STEP && mx >= rx - 2 && mx < rowRight) {
-                g.fill(rx - 2, y - 2, rowRight, y - 2 + ROW_STEP, 0x0DFFFFFF);
+                // #FFFFFF at 5% alpha across full row
+                g.fill(rx - 2, y - 2, rowRight, y - 2 + ROW_STEP, 0x0CFFFFFF);
             }
 
             // ── Row background ────────────────────────────────────────────
@@ -397,16 +403,16 @@ public class DietScreen extends Screen {
                 g.fill(rx + 24, y + 12, rx + 24 + barW, y + 12 + BAR_H, (aByte << 24) | COL_FLASH_RGB);
             }
 
-            // ── Percentage (right-aligned to pctRightEdge) ────────────────
+            // ── Percentage (right-aligned in column: 4px after bar end) ────
             String pctStr = (int)(disp * 100) + "%";
-            int pctX = pctRightEdge - font.width(pctStr);
+            int pctX = pctColumnRight - font.width(pctStr);
             g.drawString(font, pctStr, pctX, y + 2, pctColor, false);
 
             // ── Trend arrow ───────────────────────────────────────────────
             if (real > prev + 0.005f)
-                g.drawString(font, "↑", leftPos + WIDTH - PAD - 10, y + 2, COL_GREEN, false);
+                g.drawString(font, "↑", arrowLeft, y + 2, COL_GREEN, false);
             else if (real < prev - 0.005f)
-                g.drawString(font, "↓", leftPos + WIDTH - PAD - 10, y + 2, COL_RED, false);
+                g.drawString(font, "↓", arrowLeft, y + 2, COL_RED, false);
 
             y += ROW_STEP;
         }
@@ -480,7 +486,7 @@ public class DietScreen extends Screen {
 
     private void drawLegendBar(GuiGraphics g, int x, int y, int w, int h) {
         drawRoundedBox(g, x, y, w, h);
-        g.drawCenteredString(font, Component.translatable("nourished.screen.diet.legend"), x + w / 2, y + 3, COL_HEADER);
+        g.drawCenteredString(font, Component.translatable("nourished.screen.diet.legend"), x + w / 2, y + 3, dimLegend(COL_HEADER));
 
         int colLeft = x + 6;
         int colW = (w - 12) / 3;
@@ -489,20 +495,20 @@ public class DietScreen extends Screen {
         g.fill(colLeft + colW, lineTop, colLeft + colW + 1, lineBottom, COL_DIVIDER);
         g.fill(colLeft + colW * 2, lineTop, colLeft + colW * 2 + 1, lineBottom, COL_DIVIDER);
 
-        drawLegendEntry(g, colLeft, y + 14, colW, COL_GREEN, "Good", "40 - 80%", 0, -3, -2, COL_GREEN);
-        drawLegendEntry(g, colLeft + colW + 1, y + 14, colW, 0xFFE8C24F, "Low", "25 - 40%", 0, -3, 0, 0xFFE8C24F);
+        drawLegendEntry(g, colLeft, y + 14, colW, dimLegend(COL_GREEN), "Good", "40 - 80%", 0, -3, -2, dimLegend(COL_GREEN));
+        drawLegendEntry(g, colLeft + colW + 1, y + 14, colW, dimLegend(0xFFE8C24F), "Low", "25 - 40%", 0, -3, 0, dimLegend(0xFFE8C24F));
         drawLegendEntry(
                 g,
                 colLeft + colW * 2 - 2,
                 y + 14,
                 colW,
-                COL_RED,
+                dimLegend(COL_RED),
                 Component.translatable("nourished.screen.diet.legend_bad").getString(),
                 "0-25 / 80+",
                 0,
                 0,
                 0,
-                COL_RED
+                dimLegend(COL_RED)
         );
     }
 
@@ -514,8 +520,18 @@ public class DietScreen extends Screen {
 
         int line1X = squareX + 11 + line1Offset;
         int line2X = x + ((w - font.width(line2)) / 2) + 6 + line2Offset;
-        g.drawString(font, line1, line1X, y, COL_LEGEND_TEXT, false);
+        g.drawString(font, line1, line1X, y, dimLegend(COL_LEGEND_TEXT), false);
         g.drawString(font, line2, line2X, y + 10, line2Color, false);
+    }
+
+    /** ~12% darker legend text and swatches (brightness reduction). */
+    private static int dimLegend(int argb) {
+        float f = 0.88f;
+        int a = (argb >>> 24) & 0xFF;
+        int r = Mth.clamp((int) (((argb >> 16) & 0xFF) * f), 0, 255);
+        int g = Mth.clamp((int) (((argb >> 8) & 0xFF) * f), 0, 255);
+        int b = Mth.clamp((int) ((argb & 0xFF) * f), 0, 255);
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     // ── Logic helpers ────────────────────────────────────────────────────────
@@ -523,7 +539,7 @@ public class DietScreen extends Screen {
     private static DietData getClientData() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return null;
-        return mc.player.getData(DietAttachment.DIET.get());
+        return ClientDietCache.get();
     }
 
     private static String getBalanceKey(DietData data) {
@@ -547,15 +563,7 @@ public class DietScreen extends Screen {
     }
 
     private static int nutrientBaseColor(String key) {
-        return switch (key) {
-            case "fruits" -> COL_GREEN;
-            case "vegetables" -> COL_CYAN;
-            case "proteins" -> COL_RED;
-            case "grains" -> COL_GOLD;
-            case "sugars" -> COL_PURPLE;
-            case "dairy" -> COL_WHITE;
-            default -> COL_GREEN;
-        };
+        return NutrientUiColors.baseColorArgb(key);
     }
 
     private static int balanceColor(String key) {

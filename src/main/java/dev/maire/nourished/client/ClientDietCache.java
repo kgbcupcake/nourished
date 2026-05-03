@@ -23,13 +23,11 @@ public class ClientDietCache {
      */
     public static void set(DietData data) {
         DietData prev = current;
-        boolean skipEdgeEffects = firstClientSync;
         if (!firstClientSync) {
             recordNutrientIncreases(prev, data);
         }
         firstClientSync = false;
         current = data;
-        NourishedToastManager.onDietSynced(prev, data, skipEdgeEffects);
     }
 
     private static void recordNutrientIncreases(DietData prev, DietData next) {

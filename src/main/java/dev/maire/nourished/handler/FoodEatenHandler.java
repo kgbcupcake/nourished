@@ -23,7 +23,7 @@ public class FoodEatenHandler {
         if (food == null) return;
 
         FoodNutritionRegistry.NutrientValues values =
-                FoodNutritionRegistry.getNutrients(stack, player.level());
+                FoodNutritionRegistry.getNutrients(stack, player.level(), false);
 
         NutritionData data = player.getData(NutritionAttachment.NUTRITION);
         data.addProtein(values.protein());
@@ -36,7 +36,10 @@ public class FoodEatenHandler {
         diet.tick();
         FoodNutritionRegistry.DietDelta delta = FoodNutritionRegistry.computeDietDelta(
                 stack, player.level(), values, food.nutrition(), food.saturation());
-        diet.addCalories(delta.calories());
+        float caloriesAdded = delta.calories();
+        Nourished.LOGGER.debug("Nourished calories: adding {} for {}", caloriesAdded,
+                stack.getItem().getDescriptionId());
+        diet.addCalories(caloriesAdded);
         diet.addNutrient("fruits", delta.fruits());
         diet.addNutrient("vegetables", delta.vegetables());
         diet.addNutrient("proteins", delta.proteins());

@@ -1,0 +1,5 @@
+[
+  {"version":1},
+  {"ingredient":{"id":"farmersdelight:sweet_berry_cheesecake"},"type":"item_stack","bookmarkType":"INGREDIENT"},
+  {"ingredient":{"id":"minecraft:cooked_beef"},"type":"item_stack","bookmarkType":"INGREDIENT"}
+]

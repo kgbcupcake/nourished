@@ -1,0 +1,5 @@
+[
+  {"version":1},
+  {"ingredient":{"id":"pamhc2foodextended:jambalayaitem"},"type":"item_stack","bookmarkType":"INGREDIENT"},
+  {"ingredient":{"id":"bakery:strawberry_jam"},"type":"item_stack","bookmarkType":"INGREDIENT"}
+]

@@ -1,0 +1,8 @@
+/give @s minecraft:apple 64
+/give @s minecraft:bread 64
+/give @s pamhc2foodcore:applesauceitem
+/give @s pamhc2foodcore:strawberryjamitem
+/give @s farmersdelight:vegetable_soup
+/give @s farmersdelight:pasta_with_mutton_chop
+/give @s pamhc2foodcore:strawberryjamitem
+/give @s pamhc2foodcore:strawberryjam
