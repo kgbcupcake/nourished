@@ -5,6 +5,11 @@
 - HUD edit mode, drag-and-drop icons, and config expansion
 - Enhance HUD edit mode and diet screen functionality
 
+### 🐛 Bug Fixes
+
+- Make optional nutrient tag entries so TagLoader keeps proteins/dairy/grains/sugars
+- Optional nutrient tag entries, add croptopia/ends_delight/createfood proteins coverage
+
 ### 💼 Other
 
 - Add screenshots for Main Gui and Hud-Gui
@@ -23,6 +28,7 @@ Corrected the image reference for Hud-Gui in the README.
 - Update changelog workflow for improved formatting and token usage
 - Update changelog [skip ci]
 - Refine changelog formatting and update entries
+- Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
