@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "#c:foods/dairy", "required": false },
+    "minecraft:milk_bucket",
+    "pamhc2foodcore:freshmilkitem",
+    "pamhc2foodcore:cocoapowderitem",
+    "farm_and_charm:butter"
+  ]
+}
