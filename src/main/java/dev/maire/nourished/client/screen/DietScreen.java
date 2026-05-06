@@ -298,7 +298,6 @@ public class DietScreen extends Screen {
         NourishedConfig config = NourishedConfig.get();
         float low = (float) config.lowThreshold();
 
-        // Find the nutrient with the lowest value
         String worstKey = null;
         float  worstVal = Float.MAX_VALUE;
         for (Map.Entry<String, Float> e : data.nutrients.entrySet()) {
@@ -308,32 +307,36 @@ public class DietScreen extends Screen {
             }
         }
 
-        String line1, line2 = null;
+        Component line1;
+        Component line2 = null;
         int color;
 
         if (worstKey != null && worstVal < (float) config.criticalThresholdFor(worstKey)) {
-            String name = Component.translatable("nourished.screen.diet.bar." + worstKey).getString();
-            line1 = "Low " + name;
-            line2 = "Eat more " + name + " foods";
+            line1 = Component.translatable("nourished.screen.diet.tip.critical",
+                    Component.translatable("nourished.screen.diet.bar." + worstKey));
+            line2 = Component.translatable("nourished.screen.diet.tip.eat_more",
+                    Component.translatable("nourished.screen.diet.bar." + worstKey));
             color = COL_RED;
         } else if (worstKey != null && worstVal < low) {
-            String name = Component.translatable("nourished.screen.diet.bar." + worstKey).getString();
-            line1 = "Getting low on " + name;
+            line1 = Component.translatable("nourished.screen.diet.tip.getting_low",
+                    Component.translatable("nourished.screen.diet.bar." + worstKey));
+            line2 = null;
             color = COL_ORANGE;
         } else {
             boolean allGreat = data.nutrients.values().stream().allMatch(v -> v >= 0.8f);
             if (allGreat) {
-                line1 = "Diet looking great!";
+                line1 = Component.translatable("nourished.screen.diet.tip.great");
                 color = COL_GREEN;
             } else {
-                line1 = "Diet is balanced";
+                line1 = Component.translatable("nourished.screen.diet.tip.balanced");
                 color = COL_GRAY;
             }
         }
 
-        g.drawString(font, line1, x, y, color, false);
+        // render line1 and line2 exactly as before
+        g.drawString(font, line1, x, y + 4, color, false);
         if (line2 != null) {
-            g.drawWordWrap(font, Component.literal(line2), x, y + 11, bw, COL_RED);
+            g.drawString(font, line2, x, y + 15, color, false);
         }
     }
 
