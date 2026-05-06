@@ -7,6 +7,7 @@
 - Enhance HUD edit mode and diet screen functionality
 - Enhance build configuration and nutrition handling
 - Validate effect ID input in EffectBuilderWidget
+- Update diet button rendering and tooltip messages
 
 ### 🐛 Bug Fixes
 
@@ -33,6 +34,7 @@ Corrected the image reference for Hud-Gui in the README.
 - Update changelog workflow for improved formatting and token usage
 - Update changelog [skip ci]
 - Refine changelog formatting and update entries
+- Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
