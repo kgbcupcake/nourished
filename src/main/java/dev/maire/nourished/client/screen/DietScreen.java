@@ -22,6 +22,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
@@ -278,8 +279,7 @@ public class DietScreen extends Screen {
 
         y += 45;
 
-        // ── Dynamic tip box ───────────────────────────────────────────────
-        drawRoundedBox(g, x - 2, y - 3, bw + 4, 50);
+        // ── Dynamic tip box (height from wrapped text) ───────────────────
         drawDynamicTip(g, data, x, y, bw);
 
         // ── Reset timer ───────────────────────────────────────────────────
@@ -328,9 +328,39 @@ public class DietScreen extends Screen {
             color = COL_GRAY;
         }
 
-        g.drawString(font, line1, x, y + 4, color, false);
-        if (line2 != null) {
-            g.drawString(font, line2, x, y + 15, color, false);
+        int padTop = 5;
+        int padBottom = 5;
+        int gapBetween = 2;
+        List<FormattedCharSequence> lines1 = font.split(line1, bw);
+        List<FormattedCharSequence> lines2 = line2 == null ? List.of() : font.split(line2, bw);
+        int lineH = font.lineHeight;
+        int innerH = lines1.size() * lineH
+                + (lines2.isEmpty() ? 0 : gapBetween + lines2.size() * lineH);
+        int boxX = x - 2;
+        int boxY = y - 3;
+        int boxW = bw + 4;
+        int maxBottom = topPos + HEIGHT - 46 - lineH - 2;
+        int maxBoxH = Math.max(48, maxBottom - boxY);
+        int boxH = Math.min(Math.max(48, padTop + innerH + padBottom), maxBoxH);
+
+        drawRoundedBox(g, boxX, boxY, boxW, boxH);
+
+        g.enableScissor(boxX, boxY, boxX + boxW, boxY + boxH);
+        try {
+            int yy = y + padTop;
+            for (FormattedCharSequence seq : lines1) {
+                g.drawString(font, seq, x, yy, color, false);
+                yy += lineH;
+            }
+            if (!lines2.isEmpty()) {
+                yy += gapBetween;
+                for (FormattedCharSequence seq : lines2) {
+                    g.drawString(font, seq, x, yy, color, false);
+                    yy += lineH;
+                }
+            }
+        } finally {
+            g.disableScissor();
         }
     }
 
