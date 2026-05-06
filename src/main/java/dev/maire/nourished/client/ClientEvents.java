@@ -2,6 +2,8 @@ package dev.maire.nourished.client;
 
 import java.util.Locale;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+
 import dev.maire.nourished.Nourished;
 import dev.maire.nourished.client.screen.DietScreen;
 import dev.maire.nourished.config.NourishedConfig;
@@ -17,10 +19,10 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -32,7 +34,8 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 @EventBusSubscriber(modid = Nourished.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public final class ClientEvents {
 
-    private static final ItemStack GOLDEN_APPLE_STACK = new ItemStack(Items.GOLDEN_APPLE);
+    private static final ResourceLocation DIET_BUTTON_TEXTURE =
+        ResourceLocation.fromNamespaceAndPath("nourished", "textures/gui/diet_button.png");
 
     private ClientEvents() {}
 
@@ -45,7 +48,10 @@ public final class ClientEvents {
 
         @Override
         public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-            graphics.renderItem(GOLDEN_APPLE_STACK, getX() + 2, getY() + 2);
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            graphics.blit(DIET_BUTTON_TEXTURE, getX() + 2, getY() + 2, 0, 0, 16, 16, 16, 16);
+            RenderSystem.disableBlend();
             if (mouseX >= getX() && mouseX <= getX() + width && mouseY >= getY() && mouseY <= getY() + height) {
                 graphics.renderTooltip(Minecraft.getInstance().font,
                         Component.translatable("nourished.screen.diet.tooltip.nourish"),
