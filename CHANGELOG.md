@@ -10,6 +10,7 @@
 - Update diet button rendering and tooltip messages
 - Enhance client event handling and registration
 - Implement food memory tracking and tooltip enhancements
+- Add nutrition effects handling to player events
 
 ### 🐛 Bug Fixes
 
@@ -38,6 +39,7 @@ Corrected the image reference for Hud-Gui in the README.
 - Update changelog workflow for improved formatting and token usage
 - Update changelog [skip ci]
 - Refine changelog formatting and update entries
+- Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
