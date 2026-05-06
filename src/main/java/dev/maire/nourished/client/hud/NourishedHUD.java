@@ -2,7 +2,6 @@ package dev.maire.nourished.client.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.maire.nourished.Nourished;
 import dev.maire.nourished.client.ClientDietCache;
 import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.NutrientUiColors;
@@ -20,9 +19,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import org.lwjgl.glfw.GLFW;
@@ -32,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@EventBusSubscriber(modid = Nourished.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public final class NourishedHUD {
 
     // ── Layout constants ─────────────────────────────────────────────────────
@@ -92,7 +87,6 @@ public final class NourishedHUD {
 
     // ── Game-event render (normal gameplay, no screen open) ──────────────────
 
-    @SubscribeEvent
     public static void onRenderGuiPost(RenderGuiEvent.Post event) {
         if (!NourishedConfig.get().enableHUD()) return;
         Minecraft mc = Minecraft.getInstance();
@@ -243,7 +237,6 @@ public final class NourishedHUD {
 
     // ── Key input (enter edit mode only; exit is handled by HUDEditScreen) ───
 
-    @SubscribeEvent
     public static void onKeyInput(InputEvent.Key event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen != null) return;

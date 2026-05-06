@@ -4,7 +4,6 @@ import java.util.Locale;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import dev.maire.nourished.Nourished;
 import dev.maire.nourished.client.screen.DietScreen;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.NourishedConfigScreen;
@@ -24,14 +23,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
-@EventBusSubscriber(modid = Nourished.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public final class ClientEvents {
 
     private static final ResourceLocation DIET_BUTTON_TEXTURE =
@@ -60,7 +55,6 @@ public final class ClientEvents {
         }
     }
 
-    @SubscribeEvent
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!(event.getScreen() instanceof InventoryScreen screen)) return;
         if (!NourishedConfig.get().enableDietScreen()) return;
@@ -71,7 +65,6 @@ public final class ClientEvents {
         event.addListener(new InventoryDietButton(x, y));
     }
 
-    @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event) {
         if (!NourishedConfig.get().enableFoodTooltips()) {
             return;
@@ -137,7 +130,6 @@ public final class ClientEvents {
         }
     }
 
-    @SubscribeEvent
     public static void onKeyInput(InputEvent.Key event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen != null) return;
