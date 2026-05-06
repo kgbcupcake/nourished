@@ -15,18 +15,32 @@ public final class NutritionEffectApplier {
 
     public static void apply(ServerPlayer player, DietData data) {
         for (EffectRegistry.EffectDef def : EffectRegistry.getAll()) {
-            if (!def.enabled()) continue;
+            Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT
+                    .getHolder(ResourceLocation.parse(def.effect()))
+                    .orElse(null);
+            if (effect == null) continue;
+
+            if (!def.enabled()) {
+                player.removeEffect(effect);
+                continue;
+            }
+
             boolean shouldApply = switch (def.trigger()) {
                 case "below" -> data.nutrients.getOrDefault(def.nutrient(), 0f) < def.threshold();
                 case "all_above" -> NutrientRegistry.getKeys().stream()
                         .allMatch(k -> data.nutrients.getOrDefault(k, 0f) > def.threshold());
                 default -> false;
             };
-            Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT
-                    .getHolder(ResourceLocation.parse(def.effect()))
-                    .orElse(null);
-            if (effect == null) continue;
             applyEffect(player, effect, shouldApply, def.amplifier(), def.durationTicks());
+        }
+    }
+
+    /** Removes every mob effect id referenced by {@link EffectRegistry} (module off or reload cleanup). */
+    public static void clearAll(ServerPlayer player) {
+        for (EffectRegistry.EffectDef def : EffectRegistry.getAll()) {
+            BuiltInRegistries.MOB_EFFECT
+                    .getHolder(ResourceLocation.parse(def.effect()))
+                    .ifPresent(holder -> player.removeEffect(holder));
         }
     }
 

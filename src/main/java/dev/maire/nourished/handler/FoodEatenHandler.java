@@ -4,6 +4,7 @@ import dev.maire.nourished.Nourished;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
+import dev.maire.nourished.effect.NutritionEffectApplier;
 import dev.maire.nourished.network.ModNetworking;
 import dev.maire.nourished.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.nutrition.FoodOverrideRegistry;
@@ -66,6 +67,10 @@ public class FoodEatenHandler {
         }
 
         ModNetworking.syncDiet(player, diet);
+
+        if (NourishedConfig.get().enableEffects()) {
+            NutritionEffectApplier.apply(player, diet);
+        }
 
         Nourished.LOGGER.debug("{} ate {} -> {}",
                 player.getName().getString(),

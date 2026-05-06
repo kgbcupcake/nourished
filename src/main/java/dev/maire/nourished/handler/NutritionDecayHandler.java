@@ -3,7 +3,6 @@ package dev.maire.nourished.handler;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.effect.NutritionEffectApplier;
 import dev.maire.nourished.network.ModNetworking;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,9 +28,5 @@ public class NutritionDecayHandler {
         player.setData(DietAttachment.DIET.get(), data);
 
         ModNetworking.syncDiet(player, data);
-
-        if (config.enableEffects()) {
-            NutritionEffectApplier.apply(player, data);
-        }
     }
 }

@@ -19,6 +19,7 @@ import dev.maire.nourished.handler.ConfigReloadHandler;
 import dev.maire.nourished.handler.DietPlayerEvents;
 import dev.maire.nourished.handler.FoodEatenHandler;
 import dev.maire.nourished.handler.NutritionDecayHandler;
+import dev.maire.nourished.handler.NutritionEffectsHandler;
 import dev.maire.nourished.network.ModNetworking;
 import dev.maire.nourished.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.nutrition.FoodOverrideRegistry;
@@ -59,6 +60,7 @@ public class Nourished {
         modContainer.registerExtensionPoint(IConfigScreenFactory.class, (client, parent) -> NourishedConfigScreen.create(parent));
         modEventBus.addListener(ModNetworking::register);
         NeoForge.EVENT_BUS.register(new FoodEatenHandler());
+        NeoForge.EVENT_BUS.register(new NutritionEffectsHandler());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
             if (!ModCompat.LSO_LOADED || !NourishedConfig.get().isCodeCompatEnabled("legendarysurvivaloverhaul")) {
                 NeoForge.EVENT_BUS.register(new NutritionDecayHandler());
