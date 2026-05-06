@@ -39,9 +39,11 @@ public final class NourishedToastManager {
 
         NourishedConfig config = NourishedConfig.get();
         boolean effects = config.enableEffects();
+        boolean toastsEnabled = config.enableToasts();
+        boolean criticalToastsEnabled = config.enableCriticalToasts();
         Minecraft mc = Minecraft.getInstance();
 
-        if (effects && mc.player != null) {
+        if (effects && toastsEnabled && criticalToastsEnabled && mc.player != null) {
             for (String key : keys) {
                 double crit = config.criticalThresholdFor(key);
                 float before = lastNutrients.getOrDefault(key, 0f);

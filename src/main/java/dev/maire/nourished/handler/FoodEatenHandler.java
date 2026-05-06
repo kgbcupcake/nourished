@@ -1,17 +1,22 @@
 package dev.maire.nourished.handler;
 
 import dev.maire.nourished.Nourished;
-import dev.maire.nourished.attachment.NutritionAttachment;
-import dev.maire.nourished.attachment.NutritionData;
+import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
 import dev.maire.nourished.network.ModNetworking;
 import dev.maire.nourished.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.nutrition.FoodOverrideRegistry;
+import dev.maire.nourished.nutrition.NutrientRegistry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+
+import java.util.Map;
+import java.util.Optional;
 
 public class FoodEatenHandler {
 
@@ -22,37 +27,47 @@ public class FoodEatenHandler {
         FoodProperties food = stack.getItem().getFoodProperties(stack, player);
         if (food == null) return;
 
-        FoodNutritionRegistry.NutrientValues values =
-                FoodNutritionRegistry.getNutrients(stack, player.level(), false);
-
-        NutritionData data = player.getData(NutritionAttachment.NUTRITION);
-        data.addProtein(values.protein());
-        data.addCarbs(values.carbs());
-        data.addFats(values.fats());
-        data.addVitamins(values.vitamins());
-        data.addHydration(values.hydration());
-
         DietData diet = player.getData(DietAttachment.DIET.get());
         diet.tick();
-        FoodNutritionRegistry.DietDelta delta = FoodNutritionRegistry.computeDietDelta(
-                stack, player.level(), values, food.nutrition(), food.saturation());
-        float caloriesAdded = delta.calories();
-        Nourished.LOGGER.debug("Nourished calories: adding {} for {}", caloriesAdded,
-                stack.getItem().getDescriptionId());
-        diet.addCalories(caloriesAdded);
-        diet.addNutrient("fruits", delta.fruits());
-        diet.addNutrient("vegetables", delta.vegetables());
-        diet.addNutrient("proteins", delta.proteins());
-        diet.addNutrient("grains", delta.grains());
-        diet.addNutrient("sugars", delta.sugars());
-        diet.addNutrient("dairy", delta.dairy());
+
+        String itemId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+        Optional<FoodOverrideRegistry.FoodOverride> override = FoodOverrideRegistry.getOverride(itemId);
+
+        float caloriesAdded;
+        Map<String, Float> nutrientDeltas;
+
+        if (override.isPresent()) {
+            FoodOverrideRegistry.FoodOverride ov = override.get();
+            caloriesAdded = ov.calories();
+            nutrientDeltas = ov.nutrients();
+            Nourished.LOGGER.debug("Nourished: using override for {} (calories={}, nutrients={})",
+                    itemId, caloriesAdded, nutrientDeltas);
+        } else {
+            var matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, false);
+            FoodNutritionRegistry.DietDelta delta = FoodNutritionRegistry.computeDietDelta(
+                    stack, player.level(), food.nutrition(), food.saturation(), matchedBars);
+            caloriesAdded = delta.calories();
+            nutrientDeltas = delta.nutrients();
+        }
+
+        if (NourishedConfig.get().enableCalorieTracking()) {
+            Nourished.LOGGER.debug("Nourished calories: adding {} for {}", caloriesAdded,
+                    stack.getItem().getDescriptionId());
+            diet.addCalories(caloriesAdded);
+        }
+
+        for (String key : NutrientRegistry.getKeys()) {
+            float nutrientDelta = nutrientDeltas.getOrDefault(key, 0f);
+            if (nutrientDelta != 0f) {
+                diet.addNutrient(key, nutrientDelta);
+            }
+        }
 
         ModNetworking.syncDiet(player, diet);
 
-        Nourished.LOGGER.debug("{} ate {} -> {} | {}",
+        Nourished.LOGGER.debug("{} ate {} -> {}",
                 player.getName().getString(),
                 stack.getItem().getDescriptionId(),
-                data,
                 diet);
     }
 }

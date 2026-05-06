@@ -14,14 +14,38 @@ java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources', 'src/generated/resources']
+        }
+    }
+}
+
+jar {
+    from(sourceSets.main.output)
+    manifest {
+        attributes([
+            'Specification-Title'     : 'nourished',
+            'Specification-Vendor'    : 'maire',
+            'Specification-Version'   : '1',
+            'Implementation-Title'    : project.name,
+            'Implementation-Version'  : project.jar.archiveVersion,
+            'Implementation-Vendor'   : 'maire',
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
 neoForge {
     version = '21.1.228'
-
     parchment {
         mappingsVersion = '2024.11.17'
         minecraftVersion = '1.21.1'
     }
-
     runs {
         client {
             client()
@@ -44,7 +68,6 @@ neoForge {
                     '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
-
     mods {
         nourished {
             sourceSet(sourceSets.main)

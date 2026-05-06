@@ -19,10 +19,18 @@ public final class NourishedKeys {
             "key.categories.nourished"
     );
 
+    public static final KeyMapping OPEN_CONFIG = new KeyMapping(
+            "key.nourished.openConfig",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_UNKNOWN,
+            "key.categories.nourished"
+    );
+
     private NourishedKeys() {}
 
     @SubscribeEvent
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(EDIT_HUD);
+        event.register(OPEN_CONFIG);
     }
 }

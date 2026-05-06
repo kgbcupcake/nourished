@@ -289,6 +289,13 @@ public final class NourishedHUD {
             int barY = rowCenterY - BAR_H / 2;
             drawRoundedBar(g, barX, barY, layout.barW, BAR_H, displayPct, COL_BAR_BG, barFillColor(key, truePct));
 
+            float flash = ClientDietCache.flashAlpha(key);
+            if (flash > 0f) {
+                int a = (int) (flash * 80);
+                int flashColor = (a << 24) | 0xFFFFFF;
+                g.fill(barX, barY, barX + layout.barW, barY + BAR_H, flashColor);
+            }
+
             int pct = Math.round(truePct * 100f);
             int pctX = barX + layout.barW + BAR_PCT_GAP;
             int pctY = rowCenterY - (int) Math.ceil(9 * layout.labelScale) / 2;

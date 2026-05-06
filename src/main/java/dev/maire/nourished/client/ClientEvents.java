@@ -5,6 +5,7 @@ import java.util.Locale;
 import dev.maire.nourished.Nourished;
 import dev.maire.nourished.client.screen.DietScreen;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.config.NourishedConfigScreen;
 import dev.maire.nourished.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.nutrition.FoodNutritionRegistry.DietDelta;
 import dev.maire.nourished.nutrition.NutrientRegistry;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
@@ -55,6 +57,7 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!(event.getScreen() instanceof InventoryScreen screen)) return;
+        if (!NourishedConfig.get().enableDietScreen()) return;
 
         int x = screen.getGuiLeft() - 26;
         int y = screen.getGuiTop() + 60;
@@ -64,7 +67,7 @@ public final class ClientEvents {
 
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event) {
-        if (!NourishedConfig.get().showFoodTooltips()) {
+        if (!NourishedConfig.get().enableFoodTooltips()) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
@@ -85,48 +88,55 @@ public final class ClientEvents {
             return;
         }
 
-        FoodNutritionRegistry.NutrientValues values = FoodNutritionRegistry.getNutrients(stack, level, true);
+        var matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, true);
         DietDelta delta = FoodNutritionRegistry.computeDietDelta(
-                stack, level, values, food.nutrition(), food.saturation());
+                stack, level, food.nutrition(), food.saturation(), matchedBars);
 
-        final float minLine = 0.5f;
-        boolean anyAbove = false;
+        final float minLine = 0.05f;
+        String highestKey = null;
+        float highestValue = Float.NEGATIVE_INFINITY;
         for (String key : NutrientRegistry.getKeys()) {
-            if (dietValueForKey(delta, key) >= minLine) {
-                anyAbove = true;
-                break;
+            float v = delta.nutrients().getOrDefault(key, 0f);
+            if (v > highestValue) {
+                highestValue = v;
+                highestKey = key;
             }
-        }
-        if (!anyAbove) {
-            return;
         }
 
         var lines = event.getToolTip();
         lines.add(Component.empty());
         lines.add(Component.literal("✦ Nourished").withStyle(ChatFormatting.GOLD));
 
+        boolean renderedAny = false;
         for (String key : NutrientRegistry.getKeys()) {
-            float v = dietValueForKey(delta, key);
+            float v = delta.nutrients().getOrDefault(key, 0f);
             if (v < minLine) {
                 continue;
             }
+            renderedAny = true;
             String label = Character.toUpperCase(key.charAt(0)) + key.substring(1);
             String text = "  " + label + "  +" + String.format(Locale.ROOT, "%.1f", v);
             int color = NutrientUiColors.baseColorArgb(key);
             MutableComponent line = Component.literal(text).withStyle(Style.EMPTY.withColor(color));
             lines.add(line);
         }
+
+        if (!renderedAny && highestKey != null) {
+            float v = Math.max(0f, delta.nutrients().getOrDefault(highestKey, 0f));
+            String label = Character.toUpperCase(highestKey.charAt(0)) + highestKey.substring(1);
+            String text = "  " + label + "  +" + String.format(Locale.ROOT, "%.1f", v);
+            int color = NutrientUiColors.baseColorArgb(highestKey);
+            MutableComponent line = Component.literal(text).withStyle(Style.EMPTY.withColor(color));
+            lines.add(line);
+        }
     }
 
-    private static float dietValueForKey(DietDelta delta, String key) {
-        return switch (key) {
-            case "fruits" -> delta.fruits();
-            case "vegetables" -> delta.vegetables();
-            case "proteins" -> delta.proteins();
-            case "grains" -> delta.grains();
-            case "sugars" -> delta.sugars();
-            case "dairy" -> delta.dairy();
-            default -> 0f;
-        };
+    @SubscribeEvent
+    public static void onKeyInput(InputEvent.Key event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen != null) return;
+        if (NourishedKeys.OPEN_CONFIG.consumeClick()) {
+            mc.setScreen(NourishedConfigScreen.create(null));
+        }
     }
 }

@@ -15,6 +15,9 @@ import java.util.List;
 
 /**
  * Tracks daily-style diet totals. Nutrient keys are driven by {@link NutrientRegistry#getKeys()}.
+ * <p>
+ * SCHEMA CHANGE: NutritionAttachment removed in this version. Existing player saves will reset diet data.
+ * Acceptable for alpha.
  */
 public class DietData {
 
