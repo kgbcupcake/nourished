@@ -38,8 +38,6 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
     private static final int EDIT_H = 18;
     private static final int PAD = 4;
     private static final int COLLAPSED_H = 24;
-    private static final int EXPANDED_EXTRA =
-            22 + EDIT_H + 14 + EDIT_H + 18 + BTN_H + 2 + BTN_H + 18 + EDIT_H + 10 + BTN_H + 4 + BTN_H + 8;
 
     private static List<String> mobEffectIds;
 
@@ -451,10 +449,30 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
         }
 
         int rowHeight() {
-            int h = expanded ? EXPANDED_EXTRA : COLLAPSED_H;
+            int h = expanded ? expandedHeight() : COLLAPSED_H;
             if (expanded && suggestionCardIndex == listIndex && !suggestionBuffer.isEmpty()) {
                 h += suggestionBuffer.size() * 11 + 8;
             }
+            return h;
+        }
+
+        private int expandedHeight() {
+            // Keep this in sync with render() vertical layout so rows never overlap.
+            int h = 0;
+            h += EDIT_H;      // rule id
+            h += 16;          // gap to effect row
+            h += EDIT_H;      // effect id
+            h += 16;          // gap to nutrient/trigger row
+            h += BTN_H;       // nutrient + trigger buttons
+            h += 12;          // gap to threshold row
+            h += BTN_H;       // threshold slider
+            h += 18;          // gap to amplifier/duration row
+            h += EDIT_H;      // amplifier + duration edits
+            h += 10;          // gap to enabled row
+            h += BTN_H;       // enabled button
+            h += 6;           // gap to action row
+            h += BTN_H;       // preview/save/delete row
+            h += 4;           // bottom breathing room
             return h;
         }
 
@@ -519,7 +537,7 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
             triggerButton.active = editable;
             triggerButton.render(g, mouseX, mouseY, delta);
 
-            lineY += BTN_H + 6;
+            lineY += BTN_H + 12;
             g.drawString(mc.font, Component.translatable("config.nourished.effects.threshold").getString(), x, lineY - 10, 0xA0A0A0, false);
             thresholdSlider.setX(x);
             thresholdSlider.setY(lineY);
@@ -550,7 +568,7 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
             enabledButton.active = editable;
             enabledButton.render(g, mouseX, mouseY, delta);
 
-            lineY += BTN_H + 4;
+            lineY += BTN_H + 6;
             int actionGap = 6;
             int actionW = Math.max(60, (w - actionGap * 2) / 3);
             previewButton.setX(x);
