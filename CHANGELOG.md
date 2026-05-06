@@ -2,9 +2,11 @@
 
 ### 🚀 Features
 
+- Initial commit — Nourished mod v0.1.0
 - HUD edit mode, drag-and-drop icons, and config expansion
 - Enhance HUD edit mode and diet screen functionality
 - Enhance build configuration and nutrition handling
+- Validate effect ID input in EffectBuilderWidget
 
 ### 🐛 Bug Fixes
 
@@ -37,8 +39,4 @@ Corrected the image reference for Hud-Gui in the README.
 - Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
-## [0.1.0] - 2026-04-30
-
-### 🚀 Features
-
-- Initial commit — Nourished mod v0.1.0
+- Update changelog [skip ci]
