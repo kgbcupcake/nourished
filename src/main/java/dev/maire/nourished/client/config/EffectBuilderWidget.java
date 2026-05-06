@@ -372,7 +372,7 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
 
             this.effectEdit = new EditBox(mc.font, 0, 0, 160, EDIT_H, Component.translatable("config.nourished.effects.mobEffect"));
             effectEdit.setMaxLength(128);
-            effectEdit.setValue(displayEffectId(def.effect()));
+            effectEdit.setValue(editorNormalizedEffectId(def.effect()));
             effectEdit.setResponder(s -> host.refreshSuggestions(this));
             effectEdit.setHint(Component.translatable("config.nourished.effects.mobEffect.hint"));
 
@@ -518,12 +518,20 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
             effectEdit.setWidth(w);
             effectEdit.setHeight(EDIT_H);
             effectEdit.setEditable(editable);
+            boolean effectIdValid = isEffectIdValid();
+            effectEdit.setTextColor(effectIdValid ? 0xE0E0E0 : 0xFF8080);
             lastEffectEditX = x;
             lastEffectEditY = lineY;
             lastEffectEditW = w;
             effectEdit.render(g, mouseX, mouseY, delta);
 
-            lineY += EDIT_H + 16;
+            if (!effectIdValid) {
+                g.drawString(mc.font, Component.translatable("config.nourished.effects.mobEffect.invalid"), x, lineY + EDIT_H + 2, 0xFF8080, false);
+            } else {
+                g.drawString(mc.font, Component.translatable("config.nourished.effects.mobEffect.valid"), x, lineY + EDIT_H + 2, 0x80FF80, false);
+            }
+
+            lineY += EDIT_H + 28;
             int half = (w - PAD) / 2;
             nutrientButton.setX(x);
             nutrientButton.setY(lineY);
@@ -602,16 +610,11 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
             return ruleIdEdit.getValue() + " - " + effectShort + " (" + nutrientValue + ", " + triggerValue + ")";
         }
 
-        private static String displayEffectId(String raw) {
+        private static String editorNormalizedEffectId(String raw) {
             String id = raw == null ? "" : raw.trim();
-            if (id.startsWith("minecraft:")) {
-                return id.substring("minecraft:".length());
+            while (id.startsWith("/")) {
+                id = id.substring(1);
             }
-            return id;
-        }
-
-        private static String normalizeEffectId(String raw) {
-            String id = raw == null ? "" : raw.trim();
             if (id.isEmpty()) {
                 return "minecraft:slowness";
             }
@@ -619,6 +622,23 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
                 return "minecraft:" + id;
             }
             return id;
+        }
+
+        private static boolean isValidEffectId(String raw) {
+            String id = raw == null ? "" : raw.trim();
+            if (id.isEmpty() || id.startsWith("/") || id.indexOf(':') < 0) {
+                return false;
+            }
+            try {
+                ResourceLocation.parse(id);
+                return true;
+            } catch (Exception ignored) {
+                return false;
+            }
+        }
+
+        private boolean isEffectIdValid() {
+            return isValidEffectId(effectEdit.getValue());
         }
 
         List<net.minecraft.client.gui.components.events.GuiEventListener> children() {
@@ -663,7 +683,7 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
         }
 
         private EffectRegistry.EffectDef buildDef() {
-            String effectId = normalizeEffectId(effectEdit.getValue());
+            String effectId = effectEdit.getValue().trim();
             return new EffectRegistry.EffectDef(
                     ruleIdEdit.getValue().trim().isEmpty() ? "unnamed" : ruleIdEdit.getValue().trim(),
                     effectId,
@@ -680,9 +700,12 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
             if (mc.player == null || mc.level == null) {
                 return;
             }
+            if (!isEffectIdValid()) {
+                return;
+            }
             ResourceLocation rl;
             try {
-                rl = ResourceLocation.parse(normalizeEffectId(effectEdit.getValue()));
+                rl = ResourceLocation.parse(effectEdit.getValue().trim());
             } catch (Exception e) {
                 return;
             }
@@ -691,6 +714,9 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
         }
 
         private void saveCard() {
+            if (!isEffectIdValid()) {
+                return;
+            }
             EffectRegistry.EffectDef updated = buildDef();
             boolean wasExpanded = expanded;
             host.cards.set(listIndex, new EffectCard(host, updated, listIndex));

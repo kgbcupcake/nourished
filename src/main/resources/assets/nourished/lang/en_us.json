@@ -92,6 +92,8 @@
   "config.nourished.effects.ruleId.hint": "e.g. protein_penalty",
   "config.nourished.effects.mobEffect": "Effect ID",
   "config.nourished.effects.mobEffect.hint": "minecraft:slowness",
+  "config.nourished.effects.mobEffect.invalid": "Invalid effect ID format (use namespace:path)",
+  "config.nourished.effects.mobEffect.valid": "Valid effect ID",
   "config.nourished.defaultEffectDurationTicks": "Default Effect Duration",
   "config.nourished.defaultEffectDurationTicks.desc": "Default duration in ticks for nutrition effects. 20 ticks = 1 second.",
   "config.nourished.effects.nutrient": "Nutrient: %s",
