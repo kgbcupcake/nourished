@@ -18,6 +18,7 @@
 - Improve row height calculation in EffectBuilderWidget
 - Adjust layout and rendering in EffectBuilderWidget and FoodScannerWidget
 - Update diet screen messages and localization
+- Tune burst multipliers and localize diet tip text
 
 ### 💼 Other
 
@@ -37,6 +38,7 @@ Corrected the image reference for Hud-Gui in the README.
 - Update changelog workflow for improved formatting and token usage
 - Update changelog [skip ci]
 - Refine changelog formatting and update entries
+- Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
