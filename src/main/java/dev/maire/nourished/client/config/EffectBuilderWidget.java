@@ -462,7 +462,7 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
             h += EDIT_H;      // rule id
             h += 16;          // gap to effect row
             h += EDIT_H;      // effect id
-            h += 16;          // gap to nutrient/trigger row
+            h += 28;          // gap to nutrient/trigger row (+ validation line)
             h += BTN_H;       // nutrient + trigger buttons
             h += 12;          // gap to threshold row
             h += BTN_H;       // threshold slider
@@ -572,7 +572,7 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
             lineY += EDIT_H + 10;
             enabledButton.setX(x);
             enabledButton.setY(lineY);
-            enabledButton.setWidth(Math.min(120, w));
+            enabledButton.setWidth(w);
             enabledButton.active = editable;
             enabledButton.render(g, mouseX, mouseY, delta);
 

@@ -181,7 +181,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         int h = HEADER_H + PAD;
         if (!rows.isEmpty()) {
             h += LIST_VIEWPORT_H + PAD + 24;
-        } else if (canScan()) {
+        } else {
             h += 14;
             if (hasRunScan) {
                 h += 2;
@@ -254,12 +254,12 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         cy += 24;
 
         if (rows.isEmpty()) {
-            if (canScan()) {
-                Component hint = hasRunScan
-                        ? Component.translatable("config.nourished.foodScanner.noResults")
-                        : Component.translatable("config.nourished.foodScanner.emptyHint");
-                graphics.drawString(mc.font, hint, sx, cy, 0xA0A0A0, false);
-            }
+            Component hint = canScan()
+                    ? (hasRunScan
+                    ? Component.translatable("config.nourished.foodScanner.noResults")
+                    : Component.translatable("config.nourished.foodScanner.emptyHint"))
+                    : Component.translatable("config.nourished.foodScanner.noWorld");
+            graphics.drawString(mc.font, hint, sx, cy, 0xA0A0A0, false);
             writeButton.active = false;
             writeButton.setY(-2000);
             return;
