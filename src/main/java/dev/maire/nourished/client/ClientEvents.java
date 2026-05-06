@@ -7,10 +7,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.maire.nourished.client.screen.DietScreen;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.NourishedConfigScreen;
+import dev.maire.nourished.diet.DietData;
 import dev.maire.nourished.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.nutrition.FoodNutritionRegistry.DietDelta;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -105,6 +107,19 @@ public final class ClientEvents {
         var lines = event.getToolTip();
         lines.add(Component.empty());
         lines.add(Component.literal("✦ Nourished").withStyle(ChatFormatting.GOLD));
+
+        String itemId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+        DietData diet = ClientDietCache.get();
+        float multiplier = diet.peekMultiplier(itemId);
+
+        if (multiplier < 1.0f) {
+            String pct = (int)(multiplier * 100) + "%";
+            lines.add(Component.translatable("nourished.tooltip.diminished", pct)
+                    .withStyle(ChatFormatting.YELLOW));
+        } else {
+            lines.add(Component.translatable("nourished.tooltip.fresh")
+                    .withStyle(ChatFormatting.GREEN));
+        }
 
         boolean renderedAny = false;
         for (String key : NutrientRegistry.getKeys()) {

@@ -7,11 +7,14 @@ import com.mojang.serialization.Decoder;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
+import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.minecraft.util.Mth;
 
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Tracks daily-style diet totals. Nutrient keys are driven by {@link NutrientRegistry#getKeys()}.
@@ -45,6 +48,8 @@ public class DietData {
             map.add(key,           Codec.FLOAT.encodeStart(ops, data.nutrients.getOrDefault(key, 0f)));
             map.add("last_" + key, Codec.FLOAT.encodeStart(ops, data.lastNutrients.getOrDefault(key, 0f)));
         }
+        map.add("food_memory", Codec.unboundedMap(Codec.STRING, FoodMemoryEntry.CODEC)
+                .encodeStart(ops, data.foodMemory));
         return map.build(prefix);
     }
 
@@ -59,6 +64,15 @@ public class DietData {
             data.nutrients.put(key,     decodeFloat(ops, map, key,           0f));
             data.lastNutrients.put(key, decodeFloat(ops, map, "last_" + key, 0f));
         }
+
+        T foodMemoryVal = map.get("food_memory");
+        if (foodMemoryVal != null) {
+            Codec.unboundedMap(Codec.STRING, FoodMemoryEntry.CODEC)
+                    .parse(ops, foodMemoryVal)
+                    .result()
+                    .ifPresent(m -> data.foodMemory.putAll(m));
+        }
+
         return DataResult.success(data);
     }
 
@@ -74,6 +88,7 @@ public class DietData {
     public float maxCalories = 2000f;
     public final LinkedHashMap<String, Float> nutrients     = new LinkedHashMap<>();
     public final LinkedHashMap<String, Float> lastNutrients = new LinkedHashMap<>();
+    public final LinkedHashMap<String, FoodMemoryEntry> foodMemory = new LinkedHashMap<>();
 
     public DietData() {
         for (String key : barOrder()) {
@@ -112,5 +127,54 @@ public class DietData {
         float dev = 0f;
         for (String k : keys) dev += Math.abs(nutrients.getOrDefault(k, 0f) - avg);
         return 1f - Math.min(1f, dev / (avg * keys.size() * 2f));
+    }
+
+    // ── Food Memory ────────────────────────────────────────────────────────────
+
+    /**
+     * Purge expired entries, enforce count cap (evict oldest by lastEatenMs), then record this eat.
+     * Returns the multiplier to apply to this food's DietDelta.
+     */
+    public float recordEat(String itemId) {
+        long windowMs = NourishedConfig.get().memoryWindowMinutes() * 60_000L;
+        int maxCount = NourishedConfig.get().memoryWindowCount();
+
+        foodMemory.entrySet().removeIf(e -> e.getValue().isExpired(windowMs));
+
+        if (!foodMemory.containsKey(itemId) && foodMemory.size() >= maxCount) {
+            String oldest = foodMemory.entrySet().stream()
+                    .min(Comparator.comparingLong(e -> e.getValue().lastEatenMs()))
+                    .map(Map.Entry::getKey)
+                    .orElse(null);
+            if (oldest != null) foodMemory.remove(oldest);
+        }
+
+        FoodMemoryEntry entry = foodMemory.getOrDefault(itemId, new FoodMemoryEntry(0, System.currentTimeMillis()));
+        entry = entry.withEat();
+        foodMemory.put(itemId, entry);
+        return resolveMultiplier(entry.eatCount());
+    }
+
+    /**
+     * Peek the multiplier that would apply if this food were eaten next.
+     * Used for tooltip display.
+     */
+    public float peekMultiplier(String itemId) {
+        long windowMs = NourishedConfig.get().memoryWindowMinutes() * 60_000L;
+        FoodMemoryEntry entry = foodMemory.get(itemId);
+        if (entry == null || entry.isExpired(windowMs)) return 1.0f;
+        return resolveMultiplier(entry.eatCount() + 1);
+    }
+
+    private float resolveMultiplier(int eatCount) {
+        var steps = NourishedConfig.get().diminishingSteps();
+        double floor = NourishedConfig.get().diminishingFloor();
+        int idx = Math.min(eatCount - 1, steps.size() - 1);
+        double raw = idx >= 0 ? steps.get(idx) : 1.0;
+        return (float) Math.max(floor, raw);
+    }
+
+    public FoodMemoryEntry getMemoryEntry(String itemId) {
+        return foodMemory.get(itemId);
     }
 }

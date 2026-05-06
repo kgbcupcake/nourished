@@ -24,6 +24,8 @@
   "nourished.screen.diet.bar.dairy": "Dairy",
   "nourished.toast.critical.title": "%s is critically low!",
   "nourished.toast.critical.subtitle": "Your %s nutrition needs attention.",
+  "nourished.tooltip.diminished": "\u26a0 Diminished (%s)",
+  "nourished.tooltip.fresh": "\u2714 Full value",
   "nourished.inventory.tooltip": "Nutritional Values",
   "nourished.screen.diet.tooltip.nourish": "nourish",
   "nourished.screen.diet.tooltip.fruits": "Fruits: vitamins and hydration",

@@ -50,16 +50,18 @@ public class FoodEatenHandler {
             nutrientDeltas = delta.nutrients();
         }
 
+        float multiplier = diet.recordEat(itemId);
+
         if (NourishedConfig.get().enableCalorieTracking()) {
-            Nourished.LOGGER.debug("Nourished calories: adding {} for {}", caloriesAdded,
+            Nourished.LOGGER.debug("Nourished calories: adding {} * {} for {}", caloriesAdded, multiplier,
                     stack.getItem().getDescriptionId());
-            diet.addCalories(caloriesAdded);
+            diet.addCalories(caloriesAdded * multiplier);
         }
 
         for (String key : NutrientRegistry.getKeys()) {
             float nutrientDelta = nutrientDeltas.getOrDefault(key, 0f);
             if (nutrientDelta != 0f) {
-                diet.addNutrient(key, nutrientDelta);
+                diet.addNutrient(key, nutrientDelta * multiplier);
             }
         }
 

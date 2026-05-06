@@ -75,6 +75,12 @@ public final class NourishedConfig {
     // config.nourished.calorieDisplayMax.desc
     private final ModConfigSpec.IntValue calorieDisplayMax;
 
+    // Food Memory
+    private final ModConfigSpec.IntValue memoryWindowMinutes;
+    private final ModConfigSpec.IntValue memoryWindowCount;
+    private final ModConfigSpec.DoubleValue diminishingFloor;
+    private final ModConfigSpec.ConfigValue<java.util.List<? extends Double>> diminishingSteps;
+
     private final Map<String, ModConfigSpec.DoubleValue> nutrientDecayRateOverrides;
     private final Map<String, ModConfigSpec.DoubleValue> nutrientCriticalThresholdOverrides;
 
@@ -153,6 +159,22 @@ public final class NourishedConfig {
         calorieDisplayMax = builder
                 .comment("Maximum calorie value for display purposes")
                 .defineInRange("calorieDisplayMax", 2000, 100, 100000);
+        builder.pop();
+
+        builder.push("food_memory");
+        memoryWindowMinutes = builder
+                .comment("How long (in minutes) before a food memory entry expires.")
+                .defineInRange("memoryWindowMinutes", 20, 1, 120);
+        memoryWindowCount = builder
+                .comment("Maximum number of distinct food entries tracked in memory.")
+                .defineInRange("memoryWindowCount", 10, 1, 50);
+        diminishingFloor = builder
+                .comment("Minimum multiplier for heavily repeated foods. 0.15 = 15% credit floor.")
+                .defineInRange("diminishingFloor", 0.15, 0.0, 1.0);
+        diminishingSteps = builder
+                .comment("Multiplier curve by eat count. Index 0 = first eat (1.0), index 1 = second, etc.")
+                .defineList("diminishingSteps", java.util.List.of(1.0, 0.7, 0.4, 0.15),
+                    e -> e instanceof Double d && d >= 0.0 && d <= 1.0);
         builder.pop();
 
         nutrientDecayRateOverrides = new LinkedHashMap<>();
@@ -414,5 +436,21 @@ public final class NourishedConfig {
 
     public Map<String, ModConfigSpec.BooleanValue> compatTagToggles() {
         return compatTagToggles;
+    }
+
+    public int memoryWindowMinutes() {
+        return memoryWindowMinutes.get();
+    }
+
+    public int memoryWindowCount() {
+        return memoryWindowCount.get();
+    }
+
+    public double diminishingFloor() {
+        return diminishingFloor.get();
+    }
+
+    public java.util.List<? extends Double> diminishingSteps() {
+        return diminishingSteps.get();
     }
 }
