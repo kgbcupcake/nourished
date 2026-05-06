@@ -150,7 +150,7 @@ public class FoodNutritionRegistry {
             matchedWeightTotal = 1.0f;
         }
 
-        float burst = foodNutrition * 0.003f + foodSaturation * 0.004f + 0.001f;
+        float burst = foodNutrition * 0.008f + foodSaturation * 0.010f + 0.004f;
         float totalBurst = burst * matchedWeightTotal;
 
         Map<String, Float> nutrients = new HashMap<>();
