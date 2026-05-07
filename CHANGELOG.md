@@ -68,3 +68,5 @@ Corrected the image reference for Hud-Gui in the README.
 - Update changelog [skip ci]
 - Update changelog [skip ci]
 - Remove dev-only files from repo
+- Update changelog [skip ci]
+- Untrack ide and gradle user home dirs
