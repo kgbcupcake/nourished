@@ -12,6 +12,7 @@
 - Implement food memory tracking and tooltip enhancements
 - Add nutrition effects handling to player events
 - Add nutrient gain configuration options
+- Add active effects display to DietScreen
 
 ### 🐛 Bug Fixes
 
@@ -60,3 +61,4 @@ Corrected the image reference for Hud-Gui in the README.
 - Update changelog [skip ci]
 - Update changelog [skip ci]
 - Remove obsolete configuration and cache files
+- Update changelog [skip ci]
