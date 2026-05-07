@@ -35,6 +35,7 @@ Removed old screenshots section and placeholder.
 - Fix Hud-Gui image reference in README
 
 Corrected the image reference for Hud-Gui in the README.
+- Delete command.md
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -64,3 +65,4 @@ Corrected the image reference for Hud-Gui in the README.
 - Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update .gitignore to include additional files and directories
+- Update changelog [skip ci]
