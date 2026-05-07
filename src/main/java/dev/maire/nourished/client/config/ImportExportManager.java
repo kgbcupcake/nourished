@@ -220,6 +220,8 @@ public final class ImportExportManager {
         o.addProperty("decayRate", c.decayRate());
         o.addProperty("decayIntervalTicks", c.decayIntervalTicks());
         o.addProperty("startingNutrientValue", c.startingNutrientValue());
+        o.addProperty("nutrientGainScale", c.nutrientGainScale());
+        o.addProperty("nutrientGainPerBiteMax", c.nutrientGainPerBiteMax());
         o.addProperty("calorieDisplayMax", c.calorieDisplayMax());
         JsonObject decay = new JsonObject();
         JsonObject crit = new JsonObject();
@@ -332,6 +334,12 @@ public final class ImportExportManager {
         }
         if (o.has("startingNutrientValue")) {
             c.setStartingNutrientValue(clamp(o.get("startingNutrientValue").getAsDouble(), 0d, 1d));
+        }
+        if (o.has("nutrientGainScale")) {
+            c.setNutrientGainScale(clamp(o.get("nutrientGainScale").getAsDouble(), 0.5d, 20d));
+        }
+        if (o.has("nutrientGainPerBiteMax")) {
+            c.setNutrientGainPerBiteMax(clamp(o.get("nutrientGainPerBiteMax").getAsDouble(), 0.05d, 1d));
         }
         if (o.has("calorieDisplayMax")) {
             c.setCalorieDisplayMax(clampInt(o.get("calorieDisplayMax").getAsInt(), 100, 100_000));

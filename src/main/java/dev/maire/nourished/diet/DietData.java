@@ -91,9 +91,23 @@ public class DietData {
     public final LinkedHashMap<String, FoodMemoryEntry> foodMemory = new LinkedHashMap<>();
 
     public DietData() {
+        float start = startNutrientFill();
         for (String key : barOrder()) {
-            nutrients.put(key, 0f);
-            lastNutrients.put(key, 0f);
+            nutrients.put(key, start);
+            lastNutrients.put(key, start);
+        }
+    }
+
+    /**
+     * Baseline for every nutrient bar on new {@link DietData} (new players / fresh attachment).
+     * Uses {@link NourishedConfig#startingNutrientValue()} (default {@code 0.5} = 50%) so typical
+     * {@code below}-threshold debuffs do not apply until decay or poor diet pulls bars down.
+     */
+    private static float startNutrientFill() {
+        try {
+            return Mth.clamp((float) NourishedConfig.get().startingNutrientValue(), 0f, 1f);
+        } catch (IllegalStateException ignored) {
+            return 0.5f;
         }
     }
 

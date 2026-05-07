@@ -81,6 +81,10 @@ public final class NourishedConfig {
     private final ModConfigSpec.DoubleValue diminishingFloor;
     private final ModConfigSpec.ConfigValue<java.util.List<? extends Double>> diminishingSteps;
 
+    // Tag-based food → diet bar gains (FoodNutritionRegistry.computeDietDelta)
+    private final ModConfigSpec.DoubleValue nutrientGainScale;
+    private final ModConfigSpec.DoubleValue nutrientGainPerBiteMax;
+
     private final Map<String, ModConfigSpec.DoubleValue> nutrientDecayRateOverrides;
     private final Map<String, ModConfigSpec.DoubleValue> nutrientCriticalThresholdOverrides;
 
@@ -127,7 +131,7 @@ public final class NourishedConfig {
                 .comment("Ticks between nutrient decay applications")
                 .defineInRange("decayIntervalTicks", 1200, 1, Integer.MAX_VALUE);
         startingNutrientValue = builder
-                .comment("Initial value for all nutrients when a new player joins")
+                .comment("Initial fill (0-1) for every nutrient bar on new diet data. Default 0.5 avoids starting debuffs when rules use the usual below-0.25 thresholds.")
                 .defineInRange("startingNutrientValue", 0.5d, 0.0d, 1.0d);
         builder.pop();
 
@@ -175,6 +179,15 @@ public final class NourishedConfig {
                 .comment("Multiplier curve by eat count. Index 0 = first eat (1.0), index 1 = second, etc.")
                 .defineList("diminishingSteps", java.util.List.of(1.0, 0.7, 0.4, 0.15),
                     e -> e instanceof Double d && d >= 0.0 && d <= 1.0);
+        builder.pop();
+
+        builder.push("food_gains");
+        nutrientGainScale = builder
+                .comment("Multiplies tag-based nutrient burst before per-bite cap. Lower = slower bar fill.")
+                .defineInRange("nutrientGainScale", 5.0d, 0.5d, 20.0d);
+        nutrientGainPerBiteMax = builder
+                .comment("Max fraction (0-1) one bite can add to a single bar from tag-based foods (not food overrides).")
+                .defineInRange("nutrientGainPerBiteMax", 0.2d, 0.05d, 1.0d);
         builder.pop();
 
         nutrientDecayRateOverrides = new LinkedHashMap<>();
@@ -452,5 +465,21 @@ public final class NourishedConfig {
 
     public java.util.List<? extends Double> diminishingSteps() {
         return diminishingSteps.get();
+    }
+
+    public double nutrientGainScale() {
+        return nutrientGainScale.get();
+    }
+
+    public void setNutrientGainScale(double value) {
+        nutrientGainScale.set(value);
+    }
+
+    public double nutrientGainPerBiteMax() {
+        return nutrientGainPerBiteMax.get();
+    }
+
+    public void setNutrientGainPerBiteMax(double value) {
+        nutrientGainPerBiteMax.set(value);
     }
 }

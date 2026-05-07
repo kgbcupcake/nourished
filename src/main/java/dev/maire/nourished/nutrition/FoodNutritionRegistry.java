@@ -19,6 +19,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -172,10 +173,15 @@ public class FoodNutritionRegistry {
             }
         }
 
-        final float scale = 10f;
+        float scale = configuredNutrientGainScale();
         Map<String, Float> scaledNutrients = new HashMap<>();
         for (Map.Entry<String, Float> e : nutrients.entrySet()) {
             scaledNutrients.put(e.getKey(), e.getValue() * scale);
+        }
+
+        float perBiteMax = configuredNutrientGainPerBiteMax();
+        for (String k : scaledNutrients.keySet()) {
+            scaledNutrients.put(k, Math.min(scaledNutrients.get(k), perBiteMax));
         }
 
         return new DietDelta(calories, scaledNutrients);
@@ -481,5 +487,21 @@ public class FoodNutritionRegistry {
         }
 
         return false;
+    }
+
+    private static float configuredNutrientGainScale() {
+        try {
+            return Mth.clamp((float) NourishedConfig.get().nutrientGainScale(), 0.5f, 20f);
+        } catch (IllegalStateException ignored) {
+            return 5f;
+        }
+    }
+
+    private static float configuredNutrientGainPerBiteMax() {
+        try {
+            return Mth.clamp((float) NourishedConfig.get().nutrientGainPerBiteMax(), 0.05f, 1f);
+        } catch (IllegalStateException ignored) {
+            return 0.2f;
+        }
     }
 }

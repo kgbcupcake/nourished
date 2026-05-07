@@ -267,6 +267,36 @@ public final class NourishedConfigScreen {
             );
         }
 
+        if (!LockRegistry.isLocked("nutrientGainScale")) {
+            category.addEntry(
+                    buildDoubleSlider(
+                            eb,
+                            Component.translatable("config.nourished.nutrientGainScale"),
+                            config.nutrientGainScale(),
+                            0.5d,
+                            20.0d,
+                            5.0d,
+                            config::setNutrientGainScale,
+                            Component.translatable("config.nourished.nutrientGainScale.desc")
+                    )
+            );
+        }
+
+        if (!LockRegistry.isLocked("nutrientGainPerBiteMax")) {
+            category.addEntry(
+                    buildDoubleSlider(
+                            eb,
+                            Component.translatable("config.nourished.nutrientGainPerBiteMax"),
+                            config.nutrientGainPerBiteMax(),
+                            0.05d,
+                            1.0d,
+                            0.2d,
+                            config::setNutrientGainPerBiteMax,
+                            Component.translatable("config.nourished.nutrientGainPerBiteMax.desc")
+                    )
+            );
+        }
+
         addReloadButton(category, eb);
     }
 
