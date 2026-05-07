@@ -70,3 +70,6 @@ Diminishing returns apply — eating the same food repeatedly gives less credit 
 ## License
 
 MIT
+
+## Links
+- https://modrinth.com/mod/nourished
