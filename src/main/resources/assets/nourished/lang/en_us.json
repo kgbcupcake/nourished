@@ -16,6 +16,7 @@
   "nourished.screen.diet.legend_good": "Good 40 - 80%",
   "nourished.screen.diet.legend_low": "Low 25 - 40%",
   "nourished.screen.diet.legend_bad": "Critical",
+  "nourished.screen.diet.legend_bad_range": "<25% or >80%",
   "nourished.screen.diet.bar.fruits": "Fruits",
   "nourished.screen.diet.bar.vegetables": "Vegetables",
   "nourished.screen.diet.bar.proteins": "Proteins",

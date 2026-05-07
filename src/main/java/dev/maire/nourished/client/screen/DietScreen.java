@@ -395,7 +395,8 @@ public class DietScreen extends Screen {
             // ── Percentage (right-aligned in column: 4px after bar end) ────
             String pctStr = (int)(disp * 100) + "%";
             int pctX = pctColumnRight - font.width(pctStr);
-            g.drawString(font, pctStr, pctX, y + 2, pctColor, false);
+            int dimmedPct = (pctColor & 0x00FFFFFF) | 0x99000000;
+            g.drawString(font, pctStr, pctX, y + 2, dimmedPct, false);
 
             // ── Trend arrow ───────────────────────────────────────────────
             if (real > prev + 0.005f)
@@ -493,7 +494,7 @@ public class DietScreen extends Screen {
                 colW,
                 dimLegend(COL_RED),
                 Component.translatable("nourished.screen.diet.legend_bad").getString(),
-                "0-25 / 80+",
+                Component.translatable("nourished.screen.diet.legend_bad_range").getString(),
                 0,
                 0,
                 0,

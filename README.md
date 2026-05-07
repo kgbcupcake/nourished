@@ -1,81 +1,71 @@
 # Nourished
 
-Minecraft already nags you about hunger, but it never asks whether you ate anything *useful*. Nourished adds a lightweight diet layer on top: you still fill the bar, but now fruits, veggies, protein, and the rest each matter in their own lane. Watch the bars move, chase a decent balance score, and actually feel like your pantry choices mean something.
+> **Food variety now matters.**
 
-**Nourished** is a NeoForge **1.21.1** mod that tracks six food groups and shows them in a simple in-game diet screen.
+Minecraft tracks hunger. Nourished tracks _what_ you ate. Six food groups, real consequences, and a HUD you can actually read — without turning survival into a spreadsheet.
 
-## Features
+![Main Menu](Assets/MainGui.png)
 
-- **Six food group bars** — each meal nudges separate tracks for:
-  - fruits
-  - vegetables
-  - proteins
-  - grains
-  - sugars
-  - dairy
-- **Diet screen** — open from your inventory; segmented bars, trend arrows, and color-coded status so you can see what you are neglecting without digging through numbers.
-- **Calorie tracking** — daily total with a soft cap so “eat everything” is not automatically optimal.
-- **Balance score** — rewards variety, not just volume.
-- **Passive effects** — run low in a group and you pick up debuffs; stay fed and balanced for regeneration and health boost.
-- **Nutrient decay** — values ease down over time so the system stays relevant instead of one feast and forget.
-- **Saves to disk** — player data persists via codec serialization.
-- **Mod-friendly detection** — tag-based matching; works well with common kitchen mods out of the box (see compatibility below).
+---
 
-## How it works
+## What it does
 
-When you eat, the mod walks a priority list of item tags and maps the item to one or more food groups. Vanilla items are registered explicitly. Modded foods usually land via shared tags like `c:foods/fruits`, `farmersdelight:vegetables`, and `pamhc2food:proteinitem`. If nothing lines up, a generic fallback still counts the meal so nothing silently does nothing.
+Eat steak all day and your protein bar fills up — but your fruits, grains, and dairy start to slip. Let them drop too low and you'll feel it. Keep a balanced diet and the game rewards you.
 
-Nutrients live as normalized values between 0 and 1. The diet UI reads them from the client attachment, which the server syncs on login and after meals.
+That's it. No menus to dig through, no math to do. Just eat varied food and the system takes care of itself.
+
+---
+
+## The HUD
+
+The HUD is the heart of the mod. Six color-coded bars sit on screen while you play — you always know where you stand without opening a menu.
+
+![HUD Edit Mode](Assets/nourished-MiniHud.gif)
+
+**Drag it anywhere.** Press the keybind to enter edit mode and reposition the HUD exactly where you want it. Scale it, anchor it to any corner, or hide bars that are at zero.
+
+---
+
+## The Diet Screen
+
+Open it from your inventory for a full breakdown — trend arrows, balance score, active effects, calorie tracking, and a reset timer.
+
+![Diet Screen](Assets/nourished-MainMenu.gif)
+
+---
 
 ## Effects
 
-Rough guide to what the numbers do to your character:
+| Condition                   | Effect                                            |
+| --------------------------- | ------------------------------------------------- |
+| Any group < 25%             | Debuff (fatigue, weakness, slowness, or bad luck) |
+| All groups > 75% + balanced | Regeneration                                      |
+| All groups > 75%            | Health Boost                                      |
 
-| Condition                   | Effect         |
-| --------------------------- | -------------- |
-| Protein < 25%               | Mining Fatigue |
-| Carbs < 25%                 | Weakness       |
-| Vitamins < 25%              | Bad Luck       |
-| Hydration < 25%             | Slowness       |
-| All macros > 75% + balanced | Regeneration   |
-| All macros > 75%            | Health Boost   |
+Diminishing returns apply — eating the same food repeatedly gives less credit each time, encouraging real variety.
+
+---
 
 ## Compatibility
 
-| Mod                            | Status |
-| ------------------------------ | ------ |
-| Farmer's Delight               | Full tag support |
-| Pam's HarvestCraft 2           | Full tag support |
-| Legendary Survival Overhaul    | ⚠️ Effects disabled — LSO takes priority |
-| Any mod using `c:foods/*` tags | Automatic where tags exist |
-| Croptopia                      | Partial / in progress — broader item coverage planned |
-| Mama's Herbs and Harvest       | Partial / in progress — broader item coverage planned |
-| Other food mods                | Generic fallback when tags do not match |
+| Mod                         | Status                                   |
+| --------------------------- | ---------------------------------------- |
+| Farmer's Delight            | ✅ Full                                  |
+| Pam's HarvestCraft 2        | ✅ Full                                  |
+| Croptopia                   | ✅ Full                                  |
+| Create: Food                | ✅ Full                                  |
+| Any `c:foods/*` tag         | ✅ Automatic                             |
+| Legendary Survival Overhaul | ⚠️ Effects disabled — LSO takes priority |
+| Other food mods             | Fallback                                 |
 
-## Screenshots
-
-| Main Gui                                                 | Hud-Gui                                                |
-|:---------------------------------------------------------:|:-------------------------------------------------------:|
-| ![Main Gui](Assets/MainGui.png) | ![Hud-Gui](Assets/HudGui.png) |
-
-```markdown
-![Diet screen overview](docs/screenshots/diet-overview.png)
-```
+---
 
 ## Requirements
 
-- Minecraft 1.21.1
-- NeoForge 21.1.x
-- Java 21 (Gradle toolchain handles it for builds)
+- Minecraft **1.21.1**
+- NeoForge **21.1.x**
 
-## Building
-
-```bash
-./gradlew build
-```
-
-The built jar lands in `build/libs/` as `nourished-<version>.jar` (see `version` in `build.gradle`).
-
+---
 
 ## License
 
