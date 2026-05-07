@@ -37,6 +37,10 @@ Removed old screenshots section and placeholder.
 Corrected the image reference for Hud-Gui in the README.
 - Delete command.md
 
+### 🚜 Refactor
+
+- Enhance diet screen UI and update language strings
+
 ### ⚙️ Miscellaneous Tasks
 
 - Remove gradle cache from repo
@@ -72,3 +76,4 @@ Corrected the image reference for Hud-Gui in the README.
 - Untrack ide and gradle user home dirs
 - Update changelog [skip ci]
 - Remove vscode workspace settings
+- Update changelog [skip ci]
