@@ -36,6 +36,7 @@ Removed old screenshots section and placeholder.
 
 Corrected the image reference for Hud-Gui in the README.
 - Delete command.md
+- Add links section to README
 
 ### 🚜 Refactor
 
@@ -76,4 +77,5 @@ Corrected the image reference for Hud-Gui in the README.
 - Untrack ide and gradle user home dirs
 - Update changelog [skip ci]
 - Remove vscode workspace settings
+- Update changelog [skip ci]
 - Update changelog [skip ci]
