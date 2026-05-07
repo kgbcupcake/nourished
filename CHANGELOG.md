@@ -23,6 +23,7 @@
 - Update diet screen messages and localization
 - Tune burst multipliers and localize diet tip text
 - Improve dynamic tip box rendering in DietScreen
+- Update MainGui.png for improved visual design
 
 ### 💼 Other
 
@@ -77,5 +78,6 @@ Corrected the image reference for Hud-Gui in the README.
 - Untrack ide and gradle user home dirs
 - Update changelog [skip ci]
 - Remove vscode workspace settings
+- Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
