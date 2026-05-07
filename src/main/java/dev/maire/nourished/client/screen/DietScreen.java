@@ -2,6 +2,7 @@ package dev.maire.nourished.client.screen;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +23,9 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
 
 public class DietScreen extends Screen {
@@ -279,8 +281,8 @@ public class DietScreen extends Screen {
 
         y += 45;
 
-        // ── Dynamic tip box (height from wrapped text) ───────────────────
-        drawDynamicTip(g, data, x, y, bw);
+        // ── Active effects ────────────────────────────────────────────────
+        drawActiveEffects(g, x, y, bw);
 
         // ── Reset timer ───────────────────────────────────────────────────
         LocalTime now        = LocalTime.now();
@@ -294,73 +296,33 @@ public class DietScreen extends Screen {
         g.drawString(font, resetStr, resetX, topPos + HEIGHT - 46, COL_CYAN, false);
     }
 
-    private void drawDynamicTip(GuiGraphics g, DietData data, int x, int y, int bw) {
-        NourishedConfig config = NourishedConfig.get();
-        float low = (float) config.lowThreshold();
+    private void drawActiveEffects(GuiGraphics g, int x, int y, int bw) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
 
-        String worstKey = null;
-        float worstVal = Float.MAX_VALUE;
-        for (Map.Entry<String, Float> e : data.nutrients.entrySet()) {
-            if (e.getValue() < worstVal) {
-                worstVal = e.getValue();
-                worstKey = e.getKey();
-            }
+        g.drawString(font, Component.translatable("nourished.screen.diet.effects_label"),
+                x, y, COL_HEADER, false);
+        y += 10;
+
+        Collection<MobEffectInstance> effects = mc.player.getActiveEffects();
+        if (effects.isEmpty()) {
+            g.drawString(font, Component.translatable("nourished.screen.diet.effects_none"),
+                    x, y, COL_GRAY, false);
+            return;
         }
 
-        Component line1;
-        Component line2 = null;
-        int color;
-
-        if (worstKey != null && worstVal < (float) config.criticalThresholdFor(worstKey)) {
-            Component name = Component.translatable("nourished.screen.diet.bar." + worstKey);
-            line1 = Component.translatable("nourished.screen.diet.tip.critical", name);
-            line2 = Component.translatable("nourished.screen.diet.tip.eat_more", name);
-            color = COL_RED;
-        } else if (worstKey != null && worstVal < low) {
-            Component name = Component.translatable("nourished.screen.diet.bar." + worstKey);
-            line1 = Component.translatable("nourished.screen.diet.tip.getting_low", name);
-            color = COL_ORANGE;
-        } else if (data.nutrients.values().stream().allMatch(v -> v >= 0.8f)) {
-            line1 = Component.translatable("nourished.screen.diet.tip.great");
-            color = COL_GREEN;
-        } else {
-            line1 = Component.translatable("nourished.screen.diet.tip.balanced");
-            color = COL_GRAY;
-        }
-
-        int padTop = 5;
-        int padBottom = 5;
-        int gapBetween = 2;
-        List<FormattedCharSequence> lines1 = font.split(line1, bw);
-        List<FormattedCharSequence> lines2 = line2 == null ? List.of() : font.split(line2, bw);
-        int lineH = font.lineHeight;
-        int innerH = lines1.size() * lineH
-                + (lines2.isEmpty() ? 0 : gapBetween + lines2.size() * lineH);
-        int boxX = x - 2;
-        int boxY = y - 3;
-        int boxW = bw + 4;
-        int maxBottom = topPos + HEIGHT - 46 - lineH - 2;
-        int maxBoxH = Math.max(48, maxBottom - boxY);
-        int boxH = Math.min(Math.max(48, padTop + innerH + padBottom), maxBoxH);
-
-        drawRoundedBox(g, boxX, boxY, boxW, boxH);
-
-        g.enableScissor(boxX, boxY, boxX + boxW, boxY + boxH);
-        try {
-            int yy = y + padTop;
-            for (FormattedCharSequence seq : lines1) {
-                g.drawString(font, seq, x, yy, color, false);
-                yy += lineH;
-            }
-            if (!lines2.isEmpty()) {
-                yy += gapBetween;
-                for (FormattedCharSequence seq : lines2) {
-                    g.drawString(font, seq, x, yy, color, false);
-                    yy += lineH;
-                }
-            }
-        } finally {
-            g.disableScissor();
+        int count = 0;
+        for (MobEffectInstance effect : effects) {
+            if (count >= 3) break; // cap at 3 to avoid overflow
+            MobEffect type = effect.getEffect().value();
+            String name = Component.translatable(type.getDescriptionId()).getString();
+            int amplifier = effect.getAmplifier();
+            String label = (amplifier > 0 ? name + " " + (amplifier + 1) : name);
+            int color = type.isBeneficial() ? COL_GREEN : COL_RED;
+            String prefix = type.isBeneficial() ? "+ " : "- ";
+            g.drawString(font, prefix + label, x, y, color, false);
+            y += 9;
+            count++;
         }
     }
 

@@ -27,6 +27,8 @@
   "nourished.screen.diet.tip.getting_low": "Getting low on %s",
   "nourished.screen.diet.tip.great": "Diet looking great!",
   "nourished.screen.diet.tip.balanced": "Diet is balanced",
+  "nourished.screen.diet.effects_label": "Active Effects",
+  "nourished.screen.diet.effects_none": "No active effects",
   "nourished.toast.critical.title": "%s is critically low!",
   "nourished.toast.critical.subtitle": "Your %s nutrition needs attention.",
   "nourished.tooltip.diminished": "\u26a0 Diminished (%s)",
