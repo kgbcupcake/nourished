@@ -58,3 +58,5 @@ Corrected the image reference for Hud-Gui in the README.
 - Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
+- Update changelog [skip ci]
+- Remove obsolete configuration and cache files
