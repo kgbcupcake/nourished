@@ -53,8 +53,6 @@ public final class NourishedConfigScreen {
                 .setTitle(Component.translatable("config.nourished.title"));
         // Keep category cards pinned in the left rail (instead of top tabs)
         // and enable Cloth's built-in search/filter affordance.
-        builder.setGlobalized(true);
-        builder.setGlobalizedExpanded(true);
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
         Map<String, PendingOverride> decayOverrides = new LinkedHashMap<>();
