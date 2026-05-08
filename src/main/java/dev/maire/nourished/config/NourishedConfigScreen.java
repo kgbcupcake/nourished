@@ -51,6 +51,8 @@ public final class NourishedConfigScreen {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTitle(Component.translatable("config.nourished.title"));
+        // Keep category cards pinned in the left rail (instead of top tabs)
+        // and enable Cloth's built-in search/filter affordance.
         builder.setGlobalized(true);
         builder.setGlobalizedExpanded(true);
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
@@ -178,7 +180,7 @@ public final class NourishedConfigScreen {
         addModuleGroupSubcategory(category, eb, "other", groupedEntries.get("other"));
 
         if (!editableModuleKeys.isEmpty()) {
-            category.addEntry(eb.startTextDescription(Component.translatable("config.nourished.modules.dependencyHint")).build());
+            category.addEntry(new StyledChipTextEntry(Component.translatable("config.nourished.modules.dependencyHint"), 0xFFCC8844));
         }
 
         addReloadButton(category, eb);
@@ -403,6 +405,7 @@ public final class NourishedConfigScreen {
 
     private static void addHudAndDisplayCategory(NourishedConfig config, NourishedClientConfig client, ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.hud_display"));
+        category.addEntry(new HudQuickActionsListEntry(client));
 
         category.addEntry(
                 eb.startEnumSelector(Component.translatable("config.nourished.hudAnchor"), HudAnchor.class, client.hudAnchor())
@@ -722,47 +725,6 @@ public final class NourishedConfigScreen {
                 .build();
     }
 
-    /** Captures Cloth entries so the live HUD preview can read pending slider values before save. */
-    private static final class PreviewRefs {
-        private static final int SCALE = 1000;
-
-        private final NourishedConfig config;
-        AbstractConfigListEntry<Integer> criticalSlider;
-        AbstractConfigListEntry<Integer> lowSlider;
-        AbstractConfigListEntry<Integer> excessSlider;
-        AbstractConfigListEntry<Boolean> enableHudToggle;
-
-        private PreviewRefs(NourishedConfig config) {
-            this.config = config;
-        }
-
-        double criticalAsDouble() {
-            return criticalSlider != null ? criticalSlider.getValue() / (double) SCALE : config.criticalThreshold();
-        }
-
-        double lowAsDouble() {
-            return lowSlider != null ? lowSlider.getValue() / (double) SCALE : config.lowThreshold();
-        }
-
-        double excessAsDouble() {
-            return excessSlider != null ? excessSlider.getValue() / (double) SCALE : config.excessThreshold();
-        }
-
-        boolean hudEnabledAsBoolean() {
-            return enableHudToggle != null ? Boolean.TRUE.equals(enableHudToggle.getValue()) : config.enableHUD();
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static AbstractConfigListEntry<Integer> castIntEntry(AbstractConfigListEntry<?> entry) {
-        return (AbstractConfigListEntry<Integer>) entry;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static AbstractConfigListEntry<Boolean> castBoolEntry(AbstractConfigListEntry<?> entry) {
-        return (AbstractConfigListEntry<Boolean>) entry;
-    }
-
     private static final class PendingOverride {
         private final AtomicBoolean enabled;
         private final AtomicReference<Double> value;
@@ -810,6 +772,8 @@ public final class NourishedConfigScreen {
         private static final int COL_SUBTEXT = 0xFFAAAAAA;
         private static final int COL_TAB_BG = 0xAA1C1C1C;
         private static final int COL_TAB_ACTIVE = 0xFF2E5C7F;
+        private static final int COL_TAB_BORDER_ACTIVE = 0xFF5DA9DE;
+        private static final int COL_TAB_BORDER_INACTIVE = 0xFF4A4A4A;
         private static final int COL_CHIP_GREEN = 0xFF2C7F2C;
         private static final int COL_CHIP_RED = 0xFF8A2F2F;
         private static final int COL_CHIP_YELLOW = 0xFF9C7A18;
@@ -823,6 +787,9 @@ public final class NourishedConfigScreen {
         private final Button detectedTabButton;
         private final Button builtInTabButton;
         private final Button settingsTabButton;
+        private final String detectedTabLabel;
+        private final String builtInTabLabel;
+        private final String settingsTabLabel;
 
         private final Map<String, Button> codeButtons = new LinkedHashMap<>();
         private final Map<String, Button> tagButtons = new LinkedHashMap<>();
@@ -846,9 +813,13 @@ public final class NourishedConfigScreen {
             this.settingsRows = new ArrayList<>(compatPending.keySet());
             this.settingsRows.sort(String::compareTo);
 
-            this.detectedTabButton = buildTabButton(Component.translatable("config.nourished.compat.tab.detected"), 0);
-            this.builtInTabButton = buildTabButton(Component.translatable("config.nourished.compat.tab.builtin"), 1);
-            this.settingsTabButton = buildTabButton(Component.translatable("config.nourished.compat.tab.settings"), 2);
+            this.detectedTabLabel = Component.translatable("config.nourished.compat.tab.detected").getString();
+            this.builtInTabLabel = Component.translatable("config.nourished.compat.tab.builtin").getString();
+            this.settingsTabLabel = Component.translatable("config.nourished.compat.tab.settings").getString();
+
+            this.detectedTabButton = buildTabButton(Component.literal(detectedTabLabel), 0);
+            this.builtInTabButton = buildTabButton(Component.literal(builtInTabLabel), 1);
+            this.settingsTabButton = buildTabButton(Component.literal(settingsTabLabel), 2);
 
             for (String modid : settingsRows) {
                 codeButtons.put(modid, buildToggleButton(modid, true));
@@ -908,12 +879,15 @@ public final class NourishedConfigScreen {
 
         @Override
         public int getItemHeight() {
-            return TAB_BAR_H + VIEWPORT_H + 20;
+            int tabRows = rowCountForTab();
+            // Only the "Detected" tab is scrollable; the other tabs size to their full content.
+            int bodyH = tabIndex == 0 ? VIEWPORT_H : (tabRows * ROW_H);
+            return TAB_BAR_H + bodyH + 20;
         }
 
         @Override
         public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
-            if (mouseX >= listX && mouseX < listX + listW && mouseY >= listY && mouseY < listY + listH) {
+            if (tabIndex == 0 && mouseX >= listX && mouseX < listX + listW && mouseY >= listY && mouseY < listY + listH) {
                 int maxScroll = Math.max(0, rowCountForTab() * ROW_H - VIEWPORT_H);
                 scroll = Math.max(0, Math.min(maxScroll, scroll - (int) (deltaY * ROW_H)));
                 requestReferenceRebuilding();
@@ -959,37 +933,45 @@ public final class NourishedConfigScreen {
             detectedTabButton.active = isEditable();
             builtInTabButton.active = isEditable();
             settingsTabButton.active = isEditable();
-            drawTabBackground(graphics, detectedTabButton, tabIndex == 0);
-            drawTabBackground(graphics, builtInTabButton, tabIndex == 1);
-            drawTabBackground(graphics, settingsTabButton, tabIndex == 2);
-            detectedTabButton.render(graphics, mouseX, mouseY, delta);
-            builtInTabButton.render(graphics, mouseX, mouseY, delta);
-            settingsTabButton.render(graphics, mouseX, mouseY, delta);
+            drawTab(graphics, detectedTabButton, tabIndex == 0, detectedTabLabel);
+            drawTab(graphics, builtInTabButton, tabIndex == 1, builtInTabLabel);
+            drawTab(graphics, settingsTabButton, tabIndex == 2, settingsTabLabel);
 
             listX = innerX;
             listY = y + TAB_BAR_H;
             listW = innerW;
-            listH = VIEWPORT_H;
+            listH = tabIndex == 0 ? VIEWPORT_H : rowCountForTab() * ROW_H;
             graphics.fill(listX, listY, listX + listW, listY + listH, COL_BG);
             graphics.renderOutline(listX, listY, listW, listH, 0xFF404040);
-            graphics.enableScissor(listX, listY, listX + listW, listY + listH);
 
-            int yStart = listY - scroll;
             if (tabIndex == 0) {
+                graphics.enableScissor(listX, listY, listX + listW, listY + listH);
+                int yStart = listY - scroll;
                 renderDetectedRows(graphics, yStart, mouseX, mouseY);
+                graphics.disableScissor();
             } else if (tabIndex == 1) {
-                renderBuiltInRows(graphics, yStart, mouseX, mouseY);
+                renderBuiltInRows(graphics, listY, mouseX, mouseY);
             } else {
-                renderSettingsRows(graphics, yStart, mouseX, mouseY, delta);
+                renderSettingsRows(graphics, listY, mouseX, mouseY, delta);
             }
 
-            graphics.disableScissor();
         }
 
-        private void drawTabBackground(GuiGraphics graphics, Button button, boolean active) {
-            int col = active ? COL_TAB_ACTIVE : COL_TAB_BG;
-            graphics.fill(button.getX(), button.getY(), button.getX() + button.getWidth(), button.getY() + 20, col);
-            graphics.renderOutline(button.getX(), button.getY(), button.getWidth(), 20, COL_CHIP_BORDER);
+        private void drawTab(GuiGraphics graphics, Button button, boolean active, String label) {
+            int fill = active ? COL_TAB_ACTIVE : COL_TAB_BG;
+            int border = active ? COL_TAB_BORDER_ACTIVE : COL_TAB_BORDER_INACTIVE;
+            int bx = button.getX();
+            int by = button.getY();
+            int bw = button.getWidth();
+            int bh = 20;
+
+            graphics.fill(bx, by, bx + bw, by + bh, fill);
+            graphics.renderOutline(bx, by, bw, bh, border);
+
+            var font = Minecraft.getInstance().font;
+            int tx = bx + (bw - font.width(label)) / 2;
+            int ty = by + (bh - 8) / 2;
+            graphics.drawString(font, label, tx, ty, 0xFFF0F0F0, false);
         }
 
         private void renderDetectedRows(GuiGraphics graphics, int yStart, int mouseX, int mouseY) {
@@ -1119,14 +1101,82 @@ public final class NourishedConfigScreen {
         }
     }
 
+    private static final class StyledChipTextEntry extends TooltipListEntry<Object> {
+        private static final int HEIGHT = 22;
+        private static final int BG = 0x661C1C1C;
+        private static final int TEXT = 0xFFE0E0E0;
+        private final Component label;
+        private final int borderColor;
+
+        StyledChipTextEntry(Component label, int borderColor) {
+            super(label, Optional::empty, false);
+            this.label = label;
+            this.borderColor = borderColor;
+        }
+
+        @Override
+        public boolean isEdited() {
+            return false;
+        }
+
+        @Override
+        public void save() {}
+
+        @Override
+        public Object getValue() {
+            return Boolean.FALSE;
+        }
+
+        @Override
+        public Optional<Object> getDefaultValue() {
+            return Optional.empty();
+        }
+
+        @Override
+        public int getItemHeight() {
+            return HEIGHT;
+        }
+
+        @Override
+        public void render(
+                GuiGraphics graphics,
+                int index,
+                int y,
+                int x,
+                int entryWidth,
+                int entryHeight,
+                int mouseX,
+                int mouseY,
+                boolean isHovered,
+                float delta
+        ) {
+            graphics.fill(x, y, x + entryWidth, y + HEIGHT - 1, BG);
+            graphics.renderOutline(x, y, entryWidth, HEIGHT - 1, borderColor);
+            graphics.drawString(Minecraft.getInstance().font, label, x + 6, y + 7, TEXT, false);
+        }
+
+        @Override
+        public List<? extends net.minecraft.client.gui.components.events.GuiEventListener> children() {
+            return List.of();
+        }
+
+        @Override
+        public List<? extends net.minecraft.client.gui.narration.NarratableEntry> narratables() {
+            return List.of();
+        }
+    }
+
     private static final class ModuleBulkToggleListEntry extends TooltipListEntry<Object> {
         private static final int BUTTON_HEIGHT = 20;
         private static final int GAP = 6;
+        private static final long CONFIRM_WINDOW_MS = 5000L;
 
         private final List<String> editableModuleKeys;
         private final Map<String, AtomicBoolean> modulePending;
         private final Button enableAllButton;
         private final Button disableAllButton;
+        private boolean disableConfirmArmed;
+        private long disableConfirmArmedAt;
 
         ModuleBulkToggleListEntry(List<String> editableModuleKeys, Map<String, AtomicBoolean> modulePending) {
             super(
@@ -1138,7 +1188,7 @@ public final class NourishedConfigScreen {
             this.enableAllButton = Button.builder(Component.translatable("config.nourished.modules.enableAll"), b -> setAll(true))
                     .bounds(0, 0, 120, BUTTON_HEIGHT)
                     .build();
-            this.disableAllButton = Button.builder(Component.translatable("config.nourished.modules.disableAll"), b -> setAll(false))
+            this.disableAllButton = Button.builder(Component.translatable("config.nourished.modules.disableAll"), b -> onDisableAllClick())
                     .bounds(0, 0, 120, BUTTON_HEIGHT)
                     .build();
         }
@@ -1150,6 +1200,27 @@ public final class NourishedConfigScreen {
                     pending.set(value);
                 }
             }
+        }
+
+        private void onDisableAllClick() {
+            long now = System.currentTimeMillis();
+            if (!disableConfirmArmed || now - disableConfirmArmedAt > CONFIRM_WINDOW_MS) {
+                disableConfirmArmed = true;
+                disableConfirmArmedAt = now;
+                return;
+            }
+            setAll(false);
+            disableConfirmArmed = false;
+        }
+
+        private void updateLabels() {
+            long now = System.currentTimeMillis();
+            if (disableConfirmArmed && now - disableConfirmArmedAt > CONFIRM_WINDOW_MS) {
+                disableConfirmArmed = false;
+            }
+            disableAllButton.setMessage(disableConfirmArmed
+                    ? Component.translatable("config.nourished.confirm.disableAll")
+                    : Component.translatable("config.nourished.modules.disableAll"));
         }
 
         @Override
@@ -1190,6 +1261,7 @@ public final class NourishedConfigScreen {
                 boolean isHovered,
                 float delta) {
             int btnWidth = (entryWidth - GAP) / 2;
+            updateLabels();
             enableAllButton.active = isEditable();
             disableAllButton.active = isEditable();
             enableAllButton.setX(x);
@@ -1355,8 +1427,8 @@ public final class NourishedConfigScreen {
     }
 
     private static final class ModuleToggleListEntry extends TooltipListEntry<Boolean> {
-        private static final int BUTTON_WIDTH = 130;
-        private static final int BUTTON_HEIGHT = 20;
+        private static final int PILL_WIDTH = 130;
+        private static final int PILL_HEIGHT = 18;
         private static final int COL_LABEL = 0xFFE0E0E0;
         private static final int COL_HINT = 0xFFCC8844;
         private static final int COL_ON_TEXT = 0xFFB8F2B8;
@@ -1366,13 +1438,21 @@ public final class NourishedConfigScreen {
         private static final int COL_CHIP_BORDER = 0xFF1A1A1A;
         private static final int COL_CHIP_HOVER = 0x22FFFFFF;
         private static final int COL_ROW_SEPARATOR = 0x223A3A3A;
+        private static final int COL_GROUP_BG = 0x55244A6C;
+        private static final int COL_GROUP_BORDER = 0xAA5DA9DE;
 
         private final AtomicBoolean pending;
         private final String group;
         private final String dependsOnKey;
         private final Map<String, AtomicBoolean> modulePending;
-        private final Button toggleButton;
         private final Component label;
+        private int pillX;
+        private int pillY;
+        private int pillW = PILL_WIDTH;
+        private int pillH = PILL_HEIGHT;
+        private boolean pillPressed;
+        private float hoverAlpha;
+        private long lastHoverUpdateMs;
 
         ModuleToggleListEntry(
                 Component label,
@@ -1388,17 +1468,25 @@ public final class NourishedConfigScreen {
             this.group = group;
             this.dependsOnKey = dependsOnKey;
             this.modulePending = modulePending;
-            this.toggleButton = Button.builder(Component.empty(), b -> {
-                        this.pending.set(!this.pending.get());
-                        updateButtonLabel();
-                    })
-                    .bounds(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)
-                    .build();
-            updateButtonLabel();
         }
 
-        private void updateButtonLabel() {
-            toggleButton.setMessage(Component.literal(pending.get() ? "ON" : "OFF"));
+        private void togglePending() {
+            boolean next = !this.pending.get();
+            if (next && dependsOnKey != null) {
+                AtomicBoolean dep = modulePending.get(dependsOnKey);
+                if (dep != null && !dep.get()) {
+                    dep.set(true);
+                }
+            }
+            this.pending.set(next);
+        }
+
+        private static String groupBadge(String group) {
+            return switch (group) {
+                case "core" -> "C";
+                case "ui" -> "UI";
+                default -> "+";
+            };
         }
 
         @Override
@@ -1438,16 +1526,24 @@ public final class NourishedConfigScreen {
                 int mouseY,
                 boolean isHovered,
                 float delta) {
-            updateButtonLabel();
-            toggleButton.active = isEditable();
-            toggleButton.setX(x + entryWidth - BUTTON_WIDTH);
-            toggleButton.setY(y);
-            toggleButton.setWidth(BUTTON_WIDTH);
-            graphics.drawString(Minecraft.getInstance().font, label, x, y + 6, COL_LABEL, false);
+            pillX = x + entryWidth - PILL_WIDTH;
+            pillY = y + 1;
+            pillW = PILL_WIDTH;
+            pillH = PILL_HEIGHT;
+            int iconW = 24;
+            int iconH = 14;
+            int iconX = x;
+            int iconY = y + 4;
+            graphics.fill(iconX, iconY, iconX + iconW, iconY + iconH, COL_GROUP_BG);
+            graphics.renderOutline(iconX, iconY, iconW, iconH, COL_GROUP_BORDER);
+            String badge = groupBadge(group);
+            int badgeX = iconX + (iconW - Minecraft.getInstance().font.width(badge)) / 2;
+            graphics.drawString(Minecraft.getInstance().font, badge, badgeX, iconY + 3, 0xFFE8F4FF, false);
+            graphics.drawString(Minecraft.getInstance().font, label, x + iconW + 6, y + 6, COL_LABEL, false);
 
-            int chipX = x + 152;
+            int chipX = x + 188;
             int chipY = y + 4;
-            int chipW = 52;
+            int chipW = 74;
             int chipH = 12;
             boolean isOn = pending.get();
             int chipFill = isOn ? COL_CHIP_ON : COL_CHIP_OFF;
@@ -1460,30 +1556,203 @@ public final class NourishedConfigScreen {
             String chipLabel = isOn ? "ENABLED" : "DISABLED";
             int chipTextX = chipX + (chipW - Minecraft.getInstance().font.width(chipLabel)) / 2;
             graphics.drawString(Minecraft.getInstance().font, chipLabel, chipTextX, chipY + 2, chipText, false);
-            if (dependsOnKey != null && pending.get()) {
+            if (dependsOnKey != null) {
                 AtomicBoolean dep = modulePending.get(dependsOnKey);
                 if (dep != null && !dep.get()) {
                     String depLabel = Component.translatable("config.nourished." + dependsOnKey).getString();
                     String depText = Component.translatable("config.nourished.modules.requires", depLabel).getString();
-                    graphics.drawString(Minecraft.getInstance().font, depText, x + 152, y + 15, COL_HINT, false);
+                    graphics.drawString(Minecraft.getInstance().font, depText, x + 188, y + 15, COL_HINT, false);
                 }
             }
+            boolean pillHovered = mouseX >= pillX && mouseX < pillX + pillW && mouseY >= pillY && mouseY < pillY + pillH;
+            long now = System.currentTimeMillis();
+            if (lastHoverUpdateMs == 0L) {
+                lastHoverUpdateMs = now;
+            }
+            float dt = Math.min(0.05f, (now - lastHoverUpdateMs) / 1000.0f);
+            lastHoverUpdateMs = now;
+            float target = pillHovered ? 1.0f : 0.0f;
+            float speed = 10.0f;
+            hoverAlpha += (target - hoverAlpha) * Math.min(1.0f, dt * speed);
+            int drawOffset = pillPressed ? 1 : 0;
+            int px = pillX;
+            int py = pillY + drawOffset;
+            int pillBg = isEditable() ? (pillPressed ? 0xFF1D4258 : 0xFF234F6B) : 0xFF3A3A3A;
+            graphics.fill(px, py, px + pillW, py + pillH, pillBg);
+            graphics.renderOutline(px, py, pillW, pillH, 0xFF5DA9DE);
+            if (!pillPressed && hoverAlpha > 0.01f) {
+                int a = Math.max(0, Math.min(255, (int) (hoverAlpha * 0x22)));
+                graphics.fill(px, py, px + pillW, py + pillH, (a << 24) | 0x00FFFFFF);
+            }
+            String pillText = Component.translatable("config.nourished.modules.toggle").getString();
+            int pillTextX = px + (pillW - Minecraft.getInstance().font.width(pillText)) / 2;
+            graphics.drawString(Minecraft.getInstance().font, pillText, pillTextX, py + 5, 0xFFE8F4FF, false);
             graphics.fill(x, y + 23, x + entryWidth, y + 24, COL_ROW_SEPARATOR);
-            toggleButton.render(graphics, mouseX, mouseY, delta);
+        }
+
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (button == 0 && isEditable()
+                    && mouseX >= pillX && mouseX < pillX + pillW
+                    && mouseY >= pillY && mouseY < pillY + pillH) {
+                pillPressed = true;
+                togglePending();
+                return true;
+            }
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
+
+        @Override
+        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            if (button == 0) {
+                pillPressed = false;
+            }
+            return super.mouseReleased(mouseX, mouseY, button);
         }
 
         @Override
         public List<? extends net.minecraft.client.gui.components.events.GuiEventListener> children() {
-            return List.of(toggleButton);
+            return List.of();
         }
 
         @Override
         public List<? extends net.minecraft.client.gui.narration.NarratableEntry> narratables() {
-            return List.of(toggleButton);
+            return List.of();
         }
     }
 
     private record ModuleMeta(String key, String group, String dependsOn) {}
+
+    private static final class HudQuickActionsListEntry extends TooltipListEntry<Object> {
+        private static final int BUTTON_HEIGHT = 20;
+        private static final int GAP = 6;
+        private static final long CONFIRM_WINDOW_MS = 5000L;
+
+        private final NourishedClientConfig client;
+        private final Button resetHudPositionButton;
+        private final Button resetDietOrderButton;
+        private boolean resetHudConfirmArmed;
+        private boolean resetOrderConfirmArmed;
+        private long resetHudConfirmAt;
+        private long resetOrderConfirmAt;
+
+        HudQuickActionsListEntry(NourishedClientConfig client) {
+            super(
+                    Component.translatable("config.nourished.hud.quickActions"),
+                    () -> Optional.of(new Component[]{Component.translatable("config.nourished.hud.quickActions.desc")}),
+                    false);
+            this.client = client;
+            this.resetHudPositionButton = Button.builder(
+                            Component.translatable("config.nourished.hud.resetPosition"),
+                            b -> onResetHudPositionClick()
+                    )
+                    .bounds(0, 0, 120, BUTTON_HEIGHT)
+                    .build();
+            this.resetDietOrderButton = Button.builder(
+                            Component.translatable("config.nourished.hud.resetDietOrder"),
+                            b -> onResetDietOrderClick()
+                    )
+                    .bounds(0, 0, 120, BUTTON_HEIGHT)
+                    .build();
+        }
+
+        private void onResetHudPositionClick() {
+            long now = System.currentTimeMillis();
+            if (!resetHudConfirmArmed || now - resetHudConfirmAt > CONFIRM_WINDOW_MS) {
+                resetHudConfirmArmed = true;
+                resetHudConfirmAt = now;
+                return;
+            }
+            this.client.resetHudOffsets();
+            resetHudConfirmArmed = false;
+        }
+
+        private void onResetDietOrderClick() {
+            long now = System.currentTimeMillis();
+            if (!resetOrderConfirmArmed || now - resetOrderConfirmAt > CONFIRM_WINDOW_MS) {
+                resetOrderConfirmArmed = true;
+                resetOrderConfirmAt = now;
+                return;
+            }
+            this.client.resetDietBarOrder();
+            resetOrderConfirmArmed = false;
+        }
+
+        private void updateLabels() {
+            long now = System.currentTimeMillis();
+            if (resetHudConfirmArmed && now - resetHudConfirmAt > CONFIRM_WINDOW_MS) {
+                resetHudConfirmArmed = false;
+            }
+            if (resetOrderConfirmArmed && now - resetOrderConfirmAt > CONFIRM_WINDOW_MS) {
+                resetOrderConfirmArmed = false;
+            }
+            resetHudPositionButton.setMessage(resetHudConfirmArmed
+                    ? Component.translatable("config.nourished.confirm.resetHud")
+                    : Component.translatable("config.nourished.hud.resetPosition"));
+            resetDietOrderButton.setMessage(resetOrderConfirmArmed
+                    ? Component.translatable("config.nourished.confirm.resetOrder")
+                    : Component.translatable("config.nourished.hud.resetDietOrder"));
+        }
+
+        @Override
+        public boolean isEdited() {
+            return false;
+        }
+
+        @Override
+        public void save() {}
+
+        @Override
+        public Object getValue() {
+            return Boolean.FALSE;
+        }
+
+        @Override
+        public Optional<Object> getDefaultValue() {
+            return Optional.empty();
+        }
+
+        @Override
+        public int getItemHeight() {
+            return 24;
+        }
+
+        @Override
+        public void render(
+                GuiGraphics graphics,
+                int index,
+                int y,
+                int x,
+                int entryWidth,
+                int entryHeight,
+                int mouseX,
+                int mouseY,
+                boolean isHovered,
+                float delta) {
+            int btnWidth = (entryWidth - GAP) / 2;
+            updateLabels();
+            resetHudPositionButton.active = isEditable();
+            resetDietOrderButton.active = isEditable();
+            resetHudPositionButton.setX(x);
+            resetHudPositionButton.setY(y);
+            resetHudPositionButton.setWidth(btnWidth);
+            resetDietOrderButton.setX(x + btnWidth + GAP);
+            resetDietOrderButton.setY(y);
+            resetDietOrderButton.setWidth(btnWidth);
+            resetHudPositionButton.render(graphics, mouseX, mouseY, delta);
+            resetDietOrderButton.render(graphics, mouseX, mouseY, delta);
+        }
+
+        @Override
+        public List<? extends net.minecraft.client.gui.components.events.GuiEventListener> children() {
+            return List.of(resetHudPositionButton, resetDietOrderButton);
+        }
+
+        @Override
+        public List<? extends net.minecraft.client.gui.narration.NarratableEntry> narratables() {
+            return List.of(resetHudPositionButton, resetDietOrderButton);
+        }
+    }
 
     /**
      * Cloth Config 15 has no {@code startButton}; this mirrors {@code BooleanListEntry} layout with a single action
