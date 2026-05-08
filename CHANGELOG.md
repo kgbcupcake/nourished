@@ -10,6 +10,7 @@ All notable changes to Nourished will be documented here.
 - Add GitHub Actions workflow for automated releases
 - Enhance mod compatibility and configuration UI
 - Improve compatibility management and UI enhancements
+- Enhance NourishedConfigScreen with new HUD features and UI improvements
 
 ## [0.1.1-alpha] - 2026-05-08
 
