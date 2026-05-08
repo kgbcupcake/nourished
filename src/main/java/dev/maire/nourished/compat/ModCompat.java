@@ -49,21 +49,12 @@ public final class ModCompat {
     public static boolean ANY_DECAY_CONFLICT = false;
     public static ConflictBehavior MERGED_CONFLICT_BEHAVIOR = ConflictBehavior.NONE;
 
-    public static final boolean LSO_LOADED;
-    public static final boolean CROPTOPIA_LOADED;
-    public static final boolean FARMERS_LOADED;
-    public static final boolean PAMS_LOADED;
-    public static final boolean MAMAS_LOADED;
-    public static final boolean SERENE_LOADED;
-
-    static {
-        LSO_LOADED = ModList.get().isLoaded("legendarysurvivaloverhaul");
-        CROPTOPIA_LOADED = ModList.get().isLoaded("croptopia");
-        FARMERS_LOADED = ModList.get().isLoaded("farmersdelight");
-        PAMS_LOADED = ModList.get().isLoaded("pamhc2foodcore");
-        MAMAS_LOADED = ModList.get().isLoaded("mamasherbs");
-        SERENE_LOADED = ModList.get().isLoaded("sereneseasons");
-    }
+    public static boolean LSO_LOADED;
+    public static boolean CROPTOPIA_LOADED;
+    public static boolean FARMERS_LOADED;
+    public static boolean PAMS_LOADED;
+    public static boolean MAMAS_LOADED;
+    public static boolean SERENE_LOADED;
 
     private ModCompat() {}
 
@@ -72,6 +63,13 @@ public final class ModCompat {
      * Loads all three tiers and resolves runtime data.
      */
     public static void initialize() {
+        LSO_LOADED = ModList.get().isLoaded("legendarysurvivaloverhaul");
+        CROPTOPIA_LOADED = ModList.get().isLoaded("croptopia");
+        FARMERS_LOADED = ModList.get().isLoaded("farmersdelight");
+        PAMS_LOADED = ModList.get().isLoaded("pamhc2foodcore");
+        MAMAS_LOADED = ModList.get().isLoaded("mamasherbs");
+        SERENE_LOADED = ModList.get().isLoaded("sereneseasons");
+
         if (initialized) return;
         initialized = true;
 
@@ -82,11 +80,39 @@ public final class ModCompat {
         loadTier1BuiltIn(merged);
         loadTier2ModProvided(merged);
         loadTier3ModpackOverride(merged);
+        includeLoadedModsAsFallback(merged);
 
         resolveRuntimeData(merged);
         buildNamespaceMap();
         computeAggregateFlags();
         logCompatReport();
+    }
+
+    /**
+     * Ensure every currently loaded mod appears in compat config, even if no explicit entry exists.
+     * This keeps the compatibility screen complete for large modpacks.
+     */
+    private static void includeLoadedModsAsFallback(Map<String, JsonCompatEntry> merged) {
+        for (IModInfo modInfo : ModList.get().getMods()) {
+            String modId = modInfo.getModId();
+            if ("minecraft".equals(modId) || "neoforge".equals(modId) || "nourished".equals(modId)) {
+                continue;
+            }
+            if (!merged.containsKey(modId)) {
+                merged.put(modId, new JsonCompatEntry(
+                        modId,
+                        modId,
+                        CompatCategory.UNKNOWN,
+                        List.of(modId),
+                        false,
+                        false,
+                        Map.of(),
+                        null,
+                        false,
+                        0
+                ));
+            }
+        }
     }
 
     /**

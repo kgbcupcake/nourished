@@ -10,7 +10,6 @@ import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.PresetRegistry;
-import dev.maire.nourished.config.NourishedConfigScreen;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.color.ColorRegistry;
 import dev.maire.nourished.client.ClientEventRegistrar;
@@ -27,7 +26,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(Nourished.MODID)
@@ -55,7 +53,6 @@ public class Nourished {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ClientEventRegistrar.register(modEventBus);
         }
-        modContainer.registerExtensionPoint(IConfigScreenFactory.class, (client, parent) -> NourishedConfigScreen.create(parent));
         modEventBus.addListener(ModNetworking::register);
         NeoForge.EVENT_BUS.register(new FoodEatenHandler());
         NeoForge.EVENT_BUS.register(new NutritionEffectsHandler());

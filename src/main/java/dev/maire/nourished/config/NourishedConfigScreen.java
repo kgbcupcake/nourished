@@ -8,6 +8,8 @@ import dev.maire.nourished.client.config.FoodScannerWidget;
 import dev.maire.nourished.client.config.ImportExportButtonsWidget;
 import dev.maire.nourished.client.config.PresetsWidget;
 import dev.maire.nourished.color.ColorRegistry;
+import dev.maire.nourished.compat.CompatCategory;
+import dev.maire.nourished.compat.CompatReportEntry;
 import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.effect.EffectRegistry;
 import dev.maire.nourished.nutrition.FoodOverrideRegistry;
@@ -67,8 +69,10 @@ public final class NourishedConfigScreen {
         addHudAndDisplayCategory(config, client, builder, entryBuilder);
         addNutrientsCategory(config, builder, entryBuilder, decayOverrides, criticalOverrides);
         addFoodValuesCategory(builder, entryBuilder, foodValuePending);
+        addScannerCategory(config, builder, entryBuilder);
         addAdvancedCategory(config, builder, entryBuilder);
-        addCompatibilityCategory(config, builder, entryBuilder, compatPending);
+        addCompatibilityListCategory(builder, entryBuilder);
+        addCompatibilitySettingsCategory(config, builder, entryBuilder, compatPending);
 
         builder.setSavingRunnable(() -> {
             for (Map.Entry<String, PendingOverride> entry : decayOverrides.entrySet()) {
@@ -198,12 +202,7 @@ public final class NourishedConfigScreen {
     }
 
     private static Component groupTitle(String group) {
-        String icon = switch (group) {
-            case "core" -> "⚙ ";
-            case "ui" -> "🖵 ";
-            default -> "▣ ";
-        };
-        return Component.literal(icon).append(Component.translatable("config.nourished.modules.group." + group));
+        return Component.translatable("config.nourished.modules.group." + group);
     }
 
     private static List<ModuleMeta> moduleMetas(Map<String, ModConfigSpec.BooleanValue> moduleMap) {
@@ -596,20 +595,94 @@ public final class NourishedConfigScreen {
             );
         }
 
-        category.addEntry(new FoodScannerWidget());
-
         addReloadButton(category, eb);
     }
 
-    private static void addCompatibilityCategory(
+    private static void addScannerCategory(NourishedConfig config, ConfigBuilder builder, ConfigEntryBuilder eb) {
+        ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.scanner"));
+
+        if (!LockRegistry.isLocked("scanner.enableRecipeInheritance")) {
+            category.addEntry(
+                    eb.startBooleanToggle(
+                                    Component.translatable("config.nourished.scanner.enableRecipeInheritance"),
+                                    config.scannerEnableRecipeInheritance()
+                            )
+                            .setDefaultValue(true)
+                            .setTooltip(Component.translatable("config.nourished.scanner.enableRecipeInheritance.desc"))
+                            .setSaveConsumer(config::setScannerEnableRecipeInheritance)
+                            .build()
+            );
+        }
+
+        if (!LockRegistry.isLocked("scanner.confidenceSpreadThreshold")) {
+            category.addEntry(
+                    buildDoubleSlider(
+                            eb,
+                            Component.translatable("config.nourished.scanner.confidenceSpreadThreshold"),
+                            config.scannerConfidenceSpreadThreshold(),
+                            0.0d,
+                            20.0d,
+                            3.0d,
+                            config::setScannerConfidenceSpreadThreshold,
+                            Component.translatable("config.nourished.scanner.confidenceSpreadThreshold.desc")
+                    )
+            );
+        }
+
+        category.addEntry(new FoodScannerWidget());
+        addReloadButton(category, eb);
+    }
+
+    private static void addCompatibilityListCategory(
+            ConfigBuilder builder,
+            ConfigEntryBuilder eb
+    ) {
+        ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.compatibilityList"));
+        for (CompatReportEntry report : ModCompat.getCompatReport()) {
+            if (!report.loaded()) {
+                continue;
+            }
+            String loadedText = report.loaded() ? "Installed" : "Not detected";
+            String versionText = report.detectedVersion() != null ? report.detectedVersion() : "-";
+            String conflictText = report.conflictLevel().name().replace('_', ' ');
+            List<AbstractConfigListEntry> entries = new ArrayList<>();
+            entries.add(eb.startTextDescription(Component.literal("Mod ID: " + report.modId())).build());
+            entries.add(eb.startTextDescription(Component.literal("Status: " + loadedText)).build());
+            entries.add(eb.startTextDescription(Component.literal("Version: " + versionText)).build());
+            entries.add(eb.startTextDescription(Component.literal("Category: " + report.category().name().replace('_', ' '))).build());
+            entries.add(eb.startTextDescription(Component.literal("Conflict level: " + conflictText)).build());
+            if (report.effectsDisabled() || report.decayDisabled()) {
+                entries.add(eb.startTextDescription(Component.literal(
+                        "Behavior: " +
+                                (report.effectsDisabled() ? "disable effects" : "keep effects") +
+                                ", " +
+                                (report.decayDisabled() ? "disable decay" : "keep decay")
+                )).build());
+            }
+            category.addEntry(
+                    eb.startSubCategory(Component.literal(toTitleCase(report.displayName())), entries)
+                            .setExpanded(false)
+                            .build()
+            );
+        }
+        addReloadButton(category, eb);
+    }
+
+    private static void addCompatibilitySettingsCategory(
             NourishedConfig config,
             ConfigBuilder builder,
             ConfigEntryBuilder eb,
             Map<String, CompatPending> compatPending
     ) {
-        ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.compatibility"));
+        ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.compatibilitySettings"));
 
         for (String modid : ModCompat.getDetected().keySet()) {
+            boolean showInBuiltInCompat = ModCompat.getEntry(modid)
+                    .map(entry -> entry.category() != CompatCategory.UNKNOWN)
+                    .orElse(false);
+            if (!showInBuiltInCompat) {
+                continue;
+            }
             boolean detected = ModCompat.getDetected().getOrDefault(modid, false);
             String modName = toTitleCase(modid);
             String statusText = detected ? "Status: Installed ✓" : "Status: Not detected ✗";
@@ -925,6 +998,7 @@ public final class NourishedConfigScreen {
         private final Button balancedButton;
         private final Button minimalistButton;
         private final Button immersiveButton;
+        private final Button gameplayButton;
 
         ModuleProfilesListEntry(Map<String, AtomicBoolean> modulePending, List<String> editableModuleKeys) {
             super(
@@ -942,6 +1016,9 @@ public final class NourishedConfigScreen {
             this.immersiveButton = Button.builder(Component.translatable("config.nourished.modules.profile.immersive"), b -> applyProfile("immersive"))
                     .bounds(0, 0, 110, BUTTON_HEIGHT)
                     .build();
+            this.gameplayButton = Button.builder(Component.translatable("config.nourished.modules.profile.gameplay"), b -> applyProfile("gameplay"))
+                    .bounds(0, 0, 110, BUTTON_HEIGHT)
+                    .build();
         }
 
         private void applyProfile(String profile) {
@@ -953,6 +1030,11 @@ public final class NourishedConfigScreen {
             switch (profile) {
                 case "minimalist" -> setModules(true, "enableDecay", "enableEffects", "enableCalorieTracking");
                 case "immersive" -> setModules(true, editableModuleKeys.toArray(new String[0]));
+                case "gameplay" -> setModules(true,
+                        "enableDecay",
+                        "enableEffects",
+                        "enableCalorieTracking",
+                        "enableSleepBonus");
                 default -> setModules(true,
                         "enableDecay",
                         "enableEffects",
@@ -999,7 +1081,7 @@ public final class NourishedConfigScreen {
 
         @Override
         public int getItemHeight() {
-            return 24;
+            return 50;
         }
 
         @Override
@@ -1014,32 +1096,37 @@ public final class NourishedConfigScreen {
                 int mouseY,
                 boolean isHovered,
                 float delta) {
-            int btnWidth = (entryWidth - GAP * 2) / 3;
+            int btnWidth = (entryWidth - GAP) / 2;
             balancedButton.active = isEditable();
             minimalistButton.active = isEditable();
             immersiveButton.active = isEditable();
+            gameplayButton.active = isEditable();
             balancedButton.setX(x);
             balancedButton.setY(y);
             balancedButton.setWidth(btnWidth);
             minimalistButton.setX(x + btnWidth + GAP);
             minimalistButton.setY(y);
             minimalistButton.setWidth(btnWidth);
-            immersiveButton.setX(x + (btnWidth + GAP) * 2);
-            immersiveButton.setY(y);
+            immersiveButton.setX(x);
+            immersiveButton.setY(y + BUTTON_HEIGHT + GAP);
             immersiveButton.setWidth(btnWidth);
+            gameplayButton.setX(x + btnWidth + GAP);
+            gameplayButton.setY(y + BUTTON_HEIGHT + GAP);
+            gameplayButton.setWidth(btnWidth);
             balancedButton.render(graphics, mouseX, mouseY, delta);
             minimalistButton.render(graphics, mouseX, mouseY, delta);
             immersiveButton.render(graphics, mouseX, mouseY, delta);
+            gameplayButton.render(graphics, mouseX, mouseY, delta);
         }
 
         @Override
         public List<? extends net.minecraft.client.gui.components.events.GuiEventListener> children() {
-            return List.of(balancedButton, minimalistButton, immersiveButton);
+            return List.of(balancedButton, minimalistButton, immersiveButton, gameplayButton);
         }
 
         @Override
         public List<? extends net.minecraft.client.gui.narration.NarratableEntry> narratables() {
-            return List.of(balancedButton, minimalistButton, immersiveButton);
+            return List.of(balancedButton, minimalistButton, immersiveButton, gameplayButton);
         }
     }
 
@@ -1132,13 +1219,7 @@ public final class NourishedConfigScreen {
             toggleButton.setX(x + entryWidth - BUTTON_WIDTH);
             toggleButton.setY(y);
             toggleButton.setWidth(BUTTON_WIDTH);
-            String groupIcon = switch (group) {
-                case "core" -> "⚙";
-                case "ui" -> "🖵";
-                default -> "▣";
-            };
-            graphics.drawString(Minecraft.getInstance().font, groupIcon, x, y + 6, 0xFF9AA5B1, false);
-            graphics.drawString(Minecraft.getInstance().font, label, x + 12, y + 6, COL_LABEL, false);
+            graphics.drawString(Minecraft.getInstance().font, label, x, y + 6, COL_LABEL, false);
 
             int chipX = x + 152;
             int chipY = y + 4;
