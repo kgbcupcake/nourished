@@ -196,12 +196,22 @@ public class DietData {
 
     /** Extracts display-only state for lightweight network sync. */
     public SyncDietDeltaPayload toDeltaPayload() {
+        List<String> recentFoodIds = foodMemory.entrySet().stream()
+                .sorted((a, b) -> Long.compare(b.getValue().lastEatenTick(), a.getValue().lastEatenTick()))
+                .limit(3)
+                .map(Map.Entry::getKey)
+                .toList();
+        List<String> neglectedCategories = getMostNeglectedCategories(2);
+        List<String> fatiguedFamilies = getMostFatiguedFamilies(2, lastTickTime);
         return new SyncDietDeltaPayload(
                 Map.copyOf(nutrients),
                 Map.copyOf(lastNutrients),
                 calories,
                 maxCalories,
-                getBalanceScore()
+                getBalanceScore(),
+                recentFoodIds,
+                neglectedCategories,
+                fatiguedFamilies
         );
     }
 

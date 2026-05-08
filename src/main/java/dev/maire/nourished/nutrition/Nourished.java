@@ -20,6 +20,7 @@ import dev.maire.nourished.handler.DietPlayerEvents;
 import dev.maire.nourished.handler.FoodEatenHandler;
 import dev.maire.nourished.handler.NutritionDecayHandler;
 import dev.maire.nourished.handler.NutritionEffectsHandler;
+import dev.maire.nourished.handler.SleepBonusHandler;
 import dev.maire.nourished.network.ModNetworking;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -65,6 +66,7 @@ public class Nourished {
             }
         });
         NeoForge.EVENT_BUS.register(new DietPlayerEvents());
+        NeoForge.EVENT_BUS.register(new SleepBonusHandler());
         NeoForge.EVENT_BUS.register(new ConfigReloadHandler());
         NeoForge.EVENT_BUS.register(new NourishedCommand());
         LOGGER.info("Nourished loaded.");

@@ -3,7 +3,10 @@ package dev.maire.nourished.handler;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
+import dev.maire.nourished.effect.EffectRegistry;
 import dev.maire.nourished.effect.NutritionEffectApplier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -25,6 +28,15 @@ public class NutritionEffectsHandler {
         if (config.enableEffects()) {
             DietData data = player.getData(DietAttachment.DIET.get());
             NutritionEffectApplier.apply(player, data);
+            for (String oldId : EffectRegistry.getPreviousEffectIds()) {
+                boolean stillRegistered = EffectRegistry.getAll().stream()
+                        .anyMatch(d -> d.effect().equals(oldId));
+                if (!stillRegistered) {
+                    BuiltInRegistries.MOB_EFFECT
+                            .getHolder(ResourceLocation.parse(oldId))
+                            .ifPresent(player::removeEffect);
+                }
+            }
         } else {
             NutritionEffectApplier.clearAll(player);
         }

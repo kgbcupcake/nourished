@@ -241,7 +241,10 @@ public final class PresetRegistry {
                     def.threshold(),
                     def.amplifier(),
                     def.durationTicks(),
-                    true
+                    true,
+                    def.thresholdMax(),
+                    def.ambient(),
+                    def.showParticles()
             ));
         }
         try {

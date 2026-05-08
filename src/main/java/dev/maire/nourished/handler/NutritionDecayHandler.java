@@ -31,6 +31,7 @@ public class NutritionDecayHandler {
         }
 
         if (changed) {
+            player.setData(DietAttachment.DIET.get(), data);
             ModNetworking.syncDietDelta(player, data);
         }
     }

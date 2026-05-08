@@ -1,6 +1,5 @@
 package dev.maire.nourished.client.screen;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -20,12 +19,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class DietScreen extends Screen {
@@ -252,7 +254,7 @@ public class DietScreen extends Screen {
         y += 45;
 
         // ── Balance box ───────────────────────────────────────────────────
-        drawRoundedBox(g, x - 2, y - 2, bw + 4, 40);
+        drawRoundedBox(g, x - 2, y - 2, bw + 4, 50);
 
         g.renderItem(new net.minecraft.world.item.ItemStack(
                 BuiltInRegistries.ITEM.get(ResourceLocation.parse("minecraft:comparator"))),
@@ -279,21 +281,74 @@ public class DietScreen extends Screen {
         g.drawString(font, balText, 0, 0, balColor, false);
         pose.popPose();
 
-        y += 45;
+        float balScore = ClientDietCache.getBalanceScore();
+        // 5 pips: 10px wide, 6px tall, 3px gap -> total 62px, centered in bw
+        int filledPips = Math.round(balScore * 5);
+        int pipTotalW = 5 * 10 + 4 * 3; // 62
+        int pipStartX = x + (bw - pipTotalW) / 2;
+        for (int i = 0; i < 5; i++) {
+            int px = pipStartX + i * 13;
+            g.fill(px, y + 38, px + 10, y + 44, i < filledPips ? balColor : COL_SEG_EMPTY);
+        }
+        y += 55;
+
+        List<String> recentIds = ClientDietCache.getRecentFoodIds();
+        if (!recentIds.isEmpty()) {
+            g.drawString(font, Component.translatable("nourished.screen.diet.recent_label"),
+                    x, y, COL_HEADER, false);
+            y += 10;
+
+            for (String id : recentIds) {
+                ItemStack recent = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id)));
+                PoseStack poseRecent = g.pose();
+                poseRecent.pushPose();
+                poseRecent.translate(x, y, 0);
+                poseRecent.scale(0.75f, 0.75f, 1f);
+                g.renderItem(recent, 0, 0);
+                poseRecent.popPose();
+
+                String name = recent.getHoverName().getString();
+                String truncated = font.plainSubstrByWidth(name, bw - 18);
+                g.drawString(font, truncated, x + 16, y + 3, COL_WHITE, false);
+                y += 14;
+            }
+        }
+
+        List<String> neglected = ClientDietCache.getNeglectedCategories();
+        if (!neglected.isEmpty()) {
+            drawRoundedBox(g, x - 2, y - 2, bw + 4, 46);
+            g.drawString(font, Component.translatable("nourished.screen.diet.suggestion_label"),
+                    x, y, COL_HEADER, false);
+            y += 10;
+
+            for (int col = 0; col < Math.min(2, neglected.size()); col++) {
+                String categoryKey = neglected.get(col);
+                TagKey<Item> tag = TagKey.create(Registries.ITEM,
+                        ResourceLocation.parse("nourished:nutrients/" + categoryKey));
+                Item exampleItem = null;
+                for (Item item : BuiltInRegistries.ITEM) {
+                    if (item.builtInRegistryHolder().is(tag)) {
+                        exampleItem = item;
+                        break;
+                    }
+                }
+                if (exampleItem == null) continue;
+
+                int colX = x + col * 20;
+                g.renderItem(new ItemStack(exampleItem), colX, y);
+                g.drawString(font,
+                        Component.translatable("nourished.screen.diet.bar." + categoryKey),
+                        colX + 18,
+                        y + 4,
+                        NutrientUiColors.baseColorArgb(categoryKey),
+                        false);
+            }
+            y += 36 + 4;
+        }
 
         // ── Active effects ────────────────────────────────────────────────
         drawActiveEffects(g, x, y, bw);
 
-        // ── Reset timer ───────────────────────────────────────────────────
-        LocalTime now        = LocalTime.now();
-        int secondsLeft      = (23 - now.getHour()) * 3600
-                             + (59 - now.getMinute()) * 60
-                            + (60 - now.getSecond());
-        int hLeft = secondsLeft / 3600;
-        int mLeft = (secondsLeft % 3600) / 60;
-        String resetStr = Component.translatable("nourished.screen.diet.reset_in", hLeft, mLeft).getString();
-        int resetX = x + (bw - font.width(resetStr)) / 2;
-        g.drawString(font, resetStr, resetX, topPos + HEIGHT - 46, COL_CYAN, false);
     }
 
     private void drawActiveEffects(GuiGraphics g, int x, int y, int bw) {

@@ -220,6 +220,18 @@ public final class NourishedConfigScreen {
             category.addEntry(entry);
         }
 
+        if (!LockRegistry.isLocked("enableSleepBonus")) {
+            var entry = eb.startBooleanToggle(Component.translatable("config.nourished.enableSleepBonus"), config.enableSleepBonus())
+                    .setDefaultValue(true)
+                    .setTooltip(Component.translatable("config.nourished.enableSleepBonus.desc"))
+                    .setSaveConsumer(config::setEnableSleepBonus)
+                    .build();
+            if (LockRegistry.isServerOnly("enableSleepBonus") && isMultiplayer()) {
+                entry.setEditable(false);
+            }
+            category.addEntry(entry);
+        }
+
         addReloadButton(category, eb);
     }
 

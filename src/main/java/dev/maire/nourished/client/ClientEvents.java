@@ -8,6 +8,7 @@ import dev.maire.nourished.client.screen.DietScreen;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.NourishedConfigScreen;
 import dev.maire.nourished.diet.DietData;
+import dev.maire.nourished.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.nutrition.FoodNutritionRegistry.DietDelta;
 import dev.maire.nourished.nutrition.NutrientRegistry;
@@ -110,7 +111,13 @@ public final class ClientEvents {
 
         String itemId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
         DietData diet = ClientDietCache.get();
-        float multiplier = diet.peekMultiplier(itemId);
+        String dominantCategory = highestKey; // already resolved above from matchedBars
+        String familyKey = FoodFamilyResolver.resolve(
+                BuiltInRegistries.ITEM.getKey(stack.getItem()));
+        long gameTimeMs = ClientDietCache.get().lastTickTime > 0
+                ? ClientDietCache.get().lastTickTime
+                : 0L;
+        float multiplier = diet.peekMultiplier(itemId, dominantCategory, familyKey, gameTimeMs);
 
         if (multiplier < 1.0f) {
             String pct = (int)(multiplier * 100) + "%";
@@ -119,6 +126,22 @@ public final class ClientEvents {
         } else {
             lines.add(Component.translatable("nourished.tooltip.fresh")
                     .withStyle(ChatFormatting.GREEN));
+        }
+        if (NourishedConfig.get().debugMemoryLogging()) {
+            var breakdown = diet.getMultiplierBreakdown(itemId, dominantCategory, familyKey, gameTimeMs);
+            String itemPct = (int) ((breakdown.itemContribution() / breakdown.finalMultiplier()) * 100) + "%";
+            String categoryPct = (int) ((breakdown.categoryContribution() / breakdown.finalMultiplier()) * 100) + "%";
+            String familyPct = (int) ((breakdown.familyContribution() / breakdown.finalMultiplier()) * 100) + "%";
+
+            lines.add(Component.empty());
+            lines.add(Component.literal("  Item memory:     " + itemPct)
+                    .withStyle(Style.EMPTY.withColor(0xFF666666)));
+            lines.add(Component.literal("  Category (" + dominantCategory + "): " + categoryPct)
+                    .withStyle(Style.EMPTY.withColor(0xFF666666)));
+            lines.add(Component.literal("  Family (" + (familyKey != null ? familyKey : "none") + "): " + familyPct)
+                    .withStyle(Style.EMPTY.withColor(0xFF666666)));
+            lines.add(Component.literal("  \u2192 " + (int) (breakdown.finalMultiplier() * 100) + "% nutrition gain")
+                    .withStyle(breakdown.finalMultiplier() < 1.0f ? ChatFormatting.GOLD : ChatFormatting.GREEN));
         }
 
         boolean renderedAny = false;

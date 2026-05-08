@@ -17,6 +17,10 @@ public class ClientDietCache {
     private static final Map<String, Long> lastNutrientIncreaseMs = new HashMap<>();
     /** Skip recording flashes on the first sync (login) so zeros-to-values does not flash every bar. */
     private static boolean firstClientSync = true;
+    private static float cachedBalanceScore = 0f;
+    private static List<String> cachedRecentFoodIds = List.of();
+    private static List<String> cachedNeglectedCategories = List.of();
+    private static List<String> cachedFatiguedFamilies = List.of();
 
     /**
      * Applies incoming full diet from the server: updates cache, records nutrient increases for bar flash
@@ -29,6 +33,14 @@ public class ClientDietCache {
         }
         firstClientSync = false;
         current = data;
+        cachedBalanceScore = data.getBalanceScore();
+        cachedRecentFoodIds = data.foodMemory.entrySet().stream()
+                .sorted((a, b) -> Long.compare(b.getValue().lastEatenTick(), a.getValue().lastEatenTick()))
+                .limit(3)
+                .map(Map.Entry::getKey)
+                .toList();
+        cachedNeglectedCategories = data.getMostNeglectedCategories(2);
+        cachedFatiguedFamilies = data.getMostFatiguedFamilies(2, data.lastTickTime);
     }
 
     /**
@@ -48,6 +60,10 @@ public class ClientDietCache {
         current.lastNutrients.putAll(payload.lastNutrients());
         current.calories = payload.calories();
         current.maxCalories = payload.maxCalories();
+        cachedBalanceScore = payload.balanceScore();
+        cachedRecentFoodIds = payload.recentFoodIds();
+        cachedNeglectedCategories = payload.neglectedCategories();
+        cachedFatiguedFamilies = payload.fatiguedFamilies();
     }
 
     private static void recordNutrientIncreases(Map<String, Float> prev, Map<String, Float> next) {
@@ -79,5 +95,21 @@ public class ClientDietCache {
 
     public static DietData get() {
         return current;
+    }
+
+    public static float getBalanceScore() {
+        return cachedBalanceScore;
+    }
+
+    public static List<String> getRecentFoodIds() {
+        return cachedRecentFoodIds;
+    }
+
+    public static List<String> getNeglectedCategories() {
+        return cachedNeglectedCategories;
+    }
+
+    public static List<String> getFatiguedFamilies() {
+        return cachedFatiguedFamilies;
     }
 }

@@ -80,6 +80,7 @@ public class FoodEatenHandler {
             }
         }
 
+        player.setData(DietAttachment.DIET.get(), diet);
         ModNetworking.syncDietDelta(player, diet);
 
         if (NourishedConfig.get().enableEffects()) {

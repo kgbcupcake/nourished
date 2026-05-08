@@ -22,8 +22,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Loads effect definitions from config/nourished/effects.json.
@@ -40,24 +42,32 @@ public class EffectRegistry {
             double threshold,
             int amplifier,
             int durationTicks,
-            boolean enabled
+            boolean enabled,
+            double thresholdMax,
+            boolean ambient,
+            boolean showParticles
     ) {}
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private static final List<EffectDef> REGISTRY = new ArrayList<>();
+    private static final Set<String> previousEffectIds = new HashSet<>();
 
     private static final List<EffectDef> DEFAULTS = List.of(
-            new EffectDef("protein_penalty", "minecraft:mining_fatigue", "proteins", "below", 0.25, 0, 140, true),
-            new EffectDef("carbs_penalty", "minecraft:weakness", "grains", "below", 0.25, 0, 140, true),
-            new EffectDef("vitamins_penalty", "minecraft:unluck", "fruits", "below", 0.25, 0, 140, true),
-            new EffectDef("hydration_penalty", "minecraft:slowness", "vegetables", "below", 0.25, 0, 140, true),
-            new EffectDef("all_high_health", "minecraft:health_boost", "all", "all_above", 0.75, 0, 140, true),
-            new EffectDef("all_high_regen", "minecraft:regeneration", "all", "all_above", 0.75, 0, 140, true)
+            new EffectDef("protein_penalty", "minecraft:mining_fatigue", "proteins", "below", 0.25, 0, 140, true, 1.0, true, false),
+            new EffectDef("carbs_penalty", "minecraft:weakness", "grains", "below", 0.25, 0, 140, true, 1.0, true, false),
+            new EffectDef("vitamins_penalty", "minecraft:unluck", "fruits", "below", 0.25, 0, 140, true, 1.0, true, false),
+            new EffectDef("hydration_penalty", "minecraft:slowness", "vegetables", "below", 0.25, 0, 140, true, 1.0, true, false),
+            new EffectDef("all_high_health", "minecraft:health_boost", "all", "all_above", 0.75, 0, 140, true, 1.0, true, false),
+            new EffectDef("all_high_regen", "minecraft:regeneration", "all", "all_above", 0.75, 0, 140, true, 1.0, true, false)
     );
 
     public static List<EffectDef> getAll() {
         return Collections.unmodifiableList(new ArrayList<>(REGISTRY));
+    }
+
+    public static Set<String> getPreviousEffectIds() {
+        return Collections.unmodifiableSet(previousEffectIds);
     }
 
     public static void load() {
@@ -81,6 +91,8 @@ public class EffectRegistry {
     public static void reload() {
         Nourished.LOGGER.info("[EffectRegistry] Reloading effects.json");
         load();
+        EffectConflictDetector.clearWarned();
+        NutritionEffectApplier.clearWarnedPlayers();
     }
 
     /**
@@ -106,14 +118,7 @@ public class EffectRegistry {
         Nourished.LOGGER.info("[EffectRegistry] Loaded from config folder");
     }
 
-    private static void parseFromReader(Reader reader) {
-        REGISTRY.clear();
-        JsonArray arr = GSON.fromJson(reader, JsonArray.class);
-        if (arr == null || arr.isEmpty()) {
-            Nourished.LOGGER.warn("[EffectRegistry] Data was empty, using built-in defaults");
-            loadDefaults();
-            return;
-        }
+    private static void parseJson(JsonArray arr) {
         for (JsonElement el : arr) {
             JsonObject obj = el.getAsJsonObject();
             String id = obj.get("id").getAsString();
@@ -124,29 +129,32 @@ public class EffectRegistry {
             int amplifier = obj.has("amplifier") ? obj.get("amplifier").getAsInt() : 0;
             int durationTicks = obj.has("duration_ticks") ? obj.get("duration_ticks").getAsInt() : 140;
             boolean enabled = !obj.has("enabled") || obj.get("enabled").getAsBoolean();
-            REGISTRY.add(new EffectDef(id, effect, nutrient, trigger, threshold, amplifier, durationTicks, enabled));
-        }
-        if (REGISTRY.isEmpty()) {
-            loadDefaults();
+            double thresholdMax = obj.has("threshold_max") ? obj.get("threshold_max").getAsDouble() : 1.0;
+            boolean ambient = !obj.has("ambient") || obj.get("ambient").getAsBoolean();
+            boolean showParticles = obj.has("show_particles") && obj.get("show_particles").getAsBoolean();
+            REGISTRY.add(new EffectDef(id, effect, nutrient, trigger, threshold, amplifier, durationTicks, enabled, thresholdMax, ambient, showParticles));
         }
     }
 
+    private static void parseFromReader(Reader reader) {
+        REGISTRY.clear();
+        JsonArray arr = GSON.fromJson(reader, JsonArray.class);
+        if (arr == null || arr.isEmpty()) {
+            Nourished.LOGGER.warn("[EffectRegistry] Data was empty, using built-in defaults");
+            loadDefaults();
+            return;
+        }
+        parseJson(arr);
+        if (REGISTRY.isEmpty()) loadDefaults();
+    }
+
     private static void parse(Path file) throws IOException {
+        previousEffectIds.clear();
+        for (EffectDef def : REGISTRY) previousEffectIds.add(def.effect());
         REGISTRY.clear();
         try (Reader r = Files.newBufferedReader(file)) {
             JsonArray arr = GSON.fromJson(r, JsonArray.class);
-            for (JsonElement el : arr) {
-                JsonObject obj = el.getAsJsonObject();
-                String id = obj.get("id").getAsString();
-                String effect = obj.get("effect").getAsString();
-                String nutrient = obj.get("nutrient").getAsString();
-                String trigger = obj.get("trigger").getAsString();
-                double threshold = obj.has("threshold") ? obj.get("threshold").getAsDouble() : 0.25;
-                int amplifier = obj.has("amplifier") ? obj.get("amplifier").getAsInt() : 0;
-                int durationTicks = obj.has("duration_ticks") ? obj.get("duration_ticks").getAsInt() : 140;
-                boolean enabled = !obj.has("enabled") || obj.get("enabled").getAsBoolean();
-                REGISTRY.add(new EffectDef(id, effect, nutrient, trigger, threshold, amplifier, durationTicks, enabled));
-            }
+            parseJson(arr);
         }
         if (REGISTRY.isEmpty()) {
             Nourished.LOGGER.warn("[EffectRegistry] effects.json was empty, using built-in defaults");
@@ -155,6 +163,8 @@ public class EffectRegistry {
     }
 
     private static void loadDefaults() {
+        previousEffectIds.clear();
+        for (EffectDef def : REGISTRY) previousEffectIds.add(def.effect());
         REGISTRY.clear();
         REGISTRY.addAll(DEFAULTS);
     }
@@ -189,6 +199,9 @@ public class EffectRegistry {
             obj.addProperty("amplifier", def.amplifier());
             obj.addProperty("duration_ticks", def.durationTicks());
             obj.addProperty("enabled", def.enabled());
+            obj.addProperty("threshold_max", def.thresholdMax());
+            obj.addProperty("ambient", def.ambient());
+            obj.addProperty("show_particles", def.showParticles());
             arr.add(obj);
         }
         try (Writer w = Files.newBufferedWriter(file)) {

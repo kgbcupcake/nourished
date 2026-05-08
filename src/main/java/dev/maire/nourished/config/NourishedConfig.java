@@ -50,6 +50,7 @@ public final class NourishedConfig {
     // config.nourished.enableCriticalToasts
     // config.nourished.enableCriticalToasts.desc
     private final ModConfigSpec.BooleanValue enableCriticalToasts;
+    private final ModConfigSpec.BooleanValue enableSleepBonus;
 
     // General
     private final ModConfigSpec.DoubleValue decayRate;
@@ -144,6 +145,9 @@ public final class NourishedConfig {
         enableCriticalToasts = builder
                 .comment("Separate from enableToasts, controls only the critical-threshold toast specifically")
                 .define("enableCriticalToasts", true);
+        enableSleepBonus = builder
+                .comment("When true, sleeping with all nutrient bars above 50% grants Regeneration I for 30 seconds")
+                .define("enableSleepBonus", true);
         builder.pop();
 
         builder.push("general");
@@ -416,6 +420,14 @@ public final class NourishedConfig {
 
     public void setEnableCriticalToasts(boolean value) {
         enableCriticalToasts.set(value);
+    }
+
+    public boolean enableSleepBonus() {
+        return enableSleepBonus.get();
+    }
+
+    public void setEnableSleepBonus(boolean value) {
+        enableSleepBonus.set(value);
     }
 
     public double criticalThreshold() {

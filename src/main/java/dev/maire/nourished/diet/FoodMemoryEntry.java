@@ -70,13 +70,6 @@ public record FoodMemoryEntry(float eatCount, long lastEatenTick) {
     }
 
     /**
-     * Simple increment for backward compatibility. Uses current system time.
-     */
-    public FoodMemoryEntry withEat() {
-        return new FoodMemoryEntry(eatCount + 1f, System.currentTimeMillis());
-    }
-
-    /**
      * Streak-aware eat recording. If eaten within streak window, applies bonus weight.
      *
      * @param streakWindowMs  time window for streak bonus

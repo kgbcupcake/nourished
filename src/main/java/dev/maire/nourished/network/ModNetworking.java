@@ -17,8 +17,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import io.netty.buffer.ByteBuf;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ModNetworking {
@@ -97,7 +99,10 @@ public class ModNetworking {
             Map<String, Float> lastNutrients,
             float calories,
             float maxCalories,
-            float balanceScore
+            float balanceScore,
+            List<String> recentFoodIds,
+            List<String> neglectedCategories,
+            List<String> fatiguedFamilies
     ) implements CustomPacketPayload {
 
         public static final CustomPacketPayload.Type<SyncDietDeltaPayload> TYPE =
@@ -123,6 +128,13 @@ public class ModNetworking {
                         }
                 );
 
+        private static final StreamCodec<ByteBuf, List<String>> RECENT_FOOD_IDS_CODEC =
+                ByteBufCodecs.<ByteBuf, String>list().apply(ByteBufCodecs.STRING_UTF8);
+        private static final StreamCodec<ByteBuf, List<String>> NEGLECTED_CATEGORIES_CODEC =
+                ByteBufCodecs.<ByteBuf, String>list().apply(ByteBufCodecs.STRING_UTF8);
+        private static final StreamCodec<ByteBuf, List<String>> FATIGUED_FAMILIES_CODEC =
+                ByteBufCodecs.<ByteBuf, String>list().apply(ByteBufCodecs.STRING_UTF8);
+
         public static final StreamCodec<FriendlyByteBuf, SyncDietDeltaPayload> STREAM_CODEC =
                 StreamCodec.of(
                         (buf, payload) -> {
@@ -131,13 +143,19 @@ public class ModNetworking {
                             buf.writeFloat(payload.calories());
                             buf.writeFloat(payload.maxCalories());
                             buf.writeFloat(payload.balanceScore());
+                            RECENT_FOOD_IDS_CODEC.encode(buf, payload.recentFoodIds());
+                            NEGLECTED_CATEGORIES_CODEC.encode(buf, payload.neglectedCategories());
+                            FATIGUED_FAMILIES_CODEC.encode(buf, payload.fatiguedFamilies());
                         },
                         buf -> new SyncDietDeltaPayload(
                                 NUTRIENT_MAP_CODEC.decode(buf),
                                 NUTRIENT_MAP_CODEC.decode(buf),
                                 buf.readFloat(),
                                 buf.readFloat(),
-                                buf.readFloat()
+                                buf.readFloat(),
+                                RECENT_FOOD_IDS_CODEC.decode(buf),
+                                NEGLECTED_CATEGORIES_CODEC.decode(buf),
+                                FATIGUED_FAMILIES_CODEC.decode(buf)
                         )
                 );
 

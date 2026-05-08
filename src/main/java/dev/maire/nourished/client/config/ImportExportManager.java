@@ -265,6 +265,9 @@ public final class ImportExportManager {
             el.addProperty("amplifier", def.amplifier());
             el.addProperty("duration_ticks", def.durationTicks());
             el.addProperty("enabled", def.enabled());
+            el.addProperty("threshold_max", def.thresholdMax());
+            el.addProperty("ambient", def.ambient());
+            el.addProperty("show_particles", def.showParticles());
             defs.add(el);
         }
         o.add("definitions", defs);
@@ -414,7 +417,21 @@ public final class ImportExportManager {
             int amplifier = obj.has("amplifier") ? obj.get("amplifier").getAsInt() : 0;
             int durationTicks = obj.has("duration_ticks") ? obj.get("duration_ticks").getAsInt() : 140;
             boolean enabled = !obj.has("enabled") || obj.get("enabled").getAsBoolean();
-            out.add(new EffectRegistry.EffectDef(id, effect, nutrient, trigger, threshold, amplifier, durationTicks, enabled));
+            double thresholdMax = obj.has("threshold_max") ? obj.get("threshold_max").getAsDouble() : 1.0d;
+            boolean ambient = !obj.has("ambient") || obj.get("ambient").getAsBoolean();
+            boolean showParticles = obj.has("show_particles") && obj.get("show_particles").getAsBoolean();
+            out.add(new EffectRegistry.EffectDef(
+                    id,
+                    effect,
+                    nutrient,
+                    trigger,
+                    threshold,
+                    amplifier,
+                    durationTicks,
+                    enabled,
+                    thresholdMax,
+                    ambient,
+                    showParticles));
         }
         return out;
     }
