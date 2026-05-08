@@ -10,3 +10,4 @@ plugins {
 }
 
 rootProject.name = 'NutritionalBalance'
+include 'example-addon'
