@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 
 import dev.maire.nourished.command.NourishedCommand;
+import dev.maire.nourished.compat.kubejs.NourishedKubeJSPlugin;
 import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -25,6 +26,7 @@ import dev.maire.nourished.network.ModNetworking;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -69,6 +71,14 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new SleepBonusHandler());
         NeoForge.EVENT_BUS.register(new ConfigReloadHandler());
         NeoForge.EVENT_BUS.register(new NourishedCommand());
+        if (ModList.get().isLoaded("kubejs")) {
+            try {
+                NourishedKubeJSPlugin.bootstrap();
+                LOGGER.info("[Nourished] Enabled KubeJS integration bridge.");
+            } catch (Throwable t) {
+                LOGGER.warn("[Nourished] Failed to initialize KubeJS integration bridge.", t);
+            }
+        }
         LOGGER.info("Nourished loaded.");
     }
 }

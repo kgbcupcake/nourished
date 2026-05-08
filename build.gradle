@@ -78,12 +78,14 @@ neoForge {
 repositories {
     maven { url = 'https://maven.architectury.dev/' }
     maven { url = 'https://maven.blamejared.com' }
+    maven { url = 'https://maven.latvian.dev/releases' }
     maven { url = 'https://maven.terraformersmc.com/releases/' }
     maven { url = 'https://www.cursemaven.com' }
 }
 
 dependencies {
     implementation "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
+    compileOnly "dev.latvian.mods:kubejs-neoforge:2101.7.2-build.295"
     compileOnly "mezz.jei:jei-1.21.1-common-api:+"
     compileOnly "mezz.jei:jei-1.21.1-neoforge-api:+"
     compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:+"
