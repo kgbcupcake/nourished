@@ -43,6 +43,7 @@ public final class ModCompat {
 
     private static final Map<String, CompatEntry> ENTRIES_BY_MODID = new LinkedHashMap<>();
     private static final Map<String, String> NAMESPACE_TO_MODID = new HashMap<>();
+    private static final Set<String> BUILT_IN_MODIDS = new LinkedHashSet<>();
 
     public static boolean ANY_EFFECTS_CONFLICT = false;
     public static boolean ANY_SURVIVAL_OVERHAUL_LOADED = false;
@@ -190,6 +191,7 @@ public final class ModCompat {
                     for (JsonCompatEntry entry : registry.entries()) {
                         if (entry.modId() != null) {
                             merged.put(entry.modId(), entry);
+                            BUILT_IN_MODIDS.add(entry.modId());
                         }
                     }
                     LOGGER.debug("[Nourished] Tier 1 (built-in): loaded {} entries", registry.entries().size());
@@ -524,5 +526,19 @@ public final class ModCompat {
      */
     public static Collection<CompatEntry> getAllEntries() {
         return Collections.unmodifiableCollection(ENTRIES_BY_MODID.values());
+    }
+
+    /**
+     * Built-in tier 1 entries shipped directly by Nourished (compat_registry.json).
+     */
+    public static List<CompatEntry> getBuiltInEntries() {
+        return BUILT_IN_MODIDS.stream()
+                .map(ENTRIES_BY_MODID::get)
+                .filter(Objects::nonNull)
+                .sorted(Comparator
+                        .comparing((CompatEntry e) -> !e.loaded())
+                        .thenComparing(e -> e.category().ordinal())
+                        .thenComparing(CompatEntry::modId))
+                .toList();
     }
 }

@@ -5,7 +5,6 @@ license="MIT"
 [[mods]]
 modId="nourished"
 version="0.1.2-alpha"
-imageFile="nourished_icon.png"
 displayName="Nourished"
 authors="Marie"
 description="A true adventurer knows that survival depends on more than just filling your belly. Nourished tracks your diet diversity and rewards those who eat well — built for Farmer's Delight and Pam's HarvestCraft."
