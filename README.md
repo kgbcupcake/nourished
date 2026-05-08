@@ -57,6 +57,7 @@ Diminishing returns apply — eating the same food repeatedly gives less credit 
 | Any `c:foods/*` tag         | ✅ Automatic                             |
 | Legendary Survival Overhaul | ⚠️ Effects disabled — LSO takes priority |
 | Other food mods             | Fallback                                 |
+| Many More Being Added                                                  |
 
 ---
 
