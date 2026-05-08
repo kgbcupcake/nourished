@@ -2,6 +2,7 @@ package dev.maire.nourished.client;
 
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.diet.DietData;
+import dev.maire.nourished.network.ModNetworking.SyncDietDeltaPayload;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -23,16 +24,28 @@ public final class NourishedToastManager {
     private NourishedToastManager() {}
 
     /**
-     * Call when {@link dev.maire.nourished.network.ModNetworking.SyncDietPayload} applies on the client.
+     * Call when full DietData sync applies on the client (login, respawn, dimension change).
      * Seeds state on first sync; then detects {@code before >= critical && after < critical} per nutrient.
      */
     public static void onClientDietUpdated(DietData next) {
+        processNutrientUpdate(next.nutrients);
+    }
+
+    /**
+     * Call when lightweight delta sync applies on the client (every food eat, decay tick).
+     * Uses the same critical threshold detection as the full sync.
+     */
+    public static void onClientDietUpdated(SyncDietDeltaPayload delta) {
+        processNutrientUpdate(delta.nutrients());
+    }
+
+    private static void processNutrientUpdate(Map<String, Float> nextNutrients) {
         List<String> keys = DietData.barOrder();
 
         if (firstClientSync) {
             firstClientSync = false;
             for (String key : keys) {
-                lastNutrients.put(key, next.nutrients.getOrDefault(key, 0f));
+                lastNutrients.put(key, nextNutrients.getOrDefault(key, 0f));
             }
             return;
         }
@@ -47,7 +60,7 @@ public final class NourishedToastManager {
             for (String key : keys) {
                 double crit = config.criticalThresholdFor(key);
                 float before = lastNutrients.getOrDefault(key, 0f);
-                float after = next.nutrients.getOrDefault(key, 0f);
+                float after = nextNutrients.getOrDefault(key, 0f);
                 if (before >= crit && after < crit) {
                     ItemStack icon = new ItemStack(
                             BuiltInRegistries.ITEM.get(ResourceLocation.parse(NutrientRegistry.getIcon(key))));
@@ -57,7 +70,7 @@ public final class NourishedToastManager {
         }
 
         for (String key : keys) {
-            lastNutrients.put(key, next.nutrients.getOrDefault(key, 0f));
+            lastNutrients.put(key, nextNutrients.getOrDefault(key, 0f));
         }
     }
 }

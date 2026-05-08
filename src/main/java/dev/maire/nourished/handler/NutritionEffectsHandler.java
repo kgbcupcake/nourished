@@ -19,7 +19,7 @@ public class NutritionEffectsHandler {
     @SubscribeEvent
     public void onPlayerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (player.tickCount % APPLY_INTERVAL_TICKS != 0) return;
+        if (player.level().getGameTime() % APPLY_INTERVAL_TICKS != 0) return;
 
         NourishedConfig config = NourishedConfig.get();
         if (config.enableEffects()) {

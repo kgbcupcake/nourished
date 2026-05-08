@@ -20,13 +20,18 @@ public class NutritionDecayHandler {
         if (player.level().getGameTime() % interval != 0) return;
 
         DietData data = player.getData(DietAttachment.DIET.get());
+        boolean changed = false;
         for (String key : NutrientRegistry.getKeys()) {
             float rate = (float) config.decayRateFor(key);
             float current = data.nutrients.getOrDefault(key, 0f);
-            data.nutrients.put(key, Math.max(0f, current - rate));
+            if (current > 0f) {
+                data.nutrients.put(key, Math.max(0f, current - rate));
+                changed = true;
+            }
         }
-        player.setData(DietAttachment.DIET.get(), data);
 
-        ModNetworking.syncDiet(player, data);
+        if (changed) {
+            ModNetworking.syncDietDelta(player, data);
+        }
     }
 }

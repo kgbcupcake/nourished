@@ -30,11 +30,9 @@ public class FoodEatenHandler {
         if (food == null) return;
 
         DietData diet = player.getData(DietAttachment.DIET.get());
-        diet.tickTime(player.level().getGameTime() * 50L);
-        diet.tick();
-
-        // Compute game time in ms (game ticks * 50ms per tick)
         long gameTimeMs = player.level().getGameTime() * 50L;
+        diet.tickTime(gameTimeMs);
+        diet.tick();
 
         String itemId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
         Optional<FoodOverrideRegistry.FoodOverride> override = FoodOverrideRegistry.getOverride(itemId);
@@ -59,7 +57,11 @@ public class FoodEatenHandler {
         }
 
         // Resolve dominant category (first/highest match) and food family
-        String dominantCategory = matchedBars.isEmpty() ? "grains" : matchedBars.keySet().iterator().next();
+        String dominantCategory = matchedBars.isEmpty() ? "grains" :
+                matchedBars.entrySet().stream()
+                        .max(Map.Entry.comparingByValue())
+                        .map(Map.Entry::getKey)
+                        .orElse("grains");
         String familyKey = FoodFamilyResolver.resolve(
                 BuiltInRegistries.ITEM.getKey(stack.getItem()));
 
@@ -78,7 +80,7 @@ public class FoodEatenHandler {
             }
         }
 
-        ModNetworking.syncDiet(player, diet);
+        ModNetworking.syncDietDelta(player, diet);
 
         if (NourishedConfig.get().enableEffects()) {
             NutritionEffectApplier.apply(player, diet);

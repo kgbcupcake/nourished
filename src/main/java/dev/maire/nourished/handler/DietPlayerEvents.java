@@ -35,7 +35,7 @@ public class DietPlayerEvents {
     public void onPlayerChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         DietData diet = player.getData(DietAttachment.DIET.get());
-        ModNetworking.syncDiet(player, diet);
+        ModNetworking.syncDietDelta(player, diet);
         if (NourishedConfig.get().enableEffects()) {
             NutritionEffectApplier.apply(player, diet);
         }

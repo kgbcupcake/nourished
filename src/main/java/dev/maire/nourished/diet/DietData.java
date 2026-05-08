@@ -9,6 +9,7 @@ import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
 
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.network.ModNetworking.SyncDietDeltaPayload;
 import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.minecraft.util.Mth;
@@ -191,6 +192,17 @@ public class DietData {
         float dev = 0f;
         for (String k : keys) dev += Math.abs(nutrients.getOrDefault(k, 0f) - avg);
         return 1f - Math.min(1f, dev / (avg * keys.size() * 2f));
+    }
+
+    /** Extracts display-only state for lightweight network sync. */
+    public SyncDietDeltaPayload toDeltaPayload() {
+        return new SyncDietDeltaPayload(
+                Map.copyOf(nutrients),
+                Map.copyOf(lastNutrients),
+                calories,
+                maxCalories,
+                getBalanceScore()
+        );
     }
 
     // ── Food Memory ────────────────────────────────────────────────────────────

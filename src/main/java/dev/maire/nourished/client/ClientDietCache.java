@@ -1,6 +1,7 @@
 package dev.maire.nourished.client;
 
 import dev.maire.nourished.diet.DietData;
+import dev.maire.nourished.network.ModNetworking.SyncDietDeltaPayload;
 import net.minecraft.util.Mth;
 
 import java.util.HashMap;
@@ -18,24 +19,43 @@ public class ClientDietCache {
     private static boolean firstClientSync = true;
 
     /**
-     * Applies incoming diet from the server: updates cache, records nutrient increases for bar flash
-     * (except on the very first client sync this session).
+     * Applies incoming full diet from the server: updates cache, records nutrient increases for bar flash
+     * (except on the very first client sync this session). Used on login, respawn, dimension change.
      */
     public static void set(DietData data) {
         DietData prev = current;
         if (!firstClientSync) {
-            recordNutrientIncreases(prev, data);
+            recordNutrientIncreases(prev.nutrients, data.nutrients);
         }
         firstClientSync = false;
         current = data;
     }
 
-    private static void recordNutrientIncreases(DietData prev, DietData next) {
+    /**
+     * Apply a lightweight delta update — display fields only.
+     * Does NOT touch foodMemory, categoryMemory, familyMemory — these are server-side only
+     * and never exist on the client. The client DietData's memory maps are always empty.
+     */
+    public static void applyDelta(SyncDietDeltaPayload payload) {
+        if (!firstClientSync) {
+            recordNutrientIncreases(current.nutrients, payload.nutrients());
+        }
+        firstClientSync = false;
+
+        current.nutrients.clear();
+        current.nutrients.putAll(payload.nutrients());
+        current.lastNutrients.clear();
+        current.lastNutrients.putAll(payload.lastNutrients());
+        current.calories = payload.calories();
+        current.maxCalories = payload.maxCalories();
+    }
+
+    private static void recordNutrientIncreases(Map<String, Float> prev, Map<String, Float> next) {
         List<String> keys = DietData.barOrder();
         long now = System.currentTimeMillis();
         for (String key : keys) {
-            float before = prev.nutrients.getOrDefault(key, 0f);
-            float after = next.nutrients.getOrDefault(key, 0f);
+            float before = prev.getOrDefault(key, 0f);
+            float after = next.getOrDefault(key, 0f);
             if (after > before + INCREASE_EPSILON) {
                 lastNutrientIncreaseMs.put(key, now);
             }
