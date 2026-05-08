@@ -17,6 +17,7 @@ All notable changes to Nourished will be documented here.
 - Add compatibility plugins for JEI, REI, and EMI in ClientEventRegistrar
 - Add KubeJS integration support in Nourished
 - Include example-addon in settings.gradle
+- Improve modularity with example-addon integration
 
 ### 🚜 Refactor
 
