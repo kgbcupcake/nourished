@@ -13,6 +13,7 @@ All notable changes to Nourished will be documented here.
 - Enhance NourishedConfigScreen with new HUD features and UI improvements
 - Implement nutrition system functionality in NourishedAPI
 - Register NourishedDataManager reload listener in ConfigReloadHandler
+- Enhance NourishedCommand with new nutrient and profile commands
 
 ### 🚜 Refactor
 
