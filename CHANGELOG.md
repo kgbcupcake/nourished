@@ -2,6 +2,11 @@
 
 ### 🚀 Features
 
+- Expand nutrient item lists across various categories
+## [0.1.0-alpha] - 2026-05-07
+
+### 🚀 Features
+
 - Initial commit — Nourished mod v0.1.0
 - HUD edit mode, drag-and-drop icons, and config expansion
 - Enhance HUD edit mode and diet screen functionality
@@ -78,6 +83,7 @@ Corrected the image reference for Hud-Gui in the README.
 - Untrack ide and gradle user home dirs
 - Update changelog [skip ci]
 - Remove vscode workspace settings
+- Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
 - Update changelog [skip ci]
