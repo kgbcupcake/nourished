@@ -11,6 +11,8 @@ public final class DatapackSchema {
 
     /** Base directory under a datapack namespace. */
     public static final String ROOT = "nourished";
+    /** Optional integer key declaring datapack schema version. */
+    public static final String KEY_SCHEMA_VERSION = "nourished_schema_version";
 
     /** Path: {@code data/<namespace>/nourished/nutrients/<id>.json}. */
     public static final String NUTRIENTS_DIR = "nutrients";

@@ -1,4 +1,5 @@
 {
+  "nourished_schema_version": 1,
   "display_name": "Example Profile",
   "description": "Sample profile showing threshold and decay overrides.",
   "custom_thresholds": {

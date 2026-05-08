@@ -31,13 +31,20 @@ public final class FoodSynergyDefinition {
     private final String bonusNutrientKey;
     private final float bonusAmount;
 
-    private FoodSynergyDefinition(Builder builder) {
-        this.id = builder.id;
-        this.foodA = builder.foodA;
-        this.foodB = builder.foodB;
-        this.timeWindowTicks = builder.timeWindowTicks;
-        this.bonusNutrientKey = builder.bonusNutrientKey;
-        this.bonusAmount = builder.bonusAmount;
+    private FoodSynergyDefinition(
+            String id,
+            ResourceLocation foodA,
+            ResourceLocation foodB,
+            int timeWindowTicks,
+            String bonusNutrientKey,
+            float bonusAmount
+    ) {
+        this.id = id;
+        this.foodA = foodA;
+        this.foodB = foodB;
+        this.timeWindowTicks = timeWindowTicks;
+        this.bonusNutrientKey = bonusNutrientKey;
+        this.bonusAmount = bonusAmount;
     }
 
     /**
@@ -185,7 +192,19 @@ public final class FoodSynergyDefinition {
          * @throws IllegalStateException if required fields are missing or invalid
          */
         public FoodSynergyDefinition build() {
-            throw new UnsupportedOperationException("Not yet implemented");
+            if (id == null) {
+                throw new IllegalStateException("id is required");
+            }
+            if (foodA == null) {
+                throw new IllegalStateException("foodA is required");
+            }
+            if (foodB == null) {
+                throw new IllegalStateException("foodB is required");
+            }
+            if (bonusNutrientKey == null) {
+                throw new IllegalStateException("bonusNutrientKey is required");
+            }
+            return new FoodSynergyDefinition(id, foodA, foodB, timeWindowTicks, bonusNutrientKey, bonusAmount);
         }
     }
 }

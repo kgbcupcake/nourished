@@ -90,7 +90,7 @@ public final class NourishedAPI {
         if (NutrientRegistry.getKeys().contains(definition.getId())) {
             throw new IllegalArgumentException("Nutrient already registered: " + definition.getId());
         }
-        NutrientRegistry.registerExternal(definition.getId(), definition.getDisplayName());
+        NutrientRegistry.registerExternal(definition);
     }
 
     /**

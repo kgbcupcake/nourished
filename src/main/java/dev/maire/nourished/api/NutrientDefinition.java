@@ -33,15 +33,24 @@ public final class NutrientDefinition {
     @Nullable
     private final NutrientRenderer customRenderer;
 
-    private NutrientDefinition(Builder builder) {
-        this.id = builder.id;
-        this.displayName = builder.displayName;
-        this.color = builder.color;
-        this.defaultDecayRate = builder.defaultDecayRate;
-        this.criticalThreshold = builder.criticalThreshold;
-        this.lowThreshold = builder.lowThreshold;
-        this.excessThreshold = builder.excessThreshold;
-        this.customRenderer = builder.customRenderer;
+    private NutrientDefinition(
+            String id,
+            String displayName,
+            int color,
+            float defaultDecayRate,
+            float criticalThreshold,
+            float lowThreshold,
+            float excessThreshold,
+            @Nullable NutrientRenderer customRenderer
+    ) {
+        this.id = id;
+        this.displayName = displayName;
+        this.color = color;
+        this.defaultDecayRate = defaultDecayRate;
+        this.criticalThreshold = criticalThreshold;
+        this.lowThreshold = lowThreshold;
+        this.excessThreshold = excessThreshold;
+        this.customRenderer = customRenderer;
     }
 
     /**
@@ -231,7 +240,22 @@ public final class NutrientDefinition {
          * @throws IllegalStateException if required fields are missing or invalid
          */
         public NutrientDefinition build() {
-            throw new UnsupportedOperationException("Not yet implemented");
+            if (id == null) {
+                throw new IllegalStateException("id is required");
+            }
+            if (displayName == null) {
+                throw new IllegalStateException("displayName is required");
+            }
+            return new NutrientDefinition(
+                    id,
+                    displayName,
+                    color,
+                    defaultDecayRate,
+                    criticalThreshold,
+                    lowThreshold,
+                    excessThreshold,
+                    customRenderer
+            );
         }
     }
 }

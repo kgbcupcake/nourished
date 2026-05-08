@@ -40,10 +40,10 @@ public final class CompatDefinition {
     private final CompatCategory category;
     private final Map<ResourceLocation, String> foodTagMappings;
 
-    private CompatDefinition(Builder builder) {
-        this.modId = builder.modId;
-        this.category = builder.category;
-        this.foodTagMappings = Collections.unmodifiableMap(builder.foodTagMappings);
+    private CompatDefinition(String modId, CompatCategory category, Map<ResourceLocation, String> foodTagMappings) {
+        this.modId = modId;
+        this.category = category;
+        this.foodTagMappings = Collections.unmodifiableMap(foodTagMappings);
     }
 
     /**
@@ -138,7 +138,16 @@ public final class CompatDefinition {
          * @throws IllegalStateException if required fields are missing or invalid
          */
         public CompatDefinition build() {
-            throw new UnsupportedOperationException("Not yet implemented");
+            if (modId == null) {
+                throw new IllegalStateException("modId is required");
+            }
+            if (category == null) {
+                throw new IllegalStateException("category is required");
+            }
+            if (foodTagMappings == null) {
+                throw new IllegalStateException("foodTagMappings is required");
+            }
+            return new CompatDefinition(modId, category, foodTagMappings);
         }
     }
 }

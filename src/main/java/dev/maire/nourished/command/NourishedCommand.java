@@ -15,6 +15,10 @@ import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.PresetRegistry;
 import dev.maire.nourished.color.ColorRegistry;
+import dev.maire.nourished.data.DatapackDiagnostic;
+import dev.maire.nourished.data.DatapackDiagnostics;
+import dev.maire.nourished.data.SchemaDefinition;
+import dev.maire.nourished.data.SchemaTemplateGenerator;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
 import dev.maire.nourished.effect.EffectRegistry;
@@ -40,6 +44,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public class NourishedCommand {
 
@@ -54,6 +59,18 @@ public class NourishedCommand {
                     DietProfileRegistry.getAll().stream().map(p -> p.getId()),
                     builder
             );
+
+    private static final SuggestionProvider<CommandSourceStack> SCHEMA_TYPE_SUGGESTIONS =
+            (ctx, builder) -> SharedSuggestionProvider.suggest(List.of(
+                    "nutrients",
+                    "food_classifications",
+                    "effects",
+                    "synergies",
+                    "food_synergies",
+                    "milestones",
+                    "diet_profiles",
+                    "compat"
+            ), builder);
 
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
@@ -100,6 +117,12 @@ public class NourishedCommand {
                         .then(Commands.literal("reload")
                                 .requires(s -> s.hasPermission(2))
                                 .executes(this::reloadAll))
+                        .then(Commands.literal("diagnostics")
+                                .executes(this::showDiagnostics))
+                        .then(Commands.literal("schema")
+                                .then(Commands.argument("type", StringArgumentType.word())
+                                        .suggests(SCHEMA_TYPE_SUGGESTIONS)
+                                        .executes(this::showSchemaTemplate)))
                         .then(Commands.literal("debug")
                                 .requires(s -> s.hasPermission(2))
                                 .then(Commands.argument("player", EntityArgument.player())
@@ -222,6 +245,50 @@ public class NourishedCommand {
             ctx.getSource().sendSuccess(() -> Component.literal(line).withStyle(ChatFormatting.GRAY), false);
         }
         return 1;
+    }
+
+    private int showDiagnostics(CommandContext<CommandSourceStack> ctx) {
+        CommandSourceStack source = ctx.getSource();
+        DatapackDiagnostics diagnostics = DatapackDiagnostics.getInstance();
+        source.sendSuccess(() -> Component.literal(diagnostics.getSummary()).withStyle(ChatFormatting.GOLD), false);
+
+        for (DatapackDiagnostic diagnostic : diagnostics.getAll()) {
+            ChatFormatting color = diagnostic.severity() == DatapackDiagnostic.Severity.ERROR
+                    ? ChatFormatting.RED
+                    : ChatFormatting.YELLOW;
+            source.sendSuccess(() -> Component.literal(diagnostic.toString()).withStyle(color), false);
+        }
+        return 1;
+    }
+
+    private int showSchemaTemplate(CommandContext<CommandSourceStack> ctx) {
+        String type = StringArgumentType.getString(ctx, "type");
+        Supplier<SchemaDefinition> schemaSupplier = schemaSupplier(type);
+        if (schemaSupplier == null) {
+            ctx.getSource().sendFailure(Component.literal("Unknown schema type: " + type));
+            return 0;
+        }
+
+        String template = SchemaTemplateGenerator.generate(schemaSupplier.get());
+        ctx.getSource().sendSuccess(() -> Component.literal("Schema template for " + type + ":").withStyle(ChatFormatting.GOLD), false);
+        for (String line : template.split("\n")) {
+            ctx.getSource().sendSuccess(() -> Component.literal(line).withStyle(ChatFormatting.GRAY), false);
+        }
+        return 1;
+    }
+
+    private static Supplier<SchemaDefinition> schemaSupplier(String type) {
+        return switch (type) {
+            case "nutrients" -> SchemaDefinition::forNutrient;
+            case "food_classifications" -> SchemaDefinition::forFoodClassification;
+            case "effects" -> SchemaDefinition::forEffect;
+            case "synergies" -> SchemaDefinition::forSynergy;
+            case "food_synergies" -> SchemaDefinition::forFoodSynergy;
+            case "milestones" -> SchemaDefinition::forMilestone;
+            case "diet_profiles" -> SchemaDefinition::forDietProfile;
+            case "compat" -> SchemaDefinition::forCompat;
+            default -> null;
+        };
     }
 
     private int sendReport(CommandSourceStack source, ServerPlayer target) {

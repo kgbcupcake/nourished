@@ -44,6 +44,7 @@ public class FoodEatenHandler {
         float caloriesAdded;
         Map<String, Float> nutrientDeltas;
         Map<String, Float> matchedBars;
+        ResourceLocation foodResourceId = BuiltInRegistries.ITEM.getKey(stack.getItem());
 
         if (override.isPresent()) {
             FoodOverrideRegistry.FoodOverride ov = override.get();
@@ -60,6 +61,11 @@ public class FoodEatenHandler {
             nutrientDeltas = delta.nutrients();
         }
 
+        Map<String, Float> externalClassification = FoodNutritionRegistry.getExternalClassification(foodResourceId);
+        if (externalClassification != null) {
+            externalClassification.forEach((key, value) -> nutrientDeltas.merge(key, value, Float::sum));
+        }
+
         // Resolve dominant category (first/highest match) and food family
         String dominantCategory = matchedBars.isEmpty() ? "grains" :
                 matchedBars.entrySet().stream()
@@ -70,8 +76,6 @@ public class FoodEatenHandler {
                 BuiltInRegistries.ITEM.getKey(stack.getItem()));
 
         float multiplier = diet.recordEat(itemId, dominantCategory, familyKey, gameTimeMs);
-
-        ResourceLocation foodResourceId = BuiltInRegistries.ITEM.getKey(stack.getItem());
 
         if (NourishedConfig.get().enableCalorieTracking()) {
             Nourished.LOGGER.debug("Nourished calories: adding {} * {} for {}", caloriesAdded, multiplier,

@@ -57,6 +57,9 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> allJson, net.minecraft.server.packs.resources.ResourceManager resourceManager, ProfilerFiller profiler) {
+        DatapackDiagnostics diagnostics = DatapackDiagnostics.getInstance();
+        diagnostics.clear();
+
         Set<ResourceLocation> nextNutrients = new LinkedHashSet<>();
         Set<ResourceLocation> nextFoodClassifications = new LinkedHashSet<>();
         Set<ResourceLocation> nextEffects = new LinkedHashSet<>();
@@ -77,8 +80,13 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
 
         for (Map.Entry<ResourceLocation, JsonObject> entry : nutrients.entrySet()) {
             ResourceLocation fileId = entry.getKey();
+            JsonObject json = entry.getValue();
+            String filePath = datapackFilePath(DatapackSchema.NUTRIENTS_DIR, fileId);
+            if (!isValidForRegistration(json, SchemaDefinition.forNutrient(), filePath, diagnostics)) {
+                continue;
+            }
             try {
-                NutrientDefinition def = parseNutrient(fileId, entry.getValue());
+                NutrientDefinition def = parseNutrient(fileId, json);
                 NourishedAPI.registerNutrient(def);
                 nextNutrients.add(fileId);
             } catch (Exception ex) {
@@ -88,8 +96,13 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
 
         for (Map.Entry<ResourceLocation, JsonObject> entry : foodClassifications.entrySet()) {
             ResourceLocation fileId = entry.getKey();
+            JsonObject json = entry.getValue();
+            String filePath = datapackFilePath(DatapackSchema.FOOD_CLASSIFICATIONS_DIR, fileId);
+            if (!isValidForRegistration(json, SchemaDefinition.forFoodClassification(), filePath, diagnostics)) {
+                continue;
+            }
             try {
-                registerFoodClassification(fileId, entry.getValue());
+                registerFoodClassification(fileId, json);
                 nextFoodClassifications.add(fileId);
             } catch (Exception ex) {
                 warnMalformed(fileId, ex);
@@ -98,8 +111,13 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
 
         for (Map.Entry<ResourceLocation, JsonObject> entry : effects.entrySet()) {
             ResourceLocation fileId = entry.getKey();
+            JsonObject json = entry.getValue();
+            String filePath = datapackFilePath(DatapackSchema.EFFECTS_DIR, fileId);
+            if (!isValidForRegistration(json, SchemaDefinition.forEffect(), filePath, diagnostics)) {
+                continue;
+            }
             try {
-                EffectDefinition def = parseEffect(fileId, entry.getValue());
+                EffectDefinition def = parseEffect(fileId, json);
                 NourishedAPI.registerCustomEffect(def);
                 nextEffects.add(fileId);
             } catch (Exception ex) {
@@ -109,8 +127,13 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
 
         for (Map.Entry<ResourceLocation, JsonObject> entry : synergies.entrySet()) {
             ResourceLocation fileId = entry.getKey();
+            JsonObject json = entry.getValue();
+            String filePath = datapackFilePath(DatapackSchema.SYNERGIES_DIR, fileId);
+            if (!isValidForRegistration(json, SchemaDefinition.forSynergy(), filePath, diagnostics)) {
+                continue;
+            }
             try {
-                NutrientSynergyDefinition def = parseSynergy(fileId, entry.getValue());
+                NutrientSynergyDefinition def = parseSynergy(fileId, json);
                 NourishedAPI.registerNutrientSynergy(def);
                 nextSynergies.add(fileId);
             } catch (Exception ex) {
@@ -120,8 +143,13 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
 
         for (Map.Entry<ResourceLocation, JsonObject> entry : foodSynergies.entrySet()) {
             ResourceLocation fileId = entry.getKey();
+            JsonObject json = entry.getValue();
+            String filePath = datapackFilePath(DatapackSchema.FOOD_SYNERGIES_DIR, fileId);
+            if (!isValidForRegistration(json, SchemaDefinition.forFoodSynergy(), filePath, diagnostics)) {
+                continue;
+            }
             try {
-                FoodSynergyDefinition def = parseFoodSynergy(fileId, entry.getValue());
+                FoodSynergyDefinition def = parseFoodSynergy(fileId, json);
                 NourishedAPI.registerFoodSynergy(def);
                 nextFoodSynergies.add(fileId);
             } catch (Exception ex) {
@@ -131,8 +159,13 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
 
         for (Map.Entry<ResourceLocation, JsonObject> entry : milestones.entrySet()) {
             ResourceLocation fileId = entry.getKey();
+            JsonObject json = entry.getValue();
+            String filePath = datapackFilePath(DatapackSchema.MILESTONES_DIR, fileId);
+            if (!isValidForRegistration(json, SchemaDefinition.forMilestone(), filePath, diagnostics)) {
+                continue;
+            }
             try {
-                NutrientMilestoneDefinition def = parseMilestone(fileId, entry.getValue());
+                NutrientMilestoneDefinition def = parseMilestone(fileId, json);
                 NourishedAPI.registerMilestone(def);
                 nextMilestones.add(fileId);
             } catch (Exception ex) {
@@ -142,8 +175,13 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
 
         for (Map.Entry<ResourceLocation, JsonObject> entry : profiles.entrySet()) {
             ResourceLocation fileId = entry.getKey();
+            JsonObject json = entry.getValue();
+            String filePath = datapackFilePath(DatapackSchema.DIET_PROFILES_DIR, fileId);
+            if (!isValidForRegistration(json, SchemaDefinition.forDietProfile(), filePath, diagnostics)) {
+                continue;
+            }
             try {
-                DietProfileDefinition def = parseDietProfile(fileId, entry.getValue());
+                DietProfileDefinition def = parseDietProfile(fileId, json);
                 NourishedAPI.registerDietProfile(def);
                 nextProfiles.add(fileId);
             } catch (Exception ex) {
@@ -153,8 +191,13 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
 
         for (Map.Entry<ResourceLocation, JsonObject> entry : compat.entrySet()) {
             ResourceLocation fileId = entry.getKey();
+            JsonObject json = entry.getValue();
+            String filePath = datapackFilePath(DatapackSchema.COMPAT_DIR, fileId);
+            if (!isValidForRegistration(json, SchemaDefinition.forCompat(), filePath, diagnostics)) {
+                continue;
+            }
             try {
-                CompatDefinition def = parseCompat(fileId, entry.getValue());
+                CompatDefinition def = parseCompat(fileId, json);
                 NourishedAPI.registerCompatEntry(def);
                 nextCompatEntries.add(fileId);
             } catch (Exception ex) {
@@ -170,6 +213,22 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
         loadedMilestones = Collections.unmodifiableSet(nextMilestones);
         loadedProfiles = Collections.unmodifiableSet(nextProfiles);
         loadedCompatEntries = Collections.unmodifiableSet(nextCompatEntries);
+    }
+
+    private static boolean isValidForRegistration(JsonObject json, SchemaDefinition schema, String filePath, DatapackDiagnostics diagnostics) {
+        List<DatapackDiagnostic> fileDiagnostics = DatapackValidator.validate(json, schema, filePath);
+        boolean hasErrors = false;
+        for (DatapackDiagnostic diagnostic : fileDiagnostics) {
+            diagnostics.record(diagnostic);
+            if (diagnostic.severity() == DatapackDiagnostic.Severity.ERROR) {
+                hasErrors = true;
+            }
+        }
+        return !hasErrors;
+    }
+
+    private static String datapackFilePath(String directory, ResourceLocation fileId) {
+        return "data/" + fileId.getNamespace() + "/" + DatapackSchema.ROOT + "/" + directory + "/" + fileId.getPath() + ".json";
     }
 
     public Set<ResourceLocation> getLoadedNutrients() {

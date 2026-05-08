@@ -45,13 +45,20 @@ public final class EffectDefinition {
     private final int amplifier;
     private final int duration;
 
-    private EffectDefinition(Builder builder) {
-        this.nutrientKey = builder.nutrientKey;
-        this.threshold = builder.threshold;
-        this.thresholdType = builder.thresholdType;
-        this.effectId = builder.effectId;
-        this.amplifier = builder.amplifier;
-        this.duration = builder.duration;
+    private EffectDefinition(
+            String nutrientKey,
+            float threshold,
+            ThresholdType thresholdType,
+            ResourceLocation effectId,
+            int amplifier,
+            int duration
+    ) {
+        this.nutrientKey = nutrientKey;
+        this.threshold = threshold;
+        this.thresholdType = thresholdType;
+        this.effectId = effectId;
+        this.amplifier = amplifier;
+        this.duration = duration;
     }
 
     /**
@@ -204,7 +211,16 @@ public final class EffectDefinition {
          * @throws IllegalStateException if required fields are missing or invalid
          */
         public EffectDefinition build() {
-            throw new UnsupportedOperationException("Not yet implemented");
+            if (nutrientKey == null) {
+                throw new IllegalStateException("nutrientKey is required");
+            }
+            if (thresholdType == null) {
+                throw new IllegalStateException("thresholdType is required");
+            }
+            if (effectId == null) {
+                throw new IllegalStateException("effectId is required");
+            }
+            return new EffectDefinition(nutrientKey, threshold, thresholdType, effectId, amplifier, duration);
         }
     }
 }

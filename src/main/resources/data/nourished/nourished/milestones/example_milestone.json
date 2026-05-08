@@ -1,4 +1,5 @@
 {
+  "nourished_schema_version": 1,
   "nutrient_key": "example_nutrient",
   "cumulative_goal": 250.0,
   "reward_effect_id": "minecraft:regeneration",

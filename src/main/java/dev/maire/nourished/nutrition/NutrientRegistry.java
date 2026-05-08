@@ -6,6 +6,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import dev.maire.nourished.api.NutrientDefinition;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
@@ -18,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Loads nutrient definitions from config/nourished/nutrients.json.
@@ -26,21 +30,68 @@ import java.util.Map;
  */
 public class NutrientRegistry {
 
-    public record NutrientDef(String key, String icon, List<String> tags) {}
+    public record NutrientDef(
+            String key,
+            String displayName,
+            int color,
+            float defaultDecayRate,
+            float criticalThreshold,
+            float lowThreshold,
+            float excessThreshold,
+            String icon,
+            List<String> tags
+    ) {
+        public static NutrientDef fromDefinition(NutrientDefinition definition) {
+            String key = Objects.requireNonNull(definition.getId(), "definition id");
+            String icon = resolveIcon(key);
+            List<String> tags = List.of("nourished:nutrients/" + key);
+            return new NutrientDef(
+                    key,
+                    definition.getDisplayName(),
+                    definition.getColor(),
+                    definition.getDefaultDecayRate(),
+                    definition.getCriticalThreshold(),
+                    definition.getLowThreshold(),
+                    definition.getExcessThreshold(),
+                    icon,
+                    tags
+            );
+        }
+
+        public static NutrientDef fromConfig(String key, String icon, List<String> tags) {
+            return new NutrientDef(
+                    key,
+                    key,
+                    DEFAULT_COLOR,
+                    DEFAULT_DECAY_RATE,
+                    DEFAULT_CRITICAL_THRESHOLD,
+                    DEFAULT_LOW_THRESHOLD,
+                    DEFAULT_EXCESS_THRESHOLD,
+                    icon,
+                    tags
+            );
+        }
+    }
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final String DEFAULT_ICON = "minecraft:apple";
+    private static final int DEFAULT_COLOR = 0xFFFFFFFF;
+    private static final float DEFAULT_DECAY_RATE = 0.001f;
+    private static final float DEFAULT_CRITICAL_THRESHOLD = 0.1f;
+    private static final float DEFAULT_LOW_THRESHOLD = 0.3f;
+    private static final float DEFAULT_EXCESS_THRESHOLD = 0.9f;
 
     private static final Map<String, NutrientDef> REGISTRY = new LinkedHashMap<>();
 
     // ── Default definitions ───────────────────────────────────────────────────
 
     private static final List<NutrientDef> DEFAULTS = List.of(
-        new NutrientDef("fruits",     "minecraft:golden_apple", List.of("nourished:nutrients/fruits")),
-        new NutrientDef("vegetables", "minecraft:carrot", List.of("nourished:nutrients/vegetables")),
-        new NutrientDef("proteins",   "minecraft:cooked_beef", List.of("nourished:nutrients/proteins")),
-        new NutrientDef("grains",     "minecraft:bread", List.of("nourished:nutrients/grains")),
-        new NutrientDef("sugars",     "minecraft:sugar", List.of("nourished:nutrients/sugars")),
-        new NutrientDef("dairy",      "minecraft:milk_bucket", List.of("nourished:nutrients/dairy"))
+        NutrientDef.fromConfig("fruits", "minecraft:golden_apple", List.of("nourished:nutrients/fruits")),
+        NutrientDef.fromConfig("vegetables", "minecraft:carrot", List.of("nourished:nutrients/vegetables")),
+        NutrientDef.fromConfig("proteins", "minecraft:cooked_beef", List.of("nourished:nutrients/proteins")),
+        NutrientDef.fromConfig("grains", "minecraft:bread", List.of("nourished:nutrients/grains")),
+        NutrientDef.fromConfig("sugars", "minecraft:sugar", List.of("nourished:nutrients/sugars")),
+        NutrientDef.fromConfig("dairy", "minecraft:milk_bucket", List.of("nourished:nutrients/dairy"))
     );
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -67,18 +118,13 @@ public class NutrientRegistry {
         return Collections.unmodifiableList(new ArrayList<>(REGISTRY.values()));
     }
 
-    /**
-     * Registers an externally-defined nutrient via the public API.
-     * Called by {@link dev.maire.nourished.api.NourishedAPI#registerNutrient}.
-     *
-     * @param key         the unique nutrient key
-     * @param displayName the display name (used as icon fallback label)
-     */
-    public static void registerExternal(String key, String displayName) {
+    public static void registerExternal(NutrientDefinition definition) {
+        Objects.requireNonNull(definition, "definition");
+        String key = Objects.requireNonNull(definition.getId(), "definition id");
         if (REGISTRY.containsKey(key)) {
             throw new IllegalArgumentException("Nutrient already registered: " + key);
         }
-        REGISTRY.put(key, new NutrientDef(key, "minecraft:apple", List.of()));
+        REGISTRY.put(key, NutrientDef.fromDefinition(definition));
         Nourished.LOGGER.info("[NutrientRegistry] Registered external nutrient: {}", key);
     }
 
@@ -121,14 +167,14 @@ public class NutrientRegistry {
             for (JsonElement el : arr) {
                 JsonObject obj = el.getAsJsonObject();
                 String key  = obj.get("key").getAsString();
-                String icon = obj.has("icon") ? obj.get("icon").getAsString() : "minecraft:apple";
+                String icon = obj.has("icon") ? obj.get("icon").getAsString() : DEFAULT_ICON;
                 List<String> tags = new ArrayList<>();
                 if (obj.has("tags")) {
                     for (JsonElement t : obj.getAsJsonArray("tags")) {
                         tags.add(t.getAsString());
                     }
                 }
-                REGISTRY.put(key, new NutrientDef(key, icon, Collections.unmodifiableList(tags)));
+                REGISTRY.put(key, NutrientDef.fromConfig(key, icon, Collections.unmodifiableList(tags)));
             }
         }
         if (REGISTRY.isEmpty()) {
@@ -158,5 +204,18 @@ public class NutrientRegistry {
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }
+    }
+
+    private static String resolveIcon(String key) {
+        String normalizedKey = Objects.requireNonNull(key, "key");
+        ResourceLocation candidate = ResourceLocation.tryParse(normalizedKey);
+        if (candidate != null && BuiltInRegistries.ITEM.containsKey(candidate)) {
+            return candidate.toString();
+        }
+        ResourceLocation minecraftCandidate = ResourceLocation.tryParse("minecraft:" + normalizedKey);
+        if (minecraftCandidate != null && BuiltInRegistries.ITEM.containsKey(minecraftCandidate)) {
+            return minecraftCandidate.toString();
+        }
+        return DEFAULT_ICON;
     }
 }

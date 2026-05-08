@@ -45,16 +45,26 @@ public final class NutrientSynergyDefinition {
     private final int effectDuration;
     private final boolean isPenalty;
 
-    private NutrientSynergyDefinition(Builder builder) {
-        this.id = builder.id;
-        this.nutrientKeyA = builder.nutrientKeyA;
-        this.conditionA = builder.conditionA;
-        this.nutrientKeyB = builder.nutrientKeyB;
-        this.conditionB = builder.conditionB;
-        this.bonusEffectId = builder.bonusEffectId;
-        this.effectAmplifier = builder.effectAmplifier;
-        this.effectDuration = builder.effectDuration;
-        this.isPenalty = builder.isPenalty;
+    private NutrientSynergyDefinition(
+            String id,
+            String nutrientKeyA,
+            LevelCondition conditionA,
+            String nutrientKeyB,
+            LevelCondition conditionB,
+            @Nullable ResourceLocation bonusEffectId,
+            int effectAmplifier,
+            int effectDuration,
+            boolean isPenalty
+    ) {
+        this.id = id;
+        this.nutrientKeyA = nutrientKeyA;
+        this.conditionA = conditionA;
+        this.nutrientKeyB = nutrientKeyB;
+        this.conditionB = conditionB;
+        this.bonusEffectId = bonusEffectId;
+        this.effectAmplifier = effectAmplifier;
+        this.effectDuration = effectDuration;
+        this.isPenalty = isPenalty;
     }
 
     /**
@@ -247,7 +257,32 @@ public final class NutrientSynergyDefinition {
          * @throws IllegalStateException if required fields are missing or invalid
          */
         public NutrientSynergyDefinition build() {
-            throw new UnsupportedOperationException("Not yet implemented");
+            if (id == null) {
+                throw new IllegalStateException("id is required");
+            }
+            if (nutrientKeyA == null) {
+                throw new IllegalStateException("nutrientKeyA is required");
+            }
+            if (conditionA == null) {
+                throw new IllegalStateException("conditionA is required");
+            }
+            if (nutrientKeyB == null) {
+                throw new IllegalStateException("nutrientKeyB is required");
+            }
+            if (conditionB == null) {
+                throw new IllegalStateException("conditionB is required");
+            }
+            return new NutrientSynergyDefinition(
+                    id,
+                    nutrientKeyA,
+                    conditionA,
+                    nutrientKeyB,
+                    conditionB,
+                    bonusEffectId,
+                    effectAmplifier,
+                    effectDuration,
+                    isPenalty
+            );
         }
     }
 }

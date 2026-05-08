@@ -1,4 +1,5 @@
 {
+  "nourished_schema_version": 1,
   "item": "minecraft:apple",
   "nutrient_key": "example_nutrient",
   "amount": 0.2

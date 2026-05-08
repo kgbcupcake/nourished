@@ -23,7 +23,6 @@ public class NutrientModifierEvent extends Event implements ICancellableEvent {
     private final ResourceLocation foodId;
     private final String nutrientKey;
     private float amount;
-    private boolean canceled;
 
     /**
      * Constructs a new nutrient modifier event.
@@ -88,13 +87,4 @@ public class NutrientModifierEvent extends Event implements ICancellableEvent {
         this.amount = amount;
     }
 
-    @Override
-    public void setCanceled(boolean canceled) {
-        this.canceled = canceled;
-    }
-
-    @Override
-    public boolean isCanceled() {
-        return canceled;
-    }
 }

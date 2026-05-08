@@ -28,13 +28,20 @@ public final class DietProfileDefinition {
     @Nullable
     private final String description;
 
-    private DietProfileDefinition(Builder builder) {
-        this.id = builder.id;
-        this.displayName = builder.displayName;
-        this.customThresholds = Collections.unmodifiableMap(builder.customThresholds);
-        this.customDecayRates = Collections.unmodifiableMap(builder.customDecayRates);
-        this.bonusEffects = Collections.unmodifiableList(builder.bonusEffects);
-        this.description = builder.description;
+    private DietProfileDefinition(
+            String id,
+            String displayName,
+            Map<String, Float> customThresholds,
+            Map<String, Float> customDecayRates,
+            List<ResourceLocation> bonusEffects,
+            @Nullable String description
+    ) {
+        this.id = id;
+        this.displayName = displayName;
+        this.customThresholds = Collections.unmodifiableMap(customThresholds);
+        this.customDecayRates = Collections.unmodifiableMap(customDecayRates);
+        this.bonusEffects = Collections.unmodifiableList(bonusEffects);
+        this.description = description;
     }
 
     /**
@@ -185,7 +192,29 @@ public final class DietProfileDefinition {
          * @throws IllegalStateException if required fields are missing or invalid
          */
         public DietProfileDefinition build() {
-            throw new UnsupportedOperationException("Not yet implemented");
+            if (id == null) {
+                throw new IllegalStateException("id is required");
+            }
+            if (displayName == null) {
+                throw new IllegalStateException("displayName is required");
+            }
+            if (customThresholds == null) {
+                throw new IllegalStateException("customThresholds is required");
+            }
+            if (customDecayRates == null) {
+                throw new IllegalStateException("customDecayRates is required");
+            }
+            if (bonusEffects == null) {
+                throw new IllegalStateException("bonusEffects is required");
+            }
+            return new DietProfileDefinition(
+                    id,
+                    displayName,
+                    customThresholds,
+                    customDecayRates,
+                    bonusEffects,
+                    description
+            );
         }
     }
 }

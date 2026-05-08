@@ -38,14 +38,22 @@ public final class NutrientMilestoneDefinition {
     @Nullable
     private final ResourceLocation advancementId;
 
-    private NutrientMilestoneDefinition(Builder builder) {
-        this.id = builder.id;
-        this.nutrientKey = builder.nutrientKey;
-        this.cumulativeGoal = builder.cumulativeGoal;
-        this.rewardEffectId = builder.rewardEffectId;
-        this.rewardAmplifier = builder.rewardAmplifier;
-        this.rewardDuration = builder.rewardDuration;
-        this.advancementId = builder.advancementId;
+    private NutrientMilestoneDefinition(
+            String id,
+            String nutrientKey,
+            float cumulativeGoal,
+            @Nullable ResourceLocation rewardEffectId,
+            int rewardAmplifier,
+            int rewardDuration,
+            @Nullable ResourceLocation advancementId
+    ) {
+        this.id = id;
+        this.nutrientKey = nutrientKey;
+        this.cumulativeGoal = cumulativeGoal;
+        this.rewardEffectId = rewardEffectId;
+        this.rewardAmplifier = rewardAmplifier;
+        this.rewardDuration = rewardDuration;
+        this.advancementId = advancementId;
     }
 
     /**
@@ -217,7 +225,21 @@ public final class NutrientMilestoneDefinition {
          * @throws IllegalStateException if required fields are missing or invalid
          */
         public NutrientMilestoneDefinition build() {
-            throw new UnsupportedOperationException("Not yet implemented");
+            if (id == null) {
+                throw new IllegalStateException("id is required");
+            }
+            if (nutrientKey == null) {
+                throw new IllegalStateException("nutrientKey is required");
+            }
+            return new NutrientMilestoneDefinition(
+                    id,
+                    nutrientKey,
+                    cumulativeGoal,
+                    rewardEffectId,
+                    rewardAmplifier,
+                    rewardDuration,
+                    advancementId
+            );
         }
     }
 }
