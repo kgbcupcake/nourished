@@ -1,13 +1,14 @@
 package dev.maire.nourished.handler;
 
-import dev.maire.nourished.Nourished;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
 import dev.maire.nourished.effect.NutritionEffectApplier;
 import dev.maire.nourished.network.ModNetworking;
+import dev.maire.nourished.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.nutrition.FoodOverrideRegistry;
+import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,29 +30,40 @@ public class FoodEatenHandler {
         if (food == null) return;
 
         DietData diet = player.getData(DietAttachment.DIET.get());
+        diet.tickTime(player.level().getGameTime() * 50L);
         diet.tick();
+
+        // Compute game time in ms (game ticks * 50ms per tick)
+        long gameTimeMs = player.level().getGameTime() * 50L;
 
         String itemId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
         Optional<FoodOverrideRegistry.FoodOverride> override = FoodOverrideRegistry.getOverride(itemId);
 
         float caloriesAdded;
         Map<String, Float> nutrientDeltas;
+        Map<String, Float> matchedBars;
 
         if (override.isPresent()) {
             FoodOverrideRegistry.FoodOverride ov = override.get();
             caloriesAdded = ov.calories();
             nutrientDeltas = ov.nutrients();
+            matchedBars = nutrientDeltas; // Use override nutrients for category detection
             Nourished.LOGGER.debug("Nourished: using override for {} (calories={}, nutrients={})",
                     itemId, caloriesAdded, nutrientDeltas);
         } else {
-            var matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, false);
+            matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, false);
             FoodNutritionRegistry.DietDelta delta = FoodNutritionRegistry.computeDietDelta(
                     stack, player.level(), food.nutrition(), food.saturation(), matchedBars);
             caloriesAdded = delta.calories();
             nutrientDeltas = delta.nutrients();
         }
 
-        float multiplier = diet.recordEat(itemId);
+        // Resolve dominant category (first/highest match) and food family
+        String dominantCategory = matchedBars.isEmpty() ? "grains" : matchedBars.keySet().iterator().next();
+        String familyKey = FoodFamilyResolver.resolve(
+                BuiltInRegistries.ITEM.getKey(stack.getItem()));
+
+        float multiplier = diet.recordEat(itemId, dominantCategory, familyKey, gameTimeMs);
 
         if (NourishedConfig.get().enableCalorieTracking()) {
             Nourished.LOGGER.debug("Nourished calories: adding {} * {} for {}", caloriesAdded, multiplier,

@@ -1,6 +1,5 @@
 package dev.maire.nourished.nutrition;
 
-import dev.maire.nourished.Nourished;
 import dev.maire.nourished.nutrition.scanner.ClassificationResult;
 import dev.maire.nourished.nutrition.scanner.FoodClassifier;
 import dev.maire.nourished.nutrition.scanner.RecipeInheritanceResolver;

@@ -1,7 +1,7 @@
 package dev.maire.nourished.config;
 
-import dev.maire.nourished.Nourished;
 import dev.maire.nourished.compat.ModCompat;
+import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
@@ -80,6 +80,25 @@ public final class NourishedConfig {
     private final ModConfigSpec.IntValue memoryWindowCount;
     private final ModConfigSpec.DoubleValue diminishingFloor;
     private final ModConfigSpec.ConfigValue<java.util.List<? extends Double>> diminishingSteps;
+
+    // Logistic curve parameters (new system, replaces step-based)
+    private final ModConfigSpec.DoubleValue diminishingSteepness;
+    private final ModConfigSpec.DoubleValue diminishingMidpoint;
+
+    // Streak multiplier
+    private final ModConfigSpec.IntValue streakWindowMs;
+    private final ModConfigSpec.DoubleValue streakWeight;
+
+    // Graduated novelty
+    private final ModConfigSpec.DoubleValue noveltyBonus;
+    private final ModConfigSpec.DoubleValue noveltyDecayCap;
+
+    // Nutritional debt
+    private final ModConfigSpec.DoubleValue debtThreshold;
+    private final ModConfigSpec.DoubleValue debtDecayRate;
+
+    // Debug
+    private final ModConfigSpec.BooleanValue debugMemoryLogging;
 
     // Tag-based food → diet bar gains (FoodNutritionRegistry.computeDietDelta)
     private final ModConfigSpec.DoubleValue nutrientGainScale;
@@ -180,9 +199,46 @@ public final class NourishedConfig {
                 .comment("Minimum multiplier for heavily repeated foods. 0.15 = 15% credit floor.")
                 .defineInRange("diminishingFloor", 0.15, 0.0, 1.0);
         diminishingSteps = builder
-                .comment("Multiplier curve by eat count. Index 0 = first eat (1.0), index 1 = second, etc.")
+                .comment("(Legacy) Multiplier curve by eat count. Ignored when using logistic curve.")
                 .defineList("diminishingSteps", java.util.List.of(1.0, 0.7, 0.4, 0.15),
                     e -> e instanceof Double d && d >= 0.0 && d <= 1.0);
+
+        // Logistic curve parameters
+        diminishingSteepness = builder
+                .comment("Steepness of the logistic diminishing curve. Higher = sharper transition.")
+                .defineInRange("diminishingSteepness", 0.8, 0.1, 3.0);
+        diminishingMidpoint = builder
+                .comment("Midpoint of the logistic curve (eat count where multiplier = 0.5).")
+                .defineInRange("diminishingMidpoint", 3.0, 1.0, 10.0);
+
+        // Streak settings
+        streakWindowMs = builder
+                .comment("Time window (ms) for streak detection. Eating same food within window increases penalty faster.")
+                .defineInRange("streakWindowMs", 300000, 10000, 1800000);
+        streakWeight = builder
+                .comment("Multiplier for eat count increment when within streak window (e.g., 2.0 = double penalty).")
+                .defineInRange("streakWeight", 2.0, 1.0, 5.0);
+
+        // Novelty settings
+        noveltyBonus = builder
+                .comment("Maximum multiplier bonus for completely novel foods.")
+                .defineInRange("noveltyBonus", 1.25, 1.0, 2.0);
+        noveltyDecayCap = builder
+                .comment("Decayed eat count at which novelty bonus fully disappears.")
+                .defineInRange("noveltyDecayCap", 5.0, 1.0, 20.0);
+
+        // Nutritional debt settings
+        debtThreshold = builder
+                .comment("Category eat count threshold above which nutritional debt kicks in.")
+                .defineInRange("debtThreshold", 4.0, 1.0, 20.0);
+        debtDecayRate = builder
+                .comment("Rate at which neglected categories decay when debt is triggered.")
+                .defineInRange("debtDecayRate", 0.003, 0.0, 0.05);
+
+        // Debug
+        debugMemoryLogging = builder
+                .comment("Enable detailed debug logging for food memory system (development only).")
+                .define("debugMemoryLogging", false);
         builder.pop();
 
         builder.push("food_gains");
@@ -221,7 +277,7 @@ public final class NourishedConfig {
         builder.pop();
 
         builder.push("compat");
-        for (String modid : ModCompat.DETECTED.keySet()) {
+        for (String modid : ModCompat.getDetected().keySet()) {
             builder.push(modid);
             compatCodeToggles.put(
                     modid,
@@ -478,6 +534,42 @@ public final class NourishedConfig {
 
     public java.util.List<? extends Double> diminishingSteps() {
         return diminishingSteps.get();
+    }
+
+    public double diminishingSteepness() {
+        return diminishingSteepness.get();
+    }
+
+    public double diminishingMidpoint() {
+        return diminishingMidpoint.get();
+    }
+
+    public int streakWindowMs() {
+        return streakWindowMs.get();
+    }
+
+    public double streakWeight() {
+        return streakWeight.get();
+    }
+
+    public double noveltyBonus() {
+        return noveltyBonus.get();
+    }
+
+    public double noveltyDecayCap() {
+        return noveltyDecayCap.get();
+    }
+
+    public double debtThreshold() {
+        return debtThreshold.get();
+    }
+
+    public double debtDecayRate() {
+        return debtDecayRate.get();
+    }
+
+    public boolean debugMemoryLogging() {
+        return debugMemoryLogging.get();
     }
 
     public double nutrientGainScale() {

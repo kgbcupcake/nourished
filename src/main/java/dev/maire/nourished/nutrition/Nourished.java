@@ -1,4 +1,4 @@
-package dev.maire.nourished;
+package dev.maire.nourished.nutrition;
 
 import org.slf4j.Logger;
 
@@ -21,10 +21,6 @@ import dev.maire.nourished.handler.FoodEatenHandler;
 import dev.maire.nourished.handler.NutritionDecayHandler;
 import dev.maire.nourished.handler.NutritionEffectsHandler;
 import dev.maire.nourished.network.ModNetworking;
-import dev.maire.nourished.nutrition.FoodNutritionRegistry;
-import dev.maire.nourished.nutrition.FoodOverrideRegistry;
-import dev.maire.nourished.nutrition.FoodValueRegistry;
-import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -41,6 +37,7 @@ public class Nourished {
 
     public Nourished(IEventBus modEventBus, ModContainer modContainer) {
         NutrientRegistry.load();
+        ModCompat.initialize();
         FoodValueRegistry.load();
         FoodOverrideRegistry.load();
         EffectRegistry.load();
@@ -62,7 +59,8 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new FoodEatenHandler());
         NeoForge.EVENT_BUS.register(new NutritionEffectsHandler());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
-            if (!ModCompat.LSO_LOADED || !NourishedConfig.get().isCodeCompatEnabled("legendarysurvivaloverhaul")) {
+            ModCompat.discoverUnknownMods();
+            if (!ModCompat.shouldDisableEffects()) {
                 NeoForge.EVENT_BUS.register(new NutritionDecayHandler());
             }
         });

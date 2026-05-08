@@ -1,6 +1,6 @@
 package dev.maire.nourished.config;
 
-import dev.maire.nourished.Nourished;
+import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;

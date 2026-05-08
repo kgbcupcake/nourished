@@ -1,12 +1,12 @@
 package dev.maire.nourished.handler;
 
-import dev.maire.nourished.Nourished;
 import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.config.PresetRegistry;
 import dev.maire.nourished.color.ColorRegistry;
 import dev.maire.nourished.effect.EffectRegistry;
 import dev.maire.nourished.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.nutrition.FoodValueRegistry;
+import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;

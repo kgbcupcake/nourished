@@ -607,8 +607,8 @@ public final class NourishedConfigScreen {
     ) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.compatibility"));
 
-        for (String modid : ModCompat.DETECTED.keySet()) {
-            boolean detected = ModCompat.DETECTED.getOrDefault(modid, false);
+        for (String modid : ModCompat.getDetected().keySet()) {
+            boolean detected = ModCompat.getDetected().getOrDefault(modid, false);
             String modName = toTitleCase(modid);
             String statusText = detected ? "Status: Installed ✓" : "Status: Not detected ✗";
 

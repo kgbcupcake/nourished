@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.config;
 
-import dev.maire.nourished.Nourished;
 import dev.maire.nourished.effect.EffectRegistry;
+import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;

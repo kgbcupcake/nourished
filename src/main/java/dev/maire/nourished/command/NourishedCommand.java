@@ -3,10 +3,11 @@ package dev.maire.nourished.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.maire.nourished.Nourished;
+
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
+import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import dev.maire.nourished.nutrition.UnassignedFoodScanner;
 import dev.maire.nourished.nutrition.scanner.ScanCache;

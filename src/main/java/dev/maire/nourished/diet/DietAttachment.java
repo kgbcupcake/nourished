@@ -1,12 +1,13 @@
 package dev.maire.nourished.diet;
 
-import dev.maire.nourished.Nourished;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.function.Supplier;
+
+import dev.maire.nourished.nutrition.Nourished;
 
 public final class DietAttachment {
 

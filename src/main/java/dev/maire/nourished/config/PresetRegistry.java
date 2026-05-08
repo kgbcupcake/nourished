@@ -4,8 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.maire.nourished.Nourished;
+
 import dev.maire.nourished.effect.EffectRegistry;
+import dev.maire.nourished.nutrition.Nourished;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;

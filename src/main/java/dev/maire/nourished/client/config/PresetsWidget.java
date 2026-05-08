@@ -1,9 +1,9 @@
 package dev.maire.nourished.client.config;
 
-import dev.maire.nourished.Nourished;
 import dev.maire.nourished.config.NourishedConfigScreen;
 import dev.maire.nourished.config.PresetRegistry;
 import dev.maire.nourished.config.PresetRegistry.ParsedPreset;
+import dev.maire.nourished.nutrition.Nourished;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
