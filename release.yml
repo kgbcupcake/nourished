@@ -1,0 +1,96 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Release
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # git-cliff needs full history
+
+      # ── Java ────────────────────────────────────────────────────────────────
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+
+      # ── Gradle cache ────────────────────────────────────────────────────────
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: gradle-
+
+      # ── Build ────────────────────────────────────────────────────────────────
+      - name: Build mod jar
+        run: ./gradlew build --no-daemon
+
+      # ── Find jar ─────────────────────────────────────────────────────────────
+      - name: Locate built jar
+        id: jar
+        run: |
+          JAR=$(find build/libs -name "*.jar" ! -name "*-sources.jar" ! -name "*-dev.jar" | head -1)
+          echo "path=$JAR" >> $GITHUB_OUTPUT
+          echo "name=$(basename $JAR)" >> $GITHUB_OUTPUT
+
+      # ── Changelog ────────────────────────────────────────────────────────────
+      - name: Install git-cliff
+        uses: taiki-e/install-action@v2
+        with:
+          tool: git-cliff
+
+      - name: Generate release changelog
+        id: changelog
+        run: |
+          # Generate changelog for this tag only (since last tag)
+          git-cliff --config cliff.toml --latest --strip header > RELEASE_NOTES.md
+          cat RELEASE_NOTES.md
+
+      - name: Update full CHANGELOG.md
+        run: |
+          git-cliff --config cliff.toml --output CHANGELOG.md
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --staged --quiet || git commit -m "chore(changelog): update for ${{ github.ref_name }} [skip ci]"
+          git push origin HEAD:main || true
+
+      # ── GitHub Release ───────────────────────────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Nourished ${{ github.ref_name }}"
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') }}
+          files: ${{ steps.jar.outputs.path }}
+
+      # ── Modrinth Upload ──────────────────────────────────────────────────────
+      - name: Upload to Modrinth
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: YOUR_MODRINTH_PROJECT_ID        # ← replace this
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }} # ← add this secret in GitHub repo settings
+          files: ${{ steps.jar.outputs.path }}
+          name: "Nourished ${{ github.ref_name }}"
+          changelog-file: RELEASE_NOTES.md
+          game-versions: "1.21.1"
+          loaders: neoforge
+          version-type: ${{ contains(github.ref_name, 'alpha') && 'alpha' || contains(github.ref_name, 'beta') && 'beta' || 'release' }}
