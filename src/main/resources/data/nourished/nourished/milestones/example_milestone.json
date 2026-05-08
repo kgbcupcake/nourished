@@ -1,0 +1,7 @@
+{
+  "nutrient_key": "example_nutrient",
+  "cumulative_goal": 250.0,
+  "reward_effect_id": "minecraft:regeneration",
+  "amplifier": 0,
+  "reward_duration": 200
+}

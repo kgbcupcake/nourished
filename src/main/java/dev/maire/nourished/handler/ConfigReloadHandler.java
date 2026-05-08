@@ -3,6 +3,7 @@ package dev.maire.nourished.handler;
 import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.config.PresetRegistry;
 import dev.maire.nourished.color.ColorRegistry;
+import dev.maire.nourished.data.NourishedDataManager;
 import dev.maire.nourished.effect.EffectRegistry;
 import dev.maire.nourished.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.nutrition.FoodValueRegistry;
@@ -29,6 +30,7 @@ public class ConfigReloadHandler {
 
     @SubscribeEvent
     public void onAddReloadListeners(AddReloadListenerEvent event) {
+        NourishedDataManager.registerReloadListener(event);
         event.addListener((preparationBarrier, resourceManager, profilerFiller, profilerFiller2, executor, executor2) ->
                 preparationBarrier.wait(net.minecraft.util.Unit.INSTANCE).thenRunAsync(() -> {
                     FoodValueRegistry.loadFromDatapack(resourceManager);
