@@ -51,7 +51,6 @@ public final class NourishedConfigScreen {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTitle(Component.translatable("config.nourished.title"));
-        builder.setAfterInitConsumer(NourishedConfigLeftCardsLayout::apply);
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
         Map<String, PendingOverride> decayOverrides = new LinkedHashMap<>();

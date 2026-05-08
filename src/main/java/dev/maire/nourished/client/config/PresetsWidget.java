@@ -5,6 +5,7 @@ import dev.maire.nourished.config.PresetRegistry;
 import dev.maire.nourished.config.PresetRegistry.ParsedPreset;
 import dev.maire.nourished.nutrition.Nourished;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
+import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -139,6 +140,10 @@ public final class PresetsWidget extends TooltipListEntry<Object> {
             int mouseY,
             boolean isHovered,
             float delta) {
+        if (!isRowVisible(y, getItemHeight())) {
+            hideButtons();
+            return;
+        }
         super.render(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isHovered, delta);
         int innerW = entryWidth - 8;
         int sx = x + 4;
@@ -155,6 +160,20 @@ public final class PresetsWidget extends TooltipListEntry<Object> {
             c.render(graphics, sx, cy, innerW, mouseX, mouseY, delta, isEditable());
             cy += CARD_H + PAD;
         }
+    }
+
+    private void hideButtons() {
+        saveCurrentButton.setY(-2000);
+        for (PresetCard card : cards) {
+            card.hideButtons();
+        }
+    }
+
+    private boolean isRowVisible(int y, int h) {
+        if (!(Minecraft.getInstance().screen instanceof ClothConfigScreen cloth) || cloth.listWidget == null) {
+            return true;
+        }
+        return y < cloth.listWidget.bottom && y + h > cloth.listWidget.top;
     }
 
     private static final class PresetCard {
@@ -222,6 +241,11 @@ public final class PresetsWidget extends TooltipListEntry<Object> {
 
             loadButton.render(graphics, mouseX, mouseY, delta);
             deleteButton.render(graphics, mouseX, mouseY, delta);
+        }
+
+        void hideButtons() {
+            loadButton.setY(-2000);
+            deleteButton.setY(-2000);
         }
     }
 

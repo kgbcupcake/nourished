@@ -10,6 +10,7 @@ import dev.maire.nourished.nutrition.NutrientRegistry;
 import dev.maire.nourished.nutrition.UnassignedFoodScanner;
 import dev.maire.nourished.nutrition.scanner.ClassificationResult;
 import dev.maire.nourished.nutrition.scanner.ClassificationSignal;
+import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -257,6 +258,14 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             int mouseY,
             boolean isHovered,
             float delta) {
+        if (!isRowVisible(y, getItemHeight())) {
+            scanButton.setY(-2000);
+            writeButton.setY(-2000);
+            for (Row row : rows) {
+                row.nutrientButton.setY(-2000);
+            }
+            return;
+        }
         super.render(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isHovered, delta);
 
         Minecraft mc = Minecraft.getInstance();
@@ -356,6 +365,13 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
 
             graphics.renderTooltip(mc.font, tooltip, Optional.empty(), mouseX, mouseY);
         }
+    }
+
+    private boolean isRowVisible(int y, int h) {
+        if (!(Minecraft.getInstance().screen instanceof ClothConfigScreen cloth) || cloth.listWidget == null) {
+            return true;
+        }
+        return y < cloth.listWidget.bottom && y + h > cloth.listWidget.top;
     }
 
     private static final class Row {

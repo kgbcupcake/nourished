@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,6 +45,9 @@ public final class AutoCompatDiscovery {
 
             for (var modInfo : ModList.get().getMods()) {
                 String modId = modInfo.getModId();
+                if (modId != null && modId.toLowerCase(Locale.ROOT).contains("mama")) {
+                    Nourished.LOGGER.info("[Nourished] Loaded mod id containing 'mama': {}", modId);
+                }
                 if (VANILLA_MOD_IDS.contains(modId)) {
                     continue;
                 }

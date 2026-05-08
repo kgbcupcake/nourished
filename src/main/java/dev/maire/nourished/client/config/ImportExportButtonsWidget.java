@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.config;
 
+import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -85,6 +86,11 @@ public final class ImportExportButtonsWidget extends TooltipListEntry<Object> {
             int mouseY,
             boolean isHovered,
             float delta) {
+        if (!isRowVisible(y, getItemHeight())) {
+            exportButton.setY(-2000);
+            importButton.setY(-2000);
+            return;
+        }
         int innerW = entryWidth - 8;
         int sx = x + 4;
         int cy = y + 4;
@@ -99,5 +105,12 @@ public final class ImportExportButtonsWidget extends TooltipListEntry<Object> {
         exportButton.setX(sx + Math.max(0, innerW - 2 * buttonWidth - GAP));
         exportButton.render(graphics, mouseX, mouseY, delta);
         importButton.render(graphics, mouseX, mouseY, delta);
+    }
+
+    private boolean isRowVisible(int y, int h) {
+        if (!(Minecraft.getInstance().screen instanceof ClothConfigScreen cloth) || cloth.listWidget == null) {
+            return true;
+        }
+        return y < cloth.listWidget.bottom && y + h > cloth.listWidget.top;
     }
 }

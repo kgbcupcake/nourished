@@ -1,6 +1,7 @@
 package dev.maire.nourished.client.config;
 
 import dev.maire.nourished.effect.EffectRegistry;
+import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -258,6 +259,10 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
             int mouseY,
             boolean isHovered,
             float delta) {
+        if (!isRowVisible(y, getItemHeight())) {
+            hideButtons();
+            return;
+        }
         Minecraft mc = Minecraft.getInstance();
         int cy = y + 4;
         int innerW = entryWidth - 8;
@@ -287,6 +292,20 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
                 }
             }
         }
+    }
+
+    private void hideButtons() {
+        for (EffectCard card : cards) {
+            card.hideButtons();
+        }
+        newEffectButton.setY(-2000);
+    }
+
+    private boolean isRowVisible(int y, int h) {
+        if (!(Minecraft.getInstance().screen instanceof ClothConfigScreen cloth) || cloth.listWidget == null) {
+            return true;
+        }
+        return y < cloth.listWidget.bottom && y + h > cloth.listWidget.top;
     }
 
     static final class EffectSavedToast implements Toast {

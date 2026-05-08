@@ -413,6 +413,24 @@ class EffectCard {
                 deleteButton);
     }
 
+    void hideButtons() {
+        expandToggle.setY(-2000);
+        thresholdMaxSlider.setY(-2000);
+        ruleIdEdit.setY(-2000);
+        effectEdit.setY(-2000);
+        nutrientButton.setY(-2000);
+        triggerButton.setY(-2000);
+        thresholdSlider.setY(-2000);
+        amplifierEdit.setY(-2000);
+        durationEdit.setY(-2000);
+        enabledButton.setY(-2000);
+        ambientButton.setY(-2000);
+        showParticlesButton.setY(-2000);
+        previewButton.setY(-2000);
+        saveButton.setY(-2000);
+        deleteButton.setY(-2000);
+    }
+
     @SuppressWarnings("unchecked")
     List<net.minecraft.client.gui.narration.NarratableEntry> narratables() {
         return (List<net.minecraft.client.gui.narration.NarratableEntry>) (List<?>) children();
