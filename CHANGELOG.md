@@ -19,6 +19,7 @@ All notable changes to Nourished will be documented here.
 - Include example-addon in settings.gradle
 - Improve modularity with example-addon integration
 - Establish API contract and enhance documentation for v0.1.2-alpha
+- Enhance UI responsiveness and button visibility in configuration widgets
 
 ### 🚜 Refactor
 
