@@ -7,6 +7,7 @@ All notable changes to Nourished will be documented here.
 ### 🚀 Features
 
 - Enhance configuration and UI for module management
+- Add GitHub Actions workflow for automated releases
 
 ## [0.1.1-alpha] - 2026-05-08
 
