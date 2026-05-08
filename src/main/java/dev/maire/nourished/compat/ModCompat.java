@@ -423,6 +423,37 @@ public final class ModCompat {
                 MERGED_CONFLICT_BEHAVIOR.disableDecay());
     }
 
+    /**
+     * Registers an externally-defined compatibility entry via the public API.
+     * Called by {@link dev.maire.nourished.api.NourishedAPI#registerCompatEntry}.
+     */
+    public static void registerExternal(dev.maire.nourished.api.CompatDefinition definition) {
+        CompatCategory category = switch (definition.getCategory()) {
+            case FOOD_MOD -> CompatCategory.FOOD_MOD;
+            case FARMING_MOD -> CompatCategory.FARMING_MOD;
+            case SURVIVAL_OVERHAUL -> CompatCategory.SURVIVAL_OVERHAUL;
+        };
+        boolean loaded = net.neoforged.fml.ModList.get().isLoaded(definition.getModId());
+        CompatEntry entry = new CompatEntry(
+                definition.getModId(),
+                definition.getModId(),
+                category,
+                List.of(definition.getModId()),
+                false,
+                false,
+                Map.of(),
+                null,
+                false,
+                0,
+                loaded,
+                null,
+                ConflictLevel.NONE
+        );
+        ENTRIES_BY_MODID.put(definition.getModId(), entry);
+        NAMESPACE_TO_MODID.put(definition.getModId(), definition.getModId());
+        LOGGER.info("[Nourished] Registered external compat entry: {}", definition.getModId());
+    }
+
     // ═══════════════════════════════════════════════════════════════════════════
     // Public Query API
     // ═══════════════════════════════════════════════════════════════════════════

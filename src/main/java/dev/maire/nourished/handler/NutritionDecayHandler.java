@@ -1,5 +1,6 @@
 package dev.maire.nourished.handler;
 
+import dev.maire.nourished.api.NourishedEvents;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
@@ -7,6 +8,7 @@ import dev.maire.nourished.network.ModNetworking;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 public class NutritionDecayHandler {
@@ -25,8 +27,19 @@ public class NutritionDecayHandler {
             float rate = (float) config.decayRateFor(key);
             float current = data.nutrients.getOrDefault(key, 0f);
             if (current > 0f) {
-                data.nutrients.put(key, Math.max(0f, current - rate));
+                float newValue = Math.max(0f, current - rate);
+                data.nutrients.put(key, newValue);
                 changed = true;
+
+                if (current != newValue) {
+                    NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientChangedEvent(
+                            player, key, current, newValue));
+
+                    float criticalThreshold = (float) config.criticalThresholdFor(key);
+                    if (newValue <= criticalThreshold && current > criticalThreshold) {
+                        NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientCriticalEvent(player, key));
+                    }
+                }
             }
         }
 

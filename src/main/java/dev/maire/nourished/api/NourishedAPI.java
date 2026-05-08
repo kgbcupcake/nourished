@@ -1,5 +1,15 @@
 package dev.maire.nourished.api;
 
+import dev.maire.nourished.api.impl.DietDataFoodMemoryView;
+import dev.maire.nourished.api.registry.AbsorptionModifierRegistry;
+import dev.maire.nourished.api.registry.DietProfileRegistry;
+import dev.maire.nourished.api.registry.MilestoneRegistry;
+import dev.maire.nourished.api.registry.ReportProviderRegistry;
+import dev.maire.nourished.api.registry.SeasonHookRegistry;
+import dev.maire.nourished.api.registry.SynergyRegistry;
+import dev.maire.nourished.diet.DietAttachment;
+import dev.maire.nourished.diet.DietData;
+import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
@@ -31,7 +41,8 @@ public final class NourishedAPI {
      * @throws IllegalStateException if the nutrition system is not initialized
      */
     public static float getCalories(Player player) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        DietData diet = player.getData(DietAttachment.DIET.get());
+        return diet.calories;
     }
 
     /**
@@ -43,7 +54,9 @@ public final class NourishedAPI {
      *         or {@code -1.0f} if the nutrient key is not recognized
      */
     public static float getNutrientLevel(Player player, String nutrientKey) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        DietData diet = player.getData(DietAttachment.DIET.get());
+        Float value = diet.nutrients.get(nutrientKey);
+        return value != null ? value : -1.0f;
     }
 
     /**
@@ -55,7 +68,8 @@ public final class NourishedAPI {
      * @throws IllegalStateException if the nutrition system is not initialized
      */
     public static FoodMemoryView getFoodMemory(Player player) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        DietData diet = player.getData(DietAttachment.DIET.get());
+        return new DietDataFoodMemoryView(diet);
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -73,7 +87,10 @@ public final class NourishedAPI {
      * @throws IllegalArgumentException if a nutrient with the same id already exists
      */
     public static void registerNutrient(NutrientDefinition definition) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        if (NutrientRegistry.getKeys().contains(definition.getId())) {
+            throw new IllegalArgumentException("Nutrient already registered: " + definition.getId());
+        }
+        NutrientRegistry.registerExternal(definition.getId(), definition.getDisplayName());
     }
 
     /**
@@ -86,7 +103,10 @@ public final class NourishedAPI {
      * @throws IllegalArgumentException if the nutrient key is not registered
      */
     public static void registerFoodClassification(ResourceLocation foodId, String nutrientKey, float amount) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        if (!NutrientRegistry.getKeys().contains(nutrientKey)) {
+            throw new IllegalArgumentException("Unknown nutrient key: " + nutrientKey);
+        }
+        dev.maire.nourished.nutrition.FoodNutritionRegistry.registerClassification(foodId, nutrientKey, amount);
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -100,7 +120,7 @@ public final class NourishedAPI {
      * @throws IllegalArgumentException if the referenced nutrient or effect doesn't exist
      */
     public static void registerCustomEffect(EffectDefinition definition) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        dev.maire.nourished.effect.EffectRegistry.registerExternal(definition);
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -114,7 +134,7 @@ public final class NourishedAPI {
      * @param definition the compat definition with food-to-nutrient mappings
      */
     public static void registerCompatEntry(CompatDefinition definition) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        dev.maire.nourished.compat.ModCompat.registerExternal(definition);
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -130,7 +150,7 @@ public final class NourishedAPI {
      * @throws IllegalArgumentException if referenced nutrients don't exist
      */
     public static void registerNutrientSynergy(NutrientSynergyDefinition definition) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        SynergyRegistry.registerNutrientSynergy(definition);
     }
 
     /**
@@ -140,7 +160,7 @@ public final class NourishedAPI {
      * @param definition the food synergy definition
      */
     public static void registerFoodSynergy(FoodSynergyDefinition definition) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        SynergyRegistry.registerFoodSynergy(definition);
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -154,7 +174,7 @@ public final class NourishedAPI {
      * @throws IllegalArgumentException if a profile with the same id already exists
      */
     public static void registerDietProfile(DietProfileDefinition definition) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        DietProfileRegistry.register(definition);
     }
 
     /**
@@ -165,7 +185,7 @@ public final class NourishedAPI {
      * @throws IllegalArgumentException if a milestone with the same id already exists
      */
     public static void registerMilestone(NutrientMilestoneDefinition definition) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        MilestoneRegistry.register(definition);
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -179,7 +199,7 @@ public final class NourishedAPI {
      * @param hook the season hook implementation
      */
     public static void registerSeasonHook(NourishedSeasonHook hook) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        SeasonHookRegistry.register(hook);
     }
 
     /**
@@ -189,7 +209,7 @@ public final class NourishedAPI {
      * @param modifier the absorption modifier implementation
      */
     public static void registerAbsorptionModifier(NutrientAbsorptionModifier modifier) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        AbsorptionModifierRegistry.register(modifier);
     }
 
     /**
@@ -199,6 +219,6 @@ public final class NourishedAPI {
      * @param provider the report provider implementation
      */
     public static void registerReportProvider(DietReportProvider provider) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        ReportProviderRegistry.register(provider);
     }
 }

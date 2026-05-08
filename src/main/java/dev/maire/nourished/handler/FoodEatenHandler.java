@@ -1,5 +1,7 @@
 package dev.maire.nourished.handler;
 
+import dev.maire.nourished.api.NourishedEvents;
+import dev.maire.nourished.api.NutrientModifierEvent;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
@@ -11,10 +13,12 @@ import dev.maire.nourished.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 
 import java.util.Map;
@@ -67,6 +71,8 @@ public class FoodEatenHandler {
 
         float multiplier = diet.recordEat(itemId, dominantCategory, familyKey, gameTimeMs);
 
+        ResourceLocation foodResourceId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+
         if (NourishedConfig.get().enableCalorieTracking()) {
             Nourished.LOGGER.debug("Nourished calories: adding {} * {} for {}", caloriesAdded, multiplier,
                     stack.getItem().getDescriptionId());
@@ -76,9 +82,32 @@ public class FoodEatenHandler {
         for (String key : NutrientRegistry.getKeys()) {
             float nutrientDelta = nutrientDeltas.getOrDefault(key, 0f);
             if (nutrientDelta != 0f) {
-                diet.addNutrient(key, nutrientDelta * multiplier);
+                float adjustedDelta = nutrientDelta * multiplier;
+
+                NutrientModifierEvent modifierEvent = new NutrientModifierEvent(
+                        player, foodResourceId, key, adjustedDelta);
+                NeoForge.EVENT_BUS.post(modifierEvent);
+
+                if (modifierEvent.isCanceled()) {
+                    continue;
+                }
+
+                float finalDelta = modifierEvent.getAmount();
+                float oldValue = diet.nutrients.getOrDefault(key, 0f);
+                diet.addNutrient(key, finalDelta);
+                float newValue = diet.nutrients.getOrDefault(key, 0f);
+
+                if (oldValue != newValue) {
+                    NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientChangedEvent(
+                            player, key, oldValue, newValue));
+                }
+
+                NeoForge.EVENT_BUS.post(new NourishedEvents.FoodEatenEvent(
+                        player, foodResourceId, key, finalDelta));
             }
         }
+
+        checkThresholdCrossings(player, diet);
 
         player.setData(DietAttachment.DIET.get(), diet);
         ModNetworking.syncDietDelta(player, diet);
@@ -91,5 +120,23 @@ public class FoodEatenHandler {
                 player.getName().getString(),
                 stack.getItem().getDescriptionId(),
                 diet);
+    }
+
+    private void checkThresholdCrossings(ServerPlayer player, DietData diet) {
+        NourishedConfig config = NourishedConfig.get();
+        float excessThreshold = (float) config.excessThreshold();
+        for (String key : NutrientRegistry.getKeys()) {
+            float current = diet.nutrients.getOrDefault(key, 0f);
+            float previous = diet.lastNutrients.getOrDefault(key, 0f);
+
+            float criticalThreshold = (float) config.criticalThresholdFor(key);
+
+            if (current <= criticalThreshold && previous > criticalThreshold) {
+                NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientCriticalEvent(player, key));
+            }
+            if (current >= excessThreshold && previous < excessThreshold) {
+                NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientExcessEvent(player, key));
+            }
+        }
     }
 }

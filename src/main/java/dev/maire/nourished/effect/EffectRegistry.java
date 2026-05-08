@@ -66,6 +66,34 @@ public class EffectRegistry {
         return Collections.unmodifiableList(new ArrayList<>(REGISTRY));
     }
 
+    /**
+     * Registers an externally-defined effect via the public API.
+     * Called by {@link dev.maire.nourished.api.NourishedAPI#registerCustomEffect}.
+     */
+    public static void registerExternal(dev.maire.nourished.api.EffectDefinition definition) {
+        String trigger = switch (definition.getThresholdType()) {
+            case CRITICAL -> "below";
+            case LOW -> "below";
+            case EXCESS -> "above";
+            case BONUS -> "all_above";
+        };
+        EffectDef def = new EffectDef(
+                "api_" + definition.getNutrientKey() + "_" + definition.getEffectId().getPath(),
+                definition.getEffectId().toString(),
+                definition.getNutrientKey(),
+                trigger,
+                definition.getThreshold(),
+                definition.getAmplifier(),
+                definition.getDuration(),
+                true,
+                1.0,
+                true,
+                false
+        );
+        REGISTRY.add(def);
+        Nourished.LOGGER.info("[EffectRegistry] Registered external effect: {}", def.id());
+    }
+
     public static Set<String> getPreviousEffectIds() {
         return Collections.unmodifiableSet(previousEffectIds);
     }

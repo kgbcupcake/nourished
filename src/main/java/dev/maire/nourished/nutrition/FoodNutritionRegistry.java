@@ -35,6 +35,24 @@ public class FoodNutritionRegistry {
 
     private static final Set<String> WARNED_ITEMS = new HashSet<>();
 
+    private static final Map<ResourceLocation, Map<String, Float>> EXTERNAL_CLASSIFICATIONS = new HashMap<>();
+
+    /**
+     * Registers an API-driven food classification mapping a food item to a nutrient key with an amount.
+     * Called by {@link dev.maire.nourished.api.NourishedAPI#registerFoodClassification}.
+     */
+    public static void registerClassification(ResourceLocation foodId, String nutrientKey, float amount) {
+        EXTERNAL_CLASSIFICATIONS.computeIfAbsent(foodId, k -> new LinkedHashMap<>()).put(nutrientKey, amount);
+        LOGGER.info("[FoodNutritionRegistry] Registered external classification: {} -> {} ({})", foodId, nutrientKey, amount);
+    }
+
+    /**
+     * Returns externally registered classifications for a food item, or null if none.
+     */
+    public static Map<String, Float> getExternalClassification(ResourceLocation foodId) {
+        return EXTERNAL_CLASSIFICATIONS.get(foodId);
+    }
+
     public record NutrientValues(float protein, float carbs, float fats, float vitamins, float hydration) {}
 
     /** Diet UI deltas; nutrient values are driven by NutrientRegistry keys. */

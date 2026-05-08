@@ -67,6 +67,21 @@ public class NutrientRegistry {
         return Collections.unmodifiableList(new ArrayList<>(REGISTRY.values()));
     }
 
+    /**
+     * Registers an externally-defined nutrient via the public API.
+     * Called by {@link dev.maire.nourished.api.NourishedAPI#registerNutrient}.
+     *
+     * @param key         the unique nutrient key
+     * @param displayName the display name (used as icon fallback label)
+     */
+    public static void registerExternal(String key, String displayName) {
+        if (REGISTRY.containsKey(key)) {
+            throw new IllegalArgumentException("Nutrient already registered: " + key);
+        }
+        REGISTRY.put(key, new NutrientDef(key, "minecraft:apple", List.of()));
+        Nourished.LOGGER.info("[NutrientRegistry] Registered external nutrient: {}", key);
+    }
+
     // ── Loading ───────────────────────────────────────────────────────────────
 
     public static void load() {
