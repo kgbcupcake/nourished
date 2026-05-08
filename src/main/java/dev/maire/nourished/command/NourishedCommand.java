@@ -22,26 +22,36 @@ import dev.maire.nourished.data.SchemaTemplateGenerator;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
 import dev.maire.nourished.effect.EffectRegistry;
+import dev.maire.nourished.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.nutrition.FoodValueRegistry;
-import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -78,6 +88,10 @@ public class NourishedCommand {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
         dispatcher.register(
                 Commands.literal("nourished")
+                        .then(Commands.literal("nbt")
+                                .executes(this::showNbtPaths))
+                        .then(Commands.literal("get_unassigned_foods")
+                                .executes(this::showUnassignedFoods))
                         .then(Commands.literal("report")
                                 .executes(this::reportSelf)
                                 .then(Commands.argument("player", EntityArgument.player())
@@ -134,6 +148,52 @@ public class NourishedCommand {
     private int reportSelf(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer target = ctx.getSource().getPlayerOrException();
         return sendReport(ctx.getSource(), target);
+    }
+
+    private int showNbtPaths(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        String header = "[Nourished] NBT paths for Peak Stamina compat:";
+        player.sendSystemMessage(copyableGreenLine(header));
+
+        for (String key : NutrientRegistry.getKeys()) {
+            String path = DietAttachment.getNutrientNbtPath(key);
+            player.sendSystemMessage(copyableGreenLine(path));
+        }
+
+        player.sendSystemMessage(copyableGreenLine(DietAttachment.getCaloriesNbtPath()));
+        return 1;
+    }
+
+    private int showUnassignedFoods(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        Map<String, List<ResourceLocation>> byNamespace = new TreeMap<>();
+
+        for (Item item : BuiltInRegistries.ITEM) {
+            if (item.components().get(net.minecraft.core.component.DataComponents.FOOD) == null) {
+                continue;
+            }
+            ResourceLocation itemId = item.builtInRegistryHolder().key().location();
+            if (isClassified(itemId, item.builtInRegistryHolder())) {
+                continue;
+            }
+            byNamespace.computeIfAbsent(itemId.getNamespace(), k -> new ArrayList<>()).add(itemId);
+        }
+
+        if (byNamespace.isEmpty()) {
+            player.sendSystemMessage(Component.literal("[Nourished] All loaded food items are classified.").withStyle(ChatFormatting.GREEN));
+            return 1;
+        }
+
+        player.sendSystemMessage(Component.literal("[Nourished] Unassigned foods grouped by namespace:").withStyle(ChatFormatting.GOLD));
+        for (Map.Entry<String, List<ResourceLocation>> entry : byNamespace.entrySet()) {
+            List<ResourceLocation> ids = entry.getValue();
+            ids.sort(Comparator.comparing(ResourceLocation::toString));
+            player.sendSystemMessage(Component.literal("[" + entry.getKey() + "] (" + ids.size() + ")").withStyle(ChatFormatting.YELLOW));
+            for (ResourceLocation id : ids) {
+                player.sendSystemMessage(Component.literal(" - " + id).withStyle(ChatFormatting.GRAY));
+            }
+        }
+        return 1;
     }
 
     private int reportTarget(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -364,5 +424,27 @@ public class NourishedCommand {
 
     private static String activeProfile(ServerPlayer player) {
         return ACTIVE_PROFILES.getOrDefault(player.getUUID(), "none");
+    }
+
+    private static boolean isClassified(ResourceLocation itemId, Holder<Item> holder) {
+        Map<String, Float> external = FoodNutritionRegistry.getExternalClassification(itemId);
+        if (external != null && !external.isEmpty()) {
+            return true;
+        }
+        for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
+            for (String tagStr : def.tags()) {
+                TagKey<Item> tagKey = TagKey.create(Registries.ITEM, ResourceLocation.parse(tagStr));
+                if (holder.is(tagKey)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static Component copyableGreenLine(String text) {
+        return Component.literal(text).withStyle(style -> style
+                .withColor(ChatFormatting.GREEN)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, text)));
     }
 }

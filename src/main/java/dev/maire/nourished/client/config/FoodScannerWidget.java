@@ -17,6 +17,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -121,20 +122,38 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         Path root = server.getWorldPath(LevelResource.ROOT);
         Path packRoot = root.resolve("datapacks").resolve("nourished-generated");
         Path tagsDir = packRoot.resolve("data").resolve("nourished").resolve("tags").resolve("item").resolve("nutrients");
+        String outputPath = packRoot.toAbsolutePath().toString();
 
         try {
-            Files.createDirectories(tagsDir);
-            writePackMeta(packRoot.resolve("pack.mcmeta"));
+            int writtenCount = 0;
+            Path packMetaPath = packRoot.resolve("pack.mcmeta");
+            Files.createDirectories(packMetaPath.getParent());
+            writePackMeta(packMetaPath);
+            writtenCount++;
 
             for (Map.Entry<String, List<String>> e : byNutrient.entrySet()) {
                 if (e.getValue().isEmpty()) {
                     continue;
                 }
                 Path tagFile = tagsDir.resolve(e.getKey() + ".json");
+                Files.createDirectories(tagFile.getParent());
                 writeTagFile(tagFile, e.getValue());
+                writtenCount++;
+            }
+
+            Nourished.LOGGER.info("[Nourished] Dumped {} files to {}", writtenCount, outputPath);
+            if (mc.player != null) {
+                mc.player.displayClientMessage(Component.literal("[Nourished] Dumped " + writtenCount + " files to " + outputPath)
+                        .withStyle(ChatFormatting.GREEN), false);
             }
         } catch (IOException ex) {
-            Nourished.LOGGER.error("[FoodScannerWidget] Failed to write datapack", ex);
+            Nourished.LOGGER.error("[Nourished] Dump failed while writing scanner datapack output", ex);
+            if (mc.player != null) {
+                mc.player.displayClientMessage(
+                        Component.literal("[Nourished] Dump failed: " + ex.getMessage()).withStyle(ChatFormatting.RED),
+                        false
+                );
+            }
             return;
         }
 

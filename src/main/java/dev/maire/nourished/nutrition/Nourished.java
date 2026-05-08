@@ -11,6 +11,7 @@ import dev.maire.nourished.command.NourishedCommand;
 import dev.maire.nourished.compat.kubejs.NourishedKubeJSPlugin;
 import dev.maire.nourished.compat.AutoCompatDiscovery;
 import dev.maire.nourished.compat.ModCompat;
+import dev.maire.nourished.compat.peakstamina.PeakStaminaCompat;
 import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
@@ -47,6 +48,9 @@ public class Nourished {
     public Nourished(IEventBus modEventBus, ModContainer modContainer) {
         NutrientRegistry.load();
         ModCompat.initialize();
+        if (ModList.get().isLoaded("peakstamina")) {
+            PeakStaminaCompat.register();
+        }
         FoodValueRegistry.load();
         FoodOverrideRegistry.load();
         EffectRegistry.load();
@@ -87,6 +91,8 @@ public class Nourished {
             }
         }
         AutoCompatDiscovery.discover();
+        DietAttachment.logAllNutrientNbtPaths();
+        LOGGER.info("[Nourished] Calories NBT path: {}", DietAttachment.getCaloriesNbtPath());
         NourishedAPIState.close();
         LOGGER.info("[Nourished] API v{} ready — {} nutrients, {} effects, {} compat entries registered.",
                 NourishedAPIVersion.VERSION,

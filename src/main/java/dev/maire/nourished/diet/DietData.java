@@ -30,6 +30,7 @@ import java.util.Map;
  */
 @ApiStatus.Internal
 public class DietData {
+    private static final String NUTRIENTS_CODEC_PREFIX = "nutrients.";
 
     /** Display / bar order — delegates to the registry so it stays in sync. */
     public static List<String> barOrder() {
@@ -52,7 +53,7 @@ public class DietData {
         map.add("calories",     Codec.FLOAT.encodeStart(ops, data.calories));
         map.add("max_calories", Codec.FLOAT.encodeStart(ops, data.maxCalories));
         for (String key : barOrder()) {
-            map.add(key,           Codec.FLOAT.encodeStart(ops, data.nutrients.getOrDefault(key, 0f)));
+            map.add(getNutrientCodecKey(key), Codec.FLOAT.encodeStart(ops, data.nutrients.getOrDefault(key, 0f)));
             map.add("last_" + key, Codec.FLOAT.encodeStart(ops, data.lastNutrients.getOrDefault(key, 0f)));
         }
         map.add("food_memory", Codec.unboundedMap(Codec.STRING, FoodMemoryEntry.CODEC)
@@ -73,7 +74,8 @@ public class DietData {
         data.maxCalories = decodeFloat(ops, map, "max_calories", 2000f);
 
         for (String key : barOrder()) {
-            data.nutrients.put(key,     decodeFloat(ops, map, key,           0f));
+            float nutrientValue = decodeFloatWithFallback(ops, map, getNutrientCodecKey(key), key, 0f);
+            data.nutrients.put(key, nutrientValue);
             data.lastNutrients.put(key, decodeFloat(ops, map, "last_" + key, 0f));
         }
 
@@ -117,6 +119,18 @@ public class DietData {
         T val = map.get(field);
         if (val == null) return fallback;
         return Codec.FLOAT.parse(ops, val).result().orElse(fallback);
+    }
+
+    private static <T> float decodeFloatWithFallback(DynamicOps<T> ops, MapLike<T> map, String primaryField, String fallbackField, float fallback) {
+        T primary = map.get(primaryField);
+        if (primary != null) {
+            return Codec.FLOAT.parse(ops, primary).result().orElse(fallback);
+        }
+        return decodeFloat(ops, map, fallbackField, fallback);
+    }
+
+    private static String getNutrientCodecKey(String nutrientKey) {
+        return NUTRIENTS_CODEC_PREFIX + nutrientKey;
     }
 
     // ── Fields ────────────────────────────────────────────────────────────────

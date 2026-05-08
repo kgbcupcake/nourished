@@ -116,6 +116,7 @@ public final class NourishedConfigScreen {
             NourishedConfig.saveNow();
             ModuleCache.refresh();
         });
+        builder.setAlwaysShowTabs(true);
         return builder.build();
     }
 
@@ -860,7 +861,7 @@ public final class NourishedConfigScreen {
 
         @Override
         public boolean isEdited() {
-            return false;
+            return true;
         }
 
         @Override
@@ -1115,7 +1116,7 @@ public final class NourishedConfigScreen {
 
         @Override
         public boolean isEdited() {
-            return false;
+            return true;
         }
 
         @Override
@@ -1224,7 +1225,7 @@ public final class NourishedConfigScreen {
 
         @Override
         public boolean isEdited() {
-            return false;
+            return true;
         }
 
         @Override
@@ -1362,7 +1363,7 @@ public final class NourishedConfigScreen {
 
         @Override
         public boolean isEdited() {
-            return false;
+            return true;
         }
 
         @Override
@@ -1494,7 +1495,7 @@ public final class NourishedConfigScreen {
 
         @Override
         public boolean isEdited() {
-            return false;
+            return true;
         }
 
         @Override
@@ -1699,7 +1700,7 @@ public final class NourishedConfigScreen {
 
         @Override
         public boolean isEdited() {
-            return false;
+            return true;
         }
 
         @Override
@@ -1791,7 +1792,7 @@ public final class NourishedConfigScreen {
 
         @Override
         public boolean isEdited() {
-            return false;
+            return true;
         }
 
         @Override

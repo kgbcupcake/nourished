@@ -24,11 +24,8 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -314,26 +311,23 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
     private static NutrientDefinition parseNutrient(ResourceLocation fileId, JsonObject json) throws Exception {
         String id = fileId.getPath();
         String displayName = getRequiredString(json, DatapackSchema.KEY_DISPLAY_NAME);
-
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("id", id);
-        fields.put("displayName", displayName);
+        NutrientDefinition.Builder builder = NutrientDefinition.builder(id).displayName(displayName);
         if (json.has("color")) {
-            fields.put("color", json.get("color").getAsInt());
+            builder.color(json.get("color").getAsInt());
         }
         if (json.has("default_decay_rate")) {
-            fields.put("defaultDecayRate", json.get("default_decay_rate").getAsFloat());
+            builder.defaultDecayRate(json.get("default_decay_rate").getAsFloat());
         }
         if (json.has("critical_threshold")) {
-            fields.put("criticalThreshold", json.get("critical_threshold").getAsFloat());
+            builder.criticalThreshold(json.get("critical_threshold").getAsFloat());
         }
         if (json.has("low_threshold")) {
-            fields.put("lowThreshold", json.get("low_threshold").getAsFloat());
+            builder.lowThreshold(json.get("low_threshold").getAsFloat());
         }
         if (json.has("excess_threshold")) {
-            fields.put("excessThreshold", json.get("excess_threshold").getAsFloat());
+            builder.excessThreshold(json.get("excess_threshold").getAsFloat());
         }
-        return instantiateFromBuilder(NutrientDefinition.class, "dev.maire.nourished.api.NutrientDefinition$Builder", Class.forName("dev.maire.nourished.api.NutrientDefinition$Builder"), new Class<?>[]{String.class}, new Object[]{id}, fields);
+        return builder.build();
     }
 
     private static void registerFoodClassification(ResourceLocation fileId, JsonObject json) {
@@ -377,15 +371,14 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
         int amplifier = getOptionalInt(json, DatapackSchema.KEY_AMPLIFIER, 0);
         int duration = getOptionalInt(json, DatapackSchema.KEY_DURATION, 200);
         EffectDefinition.ThresholdType thresholdType = EffectDefinition.ThresholdType.valueOf(thresholdTypeName.toUpperCase(Locale.ROOT));
-
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("nutrientKey", nutrientKey);
-        fields.put("threshold", threshold);
-        fields.put("thresholdType", thresholdType);
-        fields.put("effectId", effectId);
-        fields.put("amplifier", amplifier);
-        fields.put("duration", duration);
-        return instantiateFromBuilder(EffectDefinition.class, "dev.maire.nourished.api.EffectDefinition$Builder", Class.forName("dev.maire.nourished.api.EffectDefinition$Builder"), new Class<?>[]{}, new Object[]{}, fields);
+        return EffectDefinition.builder()
+                .nutrientKey(nutrientKey)
+                .threshold(threshold)
+                .thresholdType(thresholdType)
+                .effectId(effectId)
+                .amplifier(amplifier)
+                .duration(duration)
+                .build();
     }
 
     private static NutrientSynergyDefinition parseSynergy(ResourceLocation fileId, JsonObject json) throws Exception {
@@ -396,102 +389,85 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
                 getRequiredString(json, DatapackSchema.KEY_NUTRIENT_A_CONDITION).toUpperCase(Locale.ROOT));
         NutrientSynergyDefinition.LevelCondition conditionB = NutrientSynergyDefinition.LevelCondition.valueOf(
                 getRequiredString(json, DatapackSchema.KEY_NUTRIENT_B_CONDITION).toUpperCase(Locale.ROOT));
-
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("id", id);
-        fields.put("nutrientKeyA", nutrientA);
-        fields.put("conditionA", conditionA);
-        fields.put("nutrientKeyB", nutrientB);
-        fields.put("conditionB", conditionB);
+        NutrientSynergyDefinition.Builder builder = NutrientSynergyDefinition.builder(id)
+                .nutrientA(nutrientA, conditionA)
+                .nutrientB(nutrientB, conditionB);
         if (json.has(DatapackSchema.KEY_BONUS_EFFECT_ID)) {
-            fields.put("bonusEffectId", ResourceLocation.parse(getRequiredString(json, DatapackSchema.KEY_BONUS_EFFECT_ID)));
+            builder.bonusEffect(ResourceLocation.parse(getRequiredString(json, DatapackSchema.KEY_BONUS_EFFECT_ID)));
         }
-        fields.put("effectAmplifier", getOptionalInt(json, DatapackSchema.KEY_AMPLIFIER, 0));
-        fields.put("effectDuration", getOptionalInt(json, DatapackSchema.KEY_EFFECT_DURATION, 200));
-        fields.put("isPenalty", getOptionalBoolean(json, DatapackSchema.KEY_IS_PENALTY, false));
-        return instantiateFromBuilder(NutrientSynergyDefinition.class, "dev.maire.nourished.api.NutrientSynergyDefinition$Builder", Class.forName("dev.maire.nourished.api.NutrientSynergyDefinition$Builder"), new Class<?>[]{String.class}, new Object[]{id}, fields);
+        builder.effectAmplifier(getOptionalInt(json, DatapackSchema.KEY_AMPLIFIER, 0));
+        builder.effectDuration(getOptionalInt(json, DatapackSchema.KEY_EFFECT_DURATION, 200));
+        builder.penalty(getOptionalBoolean(json, DatapackSchema.KEY_IS_PENALTY, false));
+        return builder.build();
     }
 
     private static FoodSynergyDefinition parseFoodSynergy(ResourceLocation fileId, JsonObject json) throws Exception {
         String id = fileId.getPath();
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("id", id);
-        fields.put("foodA", ResourceLocation.parse(getRequiredString(json, DatapackSchema.KEY_FOOD_A)));
-        fields.put("foodB", ResourceLocation.parse(getRequiredString(json, DatapackSchema.KEY_FOOD_B)));
-        fields.put("timeWindowTicks", getOptionalInt(json, DatapackSchema.KEY_TIME_WINDOW_TICKS, 100));
-        fields.put("bonusNutrientKey", getRequiredString(json, DatapackSchema.KEY_BONUS_NUTRIENT_KEY));
-        fields.put("bonusAmount", getRequiredFloat(json, DatapackSchema.KEY_BONUS_AMOUNT));
-        return instantiateFromBuilder(FoodSynergyDefinition.class, "dev.maire.nourished.api.FoodSynergyDefinition$Builder", Class.forName("dev.maire.nourished.api.FoodSynergyDefinition$Builder"), new Class<?>[]{String.class}, new Object[]{id}, fields);
+        return FoodSynergyDefinition.builder(id)
+                .foodA(ResourceLocation.parse(getRequiredString(json, DatapackSchema.KEY_FOOD_A)))
+                .foodB(ResourceLocation.parse(getRequiredString(json, DatapackSchema.KEY_FOOD_B)))
+                .timeWindowTicks(getOptionalInt(json, DatapackSchema.KEY_TIME_WINDOW_TICKS, 100))
+                .bonusNutrientKey(getRequiredString(json, DatapackSchema.KEY_BONUS_NUTRIENT_KEY))
+                .bonusAmount(getRequiredFloat(json, DatapackSchema.KEY_BONUS_AMOUNT))
+                .build();
     }
 
     private static NutrientMilestoneDefinition parseMilestone(ResourceLocation fileId, JsonObject json) throws Exception {
         String id = fileId.getPath();
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("id", id);
-        fields.put("nutrientKey", getRequiredString(json, DatapackSchema.KEY_NUTRIENT_KEY));
-        fields.put("cumulativeGoal", getRequiredFloat(json, DatapackSchema.KEY_CUMULATIVE_GOAL));
+        NutrientMilestoneDefinition.Builder builder = NutrientMilestoneDefinition.builder(id)
+                .nutrientKey(getRequiredString(json, DatapackSchema.KEY_NUTRIENT_KEY))
+                .cumulativeGoal(getRequiredFloat(json, DatapackSchema.KEY_CUMULATIVE_GOAL));
         if (json.has(DatapackSchema.KEY_REWARD_EFFECT_ID)) {
-            fields.put("rewardEffectId", ResourceLocation.parse(getRequiredString(json, DatapackSchema.KEY_REWARD_EFFECT_ID)));
+            builder.rewardEffect(ResourceLocation.parse(getRequiredString(json, DatapackSchema.KEY_REWARD_EFFECT_ID)));
         }
-        fields.put("rewardAmplifier", getOptionalInt(json, DatapackSchema.KEY_AMPLIFIER, 0));
-        fields.put("rewardDuration", getOptionalInt(json, DatapackSchema.KEY_REWARD_DURATION, 200));
+        builder.rewardAmplifier(getOptionalInt(json, DatapackSchema.KEY_AMPLIFIER, 0));
+        builder.rewardDuration(getOptionalInt(json, DatapackSchema.KEY_REWARD_DURATION, 200));
         if (json.has(DatapackSchema.KEY_ADVANCEMENT_ID)) {
-            fields.put("advancementId", ResourceLocation.parse(getRequiredString(json, DatapackSchema.KEY_ADVANCEMENT_ID)));
+            builder.advancement(ResourceLocation.parse(getRequiredString(json, DatapackSchema.KEY_ADVANCEMENT_ID)));
         }
-        return instantiateFromBuilder(NutrientMilestoneDefinition.class, "dev.maire.nourished.api.NutrientMilestoneDefinition$Builder", Class.forName("dev.maire.nourished.api.NutrientMilestoneDefinition$Builder"), new Class<?>[]{String.class}, new Object[]{id}, fields);
+        return builder.build();
     }
 
     private static DietProfileDefinition parseDietProfile(ResourceLocation fileId, JsonObject json) throws Exception {
         String id = fileId.getPath();
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("id", id);
-        fields.put("displayName", getRequiredString(json, DatapackSchema.KEY_DISPLAY_NAME));
+        DietProfileDefinition.Builder builder = DietProfileDefinition.builder(id)
+                .displayName(getRequiredString(json, DatapackSchema.KEY_DISPLAY_NAME));
         if (json.has(DatapackSchema.KEY_DESCRIPTION)) {
-            fields.put("description", json.get(DatapackSchema.KEY_DESCRIPTION).getAsString());
+            builder.description(json.get(DatapackSchema.KEY_DESCRIPTION).getAsString());
         }
         if (json.has(DatapackSchema.KEY_CUSTOM_THRESHOLDS) && json.get(DatapackSchema.KEY_CUSTOM_THRESHOLDS).isJsonObject()) {
-            Map<String, Float> thresholdMap = new HashMap<>();
             for (Map.Entry<String, JsonElement> e : json.getAsJsonObject(DatapackSchema.KEY_CUSTOM_THRESHOLDS).entrySet()) {
-                thresholdMap.put(e.getKey(), e.getValue().getAsFloat());
+                builder.customThreshold(e.getKey(), e.getValue().getAsFloat());
             }
-            fields.put("customThresholds", thresholdMap);
         }
         if (json.has(DatapackSchema.KEY_CUSTOM_DECAY_RATES) && json.get(DatapackSchema.KEY_CUSTOM_DECAY_RATES).isJsonObject()) {
-            Map<String, Float> decayMap = new HashMap<>();
             for (Map.Entry<String, JsonElement> e : json.getAsJsonObject(DatapackSchema.KEY_CUSTOM_DECAY_RATES).entrySet()) {
-                decayMap.put(e.getKey(), e.getValue().getAsFloat());
+                builder.customDecayRate(e.getKey(), e.getValue().getAsFloat());
             }
-            fields.put("customDecayRates", decayMap);
         }
         if (json.has(DatapackSchema.KEY_BONUS_EFFECTS) && json.get(DatapackSchema.KEY_BONUS_EFFECTS).isJsonArray()) {
             JsonArray array = json.getAsJsonArray(DatapackSchema.KEY_BONUS_EFFECTS);
-            List<ResourceLocation> effectIds = new ArrayList<>();
             for (JsonElement element : array) {
-                effectIds.add(ResourceLocation.parse(element.getAsString()));
+                builder.addBonusEffect(ResourceLocation.parse(element.getAsString()));
             }
-            fields.put("bonusEffects", effectIds);
         }
-        return instantiateFromBuilder(DietProfileDefinition.class, "dev.maire.nourished.api.DietProfileDefinition$Builder", Class.forName("dev.maire.nourished.api.DietProfileDefinition$Builder"), new Class<?>[]{String.class}, new Object[]{id}, fields);
+        return builder.build();
     }
 
     private static CompatDefinition parseCompat(ResourceLocation fileId, JsonObject json) throws Exception {
         String modId = json.has(DatapackSchema.KEY_MOD_ID) ? json.get(DatapackSchema.KEY_MOD_ID).getAsString() : fileId.getPath();
-        String categoryRaw = json.has(DatapackSchema.KEY_CATEGORY) ? json.get(DatapackSchema.KEY_CATEGORY).getAsString() : CompatDefinition.CompatCategory.FOOD_MOD.name();
+        String categoryRaw = json.has(DatapackSchema.KEY_CATEGORY) ? json.get(DatapackSchema.KEY_CATEGORY).getAsString() : "FOOD_MOD";
         CompatDefinition.CompatCategory category = CompatDefinition.CompatCategory.valueOf(categoryRaw.toUpperCase(Locale.ROOT));
-
-        Map<ResourceLocation, String> mappings = new HashMap<>();
+        Map<ResourceLocation, String> mappings = new LinkedHashMap<>();
         if (json.has(DatapackSchema.KEY_MAPPINGS) && json.get(DatapackSchema.KEY_MAPPINGS).isJsonObject()) {
-            JsonObject mappingObj = json.getAsJsonObject(DatapackSchema.KEY_MAPPINGS);
-            for (Map.Entry<String, JsonElement> e : mappingObj.entrySet()) {
+            for (Map.Entry<String, JsonElement> e : json.getAsJsonObject(DatapackSchema.KEY_MAPPINGS).entrySet()) {
                 mappings.put(ResourceLocation.parse(e.getKey()), e.getValue().getAsString());
             }
         }
-
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("modId", modId);
-        fields.put("category", category);
-        fields.put("foodTagMappings", mappings);
-        return instantiateFromBuilder(CompatDefinition.class, "dev.maire.nourished.api.CompatDefinition$Builder", Class.forName("dev.maire.nourished.api.CompatDefinition$Builder"), new Class<?>[]{String.class}, new Object[]{modId}, fields);
+        return CompatDefinition.builder(modId)
+                .category(category)
+                .addAllFoodTagMappings(mappings)
+                .build();
     }
 
     private static void applyFoodFamilies(JsonObject json) {
@@ -524,31 +500,6 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
             }
         }
         LockRegistry.replaceFromDatapack(locked, serverOnly);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T instantiateFromBuilder(
-            Class<T> targetClass,
-            String builderClassName,
-            Class<?> builderClass,
-            Class<?>[] builderCtorArgTypes,
-            Object[] builderCtorArgs,
-            Map<String, Object> builderFieldValues
-    ) throws Exception {
-        Constructor<?> builderCtor = builderClass.getDeclaredConstructor(builderCtorArgTypes);
-        builderCtor.setAccessible(true);
-        Object builder = builderCtor.newInstance(builderCtorArgs);
-
-        for (Map.Entry<String, Object> e : builderFieldValues.entrySet()) {
-            Field field = builderClass.getDeclaredField(e.getKey());
-            field.setAccessible(true);
-            field.set(builder, e.getValue());
-        }
-
-        Class<?> declaredBuilder = Class.forName(builderClassName);
-        Constructor<T> targetCtor = targetClass.getDeclaredConstructor(declaredBuilder);
-        targetCtor.setAccessible(true);
-        return targetCtor.newInstance(builder);
     }
 
     private static String getRequiredString(JsonObject json, String key) {

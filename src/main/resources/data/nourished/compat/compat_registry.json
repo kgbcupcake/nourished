@@ -101,7 +101,7 @@
       "priority": 5
     },
     {
-      "mod_id": "mamasherbs",
+      "mod_id": "herbsandharvest",
       "display_name": "Mama's Herbs and Harvest",
       "category": "food_mod",
       "namespaces": ["mamasherbs"],
@@ -123,6 +123,18 @@
       "conflict_behavior": null,
       "soft_compat": false,
       "priority": 3
+    },
+    {
+      "mod_id": "peakstamina",
+      "display_name": "Peak Stamina",
+      "category": "survival_overhaul",
+      "namespaces": ["peakstamina"],
+      "provides_food_tags": false,
+      "handles_own_nutrition": false,
+      "version_ranges": {},
+      "conflict_behavior": null,
+      "soft_compat": true,
+      "priority": 8
     }
   ]
 }

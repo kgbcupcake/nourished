@@ -138,16 +138,15 @@ public final class CompatDefinition {
          * @throws IllegalStateException if required fields are missing or invalid
          */
         public CompatDefinition build() {
-            if (modId == null) {
-                throw new IllegalStateException("modId is required");
+            if (modId == null || modId.trim().isEmpty()) {
+                throw new IllegalStateException("CompatDefinition requires a non-empty modId.");
             }
-            if (category == null) {
-                throw new IllegalStateException("category is required");
-            }
-            if (foodTagMappings == null) {
-                throw new IllegalStateException("foodTagMappings is required");
-            }
-            return new CompatDefinition(modId, category, foodTagMappings);
+
+            CompatCategory resolvedCategory = category != null ? category : CompatCategory.FOOD_MOD;
+            Map<ResourceLocation, String> resolvedFoodTagMappings =
+                    foodTagMappings != null ? foodTagMappings : Collections.emptyMap();
+
+            return new CompatDefinition(modId, resolvedCategory, resolvedFoodTagMappings);
         }
     }
 }
