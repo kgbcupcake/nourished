@@ -6,6 +6,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
+import dev.maire.nourished.api.ApiStatus;
 
 /**
  * Tracks how many times a specific food has been eaten and when.
@@ -14,6 +15,7 @@ import com.mojang.serialization.RecordBuilder;
  * lastEatenMs renamed to lastEatenTick for semantic clarity (still stores ms for now).
  * Codec is backward-compatible: reads int OR float for eatCount, falls back to 0L for missing tick.
  */
+@ApiStatus.Internal
 public record FoodMemoryEntry(float eatCount, long lastEatenTick) {
 
     public static final Codec<FoodMemoryEntry> CODEC = Codec.of(

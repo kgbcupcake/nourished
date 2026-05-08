@@ -1,5 +1,6 @@
 package dev.maire.nourished.compat;
 
+import dev.maire.nourished.api.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Matcher;
@@ -9,6 +10,7 @@ import java.util.regex.Pattern;
  * Simple semantic version parser and comparator.
  * Handles versions like "1.0.0", "2.1.3-beta", "1.0" etc.
  */
+@ApiStatus.Internal
 public record SemVer(int major, int minor, int patch, @Nullable String preRelease) implements Comparable<SemVer> {
 
     private static final Pattern VERSION_PATTERN = Pattern.compile(

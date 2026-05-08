@@ -1,5 +1,6 @@
 package dev.maire.nourished.api.registry;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.FoodSynergyDefinition;
 import dev.maire.nourished.api.NutrientSynergyDefinition;
 
@@ -11,6 +12,7 @@ import java.util.List;
  * Internal storage for nutrient synergy and food synergy definitions
  * registered via the public API.
  */
+@ApiStatus.Internal
 public final class SynergyRegistry {
 
     private static final List<NutrientSynergyDefinition> NUTRIENT_SYNERGIES = new ArrayList<>();
@@ -42,7 +44,7 @@ public final class SynergyRegistry {
      * @return an unmodifiable list of nutrient synergy definitions
      */
     public static List<NutrientSynergyDefinition> getNutrientSynergies() {
-        return Collections.unmodifiableList(NUTRIENT_SYNERGIES);
+        return Collections.unmodifiableList(new ArrayList<>(NUTRIENT_SYNERGIES));
     }
 
     /**
@@ -51,6 +53,6 @@ public final class SynergyRegistry {
      * @return an unmodifiable list of food synergy definitions
      */
     public static List<FoodSynergyDefinition> getFoodSynergies() {
-        return Collections.unmodifiableList(FOOD_SYNERGIES);
+        return Collections.unmodifiableList(new ArrayList<>(FOOD_SYNERGIES));
     }
 }

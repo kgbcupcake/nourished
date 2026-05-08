@@ -1,6 +1,8 @@
 package dev.maire.nourished.config;
 
+import com.google.gson.JsonObject;
 import dev.maire.nourished.compat.ModCompat;
+import dev.maire.nourished.effect.EffectRegistry;
 import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.neoforged.fml.ModContainer;
@@ -122,70 +124,76 @@ public final class NourishedConfig {
     private final Map<String, ModConfigSpec.BooleanValue> moduleToggles = new LinkedHashMap<>();
 
     private NourishedConfig(ModConfigSpec.Builder builder) {
+        JsonObject defaults = ConfigDefaultsLoader.loadOrEmpty("/data/nourished/config/common_defaults.json");
+
         builder.push("modules");
-        enableDecay = defineModuleToggle(builder, "enableDecay", "When false, NutritionDecayHandler does nothing", true);
-        enableEffects = defineModuleToggle(builder, "enableEffects", "When false, status effects from nutrition are not applied", true);
-        enableHUD = defineModuleToggle(builder, "enableHUD", "When false, the nutrition HUD overlay is hidden", true);
-        enableToasts = defineModuleToggle(builder, "enableToasts", "When false, NourishedToastManager never queues toasts", true);
-        enableFoodTooltips = defineModuleToggle(builder, "enableFoodTooltips", "When false, food tooltips do not show nutrient info", true);
-        enableCalorieTracking = defineModuleToggle(builder, "enableCalorieTracking", "When false, DietData.addCalories() is never called and calorie display is hidden", true);
-        enableDietScreen = defineModuleToggle(builder, "enableDietScreen", "When false, the keybind to open DietScreen does nothing", true);
-        enableCriticalToasts = defineModuleToggle(builder, "enableCriticalToasts", "Separate from enableToasts, controls only the critical-threshold toast specifically", true);
-        enableSleepBonus = defineModuleToggle(builder, "enableSleepBonus", "When true, sleeping with all nutrient bars above 50% grants Regeneration I for 30 seconds", true);
+        enableDecay = defineModuleToggle(builder, "enableDecay", "When false, NutritionDecayHandler does nothing", ConfigDefaultsLoader.getBoolean(defaults, "enableDecay", true));
+        enableEffects = defineModuleToggle(builder, "enableEffects", "When false, status effects from nutrition are not applied", ConfigDefaultsLoader.getBoolean(defaults, "enableEffects", true));
+        enableHUD = defineModuleToggle(builder, "enableHUD", "When false, the nutrition HUD overlay is hidden", ConfigDefaultsLoader.getBoolean(defaults, "enableHUD", true));
+        enableToasts = defineModuleToggle(builder, "enableToasts", "When false, NourishedToastManager never queues toasts", ConfigDefaultsLoader.getBoolean(defaults, "enableToasts", true));
+        enableFoodTooltips = defineModuleToggle(builder, "enableFoodTooltips", "When false, food tooltips do not show nutrient info", ConfigDefaultsLoader.getBoolean(defaults, "enableFoodTooltips", true));
+        enableCalorieTracking = defineModuleToggle(builder, "enableCalorieTracking", "When false, DietData.addCalories() is never called and calorie display is hidden", ConfigDefaultsLoader.getBoolean(defaults, "enableCalorieTracking", true));
+        enableDietScreen = defineModuleToggle(builder, "enableDietScreen", "When false, the keybind to open DietScreen does nothing", ConfigDefaultsLoader.getBoolean(defaults, "enableDietScreen", true));
+        enableCriticalToasts = defineModuleToggle(builder, "enableCriticalToasts", "Separate from enableToasts, controls only the critical-threshold toast specifically", ConfigDefaultsLoader.getBoolean(defaults, "enableCriticalToasts", true));
+        enableSleepBonus = defineModuleToggle(builder, "enableSleepBonus", "When true, sleeping with all nutrient bars above 50% grants Regeneration I for 30 seconds", ConfigDefaultsLoader.getBoolean(defaults, "enableSleepBonus", true));
+        defineModuleToggle(builder, "enableSynergies", "When false, nutrient and food synergy checks are skipped", ConfigDefaultsLoader.getBoolean(defaults, "enableSynergies", true));
+        defineModuleToggle(builder, "enableMilestones", "When false, milestone checks are skipped", ConfigDefaultsLoader.getBoolean(defaults, "enableMilestones", true));
+        defineModuleToggle(builder, "enableSeasonHooks", "When false, season hook modifiers are ignored", ConfigDefaultsLoader.getBoolean(defaults, "enableSeasonHooks", true));
+        defineModuleToggle(builder, "enableAbsorptionModifiers", "When false, absorption modifier hooks are ignored", ConfigDefaultsLoader.getBoolean(defaults, "enableAbsorptionModifiers", true));
         builder.pop();
 
         builder.push("general");
         decayRate = builder
                 .comment("Base decay rate per interval for all nutrients")
-                .defineInRange("decayRate", 0.1d, 0.0d, 1.0d);
+                .defineInRange("decayRate", ConfigDefaultsLoader.getDouble(defaults, "decayRate", defaultDecayRateFromRegistry()), 0.0d, 1.0d);
         decayIntervalTicks = builder
                 .comment("Ticks between nutrient decay applications")
-                .defineInRange("decayIntervalTicks", 1200, 1, Integer.MAX_VALUE);
+                .defineInRange("decayIntervalTicks", ConfigDefaultsLoader.getInt(defaults, "decayIntervalTicks", 1200), 1, Integer.MAX_VALUE);
         startingNutrientValue = builder
                 .comment("Initial fill (0-1) for every nutrient bar on new diet data. Default 0.5 avoids starting debuffs when rules use the usual below-0.25 thresholds.")
-                .defineInRange("startingNutrientValue", 0.5d, 0.0d, 1.0d);
+                .defineInRange("startingNutrientValue", ConfigDefaultsLoader.getDouble(defaults, "startingNutrientValue", 0.5d), 0.0d, 1.0d);
         builder.pop();
 
         builder.push("thresholds");
         criticalThreshold = builder
                 .comment("Nutrient level below which critical effects trigger")
-                .defineInRange("criticalThreshold", 0.25d, 0.0d, 1.0d);
+                .defineInRange("criticalThreshold", ConfigDefaultsLoader.getDouble(defaults, "criticalThreshold", defaultCriticalThresholdFromRegistry()), 0.0d, 1.0d);
         lowThreshold = builder
                 .comment("Nutrient level below which low warnings appear")
-                .defineInRange("lowThreshold", 0.40d, 0.0d, 1.0d);
+                .defineInRange("lowThreshold", ConfigDefaultsLoader.getDouble(defaults, "lowThreshold", defaultLowThresholdFromRegistry()), 0.0d, 1.0d);
         excessThreshold = builder
                 .comment("Nutrient level above which excess warnings appear")
-                .defineInRange("excessThreshold", 0.90d, 0.0d, 1.0d);
+                .defineInRange("excessThreshold", ConfigDefaultsLoader.getDouble(defaults, "excessThreshold", defaultExcessThresholdFromRegistry()), 0.0d, 1.0d);
         builder.pop();
 
         builder.push("effects");
         bonusEffectThreshold = builder
                 .comment("Nutrient level above which bonus effects are applied")
-                .defineInRange("bonusEffectThreshold", 0.75d, 0.0d, 1.0d);
+                .defineInRange("bonusEffectThreshold", ConfigDefaultsLoader.getDouble(defaults, "bonusEffectThreshold", defaultBonusEffectThresholdFromRegistry()), 0.0d, 1.0d);
         penaltyEffectThreshold = builder
                 .comment("Nutrient level below which penalty effects are applied")
-                .defineInRange("penaltyEffectThreshold", 0.25d, 0.0d, 1.0d);
+                .defineInRange("penaltyEffectThreshold", ConfigDefaultsLoader.getDouble(defaults, "penaltyEffectThreshold", defaultPenaltyEffectThresholdFromRegistry()), 0.0d, 1.0d);
         defaultEffectDurationTicks = builder
                 .comment("Default duration in ticks for nutrition effects")
-                .defineInRange("defaultEffectDurationTicks", 140, 20, 72000);
+                .defineInRange("defaultEffectDurationTicks", ConfigDefaultsLoader.getInt(defaults, "defaultEffectDurationTicks", defaultEffectDurationFromRegistry()), 20, 72000);
         builder.pop();
 
         builder.push("advanced");
         calorieDisplayMax = builder
                 .comment("Maximum calorie value for display purposes")
-                .defineInRange("calorieDisplayMax", 2000, 100, 100000);
+                .defineInRange("calorieDisplayMax", ConfigDefaultsLoader.getInt(defaults, "calorieDisplayMax", 2000), 100, 100000);
         builder.pop();
 
         builder.push("food_memory");
         memoryWindowMinutes = builder
                 .comment("How long (in minutes) before a food memory entry expires.")
-                .defineInRange("memoryWindowMinutes", 20, 1, 120);
+                .defineInRange("memoryWindowMinutes", ConfigDefaultsLoader.getInt(defaults, "memoryWindowMinutes", 20), 1, 120);
         memoryWindowCount = builder
                 .comment("Maximum number of distinct food entries tracked in memory.")
-                .defineInRange("memoryWindowCount", 10, 1, 50);
+                .defineInRange("memoryWindowCount", ConfigDefaultsLoader.getInt(defaults, "memoryWindowCount", 10), 1, 50);
         diminishingFloor = builder
                 .comment("Minimum multiplier for heavily repeated foods. 0.15 = 15% credit floor.")
-                .defineInRange("diminishingFloor", 0.15, 0.0, 1.0);
+                .defineInRange("diminishingFloor", ConfigDefaultsLoader.getDouble(defaults, "diminishingFloor", 0.15), 0.0, 1.0);
         diminishingSteps = builder
                 .comment("(Legacy) Multiplier curve by eat count. Ignored when using logistic curve.")
                 .defineList("diminishingSteps", java.util.List.of(1.0, 0.7, 0.4, 0.15),
@@ -194,57 +202,57 @@ public final class NourishedConfig {
         // Logistic curve parameters
         diminishingSteepness = builder
                 .comment("Steepness of the logistic diminishing curve. Higher = sharper transition.")
-                .defineInRange("diminishingSteepness", 0.8, 0.1, 3.0);
+                .defineInRange("diminishingSteepness", ConfigDefaultsLoader.getDouble(defaults, "diminishingSteepness", 0.8), 0.1, 3.0);
         diminishingMidpoint = builder
                 .comment("Midpoint of the logistic curve (eat count where multiplier = 0.5).")
-                .defineInRange("diminishingMidpoint", 3.0, 1.0, 10.0);
+                .defineInRange("diminishingMidpoint", ConfigDefaultsLoader.getDouble(defaults, "diminishingMidpoint", 3.0), 1.0, 10.0);
 
         // Streak settings
         streakWindowMs = builder
                 .comment("Time window (ms) for streak detection. Eating same food within window increases penalty faster.")
-                .defineInRange("streakWindowMs", 300000, 10000, 1800000);
+                .defineInRange("streakWindowMs", ConfigDefaultsLoader.getInt(defaults, "streakWindowMs", 300000), 10000, 1800000);
         streakWeight = builder
                 .comment("Multiplier for eat count increment when within streak window (e.g., 2.0 = double penalty).")
-                .defineInRange("streakWeight", 2.0, 1.0, 5.0);
+                .defineInRange("streakWeight", ConfigDefaultsLoader.getDouble(defaults, "streakWeight", 2.0), 1.0, 5.0);
 
         // Novelty settings
         noveltyBonus = builder
                 .comment("Maximum multiplier bonus for completely novel foods.")
-                .defineInRange("noveltyBonus", 1.25, 1.0, 2.0);
+                .defineInRange("noveltyBonus", ConfigDefaultsLoader.getDouble(defaults, "noveltyBonus", 1.25), 1.0, 2.0);
         noveltyDecayCap = builder
                 .comment("Decayed eat count at which novelty bonus fully disappears.")
-                .defineInRange("noveltyDecayCap", 5.0, 1.0, 20.0);
+                .defineInRange("noveltyDecayCap", ConfigDefaultsLoader.getDouble(defaults, "noveltyDecayCap", 5.0), 1.0, 20.0);
 
         // Nutritional debt settings
         debtThreshold = builder
                 .comment("Category eat count threshold above which nutritional debt kicks in.")
-                .defineInRange("debtThreshold", 4.0, 1.0, 20.0);
+                .defineInRange("debtThreshold", ConfigDefaultsLoader.getDouble(defaults, "debtThreshold", 4.0), 1.0, 20.0);
         debtDecayRate = builder
                 .comment("Rate at which neglected categories decay when debt is triggered.")
-                .defineInRange("debtDecayRate", 0.003, 0.0, 0.05);
+                .defineInRange("debtDecayRate", ConfigDefaultsLoader.getDouble(defaults, "debtDecayRate", 0.003), 0.0, 0.05);
 
         // Debug
         debugMemoryLogging = builder
                 .comment("Enable detailed debug logging for food memory system (development only).")
-                .define("debugMemoryLogging", false);
+                .define("debugMemoryLogging", ConfigDefaultsLoader.getBoolean(defaults, "debugMemoryLogging", false));
         builder.pop();
 
         builder.push("food_gains");
         nutrientGainScale = builder
                 .comment("Multiplies tag-based nutrient burst before per-bite cap. Lower = slower bar fill.")
-                .defineInRange("nutrientGainScale", 5.0d, 0.5d, 20.0d);
+                .defineInRange("nutrientGainScale", ConfigDefaultsLoader.getDouble(defaults, "nutrientGainScale", 5.0d), 0.5d, 20.0d);
         nutrientGainPerBiteMax = builder
                 .comment("Max fraction (0-1) one bite can add to a single bar from tag-based foods (not food overrides).")
-                .defineInRange("nutrientGainPerBiteMax", 0.2d, 0.05d, 1.0d);
+                .defineInRange("nutrientGainPerBiteMax", ConfigDefaultsLoader.getDouble(defaults, "nutrientGainPerBiteMax", 0.2d), 0.05d, 1.0d);
         builder.pop();
 
         builder.push("scanner");
         scannerEnableRecipeInheritance = builder
                 .comment("Enable recipe ingredient inheritance signal for food classification (requires server access)")
-                .define("enableRecipeInheritance", true);
+                .define("enableRecipeInheritance", ConfigDefaultsLoader.getBoolean(defaults, "scannerEnableRecipeInheritance", true));
         scannerConfidenceSpreadThreshold = builder
                 .comment("Minimum spread between dominant and secondary scores for confident classification (higher = stricter)")
-                .defineInRange("confidenceSpreadThreshold", 3.0d, 0.0d, 20.0d);
+                .defineInRange("confidenceSpreadThreshold", ConfigDefaultsLoader.getDouble(defaults, "scannerConfidenceSpreadThreshold", 3.0d), 0.0d, 20.0d);
         builder.pop();
 
         nutrientDecayRateOverrides = new LinkedHashMap<>();
@@ -299,6 +307,7 @@ public final class NourishedConfig {
             return;
         }
         boundCommonConfig = cfg;
+        ModuleCache.refresh();
     }
 
     /**
@@ -313,6 +322,7 @@ public final class NourishedConfig {
         if (loaded != null) {
             loaded.save();
         }
+        ModuleCache.refresh();
     }
 
     public static NourishedConfig get() {
@@ -627,5 +637,56 @@ public final class NourishedConfig {
         ModConfigSpec.BooleanValue value = builder.comment(comment).define(key, defaultValue);
         moduleToggles.put(key, value);
         return value;
+    }
+
+    private static double defaultDecayRateFromRegistry() {
+        return NutrientRegistry.getAll().stream()
+                .findFirst()
+                .map(NutrientRegistry.NutrientDef::defaultDecayRate)
+                .orElse(0.1f);
+    }
+
+    private static double defaultCriticalThresholdFromRegistry() {
+        return NutrientRegistry.getAll().stream()
+                .findFirst()
+                .map(NutrientRegistry.NutrientDef::criticalThreshold)
+                .orElse(0.25f);
+    }
+
+    private static double defaultLowThresholdFromRegistry() {
+        return NutrientRegistry.getAll().stream()
+                .findFirst()
+                .map(NutrientRegistry.NutrientDef::lowThreshold)
+                .orElse(0.4f);
+    }
+
+    private static double defaultExcessThresholdFromRegistry() {
+        return NutrientRegistry.getAll().stream()
+                .findFirst()
+                .map(NutrientRegistry.NutrientDef::excessThreshold)
+                .orElse(0.9f);
+    }
+
+    private static double defaultBonusEffectThresholdFromRegistry() {
+        return EffectRegistry.getAll().stream()
+                .filter(def -> "all_above".equals(def.trigger()))
+                .findFirst()
+                .map(EffectRegistry.EffectDef::threshold)
+                .orElse(0.75d);
+    }
+
+    private static double defaultPenaltyEffectThresholdFromRegistry() {
+        return EffectRegistry.getAll().stream()
+                .filter(def -> "below".equals(def.trigger()))
+                .findFirst()
+                .map(EffectRegistry.EffectDef::threshold)
+                .orElse(0.25d);
+    }
+
+    private static int defaultEffectDurationFromRegistry() {
+        return EffectRegistry.getAll().stream()
+                .findFirst()
+                .map(EffectRegistry.EffectDef::durationTicks)
+                .orElse(140);
     }
 }

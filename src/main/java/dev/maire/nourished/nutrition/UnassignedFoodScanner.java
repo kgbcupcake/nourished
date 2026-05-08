@@ -1,5 +1,7 @@
 package dev.maire.nourished.nutrition;
 
+import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.nutrition.scanner.ClassificationResult;
 import dev.maire.nourished.nutrition.scanner.FoodClassifier;
 import dev.maire.nourished.nutrition.scanner.RecipeInheritanceResolver;
@@ -40,10 +42,11 @@ import java.util.function.Consumer;
  *
  * <p>This is a developer-facing tool, not player-facing. Zero impact on normal gameplay.</p>
  */
+@ApiStatus.Internal
 public final class UnassignedFoodScanner {
 
-    private static final float DEFAULT_SPREAD_THRESHOLD = 3.0f;
-    private static final boolean DEFAULT_ENABLE_RECIPE_INHERITANCE = true;
+    private static final float DEFAULT_SPREAD_THRESHOLD = 0f;
+    private static final boolean DEFAULT_ENABLE_RECIPE_INHERITANCE = false;
 
     private static volatile ScanCache cache;
     private static volatile boolean initialized = false;
@@ -77,9 +80,17 @@ public final class UnassignedFoodScanner {
             @Nullable Consumer<String> progressCallback
     ) {
         public static ScanOptions defaults() {
+            boolean recipeInheritance = DEFAULT_ENABLE_RECIPE_INHERITANCE;
+            float spreadThreshold = DEFAULT_SPREAD_THRESHOLD;
+            try {
+                recipeInheritance = NourishedConfig.get().scannerEnableRecipeInheritance();
+                spreadThreshold = (float) NourishedConfig.get().scannerConfidenceSpreadThreshold();
+            } catch (IllegalStateException ignored) {
+                // Config not initialized yet; keep safe zero-default behavior.
+            }
             return new ScanOptions(
-                    DEFAULT_ENABLE_RECIPE_INHERITANCE,
-                    DEFAULT_SPREAD_THRESHOLD,
+                    recipeInheritance,
+                    spreadThreshold,
                     true,
                     true,
                     null,
@@ -183,7 +194,7 @@ public final class UnassignedFoodScanner {
         progress.accept("Starting food scan...");
 
         List<String> nutrientKeys = NutrientRegistry.getKeys();
-        String fallbackKey = nutrientKeys.isEmpty() ? "grains" : nutrientKeys.get(0);
+        String fallbackKey = nutrientKeys.isEmpty() ? "" : nutrientKeys.get(0);
 
         RecipeInheritanceResolver recipeResolver = null;
         if (options.enableRecipeInheritance() && options.recipeManager() != null) {

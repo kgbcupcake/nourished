@@ -1,5 +1,6 @@
 package dev.maire.nourished.api.registry;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NutrientMilestoneDefinition;
 
 import javax.annotation.Nullable;
@@ -12,6 +13,7 @@ import java.util.Map;
 /**
  * Internal storage for nutrient milestone definitions registered via the public API.
  */
+@ApiStatus.Internal
 public final class MilestoneRegistry {
 
     private static final Map<String, NutrientMilestoneDefinition> MILESTONES = new LinkedHashMap<>();

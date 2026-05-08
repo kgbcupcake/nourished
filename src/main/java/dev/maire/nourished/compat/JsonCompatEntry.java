@@ -1,6 +1,7 @@
 package dev.maire.nourished.compat;
 
 import com.google.gson.annotations.SerializedName;
+import dev.maire.nourished.api.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
  * JSON-serializable version of CompatEntry without runtime fields.
  * Used for parsing JSON files, then converted to CompatEntry with runtime data.
  */
+@ApiStatus.Internal
 public record JsonCompatEntry(
         @SerializedName("mod_id")
         String modId,

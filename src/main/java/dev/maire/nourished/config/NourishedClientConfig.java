@@ -1,5 +1,6 @@
 package dev.maire.nourished.config;
 
+import com.google.gson.JsonObject;
 import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.neoforged.fml.ModContainer;
@@ -33,20 +34,21 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.ConfigValue<List<? extends String>> dietBarOrder;
 
     private NourishedClientConfig(ModConfigSpec.Builder builder) {
+        JsonObject defaults = ConfigDefaultsLoader.loadOrEmpty("/data/nourished/config/client_defaults.json");
         builder.push("gui");
         hudAnchor = builder.defineEnum(
                 "hudAnchor",
                 HudAnchor.BOTTOM_LEFT,
                 Arrays.asList(HudAnchor.values())
         );
-        hudOffsetX = builder.defineInRange("hudOffsetX", 0, -2000, 2000);
-        hudOffsetY = builder.defineInRange("hudOffsetY", 0, -2000, 2000);
-        hudBarWidth = builder.defineInRange("hudBarWidth", 60, 40, 120);
-        hudScale = builder.defineInRange("hudScale", 1.0d, 0.5d, 1.5d);
-        hudReservedBottom = builder.defineInRange("hudReservedBottom", 52, 30, 100);
-        hudDraggable = builder.define("hudDraggable", true);
-        dietBarDragEnabled = builder.define("dietBarDragEnabled", true);
-        hideZeroNutrients = builder.define("hideZeroNutrients", true);
+        hudOffsetX = builder.defineInRange("hudOffsetX", ConfigDefaultsLoader.getInt(defaults, "hudOffsetX", 0), -2000, 2000);
+        hudOffsetY = builder.defineInRange("hudOffsetY", ConfigDefaultsLoader.getInt(defaults, "hudOffsetY", 0), -2000, 2000);
+        hudBarWidth = builder.defineInRange("hudBarWidth", ConfigDefaultsLoader.getInt(defaults, "hudBarWidth", 60), 40, 120);
+        hudScale = builder.defineInRange("hudScale", ConfigDefaultsLoader.getDouble(defaults, "hudScale", 1.0d), 0.5d, 1.5d);
+        hudReservedBottom = builder.defineInRange("hudReservedBottom", ConfigDefaultsLoader.getInt(defaults, "hudReservedBottom", 52), 30, 100);
+        hudDraggable = builder.define("hudDraggable", ConfigDefaultsLoader.getBoolean(defaults, "hudDraggable", true));
+        dietBarDragEnabled = builder.define("dietBarDragEnabled", ConfigDefaultsLoader.getBoolean(defaults, "dietBarDragEnabled", true));
+        hideZeroNutrients = builder.define("hideZeroNutrients", ConfigDefaultsLoader.getBoolean(defaults, "hideZeroNutrients", true));
         dietBarOrder = builder.defineListAllowEmpty(
                 "dietBarOrder",
                 List::of,

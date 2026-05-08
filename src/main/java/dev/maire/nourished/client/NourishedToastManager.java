@@ -1,5 +1,6 @@
 package dev.maire.nourished.client;
 
+import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.diet.DietData;
 import dev.maire.nourished.network.ModNetworking.SyncDietDeltaPayload;
@@ -51,12 +52,9 @@ public final class NourishedToastManager {
         }
 
         NourishedConfig config = NourishedConfig.get();
-        boolean effects = config.enableEffects();
-        boolean toastsEnabled = config.enableToasts();
-        boolean criticalToastsEnabled = config.enableCriticalToasts();
         Minecraft mc = Minecraft.getInstance();
 
-        if (effects && toastsEnabled && criticalToastsEnabled && mc.player != null) {
+        if (ModuleCache.enableEffects && ModuleCache.enableToasts && ModuleCache.enableCriticalToasts && mc.player != null) {
             for (String key : keys) {
                 double crit = config.criticalThresholdFor(key);
                 float before = lastNutrients.getOrDefault(key, 0f);

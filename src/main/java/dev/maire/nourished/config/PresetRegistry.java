@@ -115,7 +115,7 @@ public final class PresetRegistry {
                 if (Files.exists(target)) {
                     continue;
                 }
-                String resource = "/assets/" + Nourished.MODID + "/presets/" + stem + ".json";
+                String resource = "/data/nourished/nourished/presets/" + stem + ".json";
                 try (InputStream in = Nourished.class.getResourceAsStream(resource)) {
                     if (in == null) {
                         Nourished.LOGGER.error("[PresetRegistry] Missing built-in resource {}", resource);

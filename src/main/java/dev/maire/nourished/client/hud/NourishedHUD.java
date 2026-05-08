@@ -6,6 +6,7 @@ import dev.maire.nourished.client.ClientDietCache;
 import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.NutrientUiColors;
 import dev.maire.nourished.config.HudAnchor;
+import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.diet.DietData;
@@ -88,7 +89,7 @@ public final class NourishedHUD {
     // ── Game-event render (normal gameplay, no screen open) ──────────────────
 
     public static void onRenderGuiPost(RenderGuiEvent.Post event) {
-        if (!NourishedConfig.get().enableHUD()) return;
+        if (!ModuleCache.enableHUD) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen != null) return; // HUDEditScreen renders via its own render()
         LocalPlayer player = mc.player;
@@ -110,7 +111,7 @@ public final class NourishedHUD {
     // ── Screen-facing render (called by HUDEditScreen) ───────────────────────
 
     public static void renderForEditScreen(GuiGraphics g, Minecraft mc) {
-        if (!NourishedConfig.get().enableHUD()) return;
+        if (!ModuleCache.enableHUD) return;
         LocalPlayer player = mc.player;
         if (player == null || !player.isAlive()) return;
 
@@ -240,7 +241,7 @@ public final class NourishedHUD {
     public static void onKeyInput(InputEvent.Key event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen != null) return;
-        if (!NourishedConfig.get().enableHUD()) return;
+        if (!ModuleCache.enableHUD) return;
         while (NourishedKeys.EDIT_HUD.consumeClick()) {
             HUDEditMode.setActive(true);
         }

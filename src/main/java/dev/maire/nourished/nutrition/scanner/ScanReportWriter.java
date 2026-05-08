@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.nutrition.Nourished;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLPaths;
@@ -24,6 +25,7 @@ import java.util.Map;
 /**
  * Writes scan reports in both human-readable (.txt) and machine-readable (.json) formats.
  */
+@ApiStatus.Internal
 public final class ScanReportWriter {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();

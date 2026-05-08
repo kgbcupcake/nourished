@@ -1,5 +1,6 @@
 package dev.maire.nourished.nutrition.scanner;
 
+import dev.maire.nourished.api.ApiStatus;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -19,15 +20,18 @@ import java.util.function.Function;
 
 /**
  * Signal-based food classifier that analyzes items using 9 weighted signals.
- * Each signal method returns nutrient contributions that are summed together.
+ *
+ * <p>All weights, multipliers, archetype patterns, and runtime food-property
+ * heuristics are loaded from JSON via {@link ScannerSpecRegistry}. The classifier
+ * itself contains no hardcoded scoring data — only the wiring between signals.</p>
  */
+@ApiStatus.Internal
 public final class FoodClassifier {
 
     private final RecipeInheritanceResolver recipeResolver;
     private final boolean enableRecipeInheritance;
     private final float confidenceSpreadThreshold;
 
-    private final float[] preAllocatedScores;
     private final List<String> nutrientKeys;
 
     public FoodClassifier(
@@ -40,16 +44,10 @@ public final class FoodClassifier {
         this.enableRecipeInheritance = enableRecipeInheritance;
         this.confidenceSpreadThreshold = confidenceSpreadThreshold;
         this.recipeResolver = recipeResolver;
-        this.preAllocatedScores = new float[nutrientKeys.size()];
     }
 
     /**
      * Classify a single item, returning the full classification result.
-     *
-     * @param item The item to classify
-     * @param classifiedLookup Lookup function for already-classified items (for recipe inheritance)
-     * @param namespaceAverages Pre-computed namespace averages for peer signal
-     * @return The classification result
      */
     public ClassificationResult classify(
             Item item,
@@ -60,6 +58,9 @@ public final class FoodClassifier {
         if (itemId == null) {
             return ClassificationResult.empty(ResourceLocation.withDefaultNamespace("unknown"), nutrientKeys.get(0));
         }
+
+        ScannerSpecRegistry.ScannerSpec spec = ScannerSpecRegistry.get();
+        ScannerSpecRegistry.Multipliers mult = spec.multipliers();
 
         ItemStack stack = new ItemStack(item);
         Holder<Item> holder = stack.getItemHolder();
@@ -74,52 +75,47 @@ public final class FoodClassifier {
 
         List<ClassificationSignal> signals = new ArrayList<>();
 
-        // Signal 1: Community tags (5x)
-        Map<String, Float> communityTagContribs = analyzeSignal1CommunityTags(holder);
-        applySignal(scores, communityTagContribs, SignalWeights.COMMUNITY_TAG_MULTIPLIER);
+        Map<String, Float> communityTagContribs = analyzeSignal1CommunityTags(holder, spec.communityTagWeights());
+        applySignal(scores, communityTagContribs, mult.communityTag());
         if (!communityTagContribs.isEmpty()) {
             signals.add(new ClassificationSignal(
                     ClassificationSignal.TYPE_COMMUNITY_TAG,
                     "c:foods/*",
-                    scaleContributions(communityTagContribs, SignalWeights.COMMUNITY_TAG_MULTIPLIER)
+                    scaleContributions(communityTagContribs, mult.communityTag())
             ));
         }
 
-        // Signal 2: Namespace heuristics (4x)
-        Map<String, Float> namespaceContribs = analyzeSignal2Namespace(namespace);
-        applySignal(scores, namespaceContribs, SignalWeights.NAMESPACE_MULTIPLIER);
+        Map<String, Float> namespaceContribs = analyzeSignal2Namespace(namespace, spec.namespaceWeights());
+        applySignal(scores, namespaceContribs, mult.namespace());
         if (!namespaceContribs.isEmpty()) {
             signals.add(new ClassificationSignal(
                     ClassificationSignal.TYPE_NAMESPACE,
                     namespace,
-                    scaleContributions(namespaceContribs, SignalWeights.NAMESPACE_MULTIPLIER)
+                    scaleContributions(namespaceContribs, mult.namespace())
             ));
         }
 
-        // Signal 3: Suffix patterns (3x)
-        Map<String, Float> suffixContribs = analyzeSignal3Suffix(path);
-        applySignal(scores, suffixContribs, SignalWeights.SUFFIX_MULTIPLIER);
+        Map<String, Float> suffixContribs = analyzeSignal3Suffix(path, spec.suffixWeights(), mult.secondarySuffix());
+        applySignal(scores, suffixContribs, mult.suffix());
         if (!suffixContribs.isEmpty()) {
             signals.add(new ClassificationSignal(
                     ClassificationSignal.TYPE_SUFFIX,
                     extractTrailingToken(path),
-                    scaleContributions(suffixContribs, SignalWeights.SUFFIX_MULTIPLIER)
+                    scaleContributions(suffixContribs, mult.suffix())
             ));
         }
 
-        // Signal 4: Positive keywords (2x)
-        Map<String, Float> keywordContribs = analyzeSignal4Keywords(path);
-        applySignal(scores, keywordContribs, SignalWeights.KEYWORD_MULTIPLIER);
+        Map<String, Float> keywordContribs = analyzeSignal4Keywords(path, spec.keywordWeights());
+        applySignal(scores, keywordContribs, mult.keyword());
         if (!keywordContribs.isEmpty()) {
             signals.add(new ClassificationSignal(
                     ClassificationSignal.TYPE_KEYWORD,
                     path,
-                    scaleContributions(keywordContribs, SignalWeights.KEYWORD_MULTIPLIER)
+                    scaleContributions(keywordContribs, mult.keyword())
             ));
         }
 
-        // Signal 5: Negative keywords (suppression, no multiplier)
-        Map<String, Float> negativeContribs = analyzeSignal5NegativeKeywords(path);
+        Map<String, Float> negativeContribs = analyzeSignal5NegativeKeywords(path, spec.negativeKeywords());
         applySignal(scores, negativeContribs, 1.0f);
         if (!negativeContribs.isEmpty()) {
             signals.add(new ClassificationSignal(
@@ -129,21 +125,19 @@ public final class FoodClassifier {
             ));
         }
 
-        // Signal 6: Archetypes (2x)
-        Map<String, Float> archetypeContribs = analyzeSignal6Archetypes(path);
-        applySignal(scores, archetypeContribs, SignalWeights.ARCHETYPE_MULTIPLIER);
+        Map<String, Float> archetypeContribs = analyzeSignal6Archetypes(path, spec.archetypes());
+        applySignal(scores, archetypeContribs, mult.archetype());
         if (!archetypeContribs.isEmpty()) {
             signals.add(new ClassificationSignal(
                     ClassificationSignal.TYPE_ARCHETYPE,
                     path,
-                    scaleContributions(archetypeContribs, SignalWeights.ARCHETYPE_MULTIPLIER)
+                    scaleContributions(archetypeContribs, mult.archetype())
             ));
         }
 
-        // Signal 7: FoodProperties (1x)
         if (food != null) {
-            Map<String, Float> foodPropContribs = analyzeSignal7FoodProperties(food);
-            applySignal(scores, foodPropContribs, SignalWeights.FOOD_PROPERTIES_MULTIPLIER);
+            Map<String, Float> foodPropContribs = analyzeSignal7FoodProperties(food, spec.foodPropertyHeuristics());
+            applySignal(scores, foodPropContribs, mult.foodProperties());
             if (!foodPropContribs.isEmpty()) {
                 signals.add(new ClassificationSignal(
                         ClassificationSignal.TYPE_FOOD_PROPERTIES,
@@ -153,29 +147,27 @@ public final class FoodClassifier {
             }
         }
 
-        // Signal 8: Recipe inheritance (1x) - only if enabled and resolver available
         if (enableRecipeInheritance && recipeResolver != null) {
             Map<String, Float> recipeContribs = recipeResolver.resolve(item, classifiedLookup);
-            applySignal(scores, recipeContribs, SignalWeights.RECIPE_INHERITANCE_MULTIPLIER);
+            applySignal(scores, recipeContribs, mult.recipeInheritance());
             if (!recipeContribs.isEmpty()) {
                 signals.add(new ClassificationSignal(
                         ClassificationSignal.TYPE_RECIPE_INHERITANCE,
                         "recipe_ingredients",
-                        scaleContributions(recipeContribs, SignalWeights.RECIPE_INHERITANCE_MULTIPLIER)
+                        scaleContributions(recipeContribs, mult.recipeInheritance())
                 ));
             }
         }
 
-        // Signal 9: Namespace peers (0.5x)
         Map<String, Float> peerAvg = namespaceAverages.get(namespace);
         if (peerAvg != null && !peerAvg.isEmpty()) {
-            Map<String, Float> peerContribs = analyzeSignal9NamespacePeers(peerAvg);
-            applySignal(scores, peerContribs, SignalWeights.NAMESPACE_PEER_MULTIPLIER);
+            Map<String, Float> peerContribs = analyzeSignal9NamespacePeers(peerAvg, mult.namespacePeerAverageWeight());
+            applySignal(scores, peerContribs, mult.namespacePeer());
             if (!peerContribs.isEmpty()) {
                 signals.add(new ClassificationSignal(
                         ClassificationSignal.TYPE_NAMESPACE_PEER,
                         namespace + "_peers",
-                        scaleContributions(peerContribs, SignalWeights.NAMESPACE_PEER_MULTIPLIER)
+                        scaleContributions(peerContribs, mult.namespacePeer())
                 ));
             }
         }
@@ -187,13 +179,12 @@ public final class FoodClassifier {
     // Signal Analysis Methods
     // ─────────────────────────────────────────────────────────────────────────────
 
-    /**
-     * Signal 1: Check for existing c:foods/* community tags.
-     */
-    private Map<String, Float> analyzeSignal1CommunityTags(Holder<Item> holder) {
+    private Map<String, Float> analyzeSignal1CommunityTags(
+            Holder<Item> holder,
+            Map<String, Map<String, Float>> communityTagWeights
+    ) {
         Map<String, Float> contributions = new HashMap<>();
-
-        for (Map.Entry<String, Map<String, Float>> entry : SignalWeights.COMMUNITY_TAG_WEIGHTS.entrySet()) {
+        for (Map.Entry<String, Map<String, Float>> entry : communityTagWeights.entrySet()) {
             String tagSuffix = entry.getKey();
             TagKey<Item> tagKey = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "foods/" + tagSuffix));
             if (holder.is(tagKey)) {
@@ -202,108 +193,104 @@ public final class FoodClassifier {
                 }
             }
         }
-
         return contributions;
     }
 
-    /**
-     * Signal 2: Namespace heuristics from known mod patterns.
-     */
-    private Map<String, Float> analyzeSignal2Namespace(String namespace) {
-        Map<String, Float> weights = SignalWeights.NAMESPACE_WEIGHTS.get(namespace);
+    private Map<String, Float> analyzeSignal2Namespace(
+            String namespace,
+            Map<String, Map<String, Float>> namespaceWeights
+    ) {
+        Map<String, Float> weights = namespaceWeights.get(namespace);
         return weights != null ? new HashMap<>(weights) : Map.of();
     }
 
-    /**
-     * Signal 3: Suffix pattern recognition on trailing tokens.
-     */
-    private Map<String, Float> analyzeSignal3Suffix(String path) {
+    private Map<String, Float> analyzeSignal3Suffix(
+            String path,
+            Map<String, Map<String, Float>> suffixWeights,
+            float secondarySuffixWeight
+    ) {
         Map<String, Float> contributions = new HashMap<>();
         String[] tokens = path.split("_");
 
         if (tokens.length > 0) {
             String lastToken = tokens[tokens.length - 1].toLowerCase();
-            Map<String, Float> weights = SignalWeights.SUFFIX_WEIGHTS.get(lastToken);
+            Map<String, Float> weights = suffixWeights.get(lastToken);
             if (weights != null) {
                 contributions.putAll(weights);
             }
 
             if (tokens.length > 1) {
                 String secondLast = tokens[tokens.length - 2].toLowerCase();
-                Map<String, Float> secondWeights = SignalWeights.SUFFIX_WEIGHTS.get(secondLast);
+                Map<String, Float> secondWeights = suffixWeights.get(secondLast);
                 if (secondWeights != null) {
                     for (Map.Entry<String, Float> e : secondWeights.entrySet()) {
-                        contributions.merge(e.getKey(), e.getValue() * 0.5f, Float::sum);
+                        contributions.merge(e.getKey(), e.getValue() * secondarySuffixWeight, Float::sum);
                     }
                 }
             }
         }
-
         return contributions;
     }
 
-    /**
-     * Signal 4: Positive keyword scoring across all tokens.
-     */
-    private Map<String, Float> analyzeSignal4Keywords(String path) {
+    private Map<String, Float> analyzeSignal4Keywords(
+            String path,
+            Map<String, Map<String, Float>> keywordWeights
+    ) {
         Map<String, Float> contributions = new HashMap<>();
         String[] tokens = path.toLowerCase().split("_");
 
         for (String token : tokens) {
             String cleaned = token.replaceAll("item$", "");
-            Map<String, Float> weights = SignalWeights.KEYWORD_WEIGHTS.get(cleaned);
+            Map<String, Float> weights = keywordWeights.get(cleaned);
             if (weights != null) {
                 for (Map.Entry<String, Float> e : weights.entrySet()) {
                     contributions.merge(e.getKey(), e.getValue(), Float::sum);
                 }
             }
         }
-
         return contributions;
     }
 
-    /**
-     * Signal 5: Negative keyword suppression.
-     */
-    private Map<String, Float> analyzeSignal5NegativeKeywords(String path) {
+    private Map<String, Float> analyzeSignal5NegativeKeywords(
+            String path,
+            Map<String, Map<String, Float>> negativeKeywords
+    ) {
         Map<String, Float> contributions = new HashMap<>();
         String[] tokens = path.toLowerCase().split("_");
 
         for (String token : tokens) {
             String cleaned = token.replaceAll("item$", "");
-            Map<String, Float> weights = SignalWeights.NEGATIVE_KEYWORDS.get(cleaned);
+            Map<String, Float> weights = negativeKeywords.get(cleaned);
             if (weights != null) {
                 for (Map.Entry<String, Float> e : weights.entrySet()) {
                     contributions.merge(e.getKey(), e.getValue(), Float::sum);
                 }
             }
         }
-
         return contributions;
     }
 
-    /**
-     * Signal 6: Compound food archetype detection.
-     */
-    private Map<String, Float> analyzeSignal6Archetypes(String path) {
+    private Map<String, Float> analyzeSignal6Archetypes(
+            String path,
+            List<ArchetypePattern> archetypes
+    ) {
         Map<String, Float> contributions = new HashMap<>();
         String lowerPath = path.toLowerCase();
 
-        for (SignalWeights.ArchetypePattern archetype : SignalWeights.ARCHETYPE_PATTERNS) {
+        for (ArchetypePattern archetype : archetypes) {
             if (archetype.matches(lowerPath)) {
                 for (Map.Entry<String, Float> e : archetype.contributions().entrySet()) {
                     contributions.merge(e.getKey(), e.getValue(), Float::sum);
                 }
             }
         }
-
         return contributions;
     }
 
-    /**
-     * Signal 7: FoodProperties runtime data analysis.
-     */
-    private Map<String, Float> analyzeSignal7FoodProperties(FoodProperties food) {
+    private Map<String, Float> analyzeSignal7FoodProperties(
+            FoodProperties food,
+            ScannerSpecRegistry.FoodPropertyHeuristics heur
+    ) {
         Map<String, Float> contributions = new HashMap<>();
 
         int nutrition = food.nutrition();
@@ -313,40 +300,47 @@ public final class FoodClassifier {
             return contributions;
         }
 
-        if (saturation > 1.2f && nutrition > 6) {
-            contributions.put("proteins", 2f);
-            contributions.put("grains", 1f);
+        if (heur.saturatingMeal().matches(nutrition, saturation)) {
+            for (Map.Entry<String, Float> e : heur.saturatingMeal().contributions().entrySet()) {
+                contributions.merge(e.getKey(), e.getValue(), Float::sum);
+            }
         }
 
-        if (nutrition <= 2) {
-            contributions.put("vegetables", 1f);
-            contributions.put("sugars", 1f);
+        if (heur.lightSnack().matches(nutrition)) {
+            for (Map.Entry<String, Float> e : heur.lightSnack().contributions().entrySet()) {
+                contributions.merge(e.getKey(), e.getValue(), Float::sum);
+            }
         }
 
-        boolean hasBadEffects = food.effects().stream()
+        List<String> badEffectKeywords = heur.badEffectKeywords();
+        boolean hasBadEffects = !badEffectKeywords.isEmpty() && food.effects().stream()
                 .anyMatch(e -> {
                     ResourceLocation effectId = BuiltInRegistries.MOB_EFFECT.getKey(e.effect().getEffect().value());
                     if (effectId == null) return false;
-                    String id = effectId.toString();
-                    return id.contains("poison") || id.contains("nausea") || id.contains("hunger");
+                    String id = effectId.toString().toLowerCase();
+                    for (String kw : badEffectKeywords) {
+                        if (id.contains(kw)) return true;
+                    }
+                    return false;
                 });
 
         if (hasBadEffects) {
+            float dampen = heur.badEffectMultiplier();
             for (String key : contributions.keySet()) {
-                contributions.put(key, contributions.get(key) * 0.5f);
+                contributions.put(key, contributions.get(key) * dampen);
             }
         }
 
         return contributions;
     }
 
-    /**
-     * Signal 9: Namespace peer cross-reference using pre-computed averages.
-     */
-    private Map<String, Float> analyzeSignal9NamespacePeers(Map<String, Float> peerAverages) {
+    private Map<String, Float> analyzeSignal9NamespacePeers(
+            Map<String, Float> peerAverages,
+            float averageWeight
+    ) {
         Map<String, Float> contributions = new HashMap<>();
         for (Map.Entry<String, Float> e : peerAverages.entrySet()) {
-            contributions.put(e.getKey(), e.getValue() * 0.5f);
+            contributions.put(e.getKey(), e.getValue() * averageWeight);
         }
         return contributions;
     }

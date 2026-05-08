@@ -1,5 +1,6 @@
 package dev.maire.nourished.api.impl;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.FoodMemoryView;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.diet.DietData;
@@ -13,6 +14,7 @@ import java.util.Map;
 /**
  * Concrete implementation of {@link FoodMemoryView} backed by a player's {@link DietData}.
  */
+@ApiStatus.Internal
 public final class DietDataFoodMemoryView implements FoodMemoryView {
 
     private final DietData dietData;

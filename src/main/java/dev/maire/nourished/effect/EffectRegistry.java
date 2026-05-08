@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.nutrition.Nourished;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -32,6 +33,7 @@ import java.util.Set;
  * Writes a default file on first run. Call {@link #load()} after
  * {@link dev.maire.nourished.nutrition.NutrientRegistry#load()}.
  */
+@ApiStatus.Internal
 public class EffectRegistry {
 
     public record EffectDef(
@@ -53,14 +55,14 @@ public class EffectRegistry {
     private static final List<EffectDef> REGISTRY = new ArrayList<>();
     private static final Set<String> previousEffectIds = new HashSet<>();
 
-    private static final List<EffectDef> DEFAULTS = List.of(
-            new EffectDef("protein_penalty", "minecraft:mining_fatigue", "proteins", "below", 0.25, 0, 140, true, 1.0, true, false),
-            new EffectDef("carbs_penalty", "minecraft:weakness", "grains", "below", 0.25, 0, 140, true, 1.0, true, false),
-            new EffectDef("vitamins_penalty", "minecraft:unluck", "fruits", "below", 0.25, 0, 140, true, 1.0, true, false),
-            new EffectDef("hydration_penalty", "minecraft:slowness", "vegetables", "below", 0.25, 0, 140, true, 1.0, true, false),
-            new EffectDef("all_high_health", "minecraft:health_boost", "all", "all_above", 0.75, 0, 140, true, 1.0, true, false),
-            new EffectDef("all_high_regen", "minecraft:regeneration", "all", "all_above", 0.75, 0, 140, true, 1.0, true, false)
-    );
+    private static final String[] DEFAULT_EFFECT_RESOURCES = {
+            "protein_penalty",
+            "carbs_penalty",
+            "vitamins_penalty",
+            "hydration_penalty",
+            "all_high_health",
+            "all_high_regen"
+    };
 
     public static List<EffectDef> getAll() {
         return Collections.unmodifiableList(new ArrayList<>(REGISTRY));
@@ -153,9 +155,13 @@ public class EffectRegistry {
             String effect = obj.get("effect").getAsString();
             String nutrient = obj.get("nutrient").getAsString();
             String trigger = obj.get("trigger").getAsString();
-            double threshold = obj.has("threshold") ? obj.get("threshold").getAsDouble() : 0.25;
-            int amplifier = obj.has("amplifier") ? obj.get("amplifier").getAsInt() : 0;
-            int durationTicks = obj.has("duration_ticks") ? obj.get("duration_ticks").getAsInt() : 140;
+            if (!obj.has("threshold") || !obj.has("amplifier") || !obj.has("duration_ticks")) {
+                Nourished.LOGGER.warn("[EffectRegistry] Skipping effect '{}' missing required numeric fields", id);
+                continue;
+            }
+            double threshold = obj.get("threshold").getAsDouble();
+            int amplifier = obj.get("amplifier").getAsInt();
+            int durationTicks = obj.get("duration_ticks").getAsInt();
             boolean enabled = !obj.has("enabled") || obj.get("enabled").getAsBoolean();
             double thresholdMax = obj.has("threshold_max") ? obj.get("threshold_max").getAsDouble() : 1.0;
             boolean ambient = !obj.has("ambient") || obj.get("ambient").getAsBoolean();
@@ -194,11 +200,11 @@ public class EffectRegistry {
         previousEffectIds.clear();
         for (EffectDef def : REGISTRY) previousEffectIds.add(def.effect());
         REGISTRY.clear();
-        REGISTRY.addAll(DEFAULTS);
+        REGISTRY.addAll(loadBundledDefaults());
     }
 
     private static void writeDefaults(Path file) throws IOException {
-        writeDefinitionsToPath(file, DEFAULTS);
+        writeDefinitionsToPath(file, loadBundledDefaults());
     }
 
     /**
@@ -235,5 +241,46 @@ public class EffectRegistry {
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }
+    }
+
+    private static List<EffectDef> loadBundledDefaults() {
+        List<EffectDef> defaults = new ArrayList<>();
+        for (String stem : DEFAULT_EFFECT_RESOURCES) {
+            String resourcePath = "/data/nourished/nourished/effects/" + stem + ".json";
+            try (InputStream in = EffectRegistry.class.getResourceAsStream(resourcePath)) {
+                if (in == null) {
+                    continue;
+                }
+                try (Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+                    JsonObject obj = GSON.fromJson(reader, JsonObject.class);
+                    if (obj == null) {
+                        continue;
+                    }
+                    String nutrient = obj.has("nutrient_key") ? obj.get("nutrient_key").getAsString() : "all";
+                    String thresholdType = obj.has("threshold_type") ? obj.get("threshold_type").getAsString() : "LOW";
+                    String trigger = switch (thresholdType.toUpperCase(java.util.Locale.ROOT)) {
+                        case "EXCESS" -> "above";
+                        case "BONUS" -> "all_above";
+                        default -> "below";
+                    };
+                    defaults.add(new EffectDef(
+                            stem,
+                            obj.get("effect_id").getAsString(),
+                            nutrient,
+                            trigger,
+                            obj.has("threshold") ? obj.get("threshold").getAsDouble() : 0.25,
+                            obj.has("amplifier") ? obj.get("amplifier").getAsInt() : 0,
+                            obj.has("duration") ? obj.get("duration").getAsInt() : 140,
+                            true,
+                            1.0,
+                            true,
+                            false
+                    ));
+                }
+            } catch (IOException ignored) {
+                // Keep startup resilient.
+            }
+        }
+        return defaults;
     }
 }

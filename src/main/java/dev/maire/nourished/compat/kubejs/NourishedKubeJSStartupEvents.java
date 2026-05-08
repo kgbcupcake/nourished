@@ -3,10 +3,12 @@ package dev.maire.nourished.compat.kubejs;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventGroupRegistry;
 import dev.latvian.mods.kubejs.event.KubeEvent;
+import dev.maire.nourished.api.ApiStatus;
 
 /**
  * Startup event hook holder for Nourished KubeJS registration flows.
  */
+@ApiStatus.Internal
 public final class NourishedKubeJSStartupEvents {
 
     public static final String REGISTER_NUTRIENTS = "nourished.startup.register_nutrients";

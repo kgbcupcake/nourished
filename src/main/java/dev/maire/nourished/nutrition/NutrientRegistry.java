@@ -6,14 +6,18 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NutrientDefinition;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -28,6 +32,7 @@ import java.util.Objects;
  * Writes a default file on first run. Call {@link #load()} before any
  * system that reads nutrient keys, icons, or tags.
  */
+@ApiStatus.Internal
 public class NutrientRegistry {
 
     public record NutrientDef(
@@ -76,23 +81,21 @@ public class NutrientRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String DEFAULT_ICON = "minecraft:apple";
     private static final int DEFAULT_COLOR = 0xFFFFFFFF;
-    private static final float DEFAULT_DECAY_RATE = 0.001f;
-    private static final float DEFAULT_CRITICAL_THRESHOLD = 0.1f;
-    private static final float DEFAULT_LOW_THRESHOLD = 0.3f;
-    private static final float DEFAULT_EXCESS_THRESHOLD = 0.9f;
+    private static final float DEFAULT_DECAY_RATE = 0f;
+    private static final float DEFAULT_CRITICAL_THRESHOLD = 0f;
+    private static final float DEFAULT_LOW_THRESHOLD = 0f;
+    private static final float DEFAULT_EXCESS_THRESHOLD = 1f;
 
     private static final Map<String, NutrientDef> REGISTRY = new LinkedHashMap<>();
 
-    // ── Default definitions ───────────────────────────────────────────────────
-
-    private static final List<NutrientDef> DEFAULTS = List.of(
-        NutrientDef.fromConfig("fruits", "minecraft:golden_apple", List.of("nourished:nutrients/fruits")),
-        NutrientDef.fromConfig("vegetables", "minecraft:carrot", List.of("nourished:nutrients/vegetables")),
-        NutrientDef.fromConfig("proteins", "minecraft:cooked_beef", List.of("nourished:nutrients/proteins")),
-        NutrientDef.fromConfig("grains", "minecraft:bread", List.of("nourished:nutrients/grains")),
-        NutrientDef.fromConfig("sugars", "minecraft:sugar", List.of("nourished:nutrients/sugars")),
-        NutrientDef.fromConfig("dairy", "minecraft:milk_bucket", List.of("nourished:nutrients/dairy"))
-    );
+    private static final String[] DEFAULT_NUTRIENT_RESOURCES = {
+            "fruits",
+            "vegetables",
+            "proteins",
+            "grains",
+            "sugars",
+            "dairy"
+    };
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -168,13 +171,29 @@ public class NutrientRegistry {
                 JsonObject obj = el.getAsJsonObject();
                 String key  = obj.get("key").getAsString();
                 String icon = obj.has("icon") ? obj.get("icon").getAsString() : DEFAULT_ICON;
+                String displayName = obj.has("display_name") ? obj.get("display_name").getAsString() : key;
+                int color = obj.has("color") ? obj.get("color").getAsInt() : DEFAULT_COLOR;
+                float defaultDecayRate = obj.has("default_decay_rate") ? obj.get("default_decay_rate").getAsFloat() : DEFAULT_DECAY_RATE;
+                float criticalThreshold = obj.has("critical_threshold") ? obj.get("critical_threshold").getAsFloat() : DEFAULT_CRITICAL_THRESHOLD;
+                float lowThreshold = obj.has("low_threshold") ? obj.get("low_threshold").getAsFloat() : DEFAULT_LOW_THRESHOLD;
+                float excessThreshold = obj.has("excess_threshold") ? obj.get("excess_threshold").getAsFloat() : DEFAULT_EXCESS_THRESHOLD;
                 List<String> tags = new ArrayList<>();
                 if (obj.has("tags")) {
                     for (JsonElement t : obj.getAsJsonArray("tags")) {
                         tags.add(t.getAsString());
                     }
                 }
-                REGISTRY.put(key, NutrientDef.fromConfig(key, icon, Collections.unmodifiableList(tags)));
+                REGISTRY.put(key, new NutrientDef(
+                        key,
+                        displayName,
+                        color,
+                        defaultDecayRate,
+                        criticalThreshold,
+                        lowThreshold,
+                        excessThreshold,
+                        icon,
+                        Collections.unmodifiableList(tags)
+                ));
             }
         }
         if (REGISTRY.isEmpty()) {
@@ -185,16 +204,22 @@ public class NutrientRegistry {
 
     private static void loadDefaults() {
         REGISTRY.clear();
-        for (NutrientDef def : DEFAULTS) {
+        for (NutrientDef def : loadBundledDefaults()) {
             REGISTRY.put(def.key(), def);
         }
     }
 
     private static void writeDefaults(Path file) throws IOException {
         JsonArray arr = new JsonArray();
-        for (NutrientDef def : DEFAULTS) {
+        for (NutrientDef def : loadBundledDefaults()) {
             JsonObject obj = new JsonObject();
             obj.addProperty("key", def.key());
+            obj.addProperty("display_name", def.displayName());
+            obj.addProperty("color", def.color());
+            obj.addProperty("default_decay_rate", def.defaultDecayRate());
+            obj.addProperty("critical_threshold", def.criticalThreshold());
+            obj.addProperty("low_threshold", def.lowThreshold());
+            obj.addProperty("excess_threshold", def.excessThreshold());
             obj.addProperty("icon", def.icon());
             JsonArray tags = new JsonArray();
             for (String t : def.tags()) tags.add(t);
@@ -217,5 +242,36 @@ public class NutrientRegistry {
             return minecraftCandidate.toString();
         }
         return DEFAULT_ICON;
+    }
+
+    private static List<NutrientDef> loadBundledDefaults() {
+        List<NutrientDef> defaults = new ArrayList<>();
+        for (String path : DEFAULT_NUTRIENT_RESOURCES) {
+            String resource = "/data/nourished/nourished/nutrients/" + path + ".json";
+            try (InputStream in = NutrientRegistry.class.getResourceAsStream(resource)) {
+                if (in == null) {
+                    continue;
+                }
+                try (Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+                    JsonObject obj = GSON.fromJson(reader, JsonObject.class);
+                    if (obj == null) {
+                        continue;
+                    }
+                    String key = path;
+                    String displayName = obj.has("display_name") ? obj.get("display_name").getAsString() : key;
+                    int color = obj.has("color") ? obj.get("color").getAsInt() : DEFAULT_COLOR;
+                    float defaultDecayRate = obj.has("default_decay_rate") ? obj.get("default_decay_rate").getAsFloat() : DEFAULT_DECAY_RATE;
+                    float criticalThreshold = obj.has("critical_threshold") ? obj.get("critical_threshold").getAsFloat() : DEFAULT_CRITICAL_THRESHOLD;
+                    float lowThreshold = obj.has("low_threshold") ? obj.get("low_threshold").getAsFloat() : DEFAULT_LOW_THRESHOLD;
+                    float excessThreshold = obj.has("excess_threshold") ? obj.get("excess_threshold").getAsFloat() : DEFAULT_EXCESS_THRESHOLD;
+                    String icon = obj.has("icon") ? obj.get("icon").getAsString() : resolveIcon(key);
+                    List<String> tags = List.of("nourished:nutrients/" + key);
+                    defaults.add(new NutrientDef(key, displayName, color, defaultDecayRate, criticalThreshold, lowThreshold, excessThreshold, icon, tags));
+                }
+            } catch (IOException ignored) {
+                // Keep fallback loading resilient.
+            }
+        }
+        return defaults;
     }
 }

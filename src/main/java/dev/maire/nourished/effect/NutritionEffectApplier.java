@@ -1,5 +1,7 @@
 package dev.maire.nourished.effect;
 
+import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.diet.DietData;
 import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
@@ -15,12 +17,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@ApiStatus.Internal
 public final class NutritionEffectApplier {
     private static final Set<String> warnedPlayers = new HashSet<>();
 
     private NutritionEffectApplier() {}
 
     public static void apply(ServerPlayer player, DietData data) {
+        if (!ModuleCache.enableEffects) {
+            return;
+        }
         Map<ResourceLocation, String> seenActiveEffects = new HashMap<>();
         Map<ResourceLocation, EffectRegistry.EffectDef> lastSeenActiveByEffect = new HashMap<>();
         Map<ResourceLocation, EffectRegistry.EffectDef> firstSeenActiveByEffect = new HashMap<>();

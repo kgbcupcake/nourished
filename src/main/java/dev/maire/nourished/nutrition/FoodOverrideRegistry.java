@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import dev.maire.nourished.api.ApiStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -36,6 +37,7 @@ import java.util.Optional;
  *   <li>data/nourished/config/food_overrides.json (datapack override)</li>
  * </ol>
  */
+@ApiStatus.Internal
 public class FoodOverrideRegistry {
 
     /**

@@ -1,0 +1,50 @@
+[
+  {
+    "category": "fruits",
+    "protein": 0.0,
+    "carbs": 0.4,
+    "fats": 0.0,
+    "vitamins": 0.8,
+    "hydration": 1.0
+  },
+  {
+    "category": "vegetables",
+    "protein": 0.1,
+    "carbs": 0.35,
+    "fats": 0.0,
+    "vitamins": 1.0,
+    "hydration": 0.2
+  },
+  {
+    "category": "proteins",
+    "protein": 1.0,
+    "carbs": 0.1,
+    "fats": 0.3,
+    "vitamins": 0.0,
+    "hydration": 0.0
+  },
+  {
+    "category": "grains",
+    "protein": 0.2,
+    "carbs": 1.0,
+    "fats": 0.5,
+    "vitamins": 0.1,
+    "hydration": 0.0
+  },
+  {
+    "category": "sugars",
+    "protein": 0.0,
+    "carbs": 0.8,
+    "fats": 0.15,
+    "vitamins": 0.0,
+    "hydration": 0.0
+  },
+  {
+    "category": "dairy",
+    "protein": 0.5,
+    "carbs": 0.0,
+    "fats": 0.7,
+    "vitamins": 0.0,
+    "hydration": 0.3
+  }
+]

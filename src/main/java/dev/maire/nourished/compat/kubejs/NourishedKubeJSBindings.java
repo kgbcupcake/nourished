@@ -1,6 +1,7 @@
 package dev.maire.nourished.compat.kubejs;
 
 import com.google.gson.JsonObject;
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.DietProfileDefinition;
 import dev.maire.nourished.api.FoodSynergyDefinition;
 import dev.maire.nourished.api.NourishedAPI;
@@ -19,6 +20,7 @@ import java.util.Map;
 /**
  * KubeJS-facing Nourished API bindings.
  */
+@ApiStatus.Internal
 public final class NourishedKubeJSBindings {
 
     private NourishedKubeJSBindings() {}

@@ -1,0 +1,10 @@
+{
+  "nourished_schema_version": 1,
+  "locked": [],
+  "server_only": [
+    "enableSynergies",
+    "enableMilestones",
+    "enableSeasonHooks",
+    "enableAbsorptionModifiers"
+  ]
+}

@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 
 import dev.maire.nourished.client.NutrientUiColors;
 import dev.maire.nourished.color.ColorRegistry;
+import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.effect.EffectRegistry;
 import dev.maire.nourished.nutrition.FoodValueRegistry;
@@ -213,6 +214,11 @@ public final class ImportExportManager {
         o.addProperty("enableCalorieTracking", c.enableCalorieTracking());
         o.addProperty("enableDietScreen", c.enableDietScreen());
         o.addProperty("enableCriticalToasts", c.enableCriticalToasts());
+        o.addProperty("enableSleepBonus", ModuleCache.enableSleepBonus);
+        o.addProperty("enableSynergies", ModuleCache.enableSynergies);
+        o.addProperty("enableMilestones", ModuleCache.enableMilestones);
+        o.addProperty("enableSeasonHooks", ModuleCache.enableSeasonHooks);
+        o.addProperty("enableAbsorptionModifiers", ModuleCache.enableAbsorptionModifiers);
         return o;
     }
 
@@ -326,6 +332,21 @@ public final class ImportExportManager {
         }
         if (o.has("enableCriticalToasts")) {
             c.setEnableCriticalToasts(o.get("enableCriticalToasts").getAsBoolean());
+        }
+        if (o.has("enableSleepBonus")) {
+            c.setModuleEnabled("enableSleepBonus", o.get("enableSleepBonus").getAsBoolean());
+        }
+        if (o.has("enableSynergies")) {
+            c.setModuleEnabled("enableSynergies", o.get("enableSynergies").getAsBoolean());
+        }
+        if (o.has("enableMilestones")) {
+            c.setModuleEnabled("enableMilestones", o.get("enableMilestones").getAsBoolean());
+        }
+        if (o.has("enableSeasonHooks")) {
+            c.setModuleEnabled("enableSeasonHooks", o.get("enableSeasonHooks").getAsBoolean());
+        }
+        if (o.has("enableAbsorptionModifiers")) {
+            c.setModuleEnabled("enableAbsorptionModifiers", o.get("enableAbsorptionModifiers").getAsBoolean());
         }
     }
 

@@ -1,5 +1,6 @@
 package dev.maire.nourished.handler;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.config.PresetRegistry;
 import dev.maire.nourished.color.ColorRegistry;
@@ -9,10 +10,12 @@ import dev.maire.nourished.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.nutrition.FoodValueRegistry;
 import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.nutrition.scanner.ScannerSpecRegistry;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 
+@ApiStatus.Internal
 public class ConfigReloadHandler {
 
     @SubscribeEvent
@@ -25,6 +28,7 @@ public class ConfigReloadHandler {
             PresetRegistry.reload();
             ColorRegistry.reload();
             LockRegistry.reload();
+            ScannerSpecRegistry.reload();
         }
     }
 
@@ -38,6 +42,7 @@ public class ConfigReloadHandler {
                     EffectRegistry.loadFromDatapack(resourceManager);
                     ColorRegistry.loadFromDatapack(resourceManager);
                     LockRegistry.loadFromDatapack(resourceManager);
+                    ScannerSpecRegistry.loadFromDatapack(resourceManager);
                     Nourished.LOGGER.info("[Nourished] Datapack config reload complete");
                 }, executor2)
         );

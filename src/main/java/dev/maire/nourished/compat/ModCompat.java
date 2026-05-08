@@ -2,11 +2,8 @@ package dev.maire.nourished.compat;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.nutrition.Nourished;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforgespi.language.IModInfo;
@@ -34,6 +31,7 @@ import java.util.stream.Collectors;
  *   <li>Modpack override (config/nourished/compat_overrides.json)</li>
  * </ol>
  */
+@ApiStatus.Internal
 public final class ModCompat {
 
     private static final Logger LOGGER = Nourished.LOGGER;
@@ -50,13 +48,6 @@ public final class ModCompat {
     public static boolean ANY_DECAY_CONFLICT = false;
     public static ConflictBehavior MERGED_CONFLICT_BEHAVIOR = ConflictBehavior.NONE;
 
-    public static boolean LSO_LOADED;
-    public static boolean CROPTOPIA_LOADED;
-    public static boolean FARMERS_LOADED;
-    public static boolean PAMS_LOADED;
-    public static boolean MAMAS_LOADED;
-    public static boolean SERENE_LOADED;
-
     private ModCompat() {}
 
     /**
@@ -64,13 +55,6 @@ public final class ModCompat {
      * Loads all three tiers and resolves runtime data.
      */
     public static void initialize() {
-        LSO_LOADED = ModList.get().isLoaded("legendarysurvivaloverhaul");
-        CROPTOPIA_LOADED = ModList.get().isLoaded("croptopia");
-        FARMERS_LOADED = ModList.get().isLoaded("farmersdelight");
-        PAMS_LOADED = ModList.get().isLoaded("pamhc2foodcore");
-        MAMAS_LOADED = ModList.get().isLoaded("mamasherbs");
-        SERENE_LOADED = ModList.get().isLoaded("sereneseasons");
-
         if (initialized) return;
         initialized = true;
 
@@ -81,39 +65,11 @@ public final class ModCompat {
         loadTier1BuiltIn(merged);
         loadTier2ModProvided(merged);
         loadTier3ModpackOverride(merged);
-        includeLoadedModsAsFallback(merged);
 
         resolveRuntimeData(merged);
         buildNamespaceMap();
         computeAggregateFlags();
         logCompatReport();
-    }
-
-    /**
-     * Ensure every currently loaded mod appears in compat config, even if no explicit entry exists.
-     * This keeps the compatibility screen complete for large modpacks.
-     */
-    private static void includeLoadedModsAsFallback(Map<String, JsonCompatEntry> merged) {
-        for (IModInfo modInfo : ModList.get().getMods()) {
-            String modId = modInfo.getModId();
-            if ("minecraft".equals(modId) || "neoforge".equals(modId) || "nourished".equals(modId)) {
-                continue;
-            }
-            if (!merged.containsKey(modId)) {
-                merged.put(modId, new JsonCompatEntry(
-                        modId,
-                        modId,
-                        CompatCategory.UNKNOWN,
-                        List.of(modId),
-                        false,
-                        false,
-                        Map.of(),
-                        null,
-                        false,
-                        0
-                ));
-            }
-        }
     }
 
     /**
@@ -125,58 +81,7 @@ public final class ModCompat {
             LOGGER.warn("[Nourished] ModCompat.discoverUnknownMods() called before initialize()");
             return;
         }
-
-        Set<String> knownNamespaces = new HashSet<>(NAMESPACE_TO_MODID.keySet());
-        knownNamespaces.add("minecraft");
-        knownNamespaces.add("nourished");
-
-        Map<String, Set<String>> unknownFoodNamespaces = new HashMap<>();
-
-        for (Item item : BuiltInRegistries.ITEM) {
-            @SuppressWarnings("null")
-            boolean isFood = item.components().has(DataComponents.FOOD);
-            if (isFood) {
-                ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
-                String namespace = id.getNamespace();
-
-                if (!knownNamespaces.contains(namespace) && !unknownFoodNamespaces.containsKey(namespace)) {
-                    String modId = findModIdForNamespace(namespace);
-                    if (modId != null && !ENTRIES_BY_MODID.containsKey(modId)) {
-                        unknownFoodNamespaces.computeIfAbsent(modId, k -> new HashSet<>()).add(namespace);
-                    }
-                }
-            }
-        }
-
-        for (Map.Entry<String, Set<String>> entry : unknownFoodNamespaces.entrySet()) {
-            String modId = entry.getKey();
-            Set<String> namespaces = entry.getValue();
-
-            CompatEntry unknown = CompatEntry.createUnknown(modId, new ArrayList<String>(namespaces));
-            ENTRIES_BY_MODID.put(modId, unknown);
-
-            for (String ns : namespaces) {
-                NAMESPACE_TO_MODID.put(ns, modId);
-            }
-
-            LOGGER.warn("[Nourished] Unknown mod '{}' has food items but no compat entry — using fallback classification", modId);
-        }
-
-        if (!unknownFoodNamespaces.isEmpty()) {
-            LOGGER.info("[Nourished] Unknown food mods (fallback): {} ({} mods)",
-                    String.join(", ", unknownFoodNamespaces.keySet()),
-                    unknownFoodNamespaces.size());
-        }
-    }
-
-    @Nullable
-    private static String findModIdForNamespace(String namespace) {
-        return ModList.get().getMods().stream()
-                .filter(mod -> mod.getModId().equals(namespace) ||
-                        mod.getModId().replace("_", "").equals(namespace.replace("_", "")))
-                .map(IModInfo::getModId)
-                .findFirst()
-                .orElse(namespace);
+        // Compat discovery is now strictly registry-driven.
     }
 
     private static void loadTier1BuiltIn(Map<String, JsonCompatEntry> merged) {

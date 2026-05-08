@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.nutrition.Nourished;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -23,6 +24,7 @@ import java.util.Map;
  * Generates tag recommendation files for confident classifications.
  * Produces JSON entries ready to be added to tag files.
  */
+@ApiStatus.Internal
 public final class TagRecommendationWriter {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();

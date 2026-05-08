@@ -1,6 +1,7 @@
 package dev.maire.nourished.client.hud;
 
 import dev.maire.nourished.client.NourishedKeys;
+import dev.maire.nourished.config.ModuleCache;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -32,6 +33,9 @@ public final class HUDEditScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        if (!ModuleCache.enableHUD) {
+            return;
+        }
         super.render(graphics, mouseX, mouseY, partialTick);
         NourishedHUD.renderForEditScreen(graphics, minecraft);
         drawEditHints(graphics);

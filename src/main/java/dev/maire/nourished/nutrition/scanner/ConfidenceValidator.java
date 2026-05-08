@@ -1,5 +1,7 @@
 package dev.maire.nourished.nutrition.scanner;
 
+import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.config.NourishedConfig;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.Map;
  * <p>Key principle: Never use raw threshold. Always use spread.
  * A score of 8 vs 7 is uncertain. A score of 8 vs 1 is confident.</p>
  */
+@ApiStatus.Internal
 public final class ConfidenceValidator {
 
     private final float spreadThreshold;
@@ -98,6 +101,10 @@ public final class ConfidenceValidator {
      * Create a validator with the default spread threshold (3.0).
      */
     public static ConfidenceValidator withDefaultThreshold() {
-        return new ConfidenceValidator(3.0f);
+        try {
+            return new ConfidenceValidator((float) NourishedConfig.get().scannerConfidenceSpreadThreshold());
+        } catch (IllegalStateException ignored) {
+            return new ConfidenceValidator(0f);
+        }
     }
 }

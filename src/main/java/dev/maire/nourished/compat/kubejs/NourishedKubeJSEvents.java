@@ -1,5 +1,6 @@
 package dev.maire.nourished.compat.kubejs;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NourishedEvents;
 import dev.maire.nourished.api.NutrientModifierEvent;
 import dev.maire.nourished.nutrition.Nourished;
@@ -13,6 +14,7 @@ import net.neoforged.neoforge.common.NeoForge;
 /**
  * Bridges Nourished NeoForge events into KubeJS event IDs.
  */
+@ApiStatus.Internal
 public final class NourishedKubeJSEvents {
 
     public static final String NUTRIENT_CHANGED = "nourished.nutrient_changed";

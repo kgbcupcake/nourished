@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import dev.maire.nourished.api.ApiStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -24,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ArrayList;
 
 /**
  * Loads per-category food value multipliers from config/nourished/food_values.json.
@@ -37,6 +39,7 @@ import java.util.Optional;
  *   <li>data/nourished/config/food_values.json (datapack override)</li>
  * </ol>
  */
+@ApiStatus.Internal
 public class FoodValueRegistry {
 
     public record FoodValueDef(String category, float protein, float carbs, float fats, float vitamins, float hydration) {}
@@ -47,14 +50,7 @@ public class FoodValueRegistry {
 
     private static final float[] DEFAULT_WEIGHTS = {0.2f, 0.2f, 0.2f, 0.2f, 0.2f};
 
-    private static final List<FoodValueDef> DEFAULTS = List.of(
-        new FoodValueDef("fruits",     0.0f, 0.4f,  0.0f,  0.8f, 1.0f),
-        new FoodValueDef("vegetables", 0.1f, 0.35f, 0.0f,  1.0f, 0.2f),
-        new FoodValueDef("proteins",   1.0f, 0.1f,  0.3f,  0.0f, 0.0f),
-        new FoodValueDef("grains",     0.2f, 1.0f,  0.5f,  0.1f, 0.0f),
-        new FoodValueDef("sugars",     0.0f, 0.8f,  0.15f, 0.0f, 0.0f),
-        new FoodValueDef("dairy",      0.5f, 0.0f,  0.7f,  0.0f, 0.3f)
-    );
+    private static final String DEFAULT_RESOURCE_PATH = "/data/nourished/config/food_values.json";
 
     /**
      * Returns NutrientValues scaled by the category's multipliers.
@@ -214,14 +210,14 @@ public class FoodValueRegistry {
 
     private static void loadDefaults() {
         REGISTRY.clear();
-        for (FoodValueDef def : DEFAULTS) {
+        for (FoodValueDef def : loadBundledDefaults()) {
             REGISTRY.put(def.category(), def);
         }
     }
 
     private static void writeDefaults(Path file) throws IOException {
         JsonArray arr = new JsonArray();
-        for (FoodValueDef def : DEFAULTS) {
+        for (FoodValueDef def : loadBundledDefaults()) {
             arr.add(defToJson(def));
         }
         try (Writer w = Files.newBufferedWriter(file)) {
@@ -248,5 +244,33 @@ public class FoodValueRegistry {
         obj.addProperty("vitamins", def.vitamins());
         obj.addProperty("hydration", def.hydration());
         return obj;
+    }
+
+    private static List<FoodValueDef> loadBundledDefaults() {
+        List<FoodValueDef> defaults = new ArrayList<>();
+        try (InputStream in = FoodValueRegistry.class.getResourceAsStream(DEFAULT_RESOURCE_PATH)) {
+            if (in == null) {
+                return defaults;
+            }
+            try (Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+                JsonArray arr = GSON.fromJson(reader, JsonArray.class);
+                if (arr == null) {
+                    return defaults;
+                }
+                for (JsonElement el : arr) {
+                    JsonObject obj = el.getAsJsonObject();
+                    String category = obj.get("category").getAsString();
+                    float protein = obj.has("protein") ? obj.get("protein").getAsFloat() : DEFAULT_WEIGHTS[0];
+                    float carbs = obj.has("carbs") ? obj.get("carbs").getAsFloat() : DEFAULT_WEIGHTS[1];
+                    float fats = obj.has("fats") ? obj.get("fats").getAsFloat() : DEFAULT_WEIGHTS[2];
+                    float vitamins = obj.has("vitamins") ? obj.get("vitamins").getAsFloat() : DEFAULT_WEIGHTS[3];
+                    float hydration = obj.has("hydration") ? obj.get("hydration").getAsFloat() : DEFAULT_WEIGHTS[4];
+                    defaults.add(new FoodValueDef(category, protein, carbs, fats, vitamins, hydration));
+                }
+            }
+        } catch (IOException ignored) {
+            // Keep load resilient if bundled defaults are unavailable.
+        }
+        return defaults;
     }
 }

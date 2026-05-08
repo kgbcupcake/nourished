@@ -3,6 +3,7 @@ package dev.maire.nourished.compat.emi;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.stack.Comparison;
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.compat.NourishedFoodTooltipHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.food.FoodProperties;
@@ -10,6 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
 
+@ApiStatus.Internal
 public final class NourishedEmiPlugin implements EmiPlugin {
 
     public static void bootstrap() {

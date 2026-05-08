@@ -1,5 +1,6 @@
 package dev.maire.nourished.nutrition.scanner;
 
+import dev.maire.nourished.api.ApiStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.moddiscovery.ModInfo;
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Cache for scan results with automatic invalidation when mod list changes.
  * Uses a mod list hash to detect when the cache should be cleared.
  */
+@ApiStatus.Internal
 public final class ScanCache {
 
     private final ConcurrentHashMap<ResourceLocation, ClassificationResult> cache;

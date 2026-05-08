@@ -1,5 +1,6 @@
 package dev.maire.nourished.api.registry;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.DietReportProvider;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 /**
  * Internal storage for diet report providers registered via the public API.
  */
+@ApiStatus.Internal
 public final class ReportProviderRegistry {
 
     private static final List<DietReportProvider> PROVIDERS = new ArrayList<>();
@@ -30,6 +32,6 @@ public final class ReportProviderRegistry {
      * @return an unmodifiable list of report providers
      */
     public static List<DietReportProvider> getAll() {
-        return Collections.unmodifiableList(PROVIDERS);
+        return Collections.unmodifiableList(new ArrayList<>(PROVIDERS));
     }
 }

@@ -1,0 +1,10 @@
+{
+  "hudOffsetX": 0,
+  "hudOffsetY": 0,
+  "hudBarWidth": 60,
+  "hudScale": 1.0,
+  "hudReservedBottom": 52,
+  "hudDraggable": true,
+  "dietBarDragEnabled": true,
+  "hideZeroNutrients": true
+}

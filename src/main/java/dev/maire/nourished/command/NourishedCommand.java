@@ -49,6 +49,7 @@ import java.util.function.Supplier;
 public class NourishedCommand {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final int MAX_DIAGNOSTICS_LINES = 100;
     private static final Map<UUID, String> ACTIVE_PROFILES = new ConcurrentHashMap<>();
 
     private static final SuggestionProvider<CommandSourceStack> NUTRIENT_SUGGESTIONS =
@@ -252,11 +253,26 @@ public class NourishedCommand {
         DatapackDiagnostics diagnostics = DatapackDiagnostics.getInstance();
         source.sendSuccess(() -> Component.literal(diagnostics.getSummary()).withStyle(ChatFormatting.GOLD), false);
 
-        for (DatapackDiagnostic diagnostic : diagnostics.getAll()) {
+        List<DatapackDiagnostic> allDiagnostics = diagnostics.getAll();
+        int shown = 0;
+        for (DatapackDiagnostic diagnostic : allDiagnostics) {
+            if (shown >= MAX_DIAGNOSTICS_LINES) {
+                break;
+            }
             ChatFormatting color = diagnostic.severity() == DatapackDiagnostic.Severity.ERROR
                     ? ChatFormatting.RED
                     : ChatFormatting.YELLOW;
             source.sendSuccess(() -> Component.literal(diagnostic.toString()).withStyle(color), false);
+            shown++;
+        }
+
+        int hidden = allDiagnostics.size() - shown;
+        if (hidden > 0) {
+            source.sendSuccess(
+                    () -> Component.literal("... truncated " + hidden + " additional diagnostics")
+                            .withStyle(ChatFormatting.DARK_GRAY),
+                    false
+            );
         }
         return 1;
     }

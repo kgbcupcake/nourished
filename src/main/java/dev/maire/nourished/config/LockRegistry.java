@@ -72,6 +72,13 @@ public class LockRegistry {
         return Collections.unmodifiableSet(SERVER_ONLY);
     }
 
+    public static void replaceFromDatapack(Set<String> locked, Set<String> serverOnly) {
+        LOCKED.clear();
+        LOCKED.addAll(locked);
+        SERVER_ONLY.clear();
+        SERVER_ONLY.addAll(serverOnly);
+    }
+
     public static void load() {
         Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
         Path file = configDir.resolve("locks.json");

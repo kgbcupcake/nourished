@@ -106,7 +106,8 @@ public final class NourishedConfigScreen {
                 config.setModuleEnabled(entry.getKey(), entry.getValue().get());
             }
             // Dependency guard: critical toasts only makes sense when toasts are enabled.
-            if (!config.isModuleEnabled("enableToasts")) {
+            AtomicBoolean toastsPending = modulePending.get("enableToasts");
+            if (toastsPending != null && !toastsPending.get()) {
                 config.setModuleEnabled("enableCriticalToasts", false);
             }
             FoodValueRegistry.save();
@@ -114,6 +115,7 @@ public final class NourishedConfigScreen {
             NutrientUiColors.clearOverrides();
             NourishedClientConfig.saveNow();
             NourishedConfig.saveNow();
+            ModuleCache.refresh();
         });
         return builder.build();
     }
@@ -209,7 +211,8 @@ public final class NourishedConfigScreen {
             String group;
             String dependsOn = null;
             switch (key) {
-                case "enableDecay", "enableEffects", "enableCalorieTracking", "enableSleepBonus" -> group = "core";
+                case "enableDecay", "enableEffects", "enableCalorieTracking", "enableSleepBonus",
+                     "enableSynergies", "enableMilestones", "enableSeasonHooks", "enableAbsorptionModifiers" -> group = "core";
                 case "enableHUD", "enableDietScreen", "enableFoodTooltips", "enableToasts", "enableCriticalToasts" -> group = "ui";
                 default -> group = "other";
             }
@@ -1337,7 +1340,11 @@ public final class NourishedConfigScreen {
                         "enableCalorieTracking",
                         "enableDietScreen",
                         "enableCriticalToasts",
-                        "enableSleepBonus");
+                        "enableSleepBonus",
+                        "enableSynergies",
+                        "enableMilestones",
+                        "enableSeasonHooks",
+                        "enableAbsorptionModifiers");
             }
             // Dependency guard.
             AtomicBoolean toasts = modulePending.get("enableToasts");

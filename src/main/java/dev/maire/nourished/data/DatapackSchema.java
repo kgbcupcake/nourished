@@ -103,4 +103,16 @@ public final class DatapackSchema {
     public static final String KEY_CATEGORY = "category";
     /** Optional object key mapping item ids to nutrient keys. */
     public static final String KEY_MAPPINGS = "mappings";
+
+    /** Path: {@code data/<namespace>/nourished/food_families/<id>.json}. */
+    public static final String FOOD_FAMILIES_DIR = "food_families";
+    /** Required object key mapping family -> keyword array. */
+    public static final String KEY_FAMILIES = "families";
+
+    /** Path: {@code data/<namespace>/nourished/module_locks/<id>.json}. */
+    public static final String MODULE_LOCKS_DIR = "module_locks";
+    /** Optional array key of locked module keys. */
+    public static final String KEY_LOCKED = "locked";
+    /** Optional array key of server-only module keys. */
+    public static final String KEY_SERVER_ONLY = "server_only";
 }

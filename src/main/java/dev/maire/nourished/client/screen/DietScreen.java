@@ -8,6 +8,7 @@ import java.util.Map;
 
 import dev.maire.nourished.client.ClientDietCache;
 import dev.maire.nourished.client.NutrientUiColors;
+import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.diet.DietData;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
@@ -235,23 +236,25 @@ public class DietScreen extends Screen {
                 todayStartX + 20, y - 4, COL_GOLD, false);
         y += 10;
 
-        // ── Calories box ──────────────────────────────────────────────────
-        drawRoundedBox(g, x - 2, y - 2, bw + 4, 40);
+        if (ModuleCache.enableCalorieTracking) {
+            // ── Calories box ──────────────────────────────────────────────
+            drawRoundedBox(g, x - 2, y - 2, bw + 4, 40);
 
-        // Fire charge icon
-        g.renderItem(new net.minecraft.world.item.ItemStack(
-                BuiltInRegistries.ITEM.get(ResourceLocation.parse("minecraft:fire_charge"))),
-                x, y + 3);
+            // Fire charge icon
+            g.renderItem(new net.minecraft.world.item.ItemStack(
+                    BuiltInRegistries.ITEM.get(ResourceLocation.parse("minecraft:fire_charge"))),
+                    x, y + 3);
 
-        g.drawString(font, Component.translatable("nourished.screen.diet.calories_label"),
-                x + 22, y + 4, COL_WHITE, false);
+            g.drawString(font, Component.translatable("nourished.screen.diet.calories_label"),
+                    x + 22, y + 4, COL_WHITE, false);
 
-        String calStr = (int) data.calories + " / " + (int) data.maxCalories;
-        g.drawString(font, calStr, x + 22, y + 15, COL_GREEN, false);
+            String calStr = (int) data.calories + " / " + (int) data.maxCalories;
+            g.drawString(font, calStr, x + 22, y + 15, COL_GREEN, false);
 
-        float calPct = data.maxCalories > 0 ? Mth.clamp(data.calories / data.maxCalories, 0f, 1f) : 0f;
-        drawSolidBar(g, x, y + 31, bw, 4, calPct, COL_GREEN);
-        y += 45;
+            float calPct = data.maxCalories > 0 ? Mth.clamp(data.calories / data.maxCalories, 0f, 1f) : 0f;
+            drawSolidBar(g, x, y + 31, bw, 4, calPct, COL_GREEN);
+            y += 45;
+        }
 
         // ── Balance box ───────────────────────────────────────────────────
         drawRoundedBox(g, x - 2, y - 2, bw + 4, 50);

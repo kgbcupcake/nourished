@@ -5,6 +5,7 @@ import java.util.Locale;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.maire.nourished.client.screen.DietScreen;
+import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.NourishedConfigScreen;
 import dev.maire.nourished.diet.DietData;
@@ -60,7 +61,7 @@ public final class ClientEvents {
 
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!(event.getScreen() instanceof InventoryScreen screen)) return;
-        if (!NourishedConfig.get().enableDietScreen()) return;
+        if (!ModuleCache.enableDietScreen) return;
 
         int x = screen.getGuiLeft() - 26;
         int y = screen.getGuiTop() + 60;
@@ -69,7 +70,7 @@ public final class ClientEvents {
     }
 
     public static void onItemTooltip(ItemTooltipEvent event) {
-        if (!NourishedConfig.get().enableFoodTooltips()) {
+        if (!ModuleCache.enableFoodTooltips) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();

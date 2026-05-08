@@ -1,7 +1,9 @@
 package dev.maire.nourished.compat;
 
 import com.google.gson.annotations.SerializedName;
+import dev.maire.nourished.api.ApiStatus;
 
+@ApiStatus.Internal
 public enum CompatCategory {
     @SerializedName("survival_overhaul")
     SURVIVAL_OVERHAUL,

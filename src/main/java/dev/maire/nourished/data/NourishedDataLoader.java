@@ -13,7 +13,9 @@ import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.api.NutrientDefinition;
 import dev.maire.nourished.api.NutrientMilestoneDefinition;
 import dev.maire.nourished.api.NutrientSynergyDefinition;
+import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.nutrition.Nourished;
+import dev.maire.nourished.nutrition.FoodFamilyResolver;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +27,6 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -77,6 +78,8 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
         Map<ResourceLocation, JsonObject> milestones = filterDirectory(allJson, DatapackSchema.MILESTONES_DIR);
         Map<ResourceLocation, JsonObject> profiles = filterDirectory(allJson, DatapackSchema.DIET_PROFILES_DIR);
         Map<ResourceLocation, JsonObject> compat = filterDirectory(allJson, DatapackSchema.COMPAT_DIR);
+        Map<ResourceLocation, JsonObject> foodFamilies = filterDirectory(allJson, DatapackSchema.FOOD_FAMILIES_DIR);
+        Map<ResourceLocation, JsonObject> moduleLocks = filterDirectory(allJson, DatapackSchema.MODULE_LOCKS_DIR);
 
         for (Map.Entry<ResourceLocation, JsonObject> entry : nutrients.entrySet()) {
             ResourceLocation fileId = entry.getKey();
@@ -200,6 +203,34 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
                 CompatDefinition def = parseCompat(fileId, json);
                 NourishedAPI.registerCompatEntry(def);
                 nextCompatEntries.add(fileId);
+            } catch (Exception ex) {
+                warnMalformed(fileId, ex);
+            }
+        }
+
+        for (Map.Entry<ResourceLocation, JsonObject> entry : foodFamilies.entrySet()) {
+            ResourceLocation fileId = entry.getKey();
+            JsonObject json = entry.getValue();
+            String filePath = datapackFilePath(DatapackSchema.FOOD_FAMILIES_DIR, fileId);
+            if (!isValidForRegistration(json, SchemaDefinition.forFoodFamilies(), filePath, diagnostics)) {
+                continue;
+            }
+            try {
+                applyFoodFamilies(json);
+            } catch (Exception ex) {
+                warnMalformed(fileId, ex);
+            }
+        }
+
+        for (Map.Entry<ResourceLocation, JsonObject> entry : moduleLocks.entrySet()) {
+            ResourceLocation fileId = entry.getKey();
+            JsonObject json = entry.getValue();
+            String filePath = datapackFilePath(DatapackSchema.MODULE_LOCKS_DIR, fileId);
+            if (!isValidForRegistration(json, SchemaDefinition.forModuleLocks(), filePath, diagnostics)) {
+                continue;
+            }
+            try {
+                applyModuleLocks(json);
             } catch (Exception ex) {
                 warnMalformed(fileId, ex);
             }
@@ -461,6 +492,38 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
         fields.put("category", category);
         fields.put("foodTagMappings", mappings);
         return instantiateFromBuilder(CompatDefinition.class, "dev.maire.nourished.api.CompatDefinition$Builder", Class.forName("dev.maire.nourished.api.CompatDefinition$Builder"), new Class<?>[]{String.class}, new Object[]{modId}, fields);
+    }
+
+    private static void applyFoodFamilies(JsonObject json) {
+        Map<String, List<String>> configured = new LinkedHashMap<>();
+        JsonObject families = json.getAsJsonObject(DatapackSchema.KEY_FAMILIES);
+        for (Map.Entry<String, JsonElement> entry : families.entrySet()) {
+            if (!entry.getValue().isJsonArray()) {
+                continue;
+            }
+            List<String> keywords = new ArrayList<>();
+            for (JsonElement keyword : entry.getValue().getAsJsonArray()) {
+                keywords.add(keyword.getAsString());
+            }
+            configured.put(entry.getKey(), keywords);
+        }
+        FoodFamilyResolver.replaceFamilies(configured);
+    }
+
+    private static void applyModuleLocks(JsonObject json) {
+        Set<String> locked = new LinkedHashSet<>();
+        Set<String> serverOnly = new LinkedHashSet<>();
+        if (json.has(DatapackSchema.KEY_LOCKED) && json.get(DatapackSchema.KEY_LOCKED).isJsonArray()) {
+            for (JsonElement element : json.getAsJsonArray(DatapackSchema.KEY_LOCKED)) {
+                locked.add(element.getAsString());
+            }
+        }
+        if (json.has(DatapackSchema.KEY_SERVER_ONLY) && json.get(DatapackSchema.KEY_SERVER_ONLY).isJsonArray()) {
+            for (JsonElement element : json.getAsJsonArray(DatapackSchema.KEY_SERVER_ONLY)) {
+                serverOnly.add(element.getAsString());
+            }
+        }
+        LockRegistry.replaceFromDatapack(locked, serverOnly);
     }
 
     @SuppressWarnings("unchecked")

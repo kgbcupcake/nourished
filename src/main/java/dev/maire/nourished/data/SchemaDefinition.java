@@ -117,4 +117,19 @@ public final class SchemaDefinition {
                 SchemaField.optional(DatapackSchema.KEY_MAPPINGS, SchemaType.OBJECT, null)
         ));
     }
+
+    public static SchemaDefinition forFoodFamilies() {
+        return new SchemaDefinition(DatapackSchema.FOOD_FAMILIES_DIR, VERSION, List.of(
+                SchemaField.optional(DatapackSchema.KEY_SCHEMA_VERSION, SchemaType.INT, VERSION),
+                SchemaField.required(DatapackSchema.KEY_FAMILIES, SchemaType.OBJECT)
+        ));
+    }
+
+    public static SchemaDefinition forModuleLocks() {
+        return new SchemaDefinition(DatapackSchema.MODULE_LOCKS_DIR, VERSION, List.of(
+                SchemaField.optional(DatapackSchema.KEY_SCHEMA_VERSION, SchemaType.INT, VERSION),
+                SchemaField.optional(DatapackSchema.KEY_LOCKED, SchemaType.ARRAY, null),
+                SchemaField.optional(DatapackSchema.KEY_SERVER_ONLY, SchemaType.ARRAY, null)
+        ));
+    }
 }

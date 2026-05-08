@@ -1,5 +1,6 @@
 package dev.maire.nourished.api.registry;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NutrientAbsorptionModifier;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 /**
  * Internal storage for nutrient absorption modifiers registered via the public API.
  */
+@ApiStatus.Internal
 public final class AbsorptionModifierRegistry {
 
     private static final List<NutrientAbsorptionModifier> MODIFIERS = new ArrayList<>();
@@ -32,6 +34,6 @@ public final class AbsorptionModifierRegistry {
      * @return an unmodifiable list of absorption modifiers
      */
     public static List<NutrientAbsorptionModifier> getAll() {
-        return Collections.unmodifiableList(MODIFIERS);
+        return Collections.unmodifiableList(new ArrayList<>(MODIFIERS));
     }
 }

@@ -1,5 +1,6 @@
 package dev.maire.nourished.compat.rei;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.compat.NourishedFoodTooltipHelper;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
@@ -8,6 +9,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
 
+@ApiStatus.Internal
 public final class NourishedReiPlugin implements REIClientPlugin {
 
     public static void bootstrap() {

@@ -23,7 +23,7 @@ public final class ApiStatus {
      */
     @Documented
     @Retention(RetentionPolicy.CLASS)
-    @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.CONSTRUCTOR})
+    @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.PACKAGE})
     public @interface Stable {}
 
     /**
@@ -32,7 +32,7 @@ public final class ApiStatus {
      */
     @Documented
     @Retention(RetentionPolicy.CLASS)
-    @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.CONSTRUCTOR})
+    @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.PACKAGE})
     public @interface Experimental {}
 
     /**
@@ -41,6 +41,6 @@ public final class ApiStatus {
      */
     @Documented
     @Retention(RetentionPolicy.CLASS)
-    @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.CONSTRUCTOR})
+    @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.PACKAGE})
     public @interface Internal {}
 }

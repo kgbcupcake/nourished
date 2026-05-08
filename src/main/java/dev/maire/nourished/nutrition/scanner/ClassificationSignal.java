@@ -1,5 +1,6 @@
 package dev.maire.nourished.nutrition.scanner;
 
+import dev.maire.nourished.api.ApiStatus;
 import java.util.Map;
 
 /**
@@ -10,6 +11,7 @@ import java.util.Map;
  * @param source What triggered this signal (e.g., tag name, namespace, keyword matched)
  * @param contributions Map of nutrient key to score delta contributed by this signal
  */
+@ApiStatus.Internal
 public record ClassificationSignal(
         String signalType,
         String source,

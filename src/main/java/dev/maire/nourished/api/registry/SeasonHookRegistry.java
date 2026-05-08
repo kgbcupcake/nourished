@@ -1,5 +1,6 @@
 package dev.maire.nourished.api.registry;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NourishedSeasonHook;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 /**
  * Internal storage for season hooks registered via the public API.
  */
+@ApiStatus.Internal
 public final class SeasonHookRegistry {
 
     private static final List<NourishedSeasonHook> HOOKS = new ArrayList<>();
@@ -30,6 +32,6 @@ public final class SeasonHookRegistry {
      * @return an unmodifiable list of season hooks
      */
     public static List<NourishedSeasonHook> getAll() {
-        return Collections.unmodifiableList(HOOKS);
+        return Collections.unmodifiableList(new ArrayList<>(HOOKS));
     }
 }

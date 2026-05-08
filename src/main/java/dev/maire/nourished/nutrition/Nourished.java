@@ -4,8 +4,12 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
+import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.api.NourishedAPIVersion;
+import dev.maire.nourished.api.NourishedAPIState;
 import dev.maire.nourished.command.NourishedCommand;
 import dev.maire.nourished.compat.kubejs.NourishedKubeJSPlugin;
+import dev.maire.nourished.compat.AutoCompatDiscovery;
 import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -23,6 +27,7 @@ import dev.maire.nourished.handler.NutritionDecayHandler;
 import dev.maire.nourished.handler.NutritionEffectsHandler;
 import dev.maire.nourished.handler.SleepBonusHandler;
 import dev.maire.nourished.network.ModNetworking;
+import dev.maire.nourished.nutrition.scanner.ScannerSpecRegistry;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -33,6 +38,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(Nourished.MODID)
+@ApiStatus.Internal
 public class Nourished {
 
     public static final String MODID = "nourished";
@@ -46,6 +52,7 @@ public class Nourished {
         EffectRegistry.load();
         ColorRegistry.load();
         LockRegistry.load();
+        ScannerSpecRegistry.load();
         PresetRegistry.ensureBuiltInFilesOnDisk();
         NourishedConfig.register(modContainer);
         NourishedClientConfig.register(modContainer);
@@ -79,6 +86,13 @@ public class Nourished {
                 LOGGER.warn("[Nourished] Failed to initialize KubeJS integration bridge.", t);
             }
         }
+        AutoCompatDiscovery.discover();
+        NourishedAPIState.close();
+        LOGGER.info("[Nourished] API v{} ready — {} nutrients, {} effects, {} compat entries registered.",
+                NourishedAPIVersion.VERSION,
+                NutrientRegistry.getAll().size(),
+                EffectRegistry.getAll().size(),
+                ModCompat.getAllEntries().size());
         LOGGER.info("Nourished loaded.");
     }
 }

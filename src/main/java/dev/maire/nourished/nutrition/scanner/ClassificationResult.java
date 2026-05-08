@@ -1,5 +1,6 @@
 package dev.maire.nourished.nutrition.scanner;
 
+import dev.maire.nourished.api.ApiStatus;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
@@ -19,6 +20,7 @@ import java.util.Map;
  * @param signals List of all signals that contributed to this classification
  * @param uncertain True if confidenceSpread is below the threshold
  */
+@ApiStatus.Internal
 public record ClassificationResult(
         ResourceLocation itemId,
         Map<String, Float> scores,

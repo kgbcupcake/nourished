@@ -1,7 +1,9 @@
 package dev.maire.nourished.compat;
 
+import dev.maire.nourished.api.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+@ApiStatus.Internal
 public record CompatReportEntry(
         String modId,
         String displayName,

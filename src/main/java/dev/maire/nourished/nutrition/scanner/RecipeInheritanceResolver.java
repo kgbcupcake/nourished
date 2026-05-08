@@ -1,5 +1,6 @@
 package dev.maire.nourished.nutrition.scanner;
 
+import dev.maire.nourished.api.ApiStatus;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -28,6 +29,7 @@ import java.util.function.Function;
  *   <li>Apply 0.5x confidence decay per level</li>
  * </ul>
  */
+@ApiStatus.Internal
 public final class RecipeInheritanceResolver {
 
     private static final int MAX_DEPTH = 2;

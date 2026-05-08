@@ -1,11 +1,13 @@
 package dev.maire.nourished.compat;
 
 import com.google.gson.annotations.SerializedName;
+import dev.maire.nourished.api.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
 
+@ApiStatus.Internal
 public record CompatEntry(
         @SerializedName("mod_id")
         String modId,

@@ -1,8 +1,14 @@
 package dev.maire.nourished.handler;
 
+import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.api.NourishedSeasonHook;
 import dev.maire.nourished.api.NourishedEvents;
+import dev.maire.nourished.api.NutrientAbsorptionModifier;
 import dev.maire.nourished.api.NutrientModifierEvent;
+import dev.maire.nourished.api.registry.AbsorptionModifierRegistry;
+import dev.maire.nourished.api.registry.SeasonHookRegistry;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
 import dev.maire.nourished.effect.NutritionEffectApplier;
@@ -24,6 +30,7 @@ import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import java.util.Map;
 import java.util.Optional;
 
+@ApiStatus.Internal
 public class FoodEatenHandler {
 
     @SubscribeEvent
@@ -77,7 +84,7 @@ public class FoodEatenHandler {
 
         float multiplier = diet.recordEat(itemId, dominantCategory, familyKey, gameTimeMs);
 
-        if (NourishedConfig.get().enableCalorieTracking()) {
+        if (ModuleCache.enableCalorieTracking) {
             Nourished.LOGGER.debug("Nourished calories: adding {} * {} for {}", caloriesAdded, multiplier,
                     stack.getItem().getDescriptionId());
             diet.addCalories(caloriesAdded * multiplier);
@@ -87,6 +94,8 @@ public class FoodEatenHandler {
             float nutrientDelta = nutrientDeltas.getOrDefault(key, 0f);
             if (nutrientDelta != 0f) {
                 float adjustedDelta = nutrientDelta * multiplier;
+                adjustedDelta = applySeasonalAbsorption(player, key, adjustedDelta);
+                adjustedDelta = applyAbsorptionModifiers(player, key, adjustedDelta);
 
                 NutrientModifierEvent modifierEvent = new NutrientModifierEvent(
                         player, foodResourceId, key, adjustedDelta);
@@ -116,7 +125,7 @@ public class FoodEatenHandler {
         player.setData(DietAttachment.DIET.get(), diet);
         ModNetworking.syncDietDelta(player, diet);
 
-        if (NourishedConfig.get().enableEffects()) {
+        if (ModuleCache.enableEffects) {
             NutritionEffectApplier.apply(player, diet);
         }
 
@@ -142,5 +151,31 @@ public class FoodEatenHandler {
                 NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientExcessEvent(player, key));
             }
         }
+    }
+
+    private float applySeasonalAbsorption(ServerPlayer player, String nutrientKey, float baseAmount) {
+        var hooks = SeasonHookRegistry.getAll();
+        if (!ModuleCache.enableSeasonHooks || hooks.isEmpty()) {
+            return baseAmount;
+        }
+        float amount = baseAmount;
+        for (NourishedSeasonHook hook : hooks) {
+            float multiplier = Math.max(0f, hook.getSeasonalAbsorptionModifier(nutrientKey, NourishedSeasonHook.Season.SPRING));
+            amount *= multiplier;
+        }
+        return amount;
+    }
+
+    private float applyAbsorptionModifiers(ServerPlayer player, String nutrientKey, float baseAmount) {
+        var modifiers = AbsorptionModifierRegistry.getAll();
+        if (!ModuleCache.enableAbsorptionModifiers || modifiers.isEmpty()) {
+            return baseAmount;
+        }
+        float amount = baseAmount;
+        for (NutrientAbsorptionModifier modifier : modifiers) {
+            float factor = Math.max(0f, modifier.getAbsorptionMultiplier(player, nutrientKey, amount));
+            amount *= factor;
+        }
+        return amount;
     }
 }

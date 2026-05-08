@@ -1,10 +1,12 @@
 package dev.maire.nourished.compat;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.FoodSynergyDefinition;
 import dev.maire.nourished.api.NutrientMilestoneDefinition;
 import dev.maire.nourished.api.registry.MilestoneRegistry;
 import dev.maire.nourished.api.registry.SynergyRegistry;
 import dev.maire.nourished.client.NutrientUiColors;
+import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.nutrition.FoodNutritionRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -26,6 +28,7 @@ import java.util.Set;
 /**
  * Shared food tooltip formatter used by JEI/REI/EMI integrations.
  */
+@ApiStatus.Internal
 public final class NourishedFoodTooltipHelper {
 
     private NourishedFoodTooltipHelper() {}
@@ -39,6 +42,9 @@ public final class NourishedFoodTooltipHelper {
         Item item = stack.getItem();
         FoodProperties food = item.components().get(net.minecraft.core.component.DataComponents.FOOD);
         if (food == null) {
+            return lines;
+        }
+        if (!ModuleCache.enableFoodTooltips) {
             return lines;
         }
 
@@ -77,13 +83,21 @@ public final class NourishedFoodTooltipHelper {
         }
 
         ResourceLocation thisItem = BuiltInRegistries.ITEM.getKey(item);
-        addFoodSynergyLine(lines, thisItem);
-        addMilestoneLine(lines, nutrients.keySet());
+        if (ModuleCache.enableSynergies) {
+            addFoodSynergyLine(lines, thisItem);
+        }
+        if (ModuleCache.enableMilestones) {
+            addMilestoneLine(lines, nutrients.keySet());
+        }
         return lines;
     }
 
     private static void addFoodSynergyLine(List<Component> lines, ResourceLocation foodId) {
-        for (FoodSynergyDefinition def : SynergyRegistry.getFoodSynergies()) {
+        List<FoodSynergyDefinition> foodSynergies = SynergyRegistry.getFoodSynergies();
+        if (!ModuleCache.enableSynergies || foodSynergies.isEmpty()) {
+            return;
+        }
+        for (FoodSynergyDefinition def : foodSynergies) {
             ResourceLocation partner = null;
             if (foodId.equals(def.getFoodA())) {
                 partner = def.getFoodB();
@@ -102,6 +116,9 @@ public final class NourishedFoodTooltipHelper {
     }
 
     private static void addMilestoneLine(List<Component> lines, Set<String> nutrientsInTooltip) {
+        if (!ModuleCache.enableMilestones || MilestoneRegistry.getAll().isEmpty()) {
+            return;
+        }
         Set<String> nutrientSet = new LinkedHashSet<>(nutrientsInTooltip);
         for (String nutrient : nutrientSet) {
             List<NutrientMilestoneDefinition> milestones = MilestoneRegistry.getForNutrient(nutrient);

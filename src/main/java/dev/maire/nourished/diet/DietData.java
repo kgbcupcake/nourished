@@ -8,6 +8,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
 
+import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.network.ModNetworking.SyncDietDeltaPayload;
 import dev.maire.nourished.nutrition.Nourished;
@@ -16,6 +17,7 @@ import net.minecraft.util.Mth;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,7 @@ import java.util.Map;
  * SCHEMA CHANGE: NutritionAttachment removed in this version. Existing player saves will reset diet data.
  * Acceptable for alpha.
  */
+@ApiStatus.Internal
 public class DietData {
 
     /** Display / bar order — delegates to the registry so it stays in sync. */
@@ -236,15 +239,13 @@ public class DietData {
      */
     public float recordEat(String itemId, String dominantCategory, String familyKey, long gameTimeMs) {
         NourishedConfig config = NourishedConfig.get();
-        long halfLifeMs = config.memoryWindowMinutes() * 60_000L;
         int maxCount = config.memoryWindowCount();
         long streakWindowMs = config.streakWindowMs();
         float streakWeight = (float) config.streakWeight();
+        long currentTime = resolveCurrentTime(gameTimeMs);
 
         // Single cleanup pass for all three maps (remove entries decayed below threshold)
-        foodMemory.entrySet().removeIf(e -> e.getValue().isEffectivelyExpired(halfLifeMs, gameTimeMs, 0.1f));
-        categoryMemory.entrySet().removeIf(e -> e.getValue().isEffectivelyExpired(halfLifeMs, gameTimeMs, 0.1f));
-        familyMemory.entrySet().removeIf(e -> e.getValue().isEffectivelyExpired(halfLifeMs, gameTimeMs, 0.1f));
+        cleanupAllMemories(currentTime);
 
         // Enforce count cap on food memory (evict oldest)
         if (!foodMemory.containsKey(itemId) && foodMemory.size() >= maxCount) {
@@ -256,27 +257,27 @@ public class DietData {
         }
 
         // Update all three memories with appropriate weights
-        updateMemory(foodMemory, itemId, gameTimeMs, 1.0f, streakWindowMs, streakWeight);
+        updateMemory(foodMemory, itemId, currentTime, 1.0f, streakWindowMs, streakWeight);
         if (dominantCategory != null) {
-            updateMemory(categoryMemory, dominantCategory, gameTimeMs, 0.3f, streakWindowMs, streakWeight);
+            updateMemory(categoryMemory, dominantCategory, currentTime, 0.3f, streakWindowMs, streakWeight);
         }
         if (familyKey != null) {
-            updateMemory(familyMemory, familyKey, gameTimeMs, 0.2f, streakWindowMs, streakWeight);
+            updateMemory(familyMemory, familyKey, currentTime, 0.2f, streakWindowMs, streakWeight);
         }
 
         // Update tick time
-        this.lastTickTime = gameTimeMs;
+        this.lastTickTime = currentTime;
 
         // Apply nutritional debt (implemented in Phase 4)
         if (dominantCategory != null) {
-            applyNutritionalDebt(dominantCategory, gameTimeMs);
+            applyNutritionalDebt(dominantCategory, currentTime);
         }
 
-        float result = computeBlendedMultiplier(itemId, dominantCategory, familyKey, gameTimeMs);
+        float result = computeBlendedMultiplier(itemId, dominantCategory, familyKey, currentTime);
 
         // Debug logging when enabled
         if (config.debugMemoryLogging()) {
-            MultiplierBreakdown breakdown = getMultiplierBreakdown(itemId, dominantCategory, familyKey, gameTimeMs);
+            MultiplierBreakdown breakdown = getMultiplierBreakdown(itemId, dominantCategory, familyKey, currentTime);
             Nourished.LOGGER.debug(
                     "Memory breakdown for {}: item={} (w={}) cat={} (w={}) family={} (w={}) novelty={} => final={}",
                     itemId,
@@ -314,7 +315,7 @@ public class DietData {
      * @return multiplier to apply
      */
     public float recordEat(String itemId) {
-        return recordEat(itemId, null, null, System.currentTimeMillis());
+        return recordEat(itemId, null, null, resolveCurrentTime(0L));
     }
 
     /**
@@ -323,7 +324,7 @@ public class DietData {
      */
     public float peekMultiplier(String itemId) {
         long halfLifeMs = NourishedConfig.get().memoryWindowMinutes() * 60_000L;
-        long gameTimeMs = lastTickTime > 0 ? lastTickTime : System.currentTimeMillis();
+        long gameTimeMs = resolveCurrentTime(0L);
         FoodMemoryEntry entry = foodMemory.get(itemId);
         if (entry == null || entry.isEffectivelyExpired(halfLifeMs, gameTimeMs, 0.1f)) {
             return (float) NourishedConfig.get().noveltyBonus();
@@ -507,15 +508,13 @@ public class DietData {
         float itemWeight = 1.0f - categoryWeight - familyWeight;
 
         // Blend contributions
-        float blendedMultiplier = itemMultiplier * itemWeight
-                + categoryMultiplier * categoryWeight
-                + familyMultiplier * familyWeight;
-
-        // Apply novelty as multiplicative layer
+        // Apply novelty only to item freshness contribution, not category/family fatigue.
         float noveltyScore = resolveNoveltyScore(itemId, halfLifeMs, gameTimeMs);
-        // Lerp between 1.0 and noveltyBonus based on novelty score
         float noveltyFactor = 1.0f + (noveltyScore * ((float) noveltyBonus - 1.0f));
-        blendedMultiplier *= noveltyFactor;
+        float itemContribution = itemMultiplier * itemWeight * noveltyFactor;
+        float categoryContribution = categoryMultiplier * categoryWeight;
+        float familyContribution = familyMultiplier * familyWeight;
+        float blendedMultiplier = itemContribution + categoryContribution + familyContribution;
 
         // Clamp to valid range
         return (float) Math.max(floor, Math.min(noveltyBonus, blendedMultiplier));
@@ -663,7 +662,8 @@ public class DietData {
         float noveltyScore = resolveNoveltyScore(itemId, halfLifeMs, gameTimeMs);
         float noveltyContribution = 1.0f + (noveltyScore * ((float) noveltyBonus - 1.0f));
 
-        float finalMultiplier = (itemContribution + categoryContribution + familyContribution) * noveltyContribution;
+        itemContribution *= noveltyContribution;
+        float finalMultiplier = itemContribution + categoryContribution + familyContribution;
         finalMultiplier = (float) Math.max(config.diminishingFloor(), Math.min(noveltyBonus, finalMultiplier));
 
         return new MultiplierBreakdown(
@@ -687,5 +687,33 @@ public class DietData {
             float categoryWeight,
             float familyWeight
     ) {}
+
+    private long resolveCurrentTime(long tickTime) {
+        if (tickTime > 0L) {
+            return tickTime;
+        }
+        if (lastTickTime > 0L) {
+            return lastTickTime;
+        }
+        return System.currentTimeMillis();
+    }
+
+    private void cleanupAllMemories(long currentTime) {
+        long halfLifeMs = NourishedConfig.get().memoryWindowMinutes() * 60_000L;
+        float threshold = 0.1f;
+        removeExpiredEntries(foodMemory, halfLifeMs, currentTime, threshold);
+        removeExpiredEntries(categoryMemory, halfLifeMs, currentTime, threshold);
+        removeExpiredEntries(familyMemory, halfLifeMs, currentTime, threshold);
+    }
+
+    private void removeExpiredEntries(Map<String, FoodMemoryEntry> memory, long halfLifeMs, long currentTime, float threshold) {
+        Iterator<Map.Entry<String, FoodMemoryEntry>> iterator = memory.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, FoodMemoryEntry> entry = iterator.next();
+            if (entry.getValue().isEffectivelyExpired(halfLifeMs, currentTime, threshold)) {
+                iterator.remove();
+            }
+        }
+    }
 
 }

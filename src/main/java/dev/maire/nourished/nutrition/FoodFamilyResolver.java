@@ -1,8 +1,10 @@
 package dev.maire.nourished.nutrition;
 
+import dev.maire.nourished.api.ApiStatus;
 import net.minecraft.resources.ResourceLocation;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,6 +12,7 @@ import java.util.Map;
  * Used by both {@link FoodNutritionRegistry} and {@link UnassignedFoodScanner}.
  * All resolutions are cached for O(1) repeated lookups.
  */
+@ApiStatus.Internal
 public final class FoodFamilyResolver {
 
     private static final Map<ResourceLocation, String> CACHE = new HashMap<>();
@@ -58,5 +61,13 @@ public final class FoodFamilyResolver {
     /** Clears the resolution cache. Call on hot-reload only. */
     public static void clearCache() {
         CACHE.clear();
+    }
+
+    public static void replaceFamilies(Map<String, List<String>> configuredFamilies) {
+        FAMILY_KEYWORDS.clear();
+        for (Map.Entry<String, List<String>> entry : configuredFamilies.entrySet()) {
+            FAMILY_KEYWORDS.put(entry.getKey(), entry.getValue().toArray(String[]::new));
+        }
+        clearCache();
     }
 }
