@@ -2,12 +2,18 @@
 
 ### 🚀 Features
 
+- Enhance food scanning functionality and configuration options
+## [0.1.1-alpha] - 2026-05-08
+
+### 🚀 Features
+
 - Expand nutrient item lists across various categories
 
 ### ⚙️ Miscellaneous Tasks
 
 - Update changelog [skip ci]
 - Update version to 0.1.1-alpha in build.gradle
+- Update changelog [skip ci]
 ## [0.1.0-alpha] - 2026-05-07
 
 ### 🚀 Features
