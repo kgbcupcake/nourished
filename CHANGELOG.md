@@ -1,81 +1,3 @@
-# v0.1.2-alpha
-Date: 2026-05-08
-
-## Added
-- API contract baseline established for addon integrations.
-- Public API methods (NourishedAPI):
-  - `getCalories(Player)`
-  - `getNutrientLevel(Player, String)`
-  - `getFoodMemory(Player)`
-  - `getNutrition(Player, String)`
-  - `getCalorieCount(Player)`
-  - `getDietData(Player)`
-  - `modifyNutrition(Player, String, float)`
-  - `getVersion()`
-  - `registerNutrient(NutrientDefinition)`
-  - `addNutrient(NutrientDefinition)`
-  - `registerFoodClassification(ResourceLocation, String, float)`
-  - `registerFood(ResourceLocation, String, float)`
-  - `registerCustomEffect(EffectDefinition)`
-  - `addEffect(EffectDefinition)`
-  - `registerCompatEntry(CompatDefinition)`
-  - `addCompat(CompatDefinition)`
-  - `registerNutrientSynergy(NutrientSynergyDefinition)`
-  - `addNutrientSynergy(NutrientSynergyDefinition)`
-  - `registerFoodSynergy(FoodSynergyDefinition)`
-  - `addFoodSynergy(FoodSynergyDefinition)`
-  - `registerDietProfile(DietProfileDefinition)`
-  - `addProfile(DietProfileDefinition)`
-  - `registerMilestone(NutrientMilestoneDefinition)`
-  - `addMilestone(NutrientMilestoneDefinition)`
-  - `registerSeasonHook(NourishedSeasonHook)`
-  - `addSeasonHook(NourishedSeasonHook)`
-  - `registerAbsorptionModifier(NutrientAbsorptionModifier)`
-  - `addAbsorptionModifier(NutrientAbsorptionModifier)`
-  - `registerReportProvider(DietReportProvider)`
-  - `addReportSection(DietReportProvider)`
-- Public API events:
-  - `NourishedEvents.NutrientChangedEvent`
-  - `NourishedEvents.NutrientCriticalEvent`
-  - `NourishedEvents.NutrientExcessEvent`
-  - `NourishedEvents.FoodEatenEvent`
-  - `NutrientModifierEvent`
-- Datapack API types:
-  - `nourished/nutrients`
-  - `nourished/food_classifications`
-  - `nourished/effects`
-  - `nourished/synergies`
-  - `nourished/food_synergies`
-  - `nourished/milestones`
-  - `nourished/diet_profiles`
-  - `nourished/compat`
-  - `nourished/food_families`
-  - `nourished/module_locks`
-
-## Changed
-- API stability metadata enforced:
-  - Internal runtime infrastructure marked `@ApiStatus.Internal` across non-API integration/internal packages.
-  - `dev.maire.nourished.api.impl` and `dev.maire.nourished.api.registry` package-level docs now explicitly mark them as internal.
-- Added `@NourishedDeprecated` annotation for structured future deprecations (`since`, `replacement`, `reason`).
-- Added package-level API docs (`package-info.java`) for:
-  - `dev.maire.nourished.api`
-  - `dev.maire.nourished.api.impl`
-  - `dev.maire.nourished.api.registry`
-- Runtime API readiness log now emitted after API registration closes, including registered nutrient/effect/compat counts.
-
-## Removed
-- None.
-
-## API Notes
-- This entry is the baseline contract document for `v0.1.2-alpha`.
-- Any future breaking API/datapack/event changes must be logged here before release.
-- Current intentionally evolving surfaces (marked `@ApiStatus.Experimental`):
-  - `NourishedSeasonHook`
-  - `NutrientAbsorptionModifier`
-  - `NutrientSynergyDefinition`
-  - `FoodSynergyDefinition`
-  - `NutrientMilestoneDefinition`
-  - `DietProfileDefinition`
 # Changelog
 
 All notable changes to Nourished will be documented here.
@@ -96,6 +18,7 @@ All notable changes to Nourished will be documented here.
 - Add KubeJS integration support in Nourished
 - Include example-addon in settings.gradle
 - Improve modularity with example-addon integration
+- Establish API contract and enhance documentation for v0.1.2-alpha
 
 ### 🚜 Refactor
 
