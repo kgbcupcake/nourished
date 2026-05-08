@@ -2,6 +2,12 @@
 
 All notable changes to Nourished will be documented here.
 
+## [unreleased]
+
+### 🚀 Features
+
+- Update diet system with recent food tracking and neglected categories
+
 ## [0.1.2-alpha] - 2026-05-08
 
 ### 🚀 Features
