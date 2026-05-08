@@ -12,6 +12,10 @@ All notable changes to Nourished will be documented here.
 - Improve compatibility management and UI enhancements
 - Enhance NourishedConfigScreen with new HUD features and UI improvements
 
+### 🚜 Refactor
+
+- Remove globalized settings from NourishedConfigScreen
+
 ## [0.1.1-alpha] - 2026-05-08
 
 ### 🚀 Features
