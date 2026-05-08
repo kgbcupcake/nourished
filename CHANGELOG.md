@@ -6,6 +6,12 @@ All notable changes to Nourished will be documented here.
 
 ### 🚀 Features
 
+- Enhance configuration and UI for module management
+
+## [0.1.1-alpha] - 2026-05-08
+
+### 🚀 Features
+
 - Update diet system with recent food tracking and neglected categories
 
 ## [0.1.2-alpha] - 2026-05-08
