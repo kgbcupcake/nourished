@@ -3,6 +3,7 @@
 ### 🚀 Features
 
 - Enhance food scanning functionality and configuration options
+- Implement lightweight delta sync for diet updates
 
 ### 🚜 Refactor
 
@@ -10,6 +11,7 @@
 
 ### ⚙️ Miscellaneous Tasks
 
+- Update changelog [skip ci]
 - Update changelog [skip ci]
 ## [0.1.1-alpha] - 2026-05-08
 
