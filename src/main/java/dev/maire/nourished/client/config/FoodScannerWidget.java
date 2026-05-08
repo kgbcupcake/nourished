@@ -7,6 +7,8 @@ import com.google.gson.JsonObject;
 import dev.maire.nourished.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import dev.maire.nourished.nutrition.UnassignedFoodScanner;
+import dev.maire.nourished.nutrition.scanner.ClassificationResult;
+import dev.maire.nourished.nutrition.scanner.ClassificationSignal;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -19,6 +21,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.storage.LevelResource;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -30,17 +33,21 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Cloth Config entry: scan unassigned foods (same rules as {@code /nourished get_unassigned_foods}),
+ * Cloth Config entry: scan unassigned foods with full heuristic classification,
  * reassign nutrients per row, and write generated datapack tags into the current singleplayer save.
  */
 public final class FoodScannerWidget extends TooltipListEntry<Object> {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final int PAD = 4;
-    private static final int ROW_H = 22;
+    private static final int ROW_H = 26;
     private static final int VISIBLE_ROWS = 9;
     private static final int LIST_VIEWPORT_H = VISIBLE_ROWS * ROW_H;
     private static final int HEADER_H = 28;
+
+    private static final int COLOR_CONFIDENT = 0xFF90EE90;
+    private static final int COLOR_UNCERTAIN = 0xFFFFD700;
+    private static final int COLOR_DEFAULT = 0xFFFFFFFF;
 
     private final Button scanButton;
     private final Button writeButton;
@@ -52,6 +59,9 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
     private int lastListY;
     private int lastListW;
     private int lastListH;
+
+    @Nullable
+    private Row hoveredRow;
 
     public FoodScannerWidget() {
         super(
@@ -71,8 +81,15 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         scroll = 0;
         hasRunScan = true;
         List<String> keys = NutrientRegistry.getKeys();
+
         for (UnassignedFoodScanner.ScanHit hit : UnassignedFoodScanner.scan()) {
-            rows.add(new Row(hit.itemId(), hit.fallbackNutrient(), keys));
+            ClassificationResult result = hit.result();
+            String dominant = result != null ? result.dominant() : hit.fallbackNutrient();
+            boolean uncertain = result != null && result.uncertain();
+            float spread = result != null ? result.confidenceSpread() : 0f;
+            List<ClassificationSignal> signals = result != null ? result.topSignals(3) : List.of();
+
+            rows.add(new Row(hit.itemId(), hit.fallbackNutrient(), dominant, uncertain, spread, signals, keys));
         }
         requestReferenceRebuilding();
     }
@@ -277,6 +294,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         int clipBottom = cy + LIST_VIEWPORT_H;
         graphics.enableScissor(sx, clipTop, sx + innerW, clipBottom);
 
+        hoveredRow = null;
         int y0 = cy - scroll;
         for (int i = 0; i < rows.size(); i++) {
             Row row = rows.get(i);
@@ -285,19 +303,29 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
                 row.nutrientButton.setY(-2000);
                 continue;
             }
+
+            boolean rowHovered = mouseX >= sx && mouseX < sx + innerW && mouseY >= ry && mouseY < ry + ROW_H;
+            if (rowHovered) {
+                hoveredRow = row;
+                graphics.fill(sx, ry, sx + innerW, ry + ROW_H, 0x33FFFFFF);
+            }
+
+            int textColor = row.uncertain ? COLOR_UNCERTAIN : COLOR_CONFIDENT;
+
             String idStr = row.itemId.toString();
-            int idMaxW = innerW - 200;
+            int idMaxW = innerW - 240;
             if (mc.font.width(idStr) > idMaxW) {
                 idStr = mc.font.plainSubstrByWidth(idStr, idMaxW - mc.font.width("...")) + "...";
             }
-            graphics.drawString(mc.font, idStr, sx + 4, ry + 6, 0xFFFFFF, false);
-            String fb = row.fallbackNutrient;
-            Component fbLabel = Component.translatable("config.nourished.foodScanner.fallbackShort", fb);
-            graphics.drawString(mc.font, fbLabel, sx + innerW / 2 - 40, ry + 6, 0xCCCCCC, false);
+            graphics.drawString(mc.font, idStr, sx + 4, ry + 4, textColor, false);
+
+            String spreadStr = String.format("%.1f", row.confidenceSpread);
+            String confidenceLabel = row.uncertain ? "?" : "✓";
+            graphics.drawString(mc.font, confidenceLabel + " " + spreadStr, sx + 4, ry + 14, 0xAAAAAA, false);
 
             int btnW = Math.min(110, innerW / 3);
             row.nutrientButton.setX(sx + innerW - btnW - 4);
-            row.nutrientButton.setY(ry + 2);
+            row.nutrientButton.setY(ry + 4);
             row.nutrientButton.setWidth(btnW);
             row.nutrientButton.active = isEditable();
             row.nutrientButton.render(graphics, mouseX, mouseY, delta);
@@ -311,20 +339,48 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         writeButton.setWidth(Math.min(200, innerW));
         writeButton.active = isEditable() && canWrite();
         writeButton.render(graphics, mouseX, mouseY, delta);
+
+        if (hoveredRow != null && !hoveredRow.topSignals.isEmpty()) {
+            List<Component> tooltip = new ArrayList<>();
+            tooltip.add(Component.literal(hoveredRow.itemId.toString()).withStyle(s -> s.withBold(true)));
+            tooltip.add(Component.literal(""));
+            tooltip.add(Component.literal("Classification: " + hoveredRow.assignedNutrient));
+            tooltip.add(Component.literal("Confidence Spread: " + String.format("%.2f", hoveredRow.confidenceSpread)));
+            tooltip.add(Component.literal(hoveredRow.uncertain ? "Status: Uncertain (needs review)" : "Status: Confident"));
+            tooltip.add(Component.literal(""));
+            tooltip.add(Component.literal("Top Signals:").withStyle(s -> s.withUnderlined(true)));
+            for (ClassificationSignal sig : hoveredRow.topSignals) {
+                tooltip.add(Component.literal("  " + sig.signalType() + ": " + sig.source()));
+            }
+
+            graphics.renderTooltip(mc.font, tooltip, Optional.empty(), mouseX, mouseY);
+        }
     }
 
     private static final class Row {
         private final ResourceLocation itemId;
         private final String fallbackNutrient;
+        private final boolean uncertain;
+        private final float confidenceSpread;
+        private final List<ClassificationSignal> topSignals;
         private final List<String> keys;
         private String assignedNutrient;
         private final Button nutrientButton;
 
-        Row(ResourceLocation itemId, String fallbackNutrient, List<String> keys) {
+        Row(ResourceLocation itemId,
+            String fallbackNutrient,
+            String dominant,
+            boolean uncertain,
+            float confidenceSpread,
+            List<ClassificationSignal> topSignals,
+            List<String> keys) {
             this.itemId = itemId;
             this.fallbackNutrient = fallbackNutrient;
+            this.uncertain = uncertain;
+            this.confidenceSpread = confidenceSpread;
+            this.topSignals = topSignals;
             this.keys = keys;
-            this.assignedNutrient = fallbackNutrient;
+            this.assignedNutrient = dominant;
             this.nutrientButton = Button.builder(Component.literal(assignedNutrient), b -> cycle())
                     .bounds(0, 0, 100, 18)
                     .build();

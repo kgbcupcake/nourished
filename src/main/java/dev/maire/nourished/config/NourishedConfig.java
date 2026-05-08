@@ -85,6 +85,10 @@ public final class NourishedConfig {
     private final ModConfigSpec.DoubleValue nutrientGainScale;
     private final ModConfigSpec.DoubleValue nutrientGainPerBiteMax;
 
+    // Scanner configuration
+    private final ModConfigSpec.BooleanValue scannerEnableRecipeInheritance;
+    private final ModConfigSpec.DoubleValue scannerConfidenceSpreadThreshold;
+
     private final Map<String, ModConfigSpec.DoubleValue> nutrientDecayRateOverrides;
     private final Map<String, ModConfigSpec.DoubleValue> nutrientCriticalThresholdOverrides;
 
@@ -188,6 +192,15 @@ public final class NourishedConfig {
         nutrientGainPerBiteMax = builder
                 .comment("Max fraction (0-1) one bite can add to a single bar from tag-based foods (not food overrides).")
                 .defineInRange("nutrientGainPerBiteMax", 0.2d, 0.05d, 1.0d);
+        builder.pop();
+
+        builder.push("scanner");
+        scannerEnableRecipeInheritance = builder
+                .comment("Enable recipe ingredient inheritance signal for food classification (requires server access)")
+                .define("enableRecipeInheritance", true);
+        scannerConfidenceSpreadThreshold = builder
+                .comment("Minimum spread between dominant and secondary scores for confident classification (higher = stricter)")
+                .defineInRange("confidenceSpreadThreshold", 3.0d, 0.0d, 20.0d);
         builder.pop();
 
         nutrientDecayRateOverrides = new LinkedHashMap<>();
@@ -481,5 +494,23 @@ public final class NourishedConfig {
 
     public void setNutrientGainPerBiteMax(double value) {
         nutrientGainPerBiteMax.set(value);
+    }
+
+    // Scanner config getters
+
+    public boolean scannerEnableRecipeInheritance() {
+        return scannerEnableRecipeInheritance.get();
+    }
+
+    public void setScannerEnableRecipeInheritance(boolean value) {
+        scannerEnableRecipeInheritance.set(value);
+    }
+
+    public double scannerConfidenceSpreadThreshold() {
+        return scannerConfidenceSpreadThreshold.get();
+    }
+
+    public void setScannerConfidenceSpreadThreshold(double value) {
+        scannerConfidenceSpreadThreshold.set(value);
     }
 }

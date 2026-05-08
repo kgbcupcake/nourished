@@ -9,6 +9,7 @@ import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import dev.maire.nourished.nutrition.UnassignedFoodScanner;
+import dev.maire.nourished.nutrition.scanner.ScanCache;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -27,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 public class NourishedCommand {
 
@@ -45,6 +47,31 @@ public class NourishedCommand {
                         .then(Commands.literal("get_unassigned_foods")
                                 .requires(source -> source.hasPermission(2))
                                 .executes(this::executeGetUnassignedFoods)
+                        )
+                        .then(Commands.literal("scan_foods")
+                                .requires(source -> source.hasPermission(2))
+                                .executes(ctx -> executeScanFoods(ctx, true, true))
+                                .then(Commands.literal("full")
+                                        .executes(ctx -> executeScanFoods(ctx, true, true))
+                                )
+                                .then(Commands.literal("quick")
+                                        .executes(ctx -> executeScanFoods(ctx, false, false))
+                                )
+                                .then(Commands.literal("json")
+                                        .executes(ctx -> executeScanFoods(ctx, true, false))
+                                )
+                                .then(Commands.literal("recommendations")
+                                        .executes(ctx -> executeScanFoods(ctx, false, true))
+                                )
+                        )
+                        .then(Commands.literal("scan_cache")
+                                .requires(source -> source.hasPermission(2))
+                                .then(Commands.literal("clear")
+                                        .executes(this::executeClearCache)
+                                )
+                                .then(Commands.literal("status")
+                                        .executes(this::executeCacheStatus)
+                                )
                         )
         );
     }
@@ -98,6 +125,9 @@ public class NourishedCommand {
         return bar.toString();
     }
 
+    /**
+     * Legacy command - backward compatible simple scan.
+     */
     private int executeGetUnassignedFoods(CommandContext<CommandSourceStack> context) {
         List<String> unassignedFoods = new ArrayList<>();
         for (UnassignedFoodScanner.ScanHit hit : UnassignedFoodScanner.scan()) {
@@ -131,4 +161,104 @@ public class NourishedCommand {
         }
     }
 
+    /**
+     * New full-featured scan command.
+     */
+    private int executeScanFoods(CommandContext<CommandSourceStack> context, boolean writeReports, boolean writeRecommendations) {
+        CommandSourceStack source = context.getSource();
+        NourishedConfig config = NourishedConfig.get();
+
+        source.sendSuccess(() -> Component.literal("Starting food classification scan..."), false);
+
+        UnassignedFoodScanner.ScanOptions options = UnassignedFoodScanner.ScanOptions.defaults()
+                .withRecipeInheritance(config.scannerEnableRecipeInheritance())
+                .withThreshold((float) config.scannerConfidenceSpreadThreshold())
+                .withReports(writeReports)
+                .withRecommendations(writeRecommendations)
+                .withProgressCallback(msg -> source.sendSuccess(() -> Component.literal("[Scanner] " + msg), false));
+
+        if (source.getServer() != null) {
+            options = options.withRecipeManager(source.getServer().getRecipeManager());
+        }
+
+        final UnassignedFoodScanner.ScanOptions finalOptions = options;
+
+        CompletableFuture.supplyAsync(() -> UnassignedFoodScanner.scanFull(finalOptions))
+                .thenAccept(result -> {
+                    source.getServer().execute(() -> {
+                        ScanCache.ScanSummary summary = result.summary();
+
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("\n=== Food Classification Complete ===\n");
+                        sb.append(String.format(Locale.ROOT, "  Total scanned:   %d\n", summary.totalScanned()));
+                        sb.append(String.format(Locale.ROOT, "  Auto-classified: %d (confident)\n", summary.autoClassified()));
+                        sb.append(String.format(Locale.ROOT, "  Uncertain:       %d (needs review)\n", summary.uncertain()));
+                        sb.append(String.format(Locale.ROOT, "  Already tagged:  %d (skipped)\n", summary.alreadyTagged()));
+
+                        if (result.diff() != null && result.diff().hasChanges()) {
+                            sb.append(String.format(Locale.ROOT, "\nChanges from last scan:\n"));
+                            sb.append(String.format(Locale.ROOT, "  Added:   %d\n", result.diff().added().size()));
+                            sb.append(String.format(Locale.ROOT, "  Changed: %d\n", result.diff().changed().size()));
+                            sb.append(String.format(Locale.ROOT, "  Removed: %d\n", result.diff().removed().size()));
+                        }
+
+                        if (writeReports) {
+                            sb.append("\nReports written to config/nourished/");
+                        }
+                        if (writeRecommendations) {
+                            sb.append("\nTag recommendations written to config/nourished/tag_recommendations.json");
+                        }
+
+                        source.sendSuccess(() -> Component.literal(sb.toString()), false);
+                    });
+                })
+                .exceptionally(ex -> {
+                    source.getServer().execute(() -> {
+                        Nourished.LOGGER.error("[NourishedCommand] Scan failed", ex);
+                        source.sendFailure(Component.literal("Scan failed: " + ex.getMessage()));
+                    });
+                    return null;
+                });
+
+        return 1;
+    }
+
+    private int executeClearCache(CommandContext<CommandSourceStack> context) {
+        UnassignedFoodScanner.invalidateCache();
+        context.getSource().sendSuccess(
+                () -> Component.literal("Food scanner cache cleared. Next scan will perform a full analysis."),
+                false
+        );
+        return 1;
+    }
+
+    private int executeCacheStatus(CommandContext<CommandSourceStack> context) {
+        ScanCache cache = UnassignedFoodScanner.getCache();
+        if (cache == null || cache.isEmpty()) {
+            context.getSource().sendSuccess(
+                    () -> Component.literal("Scanner cache is empty. Run /nourished scan_foods to populate."),
+                    false
+            );
+        } else {
+            String hash = cache.getModListHash();
+            int size = cache.size();
+            boolean valid = cache.isValid();
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("=== Scanner Cache Status ===\n");
+            sb.append(String.format(Locale.ROOT, "  Entries: %d\n", size));
+            sb.append(String.format(Locale.ROOT, "  Mod hash: %s\n", hash.substring(0, Math.min(12, hash.length())) + "..."));
+            sb.append(String.format(Locale.ROOT, "  Valid: %s\n", valid ? "Yes" : "No (mod list changed)"));
+
+            ScanCache.ScanSummary lastSummary = cache.getLastSummary();
+            if (lastSummary != null) {
+                sb.append(String.format(Locale.ROOT, "\nLast scan:\n"));
+                sb.append(String.format(Locale.ROOT, "  Total: %d, Confident: %d, Uncertain: %d\n",
+                        lastSummary.totalScanned(), lastSummary.autoClassified(), lastSummary.uncertain()));
+            }
+
+            context.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+        }
+        return 1;
+    }
 }
