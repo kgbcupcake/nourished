@@ -317,7 +317,8 @@ public class DietScreen extends Screen {
         List<String> neglected = ClientDietCache.getNeglectedCategories();
         if (!neglected.isEmpty()) {
             drawRoundedBox(g, x - 2, y - 2, bw + 4, 46);
-            g.drawString(font, Component.translatable("nourished.screen.diet.suggestion_label"),
+            String suggestionHeader = Component.translatable("nourished.screen.diet.suggestion_label").getString();
+            g.drawString(font, font.plainSubstrByWidth(suggestionHeader, bw),
                     x, y, COL_HEADER, false);
             y += 10;
 
@@ -334,10 +335,13 @@ public class DietScreen extends Screen {
                 }
                 if (exampleItem == null) continue;
 
-                int colX = x + col * 20;
+                int suggestionColW = (bw - 4) / 2;
+                int colX = x + col * suggestionColW;
                 g.renderItem(new ItemStack(exampleItem), colX, y);
+                String label = Component.translatable("nourished.screen.diet.bar." + categoryKey).getString();
+                int labelMaxWidth = Math.max(0, suggestionColW - 20);
                 g.drawString(font,
-                        Component.translatable("nourished.screen.diet.bar." + categoryKey),
+                        font.plainSubstrByWidth(label, labelMaxWidth),
                         colX + 18,
                         y + 4,
                         NutrientUiColors.baseColorArgb(categoryKey),

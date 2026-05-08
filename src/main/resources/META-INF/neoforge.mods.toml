@@ -3,8 +3,9 @@ loaderVersion="[4,)"
 license="MIT"
 
 [[mods]]
-modId="nourished"
-version="1.0.0"
+modId="Nourished"
+version="v0.1.2-alpha"
 displayName="Nourished"
+logoFile="nourished_icon.png"
 authors="Marie"
-description="A dynamic nutrition and diet tracking mod with native compatibility for Farmer's Delight and Pam's HarvestCraft."
+description="A true adventurer knows that survival depends on more than just filling your belly. Nourished tracks your diet diversity and rewards those who eat well — built for Farmer's Delight and Pam's HarvestCraft."

@@ -8,6 +8,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -118,36 +119,19 @@ public final class NourishedConfig {
     // config.nourished.compat.<modid>.enableTagCompat.desc
     private final Map<String, ModConfigSpec.BooleanValue> compatCodeToggles = new LinkedHashMap<>();
     private final Map<String, ModConfigSpec.BooleanValue> compatTagToggles = new LinkedHashMap<>();
+    private final Map<String, ModConfigSpec.BooleanValue> moduleToggles = new LinkedHashMap<>();
 
     private NourishedConfig(ModConfigSpec.Builder builder) {
         builder.push("modules");
-        enableDecay = builder
-                .comment("When false, NutritionDecayHandler does nothing")
-                .define("enableDecay", true);
-        enableEffects = builder
-                .comment("When false, status effects from nutrition are not applied")
-                .define("enableEffects", true);
-        enableHUD = builder
-                .comment("When false, the nutrition HUD overlay is hidden")
-                .define("enableHUD", true);
-        enableToasts = builder
-                .comment("When false, NourishedToastManager never queues toasts")
-                .define("enableToasts", true);
-        enableFoodTooltips = builder
-                .comment("When false, food tooltips do not show nutrient info")
-                .define("enableFoodTooltips", true);
-        enableCalorieTracking = builder
-                .comment("When false, DietData.addCalories() is never called and calorie display is hidden")
-                .define("enableCalorieTracking", true);
-        enableDietScreen = builder
-                .comment("When false, the keybind to open DietScreen does nothing")
-                .define("enableDietScreen", true);
-        enableCriticalToasts = builder
-                .comment("Separate from enableToasts, controls only the critical-threshold toast specifically")
-                .define("enableCriticalToasts", true);
-        enableSleepBonus = builder
-                .comment("When true, sleeping with all nutrient bars above 50% grants Regeneration I for 30 seconds")
-                .define("enableSleepBonus", true);
+        enableDecay = defineModuleToggle(builder, "enableDecay", "When false, NutritionDecayHandler does nothing", true);
+        enableEffects = defineModuleToggle(builder, "enableEffects", "When false, status effects from nutrition are not applied", true);
+        enableHUD = defineModuleToggle(builder, "enableHUD", "When false, the nutrition HUD overlay is hidden", true);
+        enableToasts = defineModuleToggle(builder, "enableToasts", "When false, NourishedToastManager never queues toasts", true);
+        enableFoodTooltips = defineModuleToggle(builder, "enableFoodTooltips", "When false, food tooltips do not show nutrient info", true);
+        enableCalorieTracking = defineModuleToggle(builder, "enableCalorieTracking", "When false, DietData.addCalories() is never called and calorie display is hidden", true);
+        enableDietScreen = defineModuleToggle(builder, "enableDietScreen", "When false, the keybind to open DietScreen does nothing", true);
+        enableCriticalToasts = defineModuleToggle(builder, "enableCriticalToasts", "Separate from enableToasts, controls only the critical-threshold toast specifically", true);
+        enableSleepBonus = defineModuleToggle(builder, "enableSleepBonus", "When true, sleeping with all nutrient bars above 50% grants Regeneration I for 30 seconds", true);
         builder.pop();
 
         builder.push("general");
@@ -532,6 +516,22 @@ public final class NourishedConfig {
         return compatTagToggles;
     }
 
+    public Map<String, ModConfigSpec.BooleanValue> moduleToggles() {
+        return Collections.unmodifiableMap(moduleToggles);
+    }
+
+    public boolean isModuleEnabled(String key) {
+        ModConfigSpec.BooleanValue value = moduleToggles.get(key);
+        return value != null && value.get();
+    }
+
+    public void setModuleEnabled(String key, boolean enabled) {
+        ModConfigSpec.BooleanValue value = moduleToggles.get(key);
+        if (value != null) {
+            value.set(enabled);
+        }
+    }
+
     public int memoryWindowMinutes() {
         return memoryWindowMinutes.get();
     }
@@ -616,5 +616,16 @@ public final class NourishedConfig {
 
     public void setScannerConfidenceSpreadThreshold(double value) {
         scannerConfidenceSpreadThreshold.set(value);
+    }
+
+    private ModConfigSpec.BooleanValue defineModuleToggle(
+            ModConfigSpec.Builder builder,
+            String key,
+            String comment,
+            boolean defaultValue
+    ) {
+        ModConfigSpec.BooleanValue value = builder.comment(comment).define(key, defaultValue);
+        moduleToggles.put(key, value);
+        return value;
     }
 }

@@ -29,6 +29,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -48,15 +49,18 @@ public final class NourishedConfigScreen {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTitle(Component.translatable("config.nourished.title"));
+        builder.setGlobalized(true);
+        builder.setGlobalizedExpanded(true);
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
         Map<String, PendingOverride> decayOverrides = new LinkedHashMap<>();
         Map<String, PendingOverride> criticalOverrides = new LinkedHashMap<>();
         Map<String, FoodValuePending> foodValuePending = new LinkedHashMap<>();
         Map<String, CompatPending> compatPending = new LinkedHashMap<>();
+        Map<String, AtomicBoolean> modulePending = new LinkedHashMap<>();
 
         addPresetsCategory(builder, entryBuilder, parent);
-        addModulesCategory(config, builder, entryBuilder);
+        addModulesCategory(config, builder, entryBuilder, modulePending);
         addGeneralCategory(config, builder, entryBuilder);
         addThresholdCategory(config, builder, entryBuilder);
         addEffectsCategory(config, builder, entryBuilder);
@@ -96,10 +100,18 @@ public final class NourishedConfigScreen {
                 if (codeValue != null) codeValue.set(cp.codeCompat.get());
                 if (tagValue != null) tagValue.set(cp.tagCompat.get());
             }
+            for (Map.Entry<String, AtomicBoolean> entry : modulePending.entrySet()) {
+                config.setModuleEnabled(entry.getKey(), entry.getValue().get());
+            }
+            // Dependency guard: critical toasts only makes sense when toasts are enabled.
+            if (!config.isModuleEnabled("enableToasts")) {
+                config.setModuleEnabled("enableCriticalToasts", false);
+            }
             FoodValueRegistry.save();
             ColorRegistry.save();
             NutrientUiColors.clearOverrides();
             NourishedClientConfig.saveNow();
+            NourishedConfig.saveNow();
         });
         return builder.build();
     }
@@ -120,119 +132,97 @@ public final class NourishedConfigScreen {
     private static void addModulesCategory(
             NourishedConfig config,
             ConfigBuilder builder,
-            ConfigEntryBuilder eb
+            ConfigEntryBuilder eb,
+            Map<String, AtomicBoolean> modulePending
     ) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.modules"));
-
-        if (!LockRegistry.isLocked("enableDecay")) {
-            var entry = eb.startBooleanToggle(Component.translatable("config.nourished.enableDecay"), config.enableDecay())
-                    .setDefaultValue(true)
-                    .setTooltip(Component.translatable("config.nourished.enableDecay.desc"))
-                    .setSaveConsumer(config::setEnableDecay)
-                    .build();
-            if (LockRegistry.isServerOnly("enableDecay") && isMultiplayer()) {
-                entry.setEditable(false);
+        List<ModuleMeta> metas = moduleMetas(config.moduleToggles());
+        List<String> editableModuleKeys = new ArrayList<>();
+        Map<String, List<AbstractConfigListEntry>> groupedEntries = new LinkedHashMap<>();
+        for (String group : List.of("core", "ui", "other")) {
+            groupedEntries.put(group, new ArrayList<>());
+        }
+        for (ModuleMeta meta : metas) {
+            String key = meta.key;
+            if (LockRegistry.isLocked(key)) {
+                continue;
             }
-            category.addEntry(entry);
+            AtomicBoolean pending = new AtomicBoolean(config.isModuleEnabled(key));
+            modulePending.put(key, pending);
+            var entry = new ModuleToggleListEntry(
+                    Component.translatable("config.nourished." + key),
+                    Component.translatable("config.nourished." + key + ".desc"),
+                    pending,
+                    meta.group,
+                    meta.dependsOn,
+                    modulePending);
+            boolean editable = !(LockRegistry.isServerOnly(key) && isMultiplayer());
+            if (!editable) {
+                entry.setEditable(false);
+            } else {
+                editableModuleKeys.add(key);
+            }
+            groupedEntries.getOrDefault(meta.group, groupedEntries.get("other")).add(entry);
         }
 
-        if (!LockRegistry.isLocked("enableEffects")) {
-            var entry = eb.startBooleanToggle(Component.translatable("config.nourished.enableEffects"), config.enableEffects())
-                    .setDefaultValue(true)
-                    .setTooltip(Component.translatable("config.nourished.enableEffects.desc"))
-                    .setSaveConsumer(config::setEnableEffects)
-                    .build();
-            if (LockRegistry.isServerOnly("enableEffects") && isMultiplayer()) {
-                entry.setEditable(false);
-            }
-            category.addEntry(entry);
+        if (!editableModuleKeys.isEmpty()) {
+            category.addEntry(new ModuleProfilesListEntry(modulePending, editableModuleKeys));
+            category.addEntry(new ModuleBulkToggleListEntry(editableModuleKeys, modulePending));
         }
 
-        if (!LockRegistry.isLocked("enableHUD")) {
-            var entry = eb.startBooleanToggle(Component.translatable("config.nourished.enableHUD"), config.enableHUD())
-                    .setDefaultValue(true)
-                    .setTooltip(Component.translatable("config.nourished.enableHUD.desc"))
-                    .setSaveConsumer(config::setEnableHUD)
-                    .build();
-            if (LockRegistry.isServerOnly("enableHUD") && isMultiplayer()) {
-                entry.setEditable(false);
-            }
-            category.addEntry(entry);
-        }
+        addModuleGroupSubcategory(category, eb, "core", groupedEntries.get("core"));
+        addModuleGroupSubcategory(category, eb, "ui", groupedEntries.get("ui"));
+        addModuleGroupSubcategory(category, eb, "other", groupedEntries.get("other"));
 
-        if (!LockRegistry.isLocked("enableToasts")) {
-            var entry = eb.startBooleanToggle(Component.translatable("config.nourished.enableToasts"), config.enableToasts())
-                    .setDefaultValue(true)
-                    .setTooltip(Component.translatable("config.nourished.enableToasts.desc"))
-                    .setSaveConsumer(config::setEnableToasts)
-                    .build();
-            if (LockRegistry.isServerOnly("enableToasts") && isMultiplayer()) {
-                entry.setEditable(false);
-            }
-            category.addEntry(entry);
-        }
-
-        if (!LockRegistry.isLocked("enableFoodTooltips")) {
-            var entry = eb.startBooleanToggle(Component.translatable("config.nourished.enableFoodTooltips"), config.enableFoodTooltips())
-                    .setDefaultValue(true)
-                    .setTooltip(Component.translatable("config.nourished.enableFoodTooltips.desc"))
-                    .setSaveConsumer(config::setEnableFoodTooltips)
-                    .build();
-            if (LockRegistry.isServerOnly("enableFoodTooltips") && isMultiplayer()) {
-                entry.setEditable(false);
-            }
-            category.addEntry(entry);
-        }
-
-        if (!LockRegistry.isLocked("enableCalorieTracking")) {
-            var entry = eb.startBooleanToggle(Component.translatable("config.nourished.enableCalorieTracking"), config.enableCalorieTracking())
-                    .setDefaultValue(true)
-                    .setTooltip(Component.translatable("config.nourished.enableCalorieTracking.desc"))
-                    .setSaveConsumer(config::setEnableCalorieTracking)
-                    .build();
-            if (LockRegistry.isServerOnly("enableCalorieTracking") && isMultiplayer()) {
-                entry.setEditable(false);
-            }
-            category.addEntry(entry);
-        }
-
-        if (!LockRegistry.isLocked("enableDietScreen")) {
-            var entry = eb.startBooleanToggle(Component.translatable("config.nourished.enableDietScreen"), config.enableDietScreen())
-                    .setDefaultValue(true)
-                    .setTooltip(Component.translatable("config.nourished.enableDietScreen.desc"))
-                    .setSaveConsumer(config::setEnableDietScreen)
-                    .build();
-            if (LockRegistry.isServerOnly("enableDietScreen") && isMultiplayer()) {
-                entry.setEditable(false);
-            }
-            category.addEntry(entry);
-        }
-
-        if (!LockRegistry.isLocked("enableCriticalToasts")) {
-            var entry = eb.startBooleanToggle(Component.translatable("config.nourished.enableCriticalToasts"), config.enableCriticalToasts())
-                    .setDefaultValue(true)
-                    .setTooltip(Component.translatable("config.nourished.enableCriticalToasts.desc"))
-                    .setSaveConsumer(config::setEnableCriticalToasts)
-                    .build();
-            if (LockRegistry.isServerOnly("enableCriticalToasts") && isMultiplayer()) {
-                entry.setEditable(false);
-            }
-            category.addEntry(entry);
-        }
-
-        if (!LockRegistry.isLocked("enableSleepBonus")) {
-            var entry = eb.startBooleanToggle(Component.translatable("config.nourished.enableSleepBonus"), config.enableSleepBonus())
-                    .setDefaultValue(true)
-                    .setTooltip(Component.translatable("config.nourished.enableSleepBonus.desc"))
-                    .setSaveConsumer(config::setEnableSleepBonus)
-                    .build();
-            if (LockRegistry.isServerOnly("enableSleepBonus") && isMultiplayer()) {
-                entry.setEditable(false);
-            }
-            category.addEntry(entry);
+        if (!editableModuleKeys.isEmpty()) {
+            category.addEntry(eb.startTextDescription(Component.translatable("config.nourished.modules.dependencyHint")).build());
         }
 
         addReloadButton(category, eb);
+    }
+
+    private static void addModuleGroupSubcategory(
+            ConfigCategory category,
+            ConfigEntryBuilder eb,
+            String group,
+            List<AbstractConfigListEntry> entries
+    ) {
+        if (entries == null || entries.isEmpty()) {
+            return;
+        }
+        category.addEntry(
+                eb.startSubCategory(groupTitle(group), entries)
+                        .setExpanded(true)
+                        .build()
+        );
+    }
+
+    private static Component groupTitle(String group) {
+        String icon = switch (group) {
+            case "core" -> "⚙ ";
+            case "ui" -> "🖵 ";
+            default -> "▣ ";
+        };
+        return Component.literal(icon).append(Component.translatable("config.nourished.modules.group." + group));
+    }
+
+    private static List<ModuleMeta> moduleMetas(Map<String, ModConfigSpec.BooleanValue> moduleMap) {
+        List<ModuleMeta> out = new ArrayList<>();
+        for (String key : moduleMap.keySet()) {
+            String group;
+            String dependsOn = null;
+            switch (key) {
+                case "enableDecay", "enableEffects", "enableCalorieTracking", "enableSleepBonus" -> group = "core";
+                case "enableHUD", "enableDietScreen", "enableFoodTooltips", "enableToasts", "enableCriticalToasts" -> group = "ui";
+                default -> group = "other";
+            }
+            if ("enableCriticalToasts".equals(key)) {
+                dependsOn = "enableToasts";
+            }
+            out.add(new ModuleMeta(key, group, dependsOn));
+        }
+        out.sort(Comparator.comparing((ModuleMeta m) -> m.group).thenComparing(m -> m.key));
+        return out;
     }
 
     private static void addGeneralCategory(NourishedConfig config, ConfigBuilder builder, ConfigEntryBuilder eb) {
@@ -831,6 +821,364 @@ public final class NourishedConfigScreen {
             this.tagCompat = new AtomicBoolean(tagCompat);
         }
     }
+
+    private static final class ModuleBulkToggleListEntry extends TooltipListEntry<Object> {
+        private static final int BUTTON_HEIGHT = 20;
+        private static final int GAP = 6;
+
+        private final List<String> editableModuleKeys;
+        private final Map<String, AtomicBoolean> modulePending;
+        private final Button enableAllButton;
+        private final Button disableAllButton;
+
+        ModuleBulkToggleListEntry(List<String> editableModuleKeys, Map<String, AtomicBoolean> modulePending) {
+            super(
+                    Component.translatable("config.nourished.modules.bulk"),
+                    () -> Optional.of(new Component[]{Component.translatable("config.nourished.modules.bulk.desc")}),
+                    false);
+            this.editableModuleKeys = editableModuleKeys;
+            this.modulePending = modulePending;
+            this.enableAllButton = Button.builder(Component.translatable("config.nourished.modules.enableAll"), b -> setAll(true))
+                    .bounds(0, 0, 120, BUTTON_HEIGHT)
+                    .build();
+            this.disableAllButton = Button.builder(Component.translatable("config.nourished.modules.disableAll"), b -> setAll(false))
+                    .bounds(0, 0, 120, BUTTON_HEIGHT)
+                    .build();
+        }
+
+        private void setAll(boolean value) {
+            for (String key : editableModuleKeys) {
+                AtomicBoolean pending = modulePending.get(key);
+                if (pending != null) {
+                    pending.set(value);
+                }
+            }
+        }
+
+        @Override
+        public boolean isEdited() {
+            return false;
+        }
+
+        @Override
+        public void save() {
+            // Module values are saved by each entry's save consumer.
+        }
+
+        @Override
+        public Object getValue() {
+            return Boolean.FALSE;
+        }
+
+        @Override
+        public Optional<Object> getDefaultValue() {
+            return Optional.empty();
+        }
+
+        @Override
+        public int getItemHeight() {
+            return 24;
+        }
+
+        @Override
+        public void render(
+                GuiGraphics graphics,
+                int index,
+                int y,
+                int x,
+                int entryWidth,
+                int entryHeight,
+                int mouseX,
+                int mouseY,
+                boolean isHovered,
+                float delta) {
+            int btnWidth = (entryWidth - GAP) / 2;
+            enableAllButton.active = isEditable();
+            disableAllButton.active = isEditable();
+            enableAllButton.setX(x);
+            enableAllButton.setY(y);
+            enableAllButton.setWidth(btnWidth);
+            disableAllButton.setX(x + btnWidth + GAP);
+            disableAllButton.setY(y);
+            disableAllButton.setWidth(btnWidth);
+            enableAllButton.render(graphics, mouseX, mouseY, delta);
+            disableAllButton.render(graphics, mouseX, mouseY, delta);
+        }
+
+        @Override
+        public List<? extends net.minecraft.client.gui.components.events.GuiEventListener> children() {
+            return List.of(enableAllButton, disableAllButton);
+        }
+
+        @Override
+        public List<? extends net.minecraft.client.gui.narration.NarratableEntry> narratables() {
+            return List.of(enableAllButton, disableAllButton);
+        }
+    }
+
+    private static final class ModuleProfilesListEntry extends TooltipListEntry<Object> {
+        private static final int BUTTON_HEIGHT = 20;
+        private static final int GAP = 6;
+
+        private final Map<String, AtomicBoolean> modulePending;
+        private final List<String> editableModuleKeys;
+        private final Button balancedButton;
+        private final Button minimalistButton;
+        private final Button immersiveButton;
+
+        ModuleProfilesListEntry(Map<String, AtomicBoolean> modulePending, List<String> editableModuleKeys) {
+            super(
+                    Component.translatable("config.nourished.modules.profiles"),
+                    () -> Optional.of(new Component[]{Component.translatable("config.nourished.modules.profiles.desc")}),
+                    false);
+            this.modulePending = modulePending;
+            this.editableModuleKeys = editableModuleKeys;
+            this.balancedButton = Button.builder(Component.translatable("config.nourished.modules.profile.balanced"), b -> applyProfile("balanced"))
+                    .bounds(0, 0, 110, BUTTON_HEIGHT)
+                    .build();
+            this.minimalistButton = Button.builder(Component.translatable("config.nourished.modules.profile.minimalist"), b -> applyProfile("minimalist"))
+                    .bounds(0, 0, 110, BUTTON_HEIGHT)
+                    .build();
+            this.immersiveButton = Button.builder(Component.translatable("config.nourished.modules.profile.immersive"), b -> applyProfile("immersive"))
+                    .bounds(0, 0, 110, BUTTON_HEIGHT)
+                    .build();
+        }
+
+        private void applyProfile(String profile) {
+            // Start with all OFF then enable profile-specific modules.
+            for (String key : editableModuleKeys) {
+                AtomicBoolean pending = modulePending.get(key);
+                if (pending != null) pending.set(false);
+            }
+            switch (profile) {
+                case "minimalist" -> setModules(true, "enableDecay", "enableEffects", "enableCalorieTracking");
+                case "immersive" -> setModules(true, editableModuleKeys.toArray(new String[0]));
+                default -> setModules(true,
+                        "enableDecay",
+                        "enableEffects",
+                        "enableHUD",
+                        "enableToasts",
+                        "enableFoodTooltips",
+                        "enableCalorieTracking",
+                        "enableDietScreen",
+                        "enableCriticalToasts",
+                        "enableSleepBonus");
+            }
+            // Dependency guard.
+            AtomicBoolean toasts = modulePending.get("enableToasts");
+            AtomicBoolean crit = modulePending.get("enableCriticalToasts");
+            if (toasts != null && crit != null && !toasts.get()) {
+                crit.set(false);
+            }
+        }
+
+        private void setModules(boolean value, String... keys) {
+            for (String key : keys) {
+                AtomicBoolean pending = modulePending.get(key);
+                if (pending != null) pending.set(value);
+            }
+        }
+
+        @Override
+        public boolean isEdited() {
+            return false;
+        }
+
+        @Override
+        public void save() {}
+
+        @Override
+        public Object getValue() {
+            return Boolean.FALSE;
+        }
+
+        @Override
+        public Optional<Object> getDefaultValue() {
+            return Optional.empty();
+        }
+
+        @Override
+        public int getItemHeight() {
+            return 24;
+        }
+
+        @Override
+        public void render(
+                GuiGraphics graphics,
+                int index,
+                int y,
+                int x,
+                int entryWidth,
+                int entryHeight,
+                int mouseX,
+                int mouseY,
+                boolean isHovered,
+                float delta) {
+            int btnWidth = (entryWidth - GAP * 2) / 3;
+            balancedButton.active = isEditable();
+            minimalistButton.active = isEditable();
+            immersiveButton.active = isEditable();
+            balancedButton.setX(x);
+            balancedButton.setY(y);
+            balancedButton.setWidth(btnWidth);
+            minimalistButton.setX(x + btnWidth + GAP);
+            minimalistButton.setY(y);
+            minimalistButton.setWidth(btnWidth);
+            immersiveButton.setX(x + (btnWidth + GAP) * 2);
+            immersiveButton.setY(y);
+            immersiveButton.setWidth(btnWidth);
+            balancedButton.render(graphics, mouseX, mouseY, delta);
+            minimalistButton.render(graphics, mouseX, mouseY, delta);
+            immersiveButton.render(graphics, mouseX, mouseY, delta);
+        }
+
+        @Override
+        public List<? extends net.minecraft.client.gui.components.events.GuiEventListener> children() {
+            return List.of(balancedButton, minimalistButton, immersiveButton);
+        }
+
+        @Override
+        public List<? extends net.minecraft.client.gui.narration.NarratableEntry> narratables() {
+            return List.of(balancedButton, minimalistButton, immersiveButton);
+        }
+    }
+
+    private static final class ModuleToggleListEntry extends TooltipListEntry<Boolean> {
+        private static final int BUTTON_WIDTH = 130;
+        private static final int BUTTON_HEIGHT = 20;
+        private static final int COL_LABEL = 0xFFE0E0E0;
+        private static final int COL_HINT = 0xFFCC8844;
+        private static final int COL_ON_TEXT = 0xFFB8F2B8;
+        private static final int COL_OFF_TEXT = 0xFFF0B2B2;
+        private static final int COL_CHIP_ON = 0xFF2C7F2C;
+        private static final int COL_CHIP_OFF = 0xFF8A2F2F;
+        private static final int COL_CHIP_BORDER = 0xFF1A1A1A;
+        private static final int COL_CHIP_HOVER = 0x22FFFFFF;
+        private static final int COL_ROW_SEPARATOR = 0x223A3A3A;
+
+        private final AtomicBoolean pending;
+        private final String group;
+        private final String dependsOnKey;
+        private final Map<String, AtomicBoolean> modulePending;
+        private final Button toggleButton;
+        private final Component label;
+
+        ModuleToggleListEntry(
+                Component label,
+                Component tooltip,
+                AtomicBoolean pending,
+                String group,
+                String dependsOnKey,
+                Map<String, AtomicBoolean> modulePending
+        ) {
+            super(label, () -> Optional.of(new Component[]{tooltip}), false);
+            this.label = label;
+            this.pending = pending;
+            this.group = group;
+            this.dependsOnKey = dependsOnKey;
+            this.modulePending = modulePending;
+            this.toggleButton = Button.builder(Component.empty(), b -> {
+                        this.pending.set(!this.pending.get());
+                        updateButtonLabel();
+                    })
+                    .bounds(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)
+                    .build();
+            updateButtonLabel();
+        }
+
+        private void updateButtonLabel() {
+            toggleButton.setMessage(Component.literal(pending.get() ? "ON" : "OFF"));
+        }
+
+        @Override
+        public boolean isEdited() {
+            return false;
+        }
+
+        @Override
+        public void save() {
+            // Saved by outer screen save runnable.
+        }
+
+        @Override
+        public Boolean getValue() {
+            return pending.get();
+        }
+
+        @Override
+        public Optional<Boolean> getDefaultValue() {
+            return Optional.of(true);
+        }
+
+        @Override
+        public int getItemHeight() {
+            return 24;
+        }
+
+        @Override
+        public void render(
+                GuiGraphics graphics,
+                int index,
+                int y,
+                int x,
+                int entryWidth,
+                int entryHeight,
+                int mouseX,
+                int mouseY,
+                boolean isHovered,
+                float delta) {
+            updateButtonLabel();
+            toggleButton.active = isEditable();
+            toggleButton.setX(x + entryWidth - BUTTON_WIDTH);
+            toggleButton.setY(y);
+            toggleButton.setWidth(BUTTON_WIDTH);
+            String groupIcon = switch (group) {
+                case "core" -> "⚙";
+                case "ui" -> "🖵";
+                default -> "▣";
+            };
+            graphics.drawString(Minecraft.getInstance().font, groupIcon, x, y + 6, 0xFF9AA5B1, false);
+            graphics.drawString(Minecraft.getInstance().font, label, x + 12, y + 6, COL_LABEL, false);
+
+            int chipX = x + 152;
+            int chipY = y + 4;
+            int chipW = 52;
+            int chipH = 12;
+            boolean isOn = pending.get();
+            int chipFill = isOn ? COL_CHIP_ON : COL_CHIP_OFF;
+            int chipText = isOn ? COL_ON_TEXT : COL_OFF_TEXT;
+            graphics.fill(chipX, chipY, chipX + chipW, chipY + chipH, chipFill);
+            graphics.renderOutline(chipX, chipY, chipW, chipH, COL_CHIP_BORDER);
+            if (mouseX >= chipX && mouseX < chipX + chipW && mouseY >= chipY && mouseY < chipY + chipH) {
+                graphics.fill(chipX, chipY, chipX + chipW, chipY + chipH, COL_CHIP_HOVER);
+            }
+            String chipLabel = isOn ? "ENABLED" : "DISABLED";
+            int chipTextX = chipX + (chipW - Minecraft.getInstance().font.width(chipLabel)) / 2;
+            graphics.drawString(Minecraft.getInstance().font, chipLabel, chipTextX, chipY + 2, chipText, false);
+            if (dependsOnKey != null && pending.get()) {
+                AtomicBoolean dep = modulePending.get(dependsOnKey);
+                if (dep != null && !dep.get()) {
+                    String depLabel = Component.translatable("config.nourished." + dependsOnKey).getString();
+                    String depText = Component.translatable("config.nourished.modules.requires", depLabel).getString();
+                    graphics.drawString(Minecraft.getInstance().font, depText, x + 152, y + 15, COL_HINT, false);
+                }
+            }
+            graphics.fill(x, y + 23, x + entryWidth, y + 24, COL_ROW_SEPARATOR);
+            toggleButton.render(graphics, mouseX, mouseY, delta);
+        }
+
+        @Override
+        public List<? extends net.minecraft.client.gui.components.events.GuiEventListener> children() {
+            return List.of(toggleButton);
+        }
+
+        @Override
+        public List<? extends net.minecraft.client.gui.narration.NarratableEntry> narratables() {
+            return List.of(toggleButton);
+        }
+    }
+
+    private record ModuleMeta(String key, String group, String dependsOn) {}
 
     /**
      * Cloth Config 15 has no {@code startButton}; this mirrors {@code BooleanListEntry} layout with a single action
