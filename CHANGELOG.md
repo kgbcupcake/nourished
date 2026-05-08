@@ -15,6 +15,7 @@ All notable changes to Nourished will be documented here.
 - Register NourishedDataManager reload listener in ConfigReloadHandler
 - Enhance NourishedCommand with new nutrient and profile commands
 - Add compatibility plugins for JEI, REI, and EMI in ClientEventRegistrar
+- Add KubeJS integration support in Nourished
 
 ### 🚜 Refactor
 
