@@ -2,7 +2,7 @@
 
 All notable changes to Nourished will be documented here.
 
-## [unreleased]
+## [0.1.2-alpha] - 2026-05-08
 
 ### 🚀 Features
 
