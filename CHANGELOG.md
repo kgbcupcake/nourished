@@ -11,6 +11,7 @@ All notable changes to Nourished will be documented here.
 - Enhance mod compatibility and configuration UI
 - Improve compatibility management and UI enhancements
 - Enhance NourishedConfigScreen with new HUD features and UI improvements
+- Implement nutrition system functionality in NourishedAPI
 
 ### 🚜 Refactor
 
