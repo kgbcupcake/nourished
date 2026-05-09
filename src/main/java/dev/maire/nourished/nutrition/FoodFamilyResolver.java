@@ -2,10 +2,11 @@ package dev.maire.nourished.nutrition;
 
 import dev.maire.nourished.api.ApiStatus;
 import net.minecraft.resources.ResourceLocation;
-import java.util.HashMap;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Resolves food item IDs to logical food families based on path keyword matching.
@@ -15,7 +16,8 @@ import java.util.Map;
 @ApiStatus.Internal
 public final class FoodFamilyResolver {
 
-    private static final Map<ResourceLocation, String> CACHE = new HashMap<>();
+    // ConcurrentHashMap: resolve() may be hit from multiple threads during gameplay; computeIfAbsent is safe here.
+    private static final Map<ResourceLocation, String> CACHE = new ConcurrentHashMap<>();
 
     private static final Map<String, String[]> FAMILY_KEYWORDS = new LinkedHashMap<>();
 

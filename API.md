@@ -41,6 +41,40 @@ public final class MyAddon {
 }
 ```
 
+## Registration Window
+
+All calls to NourishedAPI.register*() must happen during mod initialization —
+specifically inside your @Mod constructor or a FMLCommonSetupEvent handler.
+
+The registration window closes automatically after mod initialization completes.
+Attempting to register outside this window throws IllegalStateException.
+
+Datapack reloads open a temporary secondary registration window for datapack-driven
+content only. This window is managed internally by Nourished and addon mods do not
+need to handle it.
+
+Rules:
+- DO register in your @Mod constructor
+- DO register in FMLCommonSetupEvent if order relative to other mods matters
+- DO NOT register lazily on first use
+- DO NOT register inside event handlers that fire after startup
+- DO NOT register on the server thread at runtime
+
+Example of correct registration timing:
+
+```java
+@Mod("my_addon")
+public final class MyAddon {
+    public MyAddon() {
+        if (!ModList.get().isLoaded("nourished")) return;
+        // safe — inside @Mod constructor, registration window is open
+        NourishedAPI.registerNutrient(myNutrientDef);
+        NourishedAPI.registerFoodClassification(
+            ResourceLocation.parse("minecraft:apple"), "fiber", 0.35f);
+    }
+}
+```
+
 ## Core Concepts
 
 - **Nutrients**: Named bars (for example `proteins`, `grains`) with thresholds and decay behavior.
@@ -202,20 +236,51 @@ CompatDefinition compat = CompatDefinition.builder("my_food_mod")
 
 ### `FoodMemoryView`
 
-Read-only interface for recent food history and variety tracking.
+Read-only view into a player's recent food consumption history. Use this to query
+dietary variety, check for recent foods, or implement diminishing returns mechanics
+in your addon.
 
-Use via:
+Obtain via:
 
 ```java
 FoodMemoryView view = NourishedAPI.getFoodMemory(player);
 ```
 
-Example:
+Methods:
 
 ```java
-FoodMemoryView view = NourishedAPI.getFoodMemory(player);
-// inspect memory fields/methods exposed by the implementation interface
+// Returns recently consumed food ids, most recent first
+List<ResourceLocation> getRecentFoods()
+
+// Returns true if the player has eaten this food within the memory window
+boolean hasEatenRecently(ResourceLocation foodId)
+
+// Returns ticks since the player last ate this food, or -1 if not in memory
+long getTimeSinceEaten(ResourceLocation foodId)
 ```
+
+The memory window duration is controlled by the memoryWindowMinutes config value.
+Entries decay exponentially and are removed once their effective weight drops below
+the configured threshold.
+
+Example — reduce nutrient gain for recently eaten foods in an absorption modifier:
+
+```java
+public class MyDiminishingReturnsModifier implements NutrientAbsorptionModifier {
+    @Override
+    public String getModifierId() { return "myaddon:diminishing_returns"; }
+
+    @Override
+    public float getAbsorptionMultiplier(Player player, String nutrientKey, float baseAmount) {
+        FoodMemoryView memory = NourishedAPI.getFoodMemory(player);
+        // if player ate this type of food very recently, reduce gain
+        // this is an example pattern — your logic will vary
+        return 1.0f;
+    }
+}
+```
+
+Do not mutate game state from inside FoodMemoryView — it is a read-only snapshot.
 
 ### `NutrientSynergyDefinition`
 
@@ -781,18 +846,35 @@ Examples:
 /nourished reload
 ```
 
-## Versioning
+## Versioning and Stability Guarantees
 
-Nourished uses API status annotations:
+Nourished uses API status annotations to communicate backwards-compatibility guarantees:
 
-- `@ApiStatus.Stable` — intended for external consumption; breaking changes should be minimized.
-- `@ApiStatus.Experimental` — available for use but may change between versions.
-- `@ApiStatus.Internal` — internal implementation detail; do not depend on this in addons.
+### @ApiStatus.Stable
+- Will not have breaking changes within the same minor version (1.x.y → 1.x.z)
+- Breaking changes require a major version bump (1.x → 2.x) with a migration guide
+- Safe to ship addons against
+- Current stable surface: NourishedAPI, NutrientDefinition, EffectDefinition,
+  CompatDefinition, NourishedEvents, NutrientModifierEvent, FoodMemoryView,
+  NourishedPlayerData, NourishedAPIVersion
+
+### @ApiStatus.Experimental
+- May change in any release without a major version bump
+- Usable but expect migration work between versions
+- Current experimental surface: DietProfileDefinition, FoodSynergyDefinition,
+  NutrientMilestoneDefinition, NutrientSynergyDefinition, NourishedSeasonHook,
+  NutrientAbsorptionModifier, NutrientRenderer, DietReportProvider
+
+### @ApiStatus.Internal
+- Not part of the public contract
+- Will change without notice in any release
+- Do not reference in addons — not even via reflection
 
 For addon authors:
-- Prefer `Stable`.
-- Treat `Experimental` as opt-in risk.
-- Avoid `Internal` entirely.
+- Depend only on @Stable APIs in released addons
+- Use @Experimental with the understanding you may need to update on any release
+- Never reference @Internal — if you need something that is currently Internal,
+  open an issue so it can be promoted with a proper stability guarantee
 
 ## Example Addon
 

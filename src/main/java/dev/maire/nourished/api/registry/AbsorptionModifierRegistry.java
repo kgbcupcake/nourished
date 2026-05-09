@@ -2,9 +2,9 @@ package dev.maire.nourished.api.registry;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NutrientAbsorptionModifier;
+import dev.maire.nourished.registry.ListRegistry;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -13,19 +13,26 @@ import java.util.List;
 @ApiStatus.Internal
 public final class AbsorptionModifierRegistry {
 
-    private static final List<NutrientAbsorptionModifier> MODIFIERS = new ArrayList<>();
+    private static final ListRegistry<NutrientAbsorptionModifier> REGISTRY = new ListRegistry<>(
+            "AbsorptionModifierRegistry",
+            Comparator.comparingInt(NutrientAbsorptionModifier::getPriority)
+    );
 
     private AbsorptionModifierRegistry() {}
 
+    @ApiStatus.Internal
+    public static void freezeInternal() {
+        REGISTRY.freeze();
+    }
+
     /**
-     * Registers an absorption modifier. Modifiers are stored in registration order
-     * and sorted by priority when applied.
+     * Registers an absorption modifier. Priority ordering is applied when the registry is frozen.
      *
      * @param modifier the absorption modifier to register
+     * @throws IllegalArgumentException if {@code modifier} is null
      */
     public static void register(NutrientAbsorptionModifier modifier) {
-        MODIFIERS.add(modifier);
-        MODIFIERS.sort((a, b) -> Integer.compare(a.getPriority(), b.getPriority()));
+        REGISTRY.register(modifier);
     }
 
     /**
@@ -34,6 +41,6 @@ public final class AbsorptionModifierRegistry {
      * @return an unmodifiable list of absorption modifiers
      */
     public static List<NutrientAbsorptionModifier> getAll() {
-        return Collections.unmodifiableList(new ArrayList<>(MODIFIERS));
+        return REGISTRY.values();
     }
 }

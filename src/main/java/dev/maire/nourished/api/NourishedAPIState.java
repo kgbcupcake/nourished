@@ -22,7 +22,14 @@ public final class NourishedAPIState {
         return currentPhase;
     }
 
+    /**
+     * Ends the mod-init registration window. Safe to call when already {@link Phase#CLOSED}
+     * (for example after a nested {@link DatapackReloadScope}).
+     */
     public static void close() {
+        if (currentPhase == Phase.CLOSED) {
+            return;
+        }
         currentPhase = Phase.CLOSED;
         Nourished.LOGGER.info("[Nourished] Registration phase: CLOSED");
     }

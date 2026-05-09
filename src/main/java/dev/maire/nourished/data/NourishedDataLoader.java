@@ -17,6 +17,7 @@ import dev.maire.nourished.api.NutrientSynergyDefinition;
 import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.FoodFamilyResolver;
+import dev.maire.nourished.registry.NourishedApiDefinitionRegistries;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -59,6 +60,8 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
         try (NourishedAPIState.DatapackReloadScope scope = NourishedAPIState.openForDatapackReload()) {
             DatapackDiagnostics diagnostics = DatapackDiagnostics.getInstance();
             diagnostics.clear();
+
+            NourishedApiDefinitionRegistries.onDatapackApplyBegin();
 
             Set<ResourceLocation> nextNutrients = new LinkedHashSet<>();
             Set<ResourceLocation> nextFoodClassifications = new LinkedHashSet<>();
@@ -234,6 +237,8 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
                 warnMalformed(fileId, ex);
             }
         }
+
+            NourishedApiDefinitionRegistries.onDatapackApplyEnd();
 
             loadedNutrients = Collections.unmodifiableSet(nextNutrients);
             loadedFoodClassifications = Collections.unmodifiableSet(nextFoodClassifications);

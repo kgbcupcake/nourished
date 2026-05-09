@@ -13,34 +13,65 @@ public class ClientDietCache {
     public static final int FLASH_MS = 600;
     private static final float INCREASE_EPSILON = 0.005f;
 
-    private static DietData current = new DietData();
+    /**
+     * Atomic client diet snapshot: {@link #diet} plus HUD lists that come from the server as a unit
+     * (full sync derives lists from {@link DietData}; delta sync carries lists on the wire separately).
+     * volatile: replaced whole on the network thread; read concurrently on the render thread.
+     */
+    private static volatile Snapshot current = Snapshot.initial();
+
+    private record Snapshot(
+            DietData diet,
+            List<String> recentFoodIds,
+            List<String> neglectedCategories,
+            List<String> fatiguedFamilies
+    ) {
+        static Snapshot initial() {
+            DietData d = new DietData();
+            return new Snapshot(d, List.of(), List.of(), List.of());
+        }
+
+        static Snapshot fromFullDiet(DietData data) {
+            DietData snapshot = DietData.copySnapshot(data);
+            List<String> recent = snapshot.foodMemory.entrySet().stream()
+                    .sorted((a, b) -> Long.compare(b.getValue().lastEatenTick(), a.getValue().lastEatenTick()))
+                    .limit(3)
+                    .map(Map.Entry::getKey)
+                    .toList();
+            return new Snapshot(
+                    snapshot,
+                    recent,
+                    snapshot.getMostNeglectedCategories(2),
+                    snapshot.getMostFatiguedFamilies(2, snapshot.lastTickTime)
+            );
+        }
+
+        static Snapshot fromDelta(DietData next, SyncDietDeltaPayload payload) {
+            return new Snapshot(
+                    next,
+                    payload.recentFoodIds(),
+                    payload.neglectedCategories(),
+                    payload.fatiguedFamilies()
+            );
+        }
+    }
+
     private static final Map<String, Long> lastNutrientIncreaseMs = new HashMap<>();
     /** Skip recording flashes on the first sync (login) so zeros-to-values does not flash every bar. */
     private static boolean firstClientSync = true;
-    private static float cachedBalanceScore = 0f;
-    private static List<String> cachedRecentFoodIds = List.of();
-    private static List<String> cachedNeglectedCategories = List.of();
-    private static List<String> cachedFatiguedFamilies = List.of();
 
     /**
      * Applies incoming full diet from the server: updates cache, records nutrient increases for bar flash
      * (except on the very first client sync this session). Used on login, respawn, dimension change.
      */
     public static void set(DietData data) {
-        DietData prev = current;
+        Snapshot prev = current;
+        Snapshot next = Snapshot.fromFullDiet(data);
         if (!firstClientSync) {
-            recordNutrientIncreases(prev.nutrients, data.nutrients);
+            recordNutrientIncreases(prev.diet.nutrients, next.diet.nutrients);
         }
         firstClientSync = false;
-        current = data;
-        cachedBalanceScore = data.getBalanceScore();
-        cachedRecentFoodIds = data.foodMemory.entrySet().stream()
-                .sorted((a, b) -> Long.compare(b.getValue().lastEatenTick(), a.getValue().lastEatenTick()))
-                .limit(3)
-                .map(Map.Entry::getKey)
-                .toList();
-        cachedNeglectedCategories = data.getMostNeglectedCategories(2);
-        cachedFatiguedFamilies = data.getMostFatiguedFamilies(2, data.lastTickTime);
+        current = next;
     }
 
     /**
@@ -49,21 +80,20 @@ public class ClientDietCache {
      * and never exist on the client. The client DietData's memory maps are always empty.
      */
     public static void applyDelta(SyncDietDeltaPayload payload) {
+        Snapshot prev = current;
         if (!firstClientSync) {
-            recordNutrientIncreases(current.nutrients, payload.nutrients());
+            recordNutrientIncreases(prev.diet.nutrients, payload.nutrients());
         }
         firstClientSync = false;
 
-        current.nutrients.clear();
-        current.nutrients.putAll(payload.nutrients());
-        current.lastNutrients.clear();
-        current.lastNutrients.putAll(payload.lastNutrients());
-        current.calories = payload.calories();
-        current.maxCalories = payload.maxCalories();
-        cachedBalanceScore = payload.balanceScore();
-        cachedRecentFoodIds = payload.recentFoodIds();
-        cachedNeglectedCategories = payload.neglectedCategories();
-        cachedFatiguedFamilies = payload.fatiguedFamilies();
+        DietData nextDiet = DietData.copySnapshot(prev.diet);
+        nextDiet.nutrients.clear();
+        nextDiet.nutrients.putAll(payload.nutrients());
+        nextDiet.lastNutrients.clear();
+        nextDiet.lastNutrients.putAll(payload.lastNutrients());
+        nextDiet.calories = payload.calories();
+        nextDiet.maxCalories = payload.maxCalories();
+        current = Snapshot.fromDelta(nextDiet, payload);
     }
 
     private static void recordNutrientIncreases(Map<String, Float> prev, Map<String, Float> next) {
@@ -94,22 +124,27 @@ public class ClientDietCache {
     }
 
     public static DietData get() {
-        return current;
+        Snapshot snap = current;
+        return snap.diet;
     }
 
     public static float getBalanceScore() {
-        return cachedBalanceScore;
+        Snapshot snap = current;
+        return snap.diet.getBalanceScore();
     }
 
     public static List<String> getRecentFoodIds() {
-        return cachedRecentFoodIds;
+        Snapshot snap = current;
+        return snap.recentFoodIds;
     }
 
     public static List<String> getNeglectedCategories() {
-        return cachedNeglectedCategories;
+        Snapshot snap = current;
+        return snap.neglectedCategories;
     }
 
     public static List<String> getFatiguedFamilies() {
-        return cachedFatiguedFamilies;
+        Snapshot snap = current;
+        return snap.fatiguedFamilies;
     }
 }

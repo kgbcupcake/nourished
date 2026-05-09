@@ -7,6 +7,7 @@ import com.mojang.logging.LogUtils;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NourishedAPIVersion;
 import dev.maire.nourished.api.NourishedAPIState;
+import dev.maire.nourished.registry.NourishedApiDefinitionRegistries;
 import dev.maire.nourished.command.NourishedCommand;
 import dev.maire.nourished.compat.kubejs.NourishedKubeJSPlugin;
 import dev.maire.nourished.compat.AutoCompatDiscovery;
@@ -84,6 +85,8 @@ public class Nourished {
                 } catch (Exception e) {
                     LOGGER.error("[Nourished] AutoCompatDiscovery failed.", e);
                 }
+                NourishedApiDefinitionRegistries.freezeModOnlyRegistriesAfterCommonSetup();
+                NourishedAPIState.close();
             });
         });
         NeoForge.EVENT_BUS.register(new DietPlayerEvents());
@@ -100,7 +103,6 @@ public class Nourished {
         }
         DietAttachment.logAllNutrientNbtPaths();
         LOGGER.info("[Nourished] Calories NBT path: {}", DietAttachment.getCaloriesNbtPath());
-        NourishedAPIState.close();
         LOGGER.info("[Nourished] API v{} ready — {} nutrients, {} effects, {} compat entries registered.",
                 NourishedAPIVersion.VERSION,
                 NutrientRegistry.getAll().size(),

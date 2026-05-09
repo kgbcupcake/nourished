@@ -2,9 +2,8 @@ package dev.maire.nourished.api.registry;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NourishedSeasonHook;
+import dev.maire.nourished.registry.ListRegistry;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -13,17 +12,23 @@ import java.util.List;
 @ApiStatus.Internal
 public final class SeasonHookRegistry {
 
-    private static final List<NourishedSeasonHook> HOOKS = new ArrayList<>();
+    private static final ListRegistry<NourishedSeasonHook> REGISTRY = new ListRegistry<>("SeasonHookRegistry", null);
 
     private SeasonHookRegistry() {}
+
+    @ApiStatus.Internal
+    public static void freezeInternal() {
+        REGISTRY.freeze();
+    }
 
     /**
      * Registers a season hook.
      *
      * @param hook the season hook to register
+     * @throws IllegalArgumentException if {@code hook} is null
      */
     public static void register(NourishedSeasonHook hook) {
-        HOOKS.add(hook);
+        REGISTRY.register(hook);
     }
 
     /**
@@ -32,6 +37,6 @@ public final class SeasonHookRegistry {
      * @return an unmodifiable list of season hooks
      */
     public static List<NourishedSeasonHook> getAll() {
-        return Collections.unmodifiableList(new ArrayList<>(HOOKS));
+        return REGISTRY.values();
     }
 }

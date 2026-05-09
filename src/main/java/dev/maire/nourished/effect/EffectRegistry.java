@@ -52,7 +52,8 @@ public class EffectRegistry {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final List<EffectDef> REGISTRY = new ArrayList<>();
+    // volatile: replaced atomically after each full parse/save (reload thread); read concurrently from server tick.
+    private static volatile List<EffectDef> REGISTRY = List.of();
     private static final Set<String> previousEffectIds = new HashSet<>();
 
     private static final String[] DEFAULT_EFFECT_RESOURCES = {
@@ -65,7 +66,7 @@ public class EffectRegistry {
     };
 
     public static List<EffectDef> getAll() {
-        return Collections.unmodifiableList(new ArrayList<>(REGISTRY));
+        return REGISTRY;
     }
 
     /**
@@ -92,7 +93,9 @@ public class EffectRegistry {
                 true,
                 false
         );
-        REGISTRY.add(def);
+        List<EffectDef> next = new ArrayList<>(REGISTRY);
+        next.add(def);
+        REGISTRY = List.copyOf(next);
         Nourished.LOGGER.info("[EffectRegistry] Registered external effect: {}", def.id());
     }
 
@@ -148,7 +151,7 @@ public class EffectRegistry {
         Nourished.LOGGER.info("[EffectRegistry] Loaded from config folder");
     }
 
-    private static void parseJson(JsonArray arr) {
+    private static void parseJson(JsonArray arr, List<EffectDef> target) {
         for (JsonElement el : arr) {
             JsonObject obj = el.getAsJsonObject();
             String id = obj.get("id").getAsString();
@@ -166,41 +169,60 @@ public class EffectRegistry {
             double thresholdMax = obj.has("threshold_max") ? obj.get("threshold_max").getAsDouble() : 1.0;
             boolean ambient = !obj.has("ambient") || obj.get("ambient").getAsBoolean();
             boolean showParticles = obj.has("show_particles") && obj.get("show_particles").getAsBoolean();
-            REGISTRY.add(new EffectDef(id, effect, nutrient, trigger, threshold, amplifier, durationTicks, enabled, thresholdMax, ambient, showParticles));
+            target.add(new EffectDef(id, effect, nutrient, trigger, threshold, amplifier, durationTicks, enabled, thresholdMax, ambient, showParticles));
         }
     }
 
     private static void parseFromReader(Reader reader) {
-        REGISTRY.clear();
         JsonArray arr = GSON.fromJson(reader, JsonArray.class);
         if (arr == null || arr.isEmpty()) {
             Nourished.LOGGER.warn("[EffectRegistry] Data was empty, using built-in defaults");
             loadDefaults();
             return;
         }
-        parseJson(arr);
-        if (REGISTRY.isEmpty()) loadDefaults();
+        List<EffectDef> old = REGISTRY;
+        previousEffectIds.clear();
+        for (EffectDef def : old) {
+            previousEffectIds.add(def.effect());
+        }
+        List<EffectDef> next = new ArrayList<>();
+        parseJson(arr, next);
+        if (next.isEmpty()) {
+            loadDefaults();
+        } else {
+            REGISTRY = List.copyOf(next);
+        }
     }
 
     private static void parse(Path file) throws IOException {
+        List<EffectDef> old = REGISTRY;
         previousEffectIds.clear();
-        for (EffectDef def : REGISTRY) previousEffectIds.add(def.effect());
-        REGISTRY.clear();
+        for (EffectDef def : old) {
+            previousEffectIds.add(def.effect());
+        }
+        List<EffectDef> next = new ArrayList<>();
         try (Reader r = Files.newBufferedReader(file)) {
             JsonArray arr = GSON.fromJson(r, JsonArray.class);
-            parseJson(arr);
+            if (arr != null) {
+                parseJson(arr, next);
+            }
         }
-        if (REGISTRY.isEmpty()) {
+        if (next.isEmpty()) {
             Nourished.LOGGER.warn("[EffectRegistry] effects.json was empty, using built-in defaults");
             loadDefaults();
+        } else {
+            REGISTRY = List.copyOf(next);
         }
     }
 
     private static void loadDefaults() {
+        List<EffectDef> old = REGISTRY;
         previousEffectIds.clear();
-        for (EffectDef def : REGISTRY) previousEffectIds.add(def.effect());
-        REGISTRY.clear();
-        REGISTRY.addAll(loadBundledDefaults());
+        for (EffectDef def : old) {
+            previousEffectIds.add(def.effect());
+        }
+        List<EffectDef> next = new ArrayList<>(loadBundledDefaults());
+        REGISTRY = List.copyOf(next);
     }
 
     private static void writeDefaults(Path file) throws IOException {
@@ -215,10 +237,7 @@ public class EffectRegistry {
         Path file = configDir.resolve("effects.json");
         Files.createDirectories(configDir);
         writeDefinitionsToPath(file, definitions);
-        REGISTRY.clear();
-        for (EffectDef def : definitions) {
-            REGISTRY.add(def);
-        }
+        REGISTRY = List.copyOf(definitions);
     }
 
     private static void writeDefinitionsToPath(Path file, List<EffectDef> definitions) throws IOException {

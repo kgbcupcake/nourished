@@ -2,13 +2,10 @@ package dev.maire.nourished.api.registry;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.DietProfileDefinition;
+import dev.maire.nourished.registry.AbstractRegistry;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Internal storage for diet profile definitions registered via the public API.
@@ -16,21 +13,38 @@ import java.util.Map;
 @ApiStatus.Internal
 public final class DietProfileRegistry {
 
-    private static final Map<String, DietProfileDefinition> PROFILES = new LinkedHashMap<>();
+    private static final class Core extends AbstractRegistry<String, DietProfileDefinition> {
+        Core() {
+            super("DietProfileRegistry");
+        }
+    }
+
+    private static final Core INSTANCE = new Core();
 
     private DietProfileRegistry() {}
+
+    @ApiStatus.Internal
+    public static void freezeInternal() {
+        INSTANCE.freeze();
+    }
+
+    @ApiStatus.Internal
+    public static void resetInternal() {
+        INSTANCE.reset();
+    }
 
     /**
      * Registers a diet profile definition.
      *
      * @param definition the diet profile to register
-     * @throws IllegalArgumentException if a profile with the same id already exists
+     * @throws IllegalStateException    if the registry is frozen or a profile with the same id already exists
+     * @throws IllegalArgumentException if {@code definition} is null
      */
     public static void register(DietProfileDefinition definition) {
-        if (PROFILES.containsKey(definition.getId())) {
-            throw new IllegalArgumentException("Diet profile already registered: " + definition.getId());
+        if (definition == null) {
+            throw new IllegalArgumentException("definition cannot be null");
         }
-        PROFILES.put(definition.getId(), definition);
+        INSTANCE.register(definition.getId(), definition);
     }
 
     /**
@@ -41,7 +55,7 @@ public final class DietProfileRegistry {
      */
     @Nullable
     public static DietProfileDefinition get(String id) {
-        return PROFILES.get(id);
+        return INSTANCE.get(id);
     }
 
     /**
@@ -50,6 +64,6 @@ public final class DietProfileRegistry {
      * @return an unmodifiable list of all profile definitions
      */
     public static List<DietProfileDefinition> getAll() {
-        return Collections.unmodifiableList(new ArrayList<>(PROFILES.values()));
+        return INSTANCE.values();
     }
 }

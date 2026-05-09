@@ -2,13 +2,10 @@ package dev.maire.nourished.api.registry;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NutrientMilestoneDefinition;
+import dev.maire.nourished.registry.AbstractRegistry;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Internal storage for nutrient milestone definitions registered via the public API.
@@ -16,21 +13,38 @@ import java.util.Map;
 @ApiStatus.Internal
 public final class MilestoneRegistry {
 
-    private static final Map<String, NutrientMilestoneDefinition> MILESTONES = new LinkedHashMap<>();
+    private static final class Core extends AbstractRegistry<String, NutrientMilestoneDefinition> {
+        Core() {
+            super("MilestoneRegistry");
+        }
+    }
+
+    private static final Core INSTANCE = new Core();
 
     private MilestoneRegistry() {}
+
+    @ApiStatus.Internal
+    public static void freezeInternal() {
+        INSTANCE.freeze();
+    }
+
+    @ApiStatus.Internal
+    public static void resetInternal() {
+        INSTANCE.reset();
+    }
 
     /**
      * Registers a nutrient milestone definition.
      *
      * @param definition the milestone to register
-     * @throws IllegalArgumentException if a milestone with the same id already exists
+     * @throws IllegalStateException    if the registry is frozen or a milestone with the same id already exists
+     * @throws IllegalArgumentException if {@code definition} is null
      */
     public static void register(NutrientMilestoneDefinition definition) {
-        if (MILESTONES.containsKey(definition.getId())) {
-            throw new IllegalArgumentException("Milestone already registered: " + definition.getId());
+        if (definition == null) {
+            throw new IllegalArgumentException("definition cannot be null");
         }
-        MILESTONES.put(definition.getId(), definition);
+        INSTANCE.register(definition.getId(), definition);
     }
 
     /**
@@ -41,7 +55,7 @@ public final class MilestoneRegistry {
      */
     @Nullable
     public static NutrientMilestoneDefinition get(String id) {
-        return MILESTONES.get(id);
+        return INSTANCE.get(id);
     }
 
     /**
@@ -50,7 +64,7 @@ public final class MilestoneRegistry {
      * @return an unmodifiable list of all milestone definitions
      */
     public static List<NutrientMilestoneDefinition> getAll() {
-        return Collections.unmodifiableList(new ArrayList<>(MILESTONES.values()));
+        return INSTANCE.values();
     }
 
     /**
@@ -60,7 +74,7 @@ public final class MilestoneRegistry {
      * @return an unmodifiable list of matching milestones
      */
     public static List<NutrientMilestoneDefinition> getForNutrient(String nutrientKey) {
-        return MILESTONES.values().stream()
+        return INSTANCE.values().stream()
                 .filter(m -> nutrientKey.equals(m.getNutrientKey()))
                 .toList();
     }

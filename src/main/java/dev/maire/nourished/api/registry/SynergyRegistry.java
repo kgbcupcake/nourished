@@ -3,9 +3,8 @@ package dev.maire.nourished.api.registry;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.FoodSynergyDefinition;
 import dev.maire.nourished.api.NutrientSynergyDefinition;
+import dev.maire.nourished.registry.ListRegistry;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,27 +14,43 @@ import java.util.List;
 @ApiStatus.Internal
 public final class SynergyRegistry {
 
-    private static final List<NutrientSynergyDefinition> NUTRIENT_SYNERGIES = new ArrayList<>();
-    private static final List<FoodSynergyDefinition> FOOD_SYNERGIES = new ArrayList<>();
+    private static final ListRegistry<NutrientSynergyDefinition> NUTRIENT_SYNERGIES =
+            new ListRegistry<>("SynergyRegistry.nutrientSynergies", null);
+    private static final ListRegistry<FoodSynergyDefinition> FOOD_SYNERGIES =
+            new ListRegistry<>("SynergyRegistry.foodSynergies", null);
 
     private SynergyRegistry() {}
+
+    @ApiStatus.Internal
+    public static void freezeInternal() {
+        NUTRIENT_SYNERGIES.freeze();
+        FOOD_SYNERGIES.freeze();
+    }
+
+    @ApiStatus.Internal
+    public static void resetInternal() {
+        NUTRIENT_SYNERGIES.reset();
+        FOOD_SYNERGIES.reset();
+    }
 
     /**
      * Registers a nutrient synergy definition.
      *
      * @param definition the nutrient synergy to register
+     * @throws IllegalArgumentException if {@code definition} is null
      */
     public static void registerNutrientSynergy(NutrientSynergyDefinition definition) {
-        NUTRIENT_SYNERGIES.add(definition);
+        NUTRIENT_SYNERGIES.register(definition);
     }
 
     /**
      * Registers a food synergy definition.
      *
      * @param definition the food synergy to register
+     * @throws IllegalArgumentException if {@code definition} is null
      */
     public static void registerFoodSynergy(FoodSynergyDefinition definition) {
-        FOOD_SYNERGIES.add(definition);
+        FOOD_SYNERGIES.register(definition);
     }
 
     /**
@@ -44,7 +59,7 @@ public final class SynergyRegistry {
      * @return an unmodifiable list of nutrient synergy definitions
      */
     public static List<NutrientSynergyDefinition> getNutrientSynergies() {
-        return Collections.unmodifiableList(new ArrayList<>(NUTRIENT_SYNERGIES));
+        return NUTRIENT_SYNERGIES.values();
     }
 
     /**
@@ -53,6 +68,6 @@ public final class SynergyRegistry {
      * @return an unmodifiable list of food synergy definitions
      */
     public static List<FoodSynergyDefinition> getFoodSynergies() {
-        return Collections.unmodifiableList(new ArrayList<>(FOOD_SYNERGIES));
+        return FOOD_SYNERGIES.values();
     }
 }

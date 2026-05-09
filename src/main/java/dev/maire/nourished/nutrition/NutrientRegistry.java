@@ -86,7 +86,8 @@ public class NutrientRegistry {
     private static final float DEFAULT_LOW_THRESHOLD = 0f;
     private static final float DEFAULT_EXCESS_THRESHOLD = 1f;
 
-    private static final Map<String, NutrientDef> REGISTRY = new LinkedHashMap<>();
+    // volatile: replaced atomically after each parse/reload; read concurrently from tick, render, and gameplay code.
+    private static volatile Map<String, NutrientDef> REGISTRY = Map.of();
 
     private static final String[] DEFAULT_NUTRIENT_RESOURCES = {
             "fruits",
@@ -101,33 +102,40 @@ public class NutrientRegistry {
 
     /** Ordered list of nutrient keys (insertion order = display order). */
     public static List<String> getKeys() {
-        return Collections.unmodifiableList(new ArrayList<>(REGISTRY.keySet()));
+        Map<String, NutrientDef> snapshot = REGISTRY;
+        return Collections.unmodifiableList(new ArrayList<>(snapshot.keySet()));
     }
 
     /** Item ID string for the nutrient's icon, e.g. {@code "minecraft:carrot"}. */
     public static String getIcon(String key) {
-        NutrientDef def = REGISTRY.get(key);
+        Map<String, NutrientDef> snapshot = REGISTRY;
+        NutrientDef def = snapshot.get(key);
         return def != null ? def.icon() : "minecraft:apple";
     }
 
     /** Food tags that map to this nutrient. */
     public static List<String> getTags(String key) {
-        NutrientDef def = REGISTRY.get(key);
+        Map<String, NutrientDef> snapshot = REGISTRY;
+        NutrientDef def = snapshot.get(key);
         return def != null ? def.tags() : List.of();
     }
 
     /** All registered nutrient definitions in order. */
     public static List<NutrientDef> getAll() {
-        return Collections.unmodifiableList(new ArrayList<>(REGISTRY.values()));
+        Map<String, NutrientDef> snapshot = REGISTRY;
+        return Collections.unmodifiableList(new ArrayList<>(snapshot.values()));
     }
 
     public static void registerExternal(NutrientDefinition definition) {
         Objects.requireNonNull(definition, "definition");
         String key = Objects.requireNonNull(definition.getId(), "definition id");
-        if (REGISTRY.containsKey(key)) {
+        Map<String, NutrientDef> snapshot = REGISTRY;
+        if (snapshot.containsKey(key)) {
             throw new IllegalArgumentException("Nutrient already registered: " + key);
         }
-        REGISTRY.put(key, NutrientDef.fromDefinition(definition));
+        LinkedHashMap<String, NutrientDef> next = new LinkedHashMap<>(snapshot);
+        next.put(key, NutrientDef.fromDefinition(definition));
+        REGISTRY = Collections.unmodifiableMap(new LinkedHashMap<>(next));
         Nourished.LOGGER.info("[NutrientRegistry] Registered external nutrient: {}", key);
     }
 
@@ -164,7 +172,7 @@ public class NutrientRegistry {
     // ── Internals ─────────────────────────────────────────────────────────────
 
     private static void parse(Path file) throws IOException {
-        REGISTRY.clear();
+        LinkedHashMap<String, NutrientDef> next = new LinkedHashMap<>();
         try (Reader r = Files.newBufferedReader(file)) {
             JsonArray arr = GSON.fromJson(r, JsonArray.class);
             for (JsonElement el : arr) {
@@ -183,7 +191,7 @@ public class NutrientRegistry {
                         tags.add(t.getAsString());
                     }
                 }
-                REGISTRY.put(key, new NutrientDef(
+                next.put(key, new NutrientDef(
                         key,
                         displayName,
                         color,
@@ -196,17 +204,20 @@ public class NutrientRegistry {
                 ));
             }
         }
-        if (REGISTRY.isEmpty()) {
+        if (next.isEmpty()) {
             Nourished.LOGGER.warn("[NutrientRegistry] nutrients.json was empty, using built-in defaults");
             loadDefaults();
+        } else {
+            REGISTRY = Collections.unmodifiableMap(new LinkedHashMap<>(next));
         }
     }
 
     private static void loadDefaults() {
-        REGISTRY.clear();
+        LinkedHashMap<String, NutrientDef> next = new LinkedHashMap<>();
         for (NutrientDef def : loadBundledDefaults()) {
-            REGISTRY.put(def.key(), def);
+            next.put(def.key(), def);
         }
+        REGISTRY = Collections.unmodifiableMap(new LinkedHashMap<>(next));
     }
 
     private static void writeDefaults(Path file) throws IOException {

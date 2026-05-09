@@ -157,6 +157,28 @@ public class DietData {
     }
 
     /**
+     * Deep-copies mutable maps and scalars for thread-safe handoff (e.g. client cache publish).
+     */
+    @ApiStatus.Internal
+    public static DietData copySnapshot(DietData src) {
+        DietData d = new DietData();
+        d.calories = src.calories;
+        d.maxCalories = src.maxCalories;
+        d.nutrients.clear();
+        d.nutrients.putAll(src.nutrients);
+        d.lastNutrients.clear();
+        d.lastNutrients.putAll(src.lastNutrients);
+        d.foodMemory.clear();
+        d.foodMemory.putAll(src.foodMemory);
+        d.categoryMemory.clear();
+        d.categoryMemory.putAll(src.categoryMemory);
+        d.familyMemory.clear();
+        d.familyMemory.putAll(src.familyMemory);
+        d.lastTickTime = src.lastTickTime;
+        return d;
+    }
+
+    /**
      * Baseline for every nutrient bar on new {@link DietData} (new players / fresh attachment).
      * Uses {@link NourishedConfig#startingNutrientValue()} (default {@code 0.5} = 50%) so typical
      * {@code below}-threshold debuffs do not apply until decay or poor diet pulls bars down.
