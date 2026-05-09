@@ -22,6 +22,7 @@ import dev.maire.nourished.data.SchemaTemplateGenerator;
 import dev.maire.nourished.diet.DietAttachment;
 import dev.maire.nourished.diet.DietData;
 import dev.maire.nourished.effect.EffectRegistry;
+import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.nutrition.FoodValueRegistry;
@@ -42,9 +43,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -184,15 +190,33 @@ public class NourishedCommand {
             return 1;
         }
 
-        player.sendSystemMessage(Component.literal("[Nourished] Unassigned foods grouped by namespace:").withStyle(ChatFormatting.GOLD));
-        for (Map.Entry<String, List<ResourceLocation>> entry : byNamespace.entrySet()) {
-            List<ResourceLocation> ids = entry.getValue();
-            ids.sort(Comparator.comparing(ResourceLocation::toString));
-            player.sendSystemMessage(Component.literal("[" + entry.getKey() + "] (" + ids.size() + ")").withStyle(ChatFormatting.YELLOW));
-            for (ResourceLocation id : ids) {
-                player.sendSystemMessage(Component.literal(" - " + id).withStyle(ChatFormatting.GRAY));
+        int totalCount = byNamespace.values().stream().mapToInt(List::size).sum();
+        Path outputPath = FMLPaths.CONFIGDIR.get().resolve("nourished/unassigned_foods.txt");
+        try {
+            Files.createDirectories(outputPath.getParent());
+            List<String> lines = new ArrayList<>();
+            lines.add("[Nourished] Total unassigned foods: " + totalCount);
+            lines.add("");
+            for (Map.Entry<String, List<ResourceLocation>> entry : byNamespace.entrySet()) {
+                List<ResourceLocation> ids = entry.getValue();
+                ids.sort(Comparator.comparing(ResourceLocation::toString));
+                lines.add("[" + entry.getKey() + "]");
+                for (ResourceLocation id : ids) {
+                    lines.add(id.toString());
+                }
+                lines.add("");
             }
+            Files.write(outputPath, lines, StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            Nourished.LOGGER.error("[Nourished] Failed to write unassigned foods file", ex);
+            player.sendSystemMessage(Component.literal("[Nourished] Failed to write unassigned foods file.").withStyle(ChatFormatting.RED));
+            return 0;
         }
+
+        player.sendSystemMessage(
+                Component.literal("[Nourished] Written " + totalCount + " unassigned foods to config/nourished/unassigned_foods.txt.")
+                        .withStyle(ChatFormatting.GREEN)
+        );
         return 1;
     }
 

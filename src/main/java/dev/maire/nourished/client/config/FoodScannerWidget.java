@@ -22,7 +22,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.storage.LevelResource;
+import net.neoforged.fml.loading.FMLPaths;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -119,8 +119,14 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             }
         }
 
-        Path root = server.getWorldPath(LevelResource.ROOT);
-        Path packRoot = root.resolve("datapacks").resolve("nourished-generated");
+        String levelName = mc.getLevelSource() != null ? mc.getLevelSource().getName() : server.getWorldData().getLevelName();
+        Path packRoot = Path.of(
+                FMLPaths.GAMEDIR.get().toAbsolutePath().toString(),
+                "saves",
+                levelName,
+                "datapacks",
+                "nourished-generated"
+        );
         Path tagsDir = packRoot.resolve("data").resolve("nourished").resolve("tags").resolve("item").resolve("nutrients");
         String outputPath = packRoot.toAbsolutePath().toString();
 
@@ -157,8 +163,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             return;
         }
 
-        String levelName = server.getWorldData().getLevelName();
-        String toastPath = "saves/" + levelName + "/datapacks/nourished-generated/";
+        String toastPath = packRoot.toAbsolutePath().toString();
         Component msg = Component.translatable("config.nourished.foodScanner.wroteToast", toastPath);
         mc.getToasts().addToast(new FoodScannerWriteToast(msg));
     }

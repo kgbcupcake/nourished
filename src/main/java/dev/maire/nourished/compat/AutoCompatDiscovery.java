@@ -21,6 +21,7 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -39,25 +40,32 @@ public final class AutoCompatDiscovery {
     private AutoCompatDiscovery() {}
 
     public static void discover() {
+        Nourished.LOGGER.info("[Nourished] AutoCompatDiscovery.discover() called — evaluating {} mods", ModList.get().getMods().size());
         try {
             Path autoCompatDir = FMLPaths.CONFIGDIR.get().resolve("nourished/auto_compat");
             Files.createDirectories(autoCompatDir);
+            Set<String> registeredModIds = new HashSet<>(ModCompat.getDetected().keySet());
 
             for (var modInfo : ModList.get().getMods()) {
                 String modId = modInfo.getModId();
+                Nourished.LOGGER.info("[Nourished] AutoCompat checking: {}", modId);
                 if (modId != null && modId.toLowerCase(Locale.ROOT).contains("mama")) {
                     Nourished.LOGGER.info("[Nourished] Loaded mod id containing 'mama': {}", modId);
                 }
                 if (VANILLA_MOD_IDS.contains(modId)) {
+                    Nourished.LOGGER.info("[Nourished] AutoCompat skipping {} — reason: {}", modId, "vanilla/system mod");
                     continue;
                 }
-                if (ModCompat.getEntry(modId).isPresent()) {
+                if (registeredModIds.contains(modId)) {
+                    Nourished.LOGGER.info("[Nourished] AutoCompat skipping {} — reason: {}", modId, "already registered");
                     continue;
                 }
 
                 Map<ResourceLocation, String> hintedMappings = new LinkedHashMap<>();
                 List<Item> foodItems = collectFoodItems(modId, hintedMappings);
+                Nourished.LOGGER.info("[Nourished] AutoCompat food item count for {}: {}", modId, foodItems.size());
                 if (foodItems.isEmpty()) {
+                    Nourished.LOGGER.info("[Nourished] AutoCompat skipping {} — reason: {}", modId, "no food items found");
                     continue;
                 }
 
@@ -66,6 +74,7 @@ public final class AutoCompatDiscovery {
                         .addAllFoodTagMappings(Map.of())
                         .build();
                 ModCompat.registerExternal(definition);
+                registeredModIds.add(modId);
 
                 Nourished.LOGGER.info(
                         "[Nourished] Auto-detected food mod: {} ({} food items found)",

@@ -216,6 +216,10 @@ public final class ModCompat {
             }
 
             CompatEntry resolved = json.toCompatEntry(loaded, detectedVersion, resolvedLevel);
+            if (ENTRIES_BY_MODID.containsKey(modId)) {
+                LOGGER.info("[Nourished] Skipping duplicate compat entry for: {}", modId);
+                continue;
+            }
             ENTRIES_BY_MODID.put(modId, resolved);
         }
     }
@@ -354,6 +358,10 @@ public final class ModCompat {
                 null,
                 ConflictLevel.NONE
         );
+        if (ENTRIES_BY_MODID.containsKey(definition.getModId())) {
+            LOGGER.info("[Nourished] Skipping duplicate compat entry for: {}", definition.getModId());
+            return;
+        }
         ENTRIES_BY_MODID.put(definition.getModId(), entry);
         NAMESPACE_TO_MODID.put(definition.getModId(), definition.getModId());
         LOGGER.info("[Nourished] Registered external compat entry: {}", definition.getModId());

@@ -157,7 +157,7 @@ public final class NourishedAPI {
      * @throws IllegalArgumentException if a nutrient with the same id already exists
      */
     public static void registerNutrient(NutrientDefinition definition) {
-        if (!NourishedAPIState.registrationOpen) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         if (NutrientRegistry.getKeys().contains(definition.getId())) {
             throw new IllegalArgumentException("Nutrient already registered: " + definition.getId());
         }
@@ -184,7 +184,7 @@ public final class NourishedAPI {
      * @throws IllegalArgumentException if the nutrient key is not registered
      */
     public static void registerFoodClassification(ResourceLocation foodId, String nutrientKey, float amount) {
-        if (!NourishedAPIState.registrationOpen) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         if (!NutrientRegistry.getKeys().contains(nutrientKey)) {
             throw new IllegalArgumentException("Unknown nutrient key: " + nutrientKey);
         }
@@ -214,7 +214,7 @@ public final class NourishedAPI {
      * @throws IllegalArgumentException if the referenced nutrient or effect doesn't exist
      */
     public static void registerCustomEffect(EffectDefinition definition) {
-        if (!NourishedAPIState.registrationOpen) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         dev.maire.nourished.effect.EffectRegistry.registerExternal(definition);
     }
 
@@ -239,7 +239,7 @@ public final class NourishedAPI {
      * @param definition the compat definition with food-to-nutrient mappings
      */
     public static void registerCompatEntry(CompatDefinition definition) {
-        if (!NourishedAPIState.registrationOpen) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         dev.maire.nourished.compat.ModCompat.registerExternal(definition);
     }
 
@@ -266,7 +266,7 @@ public final class NourishedAPI {
      * @throws IllegalArgumentException if referenced nutrients don't exist
      */
     public static void registerNutrientSynergy(NutrientSynergyDefinition definition) {
-        if (!NourishedAPIState.registrationOpen) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         SynergyRegistry.registerNutrientSynergy(definition);
     }
 
@@ -287,7 +287,7 @@ public final class NourishedAPI {
      * @param definition the food synergy definition
      */
     public static void registerFoodSynergy(FoodSynergyDefinition definition) {
-        if (!NourishedAPIState.registrationOpen) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         SynergyRegistry.registerFoodSynergy(definition);
     }
 
@@ -312,7 +312,7 @@ public final class NourishedAPI {
      * @throws IllegalArgumentException if a profile with the same id already exists
      */
     public static void registerDietProfile(DietProfileDefinition definition) {
-        if (!NourishedAPIState.registrationOpen) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         DietProfileRegistry.register(definition);
     }
 
@@ -334,7 +334,7 @@ public final class NourishedAPI {
      * @throws IllegalArgumentException if a milestone with the same id already exists
      */
     public static void registerMilestone(NutrientMilestoneDefinition definition) {
-        if (!NourishedAPIState.registrationOpen) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         MilestoneRegistry.register(definition);
     }
 
@@ -359,7 +359,7 @@ public final class NourishedAPI {
      * @param hook the season hook implementation
      */
     public static void registerSeasonHook(NourishedSeasonHook hook) {
-        if (!NourishedAPIState.registrationOpen) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         SeasonHookRegistry.register(hook);
     }
 
@@ -380,7 +380,7 @@ public final class NourishedAPI {
      * @param modifier the absorption modifier implementation
      */
     public static void registerAbsorptionModifier(NutrientAbsorptionModifier modifier) {
-        if (!NourishedAPIState.registrationOpen) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         AbsorptionModifierRegistry.register(modifier);
     }
 
@@ -401,7 +401,7 @@ public final class NourishedAPI {
      * @param provider the report provider implementation
      */
     public static void registerReportProvider(DietReportProvider provider) {
-        if (!NourishedAPIState.registrationOpen) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         ReportProviderRegistry.register(provider);
     }
 

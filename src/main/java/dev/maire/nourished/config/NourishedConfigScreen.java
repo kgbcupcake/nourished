@@ -13,6 +13,7 @@ import dev.maire.nourished.compat.CompatReportEntry;
 import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.effect.EffectRegistry;
 import dev.maire.nourished.nutrition.FoodOverrideRegistry;
+import dev.maire.nourished.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.nutrition.FoodValueRegistry;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 
@@ -25,9 +26,20 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -764,7 +776,9 @@ public final class NourishedConfigScreen {
     private static final class CompatTabbedListEntry extends TooltipListEntry<Object> {
         private static final int TAB_BAR_H = 24;
         private static final int ROW_H = 24;
+        private static final int BUILTIN_PANEL_H = 36;
         private static final int VIEWPORT_H = 240;
+        private static final int DETECTED_TOOLBAR_H = 42;
         private static final int GAP = 6;
         private static final int COL_BG = 0x66000000;
         private static final int COL_ROW_SEPARATOR = 0x223A3A3A;
@@ -790,12 +804,32 @@ public final class NourishedConfigScreen {
         private final String detectedTabLabel;
         private final String builtInTabLabel;
         private final String settingsTabLabel;
+        private final EditBox detectedSearchBox;
+        private final Button detectedSortNameButton;
+        private final Button detectedSortStatusButton;
+        private final Button detectedSortCategoryButton;
 
         private final Map<String, Button> codeButtons = new LinkedHashMap<>();
         private final Map<String, Button> tagButtons = new LinkedHashMap<>();
+        private final Button builtInCodeButton;
+        private final Button builtInTagButton;
+        private final Map<String, CompatEntry> builtInByModId = new LinkedHashMap<>();
+        private final Map<String, int[]> detectedFoodCounts = new LinkedHashMap<>();
+        private final Map<String, ResourceLocation> modLogoCache = new LinkedHashMap<>();
 
         private int tabIndex;
-        private int scroll;
+        private int scrollOffset;
+        private int expandedBuiltInIndex = -1;
+        private String expandedBuiltInModId;
+        private long flashUntilMs;
+        private String flashedModId;
+        private int hoveredDetectedIndex = -1;
+        private SortKey detectedSortKey = SortKey.DEFAULT;
+        private boolean detectedNameDesc;
+        private boolean detectedStatusMissingFirst;
+        private boolean detectedCategoryDesc;
+        private String lastSearchText = "";
+        private boolean detectedFoodCountsComputed;
         private int listX;
         private int listY;
         private int listW;
@@ -812,6 +846,9 @@ public final class NourishedConfigScreen {
             this.builtInRows = new ArrayList<>(ModCompat.getBuiltInEntries());
             this.settingsRows = new ArrayList<>(compatPending.keySet());
             this.settingsRows.sort(String::compareTo);
+            for (CompatEntry row : builtInRows) {
+                builtInByModId.put(row.modId(), row);
+            }
 
             this.detectedTabLabel = Component.translatable("config.nourished.compat.tab.detected").getString();
             this.builtInTabLabel = Component.translatable("config.nourished.compat.tab.builtin").getString();
@@ -825,12 +862,38 @@ public final class NourishedConfigScreen {
                 codeButtons.put(modid, buildToggleButton(modid, true));
                 tagButtons.put(modid, buildToggleButton(modid, false));
             }
+            this.builtInCodeButton = buildInlineBuiltInToggleButton(true);
+            this.builtInTagButton = buildInlineBuiltInToggleButton(false);
+            this.detectedSearchBox = new EditBox(
+                    Minecraft.getInstance().font,
+                    0,
+                    0,
+                    120,
+                    18,
+                    Component.literal("Search mods"));
+            this.detectedSearchBox.setHint(Component.literal("Search name or mod id"));
+            this.detectedSearchBox.setResponder(s -> {
+                if (!s.equals(lastSearchText)) {
+                    lastSearchText = s;
+                    scrollOffset = 0;
+                    requestReferenceRebuilding();
+                }
+            });
+            this.detectedSortNameButton = Button.builder(Component.literal("Name \u2191"), b -> cycleDetectedSortName())
+                    .bounds(0, 0, 70, 18)
+                    .build();
+            this.detectedSortStatusButton = Button.builder(Component.literal("Status"), b -> cycleDetectedSortStatus())
+                    .bounds(0, 0, 62, 18)
+                    .build();
+            this.detectedSortCategoryButton = Button.builder(Component.literal("Category"), b -> cycleDetectedSortCategory())
+                    .bounds(0, 0, 78, 18)
+                    .build();
         }
 
         private Button buildTabButton(Component label, int idx) {
             return Button.builder(label, b -> {
                         tabIndex = idx;
-                        scroll = 0;
+                        scrollOffset = 0;
                     })
                     .bounds(0, 0, 100, 20)
                     .build();
@@ -851,12 +914,133 @@ public final class NourishedConfigScreen {
                     .build();
         }
 
+        private Button buildInlineBuiltInToggleButton(boolean code) {
+            return Button.builder(Component.empty(), b -> {
+                        if (expandedBuiltInModId == null) return;
+                        CompatPending pending = compatPending.get(expandedBuiltInModId);
+                        if (pending == null) return;
+                        if (code) {
+                            pending.codeCompat.set(!pending.codeCompat.get());
+                        } else {
+                            pending.tagCompat.set(!pending.tagCompat.get());
+                        }
+                        updateBuiltInPanelButtonLabels();
+                    })
+                    .bounds(0, 0, 90, 18)
+                    .build();
+        }
+
         private void updateToggleLabel(String modid, boolean code) {
             CompatPending pending = compatPending.get(modid);
             Button btn = code ? codeButtons.get(modid) : tagButtons.get(modid);
             if (pending == null || btn == null) return;
             boolean value = code ? pending.codeCompat.get() : pending.tagCompat.get();
             btn.setMessage(Component.literal((code ? "Code " : "Tag ") + (value ? "ON" : "OFF")));
+        }
+
+        private void updateBuiltInPanelButtonLabels() {
+            if (expandedBuiltInModId == null) {
+                builtInCodeButton.setMessage(Component.literal("Code Compat OFF"));
+                builtInTagButton.setMessage(Component.literal("Tag Compat OFF"));
+                return;
+            }
+            CompatPending pending = compatPending.get(expandedBuiltInModId);
+            boolean codeOn = pending != null && pending.codeCompat.get();
+            boolean tagOn = pending != null && pending.tagCompat.get();
+            builtInCodeButton.setMessage(Component.literal("Code Compat " + (codeOn ? "ON" : "OFF")));
+            builtInTagButton.setMessage(Component.literal("Tag Compat " + (tagOn ? "ON" : "OFF")));
+        }
+
+        private void cycleDetectedSortName() {
+            if (detectedSortKey != SortKey.NAME) {
+                detectedSortKey = SortKey.NAME;
+                detectedNameDesc = false;
+            } else if (!detectedNameDesc) {
+                detectedNameDesc = true;
+            } else {
+                detectedSortKey = SortKey.DEFAULT;
+            }
+            updateDetectedSortButtonLabels();
+            requestReferenceRebuilding();
+        }
+
+        private void cycleDetectedSortStatus() {
+            if (detectedSortKey != SortKey.STATUS) {
+                detectedSortKey = SortKey.STATUS;
+                detectedStatusMissingFirst = false;
+            } else if (!detectedStatusMissingFirst) {
+                detectedStatusMissingFirst = true;
+            } else {
+                detectedSortKey = SortKey.DEFAULT;
+            }
+            updateDetectedSortButtonLabels();
+            requestReferenceRebuilding();
+        }
+
+        private void cycleDetectedSortCategory() {
+            if (detectedSortKey != SortKey.CATEGORY) {
+                detectedSortKey = SortKey.CATEGORY;
+                detectedCategoryDesc = false;
+            } else if (!detectedCategoryDesc) {
+                detectedCategoryDesc = true;
+            } else {
+                detectedSortKey = SortKey.DEFAULT;
+            }
+            updateDetectedSortButtonLabels();
+            requestReferenceRebuilding();
+        }
+
+        private void updateDetectedSortButtonLabels() {
+            String nameLabel = detectedSortKey == SortKey.NAME
+                    ? (detectedNameDesc ? "Name \u2193" : "Name \u2191")
+                    : "Name \u2191\u2193";
+            String statusLabel = detectedSortKey == SortKey.STATUS
+                    ? (detectedStatusMissingFirst ? "Status M\u2192L" : "Status L\u2192M")
+                    : "Status";
+            String categoryLabel = detectedSortKey == SortKey.CATEGORY
+                    ? (detectedCategoryDesc ? "Category \u2193" : "Category \u2191")
+                    : "Category";
+            detectedSortNameButton.setMessage(Component.literal(nameLabel));
+            detectedSortStatusButton.setMessage(Component.literal(statusLabel));
+            detectedSortCategoryButton.setMessage(Component.literal(categoryLabel));
+        }
+
+        private List<CompatReportEntry> filteredAndSortedDetectedRows() {
+            String q = detectedSearchBox.getValue() == null ? "" : detectedSearchBox.getValue().trim().toLowerCase(Locale.ROOT);
+            List<CompatReportEntry> rows = new ArrayList<>();
+            for (CompatReportEntry row : detectedRows) {
+                String name = row.displayName() == null ? "" : row.displayName().toLowerCase(Locale.ROOT);
+                String id = row.modId() == null ? "" : row.modId().toLowerCase(Locale.ROOT);
+                if (!q.isEmpty() && !name.contains(q) && !id.contains(q)) {
+                    continue;
+                }
+                rows.add(row);
+            }
+            Comparator<CompatReportEntry> byName = Comparator.comparing(
+                    row -> row.displayName() == null ? row.modId() : row.displayName(),
+                    String.CASE_INSENSITIVE_ORDER);
+            Comparator<CompatReportEntry> byModId = Comparator.comparing(CompatReportEntry::modId, String.CASE_INSENSITIVE_ORDER);
+            Comparator<CompatReportEntry> byCategory = Comparator.comparing(
+                    row -> row.category() == null ? "" : row.category().name(),
+                    String.CASE_INSENSITIVE_ORDER);
+            Comparator<CompatReportEntry> byStatus = Comparator.comparing(CompatReportEntry::loaded).reversed();
+            Comparator<CompatReportEntry> sort = switch (detectedSortKey) {
+                case NAME -> (detectedNameDesc ? byName.reversed() : byName).thenComparing(byModId);
+                case STATUS -> {
+                    Comparator<CompatReportEntry> status = detectedStatusMissingFirst
+                            ? Comparator.comparing(CompatReportEntry::loaded)
+                            : byStatus;
+                    yield status.thenComparing(byName);
+                }
+                case CATEGORY -> (detectedCategoryDesc ? byCategory.reversed() : byCategory).thenComparing(byName);
+                default -> byStatus.thenComparing(byName);
+            };
+            rows.sort(sort);
+            return rows;
+        }
+
+        private int detectedVisibleRows() {
+            return Math.max(1, (VIEWPORT_H - DETECTED_TOOLBAR_H) / ROW_H);
         }
 
         @Override
@@ -882,14 +1066,19 @@ public final class NourishedConfigScreen {
             int tabRows = rowCountForTab();
             // Only the "Detected" tab is scrollable; the other tabs size to their full content.
             int bodyH = tabIndex == 0 ? VIEWPORT_H : (tabRows * ROW_H);
+            if (tabIndex == 1 && expandedBuiltInIndex >= 0) {
+                bodyH += BUILTIN_PANEL_H;
+            }
             return TAB_BAR_H + bodyH + 20;
         }
 
         @Override
         public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
             if (tabIndex == 0 && mouseX >= listX && mouseX < listX + listW && mouseY >= listY && mouseY < listY + listH) {
-                int maxScroll = Math.max(0, rowCountForTab() * ROW_H - VIEWPORT_H);
-                scroll = Math.max(0, Math.min(maxScroll, scroll - (int) (deltaY * ROW_H)));
+                int visibleRows = detectedVisibleRows();
+                int maxOffset = Math.max(0, filteredAndSortedDetectedRows().size() - visibleRows);
+                int step = deltaY > 0 ? -1 : (deltaY < 0 ? 1 : 0);
+                scrollOffset = Math.max(0, Math.min(maxOffset, scrollOffset + step));
                 requestReferenceRebuilding();
                 return true;
             }
@@ -945,14 +1134,65 @@ public final class NourishedConfigScreen {
             graphics.renderOutline(listX, listY, listW, listH, 0xFF404040);
 
             if (tabIndex == 0) {
+                ensureDetectedFoodCountsComputed();
+                int toolbarX = listX + 4;
+                int toolbarY = listY + 4;
+                int toolbarW = listW - 8;
+                int searchW = Math.max(120, toolbarW - 220);
+                detectedSearchBox.setX(toolbarX);
+                detectedSearchBox.setY(toolbarY);
+                detectedSearchBox.setWidth(searchW);
+                detectedSearchBox.setHeight(18);
+                detectedSearchBox.setEditable(isEditable());
+                detectedSearchBox.render(graphics, mouseX, mouseY, delta);
+
+                int btnY = toolbarY + 20;
+                int btnX = toolbarX;
+                detectedSortNameButton.setX(btnX);
+                detectedSortNameButton.setY(btnY);
+                detectedSortNameButton.setWidth(78);
+                detectedSortNameButton.active = isEditable();
+                detectedSortNameButton.render(graphics, mouseX, mouseY, delta);
+                detectedSortStatusButton.setX(btnX + 82);
+                detectedSortStatusButton.setY(btnY);
+                detectedSortStatusButton.setWidth(80);
+                detectedSortStatusButton.active = isEditable();
+                detectedSortStatusButton.render(graphics, mouseX, mouseY, delta);
+                detectedSortCategoryButton.setX(btnX + 166);
+                detectedSortCategoryButton.setY(btnY);
+                detectedSortCategoryButton.setWidth(90);
+                detectedSortCategoryButton.active = isEditable();
+                detectedSortCategoryButton.render(graphics, mouseX, mouseY, delta);
+
                 graphics.enableScissor(listX, listY, listX + listW, listY + listH);
-                int yStart = listY - scroll;
-                renderDetectedRows(graphics, yStart, mouseX, mouseY);
+                renderDetectedRows(graphics, listY + DETECTED_TOOLBAR_H, mouseX, mouseY);
                 graphics.disableScissor();
+                if (hoveredDetectedIndex >= 0) {
+                    List<CompatReportEntry> rows = filteredAndSortedDetectedRows();
+                    if (hoveredDetectedIndex < rows.size()) {
+                        CompatReportEntry row = rows.get(hoveredDetectedIndex);
+                        List<Component> tooltip = buildDetectedTooltip(row);
+                        graphics.renderTooltip(Minecraft.getInstance().font, tooltip, Optional.empty(), mouseX, mouseY);
+                    }
+                }
+                builtInCodeButton.setY(-2000);
+                builtInTagButton.setY(-2000);
             } else if (tabIndex == 1) {
+                detectedSearchBox.setY(-2000);
+                detectedSearchBox.setFocused(false);
+                detectedSortNameButton.setY(-2000);
+                detectedSortStatusButton.setY(-2000);
+                detectedSortCategoryButton.setY(-2000);
                 renderBuiltInRows(graphics, listY, mouseX, mouseY);
             } else {
+                detectedSearchBox.setY(-2000);
+                detectedSearchBox.setFocused(false);
+                detectedSortNameButton.setY(-2000);
+                detectedSortStatusButton.setY(-2000);
+                detectedSortCategoryButton.setY(-2000);
                 renderSettingsRows(graphics, listY, mouseX, mouseY, delta);
+                builtInCodeButton.setY(-2000);
+                builtInTagButton.setY(-2000);
             }
 
         }
@@ -975,34 +1215,243 @@ public final class NourishedConfigScreen {
         }
 
         private void renderDetectedRows(GuiGraphics graphics, int yStart, int mouseX, int mouseY) {
-            for (int i = 0; i < detectedRows.size(); i++) {
-                CompatReportEntry row = detectedRows.get(i);
-                int ry = yStart + i * ROW_H;
+            List<CompatReportEntry> rows = filteredAndSortedDetectedRows();
+            hoveredDetectedIndex = -1;
+            int visibleRows = detectedVisibleRows();
+            int startIndex = Math.max(0, Math.min(scrollOffset, Math.max(0, rows.size() - visibleRows)));
+            int endIndex = Math.min(rows.size(), startIndex + visibleRows + 1);
+            for (int i = startIndex; i < endIndex; i++) {
+                CompatReportEntry row = rows.get(i);
+                int ry = yStart + (i - startIndex) * ROW_H;
                 if (ry + ROW_H < listY || ry > listY + listH) {
                     continue;
                 }
+                int tint = categoryTint(row.category());
+                if (tint != 0) {
+                    graphics.fill(listX + 1, ry + 1, listX + listW - 1, ry + ROW_H - 1, tint);
+                }
+                if (mouseX >= listX && mouseX < listX + listW && mouseY >= ry && mouseY < ry + ROW_H) {
+                    hoveredDetectedIndex = i;
+                }
+                if (flashedModId != null && flashedModId.equals(row.modId()) && System.currentTimeMillis() < flashUntilMs) {
+                    graphics.fill(listX + 1, ry + 1, listX + listW - 1, ry + ROW_H - 1, 0x33FFFFFF);
+                }
+                renderDetectedIcon(graphics, row, listX + 4, ry + 4);
                 drawStatusChip(graphics, listX + 4, ry + 4, row.loaded(), row.conflictLevel().ordinal() > 0);
                 String modName = toTitleCase(row.displayName());
-                graphics.drawString(Minecraft.getInstance().font, modName, listX + 64, ry + 5, COL_TEXT, false);
+                graphics.drawString(Minecraft.getInstance().font, modName, listX + 84, ry + 5, COL_TEXT, false);
                 String version = row.detectedVersion() != null ? row.detectedVersion() : "-";
                 String badge = row.conflictLevel().name().replace('_', ' ');
-                graphics.drawString(Minecraft.getInstance().font, "v" + version + "  [" + badge + "]", listX + 64, ry + 14, COL_SUBTEXT, false);
+                String countsBadge = detectedCountBadgeText(row);
+                int countsColor = detectedCountBadgeColor(row);
+                graphics.drawString(Minecraft.getInstance().font, "v" + version + "  [" + badge + "]", listX + 84, ry + 14, COL_SUBTEXT, false);
+                if (!countsBadge.isEmpty()) {
+                    int bw = Minecraft.getInstance().font.width(countsBadge);
+                    graphics.drawString(Minecraft.getInstance().font, countsBadge, listX + listW - bw - 6, ry + 14, countsColor, false);
+                }
                 graphics.fill(listX, ry + ROW_H - 1, listX + listW, ry + ROW_H, COL_ROW_SEPARATOR);
             }
         }
 
+        private void renderDetectedIcon(GuiGraphics graphics, CompatReportEntry row, int x, int y) {
+            ResourceLocation logo = modLogoCache.computeIfAbsent(row.modId(), id -> resolveModLogo(id).orElse(null));
+            if (logo != null) {
+                graphics.blit(logo, x, y, 0, 0, 16, 16, 16, 16);
+                return;
+            }
+            int fallback = categoryFallbackColor(row.category());
+            graphics.fill(x, y, x + 16, y + 16, fallback);
+            graphics.renderOutline(x, y, 16, 16, 0xAA000000);
+        }
+
+        private Optional<ResourceLocation> resolveModLogo(String modId) {
+            Optional<? extends ModContainer> modContainer = ModList.get().getModContainerById(modId);
+            if (modContainer.isEmpty()) {
+                return Optional.empty();
+            }
+            Optional<String> logoPath = modContainer.get().getModInfo().getLogoFile();
+            if (logoPath.isEmpty()) {
+                return Optional.empty();
+            }
+            String raw = logoPath.get();
+            List<ResourceLocation> candidates = new ArrayList<>();
+            if (raw.contains(":")) {
+                candidates.add(ResourceLocation.parse(raw));
+            } else {
+                candidates.add(ResourceLocation.fromNamespaceAndPath(modId, raw));
+                candidates.add(ResourceLocation.fromNamespaceAndPath(modId, "textures/" + raw));
+                candidates.add(ResourceLocation.fromNamespaceAndPath(modId, "textures/gui/" + raw));
+            }
+            for (ResourceLocation candidate : candidates) {
+                if (Minecraft.getInstance().getResourceManager().getResource(candidate).isPresent()) {
+                    return Optional.of(candidate);
+                }
+            }
+            return Optional.empty();
+        }
+
+        private int categoryTint(dev.maire.nourished.compat.CompatCategory category) {
+            if (category == null) return 0;
+            return switch (category) {
+                case FOOD_MOD -> 0x1A2C7F2C;
+                case FARMING_MOD -> 0x1A9C7A18;
+                case SURVIVAL_OVERHAUL -> 0x1A8A2F2F;
+                default -> 0;
+            };
+        }
+
+        private int categoryFallbackColor(dev.maire.nourished.compat.CompatCategory category) {
+            if (category == null) return 0xFF555555;
+            return switch (category) {
+                case FOOD_MOD -> 0xFF2C7F2C;
+                case FARMING_MOD -> 0xFF9C7A18;
+                case SURVIVAL_OVERHAUL -> 0xFF8A2F2F;
+                default -> 0xFF4E5C6A;
+            };
+        }
+
+        private void ensureDetectedFoodCountsComputed() {
+            if (detectedFoodCountsComputed) {
+                return;
+            }
+            detectedFoodCountsComputed = true;
+            List<TagKey<Item>> nutrientTags = new ArrayList<>();
+            for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
+                for (String tagStr : def.tags()) {
+                    nutrientTags.add(TagKey.create(Registries.ITEM, ResourceLocation.parse(tagStr)));
+                }
+            }
+            for (CompatReportEntry row : detectedRows) {
+                if (!row.loaded()) {
+                    continue;
+                }
+                int totalFood = 0;
+                int classified = 0;
+                for (Item item : BuiltInRegistries.ITEM) {
+                    ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+                    if (id == null || !row.modId().equals(id.getNamespace())) {
+                        continue;
+                    }
+                    FoodProperties food = item.components().get(DataComponents.FOOD);
+                    if (food == null) {
+                        continue;
+                    }
+                    totalFood++;
+                    Holder<Item> holder = item.builtInRegistryHolder();
+                    boolean hasTag = false;
+                    for (TagKey<Item> nutrientTag : nutrientTags) {
+                        if (holder.is(nutrientTag)) {
+                            hasTag = true;
+                            break;
+                        }
+                    }
+                    if (!hasTag && FoodNutritionRegistry.getExternalClassification(id) != null) {
+                        hasTag = true;
+                    }
+                    if (hasTag) {
+                        classified++;
+                    }
+                }
+                detectedFoodCounts.put(row.modId(), new int[]{classified, totalFood});
+            }
+        }
+
+        private String detectedCountBadgeText(CompatReportEntry row) {
+            if (!row.loaded()) return "";
+            int[] counts = detectedFoodCounts.get(row.modId());
+            if (counts == null) return "[0/0 classified]";
+            return "[" + counts[0] + "/" + counts[1] + " classified]";
+        }
+
+        private int detectedCountBadgeColor(CompatReportEntry row) {
+            int[] counts = detectedFoodCounts.get(row.modId());
+            if (counts == null || counts[1] <= 0) return COL_SUBTEXT;
+            double ratio = counts[0] / (double) counts[1];
+            if (ratio >= 1.0d) return 0xFF72D172;
+            if (ratio > 0.5d) return 0xFFE0C15C;
+            return 0xFFDD7272;
+        }
+
+        private List<Component> buildDetectedTooltip(CompatReportEntry row) {
+            List<Component> out = new ArrayList<>();
+            CompatEntry builtIn = builtInByModId.get(row.modId());
+            out.add(Component.literal(toTitleCase(row.displayName())).withStyle(s -> s.withBold(true)));
+            out.add(Component.literal("ID: " + row.modId()));
+            out.add(Component.literal("Version: " + (row.detectedVersion() == null ? "-" : row.detectedVersion())));
+            out.add(Component.literal("Category: " + (row.category() == null ? "UNKNOWN" : row.category().name())));
+            String namespaces = builtIn != null && builtIn.namespaces() != null && !builtIn.namespaces().isEmpty()
+                    ? String.join(", ", builtIn.namespaces())
+                    : row.modId();
+            out.add(Component.literal("Namespaces: " + namespaces));
+            String conflictSummary = "none";
+            if (builtIn != null && builtIn.conflictBehavior() != null) {
+                List<String> bits = new ArrayList<>();
+                if (builtIn.conflictBehavior().disableEffects()) bits.add("effects disabled");
+                if (builtIn.conflictBehavior().disableDecay()) bits.add("decay disabled");
+                if (builtIn.conflictBehavior().disableMemory()) bits.add("memory disabled");
+                if (builtIn.conflictBehavior().disableHud()) bits.add("hud disabled");
+                if (!bits.isEmpty()) conflictSummary = String.join(", ", bits);
+            }
+            out.add(Component.literal("Conflict behavior: " + conflictSummary));
+            int[] counts = detectedFoodCounts.get(row.modId());
+            int foodCount = counts == null ? 0 : counts[1];
+            out.add(Component.literal("Food item count: " + foodCount));
+            return out;
+        }
+
         private void renderBuiltInRows(GuiGraphics graphics, int yStart, int mouseX, int mouseY) {
+            int cy = yStart;
             for (int i = 0; i < builtInRows.size(); i++) {
                 CompatEntry row = builtInRows.get(i);
-                int ry = yStart + i * ROW_H;
+                int ry = cy;
                 if (ry + ROW_H < listY || ry > listY + listH) {
+                    if (expandedBuiltInIndex == i) {
+                        builtInCodeButton.setY(-2000);
+                        builtInTagButton.setY(-2000);
+                    }
+                    cy += ROW_H + (expandedBuiltInIndex == i ? BUILTIN_PANEL_H : 0);
                     continue;
                 }
                 drawCategoryChip(graphics, listX + 4, ry + 4, row.category().name());
                 graphics.drawString(Minecraft.getInstance().font, toTitleCase(row.displayName()), listX + 84, ry + 5, COL_TEXT, false);
                 graphics.drawString(Minecraft.getInstance().font, builtInSummary(row), listX + 84, ry + 14, COL_SUBTEXT, false);
                 graphics.fill(listX, ry + ROW_H - 1, listX + listW, ry + ROW_H, COL_ROW_SEPARATOR);
+                if (expandedBuiltInIndex == i) {
+                    renderBuiltInSubPanel(graphics, row, ry + ROW_H, mouseX, mouseY);
+                }
+                cy += ROW_H + (expandedBuiltInIndex == i ? BUILTIN_PANEL_H : 0);
             }
+            if (expandedBuiltInIndex < 0) {
+                builtInCodeButton.setY(-2000);
+                builtInTagButton.setY(-2000);
+            }
+        }
+
+        private void renderBuiltInSubPanel(GuiGraphics graphics, CompatEntry row, int panelY, int mouseX, int mouseY) {
+            int px = listX + 2;
+            int pw = listW - 4;
+            int py = panelY;
+            int ph = BUILTIN_PANEL_H;
+            graphics.fill(px, py, px + pw, py + ph, 0x5518202A);
+            graphics.renderOutline(px, py, pw, ph, COL_TAB_BORDER_ACTIVE);
+            graphics.drawString(Minecraft.getInstance().font, toTitleCase(row.displayName()), px + 6, py + 4, COL_TEXT, false);
+            drawCategoryChip(graphics, px + 150, py + 3, row.category().name());
+
+            updateBuiltInPanelButtonLabels();
+            int btnW = 110;
+            int btnGap = 6;
+            int btnY = py + 17;
+            int btnX = px + 6;
+            builtInCodeButton.setX(btnX);
+            builtInCodeButton.setY(btnY);
+            builtInCodeButton.setWidth(btnW);
+            builtInCodeButton.active = isToggleEditable(row.modId(), true);
+            builtInCodeButton.render(graphics, mouseX, mouseY, 0.0f);
+            builtInTagButton.setX(btnX + btnW + btnGap);
+            builtInTagButton.setY(btnY);
+            builtInTagButton.setWidth(btnW);
+            builtInTagButton.active = isToggleEditable(row.modId(), false);
+            builtInTagButton.render(graphics, mouseX, mouseY, 0.0f);
         }
 
         private void renderSettingsRows(GuiGraphics graphics, int yStart, int mouseX, int mouseY, float delta) {
@@ -1050,6 +1499,50 @@ public final class NourishedConfigScreen {
             return !(LockRegistry.isServerOnly(key) && isMultiplayer()) && isEditable();
         }
 
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (tabIndex == 0 && button == 0 && mouseX >= listX && mouseX < listX + listW && mouseY >= listY && mouseY < listY + listH) {
+                List<CompatReportEntry> rows = filteredAndSortedDetectedRows();
+                int yStart = listY + DETECTED_TOOLBAR_H;
+                int visibleRows = detectedVisibleRows();
+                int startIndex = Math.max(0, Math.min(scrollOffset, Math.max(0, rows.size() - visibleRows)));
+                int endIndex = Math.min(rows.size(), startIndex + visibleRows + 1);
+                for (int i = startIndex; i < endIndex; i++) {
+                    int ry = yStart + (i - startIndex) * ROW_H;
+                    if (mouseY >= ry && mouseY < ry + ROW_H) {
+                        CompatReportEntry row = rows.get(i);
+                        Minecraft.getInstance().keyboardHandler.setClipboard(row.modId());
+                        flashedModId = row.modId();
+                        flashUntilMs = System.currentTimeMillis() + 500L;
+                        return true;
+                    }
+                }
+            }
+            if (tabIndex == 1 && button == 0 && mouseX >= listX && mouseX < listX + listW && mouseY >= listY && mouseY < listY + listH) {
+                int cy = listY;
+                for (int i = 0; i < builtInRows.size(); i++) {
+                    int rowTop = cy;
+                    int rowBottom = cy + ROW_H;
+                    if (mouseY >= rowTop && mouseY < rowBottom) {
+                        if (expandedBuiltInIndex == i) {
+                            expandedBuiltInIndex = -1;
+                            expandedBuiltInModId = null;
+                        } else {
+                            expandedBuiltInIndex = i;
+                            expandedBuiltInModId = builtInRows.get(i).modId();
+                        }
+                        requestReferenceRebuilding();
+                        return true;
+                    }
+                    cy += ROW_H;
+                    if (expandedBuiltInIndex == i) {
+                        cy += BUILTIN_PANEL_H;
+                    }
+                }
+            }
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
+
         private void drawStatusChip(GuiGraphics graphics, int x, int y, boolean loaded, boolean conflict) {
             int chipW = 54;
             int chipH = 14;
@@ -1084,6 +1577,12 @@ public final class NourishedConfigScreen {
             out.add(detectedTabButton);
             out.add(builtInTabButton);
             out.add(settingsTabButton);
+            out.add(detectedSearchBox);
+            out.add(detectedSortNameButton);
+            out.add(detectedSortStatusButton);
+            out.add(detectedSortCategoryButton);
+            out.add(builtInCodeButton);
+            out.add(builtInTagButton);
             out.addAll(codeButtons.values());
             out.addAll(tagButtons.values());
             return out;
@@ -1095,9 +1594,22 @@ public final class NourishedConfigScreen {
             out.add(detectedTabButton);
             out.add(builtInTabButton);
             out.add(settingsTabButton);
+            out.add(detectedSearchBox);
+            out.add(detectedSortNameButton);
+            out.add(detectedSortStatusButton);
+            out.add(detectedSortCategoryButton);
+            out.add(builtInCodeButton);
+            out.add(builtInTagButton);
             out.addAll(codeButtons.values());
             out.addAll(tagButtons.values());
             return out;
+        }
+
+        private enum SortKey {
+            DEFAULT,
+            NAME,
+            STATUS,
+            CATEGORY
         }
     }
 

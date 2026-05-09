@@ -73,10 +73,18 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new FoodEatenHandler());
         NeoForge.EVENT_BUS.register(new NutritionEffectsHandler());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
-            ModCompat.discoverUnknownMods();
-            if (!ModCompat.shouldDisableEffects()) {
-                NeoForge.EVENT_BUS.register(new NutritionDecayHandler());
-            }
+            event.enqueueWork(() -> {
+                ModCompat.discoverUnknownMods();
+                if (!ModCompat.shouldDisableEffects()) {
+                    NeoForge.EVENT_BUS.register(new NutritionDecayHandler());
+                }
+                LOGGER.info("[Nourished] Starting AutoCompatDiscovery...");
+                try (var scope = NourishedAPIState.openForDatapackReload()) {
+                    AutoCompatDiscovery.discover();
+                } catch (Exception e) {
+                    LOGGER.error("[Nourished] AutoCompatDiscovery failed.", e);
+                }
+            });
         });
         NeoForge.EVENT_BUS.register(new DietPlayerEvents());
         NeoForge.EVENT_BUS.register(new SleepBonusHandler());
@@ -90,7 +98,6 @@ public class Nourished {
                 LOGGER.warn("[Nourished] Failed to initialize KubeJS integration bridge.", t);
             }
         }
-        AutoCompatDiscovery.discover();
         DietAttachment.logAllNutrientNbtPaths();
         LOGGER.info("[Nourished] Calories NBT path: {}", DietAttachment.getCaloriesNbtPath());
         NourishedAPIState.close();

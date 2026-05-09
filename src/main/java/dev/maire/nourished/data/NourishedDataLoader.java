@@ -10,6 +10,7 @@ import dev.maire.nourished.api.DietProfileDefinition;
 import dev.maire.nourished.api.EffectDefinition;
 import dev.maire.nourished.api.FoodSynergyDefinition;
 import dev.maire.nourished.api.NourishedAPI;
+import dev.maire.nourished.api.NourishedAPIState;
 import dev.maire.nourished.api.NutrientDefinition;
 import dev.maire.nourished.api.NutrientMilestoneDefinition;
 import dev.maire.nourished.api.NutrientSynergyDefinition;
@@ -55,28 +56,29 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> allJson, net.minecraft.server.packs.resources.ResourceManager resourceManager, ProfilerFiller profiler) {
-        DatapackDiagnostics diagnostics = DatapackDiagnostics.getInstance();
-        diagnostics.clear();
+        try (NourishedAPIState.DatapackReloadScope scope = NourishedAPIState.openForDatapackReload()) {
+            DatapackDiagnostics diagnostics = DatapackDiagnostics.getInstance();
+            diagnostics.clear();
 
-        Set<ResourceLocation> nextNutrients = new LinkedHashSet<>();
-        Set<ResourceLocation> nextFoodClassifications = new LinkedHashSet<>();
-        Set<ResourceLocation> nextEffects = new LinkedHashSet<>();
-        Set<ResourceLocation> nextSynergies = new LinkedHashSet<>();
-        Set<ResourceLocation> nextFoodSynergies = new LinkedHashSet<>();
-        Set<ResourceLocation> nextMilestones = new LinkedHashSet<>();
-        Set<ResourceLocation> nextProfiles = new LinkedHashSet<>();
-        Set<ResourceLocation> nextCompatEntries = new LinkedHashSet<>();
+            Set<ResourceLocation> nextNutrients = new LinkedHashSet<>();
+            Set<ResourceLocation> nextFoodClassifications = new LinkedHashSet<>();
+            Set<ResourceLocation> nextEffects = new LinkedHashSet<>();
+            Set<ResourceLocation> nextSynergies = new LinkedHashSet<>();
+            Set<ResourceLocation> nextFoodSynergies = new LinkedHashSet<>();
+            Set<ResourceLocation> nextMilestones = new LinkedHashSet<>();
+            Set<ResourceLocation> nextProfiles = new LinkedHashSet<>();
+            Set<ResourceLocation> nextCompatEntries = new LinkedHashSet<>();
 
-        Map<ResourceLocation, JsonObject> nutrients = filterDirectory(allJson, DatapackSchema.NUTRIENTS_DIR);
-        Map<ResourceLocation, JsonObject> foodClassifications = filterDirectory(allJson, DatapackSchema.FOOD_CLASSIFICATIONS_DIR);
-        Map<ResourceLocation, JsonObject> effects = filterDirectory(allJson, DatapackSchema.EFFECTS_DIR);
-        Map<ResourceLocation, JsonObject> synergies = filterDirectory(allJson, DatapackSchema.SYNERGIES_DIR);
-        Map<ResourceLocation, JsonObject> foodSynergies = filterDirectory(allJson, DatapackSchema.FOOD_SYNERGIES_DIR);
-        Map<ResourceLocation, JsonObject> milestones = filterDirectory(allJson, DatapackSchema.MILESTONES_DIR);
-        Map<ResourceLocation, JsonObject> profiles = filterDirectory(allJson, DatapackSchema.DIET_PROFILES_DIR);
-        Map<ResourceLocation, JsonObject> compat = filterDirectory(allJson, DatapackSchema.COMPAT_DIR);
-        Map<ResourceLocation, JsonObject> foodFamilies = filterDirectory(allJson, DatapackSchema.FOOD_FAMILIES_DIR);
-        Map<ResourceLocation, JsonObject> moduleLocks = filterDirectory(allJson, DatapackSchema.MODULE_LOCKS_DIR);
+            Map<ResourceLocation, JsonObject> nutrients = filterDirectory(allJson, DatapackSchema.NUTRIENTS_DIR);
+            Map<ResourceLocation, JsonObject> foodClassifications = filterDirectory(allJson, DatapackSchema.FOOD_CLASSIFICATIONS_DIR);
+            Map<ResourceLocation, JsonObject> effects = filterDirectory(allJson, DatapackSchema.EFFECTS_DIR);
+            Map<ResourceLocation, JsonObject> synergies = filterDirectory(allJson, DatapackSchema.SYNERGIES_DIR);
+            Map<ResourceLocation, JsonObject> foodSynergies = filterDirectory(allJson, DatapackSchema.FOOD_SYNERGIES_DIR);
+            Map<ResourceLocation, JsonObject> milestones = filterDirectory(allJson, DatapackSchema.MILESTONES_DIR);
+            Map<ResourceLocation, JsonObject> profiles = filterDirectory(allJson, DatapackSchema.DIET_PROFILES_DIR);
+            Map<ResourceLocation, JsonObject> compat = filterDirectory(allJson, DatapackSchema.COMPAT_DIR);
+            Map<ResourceLocation, JsonObject> foodFamilies = filterDirectory(allJson, DatapackSchema.FOOD_FAMILIES_DIR);
+            Map<ResourceLocation, JsonObject> moduleLocks = filterDirectory(allJson, DatapackSchema.MODULE_LOCKS_DIR);
 
         for (Map.Entry<ResourceLocation, JsonObject> entry : nutrients.entrySet()) {
             ResourceLocation fileId = entry.getKey();
@@ -233,14 +235,15 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
             }
         }
 
-        loadedNutrients = Collections.unmodifiableSet(nextNutrients);
-        loadedFoodClassifications = Collections.unmodifiableSet(nextFoodClassifications);
-        loadedEffects = Collections.unmodifiableSet(nextEffects);
-        loadedSynergies = Collections.unmodifiableSet(nextSynergies);
-        loadedFoodSynergies = Collections.unmodifiableSet(nextFoodSynergies);
-        loadedMilestones = Collections.unmodifiableSet(nextMilestones);
-        loadedProfiles = Collections.unmodifiableSet(nextProfiles);
-        loadedCompatEntries = Collections.unmodifiableSet(nextCompatEntries);
+            loadedNutrients = Collections.unmodifiableSet(nextNutrients);
+            loadedFoodClassifications = Collections.unmodifiableSet(nextFoodClassifications);
+            loadedEffects = Collections.unmodifiableSet(nextEffects);
+            loadedSynergies = Collections.unmodifiableSet(nextSynergies);
+            loadedFoodSynergies = Collections.unmodifiableSet(nextFoodSynergies);
+            loadedMilestones = Collections.unmodifiableSet(nextMilestones);
+            loadedProfiles = Collections.unmodifiableSet(nextProfiles);
+            loadedCompatEntries = Collections.unmodifiableSet(nextCompatEntries);
+        }
     }
 
     private static boolean isValidForRegistration(JsonObject json, SchemaDefinition schema, String filePath, DatapackDiagnostics diagnostics) {
