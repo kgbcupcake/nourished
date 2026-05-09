@@ -129,3 +129,4 @@ MIT
 - [Modrinth](https://modrinth.com/mod/nourished)
 - [API.md](API.md)
 - [PHILOSOPHY.md](PHILOSOPHY.md)
+- [PHILOSOPHY.md](ARCHITECTURE.md)
