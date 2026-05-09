@@ -4,6 +4,10 @@ All notable changes to Nourished will be documented here.
 
 ## [unreleased]
 
+### 📖 Documentation
+
+- Enhance API documentation and registration guidelines
+
 ### 🚀 Features
 
 - Enhance configuration and UI for module management
