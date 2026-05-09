@@ -28,6 +28,7 @@ All notable changes to Nourished will be documented here.
 - Optimize configuration handling in NourishedConfigScreen
 - Update constructors and validation in API definitions
 - Streamline nutrient and effect definitions with builder pattern
+- Enhance registration phase management in NourishedAPI
 
 ## [0.1.1-alpha] - 2026-05-08
 
