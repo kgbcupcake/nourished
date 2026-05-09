@@ -7,6 +7,7 @@ All notable changes to Nourished will be documented here.
 ### 📖 Documentation
 
 - Enhance API documentation and registration guidelines
+- Added ARCHITECTURE.md
 
 ### 🚀 Features
 
