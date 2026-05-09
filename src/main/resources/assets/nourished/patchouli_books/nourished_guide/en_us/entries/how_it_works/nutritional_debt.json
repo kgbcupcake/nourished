@@ -5,9 +5,20 @@
     "sortnum": 2,
     "pages": [
         {
-            "type": "patchouli:text",
+            "type": "patchouli:spotlight",
+            "item": "minecraft:poisonous_potato",
             "title": "Nutritional Debt",
-            "text": "If you consistently over-eat from one food group, Nourished applies $(thing)nutritional debt$(). This slowly drains your most neglected nutrient group, nudging you toward a more balanced diet.$(br2)Debt only kicks in when a single category has been over-consumed significantly. Eating a varied diet will prevent it from ever becoming a problem."
+            "text": "Variety is not just rewarded — it is $(bold)enforced$().$(br2)If you over-rely on a single food group, Nourished applies $(c:#e05252)$(thing)nutritional debt$()(). Every time you eat from an already-saturated category, your most neglected nutrient bar slowly drains in the background."
+        },
+        {
+            "type": "patchouli:text",
+            "title": "How It Triggers",
+            "text": "Debt kicks in when a single category's $(thing)recent eat count$() crosses a threshold — too much of the same group in a short window.$(br2)When it fires, Nourished finds whichever of your other bars is currently lowest and applies a small decay to it.$(br2)$(italic)Subtle but persistent. Ignore it long enough and you will see penalties in groups you thought were fine.$() "
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Avoiding Debt",
+            "text": "$(bold)Eat a wider variety of foods.$()$(br2)Rotating between food groups prevents any single category from building up enough to trigger debt.$(br2)Players who maintain a genuinely balanced diet will $(italic)never notice it exists$().$(br2)The $(thing)Diet Screen$() shows your most neglected groups — use it to spot imbalances before debt starts working against you."
         }
     ]
 }

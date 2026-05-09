@@ -5,9 +5,16 @@
     "sortnum": 5,
     "pages": [
         {
-            "type": "patchouli:text",
+            "type": "patchouli:spotlight",
+            "item": "minecraft:milk_bucket",
             "title": "Dairy",
-            "text": "Dairy includes milk, cheese, yogurt, and other dairy-based foods.$(br2)Dairy has no default penalty for low intake, but contributes to the overall balance bonus when kept above 75%.$(br2)$(bold)Bonus (all groups above 75%):$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)Dairy can be harder to source early game. Milk buckets count, and many food mods add cheese and yogurt options."
+            "text": "Milk, cheese, yogurt, and other dairy-based foods.$(br2)$(italic)No individual penalty for low Dairy.$()$(br2)$(c:#52c252)$(bold)Bonus (all groups above 75%):$()$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)The hardest bar to fill in vanilla. $(thing)Milk buckets$() count — keep a cow farm running."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": "herbsandharvest:aged_swiss",
+            "title": "Dairy",
+            "text": "Food mods change this completely. Cheese, yogurt, butter, and fresh milk from mods like Herbs and Harvest, Croptopia, and Pam's HarvestCraft all count.$(br2)$(italic)If dairy feels impossible to fill — install a food mod.$() "
         }
     ]
 }

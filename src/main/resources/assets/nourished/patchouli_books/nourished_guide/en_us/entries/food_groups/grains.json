@@ -5,9 +5,16 @@
     "sortnum": 3,
     "pages": [
         {
-            "type": "patchouli:text",
+            "type": "patchouli:spotlight",
+            "item": "minecraft:bread",
             "title": "Grains",
-            "text": "Grains include bread, cookies, cake, and other wheat-based foods.$(br2)$(bold)Low Grains (below 25%):$()$(br2)$(li)Weakness I$(br2)$(bold)Bonus (all groups above 75%):$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)Bread is one of the easiest grain sources to produce. A small wheat farm will keep this group satisfied."
+            "text": "Bread, cookies, cake, and other wheat-based foods.$(br2)$(c:#e05252)$(bold)Low Grains (below 25%):$()$()$(br2)$(li)Weakness I$(br2)$(c:#52c252)$(bold)Bonus (all groups above 75%):$()$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)A small wheat farm covers this indefinitely. Bread is cheap, filling, and one of the best early investments you can make."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": "minecraft:pumpkin_pie",
+            "title": "Grains",
+            "text": "Cookies, pumpkin pie, cake, and rice from food mods all count toward grains.$(br2)$(italic)Do not rely on bread alone — rotate grain sources to keep your diversity score healthy.$() "
         }
     ]
 }

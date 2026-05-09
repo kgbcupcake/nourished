@@ -5,9 +5,15 @@
     "sortnum": 2,
     "pages": [
         {
+            "type": "patchouli:image",
+            "images": ["nourished:textures/patchouli/mini_Gui.png"],
+            "title": "Nutrition HUD",
+            "border": true
+        },
+        {
             "type": "patchouli:text",
             "title": "Nutrition HUD",
-            "text": "Nourished adds a compact HUD overlay so you can monitor your nutrition without opening the Diet Screen.$(br2)The HUD shows animated bars for each food group that update in real time as you eat.$(br2)$(bold)Customizing the HUD:$()$(br2)Press $(k:nourished.hud_edit) to enter HUD edit mode. From there you can:$(br2)$(li)Drag the overlay to any position$(li)Resize it to your preference"
+            "text": "Nourished adds a compact HUD overlay showing all six nutrient bars in real time — no need to open the Diet Screen.$(br2)$(bold)Customizing the HUD:$()$(br2)Press $(k:nourished.hud_edit) to enter edit mode. From there you can:$(br2)$(li)$(thing)Drag$() the overlay to any screen position$(li)$(thing)Resize$() it to fit your layout$(br2)$(italic)Set it once and forget it exists — until you need it.$() "
         }
     ]
 }

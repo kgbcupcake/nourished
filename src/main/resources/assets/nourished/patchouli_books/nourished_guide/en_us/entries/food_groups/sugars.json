@@ -5,9 +5,16 @@
     "sortnum": 4,
     "pages": [
         {
-            "type": "patchouli:text",
+            "type": "patchouli:spotlight",
+            "item": "minecraft:cake",
             "title": "Sugars",
-            "text": "Sugars include cake, cookies, honey, and other sweet foods.$(br2)Sugars have no default penalty for low intake, but contribute to the overall balance bonus when kept above 75%.$(br2)$(bold)Bonus (all groups above 75%):$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)Sugars are easy to neglect — keep some honey bottles or cookies on hand."
+            "text": "Cake, cookies, honey, and other sweet foods.$(br2)$(italic)No individual penalty for low Sugars.$()$(br2)$(c:#52c252)$(bold)Bonus (all groups above 75%):$()$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)Easy to neglect because there is no immediate punishment. Keep $(thing)honey bottles$() or $(thing)cookies$() in your hotbar."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": "minecraft:honey_bottle",
+            "title": "Sugars",
+            "text": "Honey bottles are one of the best sugar sources in vanilla — easy to stack and eat on the go.$(br2)$(italic)With food mods, cakes, pastries, and candies expand this group considerably.$() "
         }
     ]
 }

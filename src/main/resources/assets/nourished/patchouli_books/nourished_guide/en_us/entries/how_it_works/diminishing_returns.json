@@ -5,14 +5,15 @@
     "sortnum": 0,
     "pages": [
         {
-            "type": "patchouli:text",
+            "type": "patchouli:spotlight",
+            "item": "minecraft:golden_carrot",
             "title": "Diminishing Returns",
-            "text": "Eating the same food repeatedly gives less and less nutrition each time. This is called $(thing)diminishing returns$().$(br2)The more often you eat a specific food, the lower its nutritional value becomes. Returns recover naturally over time — the longer you go without eating something, the more nutrition it gives when you eat it again."
+            "text": "Eating the same food repeatedly gives $(bold)less and less nutrition each time$(). This is $(thing)diminishing returns$().$(br2)The more often you eat something, the lower its nutritional value becomes. Returns recover naturally — the longer you go without eating something, the more nutrition it gives when you eat it again."
         },
         {
             "type": "patchouli:text",
-            "title": "Novelty Bonus",
-            "text": "Eating a food you haven't had in a long time — or ever — gives a $(thing)novelty bonus$(). This bonus decays as you eat the same food more frequently.$(br2)The takeaway: variety is always rewarded. Rotate your foods and you will consistently get better nutrition than eating the same thing every meal."
+            "title": "The Novelty Bonus",
+            "text": "Eating a food you have never had — or not had in a long time — gives a $(c:#52c252)$(bold)novelty bonus$()$() of up to $(bold)25% extra nutrition$().$(br2)This bonus fades the more you eat that food.$(br2)$(italic)Variety is always rewarded. Rotate your foods and you will consistently get better nutrition than eating the same thing every meal.$() "
         }
     ]
 }

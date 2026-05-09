@@ -13,12 +13,12 @@
         {
             "type": "patchouli:text",
             "title": "The Diet Screen",
-            "text": "Open your inventory and click the $(thing)Diet button$() next to the recipe book to view your nutrition status.$(br2)The Diet Screen shows:$(br2)$(li)Nutrient bars for all six food groups$(li)Trend indicators showing if bars are rising or falling$(li)Daily calorie tracking$(li)Your current balance score"
+            "text": "Open your inventory and click the $(thing)Diet button$() next to the recipe book.$(br2)At a glance you can see:$(br2)$(li)$(bold)Nutrient bars$() for all six groups$(li)$(bold)Trend arrows$() — rising or falling$(li)$(bold)Calorie tracking$() for the day$(li)$(bold)Balance score$() — how evenly spread your diet is"
         },
         {
             "type": "patchouli:text",
             "title": "The Diet Screen",
-            "text": "$(li)Recently eaten foods$(li)Most neglected food groups$(li)Most fatigued food families$(br2)Check this screen regularly to spot which food groups you've been neglecting before the penalties kick in."
+            "text": "Scroll down to see:$(br2)$(li)$(bold)Recently eaten$() foods$(li)$(bold)Most neglected$() food groups$(li)$(bold)Most fatigued$() food families$(br2)$(italic)Check this screen before a big session — not after a debuff hits.$() "
         }
     ]
 }

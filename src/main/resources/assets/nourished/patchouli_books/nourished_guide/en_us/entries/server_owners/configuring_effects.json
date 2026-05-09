@@ -7,12 +7,12 @@
         {
             "type": "patchouli:text",
             "title": "Configuring Effects",
-            "text": "All nutrition effects are defined in $(thing)config/nourished/effects.json$(). This file is created automatically on first launch with sensible defaults.$(br2)You can change which nutrients trigger which effects, adjust thresholds and durations, add entirely new effects, or disable any existing ones — all without touching any code."
+            "text": "All nutrition effects are defined in $(thing)config/nourished/effects.json$(). Created automatically on first launch with sensible defaults.$(br2)You can:$(br2)$(li)Change which nutrients trigger which effects$(li)Adjust thresholds and durations$(li)Add entirely new effects$(li)Disable any existing ones$(br2)$(italic)No code required.$() "
         },
         {
             "type": "patchouli:text",
             "title": "Effect Triggers",
-            "text": "Effects support the following trigger types:$(br2)$(li)$(thing)below$() — fires when a nutrient drops below a threshold$(li)$(thing)above$() — fires when a nutrient exceeds a threshold$(li)$(thing)all_above$() — fires when ALL nutrients exceed a threshold$(li)$(thing)any_below$() — fires when ANY nutrient drops below a threshold$(li)$(thing)between$() — fires when a nutrient is within a range"
+            "text": "Effects support the following trigger types:$(br2)$(li)$(thing)below$() — nutrient drops below a threshold$(li)$(thing)above$() — nutrient exceeds a threshold$(li)$(thing)all_above$() — $(bold)ALL$() nutrients exceed a threshold$(li)$(thing)any_below$() — $(bold)ANY$() nutrient drops below a threshold$(li)$(thing)between$() — nutrient is within a range"
         }
     ]
 }

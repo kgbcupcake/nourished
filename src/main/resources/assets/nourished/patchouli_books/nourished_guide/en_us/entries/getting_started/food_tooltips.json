@@ -1,0 +1,24 @@
+{
+    "name": "Food Tooltips",
+    "icon": "minecraft:bread",
+    "category": "nourished:getting_started",
+    "sortnum": 5,
+    "pages": [
+        {
+            "type": "patchouli:image",
+            "images": ["nourished:textures/patchouli/tooltip.png"],
+            "title": "Food Tooltips",
+            "border": true
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Reading the Tooltip",
+            "text": "Hover any food to see a $(c:#ffaa00)$(bold)✦ Nourished$()$() section at the bottom of its tooltip:$(br2)$(li)$(thing)Full value$() or $(thing)Diminished$() — full nutrition or reduced?$(li)$(thing)Nutrient group$() and the exact bar gain$(li)$(thing)Diversity score$() — your current nutrition multiplier$(li)$(thing)Last eaten$() — meals since you last had this food"
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Use It Actively",
+            "text": "The tooltip updates in real time.$(br2)Eat the same food twice in a row — watch the $(thing)Diversity score$() drop and the status flip from $(c:#52c252)Full value$() to $(c:#e05252)Diminished$().$(br2)$(italic)Make decisions before you eat, not after. The tooltip tells you everything you need to know.$() "
+        }
+    ]
+}

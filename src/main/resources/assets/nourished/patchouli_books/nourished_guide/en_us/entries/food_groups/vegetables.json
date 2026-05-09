@@ -5,9 +5,16 @@
     "sortnum": 1,
     "pages": [
         {
-            "type": "patchouli:text",
+            "type": "patchouli:spotlight",
+            "item": "minecraft:carrot",
             "title": "Vegetables",
-            "text": "Vegetables include carrots, potatoes, beetroot, and other plant-based foods.$(br2)$(bold)Low Vegetables (below 25%):$()$(br2)$(li)Slowness I$(br2)$(bold)Bonus (all groups above 75%):$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)Vegetables are easy to farm early on. A simple carrot or potato farm will keep this bar healthy."
+            "text": "Carrots, potatoes, beetroot, mushrooms, and other plant-based foods.$(br2)$(c:#e05252)$(bold)Low Vegetables (below 25%):$()$()$(br2)$(li)Slowness I$(br2)$(c:#52c252)$(bold)Bonus (all groups above 75%):$()$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)One of the easiest bars to maintain. A small carrot or potato farm handles this almost automatically."
+        },
+        {
+            "type": "patchouli:spotlight",
+            "item": "farm_and_charm:tomato",
+            "title": "Vegetables",
+            "text": "Food mods open this group up considerably — tomatoes, lettuce, corn, peppers, and much more all count.$(br2)$(italic)Soups and stews from Farmer's Delight and similar mods are especially good for this bar.$() "
         }
     ]
 }

@@ -1,0 +1,23 @@
+{
+    "name": "How It All Fits Together",
+    "icon": "minecraft:knowledge_book",
+    "category": "nourished:how_it_works",
+    "sortnum": 6,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "The Full Picture",
+            "text": "Every time you eat, Nourished calculates a single $(thing)nutrition multiplier$() that determines how much that meal actually fills your bars.$(br2)It is not one system — it is $(bold)four, blended together$():$(br2)$(li)$(thing)Item memory$() — how often you ate this specific food$(li)$(thing)Category memory$() — how saturated that food group is$(li)$(thing)Family memory$() — how often you ate similar foods$(li)$(thing)Novelty bonus$() — reward for eating something genuinely new"
+        },
+        {
+            "type": "patchouli:text",
+            "title": "How They Blend",
+            "text": "Item memory carries the most weight. Category and family memory only matter when you have been over-relying on a group — their influence grows the more saturated they become.$(br2)Novelty is applied $(bold)last$() as a multiplier on top of everything else. A food you have never eaten gets a $(c:#52c252)25% bonus$() no matter what the other signals say."
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Reading the Number",
+            "text": "The $(thing)Diversity score$() on food tooltips is this final blended multiplier:$(br2)$(c:#52c252)$(bold)Above 1.0$()$() — novelty bonus is active.$(br2)$(c:#e05252)$(bold)Below 1.0$()$() — diminishing returns have kicked in.$(br2)The floor is $(bold)15%$() — you always get at least 15% of a food's nutrition no matter how much you spam it.$(br2)$(italic)Variety is rewarded. You are never completely punished for eating.$() "
+        }
+    ]
+}

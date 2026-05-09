@@ -1,0 +1,19 @@
+{
+    "name": "Notifications",
+    "icon": "minecraft:bell",
+    "category": "nourished:getting_started",
+    "sortnum": 6,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": "minecraft:bell",
+            "title": "Critical Alerts",
+            "text": "When any nutrient bar drops below $(bold)25%$(), a toast notification fires in the corner of your screen — telling you exactly which group needs attention.$(br2)$(c:#e05252)By the time it fires, the debuff is already active or seconds away.$()$(br2)The best strategy is to never need the warning."
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Staying Ahead",
+            "text": "Watch your $(thing)HUD$() and top up bars that are trending downward $(bold)before$() they hit 25%.$(br2)If you miss a toast and a debuff appears — open the $(thing)Diet Screen$() immediately. The most neglected groups are listed right at the top.$(br2)$(italic)A downward trend arrow is a warning. A toast is a crisis. Aim for warnings.$() "
+        }
+    ]
+}

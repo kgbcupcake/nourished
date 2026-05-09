@@ -7,12 +7,12 @@
         {
             "type": "patchouli:text",
             "title": "Datapack Overrides",
-            "text": "Nourished uses a three-layer override system:$(br2)$(li)$(thing)Bundled defaults$() — curated food classifications that ship with the mod$(li)$(thing)Config$() — server owners can tune any mechanic$(li)$(thing)Datapacks$() — always win, full control over food classifications$(br2)Datapacks can reclassify any food, add foods Nourished doesn't know about, or remove foods from a group entirely."
+            "text": "Nourished uses a $(bold)three-layer override system$():$(br2)$(li)$(thing)Bundled defaults$() — curated food classifications that ship with the mod$(li)$(thing)Config$() — server owners tune any mechanic$(li)$(thing)Datapacks$() — $(bold)always win.$() Full control over food classifications.$(br2)Datapacks can reclassify any food, add unknowns, or remove foods from a group entirely."
         },
         {
             "type": "patchouli:text",
-            "title": "Datapack Overrides",
-            "text": "No code forks, no mixins, and no hard dependencies are required to integrate with Nourished via datapacks.$(br2)For mod developers looking to integrate via Java, Nourished provides a stable public API. See the Nourished documentation on GitHub for details."
+            "title": "Integration",
+            "text": "$(italic)No code forks. No mixins. No hard dependencies.$()$(br2)Integrating with Nourished via datapacks requires nothing beyond the datapack itself.$(br2)For mod developers integrating via Java, Nourished exposes a stable public API.$(br2)See the $(thing)Nourished documentation on GitHub$() for full details."
         }
     ]
 }

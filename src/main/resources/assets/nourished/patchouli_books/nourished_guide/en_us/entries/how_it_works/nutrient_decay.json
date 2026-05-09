@@ -1,0 +1,19 @@
+{
+    "name": "Nutrient Decay",
+    "icon": "minecraft:clock",
+    "category": "nourished:how_it_works",
+    "sortnum": 4,
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "item": "minecraft:clock",
+            "title": "Nutrient Decay",
+            "text": "Your nutrient bars do not stay full forever.$(br2)Every $(bold)60 seconds$(), all six bars lose a small amount — regardless of what you eat. Stop eating entirely and your nutrition will gradually fall back toward zero.$(br2)This is $(thing)nutrient decay$(). It is always running."
+        },
+        {
+            "type": "patchouli:text",
+            "title": "What This Means",
+            "text": "You cannot front-load your nutrition at the start of a session and forget about it.$(br2)Nourished expects you to eat $(bold)consistently$() — not just once.$(br2)$(italic)The decay rate is gentle by design. A well-fed player going mining for 10 minutes will not come back to empty bars. But ignoring food for an entire session will hurt.$()$(br2)Server owners can adjust rate and interval in the config."
+        }
+    ]
+}
