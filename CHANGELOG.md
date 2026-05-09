@@ -9,6 +9,7 @@ All notable changes to Nourished will be documented here.
 - Enhance API documentation and registration guidelines
 - Added ARCHITECTURE.md
 - Expand ARCHITECTURE.md with detailed override priority stack and clarifications on mod functionality
+- Update food group entries and nutrition HUD in Patchouli guide
 
 ### 🚀 Features
 
