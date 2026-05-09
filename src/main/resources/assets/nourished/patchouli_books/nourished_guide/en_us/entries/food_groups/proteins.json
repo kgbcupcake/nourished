@@ -1,0 +1,13 @@
+{
+    "name": "Proteins",
+    "icon": "minecraft:cooked_beef",
+    "category": "nourished:food_groups",
+    "sortnum": 2,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Proteins",
+            "text": "Proteins include meat, fish, eggs, and other high-protein foods.$(br2)$(bold)Low Proteins (below 25%):$()$(br2)$(li)Mining Fatigue I$(br2)$(bold)Bonus (all groups above 75%):$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)Mining Fatigue will slow your progress significantly. Keep your protein up by cooking and eating meat regularly."
+        }
+    ]
+}

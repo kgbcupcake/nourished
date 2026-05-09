@@ -1,0 +1,13 @@
+{
+    "name": "Nutritional Debt",
+    "icon": "minecraft:poisonous_potato",
+    "category": "nourished:how_it_works",
+    "sortnum": 2,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Nutritional Debt",
+            "text": "If you consistently over-eat from one food group, Nourished applies $(thing)nutritional debt$(). This slowly drains your most neglected nutrient group, nudging you toward a more balanced diet.$(br2)Debt only kicks in when a single category has been over-consumed significantly. Eating a varied diet will prevent it from ever becoming a problem."
+        }
+    ]
+}

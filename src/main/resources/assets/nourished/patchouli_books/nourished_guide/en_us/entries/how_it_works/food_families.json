@@ -1,0 +1,18 @@
+{
+    "name": "Food Families",
+    "icon": "minecraft:salmon",
+    "category": "nourished:how_it_works",
+    "sortnum": 1,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Food Families",
+            "text": "Foods are grouped into $(thing)families$() based on what kind of food they are. Examples include $(thing)fish$(), $(thing)bread$(), and $(thing)leafy greens$().$(br2)Eating too many foods from the same family reduces nutrition returns across that entire family — even if the specific items are different."
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Food Families",
+            "text": "For example: eating salmon, then cod, then tuna in quick succession will build up $(thing)fish family fatigue$(). All three are different items, but they belong to the same family.$(br2)The Diet Screen shows your most fatigued families so you can see which kinds of food you have been over-relying on."
+        }
+    ]
+}

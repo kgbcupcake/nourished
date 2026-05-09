@@ -1,0 +1,13 @@
+{
+    "name": "Fruits",
+    "icon": "minecraft:apple",
+    "category": "nourished:food_groups",
+    "sortnum": 0,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Fruits",
+            "text": "Fruits include apples, berries, melons, and other sweet plant-based foods.$(br2)$(bold)Low Fruits (below 25%):$()$(br2)$(li)Unluck I$(br2)$(bold)Bonus (all groups above 75%):$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)Keep your fruit intake up by snacking on apples, golden carrots, and berries regularly."
+        }
+    ]
+}

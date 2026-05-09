@@ -1,0 +1,13 @@
+{
+    "name": "Vegetables",
+    "icon": "minecraft:carrot",
+    "category": "nourished:food_groups",
+    "sortnum": 1,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Vegetables",
+            "text": "Vegetables include carrots, potatoes, beetroot, and other plant-based foods.$(br2)$(bold)Low Vegetables (below 25%):$()$(br2)$(li)Slowness I$(br2)$(bold)Bonus (all groups above 75%):$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)Vegetables are easy to farm early on. A simple carrot or potato farm will keep this bar healthy."
+        }
+    ]
+}

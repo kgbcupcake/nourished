@@ -1,0 +1,11 @@
+{
+    "name": "Nourished Guide",
+    "landing_text": "Welcome to Nourished. This guide will teach you everything you need to know about nutrition, food variety, and keeping your body in balance.",
+    "version": 1,
+    "creative_tab": "minecraft:food_and_drinks",
+    "use_resource_pack": true,
+    "give_on_first_join": true,
+    "creative_tab": "minecraft:food_and_drinks",
+    "accent_color": "0x2D7A2D",
+    "nameplates_color": "0x2D7A2D"
+}

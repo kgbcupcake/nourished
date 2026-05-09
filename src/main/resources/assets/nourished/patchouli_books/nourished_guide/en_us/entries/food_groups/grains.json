@@ -1,0 +1,13 @@
+{
+    "name": "Grains",
+    "icon": "minecraft:bread",
+    "category": "nourished:food_groups",
+    "sortnum": 3,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Grains",
+            "text": "Grains include bread, cookies, cake, and other wheat-based foods.$(br2)$(bold)Low Grains (below 25%):$()$(br2)$(li)Weakness I$(br2)$(bold)Bonus (all groups above 75%):$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)Bread is one of the easiest grain sources to produce. A small wheat farm will keep this group satisfied."
+        }
+    ]
+}

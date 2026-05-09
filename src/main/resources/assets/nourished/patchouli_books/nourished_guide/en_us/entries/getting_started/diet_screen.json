@@ -1,0 +1,24 @@
+{
+    "name": "The Diet Screen",
+    "icon": "minecraft:paper",
+    "category": "nourished:getting_started",
+    "sortnum": 1,
+    "pages": [
+        {
+            "type": "patchouli:image",
+            "images": ["nourished:textures/patchouli/diet_screen.png"],
+            "title": "The Diet Screen",
+            "border": true
+        },
+        {
+            "type": "patchouli:text",
+            "title": "The Diet Screen",
+            "text": "Open your inventory and click the $(thing)Diet button$() next to the recipe book to view your nutrition status.$(br2)The Diet Screen shows:$(br2)$(li)Nutrient bars for all six food groups$(li)Trend indicators showing if bars are rising or falling$(li)Daily calorie tracking$(li)Your current balance score"
+        },
+        {
+            "type": "patchouli:text",
+            "title": "The Diet Screen",
+            "text": "$(li)Recently eaten foods$(li)Most neglected food groups$(li)Most fatigued food families$(br2)Check this screen regularly to spot which food groups you've been neglecting before the penalties kick in."
+        }
+    ]
+}

@@ -2,18 +2,14 @@ plugins {
     id 'java'
     id 'net.neoforged.moddev' version '2.0.141'
 }
-
 version = '0.1.2-alpha'
 group = 'dev.maire.nourished'
-
 base {
     archivesName = 'nourished'
 }
-
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
-
 sourceSets {
     main {
         java {
@@ -24,7 +20,6 @@ sourceSets {
         }
     }
 }
-
 jar {
     from(sourceSets.main.output)
     manifest {
@@ -35,11 +30,11 @@ jar {
             'Implementation-Title'    : project.name,
             'Implementation-Version'  : project.jar.archiveVersion,
             'Implementation-Vendor'   : 'maire',
-            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+            'Jar-Version'             : project.version
         ])
     }
 }
-
 neoForge {
     version = '21.1.228'
     parchment {
@@ -74,7 +69,6 @@ neoForge {
         }
     }
 }
-
 repositories {
     maven { url = 'https://maven.architectury.dev/' }
     maven { url = 'https://maven.blamejared.com' }
@@ -82,7 +76,6 @@ repositories {
     maven { url = 'https://maven.terraformersmc.com/releases/' }
     maven { url = 'https://www.cursemaven.com' }
 }
-
 dependencies {
     implementation "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
     compileOnly "dev.latvian.mods:kubejs-neoforge:2101.7.2-build.295"
@@ -90,8 +83,9 @@ dependencies {
     compileOnly "mezz.jei:jei-1.21.1-neoforge-api:+"
     compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:+"
     compileOnly "dev.emi:emi-neoforge:+"
+    compileOnly "vazkii.patchouli:Patchouli:1.21.1-93-NEOFORGE:api"
+    runtimeOnly "vazkii.patchouli:Patchouli:1.21.1-93-NEOFORGE"
 }
-
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }

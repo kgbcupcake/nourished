@@ -1,0 +1,13 @@
+{
+    "name": "The HUD",
+    "icon": "minecraft:spyglass",
+    "category": "nourished:getting_started",
+    "sortnum": 2,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Nutrition HUD",
+            "text": "Nourished adds a compact HUD overlay so you can monitor your nutrition without opening the Diet Screen.$(br2)The HUD shows animated bars for each food group that update in real time as you eat.$(br2)$(bold)Customizing the HUD:$()$(br2)Press $(k:nourished.hud_edit) to enter HUD edit mode. From there you can:$(br2)$(li)Drag the overlay to any position$(li)Resize it to your preference"
+        }
+    ]
+}

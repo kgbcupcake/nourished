@@ -1,0 +1,13 @@
+{
+    "name": "Sugars",
+    "icon": "minecraft:sugar",
+    "category": "nourished:food_groups",
+    "sortnum": 4,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Sugars",
+            "text": "Sugars include cake, cookies, honey, and other sweet foods.$(br2)Sugars have no default penalty for low intake, but contribute to the overall balance bonus when kept above 75%.$(br2)$(bold)Bonus (all groups above 75%):$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)Sugars are easy to neglect — keep some honey bottles or cookies on hand."
+        }
+    ]
+}
