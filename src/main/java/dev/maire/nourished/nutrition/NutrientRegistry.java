@@ -80,6 +80,14 @@ public class NutrientRegistry {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String DEFAULT_ICON = "minecraft:apple";
+    private static final Map<String, String> ICON_FALLBACKS = Map.of(
+            "fruits", "minecraft:apple",
+            "vegetables", "minecraft:carrot",
+            "proteins", "minecraft:cooked_beef",
+            "grains", "minecraft:wheat",
+            "sugars", "minecraft:sugar",
+            "dairy", "minecraft:milk_bucket"
+    );
     private static final int DEFAULT_COLOR = 0xFFFFFFFF;
     private static final float DEFAULT_DECAY_RATE = 0f;
     private static final float DEFAULT_CRITICAL_THRESHOLD = 0f;
@@ -110,7 +118,10 @@ public class NutrientRegistry {
     public static String getIcon(String key) {
         Map<String, NutrientDef> snapshot = REGISTRY;
         NutrientDef def = snapshot.get(key);
-        return def != null ? def.icon() : "minecraft:apple";
+        if (def != null && def.icon() != null && !def.icon().isBlank()) {
+            return def.icon();
+        }
+        return fallbackIconForKey(key);
     }
 
     /** Food tags that map to this nutrient. */
@@ -178,7 +189,7 @@ public class NutrientRegistry {
             for (JsonElement el : arr) {
                 JsonObject obj = el.getAsJsonObject();
                 String key  = obj.get("key").getAsString();
-                String icon = obj.has("icon") ? obj.get("icon").getAsString() : DEFAULT_ICON;
+                String icon = obj.has("icon") ? obj.get("icon").getAsString() : fallbackIconForKey(key);
                 String displayName = obj.has("display_name") ? obj.get("display_name").getAsString() : key;
                 int color = obj.has("color") ? obj.get("color").getAsInt() : DEFAULT_COLOR;
                 float defaultDecayRate = obj.has("default_decay_rate") ? obj.get("default_decay_rate").getAsFloat() : DEFAULT_DECAY_RATE;
@@ -252,7 +263,11 @@ public class NutrientRegistry {
         if (minecraftCandidate != null && BuiltInRegistries.ITEM.containsKey(minecraftCandidate)) {
             return minecraftCandidate.toString();
         }
-        return DEFAULT_ICON;
+        return fallbackIconForKey(normalizedKey);
+    }
+
+    private static String fallbackIconForKey(String key) {
+        return ICON_FALLBACKS.getOrDefault(key, DEFAULT_ICON);
     }
 
     private static List<NutrientDef> loadBundledDefaults() {

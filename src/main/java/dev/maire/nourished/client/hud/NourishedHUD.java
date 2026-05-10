@@ -80,10 +80,6 @@ public final class NourishedHUD {
     private static double resizeBaseDiagonal;
     private static double resizePreviewScale;
 
-    // ── Icon cache ───────────────────────────────────────────────────────────
-
-    private static final Map<String, ItemStack> iconCache = new HashMap<>();
-
     private NourishedHUD() {}
 
     // ── Game-event render (normal gameplay, no screen open) ──────────────────
@@ -445,11 +441,9 @@ public final class NourishedHUD {
     }
 
     private static void renderIcon(GuiGraphics g, String key, int x, int y, int iconSize) {
-        ItemStack stack = iconCache.computeIfAbsent(key, k -> {
-            String iconId = NutrientRegistry.getIcon(k);
-            var item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(iconId)).orElse(Items.APPLE);
-            return new ItemStack(item);
-        });
+        String iconId = NutrientRegistry.getIcon(key);
+        var item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(iconId)).orElse(Items.APPLE);
+        ItemStack stack = new ItemStack(item);
         PoseStack pose = g.pose();
         pose.pushPose();
         pose.translate(x, y, 0);

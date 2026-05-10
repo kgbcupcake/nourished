@@ -73,7 +73,6 @@ public class DietScreen extends Screen {
     // ── State ────────────────────────────────────────────────────────────────
     private int leftPos, topPos;
     private final Map<String, Float>     display = new LinkedHashMap<>();
-    private final Map<String, ItemStack> icons   = new LinkedHashMap<>();
     private final List<String> visibleBars        = new ArrayList<>();
     /** Index of nutrient row whose icon is being dragged; null when not dragging. */
     private Integer dragBarFromIndex;
@@ -106,8 +105,6 @@ public class DietScreen extends Screen {
         dragBarFromIndex = null;
         for (String key : NourishedClientConfig.get().effectiveDietBarOrder()) {
             display.putIfAbsent(key, 0f);
-            icons.put(key, new ItemStack(
-                    BuiltInRegistries.ITEM.get(ResourceLocation.parse(NutrientRegistry.getIcon(key)))));
             visibleBars.add(key);
         }
 
@@ -435,10 +432,9 @@ public class DietScreen extends Screen {
             int bx = rx;
             int by = y;
             drawRoundedPanel(g, bx, by, 20, 20, COL_PANEL, COL_BORDER_LT, COL_BORDER);
-            ItemStack icon = icons.get(key);
-            if (icon != null && !icon.isEmpty()) {
-                g.renderItem(icon, bx + 2, by + 2);
-            }
+            String iconId = NutrientRegistry.getIcon(key);
+            Item iconItem = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(iconId)).orElse(BuiltInRegistries.ITEM.get(ResourceLocation.parse("minecraft:apple")));
+            g.renderItem(new ItemStack(iconItem), bx + 2, by + 2);
 
             // ── Nutrient name ─────────────────────────────────────────────
             g.drawString(font,
@@ -455,7 +451,7 @@ public class DietScreen extends Screen {
             }
 
             // ── Percentage (right-aligned in column: 4px after bar end) ────
-            String pctStr = (int)(disp * 100) + "%";
+            String pctStr = Math.round(disp * 100) + "%";
             int pctX = pctColumnRight - font.width(pctStr);
             int dimmedPct = (pctColor & 0x00FFFFFF) | 0x99000000;
             g.drawString(font, pctStr, pctX, y + 2, dimmedPct, false);
