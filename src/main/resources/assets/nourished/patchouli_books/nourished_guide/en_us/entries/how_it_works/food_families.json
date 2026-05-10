@@ -1,19 +1,18 @@
 {
-    "name": "Food Families",
-    "icon": "minecraft:salmon",
-    "category": "nourished:how_it_works",
-    "sortnum": 1,
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:salmon",
-            "title": "Food Families",
-            "text": "Foods are grouped into $(thing)families$() based on what kind of food they are — $(thing)fish$(), $(thing)bread$(), $(thing)leafy greens$(), and more.$(br2)$(bold)Eating too many foods from the same family reduces nutrition returns across that entire family$() — even if the specific items are different."
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Family Fatigue",
-            "text": "Salmon, cod, and tuna are all different items — but they all belong to the $(thing)fish family$().$(br2)Eating all three in quick succession builds up $(c:#e05252)fish family fatigue$(). Each fish gives less nutrition than the last, even though you technically ate three different things.$(br2)$(italic)The Diet Screen shows your most fatigued families — check it to see what you have been over-relying on.$() "
-        }
-    ]
+  "name": "Food Families",
+  "category": "nourished:how_it_works",
+  "icon": "minecraft:apple",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Food Families",
+      "text": "Within each food group, foods are organized into $(bold)families$(). For example, all apple-type foods share the Apple family. Eating within the same family triggers diminishing returns faster than switching to a different family in the same group."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Why It Matters",
+      "text": "You can check a food's family in its tooltip. Ideally you want to rotate across $(bold)multiple families$() within each group, not just multiple foods.\n\nEating an apple, then a golden apple, then an enchanted golden apple is still all Apple family — variety means switching to melons or berries instead."
+    }
+  ]
 }

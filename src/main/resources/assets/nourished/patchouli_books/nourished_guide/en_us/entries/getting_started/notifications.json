@@ -1,19 +1,18 @@
 {
-    "name": "Notifications",
-    "icon": "minecraft:bell",
-    "category": "nourished:getting_started",
-    "sortnum": 6,
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:bell",
-            "title": "Critical Alerts",
-            "text": "When any nutrient bar drops below $(bold)25%$(), a toast notification fires in the corner of your screen — telling you exactly which group needs attention.$(br2)$(c:#e05252)By the time it fires, the debuff is already active or seconds away.$()$(br2)The best strategy is to never need the warning."
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Staying Ahead",
-            "text": "Watch your $(thing)HUD$() and top up bars that are trending downward $(bold)before$() they hit 25%.$(br2)If you miss a toast and a debuff appears — open the $(thing)Diet Screen$() immediately. The most neglected groups are listed right at the top.$(br2)$(italic)A downward trend arrow is a warning. A toast is a crisis. Aim for warnings.$() "
-        }
-    ]
+  "name": "Notifications",
+  "category": "nourished:getting_started",
+  "icon": "minecraft:bell",
+  "sortnum": 6,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Critical Toasts",
+      "text": "When a food group drops critically low, Nourished sends a $(#e05252)toast notification$() in the top-right corner of your screen.\n\nToasts appear once per group when they cross the critical threshold — pay attention to them or your stats will suffer."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Staying Ahead",
+      "text": "You can disable notifications in the mod's config if you prefer to manage nutrition manually.\n\nThe HUD mini bars will still change color as groups reach critical levels, giving you a passive visual warning at all times."
+    }
+  ]
 }

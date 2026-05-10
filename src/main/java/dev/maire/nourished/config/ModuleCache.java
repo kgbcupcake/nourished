@@ -18,6 +18,12 @@ public final class ModuleCache {
     public static boolean enableDietScreen = true;
     public static boolean enableCriticalToasts = true;
     public static boolean enableSleepBonus = true;
+    public static boolean enablePSStaminaUsage = true;
+    public static boolean enablePSPenaltyDecay = true;
+    public static boolean enablePSExhaustionDuration = true;
+    public static boolean enableLSOThermalResistance = true;
+    public static boolean enableLSOBrokenHeartResilience = true;
+    public static boolean enableLSOThirstSaturation = true;
     public static boolean enableSynergies = true;
     public static boolean enableMilestones = true;
     public static boolean enableSeasonHooks = true;
@@ -36,6 +42,12 @@ public final class ModuleCache {
         enableDietScreen = config.isModuleEnabled("enableDietScreen");
         enableCriticalToasts = config.isModuleEnabled("enableCriticalToasts");
         enableSleepBonus = config.isModuleEnabled("enableSleepBonus");
+        enablePSStaminaUsage = config.isModuleEnabled("enablePSStaminaUsage");
+        enablePSPenaltyDecay = config.isModuleEnabled("enablePSPenaltyDecay");
+        enablePSExhaustionDuration = config.isModuleEnabled("enablePSExhaustionDuration");
+        enableLSOThermalResistance = config.enableLSOThermalResistance();
+        enableLSOBrokenHeartResilience = config.enableLSOBrokenHeartResilience();
+        enableLSOThirstSaturation = config.enableLSOThirstSaturation();
         enableSynergies = config.isModuleEnabled("enableSynergies");
         enableMilestones = config.isModuleEnabled("enableMilestones");
         enableSeasonHooks = config.isModuleEnabled("enableSeasonHooks");

@@ -1,20 +1,20 @@
 {
-    "name": "Proteins",
-    "icon": "minecraft:cooked_beef",
-    "category": "nourished:food_groups",
-    "sortnum": 2,
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:cooked_beef",
-            "title": "Proteins",
-            "text": "Meat, fish, eggs, and other high-protein foods.$(br2)$(c:#e05252)$(bold)Low Proteins (below 25%):$()$()$(br2)$(li)Mining Fatigue I$(br2)$(c:#52c252)$(bold)Bonus (all groups above 75%):$()$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)$(bold)This is your most important bar early game.$(br)Mining Fatigue will cripple your progress. Cook your meat. Eat it."
-        },
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:cooked_salmon",
-            "title": "Proteins",
-            "text": "Fish, eggs, and modded meats all count. Rotate between different protein sources to avoid diminishing returns.$(br2)$(italic)Eating only steak every meal will give you less and less nutrition over time. Mix it up.$() "
-        }
-    ]
+  "name": "Proteins",
+  "category": "nourished:food_groups",
+  "icon": "minecraft:cooked_beef",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:cooked_beef",
+      "title": "Proteins",
+      "text": "Proteins are rich, sustaining foods. $(#e05252)Penalty:$() reduced attack damage when depleted. $(#52c252)Bonus:$() increased max health when maintained. Cooked meats and fish are your primary sources."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:cooked_salmon",
+      "title": "Proteins — Fish",
+      "text": "Cooked salmon and cod are excellent protein sources and easy to obtain near any river or ocean. Fish provide solid nutrition value and are a great early-game alternative to land animals."
+    }
+  ]
 }

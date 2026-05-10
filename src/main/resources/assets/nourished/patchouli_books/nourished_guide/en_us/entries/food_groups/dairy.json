@@ -1,20 +1,28 @@
 {
-    "name": "Dairy",
-    "icon": "minecraft:milk_bucket",
-    "category": "nourished:food_groups",
-    "sortnum": 5,
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:milk_bucket",
-            "title": "Dairy",
-            "text": "Milk, cheese, yogurt, and other dairy-based foods.$(br2)$(italic)No individual penalty for low Dairy.$()$(br2)$(c:#52c252)$(bold)Bonus (all groups above 75%):$()$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)The hardest bar to fill in vanilla. $(thing)Milk buckets$() count — keep a cow farm running."
-        },
-        {
-            "type": "patchouli:spotlight",
-            "item": "herbsandharvest:aged_swiss",
-            "title": "Dairy",
-            "text": "Food mods change this completely. Cheese, yogurt, butter, and fresh milk from mods like Herbs and Harvest, Croptopia, and Pam's HarvestCraft all count.$(br2)$(italic)If dairy feels impossible to fill — install a food mod.$() "
-        }
-    ]
+  "name": "Dairy",
+  "category": "nourished:food_groups",
+  "icon": "minecraft:milk_bucket",
+  "sortnum": 5,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:milk_bucket",
+      "title": "Dairy",
+      "text": "Dairy foods strengthen bones and body. $(#e05252)Penalty:$() reduced knockback resistance when depleted. $(#52c252)Bonus:$() increased armor toughness when maintained. A single cow pen keeps this group topped up easily."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "herbsandharvest:aged_swiss",
+      "flag": "mod:herbsandharvest",
+      "title": "Dairy — Herbs & Harvest",
+      "text": "Herbs & Harvest adds aged cheeses including Swiss, cheddar, and brie. These provide significantly higher dairy nutrition than plain milk and are worth crafting once your farm is established."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:milk_bucket",
+      "flag": "!mod:herbsandharvest",
+      "title": "Dairy — Vanilla",
+      "text": "Without Herbs & Harvest, milk bucket is your primary dairy source. Keep at least one cow nearby and bucket up regularly — it is one of the easiest groups to maintain in a vanilla world."
+    }
+  ]
 }

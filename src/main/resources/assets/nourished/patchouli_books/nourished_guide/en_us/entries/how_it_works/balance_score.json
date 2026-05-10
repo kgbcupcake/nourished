@@ -1,19 +1,18 @@
 {
-    "name": "Balance Score",
-    "icon": "minecraft:comparator",
-    "category": "nourished:how_it_works",
-    "sortnum": 3,
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:comparator",
-            "title": "Balance Score",
-            "text": "The $(thing)Balance Score$() on your Diet Screen measures how $(bold)evenly spread$() your six bars are — not how full they are.$(br2)$(c:#52c252)$(bold)1.0$()$() — all six bars are perfectly equal.$(br2)$(c:#e05252)$(bold)Near 0$()$() — your diet is heavily skewed toward one or two groups."
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Why It Matters",
-            "text": "Two players can have the same $(italic)average$() nutrition and completely different outcomes.$(br2)Proteins at $(c:#52c252)95%$() and Fruits at $(c:#e05252)5%$() averages the same as both at 50% — but only one of them has Unluck I.$(br2)$(bold)The Balance Score is your early warning system.$() Watch it trend downward and you know your diet is drifting $(italic)before$() the penalties arrive."
-        }
-    ]
+  "name": "Balance Score",
+  "category": "nourished:how_it_works",
+  "icon": "minecraft:golden_apple",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Balance Score",
+      "text": "The $(bold)Balance Score$() measures how evenly spread your nutrition is across all six groups. Having five groups full and one empty scores worse than having all six groups at a moderate level.\n\nIt is shown on the left panel of the diet screen."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Balanced vs Excess",
+      "text": "$(#52c252)Balanced$() means all groups are within the healthy range of 40–80%.\n\n$(#e05252)Excess$() means one or more groups have exceeded 80% — overeating a single group is treated as imbalance, not a bonus. Aim for even coverage, not maxing individual bars."
+    }
+  ]
 }

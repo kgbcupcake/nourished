@@ -1,18 +1,23 @@
 {
-    "name": "Datapack Overrides",
-    "icon": "minecraft:chest",
-    "category": "nourished:server_owners",
-    "sortnum": 1,
-    "pages": [
-        {
-            "type": "patchouli:text",
-            "title": "Datapack Overrides",
-            "text": "Nourished uses a $(bold)three-layer override system$():$(br2)$(li)$(thing)Bundled defaults$() — curated food classifications that ship with the mod$(li)$(thing)Config$() — server owners tune any mechanic$(li)$(thing)Datapacks$() — $(bold)always win.$() Full control over food classifications.$(br2)Datapacks can reclassify any food, add unknowns, or remove foods from a group entirely."
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Integration",
-            "text": "$(italic)No code forks. No mixins. No hard dependencies.$()$(br2)Integrating with Nourished via datapacks requires nothing beyond the datapack itself.$(br2)For mod developers integrating via Java, Nourished exposes a stable public API.$(br2)See the $(thing)Nourished documentation on GitHub$() for full details."
-        }
-    ]
+  "name": "Datapack Overrides",
+  "category": "nourished:server_owners",
+  "icon": "minecraft:chest",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Datapack Overrides",
+      "text": "Nourished supports $(bold)datapack overrides$() for food group assignments and nutrition values. This allows server owners and modpack makers to reassign any food to a different group or adjust its value without modifying the mod itself."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "File Location",
+      "text": "Place override files at:\n\n$(bold)data/nourished/food_groups/<group>.json$()\n\nEach file is a list of item IDs with optional nutrition value overrides. Entries in your datapack take full priority over the mod's built-in assignments."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Example Override",
+      "text": "To move $(bold)minecraft:pumpkin_pie$() from Grains to Sugars with a custom value, add its entry to $(bold)data/nourished/food_groups/sugars.json$() and remove it from $(bold)grains.json$().\n\nChanges apply on world load or when datapacks are reloaded with $(bold)/reload$()."
+    }
+  ]
 }

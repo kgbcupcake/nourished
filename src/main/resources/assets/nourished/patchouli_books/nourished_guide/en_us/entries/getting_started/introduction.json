@@ -1,18 +1,18 @@
 {
-    "name": "What is Nourished?",
-    "icon": "minecraft:golden_apple",
-    "category": "nourished:getting_started",
-    "sortnum": 0,
-    "pages": [
-        {
-            "type": "patchouli:text",
-            "title": "What is Nourished?",
-            "text": "Nourished adds a $(bold)nutrition system$() to Minecraft that rewards dietary variety with real gameplay benefits.$(br2)Eat a wide variety of foods, maintain a balanced diet, and earn passive bonuses. Neglect entire food groups and your nutrition will slowly work against you.$(br2)$(italic)The more varied your diet, the better it works for you.$() "
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Six Food Groups",
-            "text": "Nourished tracks $(bold)six core dietary groups$():$(br2)$(li)$(c:#ff6b6b)Fruits$()$(li)$(c:#6bff6b)Vegetables$()$(li)$(c:#ff9f6b)Proteins$()$(li)$(c:#ffef6b)Grains$()$(li)$(c:#ff6bef)Sugars$()$(li)$(c:#6bdfff)Dairy$()$(br2)Every food you eat contributes to one or more of these groups. Your goal is to keep all six balanced."
-        }
-    ]
+  "name": "Introduction",
+  "category": "nourished:getting_started",
+  "icon": "minecraft:book",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Welcome to Nourished",
+      "text": "Nourished adds a nutrition system that encourages eating a $(bold)varied diet$(). Each food group you consume contributes to your overall health and performance.\n\nEat well, sleep soundly, and your body will reward you."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "The Core Idea",
+      "text": "There are $(bold)six food groups$(): Fruits, Vegetables, Proteins, Grains, Sugars, and Dairy.\n\nMaintaining each group provides $(#52c252)bonuses$(), while neglecting them causes $(#e05252)penalties$(). Balance is everything."
+    }
+  ]
 }

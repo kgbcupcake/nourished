@@ -1,14 +1,19 @@
 {
-    "name": "The Sleep Bonus",
-    "icon": "minecraft:red_bed",
-    "category": "nourished:getting_started",
-    "sortnum": 3,
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:minecraft:white_bed",
-            "title": "Eat Well, Sleep Well",
-            "text": "Keep $(bold)all six nutrient bars above 50%$() before you sleep and you will wake up with:$(br2)$(c:#52c252)$(li)Regeneration I for 30 seconds$()$(br2)It is a small but meaningful reward for maintaining a consistently balanced diet — not just spiking one bar and ignoring the rest.$(br2)$(italic)Another reason to check your Diet Screen before logging off.$() "
-        }
-    ]
+  "name": "Sleep Bonus",
+  "category": "nourished:getting_started",
+  "icon": "minecraft:golden_apple",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:golden_apple",
+      "title": "Sleep Bonus",
+      "text": "Sleeping while well-nourished grants a $(#52c252)Sleep Bonus$(). The more food groups you have filled, the stronger the bonus when you wake."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "How It Scales",
+      "text": "Filling $(bold)all six groups$() to a healthy level before bed gives the maximum bonus — a burst of regeneration and a small boost to your nutrient levels on waking.\n\nNeglecting your diet means waking up feeling no better than when you went to sleep."
+    }
+  ]
 }

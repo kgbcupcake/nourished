@@ -1,19 +1,18 @@
 {
-    "name": "Streak Penalty",
-    "icon": "minecraft:repeater",
-    "category": "nourished:how_it_works",
-    "sortnum": 5,
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:repeater",
-            "title": "Streak Penalty",
-            "text": "Eating the same food back to back does not just trigger diminishing returns — it triggers them $(bold)twice as fast$().$(br2)Eat the same item within $(bold)5 minutes$() of the last time you ate it and the eat count buildup doubles. Your $(thing)Diversity score$() will drop visibly faster than if you had spaced those meals out."
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Breaking the Streak",
-            "text": "Eat $(italic)something else$() in between. That is it.$(br2)You do not need to wait out the full memory window — just break the consecutive run. Even one different food resets the streak.$(br2)The $(thing)Last eaten$() line on food tooltips tells you exactly how long ago you had that food.$(br2)$(italic)If it says zero meals ago — eat something else first.$() "
-        }
-    ]
+  "name": "Streak Penalty",
+  "category": "nourished:how_it_works",
+  "icon": "minecraft:barrier",
+  "sortnum": 5,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Streak Penalty",
+      "text": "Eating the same food in a row applies a $(#e05252)Streak Penalty$(). Three meals of plain bread back to back? The third gives noticeably less grain nutrition than the first.\n\nThis stacks with food family diminishing returns to strongly discourage single-food diets."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Breaking the Streak",
+      "text": "Eating any $(bold)different food$() resets your streak immediately. You do not need to eat from a different group — just a different item.\n\nThe streak counter is visible in the food tooltip when it is active, so you always know when you are about to take a penalty."
+    }
+  ]
 }

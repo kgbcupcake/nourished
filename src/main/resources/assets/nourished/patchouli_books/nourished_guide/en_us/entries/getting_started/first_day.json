@@ -1,43 +1,43 @@
 {
-    "name": "Your First Day",
-    "icon": "minecraft:map",
-    "category": "nourished:getting_started",
-    "sortnum": 7,
-    "pages": [
-        {
-            "type": "patchouli:text",
-            "title": "You Have a Head Start",
-            "text": "All six bars start at $(bold)50%$(). The penalty threshold is $(bold)25%$(). You have a 25-point buffer before Nourished starts working against you.$(br2)That is enough time to get your bearings, find food sources, and start your first farm.$(br2)$(c:#e05252)$(italic)Do not squander it eating the same thing over and over.$() "
-        },
-        {
-            "type": "patchouli:text",
-            "title": "The Clock is Running",
-            "text": "Every $(bold)60 seconds$(), all six bars lose a small amount — regardless of what you eat.$(br2)A bar at 50% hits the danger zone in roughly $(bold)5 minutes$() of eating nothing.$(br2)$(italic)Eat before you are hungry. Treat food like a resource you manage — not a reaction to an empty hunger bar.$() "
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Priorities, In Order",
-            "text": "Not all six groups are equal on day one:$(br2)$(li)$(c:#ff9f6b)$(bold)Proteins first.$()$() Mining Fatigue is the worst early penalty. Cook meat. Eat it.$(li)$(c:#6bff6b)$(bold)Vegetables second.$()$() Carrots and potatoes are everywhere.$(li)$(c:#ff6b6b)$(bold)Fruits third.$()$() Apples drop from trees you are already cutting.$(li)$(c:#ffef6b)$(bold)Grains fourth.$()$() Your first wheat farm covers this."
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Priorities, In Order",
-            "text": "$(li)$(c:#ff6bef)$(bold)Sugars$()$() and $(c:#6bdfff)$(bold)Dairy$()$() — last. Neither has an individual penalty. They only matter for the 75% balance bonus, which is a late-game goal.$(br2)A cooked steak, a carrot, an apple, and some bread covers four of six groups with almost no infrastructure.$(br2)$(italic)That is enough. Do not over-optimize from minute one.$() "
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Variety Over Volume",
-            "text": "$(bold)Eating the same food repeatedly gives less and less nutrition each time.$()$(br2)Ten steaks fills your protein bar far less than two steaks, a piece of salmon, a cooked chicken, and an egg.$(br2)Same amount of food. Completely different outcome.$(br2)$(italic)Nourished is not asking you to eat more — it is asking you to eat differently.$() "
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Your Most Important Tool",
-            "text": "Open the $(thing)Diet Screen$() early. Get familiar with your bars.$(br2)The $(bold)trend arrows$() tell you where you are heading before you get there. A downward arrow on proteins means $(italic)cook something$(). Not a crisis — a heads-up.$(br2)The $(thing)HUD$() keeps all of this on screen without opening anything. Position it once."
-        },
-        {
-            "type": "patchouli:text",
-            "title": "The Honest Truth",
-            "text": "Nourished is not punishing you for playing normally.$(br2)Players who cook their food and eat a variety of things will earn $(c:#52c252)Health Boost I$(), $(c:#52c252)Regeneration I$(), and the $(thing)sleep bonus$() without much thought.$(br2)The penalties only appear if you ignore entire food groups for extended periods.$(br2)$(bold)Eat well. Stay balanced. The rest takes care of itself.$() "
-        }
-    ]
+  "name": "Your First Day",
+  "category": "nourished:getting_started",
+  "icon": "minecraft:cooked_beef",
+  "sortnum": 7,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Your First Day",
+      "text": "When you first spawn, all six nutrition bars start at a moderate level. You won't feel any effects immediately — but they will begin to decay.\n\nYour priority on day one is to gather a variety of foods before the bars run dry."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Early Food Sources",
+      "text": "$(bold)Fruits:$() Berry bushes, apple-bearing trees, and melon patches.\n$(bold)Vegetables:$() Carrots, potatoes, and beetroot from villages or the ground.\n$(bold)Proteins:$() Cooked chicken, beef, or fish from nearby animals and rivers."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "More Early Sources",
+      "text": "$(bold)Grains:$() Bread from village chests, or seeds to plant wheat immediately.\n$(bold)Sugars:$() Cookies, cake, or honey from bee nests — treat yourself early.\n$(bold)Dairy:$() A bucket of milk from any cow covers the dairy group in a pinch."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Setting Up a Farm",
+      "text": "A small mixed farm is the most reliable long-term strategy. Plant wheat, carrots, potatoes, and beetroot early.\n\nKeep a cow pen nearby for milk and cooked beef. Even a tiny farm covers four of the six groups with minimal effort."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Cooking Matters",
+      "text": "Raw meats count as Proteins, but their nutrition values are lower than their cooked equivalents. Always cook your meat when possible.\n\nSome foods only register as their group when prepared — check tooltips if a food isn't filling the bar you expect."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Diminishing Returns",
+      "text": "Eating the same food repeatedly gives less nutrition each time due to $(bold)diminishing returns$(). Rotate through different foods within each group to maximize efficiency.\n\nSee the $(bold)How It Works$() chapter for the full details."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "End of Day One",
+      "text": "Sleep when all six bars are above their threshold and wake up with the $(#52c252)Sleep Bonus$(). This is the ideal daily rhythm Nourished is designed around.\n\nWith a bit of preparation, staying balanced becomes second nature."
+    }
+  ]
 }

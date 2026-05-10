@@ -1,18 +1,23 @@
 {
-    "name": "Configuring Effects",
-    "icon": "minecraft:command_block",
-    "category": "nourished:server_owners",
-    "sortnum": 0,
-    "pages": [
-        {
-            "type": "patchouli:text",
-            "title": "Configuring Effects",
-            "text": "All nutrition effects are defined in $(thing)config/nourished/effects.json$(). Created automatically on first launch with sensible defaults.$(br2)You can:$(br2)$(li)Change which nutrients trigger which effects$(li)Adjust thresholds and durations$(li)Add entirely new effects$(li)Disable any existing ones$(br2)$(italic)No code required.$() "
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Effect Triggers",
-            "text": "Effects support the following trigger types:$(br2)$(li)$(thing)below$() — nutrient drops below a threshold$(li)$(thing)above$() — nutrient exceeds a threshold$(li)$(thing)all_above$() — $(bold)ALL$() nutrients exceed a threshold$(li)$(thing)any_below$() — $(bold)ANY$() nutrient drops below a threshold$(li)$(thing)between$() — nutrient is within a range"
-        }
-    ]
+  "name": "Configuring Effects",
+  "category": "nourished:server_owners",
+  "icon": "minecraft:command_block",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Configuring Effects",
+      "text": "Nourished exposes all bonus and penalty effects through its config file. Server owners can change which potion effects are applied, their duration, amplifier, and the thresholds that trigger them.\n\nThe config is located at $(bold)config/nourished-server.toml$()."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Per-Group Settings",
+      "text": "Each food group has its own block in the config with the following fields:\n\n$(bold)bonusEffect$() — effect ID applied when the group is healthy.\n$(bold)penaltyEffect$() — effect ID applied when the group is depleted.\n$(bold)goodThreshold$() — minimum value to receive the bonus.\n$(bold)criticalThreshold$() — value at which the penalty activates."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Disabling Effects",
+      "text": "To disable a bonus or penalty for a specific group, set the effect ID to $(bold)\"none\"$(). The bar will still track nutrition but no potion effect will be applied for that group.\n\nThis is useful for lighter server experiences or modpacks with their own progression systems."
+    }
+  ]
 }

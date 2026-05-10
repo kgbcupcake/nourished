@@ -1,20 +1,28 @@
 {
-    "name": "Vegetables",
-    "icon": "minecraft:carrot",
-    "category": "nourished:food_groups",
-    "sortnum": 1,
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:carrot",
-            "title": "Vegetables",
-            "text": "Carrots, potatoes, beetroot, mushrooms, and other plant-based foods.$(br2)$(c:#e05252)$(bold)Low Vegetables (below 25%):$()$()$(br2)$(li)Slowness I$(br2)$(c:#52c252)$(bold)Bonus (all groups above 75%):$()$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)One of the easiest bars to maintain. A small carrot or potato farm handles this almost automatically."
-        },
-        {
-            "type": "patchouli:spotlight",
-            "item": "farm_and_charm:tomato",
-            "title": "Vegetables",
-            "text": "Food mods open this group up considerably — tomatoes, lettuce, corn, peppers, and much more all count.$(br2)$(italic)Soups and stews from Farmer's Delight and similar mods are especially good for this bar.$() "
-        }
-    ]
+  "name": "Vegetables",
+  "category": "nourished:food_groups",
+  "icon": "minecraft:carrot",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:carrot",
+      "title": "Vegetables",
+      "text": "Vegetables are hearty, grounding foods. $(#e05252)Penalty:$() reduced movement speed when depleted. $(#52c252)Bonus:$() improved hunger saturation when maintained. Carrots, potatoes, and beetroot all qualify."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "farm_and_charm:tomato",
+      "flag": "mod:farm_and_charm",
+      "title": "Vegetables — Farm & Charm",
+      "text": "Farm & Charm adds tomatoes, onions, peppers, and more. Growing these alongside vanilla crops gives excellent variety within the Vegetables group and makes maintaining it effortless."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:beetroot",
+      "flag": "!mod:farm_and_charm",
+      "title": "Vegetables — Vanilla",
+      "text": "Without Farm & Charm, beetroot is your best secondary vegetable alongside carrots and potatoes. A small mixed crop farm covers this group reliably from early game onward."
+    }
+  ]
 }

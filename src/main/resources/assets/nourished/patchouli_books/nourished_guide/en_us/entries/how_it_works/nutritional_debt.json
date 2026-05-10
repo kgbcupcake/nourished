@@ -1,24 +1,23 @@
 {
-    "name": "Nutritional Debt",
-    "icon": "minecraft:poisonous_potato",
-    "category": "nourished:how_it_works",
-    "sortnum": 2,
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:poisonous_potato",
-            "title": "Nutritional Debt",
-            "text": "Variety is not just rewarded — it is $(bold)enforced$().$(br2)If you over-rely on a single food group, Nourished applies $(c:#e05252)$(thing)nutritional debt$()(). Every time you eat from an already-saturated category, your most neglected nutrient bar slowly drains in the background."
-        },
-        {
-            "type": "patchouli:text",
-            "title": "How It Triggers",
-            "text": "Debt kicks in when a single category's $(thing)recent eat count$() crosses a threshold — too much of the same group in a short window.$(br2)When it fires, Nourished finds whichever of your other bars is currently lowest and applies a small decay to it.$(br2)$(italic)Subtle but persistent. Ignore it long enough and you will see penalties in groups you thought were fine.$() "
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Avoiding Debt",
-            "text": "$(bold)Eat a wider variety of foods.$()$(br2)Rotating between food groups prevents any single category from building up enough to trigger debt.$(br2)Players who maintain a genuinely balanced diet will $(italic)never notice it exists$().$(br2)The $(thing)Diet Screen$() shows your most neglected groups — use it to spot imbalances before debt starts working against you."
-        }
-    ]
+  "name": "Nutritional Debt",
+  "category": "nourished:how_it_works",
+  "icon": "minecraft:rotten_flesh",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Nutritional Debt",
+      "text": "When a food group drops to zero and stays there, you accumulate $(#e05252)Nutritional Debt$(). Debt represents a deeper deficit than a simple empty bar — your body has been running on empty for too long."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Effects of Debt",
+      "text": "While in debt for a group, the normal penalty is replaced by a $(#e05252)stronger debuff$(). The longer you remain in debt, the more severe the effect becomes.\n\nDebt is shown as a negative indicator below the bar on the diet screen."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Recovering from Debt",
+      "text": "Refilling the bar does not immediately clear debt. You must keep the group $(bold)above zero for a sustained period$() before debt clears and the normal bar logic resumes.\n\nThe best cure is prevention — do not let bars sit empty."
+    }
+  ]
 }

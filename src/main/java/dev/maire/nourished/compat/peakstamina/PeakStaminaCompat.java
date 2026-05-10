@@ -2,6 +2,7 @@ package dev.maire.nourished.compat.peakstamina;
 
 import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.api.NourishedEvents;
+import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.nutrition.Nourished;
 import dev.maire.nourished.nutrition.NutrientRegistry;
 import net.minecraft.core.Holder;
@@ -21,8 +22,11 @@ public final class PeakStaminaCompat {
 
     private static final String PEAK_STAMINA_MOD_ID = "peakstamina";
     private static final ResourceLocation MODIFIER_ID = ResourceLocation.fromNamespaceAndPath("nourished", "peak_stamina_nutrition_modifier");
-    private static final ResourceLocation STAMINA_REGEN_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peakstamina", "stamina_regen_rate");
-    private static final ResourceLocation MAX_STAMINA_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peakstamina", "max_stamina");
+    private static final ResourceLocation STAMINA_REGEN_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peak_stamina", "stamina_regen");
+    private static final ResourceLocation MAX_STAMINA_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peak_stamina", "max_stamina");
+    private static final ResourceLocation STAMINA_USAGE_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peak_stamina", "stamina_usage");
+    private static final ResourceLocation PENALTY_DECAY_MULTIPLIER_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peak_stamina", "penalty_decay_multiplier");
+    private static final ResourceLocation EXHAUSTION_DURATION_MULTIPLIER_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peak_stamina", "exhaustion_duration_multiplier");
 
     private PeakStaminaCompat() {
     }
@@ -49,9 +53,21 @@ public final class PeakStaminaCompat {
 
         double regenMultiplier = calculateRegenMultiplier(averageNutrition);
         double maxStaminaMultiplier = calculateMaxStaminaMultiplier(averageNutrition);
+        double staminaUsageMultiplier = ModuleCache.enablePSStaminaUsage
+                ? calculateStaminaUsageMultiplier(averageNutrition)
+                : 0.0d;
+        double penaltyDecayMultiplier = ModuleCache.enablePSPenaltyDecay
+                ? calculatePenaltyDecayMultiplier(averageNutrition)
+                : 0.0d;
+        double exhaustionDurationMultiplier = ModuleCache.enablePSExhaustionDuration
+                ? calculateExhaustionDurationMultiplier(averageNutrition)
+                : 0.0d;
 
         applyAttributeModifier(serverPlayer, STAMINA_REGEN_ATTRIBUTE_ID, regenMultiplier);
         applyAttributeModifier(serverPlayer, MAX_STAMINA_ATTRIBUTE_ID, maxStaminaMultiplier);
+        applyAttributeModifier(serverPlayer, STAMINA_USAGE_ATTRIBUTE_ID, staminaUsageMultiplier);
+        applyAttributeModifier(serverPlayer, PENALTY_DECAY_MULTIPLIER_ATTRIBUTE_ID, penaltyDecayMultiplier);
+        applyAttributeModifier(serverPlayer, EXHAUSTION_DURATION_MULTIPLIER_ATTRIBUTE_ID, exhaustionDurationMultiplier);
     }
 
     private static float getAverageNutrition(ServerPlayer player) {
@@ -92,6 +108,30 @@ public final class PeakStaminaCompat {
         }
         if (averageNutrition < 0.15f) {
             return -0.15d;
+        }
+        return 0.0d;
+    }
+
+    private static double calculateStaminaUsageMultiplier(float averageNutrition) {
+        if (averageNutrition < 0.25f) {
+            return 0.25d;
+        }
+        if (averageNutrition > 0.75f) {
+            return -0.15d;
+        }
+        return 0.0d;
+    }
+
+    private static double calculatePenaltyDecayMultiplier(float averageNutrition) {
+        if (averageNutrition > 0.75f) {
+            return 0.3d;
+        }
+        return 0.0d;
+    }
+
+    private static double calculateExhaustionDurationMultiplier(float averageNutrition) {
+        if (averageNutrition < 0.25f) {
+            return 0.3d;
         }
         return 0.0d;
     }

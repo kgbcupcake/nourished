@@ -1,23 +1,18 @@
 {
-    "name": "Buffs & Debuffs",
-    "icon": "minecraft:golden_apple",
-    "category": "nourished:getting_started",
-    "sortnum": 4,
-    "pages": [
-        {
-            "type": "patchouli:text",
-            "title": "How Effects Work",
-            "text": "Your nutrient bars directly affect your character.$(br2)$(c:#e05252)Let them fall too low — debuffs kick in.$()$(br2)$(c:#52c252)Keep them high — passive bonuses kick in.$()$(br2)Effects are checked every second and applied automatically. No potions. No crafting. Your diet does the work."
-        },
-        {
-            "type": "patchouli:text",
-            "title": "Penalties",
-            "text": "When a nutrient drops $(bold)below 25%$():$(br2)$(li)$(c:#ff6b6b)$(bold)Fruits$()$() → Unluck I$(li)$(c:#6bff6b)$(bold)Vegetables$()$() → Slowness I$(li)$(c:#ff9f6b)$(bold)Proteins$()$() → Mining Fatigue I$(li)$(c:#ffef6b)$(bold)Grains$()$() → Weakness I$(br2)$(italic)Sugars and Dairy have no individual penalty — but neglecting them costs you the balance bonus.$() "
-        },
-        {
-            "type": "patchouli:text",
-            "title": "The Balance Bonus",
-            "text": "When $(bold)all six groups are above 75%$(), you earn:$(br2)$(c:#52c252)$(li)Health Boost I$(li)Regeneration I$()$(br2)Both effects persist as long as every bar stays above the threshold. Let $(italic)one$() slip and they both fade.$(br2)$(bold)This is the payoff.$() Build toward it."
-        }
-    ]
+  "name": "Effects",
+  "category": "nourished:getting_started",
+  "icon": "minecraft:potion",
+  "sortnum": 4,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Balance Bonus",
+      "text": "When all six food groups are above their threshold, you gain the $(#52c252)Balance Bonus$() — a persistent buff that improves health, speed, or other stats depending on your configuration.\n\nKeeping the bonus active should be your primary goal."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Penalties",
+      "text": "Letting any group fall to zero applies a $(#e05252)penalty$() for that group. Penalties stack — neglecting multiple groups at once causes increasingly severe debuffs.\n\nRecovery is straightforward: eat foods from the depleted group and the penalty fades as the bar refills."
+    }
+  ]
 }

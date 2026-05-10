@@ -12,6 +12,7 @@ import dev.maire.nourished.command.NourishedCommand;
 import dev.maire.nourished.compat.kubejs.NourishedKubeJSPlugin;
 import dev.maire.nourished.compat.AutoCompatDiscovery;
 import dev.maire.nourished.compat.ModCompat;
+import dev.maire.nourished.compat.lso.LSOCompat;
 import dev.maire.nourished.compat.peakstamina.PeakStaminaCompat;
 import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -51,6 +52,9 @@ public class Nourished {
         ModCompat.initialize();
         if (ModList.get().isLoaded("peakstamina")) {
             PeakStaminaCompat.register();
+        }
+        if (ModList.get().isLoaded("legendarysurvivaloverhaul")) {
+            LSOCompat.register();
         }
         FoodValueRegistry.load();
         FoodOverrideRegistry.load();

@@ -91,7 +91,7 @@ public final class ClientEvents {
             return;
         }
 
-        var matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, true);
+        var matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, false);
         DietDelta delta = FoodNutritionRegistry.computeDietDelta(
                 stack, level, food.nutrition(), food.saturation(), matchedBars);
 

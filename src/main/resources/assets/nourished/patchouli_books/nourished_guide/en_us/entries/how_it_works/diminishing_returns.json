@@ -1,19 +1,18 @@
 {
-    "name": "Diminishing Returns",
-    "icon": "minecraft:golden_carrot",
-    "category": "nourished:how_it_works",
-    "sortnum": 0,
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:golden_carrot",
-            "title": "Diminishing Returns",
-            "text": "Eating the same food repeatedly gives $(bold)less and less nutrition each time$(). This is $(thing)diminishing returns$().$(br2)The more often you eat something, the lower its nutritional value becomes. Returns recover naturally — the longer you go without eating something, the more nutrition it gives when you eat it again."
-        },
-        {
-            "type": "patchouli:text",
-            "title": "The Novelty Bonus",
-            "text": "Eating a food you have never had — or not had in a long time — gives a $(c:#52c252)$(bold)novelty bonus$()$() of up to $(bold)25% extra nutrition$().$(br2)This bonus fades the more you eat that food.$(br2)$(italic)Variety is always rewarded. Rotate your foods and you will consistently get better nutrition than eating the same thing every meal.$() "
-        }
-    ]
+  "name": "Diminishing Returns",
+  "category": "nourished:how_it_works",
+  "icon": "minecraft:cookie",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Diminishing Returns",
+      "text": "Eating the same food repeatedly gives $(#e05252)less nutrition each time$(). The first apple of the day fills your Fruits bar noticeably. The fifth apple barely moves it.\n\nThis system exists to reward variety over repetition."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "How It Resets",
+      "text": "Diminishing returns are tracked per food item and reset each in-game day. By the next morning, every food is back to full nutritional value.\n\nThe best strategy is to rotate through several different foods within each group rather than eating one food to exhaustion."
+    }
+  ]
 }

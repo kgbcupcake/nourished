@@ -1,6 +1,6 @@
 {
-    "name": "For Server Owners",
-    "description": "How to configure Nourished for your server or modpack.",
-    "icon": "minecraft:writable_book",
-    "sortnum": 3
+  "name": "Server Owners",
+  "description": "Configuration options and datapack support for server administrators.",
+  "icon": "minecraft:writable_book",
+  "sortnum": 3
 }

@@ -1,20 +1,20 @@
 {
-    "name": "Sugars",
-    "icon": "minecraft:sugar",
-    "category": "nourished:food_groups",
-    "sortnum": 4,
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:cake",
-            "title": "Sugars",
-            "text": "Cake, cookies, honey, and other sweet foods.$(br2)$(italic)No individual penalty for low Sugars.$()$(br2)$(c:#52c252)$(bold)Bonus (all groups above 75%):$()$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)Easy to neglect because there is no immediate punishment. Keep $(thing)honey bottles$() or $(thing)cookies$() in your hotbar."
-        },
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:honey_bottle",
-            "title": "Sugars",
-            "text": "Honey bottles are one of the best sugar sources in vanilla — easy to stack and eat on the go.$(br2)$(italic)With food mods, cakes, pastries, and candies expand this group considerably.$() "
-        }
-    ]
+  "name": "Sugars",
+  "category": "nourished:food_groups",
+  "icon": "minecraft:cake",
+  "sortnum": 4,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:cake",
+      "title": "Sugars",
+      "text": "Sugars are indulgent foods that provide quick energy. $(#e05252)Penalty:$() reduced sprint speed when depleted. $(#52c252)Bonus:$() increased jump height when maintained. A little goes a long way — don't overdo it."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:honey_bottle",
+      "title": "Sugars — Honey",
+      "text": "Honey bottles are an excellent sugar source that also clears poison. Keeping a bee farm gives you a steady supply of both honey bottles and honeycomb, covering this group with minimal effort."
+    }
+  ]
 }

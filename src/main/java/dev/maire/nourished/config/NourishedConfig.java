@@ -54,6 +54,9 @@ public final class NourishedConfig {
     // config.nourished.enableCriticalToasts.desc
     private final ModConfigSpec.BooleanValue enableCriticalToasts;
     private final ModConfigSpec.BooleanValue enableSleepBonus;
+    private final ModConfigSpec.BooleanValue enableLSOThermalResistance;
+    private final ModConfigSpec.BooleanValue enableLSOBrokenHeartResilience;
+    private final ModConfigSpec.BooleanValue enableLSOThirstSaturation;
 
     // General
     private final ModConfigSpec.DoubleValue decayRate;
@@ -136,6 +139,12 @@ public final class NourishedConfig {
         enableDietScreen = defineModuleToggle(builder, "enableDietScreen", "When false, the keybind to open DietScreen does nothing", ConfigDefaultsLoader.getBoolean(defaults, "enableDietScreen", true));
         enableCriticalToasts = defineModuleToggle(builder, "enableCriticalToasts", "Separate from enableToasts, controls only the critical-threshold toast specifically", ConfigDefaultsLoader.getBoolean(defaults, "enableCriticalToasts", true));
         enableSleepBonus = defineModuleToggle(builder, "enableSleepBonus", "When true, sleeping with all nutrient bars above 50% grants Regeneration I for 30 seconds", ConfigDefaultsLoader.getBoolean(defaults, "enableSleepBonus", true));
+        defineModuleToggle(builder, "enablePSStaminaUsage", "When false, Peak Stamina nutrition hook does not apply the stamina_usage attribute modifier", ConfigDefaultsLoader.getBoolean(defaults, "enablePSStaminaUsage", true));
+        defineModuleToggle(builder, "enablePSPenaltyDecay", "When false, Peak Stamina nutrition hook does not apply the penalty_decay_multiplier attribute modifier", ConfigDefaultsLoader.getBoolean(defaults, "enablePSPenaltyDecay", true));
+        defineModuleToggle(builder, "enablePSExhaustionDuration", "When false, Peak Stamina nutrition hook does not apply the exhaustion_duration_multiplier attribute modifier", ConfigDefaultsLoader.getBoolean(defaults, "enablePSExhaustionDuration", true));
+        enableLSOThermalResistance = defineModuleToggle(builder, "enableLSOThermalResistance", "When true, nutrition level affects LSO thermal resistance attribute", ConfigDefaultsLoader.getBoolean(defaults, "enableLSOThermalResistance", true));
+        enableLSOBrokenHeartResilience = defineModuleToggle(builder, "enableLSOBrokenHeartResilience", "When true, high nutrition boosts LSO broken heart resilience", ConfigDefaultsLoader.getBoolean(defaults, "enableLSOBrokenHeartResilience", true));
+        enableLSOThirstSaturation = defineModuleToggle(builder, "enableLSOThirstSaturation", "When true, eating nutritious food adds a small LSO thirst saturation bonus", ConfigDefaultsLoader.getBoolean(defaults, "enableLSOThirstSaturation", true));
         defineModuleToggle(builder, "enableSynergies", "When false, nutrient and food synergy checks are skipped", ConfigDefaultsLoader.getBoolean(defaults, "enableSynergies", true));
         defineModuleToggle(builder, "enableMilestones", "When false, milestone checks are skipped", ConfigDefaultsLoader.getBoolean(defaults, "enableMilestones", true));
         defineModuleToggle(builder, "enableSeasonHooks", "When false, season hook modifiers are ignored", ConfigDefaultsLoader.getBoolean(defaults, "enableSeasonHooks", true));
@@ -422,6 +431,18 @@ public final class NourishedConfig {
 
     public void setEnableSleepBonus(boolean value) {
         enableSleepBonus.set(value);
+    }
+
+    public boolean enableLSOThermalResistance() {
+        return enableLSOThermalResistance.get();
+    }
+
+    public boolean enableLSOBrokenHeartResilience() {
+        return enableLSOBrokenHeartResilience.get();
+    }
+
+    public boolean enableLSOThirstSaturation() {
+        return enableLSOThirstSaturation.get();
     }
 
     public double criticalThreshold() {

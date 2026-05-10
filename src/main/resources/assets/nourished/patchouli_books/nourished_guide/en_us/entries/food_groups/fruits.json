@@ -1,20 +1,28 @@
 {
-    "name": "Fruits",
-    "icon": "minecraft:apple",
-    "category": "nourished:food_groups",
-    "sortnum": 0,
-    "pages": [
-        {
-            "type": "patchouli:spotlight",
-            "item": "minecraft:apple",
-            "title": "Fruits",
-            "text": "Apples, berries, melons — anything sweet and plant-based.$(br2)$(c:#e05252)$(bold)Low Fruits (below 25%):$()$()$(br2)$(li)Unluck I$(br2)$(c:#52c252)$(bold)Bonus (all groups above 75%):$()$()$(br2)$(li)Health Boost I$(li)Regeneration I$(br2)Apples drop from trees you are already cutting. $(italic)Easy to keep up if you are paying attention.$() "
-        },
-        {
-            "type": "patchouli:spotlight",
-            "item": "croptopia:strawberry",
-            "title": "Fruits",
-            "text": "With food mods installed, fruits expand massively — strawberries, mangoes, bananas, citrus, and dozens more all count.$(br2)$(italic)The more food mods you have, the easier this bar becomes to keep full.$() "
-        }
-    ]
+  "name": "Fruits",
+  "category": "nourished:food_groups",
+  "icon": "minecraft:apple",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:apple",
+      "title": "Fruits",
+      "text": "Fruits are sweet, vitamin-rich foods. $(#e05252)Penalty:$() reduced max health when depleted. $(#52c252)Bonus:$() increased regeneration speed when maintained. Apples, melons, and berries all count."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "croptopia:strawberry",
+      "flag": "mod:croptopia",
+      "title": "Fruits — Croptopia",
+      "text": "With Croptopia installed, the Fruits group expands significantly. Strawberries, peaches, mangoes, and many more exotic fruits are available to keep this group well-stocked."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:sweet_berries",
+      "flag": "!mod:croptopia",
+      "title": "Fruits — Vanilla",
+      "text": "Without Croptopia, sweet berries are one of your most accessible wild fruit sources alongside apples and melons. Keep a berry bush farm early on to maintain this group easily."
+    }
+  ]
 }
