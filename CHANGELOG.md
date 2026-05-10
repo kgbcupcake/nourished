@@ -11,6 +11,7 @@ All notable changes to Nourished will be documented here.
 - Expand ARCHITECTURE.md with detailed override priority stack and clarifications on mod functionality
 - Update food group entries and nutrition HUD in Patchouli guide
 - Enhance README and implement Peak Stamina compatibility features
+- Expand ARCHITECTURE.md with new sections on memory, fatigue, debt, and category management
 
 ### 🚀 Features
 
@@ -28,6 +29,7 @@ All notable changes to Nourished will be documented here.
 - Improve modularity with example-addon integration
 - Establish API contract and enhance documentation for v0.1.2-alpha
 - Enhance UI responsiveness and button visibility in configuration widgets
+- Introduce core diet and nutrition management system
 
 ### 🚜 Refactor
 
