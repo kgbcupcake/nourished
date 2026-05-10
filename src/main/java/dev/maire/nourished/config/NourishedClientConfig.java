@@ -1,8 +1,9 @@
 package dev.maire.nourished.config;
 
 import com.google.gson.JsonObject;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -53,7 +54,17 @@ public final class NourishedClientConfig {
                 "dietBarOrder",
                 List::of,
                 () -> "",
-                o -> o instanceof String s && NutrientRegistry.getKeys().contains(s)
+                o -> {
+                    if (!(o instanceof String s)) {
+                        return false;
+                    }
+                    try {
+                        NourishedRegistryUtils.requireNutrientKey(s, "NourishedClientConfig.dietBarOrder");
+                        return true;
+                    } catch (IllegalArgumentException e) {
+                        return false;
+                    }
+                }
         );
         builder.pop();
     }

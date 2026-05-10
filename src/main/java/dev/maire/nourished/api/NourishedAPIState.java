@@ -1,6 +1,6 @@
 package dev.maire.nourished.api;
 
-import dev.maire.nourished.nutrition.Nourished;
+import dev.maire.nourished.core.Nourished;
 
 public final class NourishedAPIState {
 

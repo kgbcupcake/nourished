@@ -15,9 +15,10 @@ import dev.maire.nourished.api.NutrientDefinition;
 import dev.maire.nourished.api.NutrientMilestoneDefinition;
 import dev.maire.nourished.api.NutrientSynergyDefinition;
 import dev.maire.nourished.config.LockRegistry;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.FoodFamilyResolver;
-import dev.maire.nourished.registry.NourishedApiDefinitionRegistries;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
+import dev.maire.nourished.core.registry.NourishedApiDefinitionRegistries;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -356,7 +357,7 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
             Iterable<Holder<net.minecraft.world.item.Item>> tagged = BuiltInRegistries.ITEM.getTagOrEmpty(key);
             int matched = 0;
             for (Holder<net.minecraft.world.item.Item> holder : tagged) {
-                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(holder.value());
+                ResourceLocation itemId = NourishedRegistryUtils.itemKey(holder.value());
                 if (itemId != null) {
                     NourishedAPI.registerFoodClassification(itemId, nutrientKey, amount);
                     matched++;

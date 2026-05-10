@@ -3,7 +3,7 @@ package dev.maire.nourished.compat;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.nutrition.Nourished;
+import dev.maire.nourished.core.Nourished;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforgespi.language.IModInfo;

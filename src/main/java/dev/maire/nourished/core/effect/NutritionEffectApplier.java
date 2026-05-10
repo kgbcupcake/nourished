@@ -1,10 +1,11 @@
-package dev.maire.nourished.effect;
+package dev.maire.nourished.core.effect;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.util.NourishedEffectUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -31,11 +32,10 @@ public final class NutritionEffectApplier {
         Map<ResourceLocation, EffectRegistry.EffectDef> lastSeenActiveByEffect = new HashMap<>();
         Map<ResourceLocation, EffectRegistry.EffectDef> firstSeenActiveByEffect = new HashMap<>();
         for (EffectRegistry.EffectDef def : EffectRegistry.getAll()) {
-            ResourceLocation effectId = ResourceLocation.parse(def.effect());
-            Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT
-                    .getHolder(effectId)
-                    .orElse(null);
+            Holder<MobEffect> effect = NourishedEffectUtils.resolveEffect(def.effect()).orElse(null);
             if (effect == null) continue;
+
+            ResourceLocation effectId = BuiltInRegistries.MOB_EFFECT.getKey(effect.value());
 
             if (!def.enabled()) {
                 player.removeEffect(effect);
@@ -89,9 +89,7 @@ public final class NutritionEffectApplier {
     /** Removes every mob effect id referenced by {@link EffectRegistry} (module off or reload cleanup). */
     public static void clearAll(ServerPlayer player) {
         for (EffectRegistry.EffectDef def : EffectRegistry.getAll()) {
-            BuiltInRegistries.MOB_EFFECT
-                    .getHolder(ResourceLocation.parse(def.effect()))
-                    .ifPresent(holder -> player.removeEffect(holder));
+            NourishedEffectUtils.resolveEffect(def.effect()).ifPresent(holder -> player.removeEffect(holder));
         }
     }
 

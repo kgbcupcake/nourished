@@ -1,8 +1,8 @@
 package dev.maire.nourished.client.config;
 
-import dev.maire.nourished.effect.EffectRegistry;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.effect.EffectRegistry;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;

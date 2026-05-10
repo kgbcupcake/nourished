@@ -2,7 +2,7 @@ package dev.maire.nourished.client.config;
 
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.nutrition.Nourished;
+import dev.maire.nourished.core.Nourished;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;

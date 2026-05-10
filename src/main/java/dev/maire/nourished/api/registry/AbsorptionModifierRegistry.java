@@ -2,7 +2,7 @@ package dev.maire.nourished.api.registry;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NutrientAbsorptionModifier;
-import dev.maire.nourished.registry.ListRegistry;
+import dev.maire.nourished.core.registry.ListRegistry;
 
 import java.util.Comparator;
 import java.util.List;

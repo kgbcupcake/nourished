@@ -5,11 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
-import dev.maire.nourished.nutrition.UnassignedFoodScanner;
-import dev.maire.nourished.nutrition.scanner.ClassificationResult;
-import dev.maire.nourished.nutrition.scanner.ClassificationSignal;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
+import dev.maire.nourished.tooling.scanner.ClassificationResult;
+import dev.maire.nourished.tooling.scanner.ClassificationSignal;
 import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;

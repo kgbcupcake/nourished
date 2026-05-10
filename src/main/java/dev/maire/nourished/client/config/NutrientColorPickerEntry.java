@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.config;
 
 import dev.maire.nourished.client.NutrientUiColors;
-import dev.maire.nourished.color.ColorRegistry;
+import dev.maire.nourished.core.color.ColorRegistry;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

@@ -1,7 +1,7 @@
-package dev.maire.nourished.effect;
+package dev.maire.nourished.core.effect;
 
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 
 final class EffectTriggerEvaluator {
 

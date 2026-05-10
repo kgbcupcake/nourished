@@ -6,23 +6,17 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.nutrition.Nourished;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.registry.AbstractRegistry;
+import dev.maire.nourished.core.util.NourishedResourceLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -45,8 +39,20 @@ public class LockRegistry {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final Set<String> LOCKED = new HashSet<>();
-    private static final Set<String> SERVER_ONLY = new HashSet<>();
+    private static final class LockedCore extends AbstractRegistry<String, Boolean> {
+        LockedCore() {
+            super("LockRegistry.locked");
+        }
+    }
+
+    private static final class ServerOnlyCore extends AbstractRegistry<String, Boolean> {
+        ServerOnlyCore() {
+            super("LockRegistry.serverOnly");
+        }
+    }
+
+    private static final LockedCore LOCKED = new LockedCore();
+    private static final ServerOnlyCore SERVER_ONLY = new ServerOnlyCore();
 
     /**
      * Returns true if the key is locked (should be hidden from config screen).
@@ -64,19 +70,25 @@ public class LockRegistry {
 
     /** Returns all locked keys. */
     public static Set<String> getLockedKeys() {
-        return Collections.unmodifiableSet(LOCKED);
+        return Set.copyOf(LOCKED.keys());
     }
 
     /** Returns all server-only keys. */
     public static Set<String> getServerOnlyKeys() {
-        return Collections.unmodifiableSet(SERVER_ONLY);
+        return Set.copyOf(SERVER_ONLY.keys());
     }
 
     public static void replaceFromDatapack(Set<String> locked, Set<String> serverOnly) {
-        LOCKED.clear();
-        LOCKED.addAll(locked);
-        SERVER_ONLY.clear();
-        SERVER_ONLY.addAll(serverOnly);
+        LOCKED.reset();
+        for (String k : locked) {
+            LOCKED.register(k, Boolean.TRUE);
+        }
+        LOCKED.freeze();
+        SERVER_ONLY.reset();
+        for (String k : serverOnly) {
+            SERVER_ONLY.register(k, Boolean.TRUE);
+        }
+        SERVER_ONLY.freeze();
     }
 
     public static void load() {
@@ -94,8 +106,10 @@ public class LockRegistry {
                     LOCKED.size(), SERVER_ONLY.size());
         } catch (IOException e) {
             Nourished.LOGGER.error("[LockRegistry] Failed to load locks.json", e);
-            LOCKED.clear();
-            SERVER_ONLY.clear();
+            LOCKED.reset();
+            SERVER_ONLY.reset();
+            LOCKED.freeze();
+            SERVER_ONLY.freeze();
         }
     }
 
@@ -109,46 +123,40 @@ public class LockRegistry {
      * Call this from a reload listener when datapacks are available.
      */
     public static void loadFromDatapack(ResourceManager resourceManager) {
-        ResourceLocation datapackPath = ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "config/locks.json");
-        Optional<Resource> resource = resourceManager.getResource(datapackPath);
-
-        if (resource.isPresent()) {
-            try (InputStream is = resource.get().open();
-                 Reader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                parseFromReader(r);
-                Nourished.LOGGER.info("[LockRegistry] Loaded from datapack override");
-                return;
-            } catch (IOException e) {
-                Nourished.LOGGER.error("[LockRegistry] Failed to load from datapack, falling back to config folder", e);
-            }
-        }
-
-        load();
-        Nourished.LOGGER.info("[LockRegistry] Loaded from config folder");
+        NourishedResourceLoader.loadFromModConfig(
+                resourceManager,
+                "config/locks.json",
+                LockRegistry::parseFromReader,
+                LockRegistry::load,
+                "[LockRegistry] Loaded from datapack override",
+                "[LockRegistry] Failed to load from datapack, falling back to config folder",
+                "[LockRegistry] Loaded from config folder"
+        );
     }
 
     private static void parseFromReader(Reader reader) {
-        LOCKED.clear();
-        SERVER_ONLY.clear();
+        LOCKED.reset();
+        SERVER_ONLY.reset();
 
         JsonObject obj = GSON.fromJson(reader, JsonObject.class);
-        if (obj == null) {
-            return;
-        }
+        if (obj != null) {
+            if (obj.has("locked") && obj.get("locked").isJsonArray()) {
+                JsonArray arr = obj.getAsJsonArray("locked");
+                for (JsonElement el : arr) {
+                    LOCKED.register(el.getAsString(), Boolean.TRUE);
+                }
+            }
 
-        if (obj.has("locked") && obj.get("locked").isJsonArray()) {
-            JsonArray arr = obj.getAsJsonArray("locked");
-            for (JsonElement el : arr) {
-                LOCKED.add(el.getAsString());
+            if (obj.has("server_only") && obj.get("server_only").isJsonArray()) {
+                JsonArray arr = obj.getAsJsonArray("server_only");
+                for (JsonElement el : arr) {
+                    SERVER_ONLY.register(el.getAsString(), Boolean.TRUE);
+                }
             }
         }
 
-        if (obj.has("server_only") && obj.get("server_only").isJsonArray()) {
-            JsonArray arr = obj.getAsJsonArray("server_only");
-            for (JsonElement el : arr) {
-                SERVER_ONLY.add(el.getAsString());
-            }
-        }
+        LOCKED.freeze();
+        SERVER_ONLY.freeze();
     }
 
     private static void parse(Path file) throws IOException {

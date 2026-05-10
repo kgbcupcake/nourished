@@ -1,6 +1,6 @@
 package dev.maire.nourished.client.config;
 
-import dev.maire.nourished.config.NourishedConfigScreen;
+import dev.maire.nourished.client.config.NourishedConfigScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;

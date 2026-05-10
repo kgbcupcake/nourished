@@ -1,4 +1,4 @@
-package dev.maire.nourished.registry;
+package dev.maire.nourished.core.registry;
 
 import dev.maire.nourished.api.ApiStatus;
 

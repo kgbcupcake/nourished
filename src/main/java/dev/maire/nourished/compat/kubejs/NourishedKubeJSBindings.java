@@ -7,8 +7,8 @@ import dev.maire.nourished.api.FoodSynergyDefinition;
 import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.api.NutrientDefinition;
 import dev.maire.nourished.api.NutrientMilestoneDefinition;
-import dev.maire.nourished.diet.DietAttachment;
-import dev.maire.nourished.diet.DietData;
+import dev.maire.nourished.core.diet.DietAttachment;
+import dev.maire.nourished.core.diet.DietData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 

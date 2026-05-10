@@ -1,7 +1,7 @@
 package dev.maire.nourished.client;
 
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.network.ModNetworking.SyncDietDeltaPayload;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.network.ModNetworking.SyncDietDeltaPayload;
 import net.minecraft.util.Mth;
 
 import java.util.HashMap;

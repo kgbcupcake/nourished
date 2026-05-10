@@ -7,7 +7,8 @@ import dev.maire.nourished.api.registry.MilestoneRegistry;
 import dev.maire.nourished.api.registry.SynergyRegistry;
 import dev.maire.nourished.client.NutrientUiColors;
 import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -75,14 +76,14 @@ public final class NourishedFoodTooltipHelper {
                 continue;
             }
             String key = entry.getKey();
-            String nutrientName = Character.toUpperCase(key.charAt(0)) + key.substring(1);
+            String nutrientName = NourishedRegistryUtils.capitalizeFirst(key);
             int color = NutrientUiColors.baseColorArgb(key);
             MutableComponent line = Component.literal(nutrientName + ": +" + String.format(Locale.ROOT, "%.2f", value))
                     .withStyle(Style.EMPTY.withColor(color));
             lines.add(line);
         }
 
-        ResourceLocation thisItem = BuiltInRegistries.ITEM.getKey(item);
+        ResourceLocation thisItem = NourishedRegistryUtils.itemKey(item);
         if (ModuleCache.enableSynergies) {
             addFoodSynergyLine(lines, thisItem);
         }

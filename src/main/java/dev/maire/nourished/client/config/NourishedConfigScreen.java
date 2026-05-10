@@ -1,4 +1,4 @@
-package dev.maire.nourished.config;
+package dev.maire.nourished.client.config;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.maire.nourished.client.NourishedKeys;
@@ -7,16 +7,22 @@ import dev.maire.nourished.client.config.EffectBuilderWidget;
 import dev.maire.nourished.client.config.FoodScannerWidget;
 import dev.maire.nourished.client.config.ImportExportButtonsWidget;
 import dev.maire.nourished.client.config.PresetsWidget;
-import dev.maire.nourished.color.ColorRegistry;
 import dev.maire.nourished.compat.CompatEntry;
 import dev.maire.nourished.compat.CompatReportEntry;
 import dev.maire.nourished.compat.ModCompat;
-import dev.maire.nourished.effect.EffectRegistry;
-import dev.maire.nourished.nutrition.FoodOverrideRegistry;
-import dev.maire.nourished.nutrition.FoodNutritionRegistry;
-import dev.maire.nourished.nutrition.FoodValueRegistry;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.color.ColorRegistry;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.FoodValueRegistry;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.core.reload.NourishedReloadPipeline;
+import dev.maire.nourished.config.HudAnchor;
+import dev.maire.nourished.config.LockRegistry;
+import dev.maire.nourished.config.ModuleCache;
+import dev.maire.nourished.config.NourishedClientConfig;
+import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.config.PresetRegistry;
 
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -227,7 +233,7 @@ public final class NourishedConfigScreen {
             String group;
             String dependsOn = null;
             switch (key) {
-                case "enableDecay", "enableEffects", "enableCalorieTracking", "enableSleepBonus",
+                case "enableDecay", "enableNutritionEating", "enableCalorieSaturationBlock", "enableEffects", "enableCalorieTracking", "enableSleepBonus",
                      "enableSynergies", "enableMilestones", "enableSeasonHooks", "enableAbsorptionModifiers" -> group = "core";
                 case "enableHUD", "enableDietScreen", "enableFoodTooltips", "enableToasts", "enableCriticalToasts" -> group = "ui";
                 default -> group = "other";
@@ -1459,7 +1465,7 @@ public final class NourishedConfigScreen {
                 int totalFood = 0;
                 int classified = 0;
                 for (Item item : BuiltInRegistries.ITEM) {
-                    ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+                    ResourceLocation id = NourishedRegistryUtils.itemKey(item);
                     if (id == null || !row.modId().equals(id.getNamespace())) {
                         continue;
                     }
@@ -1995,15 +2001,19 @@ public final class NourishedConfigScreen {
                 if (pending != null) pending.set(false);
             }
             switch (profile) {
-                case "minimalist" -> setModules(true, "enableDecay", "enableEffects", "enableCalorieTracking");
+                case "minimalist" -> setModules(true, "enableDecay", "enableNutritionEating", "enableCalorieSaturationBlock", "enableEffects", "enableCalorieTracking");
                 case "immersive" -> setModules(true, editableModuleKeys.toArray(new String[0]));
                 case "gameplay" -> setModules(true,
                         "enableDecay",
+                        "enableNutritionEating",
+                        "enableCalorieSaturationBlock",
                         "enableEffects",
                         "enableCalorieTracking",
                         "enableSleepBonus");
                 default -> setModules(true,
                         "enableDecay",
+                        "enableNutritionEating",
+                        "enableCalorieSaturationBlock",
                         "enableEffects",
                         "enableHUD",
                         "enableToasts",
@@ -2445,12 +2455,7 @@ public final class NourishedConfigScreen {
                     () -> Optional.of(new Component[]{Component.translatable("config.nourished.reloadConfigs.desc")}),
                     false);
             this.button = Button.builder(Component.translatable("config.nourished.reloadConfigs"), b -> {
-                        NutrientRegistry.reload();
-                        EffectRegistry.reload();
-                        PresetRegistry.reload();
-                        ColorRegistry.reload();
-                        FoodValueRegistry.reload();
-                        FoodOverrideRegistry.reload();
+                        NourishedReloadPipeline.reloadAll();
                         Minecraft mc = Minecraft.getInstance();
                         if (mc.player != null) {
                             mc.player.displayClientMessage(

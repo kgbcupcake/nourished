@@ -1,6 +1,6 @@
 package dev.maire.nourished.client.config;
 
-import dev.maire.nourished.effect.EffectRegistry;
+import dev.maire.nourished.core.effect.EffectRegistry;
 import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;

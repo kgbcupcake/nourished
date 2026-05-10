@@ -3,7 +3,7 @@ package dev.maire.nourished.api.registry;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.FoodSynergyDefinition;
 import dev.maire.nourished.api.NutrientSynergyDefinition;
-import dev.maire.nourished.registry.ListRegistry;
+import dev.maire.nourished.core.registry.ListRegistry;
 
 import java.util.List;
 

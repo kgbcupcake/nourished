@@ -1,4 +1,4 @@
-package dev.maire.nourished.nutrition.scanner;
+package dev.maire.nourished.tooling.scanner;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.config.NourishedConfig;

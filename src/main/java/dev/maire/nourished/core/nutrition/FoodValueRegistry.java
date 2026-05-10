@@ -1,4 +1,4 @@
-package dev.maire.nourished.nutrition;
+package dev.maire.nourished.core.nutrition;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -7,8 +7,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import dev.maire.nourished.api.ApiStatus;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.registry.AbstractRegistry;
+import dev.maire.nourished.core.util.NourishedJsonUtils;
+import dev.maire.nourished.core.util.NourishedResourceLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -20,13 +22,11 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.ArrayList;
-
+import java.util.Objects;
 /**
  * Loads per-category food value multipliers from config/nourished/food_values.json.
  * Each category maps to five multipliers (protein, carbs, fats, vitamins, hydration).
@@ -46,7 +46,13 @@ public class FoodValueRegistry {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final Map<String, FoodValueDef> REGISTRY = new LinkedHashMap<>();
+    private static final class Core extends AbstractRegistry<String, FoodValueDef> {
+        Core() {
+            super("FoodValueRegistry");
+        }
+    }
+
+    private static final Core INSTANCE = new Core();
 
     private static final float[] DEFAULT_WEIGHTS = {0.2f, 0.2f, 0.2f, 0.2f, 0.2f};
 
@@ -57,7 +63,7 @@ public class FoodValueRegistry {
      * Falls back to an even split if the category is unknown.
      */
     public static FoodNutritionRegistry.NutrientValues getValuesForCategory(String categoryKey, float totalPoints) {
-        FoodValueDef def = REGISTRY.get(categoryKey);
+        FoodValueDef def = INSTANCE.get(categoryKey);
         if (def == null) {
             return new FoodNutritionRegistry.NutrientValues(
                     totalPoints * DEFAULT_WEIGHTS[0],
@@ -78,17 +84,17 @@ public class FoodValueRegistry {
 
     /** Returns the definition for a category, or null if not found. */
     public static FoodValueDef get(String categoryKey) {
-        return REGISTRY.get(categoryKey);
+        return INSTANCE.get(categoryKey);
     }
 
     /** Returns all registered food value definitions. */
     public static List<FoodValueDef> getAll() {
-        return Collections.unmodifiableList(new java.util.ArrayList<>(REGISTRY.values()));
+        return INSTANCE.values();
     }
 
     /** Returns all category keys. */
     public static List<String> getCategories() {
-        return Collections.unmodifiableList(new java.util.ArrayList<>(REGISTRY.keySet()));
+        return INSTANCE.keys();
     }
 
     public static void load() {
@@ -102,7 +108,7 @@ public class FoodValueRegistry {
                 Nourished.LOGGER.info("[FoodValueRegistry] Wrote default food_values.json");
             }
             parse(file);
-            Nourished.LOGGER.info("[FoodValueRegistry] Loaded {} categories from config folder", REGISTRY.size());
+            Nourished.LOGGER.info("[FoodValueRegistry] Loaded {} categories from config folder", INSTANCE.size());
         } catch (IOException e) {
             Nourished.LOGGER.error("[FoodValueRegistry] Failed to load food_values.json, using built-in defaults", e);
             loadDefaults();
@@ -119,44 +125,44 @@ public class FoodValueRegistry {
      * Call this from a reload listener when datapacks are available.
      */
     public static void loadFromDatapack(ResourceManager resourceManager) {
-        ResourceLocation datapackPath = ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "config/food_values.json");
-        Optional<Resource> resource = resourceManager.getResource(datapackPath);
+        NourishedResourceLoader.loadFromModConfig(
+                resourceManager,
+                "config/food_values.json",
+                FoodValueRegistry::parseFromReader,
+                FoodValueRegistry::load,
+                "[FoodValueRegistry] Loaded from datapack override",
+                "[FoodValueRegistry] Failed to load from datapack, falling back to config folder",
+                "[FoodValueRegistry] Loaded from config folder"
+        );
+    }
 
-        if (resource.isPresent()) {
-            try (InputStream is = resource.get().open();
-                 Reader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                parseFromReader(r);
-                Nourished.LOGGER.info("[FoodValueRegistry] Loaded from datapack override");
-                return;
-            } catch (IOException e) {
-                Nourished.LOGGER.error("[FoodValueRegistry] Failed to load from datapack, falling back to config folder", e);
-            }
-        }
-
-        load();
-        Nourished.LOGGER.info("[FoodValueRegistry] Loaded from config folder");
+    private static void registerFoodValueRow(JsonObject obj) {
+        String category = obj.get("category").getAsString();
+        float protein = NourishedJsonUtils.getOptionalFloat(obj, "protein", 0.2f);
+        float carbs = NourishedJsonUtils.getOptionalFloat(obj, "carbs", 0.2f);
+        float fats = NourishedJsonUtils.getOptionalFloat(obj, "fats", 0.2f);
+        float vitamins = NourishedJsonUtils.getOptionalFloat(obj, "vitamins", 0.2f);
+        float hydration = NourishedJsonUtils.getOptionalFloat(obj, "hydration", 0.2f);
+        INSTANCE.register(category, new FoodValueDef(category, protein, carbs, fats, vitamins, hydration));
     }
 
     private static void parseFromReader(Reader reader) {
-        REGISTRY.clear();
+        INSTANCE.reset();
         JsonArray arr = GSON.fromJson(reader, JsonArray.class);
         if (arr == null || arr.isEmpty()) {
             Nourished.LOGGER.warn("[FoodValueRegistry] Data was empty, using built-in defaults");
-            loadDefaults();
+            registerBundledDefaults();
             return;
         }
         for (JsonElement el : arr) {
-            JsonObject obj = el.getAsJsonObject();
-            String category = obj.get("category").getAsString();
-            float protein   = obj.has("protein")   ? obj.get("protein").getAsFloat()   : 0.2f;
-            float carbs     = obj.has("carbs")     ? obj.get("carbs").getAsFloat()     : 0.2f;
-            float fats      = obj.has("fats")      ? obj.get("fats").getAsFloat()      : 0.2f;
-            float vitamins  = obj.has("vitamins")  ? obj.get("vitamins").getAsFloat()  : 0.2f;
-            float hydration = obj.has("hydration") ? obj.get("hydration").getAsFloat() : 0.2f;
-            REGISTRY.put(category, new FoodValueDef(category, protein, carbs, fats, vitamins, hydration));
+            registerFoodValueRow(el.getAsJsonObject());
         }
-        if (REGISTRY.isEmpty()) {
-            loadDefaults();
+        if (INSTANCE.size() == 0) {
+            Nourished.LOGGER.warn("[FoodValueRegistry] Data was empty, using built-in defaults");
+            INSTANCE.reset();
+            registerBundledDefaults();
+        } else {
+            INSTANCE.freeze();
         }
     }
 
@@ -179,40 +185,48 @@ public class FoodValueRegistry {
      * Updates or adds a category definition in the registry.
      */
     public static void setCategory(String category, float protein, float carbs, float fats, float vitamins, float hydration) {
-        REGISTRY.put(category, new FoodValueDef(category, protein, carbs, fats, vitamins, hydration));
+        Objects.requireNonNull(category, "category");
+        LinkedHashMap<String, FoodValueDef> next = new LinkedHashMap<>(INSTANCE.entries());
+        next.put(category, new FoodValueDef(category, protein, carbs, fats, vitamins, hydration));
+        INSTANCE.reset();
+        for (Map.Entry<String, FoodValueDef> e : next.entrySet()) {
+            INSTANCE.register(e.getKey(), e.getValue());
+        }
+        INSTANCE.freeze();
     }
 
     private static void parse(Path file) throws IOException {
-        REGISTRY.clear();
+        INSTANCE.reset();
         try (Reader r = Files.newBufferedReader(file)) {
             JsonArray arr = GSON.fromJson(r, JsonArray.class);
             if (arr == null) {
                 Nourished.LOGGER.warn("[FoodValueRegistry] food_values.json was empty, using built-in defaults");
-                loadDefaults();
+                registerBundledDefaults();
                 return;
             }
             for (JsonElement el : arr) {
-                JsonObject obj = el.getAsJsonObject();
-                String category = obj.get("category").getAsString();
-                float protein   = obj.has("protein")   ? obj.get("protein").getAsFloat()   : 0.2f;
-                float carbs     = obj.has("carbs")     ? obj.get("carbs").getAsFloat()     : 0.2f;
-                float fats      = obj.has("fats")      ? obj.get("fats").getAsFloat()      : 0.2f;
-                float vitamins  = obj.has("vitamins")  ? obj.get("vitamins").getAsFloat()  : 0.2f;
-                float hydration = obj.has("hydration") ? obj.get("hydration").getAsFloat() : 0.2f;
-                REGISTRY.put(category, new FoodValueDef(category, protein, carbs, fats, vitamins, hydration));
+                registerFoodValueRow(el.getAsJsonObject());
             }
         }
-        if (REGISTRY.isEmpty()) {
+        if (INSTANCE.size() == 0) {
             Nourished.LOGGER.warn("[FoodValueRegistry] food_values.json was empty, using built-in defaults");
-            loadDefaults();
+            INSTANCE.reset();
+            registerBundledDefaults();
+        } else {
+            INSTANCE.freeze();
         }
     }
 
     private static void loadDefaults() {
-        REGISTRY.clear();
+        INSTANCE.reset();
+        registerBundledDefaults();
+    }
+
+    private static void registerBundledDefaults() {
         for (FoodValueDef def : loadBundledDefaults()) {
-            REGISTRY.put(def.category(), def);
+            INSTANCE.register(def.category(), def);
         }
+        INSTANCE.freeze();
     }
 
     private static void writeDefaults(Path file) throws IOException {
@@ -227,7 +241,7 @@ public class FoodValueRegistry {
 
     private static void writeRegistry(Path file) throws IOException {
         JsonArray arr = new JsonArray();
-        for (FoodValueDef def : REGISTRY.values()) {
+        for (FoodValueDef def : INSTANCE.values()) {
             arr.add(defToJson(def));
         }
         try (Writer w = Files.newBufferedWriter(file)) {

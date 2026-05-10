@@ -1,6 +1,6 @@
-package dev.maire.nourished.effect;
+package dev.maire.nourished.core.effect;
 
-import dev.maire.nourished.nutrition.Nourished;
+import dev.maire.nourished.core.Nourished;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashSet;
@@ -21,10 +21,8 @@ final class EffectConflictDetector {
         if (!shouldApply) {
             return;
         }
-        ResourceLocation effectId;
-        try {
-            effectId = ResourceLocation.parse(def.effect());
-        } catch (Exception ignored) {
+        ResourceLocation effectId = ResourceLocation.tryParse(def.effect());
+        if (effectId == null) {
             return;
         }
 

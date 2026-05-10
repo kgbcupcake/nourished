@@ -7,13 +7,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import dev.maire.nourished.client.NutrientUiColors;
-import dev.maire.nourished.color.ColorRegistry;
+import dev.maire.nourished.core.color.ColorRegistry;
 import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.effect.EffectRegistry;
-import dev.maire.nourished.nutrition.FoodValueRegistry;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.effect.EffectRegistry;
+import dev.maire.nourished.core.nutrition.FoodValueRegistry;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.util.NourishedJsonUtils;
+import dev.maire.nourished.core.reload.NourishedReloadPipeline;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -184,9 +186,7 @@ public final class ImportExportManager {
             applyFoodValues(root.get(Section.FOOD_VALUES.jsonKey()));
         }
         NourishedConfig.saveNow();
-        EffectRegistry.reload();
-        ColorRegistry.reload();
-        FoodValueRegistry.reload();
+        NourishedReloadPipeline.reloadAll();
         NutrientUiColors.clearOverrides();
     }
 
@@ -434,13 +434,13 @@ public final class ImportExportManager {
             String effect = obj.get("effect").getAsString();
             String nutrient = obj.get("nutrient").getAsString();
             String trigger = obj.get("trigger").getAsString();
-            double threshold = obj.has("threshold") ? obj.get("threshold").getAsDouble() : 0.25d;
-            int amplifier = obj.has("amplifier") ? obj.get("amplifier").getAsInt() : 0;
-            int durationTicks = obj.has("duration_ticks") ? obj.get("duration_ticks").getAsInt() : 140;
-            boolean enabled = !obj.has("enabled") || obj.get("enabled").getAsBoolean();
-            double thresholdMax = obj.has("threshold_max") ? obj.get("threshold_max").getAsDouble() : 1.0d;
-            boolean ambient = !obj.has("ambient") || obj.get("ambient").getAsBoolean();
-            boolean showParticles = obj.has("show_particles") && obj.get("show_particles").getAsBoolean();
+            double threshold = NourishedJsonUtils.getOptionalDouble(obj, "threshold", 0.25d);
+            int amplifier = NourishedJsonUtils.getOptionalInt(obj, "amplifier", 0);
+            int durationTicks = NourishedJsonUtils.getOptionalInt(obj, "duration_ticks", 140);
+            boolean enabled = NourishedJsonUtils.getOptionalBoolean(obj, "enabled", true);
+            double thresholdMax = NourishedJsonUtils.getOptionalDouble(obj, "threshold_max", 1.0d);
+            boolean ambient = NourishedJsonUtils.getOptionalBoolean(obj, "ambient", true);
+            boolean showParticles = NourishedJsonUtils.getOptionalBoolean(obj, "show_particles", false);
             out.add(new EffectRegistry.EffectDef(
                     id,
                     effect,
@@ -483,11 +483,11 @@ public final class ImportExportManager {
             }
             JsonObject obj = row.getAsJsonObject();
             String category = obj.get("category").getAsString();
-            float protein = obj.has("protein") ? obj.get("protein").getAsFloat() : 0.2f;
-            float carbs = obj.has("carbs") ? obj.get("carbs").getAsFloat() : 0.2f;
-            float fats = obj.has("fats") ? obj.get("fats").getAsFloat() : 0.2f;
-            float vitamins = obj.has("vitamins") ? obj.get("vitamins").getAsFloat() : 0.2f;
-            float hydration = obj.has("hydration") ? obj.get("hydration").getAsFloat() : 0.2f;
+            float protein = NourishedJsonUtils.getOptionalFloat(obj, "protein", 0.2f);
+            float carbs = NourishedJsonUtils.getOptionalFloat(obj, "carbs", 0.2f);
+            float fats = NourishedJsonUtils.getOptionalFloat(obj, "fats", 0.2f);
+            float vitamins = NourishedJsonUtils.getOptionalFloat(obj, "vitamins", 0.2f);
+            float hydration = NourishedJsonUtils.getOptionalFloat(obj, "hydration", 0.2f);
             FoodValueRegistry.setCategory(category, protein, carbs, fats, vitamins, hydration);
         }
         FoodValueRegistry.save();

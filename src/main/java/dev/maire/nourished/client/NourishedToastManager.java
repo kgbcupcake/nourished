@@ -2,9 +2,9 @@ package dev.maire.nourished.client;
 
 import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.network.ModNetworking.SyncDietDeltaPayload;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.network.ModNetworking.SyncDietDeltaPayload;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;

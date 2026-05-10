@@ -1,9 +1,9 @@
-package dev.maire.nourished.handler;
+package dev.maire.nourished.core.handler;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.diet.DietAttachment;
-import dev.maire.nourished.diet.DietData;
+import dev.maire.nourished.core.diet.DietAttachment;
+import dev.maire.nourished.core.diet.DietData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;

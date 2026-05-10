@@ -6,9 +6,10 @@ import dev.maire.nourished.api.registry.MilestoneRegistry;
 import dev.maire.nourished.api.registry.ReportProviderRegistry;
 import dev.maire.nourished.api.registry.SeasonHookRegistry;
 import dev.maire.nourished.api.registry.SynergyRegistry;
-import dev.maire.nourished.diet.DietAttachment;
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.diet.DietAttachment;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.NeoForge;
@@ -185,10 +186,8 @@ public final class NourishedAPI {
      */
     public static void registerFoodClassification(ResourceLocation foodId, String nutrientKey, float amount) {
         if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
-        if (!NutrientRegistry.getKeys().contains(nutrientKey)) {
-            throw new IllegalArgumentException("Unknown nutrient key: " + nutrientKey);
-        }
-        dev.maire.nourished.nutrition.FoodNutritionRegistry.registerClassification(foodId, nutrientKey, amount);
+        NourishedRegistryUtils.requireNutrientKey(nutrientKey, "NourishedAPI.registerFoodClassification");
+        dev.maire.nourished.core.nutrition.FoodNutritionRegistry.registerClassification(foodId, nutrientKey, amount);
     }
 
     /**
@@ -215,7 +214,7 @@ public final class NourishedAPI {
      */
     public static void registerCustomEffect(EffectDefinition definition) {
         if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
-        dev.maire.nourished.effect.EffectRegistry.registerExternal(definition);
+        dev.maire.nourished.core.effect.EffectRegistry.registerExternal(definition);
     }
 
     /**

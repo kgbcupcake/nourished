@@ -1,9 +1,9 @@
-package dev.maire.nourished.command;
+package dev.maire.nourished.core.command;
 
 import dev.maire.nourished.api.DietReportProvider;
 import dev.maire.nourished.api.registry.ReportProviderRegistry;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.diet.DietData;
+import dev.maire.nourished.core.diet.DietData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;

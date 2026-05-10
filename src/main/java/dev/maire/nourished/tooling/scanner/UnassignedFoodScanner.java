@@ -1,18 +1,13 @@
-package dev.maire.nourished.nutrition;
+package dev.maire.nourished.tooling.scanner;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.nutrition.scanner.ClassificationResult;
-import dev.maire.nourished.nutrition.scanner.FoodClassifier;
-import dev.maire.nourished.nutrition.scanner.RecipeInheritanceResolver;
-import dev.maire.nourished.nutrition.scanner.ScanCache;
-import dev.maire.nourished.nutrition.scanner.ScanReportWriter;
-import dev.maire.nourished.nutrition.scanner.TagRecommendationWriter;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -161,7 +156,7 @@ public final class UnassignedFoodScanner {
         var holder = stack.getItemHolder();
         for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
             for (String tagStr : def.tags()) {
-                TagKey<Item> tagKey = TagKey.create(Registries.ITEM, ResourceLocation.parse(tagStr));
+                var tagKey = NourishedRegistryUtils.itemTagKey(tagStr);
                 if (holder.is(tagKey)) {
                     return true;
                 }
@@ -235,7 +230,7 @@ public final class UnassignedFoodScanner {
 
         progress.accept("Running classification pass 1 (without namespace peers)...");
         for (Item item : foodItems) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+            ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
             if (itemId == null) continue;
 
             ClassificationResult cached = cache.get(itemId);
@@ -258,7 +253,7 @@ public final class UnassignedFoodScanner {
 
         progress.accept("Running classification pass 2 (with namespace peers)...");
         for (Item item : foodItems) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+            ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
             if (itemId == null) continue;
 
             ClassificationResult result = classifier.classify(

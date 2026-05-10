@@ -1,4 +1,4 @@
-package dev.maire.nourished.nutrition;
+package dev.maire.nourished.core.nutrition;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NutrientDefinition;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.registry.AbstractRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLPaths;
@@ -22,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -94,8 +95,13 @@ public class NutrientRegistry {
     private static final float DEFAULT_LOW_THRESHOLD = 0f;
     private static final float DEFAULT_EXCESS_THRESHOLD = 1f;
 
-    // volatile: replaced atomically after each parse/reload; read concurrently from tick, render, and gameplay code.
-    private static volatile Map<String, NutrientDef> REGISTRY = Map.of();
+    private static final class Core extends AbstractRegistry<String, NutrientDef> {
+        Core() {
+            super("NutrientRegistry");
+        }
+    }
+
+    private static final Core INSTANCE = new Core();
 
     private static final String[] DEFAULT_NUTRIENT_RESOURCES = {
             "fruits",
@@ -110,14 +116,12 @@ public class NutrientRegistry {
 
     /** Ordered list of nutrient keys (insertion order = display order). */
     public static List<String> getKeys() {
-        Map<String, NutrientDef> snapshot = REGISTRY;
-        return Collections.unmodifiableList(new ArrayList<>(snapshot.keySet()));
+        return INSTANCE.keys();
     }
 
     /** Item ID string for the nutrient's icon, e.g. {@code "minecraft:carrot"}. */
     public static String getIcon(String key) {
-        Map<String, NutrientDef> snapshot = REGISTRY;
-        NutrientDef def = snapshot.get(key);
+        NutrientDef def = INSTANCE.get(key);
         if (def != null && def.icon() != null && !def.icon().isBlank()) {
             return def.icon();
         }
@@ -126,27 +130,33 @@ public class NutrientRegistry {
 
     /** Food tags that map to this nutrient. */
     public static List<String> getTags(String key) {
-        Map<String, NutrientDef> snapshot = REGISTRY;
-        NutrientDef def = snapshot.get(key);
+        NutrientDef def = INSTANCE.get(key);
         return def != null ? def.tags() : List.of();
     }
 
     /** All registered nutrient definitions in order. */
     public static List<NutrientDef> getAll() {
-        Map<String, NutrientDef> snapshot = REGISTRY;
-        return Collections.unmodifiableList(new ArrayList<>(snapshot.values()));
+        return INSTANCE.values();
     }
 
     public static void registerExternal(NutrientDefinition definition) {
         Objects.requireNonNull(definition, "definition");
         String key = Objects.requireNonNull(definition.getId(), "definition id");
-        Map<String, NutrientDef> snapshot = REGISTRY;
-        if (snapshot.containsKey(key)) {
+        if (INSTANCE.contains(key)) {
             throw new IllegalArgumentException("Nutrient already registered: " + key);
         }
-        LinkedHashMap<String, NutrientDef> next = new LinkedHashMap<>(snapshot);
-        next.put(key, NutrientDef.fromDefinition(definition));
-        REGISTRY = Collections.unmodifiableMap(new LinkedHashMap<>(next));
+        if (!INSTANCE.isFrozen()) {
+            INSTANCE.register(key, NutrientDef.fromDefinition(definition));
+            Nourished.LOGGER.info("[NutrientRegistry] Registered external nutrient: {}", key);
+            return;
+        }
+        List<NutrientDef> prior = new ArrayList<>(INSTANCE.values());
+        INSTANCE.reset();
+        for (NutrientDef d : prior) {
+            INSTANCE.register(d.key(), d);
+        }
+        INSTANCE.register(key, NutrientDef.fromDefinition(definition));
+        INSTANCE.freeze();
         Nourished.LOGGER.info("[NutrientRegistry] Registered external nutrient: {}", key);
     }
 
@@ -163,7 +173,7 @@ public class NutrientRegistry {
                 Nourished.LOGGER.info("[NutrientRegistry] Wrote default nutrients.json");
             }
             parse(file);
-            Nourished.LOGGER.info("[NutrientRegistry] Loaded {} nutrients from {}", REGISTRY.size(), file);
+            Nourished.LOGGER.info("[NutrientRegistry] Loaded {} nutrients from {}", INSTANCE.size(), file);
         } catch (IOException e) {
             Nourished.LOGGER.error("[NutrientRegistry] Failed to load nutrients.json, using built-in defaults", e);
             loadDefaults();
@@ -183,9 +193,14 @@ public class NutrientRegistry {
     // ── Internals ─────────────────────────────────────────────────────────────
 
     private static void parse(Path file) throws IOException {
-        LinkedHashMap<String, NutrientDef> next = new LinkedHashMap<>();
+        INSTANCE.reset();
         try (Reader r = Files.newBufferedReader(file)) {
             JsonArray arr = GSON.fromJson(r, JsonArray.class);
+            if (arr == null) {
+                Nourished.LOGGER.warn("[NutrientRegistry] nutrients.json was empty, using built-in defaults");
+                loadDefaults();
+                return;
+            }
             for (JsonElement el : arr) {
                 JsonObject obj = el.getAsJsonObject();
                 String key  = obj.get("key").getAsString();
@@ -202,7 +217,7 @@ public class NutrientRegistry {
                         tags.add(t.getAsString());
                     }
                 }
-                next.put(key, new NutrientDef(
+                INSTANCE.register(key, new NutrientDef(
                         key,
                         displayName,
                         color,
@@ -215,20 +230,20 @@ public class NutrientRegistry {
                 ));
             }
         }
-        if (next.isEmpty()) {
+        if (INSTANCE.size() == 0) {
             Nourished.LOGGER.warn("[NutrientRegistry] nutrients.json was empty, using built-in defaults");
             loadDefaults();
         } else {
-            REGISTRY = Collections.unmodifiableMap(new LinkedHashMap<>(next));
+            INSTANCE.freeze();
         }
     }
 
     private static void loadDefaults() {
-        LinkedHashMap<String, NutrientDef> next = new LinkedHashMap<>();
+        INSTANCE.reset();
         for (NutrientDef def : loadBundledDefaults()) {
-            next.put(def.key(), def);
+            INSTANCE.register(def.key(), def);
         }
-        REGISTRY = Collections.unmodifiableMap(new LinkedHashMap<>(next));
+        INSTANCE.freeze();
     }
 
     private static void writeDefaults(Path file) throws IOException {

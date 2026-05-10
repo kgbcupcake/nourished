@@ -1,4 +1,4 @@
-package dev.maire.nourished.command;
+package dev.maire.nourished.core.command;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,25 +11,20 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.maire.nourished.api.NourishedEvents;
 import dev.maire.nourished.api.registry.DietProfileRegistry;
-import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.config.PresetRegistry;
-import dev.maire.nourished.color.ColorRegistry;
 import dev.maire.nourished.data.DatapackDiagnostic;
 import dev.maire.nourished.data.DatapackDiagnostics;
 import dev.maire.nourished.data.SchemaDefinition;
-import dev.maire.nourished.data.SchemaTemplateGenerator;
-import dev.maire.nourished.diet.DietAttachment;
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.effect.EffectRegistry;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.FoodNutritionRegistry;
-import dev.maire.nourished.nutrition.FoodOverrideRegistry;
-import dev.maire.nourished.nutrition.FoodValueRegistry;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.tooling.datapack.SchemaTemplateGenerator;
+import dev.maire.nourished.core.diet.DietAttachment;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.reload.NourishedReloadPipeline;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -234,7 +229,9 @@ public class NourishedCommand {
 
     private int setNutrient(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         String key = StringArgumentType.getString(ctx, "key");
-        if (!NutrientRegistry.getKeys().contains(key)) {
+        try {
+            NourishedRegistryUtils.requireNutrientKey(key, "nourished set nutrient command");
+        } catch (IllegalArgumentException e) {
             ctx.getSource().sendFailure(Component.literal("Unknown nutrient key: " + key));
             return 0;
         }
@@ -295,13 +292,7 @@ public class NourishedCommand {
         source.sendSuccess(() -> Component.literal("Reloading Nourished data..."), true);
         server.reloadResources(server.getPackRepository().getSelectedIds()).thenRun(() -> {
             server.execute(() -> {
-                NutrientRegistry.reload();
-                FoodValueRegistry.reload();
-                FoodOverrideRegistry.reload();
-                EffectRegistry.reload();
-                PresetRegistry.reload();
-                ColorRegistry.reload();
-                LockRegistry.reload();
+                NourishedReloadPipeline.reloadAll();
                 source.sendSuccess(() -> Component.literal("Nourished data reload complete."), true);
             });
         });
@@ -405,7 +396,9 @@ public class NourishedCommand {
     }
 
     private int sendNutrientDetail(CommandSourceStack source, String key, ServerPlayer target) {
-        if (!NutrientRegistry.getKeys().contains(key)) {
+        try {
+            NourishedRegistryUtils.requireNutrientKey(key, "nourished nutrient command");
+        } catch (IllegalArgumentException e) {
             source.sendFailure(Component.literal("Unknown nutrient key: " + key));
             return 0;
         }
@@ -457,7 +450,7 @@ public class NourishedCommand {
         }
         for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
             for (String tagStr : def.tags()) {
-                TagKey<Item> tagKey = TagKey.create(Registries.ITEM, ResourceLocation.parse(tagStr));
+                TagKey<Item> tagKey = NourishedRegistryUtils.itemTagKey(tagStr);
                 if (holder.is(tagKey)) {
                     return true;
                 }

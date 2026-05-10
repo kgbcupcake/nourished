@@ -17,7 +17,7 @@ public final class NourishedKeys {
     public static final KeyMapping OPEN_CONFIG = new KeyMapping(
             "key.nourished.openConfig",
             InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_UNKNOWN,
+            GLFW.GLFW_KEY_N,
             "key.categories.nourished"
     );
 

@@ -1,4 +1,4 @@
-package dev.maire.nourished.nutrition;
+package dev.maire.nourished.core;
 
 import org.slf4j.Logger;
 
@@ -7,30 +7,37 @@ import com.mojang.logging.LogUtils;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NourishedAPIVersion;
 import dev.maire.nourished.api.NourishedAPIState;
-import dev.maire.nourished.registry.NourishedApiDefinitionRegistries;
-import dev.maire.nourished.command.NourishedCommand;
+import dev.maire.nourished.core.registry.NourishedApiDefinitionRegistries;
+import dev.maire.nourished.core.registry.NourishedAttributes;
+import dev.maire.nourished.core.command.NourishedCommand;
 import dev.maire.nourished.compat.kubejs.NourishedKubeJSPlugin;
 import dev.maire.nourished.compat.AutoCompatDiscovery;
 import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.compat.lso.LSOCompat;
 import dev.maire.nourished.compat.peakstamina.PeakStaminaCompat;
+import dev.maire.nourished.compat.spiceoflifeonion.SpiceOfLifeOnionCompat;
 import dev.maire.nourished.config.LockRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.config.NourishedConfigScreen;
+import dev.maire.nourished.client.config.NourishedConfigScreen;
 import dev.maire.nourished.config.PresetRegistry;
-import dev.maire.nourished.diet.DietAttachment;
-import dev.maire.nourished.color.ColorRegistry;
+import dev.maire.nourished.core.diet.DietAttachment;
+import dev.maire.nourished.core.color.ColorRegistry;
 import dev.maire.nourished.client.ClientEventRegistrar;
-import dev.maire.nourished.effect.EffectRegistry;
-import dev.maire.nourished.handler.ConfigReloadHandler;
-import dev.maire.nourished.handler.DietPlayerEvents;
-import dev.maire.nourished.handler.FoodEatenHandler;
-import dev.maire.nourished.handler.NutritionDecayHandler;
-import dev.maire.nourished.handler.NutritionEffectsHandler;
-import dev.maire.nourished.handler.SleepBonusHandler;
-import dev.maire.nourished.network.ModNetworking;
-import dev.maire.nourished.nutrition.scanner.ScannerSpecRegistry;
+import dev.maire.nourished.core.effect.EffectRegistry;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
+import dev.maire.nourished.core.nutrition.FoodValueRegistry;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.handler.ConfigReloadHandler;
+import dev.maire.nourished.core.handler.DietPlayerEvents;
+import dev.maire.nourished.core.handler.FoodEatenHandler;
+import dev.maire.nourished.core.handler.NutritionDecayHandler;
+import dev.maire.nourished.core.handler.NutritionEatingHandler;
+import dev.maire.nourished.core.handler.NutritionEffectsHandler;
+import dev.maire.nourished.core.handler.SleepBonusHandler;
+import dev.maire.nourished.core.network.ModNetworking;
+import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -49,9 +56,13 @@ public class Nourished {
 
     public Nourished(IEventBus modEventBus, ModContainer modContainer) {
         NutrientRegistry.load();
+        NourishedAttributes.register(modEventBus);
         ModCompat.initialize();
         if (ModList.get().isLoaded("peakstamina")) {
             PeakStaminaCompat.register();
+        }
+        if (ModList.get().isLoaded("solonion")) {
+            SpiceOfLifeOnionCompat.register();
         }
         if (ModList.get().isLoaded("legendarysurvivaloverhaul")) {
             LSOCompat.register();
@@ -75,12 +86,13 @@ public class Nourished {
             ClientEventRegistrar.register(modEventBus);
         }
         modEventBus.addListener(ModNetworking::register);
+        NeoForge.EVENT_BUS.register(new NutritionEatingHandler());
         NeoForge.EVENT_BUS.register(new FoodEatenHandler());
         NeoForge.EVENT_BUS.register(new NutritionEffectsHandler());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
             event.enqueueWork(() -> {
                 ModCompat.discoverUnknownMods();
-                if (!ModCompat.shouldDisableEffects()) {
+                if (!ModCompat.shouldDisableDecay()) {
                     NeoForge.EVENT_BUS.register(new NutritionDecayHandler());
                 }
                 LOGGER.info("[Nourished] Starting AutoCompatDiscovery...");

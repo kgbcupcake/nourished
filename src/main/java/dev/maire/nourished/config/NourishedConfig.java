@@ -2,9 +2,9 @@ package dev.maire.nourished.config;
 
 import com.google.gson.JsonObject;
 import dev.maire.nourished.compat.ModCompat;
-import dev.maire.nourished.effect.EffectRegistry;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.effect.EffectRegistry;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -54,9 +54,6 @@ public final class NourishedConfig {
     // config.nourished.enableCriticalToasts.desc
     private final ModConfigSpec.BooleanValue enableCriticalToasts;
     private final ModConfigSpec.BooleanValue enableSleepBonus;
-    private final ModConfigSpec.BooleanValue enableLSOThermalResistance;
-    private final ModConfigSpec.BooleanValue enableLSOBrokenHeartResilience;
-    private final ModConfigSpec.BooleanValue enableLSOThirstSaturation;
 
     // General
     private final ModConfigSpec.DoubleValue decayRate;
@@ -131,6 +128,8 @@ public final class NourishedConfig {
 
         builder.push("modules");
         enableDecay = defineModuleToggle(builder, "enableDecay", "When false, NutritionDecayHandler does nothing", ConfigDefaultsLoader.getBoolean(defaults, "enableDecay", true));
+        defineModuleToggle(builder, "enableNutritionEating", "When false, nutrition-only eating bypass at full hunger is disabled. Items tagged nourished:meal never use this bypass.", ConfigDefaultsLoader.getBoolean(defaults, "enableNutritionEating", true));
+        defineModuleToggle(builder, "enableCalorieSaturationBlock", "When true, eating normal food is canceled when the calorie bar is full and vanilla hunger is full (canAlwaysEat items are unaffected).", ConfigDefaultsLoader.getBoolean(defaults, "enableCalorieSaturationBlock", true));
         enableEffects = defineModuleToggle(builder, "enableEffects", "When false, status effects from nutrition are not applied", ConfigDefaultsLoader.getBoolean(defaults, "enableEffects", true));
         enableHUD = defineModuleToggle(builder, "enableHUD", "When false, the nutrition HUD overlay is hidden", ConfigDefaultsLoader.getBoolean(defaults, "enableHUD", true));
         enableToasts = defineModuleToggle(builder, "enableToasts", "When false, NourishedToastManager never queues toasts", ConfigDefaultsLoader.getBoolean(defaults, "enableToasts", true));
@@ -142,9 +141,11 @@ public final class NourishedConfig {
         defineModuleToggle(builder, "enablePSStaminaUsage", "When false, Peak Stamina nutrition hook does not apply the stamina_usage attribute modifier", ConfigDefaultsLoader.getBoolean(defaults, "enablePSStaminaUsage", true));
         defineModuleToggle(builder, "enablePSPenaltyDecay", "When false, Peak Stamina nutrition hook does not apply the penalty_decay_multiplier attribute modifier", ConfigDefaultsLoader.getBoolean(defaults, "enablePSPenaltyDecay", true));
         defineModuleToggle(builder, "enablePSExhaustionDuration", "When false, Peak Stamina nutrition hook does not apply the exhaustion_duration_multiplier attribute modifier", ConfigDefaultsLoader.getBoolean(defaults, "enablePSExhaustionDuration", true));
-        enableLSOThermalResistance = defineModuleToggle(builder, "enableLSOThermalResistance", "When true, nutrition level affects LSO thermal resistance attribute", ConfigDefaultsLoader.getBoolean(defaults, "enableLSOThermalResistance", true));
-        enableLSOBrokenHeartResilience = defineModuleToggle(builder, "enableLSOBrokenHeartResilience", "When true, high nutrition boosts LSO broken heart resilience", ConfigDefaultsLoader.getBoolean(defaults, "enableLSOBrokenHeartResilience", true));
-        enableLSOThirstSaturation = defineModuleToggle(builder, "enableLSOThirstSaturation", "When true, eating nutritious food adds a small LSO thirst saturation bonus", ConfigDefaultsLoader.getBoolean(defaults, "enableLSOThirstSaturation", true));
+        defineModuleToggle(builder, "enableSOLDiversityHealth", "When false, Spice of Life: Onion hook does not apply the high-diversity max health bonus on minecraft:max_health", ConfigDefaultsLoader.getBoolean(defaults, "enableSOLDiversityHealth", false));
+        defineModuleToggle(builder, "enableSOLDiversityPenalty", "When false, Spice of Life: Onion hook does not apply the low-diversity max health penalty on minecraft:max_health", ConfigDefaultsLoader.getBoolean(defaults, "enableSOLDiversityPenalty", true));
+        defineModuleToggle(builder, "enableLSOThermalResistance", "When true, nutrition level affects LSO thermal resistance attribute", ConfigDefaultsLoader.getBoolean(defaults, "enableLSOThermalResistance", true));
+        defineModuleToggle(builder, "enableLSOBrokenHeartResilience", "When true, high nutrition boosts LSO broken heart resilience", ConfigDefaultsLoader.getBoolean(defaults, "enableLSOBrokenHeartResilience", true));
+        defineModuleToggle(builder, "enableLSOThirstSaturation", "When true, eating nutritious food adds a small LSO thirst saturation bonus", ConfigDefaultsLoader.getBoolean(defaults, "enableLSOThirstSaturation", true));
         defineModuleToggle(builder, "enableSynergies", "When false, nutrient and food synergy checks are skipped", ConfigDefaultsLoader.getBoolean(defaults, "enableSynergies", true));
         defineModuleToggle(builder, "enableMilestones", "When false, milestone checks are skipped", ConfigDefaultsLoader.getBoolean(defaults, "enableMilestones", true));
         defineModuleToggle(builder, "enableSeasonHooks", "When false, season hook modifiers are ignored", ConfigDefaultsLoader.getBoolean(defaults, "enableSeasonHooks", true));
@@ -431,18 +432,6 @@ public final class NourishedConfig {
 
     public void setEnableSleepBonus(boolean value) {
         enableSleepBonus.set(value);
-    }
-
-    public boolean enableLSOThermalResistance() {
-        return enableLSOThermalResistance.get();
-    }
-
-    public boolean enableLSOBrokenHeartResilience() {
-        return enableLSOBrokenHeartResilience.get();
-    }
-
-    public boolean enableLSOThirstSaturation() {
-        return enableLSOThirstSaturation.get();
     }
 
     public double criticalThreshold() {

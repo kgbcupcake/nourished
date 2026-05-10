@@ -35,6 +35,7 @@
   "nourished.toast.critical.subtitle": "Your %s nutrition needs attention.",
   "nourished.tooltip.diminished": "⚠ Diminished (%s)",
   "nourished.tooltip.fresh": "✔ Full value",
+  "nourished.tooltip.light_food": "Can be eaten for nutrients when hunger is full (no hunger restore).",
   "nourished.inventory.tooltip": "Nutritional Values",
   "nourished.screen.diet.tooltip.nourish": "nourish",
   "nourished.screen.diet.tooltip.fruits": "Fruits: vitamins and hydration",
@@ -92,6 +93,10 @@
   "config.nourished.compat.tab.settings": "Settings",
   "config.nourished.enableDecay": "Enable Decay",
   "config.nourished.enableDecay.desc": "Nutrients slowly drain over time when enabled.",
+  "config.nourished.enableNutritionEating": "Nutrition-Only Eating",
+  "config.nourished.enableNutritionEating.desc": "When hunger is full, low-impact foods can still grant nutrients without restoring hunger. Items tagged nourished:meal never use this bypass (see data/nourished/tags/item/meal.json).",
+  "config.nourished.enableCalorieSaturationBlock": "Calorie Saturation Eating Block",
+  "config.nourished.enableCalorieSaturationBlock.desc": "When enabled, you cannot start eating normal food if your Nourished calorie bar is full and vanilla hunger is already satisfied. Always-edible items (for example golden apples) ignore this rule.",
   "config.nourished.enableToasts": "Enable Toasts",
   "config.nourished.enableToasts.desc": "Show pop-up notifications for nutrient events.",
   "config.nourished.enableFoodTooltips": "Enable Food Tooltips",
@@ -275,5 +280,9 @@
   "config.nourished.enablePSPenaltyDecay": "Peak Stamina: Penalty Decay",
   "config.nourished.enablePSPenaltyDecay.desc": "When true, high nutrition speeds up Peak Stamina penalty recovery",
   "config.nourished.enablePSStaminaUsage": "Peak Stamina: Stamina Usage",
-  "config.nourished.enablePSStaminaUsage.desc": "When true, nutrition level affects Peak Stamina usage costs"
+  "config.nourished.enablePSStaminaUsage.desc": "When true, nutrition level affects Peak Stamina usage costs",
+  "config.nourished.enableSOLDiversityHealth": "SoL Onion: Diversity Health",
+  "config.nourished.enableSOLDiversityHealth.desc": "When true, high food diversity grants a max health bonus (ADD_MULTIPLIED_TOTAL on minecraft:max_health).",
+  "config.nourished.enableSOLDiversityPenalty": "SoL Onion: Diversity Penalty",
+  "config.nourished.enableSOLDiversityPenalty.desc": "When true, low food diversity applies a max health penalty (ADD_MULTIPLIED_TOTAL on minecraft:max_health)."
 }

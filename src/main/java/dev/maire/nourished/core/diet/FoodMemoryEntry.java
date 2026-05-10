@@ -1,4 +1,4 @@
-package dev.maire.nourished.diet;
+package dev.maire.nourished.core.diet;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;

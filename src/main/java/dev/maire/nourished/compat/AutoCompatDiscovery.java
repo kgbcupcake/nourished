@@ -4,8 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import dev.maire.nourished.api.CompatDefinition;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -92,7 +93,7 @@ public final class AutoCompatDiscovery {
     private static List<Item> collectFoodItems(String modId, Map<ResourceLocation, String> hintedMappings) {
         List<Item> items = new ArrayList<>();
         for (Item item : BuiltInRegistries.ITEM) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+            ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
             if (itemId == null || !modId.equals(itemId.getNamespace())) {
                 continue;
             }

@@ -1,10 +1,10 @@
-package dev.maire.nourished.api.impl;
+package dev.maire.nourished.core.impl;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.FoodMemoryView;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.diet.FoodMemoryEntry;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.diet.FoodMemoryEntry;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Comparator;

@@ -1,11 +1,11 @@
-package dev.maire.nourished.handler;
+package dev.maire.nourished.core.handler;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.diet.DietAttachment;
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.effect.NutritionEffectApplier;
-import dev.maire.nourished.network.ModNetworking;
+import dev.maire.nourished.core.diet.DietAttachment;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.effect.NutritionEffectApplier;
+import dev.maire.nourished.core.network.ModNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;

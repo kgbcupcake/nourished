@@ -2,9 +2,9 @@ package dev.maire.nourished.compat.lso;
 
 import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.api.NourishedEvents;
-import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.config.ModuleCache;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -66,10 +66,10 @@ public final class LSOCompat {
             return;
         }
 
-        double thermal = NourishedConfig.get().enableLSOThermalResistance()
+        double thermal = ModuleCache.enableLSOThermalResistance
                 ? calculateThermalResistanceBonus(averageNutrition)
                 : 0.0d;
-        double brokenHeart = NourishedConfig.get().enableLSOBrokenHeartResilience()
+        double brokenHeart = ModuleCache.enableLSOBrokenHeartResilience
                 ? calculateBrokenHeartResilienceMultiplier(averageNutrition)
                 : 0.0d;
 
@@ -86,7 +86,7 @@ public final class LSOCompat {
         if (!ModList.get().isLoaded(LSO_MOD_ID)) {
             return;
         }
-        if (!NourishedConfig.get().enableLSOThirstSaturation()) {
+        if (!ModuleCache.enableLSOThirstSaturation) {
             return;
         }
         if (!(event.getPlayer() instanceof ServerPlayer serverPlayer)) {

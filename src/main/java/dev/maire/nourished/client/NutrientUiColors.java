@@ -1,7 +1,7 @@
 package dev.maire.nourished.client;
 
-import dev.maire.nourished.color.ColorRegistry;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.color.ColorRegistry;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 
 import java.util.List;
 import java.util.Map;

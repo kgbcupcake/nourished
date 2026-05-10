@@ -1,4 +1,4 @@
-package dev.maire.nourished.handler;
+package dev.maire.nourished.core.handler;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NourishedSeasonHook;
@@ -9,58 +9,54 @@ import dev.maire.nourished.api.registry.AbsorptionModifierRegistry;
 import dev.maire.nourished.api.registry.SeasonHookRegistry;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.diet.DietAttachment;
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.effect.NutritionEffectApplier;
-import dev.maire.nourished.network.ModNetworking;
-import dev.maire.nourished.nutrition.FoodFamilyResolver;
-import dev.maire.nourished.nutrition.FoodNutritionRegistry;
-import dev.maire.nourished.nutrition.FoodOverrideRegistry;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
-import net.minecraft.core.registries.BuiltInRegistries;
+import dev.maire.nourished.core.diet.DietAttachment;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.effect.NutritionEffectApplier;
+import dev.maire.nourished.core.network.ModNetworking;
+import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.core.registry.NourishedAttributes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Shared Nourished nutrient application for a food {@link ItemStack} after diet tick bookkeeping.
+ */
 @ApiStatus.Internal
-public class FoodEatenHandler {
+final class FoodNutrientPipeline {
 
-    @SubscribeEvent
-    public void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        ItemStack stack = event.getItem();
-        FoodProperties food = stack.getItem().getFoodProperties(stack, player);
-        if (food == null) return;
+    private FoodNutrientPipeline() {}
 
-        DietData diet = player.getData(DietAttachment.DIET.get());
-        long gameTimeMs = player.level().getGameTime() * 50L;
-        diet.tickTime(gameTimeMs);
-        diet.tick();
-
-        String itemId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+    static void process(ServerPlayer player, ItemStack stack, DietData diet, long gameTimeMs) {
+        String itemId = NourishedRegistryUtils.itemKey(stack).toString();
         Optional<FoodOverrideRegistry.FoodOverride> override = FoodOverrideRegistry.getOverride(itemId);
 
         float caloriesAdded;
         Map<String, Float> nutrientDeltas;
         Map<String, Float> matchedBars;
-        ResourceLocation foodResourceId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        ResourceLocation foodResourceId = NourishedRegistryUtils.itemKey(stack);
 
         if (override.isPresent()) {
             FoodOverrideRegistry.FoodOverride ov = override.get();
             caloriesAdded = ov.calories();
             nutrientDeltas = ov.nutrients();
-            matchedBars = nutrientDeltas; // Use override nutrients for category detection
+            matchedBars = nutrientDeltas;
             Nourished.LOGGER.debug("Nourished: using override for {} (calories={}, nutrients={})",
                     itemId, caloriesAdded, nutrientDeltas);
         } else {
+            var food = stack.getItem().getFoodProperties(stack, player);
+            if (food == null) {
+                return;
+            }
             matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, false);
             FoodNutritionRegistry.DietDelta delta = FoodNutritionRegistry.computeDietDelta(
                     stack, player.level(), food.nutrition(), food.saturation(), matchedBars);
@@ -73,14 +69,13 @@ public class FoodEatenHandler {
             externalClassification.forEach((key, value) -> nutrientDeltas.merge(key, value, Float::sum));
         }
 
-        // Resolve dominant category (first/highest match) and food family
         String dominantCategory = matchedBars.isEmpty() ? "grains" :
                 matchedBars.entrySet().stream()
                         .max(Map.Entry.comparingByValue())
                         .map(Map.Entry::getKey)
                         .orElse("grains");
         String familyKey = FoodFamilyResolver.resolve(
-                BuiltInRegistries.ITEM.getKey(stack.getItem()));
+                NourishedRegistryUtils.itemKey(stack));
 
         float multiplier = diet.recordEat(itemId, dominantCategory, familyKey, gameTimeMs);
 
@@ -96,6 +91,7 @@ public class FoodEatenHandler {
                 float adjustedDelta = nutrientDelta * multiplier;
                 adjustedDelta = applySeasonalAbsorption(player, key, adjustedDelta);
                 adjustedDelta = applyAbsorptionModifiers(player, key, adjustedDelta);
+                adjustedDelta *= NourishedAttributes.nutrientRegenMultiplier(player);
 
                 NutrientModifierEvent modifierEvent = new NutrientModifierEvent(
                         player, foodResourceId, key, adjustedDelta);
@@ -135,7 +131,7 @@ public class FoodEatenHandler {
                 diet);
     }
 
-    private void checkThresholdCrossings(ServerPlayer player, DietData diet) {
+    private static void checkThresholdCrossings(ServerPlayer player, DietData diet) {
         NourishedConfig config = NourishedConfig.get();
         float excessThreshold = (float) config.excessThreshold();
         for (String key : NutrientRegistry.getKeys()) {
@@ -153,7 +149,7 @@ public class FoodEatenHandler {
         }
     }
 
-    private float applySeasonalAbsorption(ServerPlayer player, String nutrientKey, float baseAmount) {
+    private static float applySeasonalAbsorption(ServerPlayer player, String nutrientKey, float baseAmount) {
         var hooks = SeasonHookRegistry.getAll();
         if (!ModuleCache.enableSeasonHooks || hooks.isEmpty()) {
             return baseAmount;
@@ -166,7 +162,7 @@ public class FoodEatenHandler {
         return amount;
     }
 
-    private float applyAbsorptionModifiers(ServerPlayer player, String nutrientKey, float baseAmount) {
+    private static float applyAbsorptionModifiers(ServerPlayer player, String nutrientKey, float baseAmount) {
         var modifiers = AbsorptionModifierRegistry.getAll();
         if (!ModuleCache.enableAbsorptionModifiers || modifiers.isEmpty()) {
             return baseAmount;

@@ -1,9 +1,9 @@
-package dev.maire.nourished.nutrition;
+package dev.maire.nourished.core.nutrition;
 
 import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.core.registry.AbstractRegistry;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,24 +19,32 @@ public final class FoodFamilyResolver {
     // ConcurrentHashMap: resolve() may be hit from multiple threads during gameplay; computeIfAbsent is safe here.
     private static final Map<ResourceLocation, String> CACHE = new ConcurrentHashMap<>();
 
-    private static final Map<String, String[]> FAMILY_KEYWORDS = new LinkedHashMap<>();
+    private static final class Core extends AbstractRegistry<String, String[]> {
+        Core() {
+            super("FoodFamilyResolver");
+        }
+    }
+
+    private static final Core INSTANCE = new Core();
 
     static {
-        FAMILY_KEYWORDS.put("berry",       new String[]{"berry", "berries", "strawberry", "blueberry", "raspberry", "blackberry", "cranberry", "goji"});
-        FAMILY_KEYWORDS.put("citrus",      new String[]{"orange", "lemon", "lime", "grapefruit", "citrus", "tangerine", "mandarin"});
-        FAMILY_KEYWORDS.put("apple",       new String[]{"apple", "cider"});
-        FAMILY_KEYWORDS.put("melon",       new String[]{"melon", "watermelon", "cantaloupe", "honeydew"});
-        FAMILY_KEYWORDS.put("tropical",    new String[]{"banana", "mango", "pineapple", "coconut", "papaya", "kiwi", "passion"});
-        FAMILY_KEYWORDS.put("stone_fruit", new String[]{"peach", "plum", "cherry", "apricot", "nectarine"});
-        FAMILY_KEYWORDS.put("fish",        new String[]{"fish", "salmon", "cod", "tuna", "trout", "bass", "carp", "mackerel", "sardine", "anchov"});
-        FAMILY_KEYWORDS.put("shellfish",   new String[]{"shrimp", "crab", "lobster", "clam", "mussel", "oyster", "scallop", "prawn"});
-        FAMILY_KEYWORDS.put("poultry",     new String[]{"chicken", "turkey", "duck", "goose", "poultry", "fowl"});
-        FAMILY_KEYWORDS.put("red_meat",    new String[]{"beef", "steak", "pork", "lamb", "mutton", "venison", "bison"});
-        FAMILY_KEYWORDS.put("mushroom",    new String[]{"mushroom", "fungus", "truffle", "shroom", "chanterelle", "morel", "portobello"});
-        FAMILY_KEYWORDS.put("bread",       new String[]{"bread", "loaf", "baguette", "roll", "bun", "toast", "sourdough"});
-        FAMILY_KEYWORDS.put("pasta",       new String[]{"pasta", "noodle", "spaghetti", "macaroni", "lasagna", "ravioli", "ramen", "udon"});
-        FAMILY_KEYWORDS.put("rice",        new String[]{"rice", "risotto", "sushi"});
-        FAMILY_KEYWORDS.put("leafy_green", new String[]{"lettuce", "spinach", "kale", "cabbage", "chard", "arugula", "salad"});
+        INSTANCE.reset();
+        INSTANCE.register("berry",       new String[]{"berry", "berries", "strawberry", "blueberry", "raspberry", "blackberry", "cranberry", "goji"});
+        INSTANCE.register("citrus",      new String[]{"orange", "lemon", "lime", "grapefruit", "citrus", "tangerine", "mandarin"});
+        INSTANCE.register("apple",       new String[]{"apple", "cider"});
+        INSTANCE.register("melon",       new String[]{"melon", "watermelon", "cantaloupe", "honeydew"});
+        INSTANCE.register("tropical",    new String[]{"banana", "mango", "pineapple", "coconut", "papaya", "kiwi", "passion"});
+        INSTANCE.register("stone_fruit", new String[]{"peach", "plum", "cherry", "apricot", "nectarine"});
+        INSTANCE.register("fish",        new String[]{"fish", "salmon", "cod", "tuna", "trout", "bass", "carp", "mackerel", "sardine", "anchov"});
+        INSTANCE.register("shellfish",   new String[]{"shrimp", "crab", "lobster", "clam", "mussel", "oyster", "scallop", "prawn"});
+        INSTANCE.register("poultry",     new String[]{"chicken", "turkey", "duck", "goose", "poultry", "fowl"});
+        INSTANCE.register("red_meat",    new String[]{"beef", "steak", "pork", "lamb", "mutton", "venison", "bison"});
+        INSTANCE.register("mushroom",    new String[]{"mushroom", "fungus", "truffle", "shroom", "chanterelle", "morel", "portobello"});
+        INSTANCE.register("bread",       new String[]{"bread", "loaf", "baguette", "roll", "bun", "toast", "sourdough"});
+        INSTANCE.register("pasta",       new String[]{"pasta", "noodle", "spaghetti", "macaroni", "lasagna", "ravioli", "ramen", "udon"});
+        INSTANCE.register("rice",        new String[]{"rice", "risotto", "sushi"});
+        INSTANCE.register("leafy_green", new String[]{"lettuce", "spinach", "kale", "cabbage", "chard", "arugula", "salad"});
+        INSTANCE.freeze();
     }
 
     private FoodFamilyResolver() {}
@@ -52,9 +60,13 @@ public final class FoodFamilyResolver {
 
     private static String doResolve(ResourceLocation itemId) {
         String path = itemId.getPath().toLowerCase();
-        for (Map.Entry<String, String[]> family : FAMILY_KEYWORDS.entrySet()) {
-            for (String keyword : family.getValue()) {
-                if (path.contains(keyword)) return family.getKey();
+        for (String family : INSTANCE.keys()) {
+            String[] keywords = INSTANCE.get(family);
+            if (keywords == null) {
+                continue;
+            }
+            for (String keyword : keywords) {
+                if (path.contains(keyword)) return family;
             }
         }
         return null;
@@ -66,10 +78,11 @@ public final class FoodFamilyResolver {
     }
 
     public static void replaceFamilies(Map<String, List<String>> configuredFamilies) {
-        FAMILY_KEYWORDS.clear();
+        INSTANCE.reset();
         for (Map.Entry<String, List<String>> entry : configuredFamilies.entrySet()) {
-            FAMILY_KEYWORDS.put(entry.getKey(), entry.getValue().toArray(String[]::new));
+            INSTANCE.register(entry.getKey(), entry.getValue().toArray(String[]::new));
         }
+        INSTANCE.freeze();
         clearCache();
     }
 }

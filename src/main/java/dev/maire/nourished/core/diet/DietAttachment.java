@@ -1,8 +1,8 @@
-package dev.maire.nourished.diet;
+package dev.maire.nourished.core.diet;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.FoodMemoryView;
-import dev.maire.nourished.api.impl.DietDataFoodMemoryView;
+import dev.maire.nourished.core.impl.DietDataFoodMemoryView;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -12,8 +12,8 @@ import net.minecraft.world.entity.player.Player;
 import java.util.function.Supplier;
 import java.util.List;
 
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 
 @ApiStatus.Internal
 public final class DietAttachment {

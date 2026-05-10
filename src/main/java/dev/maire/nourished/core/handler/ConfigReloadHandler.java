@@ -1,16 +1,15 @@
-package dev.maire.nourished.handler;
+package dev.maire.nourished.core.handler;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.config.LockRegistry;
-import dev.maire.nourished.config.PresetRegistry;
-import dev.maire.nourished.color.ColorRegistry;
+import dev.maire.nourished.core.color.ColorRegistry;
 import dev.maire.nourished.data.NourishedDataManager;
-import dev.maire.nourished.effect.EffectRegistry;
-import dev.maire.nourished.nutrition.FoodOverrideRegistry;
-import dev.maire.nourished.nutrition.FoodValueRegistry;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
-import dev.maire.nourished.nutrition.scanner.ScannerSpecRegistry;
+import dev.maire.nourished.core.effect.EffectRegistry;
+import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
+import dev.maire.nourished.core.nutrition.FoodValueRegistry;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.reload.NourishedReloadPipeline;
+import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
@@ -21,14 +20,7 @@ public class ConfigReloadHandler {
     @SubscribeEvent
     public void onLevelLoad(LevelEvent.Load event) {
         if (!event.getLevel().isClientSide()) {
-            NutrientRegistry.reload();
-            FoodValueRegistry.reload();
-            FoodOverrideRegistry.reload();
-            EffectRegistry.reload();
-            PresetRegistry.reload();
-            ColorRegistry.reload();
-            LockRegistry.reload();
-            ScannerSpecRegistry.reload();
+            NourishedReloadPipeline.reloadAll();
         }
     }
 

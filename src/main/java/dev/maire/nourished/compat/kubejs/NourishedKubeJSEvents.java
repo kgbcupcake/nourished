@@ -3,7 +3,7 @@ package dev.maire.nourished.compat.kubejs;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NourishedEvents;
 import dev.maire.nourished.api.NutrientModifierEvent;
-import dev.maire.nourished.nutrition.Nourished;
+import dev.maire.nourished.core.Nourished;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventGroupRegistry;
 import dev.latvian.mods.kubejs.event.EventHandler;

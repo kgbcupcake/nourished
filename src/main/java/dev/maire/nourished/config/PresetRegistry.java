@@ -5,8 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.effect.EffectRegistry;
-import dev.maire.nourished.nutrition.Nourished;
+import dev.maire.nourished.core.effect.EffectRegistry;
+import dev.maire.nourished.core.Nourished;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 /**
  * Loads and writes gameplay presets under {@code config/nourished/presets/}.
- * Built-in files are copied from the jar on first run when missing, similar to {@link dev.maire.nourished.effect.EffectRegistry}.
+ * Built-in files are copied from the jar on first run when missing, similar to {@link dev.maire.nourished.core.effect.EffectRegistry}.
  */
 public final class PresetRegistry {
 

@@ -1,4 +1,4 @@
-package dev.maire.nourished.diet;
+package dev.maire.nourished.core.diet;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -10,9 +10,9 @@ import com.mojang.serialization.RecordBuilder;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.network.ModNetworking.SyncDietDeltaPayload;
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.network.ModNetworking.SyncDietDeltaPayload;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.util.Mth;
 
 import java.util.Comparator;

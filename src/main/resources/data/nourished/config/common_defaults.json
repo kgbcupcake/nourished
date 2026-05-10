@@ -26,6 +26,8 @@
   "scannerEnableRecipeInheritance": true,
   "scannerConfidenceSpreadThreshold": 3.0,
   "enableDecay": true,
+  "enableNutritionEating": true,
+  "enableCalorieSaturationBlock": true,
   "enableEffects": true,
   "enableHUD": true,
   "enableToasts": true,
@@ -37,5 +39,7 @@
   "enableSynergies": true,
   "enableMilestones": true,
   "enableSeasonHooks": true,
-  "enableAbsorptionModifiers": true
+  "enableAbsorptionModifiers": true,
+  "enableSOLDiversityHealth": false,
+  "enableSOLDiversityPenalty": true
 }

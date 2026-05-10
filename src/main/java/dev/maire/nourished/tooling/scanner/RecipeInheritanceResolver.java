@@ -1,6 +1,7 @@
-package dev.maire.nourished.nutrition.scanner;
+package dev.maire.nourished.tooling.scanner;
 
 import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -60,7 +61,7 @@ public final class RecipeInheritanceResolver {
             return Map.of();
         }
 
-        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+        ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
         if (itemId == null) {
             return Map.of();
         }
@@ -143,7 +144,7 @@ public final class RecipeInheritanceResolver {
                     for (Ingredient ingredient : recipeIngredients) {
                         ItemStack[] items = ingredient.getItems();
                         if (items.length > 0) {
-                            ResourceLocation ingId = BuiltInRegistries.ITEM.getKey(items[0].getItem());
+                            ResourceLocation ingId = NourishedRegistryUtils.itemKey(items[0]);
                             if (ingId != null && !ingId.equals(itemId)) {
                                 ingredients.add(ingId);
                             }

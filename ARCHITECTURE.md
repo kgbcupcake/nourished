@@ -72,6 +72,46 @@ Player eats food → DietData.recordEat(itemId, category, family, time)
 
 ---
 
+### Memory
+
+**Memory** is the collective name for the three server-side maps on `DietData` that remember recent eating: **`foodMemory`** (per item id), **`categoryMemory`** (per dominant nutrient category), and **`familyMemory`** (per food family). Each entry is a `FoodMemoryEntry` — essentially a weighted eat count with a last-eaten timestamp — that **decays over time** using the configured memory window. Memory never leaves the server; the client only receives derived hints (e.g. neglected categories and fatigued families) for display.
+
+> Memory is “what have you been eating lately, at item / category / family granularity?” It drives diminishing returns, not the nutrient bars directly.
+
+---
+
+### Fatigue
+
+**Fatigue** is the **loss of nutritional efficiency** from repeating the same signal before memory has faded. Mechanically, decayed eat counts from memory maps are mapped through the same diminishing curve as **item** repetition; **category** and **family** contributions are blended into the final multiplier (`computeBlendedMultiplier`). High fatigue means a **lower** multiplier — you still gain nutrients, but less per bite. **Category fatigue** can also be read as a normalized “freshness” score via `getCategoryFatigue` (1 = fresh, 0 = saturated).
+
+> Fatigue is the penalty side of memory: the more you lean on one item, category, or family in a short window, the less rewarding the next bite becomes.
+
+---
+
+### Debt
+
+**Debt** (more precisely **nutritional debt**) is a **soft variety nudge** in `applyNutritionalDebt`: when the **dominant category** you are eating has a **decayed category-memory count** above the configured **debt threshold**, Nourished finds another category with the **lowest nutrient bar** (excluding the one you are eating) and applies a **small downward tick** to that bar, bounded by a floor. It is not a loan or currency — it models “if you keep hammering one group, something else you have neglected slips a bit further.”
+
+> Debt is the system gently pulling neglected bars down when you over-repeat a category, to encourage rotation without hard-blocking food.
+
+---
+
+### Neglected Category
+
+A **neglected category** is a **nutrient category whose bar value is among the lowest** compared to the others. `getMostNeglectedCategories(n)` sorts nutrient bars ascending and takes the bottom *n* keys — used for HUD / Diet Screen copy and internally when debt chooses which bar to nudge. “Neglected” refers to **low intake relative to other groups**, not to memory maps.
+
+> A neglected category is a bar you have starved relative to the rest of your diet.
+
+---
+
+### Fatigued Family
+
+A **fatigued family** is a **food family key** (e.g. `"fish"`) whose **family memory** still has meaningful weight: among non-expired `familyMemory` entries, families are ranked by **decayed eat count** descending, and `getMostFatiguedFamilies(n, time)` returns the top *n* — the families you have **eaten most repetitively** recently, i.e. the ones contributing most to **family-side fatigue** in the multiplier blend.
+
+> A fatigued family is a “kind” of food you have leaned on too hard lately; the HUD can surface it so the player sees the pattern.
+
+---
+
 ### What "group" means (and why it doesn't exist as a term)
 
 The word **group** is intentionally avoided in Nourished's API and documentation. It is ambiguous — it could mean nutrient group, food family, or category depending on context. If you find "group" appearing in code, treat it as a bug in naming and prefer `category` or `family` depending on what it actually represents.
@@ -332,4 +372,67 @@ Nourished fires events on the NeoForge event bus at key moments:
 You can also listen for `NutrientModifierEvent` to intercept and adjust any nutrient change before it lands, or cancel it entirely.
 
 > Use events when you want to react to nutrition state without modifying food classifications or registering new nutrients.
-```
+
+---
+
+## 7. Registry Lifecycle
+
+Nourished uses two different “registry stories”: **keyed config registries** (nutrients, food values, JSON on disk / datapack slices) and **API list registries** (definitions exposed through `dev.maire.nourished.api.registry` that are filled from mods and datapacks).
+
+### reset() → register() → freeze()
+
+Internal keyed and list registries (`AbstractRegistry`, `ListRegistry`) share a common lifecycle:
+
+1. **`reset()`** — clears mutable storage, clears the frozen snapshot, and returns the registry to a **mutable registration phase**. Used when reloading definitions from disk or when rebuilding state before a new parse.
+
+2. **`register()` / `register(key, value)`** — appends entries **only while unfrozen**. After `freeze()`, registration throws `IllegalStateException` (registry name appears in the message). This guarantees gameplay code never mutates definitions mid-tick by accident.
+
+3. **`freeze()`** — copies mutable entries into **immutable snapshots** used for fast, allocation-free reads at runtime. Some API-facing registries expose `freezeInternal()` through `NourishedApiDefinitionRegistries` so datapack apply can close a pass deterministically.
+
+Addon-facing registries documented under “Extension Points” follow the same rule: **register during mod init before the server starts** — late registration is rejected so load order stays predictable.
+
+### When `load()` vs `reload()` is used
+
+- **`load()`** — **cold startup** path: called from the mod constructor (`Nourished`) once per game launch to **create default files if missing** and **populate registries from config / bundled JSON** before other systems wire up. It is not tied to `/reload` or the config screen.
+
+- **`reload()`** — **runtime refresh** of the same config-backed files while the game is running (after edits, import, level load on dedicated server, or `/nourished reload`). Implementations typically **`reset()`**, re-parse, **`freeze()`**, and sometimes call follow-up hooks (e.g. `NutrientRegistry.reload()` re-runs `FoodNutritionRegistry.init()`).
+
+**Datapack JSON** for Nourished definitions uses a separate path: `NourishedDataLoader` / `loadFromDatapack(...)` on individual registries where applicable — that is **data reload**, not the same as the static `*.reload()` pipeline in §8.
+
+### `NourishedReloadPipeline` vs `NourishedApiDefinitionRegistries`
+
+| | **`NourishedReloadPipeline.reloadAll()`** | **`NourishedApiDefinitionRegistries`** |
+|---|-------------------------------------------|----------------------------------------|
+| **Purpose** | One ordered pass to **re-read server/client config files** for the eight static registries (nutrients, food values, overrides, effects, presets, colors, locks, scanner spec). | **Coordinates reset/freeze** of **public API list registries** around **`NourishedDataLoader`** datapack apply and common setup. |
+| **Trigger** | Level load (server), `/nourished reload`, config UI “reload”, import apply — see §8. | Start of each datapack `apply` (`onDatapackApplyBegin` — **reset** selected registries after the first pass), end of apply (`onDatapackApplyEnd` — **freeze**), and after common setup (`freezeModOnlyRegistriesAfterCommonSetup` for registries that only accept mod-time registration). |
+| **Data source** | Config directory JSON / TOML-adjacent files written by the mod and edited by users. | Datapack JSON under `data/<namespace>/nourished/...` plus mod constructor registrations. |
+
+They **do not call each other**. Think: **ReloadPipeline** = “refresh local config files”; **ApiDefinitionRegistries** = “wrap datapack-driven API registry passes in reset/freeze discipline.”
+
+---
+
+## 8. Reload Pipeline
+
+**Entry point:** `dev.maire.nourished.core.reload.NourishedReloadPipeline.reloadAll()` — a single static method that reloads every **config-backed** registry in a **fixed order** so downstream readers always see a consistent snapshot.
+
+### Registry order (and why order matters)
+
+1. **`NutrientRegistry.reload()`** — Re-establishes nutrient keys, thresholds, icons, and tags; many other registries and `DietData` logic assume this set is current.
+2. **`FoodValueRegistry.reload()`** — Re-loads per-food nutrition contributions; classification and HUD use nutrient keys from (1).
+3. **`FoodOverrideRegistry.reload()`** — Re-applies item-level overrides on top of base food values.
+4. **`EffectRegistry.reload()`** — Re-loads threshold-triggered effects; definitions reference nutrient ids from the live key set.
+5. **`PresetRegistry.reload()`** — Re-loads named presets that bundle user-facing config snapshots.
+6. **`ColorRegistry.reload()`** — Re-binds display colors to the current nutrient key list.
+7. **`LockRegistry.reload()`** — Re-loads merge / lock rules used when persisting or combining config-derived maps.
+8. **`ScannerSpecRegistry.reload()`** — Re-loads scanner/heuristic spec used by the food tooling pipeline; kept last so it reads stable nutrition and override data.
+
+### Call sites
+
+| Location | What triggers it |
+|----------|------------------|
+| `ConfigReloadHandler.onLevelLoad` | Server **`LevelEvent.Load`** (not client) — ensures dedicated servers pick up disk config when a level loads. |
+| `NourishedCommand.reloadAll` | **`/nourished reload`** — after `MinecraftServer.reloadResources(...)`, runs on the server executor so datapack and config views stay aligned. |
+| `NourishedConfigScreen.ReloadConfigsListEntry` (button lambda) | Mod **config screen** “reload configs” control — immediate client-side refresh for local files. |
+| `ImportExportManager.applyImport` | **Config import** completes (`apply*` sections + `NourishedConfig.saveNow()`), then `reloadAll()`, then `NutrientUiColors.clearOverrides()`. |
+
+Do not reorder the eight calls inside `reloadAll()` without auditing dependents; comments in the pipeline class should stay in sync with this section.

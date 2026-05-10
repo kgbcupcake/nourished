@@ -9,10 +9,10 @@ import java.util.Map;
 import dev.maire.nourished.client.ClientDietCache;
 import dev.maire.nourished.client.NutrientUiColors;
 import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.diet.DietData;
+import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 

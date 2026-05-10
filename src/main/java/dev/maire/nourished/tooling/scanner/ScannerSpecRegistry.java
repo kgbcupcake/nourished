@@ -1,4 +1,4 @@
-package dev.maire.nourished.nutrition.scanner;
+package dev.maire.nourished.tooling.scanner;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -6,8 +6,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.nutrition.Nourished;
-import net.minecraft.resources.ResourceLocation;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.registry.AbstractRegistry;
+import dev.maire.nourished.core.util.NourishedJsonUtils;
+import dev.maire.nourished.core.util.NourishedResourceLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -45,15 +47,21 @@ public final class ScannerSpecRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String BUNDLED_RESOURCE_PATH = "/data/nourished/nourished/scanner/scanner_spec.json";
     private static final String CONFIG_FILE_NAME = "scanner_spec.json";
-    private static final ResourceLocation DATAPACK_PATH =
-            ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "scanner/scanner_spec.json");
+    private static final String SPEC_KEY = "active";
 
-    private static volatile ScannerSpec ACTIVE = ScannerSpec.empty();
+    private static final class Core extends AbstractRegistry<String, ScannerSpec> {
+        Core() {
+            super("ScannerSpecRegistry");
+        }
+    }
+
+    private static final Core INSTANCE = new Core();
 
     private ScannerSpecRegistry() {}
 
     public static ScannerSpec get() {
-        return ACTIVE;
+        ScannerSpec spec = INSTANCE.get(SPEC_KEY);
+        return spec != null ? spec : ScannerSpec.empty();
     }
 
     public static void load() {
@@ -70,12 +78,19 @@ public final class ScannerSpecRegistry {
                 Nourished.LOGGER.warn("[ScannerSpecRegistry] scanner_spec.json was empty/invalid, falling back to bundled defaults");
                 spec = parseBundled();
             }
-            ACTIVE = spec != null ? spec : ScannerSpec.empty();
+            if (spec == null) {
+                spec = ScannerSpec.empty();
+            }
+            INSTANCE.reset();
+            INSTANCE.register(SPEC_KEY, spec);
+            INSTANCE.freeze();
             Nourished.LOGGER.info("[ScannerSpecRegistry] Loaded scanner spec from {}", file);
         } catch (IOException e) {
             Nourished.LOGGER.error("[ScannerSpecRegistry] Failed to load scanner_spec.json, using bundled defaults", e);
             ScannerSpec bundled = parseBundled();
-            ACTIVE = bundled != null ? bundled : ScannerSpec.empty();
+            INSTANCE.reset();
+            INSTANCE.register(SPEC_KEY, bundled != null ? bundled : ScannerSpec.empty());
+            INSTANCE.freeze();
         }
     }
 
@@ -85,21 +100,24 @@ public final class ScannerSpecRegistry {
     }
 
     public static void loadFromDatapack(ResourceManager resourceManager) {
-        var resource = resourceManager.getResource(DATAPACK_PATH);
-        if (resource.isPresent()) {
-            try (InputStream in = resource.get().open();
-                 Reader r = new InputStreamReader(in, StandardCharsets.UTF_8)) {
-                ScannerSpec spec = parseReader(r);
-                if (spec != null) {
-                    ACTIVE = spec;
-                    Nourished.LOGGER.info("[ScannerSpecRegistry] Loaded scanner_spec.json from datapack override");
-                    return;
-                }
-            } catch (IOException e) {
-                Nourished.LOGGER.error("[ScannerSpecRegistry] Failed to load datapack override, falling back to config folder", e);
-            }
-        }
-        load();
+        NourishedResourceLoader.loadFromModConfig(
+                resourceManager,
+                "scanner/scanner_spec.json",
+                reader -> {
+                    ScannerSpec spec = parseReader(reader);
+                    if (spec == null) {
+                        return false;
+                    }
+                    INSTANCE.reset();
+                    INSTANCE.register(SPEC_KEY, spec);
+                    INSTANCE.freeze();
+                    return true;
+                },
+                ScannerSpecRegistry::load,
+                "[ScannerSpecRegistry] Loaded scanner_spec.json from datapack override",
+                "[ScannerSpecRegistry] Failed to load datapack override, falling back to config folder",
+                null
+        );
     }
 
     private static ScannerSpec parseFile(Path file) throws IOException {
@@ -250,13 +268,17 @@ public final class ScannerSpecRegistry {
     }
 
     private static float getFloat(JsonObject obj, String key, float fallback) {
-        return obj != null && obj.has(key) && obj.get(key).isJsonPrimitive()
-                ? obj.get(key).getAsFloat() : fallback;
+        if (obj == null) {
+            return fallback;
+        }
+        return NourishedJsonUtils.getOptionalFloat(obj, key, fallback);
     }
 
     private static int getInt(JsonObject obj, String key, int fallback) {
-        return obj != null && obj.has(key) && obj.get(key).isJsonPrimitive()
-                ? obj.get(key).getAsInt() : fallback;
+        if (obj == null) {
+            return fallback;
+        }
+        return NourishedJsonUtils.getOptionalInt(obj, key, fallback);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -2,7 +2,7 @@ package dev.maire.nourished.api.registry;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.DietProfileDefinition;
-import dev.maire.nourished.registry.AbstractRegistry;
+import dev.maire.nourished.core.registry.AbstractRegistry;
 
 import javax.annotation.Nullable;
 import java.util.List;

@@ -1,4 +1,4 @@
-package dev.maire.nourished.color;
+package dev.maire.nourished.core.color;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -6,24 +6,24 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.nutrition.Nourished;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.registry.AbstractRegistry;
+import dev.maire.nourished.core.util.NourishedResourceLoader;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Per-nutrient HUD/UI colors from {@code config/nourished/colors.json}, with optional datapack override
@@ -35,30 +35,50 @@ import java.util.concurrent.ConcurrentHashMap;
  *   {"key": "proteins", "argb": "0xFF4DD9D9"}
  * ]
  * }</pre>
- * Call {@link #load()} after {@link dev.maire.nourished.effect.EffectRegistry#load()}.
+ * Call {@link #load()} after {@link dev.maire.nourished.core.effect.EffectRegistry#load()}.
  */
 public final class ColorRegistry {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final ConcurrentHashMap<String, Integer> COLORS = new ConcurrentHashMap<>();
+    private static final class Core extends AbstractRegistry<String, Integer> {
+        Core() {
+            super("ColorRegistry");
+        }
+    }
+
+    private static final Core INSTANCE = new Core();
 
     private ColorRegistry() {}
 
     public static Optional<Integer> getArgb(String key) {
-        Integer v = COLORS.get(key);
+        Integer v = INSTANCE.get(key);
         return v == null ? Optional.empty() : Optional.of(v);
     }
 
     /** Puts or replaces a color (alpha forced to 0xFF). */
     public static void setArgb(String key, int argb) {
+        Objects.requireNonNull(key, "key");
         int opaque = (argb & 0x00_FF_FF_FF) | 0xFF00_0000;
-        COLORS.put(key, opaque);
+        LinkedHashMap<String, Integer> next = new LinkedHashMap<>(INSTANCE.entries());
+        next.put(key, opaque);
+        INSTANCE.reset();
+        for (Map.Entry<String, Integer> e : next.entrySet()) {
+            INSTANCE.register(e.getKey(), e.getValue());
+        }
+        INSTANCE.freeze();
     }
 
     /** Removes a custom color so UI falls back to the default palette. */
     public static void remove(String key) {
-        COLORS.remove(key);
+        Objects.requireNonNull(key, "key");
+        LinkedHashMap<String, Integer> next = new LinkedHashMap<>(INSTANCE.entries());
+        next.remove(key);
+        INSTANCE.reset();
+        for (Map.Entry<String, Integer> e : next.entrySet()) {
+            INSTANCE.register(e.getKey(), e.getValue());
+        }
+        INSTANCE.freeze();
     }
 
     public static void load() {
@@ -71,10 +91,11 @@ public final class ColorRegistry {
                 Nourished.LOGGER.info("[ColorRegistry] Wrote default colors.json");
             }
             parseFile(file);
-            Nourished.LOGGER.info("[ColorRegistry] Loaded {} custom colors from {}", COLORS.size(), file);
+            Nourished.LOGGER.info("[ColorRegistry] Loaded {} custom colors from {}", INSTANCE.size(), file);
         } catch (IOException e) {
             Nourished.LOGGER.error("[ColorRegistry] Failed to load colors.json", e);
-            COLORS.clear();
+            INSTANCE.reset();
+            INSTANCE.freeze();
         }
     }
 
@@ -91,7 +112,7 @@ public final class ColorRegistry {
             JsonArray arr = new JsonArray();
             List<String> keys = NutrientRegistry.getKeys();
             for (String key : keys) {
-                Integer argb = COLORS.get(key);
+                Integer argb = INSTANCE.get(key);
                 if (argb == null) {
                     continue;
                 }
@@ -114,20 +135,15 @@ public final class ColorRegistry {
      * If absent, falls back to {@link #load()}.
      */
     public static void loadFromDatapack(ResourceManager resourceManager) {
-        ResourceLocation datapackPath = ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "config/colors.json");
-        Optional<Resource> resource = resourceManager.getResource(datapackPath);
-        if (resource.isPresent()) {
-            try (InputStream is = resource.get().open();
-                 Reader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                parseFromReader(r);
-                Nourished.LOGGER.info("[ColorRegistry] Loaded from datapack override");
-                return;
-            } catch (IOException e) {
-                Nourished.LOGGER.error("[ColorRegistry] Failed to load datapack colors, falling back to config folder", e);
-            }
-        }
-        load();
-        Nourished.LOGGER.info("[ColorRegistry] Loaded from config folder");
+        NourishedResourceLoader.loadFromModConfig(
+                resourceManager,
+                "config/colors.json",
+                ColorRegistry::parseFromReader,
+                ColorRegistry::load,
+                "[ColorRegistry] Loaded from datapack override",
+                "[ColorRegistry] Failed to load datapack colors, falling back to config folder",
+                "[ColorRegistry] Loaded from config folder"
+        );
     }
 
     private static void writeEmpty(Path file) throws IOException {
@@ -143,9 +159,10 @@ public final class ColorRegistry {
     }
 
     private static void parseFromReader(Reader reader) {
-        COLORS.clear();
+        INSTANCE.reset();
         JsonArray arr = GSON.fromJson(reader, JsonArray.class);
         if (arr == null || arr.isEmpty()) {
+            INSTANCE.freeze();
             return;
         }
         for (JsonElement el : arr) {
@@ -158,8 +175,10 @@ public final class ColorRegistry {
             }
             String key = obj.get("key").getAsString();
             int argb = parseArgbElement(obj.get("argb"));
-            setArgb(key, argb);
+            int opaque = (argb & 0x00_FF_FF_FF) | 0xFF00_0000;
+            INSTANCE.register(key, opaque);
         }
+        INSTANCE.freeze();
     }
 
     private static int parseArgbElement(JsonElement el) {

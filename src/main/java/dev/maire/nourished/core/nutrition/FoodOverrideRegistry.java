@@ -1,4 +1,4 @@
-package dev.maire.nourished.nutrition;
+package dev.maire.nourished.core.nutrition;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -7,23 +7,21 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import dev.maire.nourished.api.ApiStatus;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.registry.AbstractRegistry;
+import dev.maire.nourished.core.util.NourishedResourceLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -51,13 +49,19 @@ public class FoodOverrideRegistry {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final Map<String, FoodOverride> REGISTRY = new LinkedHashMap<>();
+    private static final class Core extends AbstractRegistry<String, FoodOverride> {
+        Core() {
+            super("FoodOverrideRegistry");
+        }
+    }
+
+    private static final Core INSTANCE = new Core();
 
     /**
      * Returns the override for an item, if one exists and is enabled.
      */
     public static Optional<FoodOverride> getOverride(String itemId) {
-        FoodOverride override = REGISTRY.get(itemId);
+        FoodOverride override = INSTANCE.get(itemId);
         if (override != null && override.enabled()) {
             return Optional.of(override);
         }
@@ -68,12 +72,12 @@ public class FoodOverrideRegistry {
      * Returns the override for an item (whether enabled or not), or null if none.
      */
     public static FoodOverride get(String itemId) {
-        return REGISTRY.get(itemId);
+        return INSTANCE.get(itemId);
     }
 
     /** Returns all registered overrides. */
     public static Map<String, FoodOverride> getAll() {
-        return Collections.unmodifiableMap(REGISTRY);
+        return INSTANCE.entries();
     }
 
     public static void load() {
@@ -87,10 +91,11 @@ public class FoodOverrideRegistry {
                 Nourished.LOGGER.info("[FoodOverrideRegistry] Wrote default food_overrides.json");
             }
             parse(file);
-            Nourished.LOGGER.info("[FoodOverrideRegistry] Loaded {} overrides from config folder", REGISTRY.size());
+            Nourished.LOGGER.info("[FoodOverrideRegistry] Loaded {} overrides from config folder", INSTANCE.size());
         } catch (IOException e) {
             Nourished.LOGGER.error("[FoodOverrideRegistry] Failed to load food_overrides.json", e);
-            REGISTRY.clear();
+            INSTANCE.reset();
+            INSTANCE.freeze();
         }
     }
 
@@ -104,46 +109,39 @@ public class FoodOverrideRegistry {
      * Call this from a reload listener when datapacks are available.
      */
     public static void loadFromDatapack(ResourceManager resourceManager) {
-        ResourceLocation datapackPath = ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "config/food_overrides.json");
-        Optional<Resource> resource = resourceManager.getResource(datapackPath);
-
-        if (resource.isPresent()) {
-            try (InputStream is = resource.get().open();
-                 Reader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                parseFromReader(r);
-                Nourished.LOGGER.info("[FoodOverrideRegistry] Loaded from datapack override");
-                return;
-            } catch (IOException e) {
-                Nourished.LOGGER.error("[FoodOverrideRegistry] Failed to load from datapack, falling back to config folder", e);
-            }
-        }
-
-        load();
-        Nourished.LOGGER.info("[FoodOverrideRegistry] Loaded from config folder");
+        NourishedResourceLoader.loadFromModConfig(
+                resourceManager,
+                "config/food_overrides.json",
+                FoodOverrideRegistry::parseFromReader,
+                FoodOverrideRegistry::load,
+                "[FoodOverrideRegistry] Loaded from datapack override",
+                "[FoodOverrideRegistry] Failed to load from datapack, falling back to config folder",
+                "[FoodOverrideRegistry] Loaded from config folder"
+        );
     }
 
     private static void parseFromReader(Reader reader) {
-        REGISTRY.clear();
+        INSTANCE.reset();
         JsonArray arr = GSON.fromJson(reader, JsonArray.class);
-        if (arr == null) {
-            return;
-        }
-        for (JsonElement el : arr) {
-            JsonObject obj = el.getAsJsonObject();
-            String item = obj.get("item").getAsString();
-            int calories = obj.has("calories") ? obj.get("calories").getAsInt() : 0;
-            boolean enabled = !obj.has("enabled") || obj.get("enabled").getAsBoolean();
+        if (arr != null) {
+            for (JsonElement el : arr) {
+                JsonObject obj = el.getAsJsonObject();
+                String item = obj.get("item").getAsString();
+                int calories = obj.has("calories") ? obj.get("calories").getAsInt() : 0;
+                boolean enabled = !obj.has("enabled") || obj.get("enabled").getAsBoolean();
 
-            Map<String, Float> nutrients = new HashMap<>();
-            if (obj.has("nutrients") && obj.get("nutrients").isJsonObject()) {
-                JsonObject nutrientsObj = obj.getAsJsonObject("nutrients");
-                for (Map.Entry<String, JsonElement> entry : nutrientsObj.entrySet()) {
-                    nutrients.put(entry.getKey(), entry.getValue().getAsFloat());
+                Map<String, Float> nutrients = new HashMap<>();
+                if (obj.has("nutrients") && obj.get("nutrients").isJsonObject()) {
+                    JsonObject nutrientsObj = obj.getAsJsonObject("nutrients");
+                    for (Map.Entry<String, JsonElement> entry : nutrientsObj.entrySet()) {
+                        nutrients.put(entry.getKey(), entry.getValue().getAsFloat());
+                    }
                 }
-            }
 
-            REGISTRY.put(item, new FoodOverride(item, nutrients, calories, enabled));
+                INSTANCE.register(item, new FoodOverride(item, nutrients, calories, enabled));
+            }
         }
+        INSTANCE.freeze();
     }
 
     /**
@@ -164,39 +162,33 @@ public class FoodOverrideRegistry {
      * Adds or updates an override.
      */
     public static void setOverride(String item, Map<String, Float> nutrients, int calories, boolean enabled) {
-        REGISTRY.put(item, new FoodOverride(item, new HashMap<>(nutrients), calories, enabled));
+        Objects.requireNonNull(item, "item");
+        LinkedHashMap<String, FoodOverride> next = new LinkedHashMap<>(INSTANCE.entries());
+        next.put(item, new FoodOverride(item, new HashMap<>(nutrients), calories, enabled));
+        INSTANCE.reset();
+        for (Map.Entry<String, FoodOverride> e : next.entrySet()) {
+            INSTANCE.register(e.getKey(), e.getValue());
+        }
+        INSTANCE.freeze();
     }
 
     /**
      * Removes an override.
      */
     public static void removeOverride(String item) {
-        REGISTRY.remove(item);
+        Objects.requireNonNull(item, "item");
+        LinkedHashMap<String, FoodOverride> next = new LinkedHashMap<>(INSTANCE.entries());
+        next.remove(item);
+        INSTANCE.reset();
+        for (Map.Entry<String, FoodOverride> e : next.entrySet()) {
+            INSTANCE.register(e.getKey(), e.getValue());
+        }
+        INSTANCE.freeze();
     }
 
     private static void parse(Path file) throws IOException {
-        REGISTRY.clear();
         try (Reader r = Files.newBufferedReader(file)) {
-            JsonArray arr = GSON.fromJson(r, JsonArray.class);
-            if (arr == null) {
-                return;
-            }
-            for (JsonElement el : arr) {
-                JsonObject obj = el.getAsJsonObject();
-                String item = obj.get("item").getAsString();
-                int calories = obj.has("calories") ? obj.get("calories").getAsInt() : 0;
-                boolean enabled = !obj.has("enabled") || obj.get("enabled").getAsBoolean();
-
-                Map<String, Float> nutrients = new HashMap<>();
-                if (obj.has("nutrients") && obj.get("nutrients").isJsonObject()) {
-                    JsonObject nutrientsObj = obj.getAsJsonObject("nutrients");
-                    for (Map.Entry<String, JsonElement> entry : nutrientsObj.entrySet()) {
-                        nutrients.put(entry.getKey(), entry.getValue().getAsFloat());
-                    }
-                }
-
-                REGISTRY.put(item, new FoodOverride(item, nutrients, calories, enabled));
-            }
+            parseFromReader(r);
         }
     }
 
@@ -209,16 +201,16 @@ public class FoodOverrideRegistry {
 
     private static void writeRegistry(Path file) throws IOException {
         JsonArray arr = new JsonArray();
-        for (FoodOverride override : REGISTRY.values()) {
+        for (FoodOverride override : INSTANCE.values()) {
             JsonObject obj = new JsonObject();
             obj.addProperty("item", override.item());
-            
+
             JsonObject nutrientsObj = new JsonObject();
             for (Map.Entry<String, Float> entry : override.nutrients().entrySet()) {
                 nutrientsObj.addProperty(entry.getKey(), entry.getValue());
             }
             obj.add("nutrients", nutrientsObj);
-            
+
             obj.addProperty("calories", override.calories());
             obj.addProperty("enabled", override.enabled());
             arr.add(obj);

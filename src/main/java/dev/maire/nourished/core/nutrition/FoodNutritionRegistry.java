@@ -1,4 +1,4 @@
-package dev.maire.nourished.nutrition;
+package dev.maire.nourished.core.nutrition;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,9 +17,8 @@ import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.config.NourishedConfig;
 
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.Registries;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
@@ -84,7 +83,7 @@ public class FoodNutritionRegistry {
 
         for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
             for (String tagStr : def.tags()) {
-                TagKey<Item> tagKey = TagKey.create(Registries.ITEM, ResourceLocation.parse(tagStr));
+                var tagKey = NourishedRegistryUtils.itemTagKey(tagStr);
                 if (holder.is(tagKey)) {
                     matches.put(def.key(), 1.0f);
                     break;

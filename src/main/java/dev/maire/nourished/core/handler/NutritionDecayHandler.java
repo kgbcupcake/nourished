@@ -1,4 +1,4 @@
-package dev.maire.nourished.handler;
+package dev.maire.nourished.core.handler;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NourishedSeasonHook;
@@ -6,10 +6,11 @@ import dev.maire.nourished.api.NourishedEvents;
 import dev.maire.nourished.api.registry.SeasonHookRegistry;
 import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.diet.DietAttachment;
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.network.ModNetworking;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.diet.DietAttachment;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.network.ModNetworking;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.registry.NourishedAttributes;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -31,6 +32,7 @@ public class NutritionDecayHandler {
         for (String key : NutrientRegistry.getKeys()) {
             float rate = (float) config.decayRateFor(key);
             rate = applySeasonalDecayModifier(key, rate);
+            rate *= NourishedAttributes.nutrientDecayMultiplier(player);
             float current = data.nutrients.getOrDefault(key, 0f);
             if (current > 0f) {
                 float newValue = Math.max(0f, current - rate);

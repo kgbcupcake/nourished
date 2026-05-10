@@ -1,11 +1,11 @@
-package dev.maire.nourished.handler;
+package dev.maire.nourished.core.handler;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.diet.DietAttachment;
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.effect.EffectRegistry;
-import dev.maire.nourished.effect.NutritionEffectApplier;
+import dev.maire.nourished.core.diet.DietAttachment;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.effect.EffectRegistry;
+import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,7 +19,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 @ApiStatus.Internal
 public class NutritionEffectsHandler {
 
-    private static final int APPLY_INTERVAL_TICKS = 20;
+    private static final int APPLY_INTERVAL_TICKS = 40;
 
     @SubscribeEvent
     public void onPlayerTick(PlayerTickEvent.Post event) {

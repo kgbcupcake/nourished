@@ -1,6 +1,7 @@
-package dev.maire.nourished.nutrition.scanner;
+package dev.maire.nourished.tooling.scanner;
 
 import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -54,7 +55,7 @@ public final class FoodClassifier {
             Function<ResourceLocation, ClassificationResult> classifiedLookup,
             Map<String, Map<String, Float>> namespaceAverages
     ) {
-        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+        ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
         if (itemId == null) {
             return ClassificationResult.empty(ResourceLocation.withDefaultNamespace("unknown"), nutrientKeys.get(0));
         }

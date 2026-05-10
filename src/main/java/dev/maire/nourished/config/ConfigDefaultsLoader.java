@@ -2,7 +2,8 @@ package dev.maire.nourished.config;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dev.maire.nourished.nutrition.Nourished;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.util.NourishedJsonUtils;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,14 +31,14 @@ final class ConfigDefaultsLoader {
     }
 
     static double getDouble(JsonObject obj, String key, double fallback) {
-        return obj.has(key) ? obj.get(key).getAsDouble() : fallback;
+        return NourishedJsonUtils.getOptionalDouble(obj, key, fallback);
     }
 
     static int getInt(JsonObject obj, String key, int fallback) {
-        return obj.has(key) ? obj.get(key).getAsInt() : fallback;
+        return NourishedJsonUtils.getOptionalInt(obj, key, fallback);
     }
 
     static boolean getBoolean(JsonObject obj, String key, boolean fallback) {
-        return obj.has(key) ? obj.get(key).getAsBoolean() : fallback;
+        return NourishedJsonUtils.getOptionalBoolean(obj, key, fallback);
     }
 }

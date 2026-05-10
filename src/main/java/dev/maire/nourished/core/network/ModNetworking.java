@@ -1,10 +1,10 @@
-package dev.maire.nourished.network;
+package dev.maire.nourished.core.network;
 
 import dev.maire.nourished.client.ClientDietCache;
 import dev.maire.nourished.client.NourishedToastManager;
-import dev.maire.nourished.diet.DietAttachment;
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.nutrition.Nourished;
+import dev.maire.nourished.core.diet.DietAttachment;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.Nourished;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;

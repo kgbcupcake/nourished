@@ -7,12 +7,15 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.maire.nourished.client.screen.DietScreen;
 import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.config.NourishedConfigScreen;
-import dev.maire.nourished.diet.DietData;
-import dev.maire.nourished.nutrition.FoodFamilyResolver;
-import dev.maire.nourished.nutrition.FoodNutritionRegistry;
-import dev.maire.nourished.nutrition.FoodNutritionRegistry.DietDelta;
-import dev.maire.nourished.nutrition.NutrientRegistry;
+import dev.maire.nourished.client.config.NourishedConfigScreen;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry.DietDelta;
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.util.NourishedItemTags;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.client.Minecraft;
@@ -110,11 +113,11 @@ public final class ClientEvents {
         lines.add(Component.empty());
         lines.add(Component.literal("✦ Nourished").withStyle(ChatFormatting.GOLD));
 
-        String itemId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+        String itemId = NourishedRegistryUtils.itemKey(stack).toString();
         DietData diet = ClientDietCache.get();
         String dominantCategory = highestKey; // already resolved above from matchedBars
         String familyKey = FoodFamilyResolver.resolve(
-                BuiltInRegistries.ITEM.getKey(stack.getItem()));
+                NourishedRegistryUtils.itemKey(stack));
         long gameTimeMs = ClientDietCache.get().lastTickTime > 0
                 ? ClientDietCache.get().lastTickTime
                 : 0L;
@@ -152,7 +155,7 @@ public final class ClientEvents {
                 continue;
             }
             renderedAny = true;
-            String label = Character.toUpperCase(key.charAt(0)) + key.substring(1);
+            String label = NourishedRegistryUtils.capitalizeFirst(key);
             String text = "  " + label + "  +" + String.format(Locale.ROOT, "%.1f", v);
             int color = NutrientUiColors.baseColorArgb(key);
             MutableComponent line = Component.literal(text).withStyle(Style.EMPTY.withColor(color));
@@ -161,11 +164,19 @@ public final class ClientEvents {
 
         if (!renderedAny && highestKey != null) {
             float v = Math.max(0f, delta.nutrients().getOrDefault(highestKey, 0f));
-            String label = Character.toUpperCase(highestKey.charAt(0)) + highestKey.substring(1);
+            String label = NourishedRegistryUtils.capitalizeFirst(highestKey);
             String text = "  " + label + "  +" + String.format(Locale.ROOT, "%.1f", v);
             int color = NutrientUiColors.baseColorArgb(highestKey);
             MutableComponent line = Component.literal(text).withStyle(Style.EMPTY.withColor(color));
             lines.add(line);
+        }
+
+        if (ModuleCache.enableDecay && ModuleCache.enableNutritionEating) {
+            boolean bypassEligible = (food.nutrition() <= 2 || stack.is(NourishedItemTags.LIGHT_FOOD)) && !stack.is(NourishedItemTags.MEAL);
+            if (bypassEligible) {
+                lines.add(Component.translatable("nourished.tooltip.light_food")
+                        .withStyle(ChatFormatting.GRAY));
+            }
         }
     }
 
