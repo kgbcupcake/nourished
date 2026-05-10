@@ -37,6 +37,7 @@ All notable changes to Nourished will be documented here.
 - Update constructors and validation in API definitions
 - Streamline nutrient and effect definitions with builder pattern
 - Enhance registration phase management in NourishedAPI
+- Streamline icon handling and improve nutrient icon fallback logic
 
 ## [0.1.1-alpha] - 2026-05-08
 
