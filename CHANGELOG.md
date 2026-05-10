@@ -10,6 +10,7 @@ All notable changes to Nourished will be documented here.
 - Added ARCHITECTURE.md
 - Expand ARCHITECTURE.md with detailed override priority stack and clarifications on mod functionality
 - Update food group entries and nutrition HUD in Patchouli guide
+- Enhance README and implement Peak Stamina compatibility features
 
 ### 🚀 Features
 
