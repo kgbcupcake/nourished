@@ -1,7 +1,7 @@
 package dev.maire.nourished.tooling.datapack;
 
-import dev.maire.nourished.data.SchemaDefinition;
-import dev.maire.nourished.data.SchemaField;
+import dev.maire.nourished.tooling.data.SchemaDefinition;
+import dev.maire.nourished.tooling.data.SchemaField;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

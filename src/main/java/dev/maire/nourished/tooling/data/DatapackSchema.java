@@ -1,4 +1,4 @@
-package dev.maire.nourished.data;
+package dev.maire.nourished.tooling.data;
 
 /**
  * Constants describing Nourished datapack schema locations and keys.

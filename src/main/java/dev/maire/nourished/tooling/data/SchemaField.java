@@ -1,4 +1,4 @@
-package dev.maire.nourished.data;
+package dev.maire.nourished.tooling.data;
 
 public record SchemaField(String name, SchemaType type, boolean required, Object defaultValue) {
 

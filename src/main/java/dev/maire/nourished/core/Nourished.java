@@ -9,6 +9,7 @@ import dev.maire.nourished.api.NourishedAPIVersion;
 import dev.maire.nourished.api.NourishedAPIState;
 import dev.maire.nourished.core.registry.NourishedApiDefinitionRegistries;
 import dev.maire.nourished.core.registry.NourishedAttributes;
+import dev.maire.nourished.core.registry.RegistryLifecycleManager;
 import dev.maire.nourished.core.command.NourishedCommand;
 import dev.maire.nourished.compat.kubejs.NourishedKubeJSPlugin;
 import dev.maire.nourished.compat.AutoCompatDiscovery;
@@ -56,7 +57,8 @@ public class Nourished {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Nourished(IEventBus modEventBus, ModContainer modContainer) {
-        NutrientRegistry.load();
+        registerLifecycleEntries();
+        RegistryLifecycleManager.loadAll();
         NourishedAttributes.register(modEventBus);
         ModCompat.initialize();
         if (ModList.get().isLoaded("peakstamina")) {
@@ -68,14 +70,6 @@ public class Nourished {
         if (ModList.get().isLoaded("legendarysurvivaloverhaul")) {
             LSOCompat.register();
         }
-        FoodValueRegistry.load();
-        FoodOverrideRegistry.load();
-        EffectRegistry.load();
-        ColorRegistry.load();
-        LockRegistry.load();
-        ModCompatRegistry.load();
-        ScannerSpecRegistry.load();
-        PresetRegistry.ensureBuiltInFilesOnDisk();
         NourishedConfig.register(modContainer);
         NourishedClientConfig.register(modContainer);
         modEventBus.addListener(NourishedConfig::onModConfigLoading);
@@ -127,5 +121,35 @@ public class Nourished {
                 EffectRegistry.getAll().size(),
                 ModCompat.getAllEntries().size());
         LOGGER.info("Nourished loaded.");
+    }
+
+    /**
+     * Registers all config-backed registries with {@link RegistryLifecycleManager} in dependency
+     * order. Called exactly once during mod construction before {@link RegistryLifecycleManager#loadAll()}.
+     *
+     * <p>Order rationale: {@code NutrientRegistry} provides keys consumed by every other registry,
+     * so it loads first. Color/Effect/FoodValue/FoodOverride/ScannerSpec are independent JSON loads.
+     * Lock/ModCompat/PresetRegistry are appended at the end; {@code ModCompatRegistry} has no reload
+     * hook (no-op preserves prior behavior since it was absent from the legacy reload pipeline).</p>
+     */
+    private static void registerLifecycleEntries() {
+        RegistryLifecycleManager.registerRegistry(
+                "NutrientRegistry", NutrientRegistry::load, NutrientRegistry::reload);
+        RegistryLifecycleManager.registerRegistry(
+                "ColorRegistry", ColorRegistry::load, ColorRegistry::reload, ColorRegistry::loadFromDatapack);
+        RegistryLifecycleManager.registerRegistry(
+                "EffectRegistry", EffectRegistry::load, EffectRegistry::reload, EffectRegistry::loadFromDatapack);
+        RegistryLifecycleManager.registerRegistry(
+                "FoodValueRegistry", FoodValueRegistry::load, FoodValueRegistry::reload, FoodValueRegistry::loadFromDatapack);
+        RegistryLifecycleManager.registerRegistry(
+                "FoodOverrideRegistry", FoodOverrideRegistry::load, FoodOverrideRegistry::reload, FoodOverrideRegistry::loadFromDatapack);
+        RegistryLifecycleManager.registerRegistry(
+                "ScannerSpecRegistry", ScannerSpecRegistry::load, ScannerSpecRegistry::reload, ScannerSpecRegistry::loadFromDatapack);
+        RegistryLifecycleManager.registerRegistry(
+                "LockRegistry", LockRegistry::load, LockRegistry::reload, LockRegistry::loadFromDatapack);
+        RegistryLifecycleManager.registerRegistry(
+                "ModCompatRegistry", ModCompatRegistry::load, () -> {});
+        RegistryLifecycleManager.registerRegistry(
+                "PresetRegistry", PresetRegistry::ensureBuiltInFilesOnDisk, PresetRegistry::reload);
     }
 }

@@ -1,4 +1,4 @@
-package dev.maire.nourished.data;
+package dev.maire.nourished.tooling.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

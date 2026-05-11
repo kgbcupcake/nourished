@@ -28,7 +28,7 @@ public final class NourishedApiDefinitionRegistries {
     }
 
     /**
-     * Called at the start of each {@link dev.maire.nourished.data.NourishedDataLoader} apply pass.
+     * Called at the start of each {@link dev.maire.nourished.tooling.data.NourishedDataLoader} apply pass.
      * On the first pass, mod-constructor entries are preserved; on later passes, datapack-backed
      * registries are cleared before JSON is re-applied.
      */

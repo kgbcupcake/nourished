@@ -1,4 +1,4 @@
-package dev.maire.nourished.data;
+package dev.maire.nourished.tooling.data;
 
 import java.util.ArrayList;
 import java.util.List;

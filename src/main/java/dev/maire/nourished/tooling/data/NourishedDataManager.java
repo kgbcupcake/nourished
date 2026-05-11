@@ -1,4 +1,4 @@
-package dev.maire.nourished.data;
+package dev.maire.nourished.tooling.data;
 
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;

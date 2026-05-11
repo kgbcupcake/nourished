@@ -50,7 +50,7 @@ A single piece of evidence collected during classification. Each signal has a ty
 
 ### The Pipeline (how these connect)
 
-```
+```text
 Food Item
     │
     ▼
@@ -98,7 +98,7 @@ Player eats food → DietData.recordEat(itemId, category, family, time)
 
 ### Neglected Category
 
-A **neglected category** is a **nutrient category whose bar value is among the lowest** compared to the others. `getMostNeglectedCategories(n)` sorts nutrient bars ascending and takes the bottom *n* keys — used for HUD / Diet Screen copy and internally when debt chooses which bar to nudge. “Neglected” refers to **low intake relative to other groups**, not to memory maps.
+A **neglected category** is a **nutrient category whose bar value is among the lowest** compared to the others. `getMostNeglectedCategories(n)` sorts nutrient bars ascending and takes the bottom _n_ keys — used for HUD / Diet Screen copy and internally when debt chooses which bar to nudge. “Neglected” refers to **low intake relative to other groups**, not to memory maps.
 
 > A neglected category is a bar you have starved relative to the rest of your diet.
 
@@ -106,7 +106,7 @@ A **neglected category** is a **nutrient category whose bar value is among the l
 
 ### Fatigued Family
 
-A **fatigued family** is a **food family key** (e.g. `"fish"`) whose **family memory** still has meaningful weight: among non-expired `familyMemory` entries, families are ranked by **decayed eat count** descending, and `getMostFatiguedFamilies(n, time)` returns the top *n* — the families you have **eaten most repetitively** recently, i.e. the ones contributing most to **family-side fatigue** in the multiplier blend.
+A **fatigued family** is a **food family key** (e.g. `"fish"`) whose **family memory** still has meaningful weight: among non-expired `familyMemory` entries, families are ranked by **decayed eat count** descending, and `getMostFatiguedFamilies(n, time)` returns the top _n_ — the families you have **eaten most repetitively** recently, i.e. the ones contributing most to **family-side fatigue** in the multiplier blend.
 
 > A fatigued family is a “kind” of food you have leaned on too hard lately; the HUD can surface it so the player sees the pattern.
 
@@ -122,7 +122,7 @@ The word **group** is intentionally avoided in Nourished's API and documentation
 
 Nourished resolves food classifications through three layers, applied in order from lowest to highest priority:
 
-```
+```text
 bundled defaults  →  config override  →  datapack override
    (lowest)                                   (highest)
 ```
@@ -252,7 +252,7 @@ The reason they are separate is thread safety. The server writes to `DietData` o
 
 ### Lifecycle of a player's diet data from login to logout
 
-```
+```text
 Player logs in
     │
     ▼
@@ -399,32 +399,39 @@ Addon-facing registries documented under “Extension Points” follow the same 
 
 **Datapack JSON** for Nourished definitions uses a separate path: `NourishedDataLoader` / `loadFromDatapack(...)` on individual registries where applicable — that is **data reload**, not the same as the static `*.reload()` pipeline in §8.
 
-### `NourishedReloadPipeline` vs `NourishedApiDefinitionRegistries`
+### `RegistryLifecycleManager` vs `NourishedApiDefinitionRegistries`
 
-| | **`NourishedReloadPipeline.reloadAll()`** | **`NourishedApiDefinitionRegistries`** |
+| | **`RegistryLifecycleManager`** | **`NourishedApiDefinitionRegistries`** |
 |---|-------------------------------------------|----------------------------------------|
-| **Purpose** | One ordered pass to **re-read server/client config files** for the eight static registries (nutrients, food values, overrides, effects, presets, colors, locks, scanner spec). | **Coordinates reset/freeze** of **public API list registries** around **`NourishedDataLoader`** datapack apply and common setup. |
-| **Trigger** | Level load (server), `/nourished reload`, config UI “reload”, import apply — see §8. | Start of each datapack `apply` (`onDatapackApplyBegin` — **reset** selected registries after the first pass), end of apply (`onDatapackApplyEnd` — **freeze**), and after common setup (`freezeModOnlyRegistriesAfterCommonSetup` for registries that only accept mod-time registration). |
-| **Data source** | Config directory JSON / TOML-adjacent files written by the mod and edited by users. | Datapack JSON under `data/<namespace>/nourished/...` plus mod constructor registrations. |
+| **Purpose** | One ordered pass to **re-read server/client config files** (and datapack slices) for the nine static registries (nutrients, colors, effects, food values, overrides, scanner spec, locks, mod compat, presets). | **Coordinates reset/freeze** of **public API list registries** around **`NourishedDataLoader`** datapack apply and common setup. |
+| **Trigger** | Bootstrap `loadAll()`, level load (server), `/nourished reload`, config UI “reload”, import apply — see §8. Datapack reload uses `loadAll(ResourceManager)`. | Start of each datapack `apply` (`onDatapackApplyBegin` — **reset** selected registries after the first pass), end of apply (`onDatapackApplyEnd` — **freeze**), and after common setup (`freezeModOnlyRegistriesAfterCommonSetup` for registries that only accept mod-time registration). |
+| **Data source** | Config directory JSON / TOML-adjacent files written by the mod and edited by users; optional `loadFromDatapack` hook for datapack JSON. | Datapack JSON under `data/<namespace>/nourished/...` plus mod constructor registrations. |
 
-They **do not call each other**. Think: **ReloadPipeline** = “refresh local config files”; **ApiDefinitionRegistries** = “wrap datapack-driven API registry passes in reset/freeze discipline.”
+They **do not call each other**. Think: **RegistryLifecycleManager** = “refresh local config files”; **ApiDefinitionRegistries** = “wrap datapack-driven API registry passes in reset/freeze discipline.”
+
+> `NourishedReloadPipeline.reloadAll()` is retained as a thin shim that delegates to `RegistryLifecycleManager.reloadAll()`. Older call sites (`ImportExportManager`, `NourishedCommand`, `NourishedConfigScreen`) still target the shim; new code should call `RegistryLifecycleManager.reloadAll()` directly.
 
 ---
 
 ## 8. Reload Pipeline
 
-**Entry point:** `dev.maire.nourished.core.reload.NourishedReloadPipeline.reloadAll()` — a single static method that reloads every **config-backed** registry in a **fixed order** so downstream readers always see a consistent snapshot.
+**Entry point:** `dev.maire.nourished.core.registry.RegistryLifecycleManager.reloadAll()` — a single static method that reloads every **config-backed** registry in a **fixed order** so downstream readers always see a consistent snapshot. `NourishedReloadPipeline.reloadAll()` remains as a one-line shim that delegates here (kept to avoid churn at older call sites).
 
-### Registry order (and why order matters)
+The manager is also the **bootstrap entry point** (`loadAll()`, called once during mod construction) and the **datapack reload entry point** (`loadAll(ResourceManager)`, called by `ConfigReloadHandler.onAddReloadListeners`). All three flows iterate the same registration list in the same order.
 
-1. **`NutrientRegistry.reload()`** — Re-establishes nutrient keys, thresholds, icons, and tags; many other registries and `DietData` logic assume this set is current.
-2. **`FoodValueRegistry.reload()`** — Re-loads per-food nutrition contributions; classification and HUD use nutrient keys from (1).
-3. **`FoodOverrideRegistry.reload()`** — Re-applies item-level overrides on top of base food values.
-4. **`EffectRegistry.reload()`** — Re-loads threshold-triggered effects; definitions reference nutrient ids from the live key set.
-5. **`PresetRegistry.reload()`** — Re-loads named presets that bundle user-facing config snapshots.
-6. **`ColorRegistry.reload()`** — Re-binds display colors to the current nutrient key list.
-7. **`LockRegistry.reload()`** — Re-loads merge / lock rules used when persisting or combining config-derived maps.
-8. **`ScannerSpecRegistry.reload()`** — Re-loads scanner/heuristic spec used by the food tooling pipeline; kept last so it reads stable nutrition and override data.
+### Registration order (and why order matters)
+
+1. **`NutrientRegistry`** — Re-establishes nutrient keys, thresholds, icons, and tags; every later registry and `DietData` logic assumes this set is current. *No datapack hook.*
+2. **`ColorRegistry`** — Re-binds display colors to the current nutrient key list. *Has datapack hook.*
+3. **`EffectRegistry`** — Re-loads threshold-triggered effects; definitions reference nutrient ids from the live key set. *Has datapack hook.*
+4. **`FoodValueRegistry`** — Re-loads per-food nutrition contributions; classification and HUD use nutrient keys from (1). *Has datapack hook.*
+5. **`FoodOverrideRegistry`** — Re-applies item-level overrides on top of base food values. *Has datapack hook.*
+6. **`ScannerSpecRegistry`** — Re-loads scanner/heuristic spec used by the food tooling pipeline. *Has datapack hook.*
+7. **`LockRegistry`** — Re-loads merge / lock rules used when persisting or combining config-derived maps. *Has datapack hook.*
+8. **`ModCompatRegistry`** — Re-reads the bundled `mod_compat.json`. *Reload is a no-op (preserves prior behavior: this registry was never in the legacy reload pipeline). No datapack hook.*
+9. **`PresetRegistry`** — Re-ensures built-in preset files on disk. Load and reload both call `ensureBuiltInFilesOnDisk()`. *No datapack hook.*
+
+> **Out of scope for the manager:** `FoodFamilyResolver`, `DietProfileRegistry`, and `MilestoneRegistry` do not have `load()`/`reload()` methods — they are populated via API registrations (mod constructor or KubeJS) and frozen by `NourishedApiDefinitionRegistries` around the datapack apply cycle. See §7.
 
 ### Call sites
 
@@ -435,4 +442,26 @@ They **do not call each other**. Think: **ReloadPipeline** = “refresh local co
 | `NourishedConfigScreen.ReloadConfigsListEntry` (button lambda) | Mod **config screen** “reload configs” control — immediate client-side refresh for local files. |
 | `ImportExportManager.applyImport` | **Config import** completes (`apply*` sections + `NourishedConfig.saveNow()`), then `reloadAll()`, then `NutrientUiColors.clearOverrides()`. |
 
-Do not reorder the eight calls inside `reloadAll()` without auditing dependents; comments in the pipeline class should stay in sync with this section.
+Do not reorder the nine entries registered in `Nourished.registerLifecycleEntries()` without auditing dependents; the Javadoc on that method and the order list above should stay in sync.
+
+### Adding a new registry
+
+To wire a new config-backed registry into the lifecycle:
+
+1. **Implement the registry hooks on your class.** At minimum provide a `public static void load()` (called at bootstrap) and a `public static void reload()` (called on `/nourished reload` and friends). If the registry should also re-read from datapacks, add a `public static void loadFromDatapack(ResourceManager rm)` that uses `NourishedResourceLoader.loadFromModConfig(...)`.
+
+2. **Register it in `Nourished.registerLifecycleEntries()`.** Insert the call in dependency order — entries earlier in the list run first, so anything that depends on nutrient keys must come after `NutrientRegistry`. Pick the right overload:
+
+    ```java
+    // No datapack hook (rare):
+    RegistryLifecycleManager.registerRegistry(
+            "MyRegistry", MyRegistry::load, MyRegistry::reload);
+
+    // With datapack hook (typical for config-backed registries):
+    RegistryLifecycleManager.registerRegistry(
+            "MyRegistry", MyRegistry::load, MyRegistry::reload, MyRegistry::loadFromDatapack);
+    ```
+3. **Do not call `MyRegistry.load()` elsewhere from `Nourished`'s constructor.** `RegistryLifecycleManager.loadAll()` handles it. Likewise, do not add `MyRegistry.reload()` to any other reload chain — the shim `NourishedReloadPipeline.reloadAll()` and `ConfigReloadHandler` both route through the manager.
+4. **Update the order list above** in this section to keep the docs aligned with `Nourished.registerLifecycleEntries()`.
+
+Registries without a meaningful reload (e.g. write-on-startup helpers) should pass `() -> {}` as the reload runnable rather than skip registration, so logging still shows them in the lifecycle pass.

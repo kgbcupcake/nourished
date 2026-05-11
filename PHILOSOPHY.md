@@ -10,7 +10,7 @@ Everything annotated `@ApiStatus.Stable` in `dev.maire.nourished.api` is a publi
 Anything annotated `@ApiStatus.Experimental` may change between minor versions. Anything annotated `@ApiStatus.Internal` is not part of the public contract and may change or disappear at any time without notice. Do not depend on internal classes.
 
 ## What Addons Should Build Against
-Only `dev.maire.nourished.api.*` (including registry facades under `dev.maire.nourished.api.registry` where those types are part of the supported surface). Do not import from `dev.maire.nourished.core`, `dev.maire.nourished.tooling`, `dev.maire.nourished.client`, `dev.maire.nourished.config`, `dev.maire.nourished.data`, `dev.maire.nourished.compat`, or `dev.maire.nourished.api.impl`. Those packages are implementation details and may change without notice.
+Only `dev.maire.nourished.api.*` (including registry facades under `dev.maire.nourished.api.registry` where those types are part of the supported surface). Do not import from `dev.maire.nourished.core`, `dev.maire.nourished.tooling`, `dev.maire.nourished.client`, `dev.maire.nourished.config`, `dev.maire.nourished.compat`, or `dev.maire.nourished.api.impl`. Those packages are implementation details and may change without notice.
 
 ## What Addons Should Avoid
 Do not depend on specific nutrient keys like `"proteins"` or `"carbs"` being present. Query `NourishedAPI` at runtime. Do not depend on specific internal balancing values. Those evolve with gameplay. Do not depend on HUD layout or rendering internals. Do not reflect into internal classes.

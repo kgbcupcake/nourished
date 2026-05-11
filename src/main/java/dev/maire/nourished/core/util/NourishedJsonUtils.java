@@ -3,7 +3,7 @@ package dev.maire.nourished.core.util;
 import com.google.gson.JsonObject;
 
 /**
- * Gson {@link JsonObject} helpers, modeled on {@link dev.maire.nourished.data.NourishedDataLoader}.
+ * Gson {@link JsonObject} helpers, modeled on {@link dev.maire.nourished.tooling.data.NourishedDataLoader}.
  */
 public final class NourishedJsonUtils {
 
