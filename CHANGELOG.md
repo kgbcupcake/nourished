@@ -2,22 +2,19 @@
 
 All notable changes to Nourished will be documented here.
 
-## [0.1.0-beta] - 2026-05-10
+## [unreleased]
 
-### 🐛 Bug Fixes
+### 📖 Documentation
 
-- Fix config menu keybind not firing (OPEN_CONFIG was bound to GLFW_KEY_UNKNOWN)
-- Fix eating at full vanilla hunger not triggering nutrition-only bypass
-- Fix mob effects flickering by tracking which effects Nourished applied
-- Fix effects not saving when using the config screen
-- Fix eating animation — now uses vanilla eat animation via startUsingItem
+- Enhance API documentation and registration guidelines
+- Added ARCHITECTURE.md
+- Expand ARCHITECTURE.md with detailed override priority stack and clarifications on mod functionality
+- Update food group entries and nutrition HUD in Patchouli guide
+- Enhance README and implement Peak Stamina compatibility features
+- Expand ARCHITECTURE.md with new sections on memory, fatigue, debt, and category management
 
 ### 🚀 Features
 
-- Nutrition-only eating at full hunger — any food can contribute to nutrients without restoring hunger
-- Configurable block toggles: blockHeavyMeals and blockLightFood for server admins
-- Per-player cooldown (20 ticks) on nutrition-only eating to prevent spamming
-- Add block heavy meals and block light food configuration options
 - Enhance configuration and UI for module management
 - Add GitHub Actions workflow for automated releases
 - Enhance mod compatibility and configuration UI
@@ -30,8 +27,11 @@ All notable changes to Nourished will be documented here.
 - Add KubeJS integration support in Nourished
 - Include example-addon in settings.gradle
 - Improve modularity with example-addon integration
+- Establish API contract and enhance documentation for v0.1.2-alpha
 - Enhance UI responsiveness and button visibility in configuration widgets
 - Introduce core diet and nutrition management system
+- Add block heavy meals and block light food configuration options
+- Integrate effect saving and streamline nutrition eating mechanics
 
 ### 🚜 Refactor
 
@@ -43,15 +43,11 @@ All notable changes to Nourished will be documented here.
 - Enhance registration phase management in NourishedAPI
 - Streamline icon handling and improve nutrient icon fallback logic
 
-### 📖 Documentation
+## [0.1.1-alpha] - 2026-05-08
 
-- Enhance API documentation and registration guidelines
-- Added ARCHITECTURE.md
-- Expand ARCHITECTURE.md with detailed override priority stack and clarifications on mod functionality
-- Update food group entries and nutrition HUD in Patchouli guide
-- Enhance README and implement Peak Stamina compatibility features
-- Expand ARCHITECTURE.md with new sections on memory, fatigue, debt, and category management
-- Establish API contract and enhance documentation for v0.1.2-alpha
+### 🚀 Features
+
+- Update diet system with recent food tracking and neglected categories
 
 ## [0.1.2-alpha] - 2026-05-08
 
@@ -64,12 +60,6 @@ All notable changes to Nourished will be documented here.
 ### 🚜 Refactor
 
 - Remove deprecated Scanner.md and Nourished.java files
-
-## [0.1.1-alpha] - 2026-05-08
-
-### 🚀 Features
-
-- Update diet system with recent food tracking and neglected categories
 
 ## [0.1.0-alpha] - 2026-05-07
 
@@ -101,3 +91,5 @@ All notable changes to Nourished will be documented here.
 ### 🚜 Refactor
 
 - Enhance diet screen UI and update language strings
+
+
