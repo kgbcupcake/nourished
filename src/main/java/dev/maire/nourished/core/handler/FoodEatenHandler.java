@@ -6,15 +6,19 @@ import dev.maire.nourished.core.diet.DietData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 
 @ApiStatus.Internal
 public class FoodEatenHandler {
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (NutritionEatingHandler.isNutritionOnlyPipelinePending(player)) {
+            return;
+        }
         ItemStack stack = event.getItem();
         FoodProperties food = stack.getItem().getFoodProperties(stack, player);
         if (food == null) return;

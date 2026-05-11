@@ -11,7 +11,6 @@ public final class ModuleCache {
 
     public static boolean enableDecay = true;
     public static boolean enableNutritionEating = true;
-    public static boolean enableCalorieSaturationBlock = true;
     public static boolean enableBlockHeavyMeals = false;
     public static boolean enableBlockLightFood = false;
     public static boolean enableEffects = true;
@@ -41,7 +40,6 @@ public final class ModuleCache {
         NourishedConfig config = NourishedConfig.get();
         enableDecay = config.isModuleEnabled("enableDecay");
         enableNutritionEating = config.isModuleEnabled("enableNutritionEating");
-        enableCalorieSaturationBlock = config.isModuleEnabled("enableCalorieSaturationBlock");
         enableBlockHeavyMeals = config.isModuleEnabled("blockHeavyMeals");
         enableBlockLightFood = config.isModuleEnabled("blockLightFood");
         enableEffects = config.isModuleEnabled("enableEffects");

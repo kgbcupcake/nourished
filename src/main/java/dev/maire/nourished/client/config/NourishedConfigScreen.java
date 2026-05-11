@@ -11,6 +11,7 @@ import dev.maire.nourished.compat.CompatEntry;
 import dev.maire.nourished.compat.CompatReportEntry;
 import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.core.color.ColorRegistry;
+import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.Nourished;
@@ -133,6 +134,7 @@ public final class NourishedConfigScreen {
             }
             FoodValueRegistry.save();
             ColorRegistry.save();
+            EffectRegistry.save();
             NutrientUiColors.clearOverrides();
             NourishedClientConfig.saveNow();
             NourishedConfig.saveNow();
@@ -249,7 +251,7 @@ public final class NourishedConfigScreen {
             String group;
             String dependsOn = null;
             switch (key) {
-                case "enableDecay", "enableNutritionEating", "enableCalorieSaturationBlock", "blockHeavyMeals", "blockLightFood",
+                case "enableDecay", "enableNutritionEating", "blockHeavyMeals", "blockLightFood",
                      "enableEffects", "enableCalorieTracking", "enableSleepBonus",
                      "enableSynergies", "enableMilestones", "enableSeasonHooks", "enableAbsorptionModifiers" -> group = "core";
                 case "enableHUD", "enableDietScreen", "enableFoodTooltips", "enableToasts", "enableCriticalToasts" -> group = "ui";
@@ -2018,19 +2020,17 @@ public final class NourishedConfigScreen {
                 if (pending != null) pending.set(false);
             }
             switch (profile) {
-                case "minimalist" -> setModules(true, "enableDecay", "enableNutritionEating", "enableCalorieSaturationBlock", "enableEffects", "enableCalorieTracking");
+                case "minimalist" -> setModules(true, "enableDecay", "enableNutritionEating", "enableEffects", "enableCalorieTracking");
                 case "immersive" -> setModules(true, editableModuleKeys.toArray(new String[0]));
                 case "gameplay" -> setModules(true,
                         "enableDecay",
                         "enableNutritionEating",
-                        "enableCalorieSaturationBlock",
                         "enableEffects",
                         "enableCalorieTracking",
                         "enableSleepBonus");
                 default -> setModules(true,
                         "enableDecay",
                         "enableNutritionEating",
-                        "enableCalorieSaturationBlock",
                         "enableEffects",
                         "enableHUD",
                         "enableToasts",

@@ -17,10 +17,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 @ApiStatus.Internal
 public final class NutritionEffectApplier {
     private static final Set<String> warnedPlayers = new HashSet<>();
+    private static final Map<UUID, Set<ResourceLocation>> NOURISHED_APPLIED_EFFECTS = new HashMap<>();
 
     private NutritionEffectApplier() {}
 
@@ -38,7 +40,7 @@ public final class NutritionEffectApplier {
             ResourceLocation effectId = BuiltInRegistries.MOB_EFFECT.getKey(effect.value());
 
             if (!def.enabled()) {
-                player.removeEffect(effect);
+                applyEffect(player, effectId, effect, false, def);
                 continue;
             }
 
@@ -62,7 +64,7 @@ public final class NutritionEffectApplier {
                 default -> false;
             };
             EffectConflictDetector.checkAndWarn(def, shouldApply, seenActiveEffects);
-            applyEffect(player, effect, shouldApply, def);
+            applyEffect(player, effectId, effect, shouldApply, def);
             if (shouldApply) {
                 firstSeenActiveByEffect.putIfAbsent(effectId, def);
                 lastSeenActiveByEffect.put(effectId, def);
@@ -88,8 +90,17 @@ public final class NutritionEffectApplier {
 
     /** Removes every mob effect id referenced by {@link EffectRegistry} (module off or reload cleanup). */
     public static void clearAll(ServerPlayer player) {
+        Set<ResourceLocation> appliedByNourished = NOURISHED_APPLIED_EFFECTS.remove(player.getUUID());
+        if (appliedByNourished == null || appliedByNourished.isEmpty()) {
+            return;
+        }
         for (EffectRegistry.EffectDef def : EffectRegistry.getAll()) {
-            NourishedEffectUtils.resolveEffect(def.effect()).ifPresent(holder -> player.removeEffect(holder));
+            NourishedEffectUtils.resolveEffect(def.effect()).ifPresent(holder -> {
+                ResourceLocation effectId = BuiltInRegistries.MOB_EFFECT.getKey(holder.value());
+                if (appliedByNourished.contains(effectId)) {
+                    player.removeEffect(holder);
+                }
+            });
         }
     }
 
@@ -97,11 +108,12 @@ public final class NutritionEffectApplier {
         warnedPlayers.clear();
     }
 
-    private static void applyEffect(ServerPlayer player, Holder<MobEffect> effect, boolean enabled, EffectRegistry.EffectDef def) {
+    private static void applyEffect(ServerPlayer player, ResourceLocation effectId, Holder<MobEffect> effect, boolean enabled, EffectRegistry.EffectDef def) {
+        Set<ResourceLocation> ownedEffects = NOURISHED_APPLIED_EFFECTS.computeIfAbsent(player.getUUID(), ignored -> new HashSet<>());
         if (enabled) {
             int durationTicks = def.durationTicks();
             MobEffectInstance existing = player.getEffect(effect);
-            if (existing == null || existing.getDuration() < durationTicks / 2) {
+            if (existing == null || existing.getDuration() < 60) {
                 player.addEffect(new MobEffectInstance(
                         effect,
                         durationTicks,
@@ -109,9 +121,16 @@ public final class NutritionEffectApplier {
                         def.ambient(),
                         def.showParticles(),
                         true));
+                ownedEffects.add(effectId);
             }
         } else {
-            player.removeEffect(effect);
+            if (ownedEffects.contains(effectId)) {
+                player.removeEffect(effect);
+                ownedEffects.remove(effectId);
+            }
+            if (ownedEffects.isEmpty()) {
+                NOURISHED_APPLIED_EFFECTS.remove(player.getUUID());
+            }
         }
     }
 }

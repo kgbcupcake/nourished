@@ -11,7 +11,6 @@ import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.registry.ListRegistry;
 import dev.maire.nourished.core.util.NourishedJsonUtils;
 import dev.maire.nourished.core.util.NourishedResourceLoader;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -131,6 +130,40 @@ public class EffectRegistry {
         load();
         EffectConflictDetector.clearWarned();
         NutritionEffectApplier.clearWarnedPlayers();
+    }
+
+    /**
+     * Saves the current registry state back to config/nourished/effects.json.
+     * Uses the same object-array shape expected by the config file.
+     */
+    public static void save() {
+        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
+        Path file = configDir.resolve("effects.json");
+        try {
+            Files.createDirectories(configDir);
+            JsonArray arr = new JsonArray();
+            for (EffectDef def : INSTANCE.values()) {
+                JsonObject obj = new JsonObject();
+                obj.addProperty("id", def.id());
+                obj.addProperty("effect", def.effect());
+                obj.addProperty("nutrient", def.nutrient());
+                obj.addProperty("trigger", def.trigger());
+                obj.addProperty("threshold", def.threshold());
+                obj.addProperty("amplifier", def.amplifier());
+                obj.addProperty("duration_ticks", def.durationTicks());
+                obj.addProperty("enabled", def.enabled());
+                obj.addProperty("threshold_max", def.thresholdMax());
+                obj.addProperty("ambient", def.ambient());
+                obj.addProperty("show_particles", def.showParticles());
+                arr.add(obj);
+            }
+            try (Writer w = Files.newBufferedWriter(file)) {
+                GSON.toJson(arr, w);
+            }
+            Nourished.LOGGER.info("[EffectRegistry] Saved {} effects to {}", arr.size(), file);
+        } catch (IOException e) {
+            Nourished.LOGGER.error("[EffectRegistry] Failed to save effects.json", e);
+        }
     }
 
     /**

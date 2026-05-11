@@ -27,7 +27,6 @@
   "scannerConfidenceSpreadThreshold": 3.0,
   "enableDecay": true,
   "enableNutritionEating": true,
-  "enableCalorieSaturationBlock": true,
   "blockHeavyMeals": false,
   "blockLightFood": false,
   "enableEffects": true,

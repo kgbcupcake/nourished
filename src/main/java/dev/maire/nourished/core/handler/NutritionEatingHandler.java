@@ -7,56 +7,86 @@ import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.core.util.NourishedItemTags;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.UUID;
 
 @ApiStatus.Internal
 public class NutritionEatingHandler {
 
+    private static final int NUTRITION_ONLY_EAT_COOLDOWN_TICKS = 20;
+    private static final HashMap<UUID, Long> LAST_NUTRITION_ONLY_EAT_GAME_TIME = new HashMap<>();
+    /** ServerPlayer UUIDs waiting for {@link LivingEntityUseItemEvent.Finish} after {@link ServerPlayer#startUsingItem}. */
+    private static final HashSet<UUID> PENDING_NUTRITION_ONLY_FINISH = new HashSet<>();
+
     @SubscribeEvent
-    public void onItemUseStart(LivingEntityUseItemEvent.Start event) {
-        if (!ModuleCache.enableDecay || !ModuleCache.enableNutritionEating) {
+    public void onRightClick(PlayerInteractEvent.RightClickItem event) {
+        if (!ModuleCache.enableDecay || !ModuleCache.enableNutritionEating) return;
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        long now = player.level().getGameTime();
+        Long lastEat = LAST_NUTRITION_ONLY_EAT_GAME_TIME.get(player.getUUID());
+        if (lastEat != null && now - lastEat < NUTRITION_ONLY_EAT_COOLDOWN_TICKS) {
             return;
         }
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
-            return;
-        }
-        if (player.level().isClientSide()) {
-            return;
-        }
-        ItemStack stack = event.getItem();
-        if (stack.isEmpty()) {
-            return;
-        }
+        ItemStack stack = event.getItemStack();
+        if (stack.isEmpty()) return;
         FoodProperties food = stack.getItem().getFoodProperties(stack, player);
-        if (food == null) {
-            return;
-        }
-        if (food.canAlwaysEat()) {
-            return;
-        }
-        if (player.canEat(false)) {
-            return;
-        }
+        if (food == null || food.canAlwaysEat()) return;
+        if (player.canEat(false)) return;
         if (shouldBlockNutritionOnlyAtFullHunger(stack)) {
             event.setCanceled(true);
             return;
         }
-
-        event.setCanceled(true);
-
+        ItemStack captured = stack.copy();
         InteractionHand hand = event.getHand();
+        event.setCanceled(true);
         MinecraftServer server = player.level().getServer();
-        if (server == null) {
+        if (server != null) {
+            server.execute(() -> performNutritionOnlyConsume(player, captured, hand));
+        }
+    }
+
+    @SubscribeEvent
+    public void onItemUseFinish(LivingEntityUseItemEvent.Finish event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+        if (!PENDING_NUTRITION_ONLY_FINISH.contains(player.getUUID())) {
+            return;
+        }
+        ItemStack stack = event.getItem();
+        FoodProperties food = stack.getItem().getFoodProperties(stack, player);
+        if (food == null) {
+            PENDING_NUTRITION_ONLY_FINISH.remove(player.getUUID());
+            return;
+        }
+        PENDING_NUTRITION_ONLY_FINISH.remove(player.getUUID());
+        DietData diet = player.getData(DietAttachment.DIET.get());
+        long gameTimeMs = player.level().getGameTime() * 50L;
+        diet.tickTime(gameTimeMs);
+        diet.tick();
+        FoodNutrientPipeline.process(player, stack, diet, gameTimeMs);
+        LAST_NUTRITION_ONLY_EAT_GAME_TIME.put(player.getUUID(), player.level().getGameTime());
+    }
 
-        server.execute(() -> performNutritionOnlyConsume(player, hand));
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onItemUseStop(LivingEntityUseItemEvent.Stop event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        PENDING_NUTRITION_ONLY_FINISH.remove(player.getUUID());
+    }
+
+    static boolean isNutritionOnlyPipelinePending(ServerPlayer player) {
+        return PENDING_NUTRITION_ONLY_FINISH.contains(player.getUUID());
     }
 
     /**
@@ -69,49 +99,35 @@ public class NutritionEatingHandler {
         return ModuleCache.enableBlockLightFood && stack.is(NourishedItemTags.LIGHT_FOOD);
     }
 
-    private static void performNutritionOnlyConsume(ServerPlayer player, InteractionHand hand) {
+    private static boolean performNutritionOnlyConsume(ServerPlayer player, ItemStack stack, InteractionHand hand) {
         if (!ModuleCache.enableDecay || !ModuleCache.enableNutritionEating) {
-            return;
+            return false;
         }
         if (!player.isAlive()) {
-            return;
-        }
-        ItemStack stack = player.getItemInHand(hand);
-        if (stack.isEmpty()) {
-            return;
+            return false;
         }
         FoodProperties foodNow = stack.getItem().getFoodProperties(stack, player);
         if (foodNow == null || foodNow.canAlwaysEat()) {
-            return;
+            return false;
         }
         if (shouldBlockNutritionOnlyAtFullHunger(stack)) {
-            return;
+            return false;
         }
 
-        ItemStack pipelineStack = stack.copy();
-
-        if (!player.getAbilities().instabuild) {
-            stack.shrink(1);
+        ItemStack live = hand == InteractionHand.MAIN_HAND ? player.getMainHandItem() : player.getOffhandItem();
+        if (live.isEmpty() || !ItemStack.isSameItemSameComponents(stack, live)) {
+            return false;
         }
 
-        player.swing(InteractionHand.MAIN_HAND, true);
+        if (player.isUsingItem()) {
+            return false;
+        }
 
-        SoundEvent eatSound = pipelineStack.getItem().getEatingSound();
-        player.level().playSound(
-                null,
-                player.getX(),
-                player.getY(),
-                player.getZ(),
-                eatSound,
-                SoundSource.PLAYERS,
-                0.5F + 0.5F * player.getRandom().nextFloat(),
-                (player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.2F + 1.0F);
-
-        DietData diet = player.getData(DietAttachment.DIET.get());
-        long gameTimeMs = player.level().getGameTime() * 50L;
-        diet.tickTime(gameTimeMs);
-        diet.tick();
-
-        FoodNutrientPipeline.process(player, pipelineStack, diet, gameTimeMs);
+        player.startUsingItem(hand);
+        if (!player.isUsingItem()) {
+            return false;
+        }
+        PENDING_NUTRITION_ONLY_FINISH.add(player.getUUID());
+        return true;
     }
 }
