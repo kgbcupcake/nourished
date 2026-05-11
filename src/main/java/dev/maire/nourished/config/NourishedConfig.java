@@ -54,6 +54,7 @@ public final class NourishedConfig {
     // config.nourished.enableCriticalToasts.desc
     private final ModConfigSpec.BooleanValue enableCriticalToasts;
     private final ModConfigSpec.BooleanValue enableSleepBonus;
+    private final ModConfigSpec.IntValue heavyMealNutritionThreshold;
 
     // General
     private final ModConfigSpec.DoubleValue decayRate;
@@ -131,6 +132,9 @@ public final class NourishedConfig {
         defineModuleToggle(builder, "enableNutritionEating", "When false, nutrition-only eating at full vanilla hunger is disabled.", ConfigDefaultsLoader.getBoolean(defaults, "enableNutritionEating", true));
         defineModuleToggle(builder, "blockHeavyMeals", "When true, items tagged nourished:meal cannot be eaten at full vanilla hunger", ConfigDefaultsLoader.getBoolean(defaults, "blockHeavyMeals", false));
         defineModuleToggle(builder, "blockLightFood", "When true, items tagged nourished:light_food cannot be eaten at full vanilla hunger", ConfigDefaultsLoader.getBoolean(defaults, "blockLightFood", false));
+        heavyMealNutritionThreshold = builder
+                .comment("Nutrition (FoodProperties) at or above this counts as a heavy meal when solonion is loaded and blockHeavyMeals is true. Also used if mod_compat omits solonion's threshold.")
+                .defineInRange("heavyMealNutritionThreshold", ConfigDefaultsLoader.getInt(defaults, "heavyMealNutritionThreshold", 6), 1, 20);
         enableEffects = defineModuleToggle(builder, "enableEffects", "When false, status effects from nutrition are not applied", ConfigDefaultsLoader.getBoolean(defaults, "enableEffects", true));
         enableHUD = defineModuleToggle(builder, "enableHUD", "When false, the nutrition HUD overlay is hidden", ConfigDefaultsLoader.getBoolean(defaults, "enableHUD", true));
         enableToasts = defineModuleToggle(builder, "enableToasts", "When false, NourishedToastManager never queues toasts", ConfigDefaultsLoader.getBoolean(defaults, "enableToasts", true));
@@ -433,6 +437,14 @@ public final class NourishedConfig {
 
     public void setEnableSleepBonus(boolean value) {
         enableSleepBonus.set(value);
+    }
+
+    public int heavyMealNutritionThreshold() {
+        return heavyMealNutritionThreshold.get();
+    }
+
+    public void setHeavyMealNutritionThreshold(int value) {
+        heavyMealNutritionThreshold.set(value);
     }
 
     public double criticalThreshold() {

@@ -28,6 +28,7 @@
   "enableDecay": true,
   "enableNutritionEating": true,
   "blockHeavyMeals": false,
+  "heavyMealNutritionThreshold": 6,
   "blockLightFood": false,
   "enableEffects": true,
   "enableHUD": true,

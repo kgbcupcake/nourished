@@ -17,6 +17,7 @@ import dev.maire.nourished.compat.lso.LSOCompat;
 import dev.maire.nourished.compat.peakstamina.PeakStaminaCompat;
 import dev.maire.nourished.compat.spiceoflifeonion.SpiceOfLifeOnionCompat;
 import dev.maire.nourished.config.LockRegistry;
+import dev.maire.nourished.config.ModCompatRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
@@ -72,6 +73,7 @@ public class Nourished {
         EffectRegistry.load();
         ColorRegistry.load();
         LockRegistry.load();
+        ModCompatRegistry.load();
         ScannerSpecRegistry.load();
         PresetRegistry.ensureBuiltInFilesOnDisk();
         NourishedConfig.register(modContainer);

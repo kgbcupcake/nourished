@@ -202,6 +202,20 @@ public final class NourishedConfigScreen {
         addModuleGroupSubcategory(category, eb, "ui", groupedEntries.get("ui"));
         addModuleGroupSubcategory(category, eb, "other", groupedEntries.get("other"));
 
+        if (!LockRegistry.isLocked("heavyMealNutritionThreshold")) {
+            category.addEntry(
+                    eb.startIntSlider(
+                                    Component.translatable("nourished.config.heavyMealNutritionThreshold"),
+                                    config.heavyMealNutritionThreshold(),
+                                    1,
+                                    20)
+                            .setDefaultValue(6)
+                            .setTooltip(Component.translatable("nourished.config.heavyMealNutritionThreshold.desc"))
+                            .setSaveConsumer(config::setHeavyMealNutritionThreshold)
+                            .build()
+            );
+        }
+
         if (!editableModuleKeys.isEmpty()) {
             category.addEntry(new StyledChipTextEntry(Component.translatable("config.nourished.modules.dependencyHint"), 0xFFCC8844));
         }
@@ -530,6 +544,22 @@ public final class NourishedConfigScreen {
                         })
                         .build()
         );
+
+        category.addEntry(new HudNutrientColorsSectionHeaderEntry());
+        List<NutrientHudHexColorRowEntry> hudNutrientColorRows = new ArrayList<>();
+        category.addEntry(new HudNutrientColorsResetAllEntry(() -> {
+            for (String nutrientKey : NutrientRegistry.getKeys()) {
+                ColorRegistry.remove(nutrientKey);
+            }
+            for (NutrientHudHexColorRowEntry row : hudNutrientColorRows) {
+                row.syncAfterBulkReset();
+            }
+        }));
+        for (String nutrientKey : NutrientRegistry.getKeys()) {
+            NutrientHudHexColorRowEntry row = new NutrientHudHexColorRowEntry(nutrientKey);
+            hudNutrientColorRows.add(row);
+            category.addEntry(row);
+        }
 
         addReloadButton(category, eb);
     }

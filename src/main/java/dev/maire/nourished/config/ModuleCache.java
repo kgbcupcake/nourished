@@ -12,6 +12,8 @@ public final class ModuleCache {
     public static boolean enableDecay = true;
     public static boolean enableNutritionEating = true;
     public static boolean enableBlockHeavyMeals = false;
+    /** Fallback / config value for heavy-meal nutrition threshold (see {@link ModCompatRegistry#getHeavyMealThreshold()}). */
+    public static int heavyMealNutritionThreshold = 6;
     public static boolean enableBlockLightFood = false;
     public static boolean enableEffects = true;
     public static boolean enableHUD = true;
@@ -41,6 +43,7 @@ public final class ModuleCache {
         enableDecay = config.isModuleEnabled("enableDecay");
         enableNutritionEating = config.isModuleEnabled("enableNutritionEating");
         enableBlockHeavyMeals = config.isModuleEnabled("blockHeavyMeals");
+        heavyMealNutritionThreshold = config.heavyMealNutritionThreshold();
         enableBlockLightFood = config.isModuleEnabled("blockLightFood");
         enableEffects = config.isModuleEnabled("enableEffects");
         enableHUD = config.isModuleEnabled("enableHUD");

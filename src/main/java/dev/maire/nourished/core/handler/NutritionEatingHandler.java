@@ -3,6 +3,7 @@ package dev.maire.nourished.core.handler;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.config.ModCompatRegistry;
 import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.core.util.NourishedItemTags;
 import net.minecraft.server.MinecraftServer;
@@ -41,7 +42,7 @@ public class NutritionEatingHandler {
         FoodProperties food = stack.getItem().getFoodProperties(stack, player);
         if (food == null || food.canAlwaysEat()) return;
         if (player.canEat(false)) return;
-        if (shouldBlockNutritionOnlyAtFullHunger(stack)) {
+        if (shouldBlockNutritionOnlyAtFullHunger(stack, food)) {
             event.setCanceled(true);
             return;
         }
@@ -90,11 +91,18 @@ public class NutritionEatingHandler {
     }
 
     /**
-     * When vanilla hunger is full, optionally block nutrition-only eating for tagged items.
+     * When vanilla hunger is full, optionally block nutrition-only eating for heavy meals and light food.
      */
-    private static boolean shouldBlockNutritionOnlyAtFullHunger(ItemStack stack) {
-        if (ModuleCache.enableBlockHeavyMeals && stack.is(NourishedItemTags.MEAL)) {
-            return true;
+    private static boolean shouldBlockNutritionOnlyAtFullHunger(ItemStack stack, FoodProperties food) {
+        if (ModuleCache.enableBlockHeavyMeals) {
+            if (ModCompatRegistry.isLoaded("solonion")) {
+                int threshold = ModCompatRegistry.getHeavyMealThreshold();
+                if (food != null && food.nutrition() >= threshold) {
+                    return true;
+                }
+            } else if (stack.is(NourishedItemTags.MEAL)) {
+                return true;
+            }
         }
         return ModuleCache.enableBlockLightFood && stack.is(NourishedItemTags.LIGHT_FOOD);
     }
@@ -110,7 +118,7 @@ public class NutritionEatingHandler {
         if (foodNow == null || foodNow.canAlwaysEat()) {
             return false;
         }
-        if (shouldBlockNutritionOnlyAtFullHunger(stack)) {
+        if (shouldBlockNutritionOnlyAtFullHunger(stack, foodNow)) {
             return false;
         }
 

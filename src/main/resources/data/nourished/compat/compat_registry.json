@@ -135,6 +135,102 @@
       "conflict_behavior": null,
       "soft_compat": true,
       "priority": 8
+    },
+    {
+      "mod_id": "endersdelight",
+      "display_name": "Ender's Delight",
+      "category": "food_mod",
+      "namespaces": ["endersdelight"],
+      "provides_food_tags": false,
+      "handles_own_nutrition": false,
+      "version_ranges": {},
+      "conflict_behavior": null,
+      "soft_compat": false,
+      "priority": 5
+    },
+    {
+      "mod_id": "lendersdelight",
+      "display_name": "L_Ender's Delight",
+      "category": "food_mod",
+      "namespaces": ["lendersdelight"],
+      "provides_food_tags": false,
+      "handles_own_nutrition": false,
+      "version_ranges": {},
+      "conflict_behavior": null,
+      "soft_compat": false,
+      "priority": 5
+    },
+    {
+      "mod_id": "arsdelight",
+      "display_name": "Ars Delight",
+      "category": "food_mod",
+      "namespaces": ["arsdelight"],
+      "provides_food_tags": false,
+      "handles_own_nutrition": false,
+      "version_ranges": {},
+      "conflict_behavior": null,
+      "soft_compat": false,
+      "priority": 5
+    },
+    {
+      "mod_id": "autochefsdelight",
+      "display_name": "Autochef's Delight",
+      "category": "food_mod",
+      "namespaces": ["autochefsdelight"],
+      "provides_food_tags": false,
+      "handles_own_nutrition": false,
+      "version_ranges": {},
+      "conflict_behavior": null,
+      "soft_compat": false,
+      "priority": 5
+    },
+    {
+      "mod_id": "croptopiadelight",
+      "display_name": "Croptopia Delight",
+      "category": "food_mod",
+      "namespaces": ["croptopiadelight"],
+      "provides_food_tags": false,
+      "handles_own_nutrition": false,
+      "version_ranges": {},
+      "conflict_behavior": null,
+      "soft_compat": false,
+      "priority": 5
+    },
+    {
+      "mod_id": "farmers_croptopia",
+      "display_name": "Farmers Croptopia",
+      "category": "food_mod",
+      "namespaces": ["farmers_croptopia"],
+      "provides_food_tags": false,
+      "handles_own_nutrition": false,
+      "version_ranges": {},
+      "conflict_behavior": null,
+      "soft_compat": false,
+      "priority": 5
+    },
+    {
+      "mod_id": "farm_and_charm",
+      "display_name": "Farm and Charm",
+      "category": "food_mod",
+      "namespaces": ["farmandcharm"],
+      "provides_food_tags": false,
+      "handles_own_nutrition": false,
+      "version_ranges": {},
+      "conflict_behavior": null,
+      "soft_compat": false,
+      "priority": 5
+    },
+    {
+      "mod_id": "solonion",
+      "display_name": "Spice of Life: Onion",
+      "category": "food_mod",
+      "namespaces": ["solonion"],
+      "provides_food_tags": true,
+      "handles_own_nutrition": false,
+      "version_ranges": {},
+      "conflict_behavior": null,
+      "soft_compat": false,
+      "priority": 5
     }
   ]
 }
