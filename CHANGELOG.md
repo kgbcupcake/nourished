@@ -30,6 +30,7 @@ All notable changes to Nourished will be documented here.
 - Establish API contract and enhance documentation for v0.1.2-alpha
 - Enhance UI responsiveness and button visibility in configuration widgets
 - Introduce core diet and nutrition management system
+- Add block heavy meals and block light food configuration options
 
 ### 🚜 Refactor
 
