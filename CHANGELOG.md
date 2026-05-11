@@ -2,6 +2,12 @@
 
 All notable changes to Nourished will be documented here.
 
+## [unreleased]
+
+### 🚀 Features
+
+- Add heavy meal nutrition threshold configuration
+
 ## [0.1.0-beta] - 2026-05-11
 
 ### 📖 Documentation
