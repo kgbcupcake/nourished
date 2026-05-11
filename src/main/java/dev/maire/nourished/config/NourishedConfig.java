@@ -202,10 +202,10 @@ public final class NourishedConfig {
         builder.push("food_memory");
         memoryWindowMinutes = builder
                 .comment("How long (in minutes) before a food memory entry expires.")
-                .defineInRange("memoryWindowMinutes", ConfigDefaultsLoader.getInt(defaults, "memoryWindowMinutes", 20), 1, 120);
+                .defineInRange("memoryWindowMinutes", ConfigDefaultsLoader.getInt(defaults, "memoryWindowMinutes", 30), 1, 120);
         memoryWindowCount = builder
                 .comment("Maximum number of distinct food entries tracked in memory.")
-                .defineInRange("memoryWindowCount", ConfigDefaultsLoader.getInt(defaults, "memoryWindowCount", 10), 1, 50);
+                .defineInRange("memoryWindowCount", ConfigDefaultsLoader.getInt(defaults, "memoryWindowCount", 50), 1, 200);
         diminishingFloor = builder
                 .comment("Minimum multiplier for heavily repeated foods. 0.15 = 15% credit floor.")
                 .defineInRange("diminishingFloor", ConfigDefaultsLoader.getDouble(defaults, "diminishingFloor", 0.15), 0.0, 1.0);

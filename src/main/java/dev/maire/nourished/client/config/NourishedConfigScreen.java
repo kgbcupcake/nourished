@@ -1,6 +1,7 @@
 package dev.maire.nourished.client.config;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.NativeImage;
 import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.NutrientUiColors;
 import dev.maire.nourished.client.config.EffectBuilderWidget;
@@ -33,6 +34,7 @@ import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -51,6 +53,7 @@ import net.minecraft.Util;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -1404,7 +1407,7 @@ public final class NourishedConfigScreen {
         }
 
         private void renderDetectedIcon(GuiGraphics graphics, CompatReportEntry row, int x, int y) {
-            ResourceLocation logo = modLogoCache.computeIfAbsent(row.modId(), id -> resolveModLogo(id).orElse(null));
+            ResourceLocation logo = resolveModLogo(row.modId()).orElse(null);
             if (logo != null) {
                 graphics.blit(logo, x, y, 0, 0, 16, 16, 16, 16);
                 return;
@@ -1415,29 +1418,42 @@ public final class NourishedConfigScreen {
         }
 
         private Optional<ResourceLocation> resolveModLogo(String modId) {
+            if (modLogoCache.containsKey(modId)) {
+                return Optional.ofNullable(modLogoCache.get(modId));
+            }
+
             Optional<? extends ModContainer> modContainer = ModList.get().getModContainerById(modId);
             if (modContainer.isEmpty()) {
+                modLogoCache.put(modId, null);
                 return Optional.empty();
             }
-            Optional<String> logoPath = modContainer.get().getModInfo().getLogoFile();
-            if (logoPath.isEmpty()) {
+            var modInfo = modContainer.get().getModInfo();
+            Optional<String> logoPathOpt = modInfo.getLogoFile();
+            if (logoPathOpt.isEmpty() || logoPathOpt.get().isBlank()) {
+                modLogoCache.put(modId, null);
                 return Optional.empty();
             }
-            String raw = logoPath.get();
-            List<ResourceLocation> candidates = new ArrayList<>();
-            if (raw.contains(":")) {
-                candidates.add(ResourceLocation.parse(raw));
-            } else {
-                candidates.add(ResourceLocation.fromNamespaceAndPath(modId, raw));
-                candidates.add(ResourceLocation.fromNamespaceAndPath(modId, "textures/" + raw));
-                candidates.add(ResourceLocation.fromNamespaceAndPath(modId, "textures/gui/" + raw));
-            }
-            for (ResourceLocation candidate : candidates) {
-                if (Minecraft.getInstance().getResourceManager().getResource(candidate).isPresent()) {
-                    return Optional.of(candidate);
+
+            ResourceLocation rl = ResourceLocation.fromNamespaceAndPath(
+                    "nourished", "mod_icon/" + modId.toLowerCase(Locale.ROOT));
+
+            try {
+                Path logoPath = modInfo.getOwningFile().getFile().findResource(logoPathOpt.get());
+                if (logoPath == null || !Files.exists(logoPath)) {
+                    modLogoCache.put(modId, null);
+                    return Optional.empty();
                 }
+                try (InputStream stream = Files.newInputStream(logoPath)) {
+                    NativeImage image = NativeImage.read(stream);
+                    Minecraft.getInstance().getTextureManager().register(rl, new DynamicTexture(image));
+                    modLogoCache.put(modId, rl);
+                    return Optional.of(rl);
+                }
+            } catch (IOException | RuntimeException e) {
+                Nourished.LOGGER.debug("[Compat Config] Failed to load mod logo for {}: {}", modId, e.getMessage());
+                modLogoCache.put(modId, null);
+                return Optional.empty();
             }
-            return Optional.empty();
         }
 
         private String resolvedDetectedCategory(CompatReportEntry row) {
