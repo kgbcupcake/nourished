@@ -12,6 +12,11 @@ All notable changes to Nourished will be documented here.
 ### 🚀 Features
 
 - Add heavy meal nutrition threshold configuration
+- Implement datapack diagnostics and validation framework
+
+### 🚜 Refactor
+
+- Centralize registry lifecycle management
 
 ## [0.1.0-beta] - 2026-05-11
 
