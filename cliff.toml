@@ -60,9 +60,20 @@ commit_parsers = [
   { message = "^chore", skip = true },
   { message = "^style", skip = true },
   { message = "^build", skip = true },
+  { message = "^Enhance", skip = true },
+  { message = "^Improve", skip = true },
+  { message = "^Update", skip = true },
+  { message = "^Add", skip = true },
+  { message = "^Implement", skip = true },
+  { message = "^Introduce", skip = true },
+  { message = "^Streamline", skip = true },
+  { message = "^Optimize", skip = true },
+  { message = "^Expand", skip = true },
+  { message = "^Register", skip = true },
+  { message = "^Include", skip = true },
 
   # Catch-all for anything unconventional that slips through
-  { message = ".*", group = "💼 Other", skip = false },
+  { message = ".*", group = "💼 Other", skip = true },
 ]
 
 # Only include tags that look like version tags
