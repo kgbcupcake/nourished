@@ -1428,32 +1428,44 @@ public final class NourishedConfigScreen {
                 return Optional.empty();
             }
             var modInfo = modContainer.get().getModInfo();
-            Optional<String> logoPathOpt = modInfo.getLogoFile();
-            if (logoPathOpt.isEmpty() || logoPathOpt.get().isBlank()) {
-                modLogoCache.put(modId, null);
-                return Optional.empty();
-            }
+            var modFile = modInfo.getOwningFile().getFile();
 
             ResourceLocation rl = ResourceLocation.fromNamespaceAndPath(
                     "nourished", "mod_icon/" + modId.toLowerCase(Locale.ROOT));
 
-            try {
-                Path logoPath = modInfo.getOwningFile().getFile().findResource(logoPathOpt.get());
-                if (logoPath == null || !Files.exists(logoPath)) {
-                    modLogoCache.put(modId, null);
-                    return Optional.empty();
-                }
-                try (InputStream stream = Files.newInputStream(logoPath)) {
-                    NativeImage image = NativeImage.read(stream);
-                    Minecraft.getInstance().getTextureManager().register(rl, new DynamicTexture(image));
-                    modLogoCache.put(modId, rl);
-                    return Optional.of(rl);
-                }
-            } catch (IOException | RuntimeException e) {
-                Nourished.LOGGER.debug("[Compat Config] Failed to load mod logo for {}: {}", modId, e.getMessage());
-                modLogoCache.put(modId, null);
-                return Optional.empty();
+            List<String> candidates = new ArrayList<>(7);
+            Optional<String> declared = modInfo.getLogoFile();
+            if (declared.isPresent() && !declared.get().isBlank()) {
+                candidates.add(declared.get());
             }
+            // Fallbacks for mods that ship an icon but don't declare it in mods.toml.
+            candidates.add("icon.png");
+            candidates.add("logo.png");
+            candidates.add("pack.png");
+            candidates.add("assets/" + modId + "/icon.png");
+            candidates.add("assets/" + modId + "/logo.png");
+            candidates.add("assets/" + modId + "/icon.PNG");
+
+            for (String candidatePath : candidates) {
+                try {
+                    Path logoPath = modFile.findResource(candidatePath);
+                    if (logoPath == null || !Files.exists(logoPath)) {
+                        continue;
+                    }
+                    try (InputStream stream = Files.newInputStream(logoPath)) {
+                        NativeImage image = NativeImage.read(stream);
+                        Minecraft.getInstance().getTextureManager().register(rl, new DynamicTexture(image));
+                        modLogoCache.put(modId, rl);
+                        return Optional.of(rl);
+                    }
+                } catch (IOException | RuntimeException e) {
+                    Nourished.LOGGER.debug("[Compat Config] Failed to load mod logo for {} from {}: {}",
+                            modId, candidatePath, e.getMessage());
+                }
+            }
+
+            modLogoCache.put(modId, null);
+            return Optional.empty();
         }
 
         private String resolvedDetectedCategory(CompatReportEntry row) {
