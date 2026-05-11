@@ -30,8 +30,7 @@ run/
 .clinerules
 .cursorrules
 
-# Cline task history
-.cline/
+
 
 # Cursor
 .cursor/
