@@ -4,6 +4,10 @@ All notable changes to Nourished will be documented here.
 
 ## [unreleased]
 
+### 🐛 Bug Fixes
+
+- Update memory window configuration values
+
 ### 🚀 Features
 
 - Add heavy meal nutrition threshold configuration
