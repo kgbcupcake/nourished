@@ -7,6 +7,7 @@ All notable changes to Nourished will be documented here.
 ### 🐛 Bug Fixes
 
 - Update memory window configuration values
+- Improve mod logo loading logic in NourishedConfigScreen
 
 ### 🚀 Features
 
