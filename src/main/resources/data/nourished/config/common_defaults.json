@@ -28,6 +28,8 @@
   "enableDecay": true,
   "enableNutritionEating": true,
   "enableCalorieSaturationBlock": true,
+  "blockHeavyMeals": false,
+  "blockLightFood": false,
   "enableEffects": true,
   "enableHUD": true,
   "enableToasts": true,

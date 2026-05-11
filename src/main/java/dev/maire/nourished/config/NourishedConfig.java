@@ -130,6 +130,8 @@ public final class NourishedConfig {
         enableDecay = defineModuleToggle(builder, "enableDecay", "When false, NutritionDecayHandler does nothing", ConfigDefaultsLoader.getBoolean(defaults, "enableDecay", true));
         defineModuleToggle(builder, "enableNutritionEating", "When false, nutrition-only eating bypass at full hunger is disabled. Items tagged nourished:meal never use this bypass.", ConfigDefaultsLoader.getBoolean(defaults, "enableNutritionEating", true));
         defineModuleToggle(builder, "enableCalorieSaturationBlock", "When true, eating normal food is canceled when the calorie bar is full and vanilla hunger is full (canAlwaysEat items are unaffected).", ConfigDefaultsLoader.getBoolean(defaults, "enableCalorieSaturationBlock", true));
+        defineModuleToggle(builder, "blockHeavyMeals", "When true, items tagged nourished:meal cannot be eaten at full vanilla hunger", ConfigDefaultsLoader.getBoolean(defaults, "blockHeavyMeals", false));
+        defineModuleToggle(builder, "blockLightFood", "When true, items tagged nourished:light_food cannot be eaten at full vanilla hunger", ConfigDefaultsLoader.getBoolean(defaults, "blockLightFood", false));
         enableEffects = defineModuleToggle(builder, "enableEffects", "When false, status effects from nutrition are not applied", ConfigDefaultsLoader.getBoolean(defaults, "enableEffects", true));
         enableHUD = defineModuleToggle(builder, "enableHUD", "When false, the nutrition HUD overlay is hidden", ConfigDefaultsLoader.getBoolean(defaults, "enableHUD", true));
         enableToasts = defineModuleToggle(builder, "enableToasts", "When false, NourishedToastManager never queues toasts", ConfigDefaultsLoader.getBoolean(defaults, "enableToasts", true));

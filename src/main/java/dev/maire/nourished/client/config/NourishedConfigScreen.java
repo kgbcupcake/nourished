@@ -176,8 +176,8 @@ public final class NourishedConfigScreen {
             AtomicBoolean pending = new AtomicBoolean(config.isModuleEnabled(key));
             modulePending.put(key, pending);
             var entry = new ModuleToggleListEntry(
-                    Component.translatable("config.nourished." + key),
-                    Component.translatable("config.nourished." + key + ".desc"),
+                    moduleToggleTitle(key),
+                    moduleToggleDescription(key),
                     pending,
                     meta.group,
                     meta.dependsOn,
@@ -227,13 +227,30 @@ public final class NourishedConfigScreen {
         return Component.translatable("config.nourished.modules.group." + group);
     }
 
+    private static Component moduleToggleTitle(String key) {
+        return Component.translatable(switch (key) {
+            case "blockHeavyMeals" -> "nourished.config.blockHeavyMeals";
+            case "blockLightFood" -> "nourished.config.blockLightFood";
+            default -> "config.nourished." + key;
+        });
+    }
+
+    private static Component moduleToggleDescription(String key) {
+        return Component.translatable(switch (key) {
+            case "blockHeavyMeals" -> "nourished.config.blockHeavyMeals.desc";
+            case "blockLightFood" -> "nourished.config.blockLightFood.desc";
+            default -> "config.nourished." + key + ".desc";
+        });
+    }
+
     private static List<ModuleMeta> moduleMetas(Map<String, ModConfigSpec.BooleanValue> moduleMap) {
         List<ModuleMeta> out = new ArrayList<>();
         for (String key : moduleMap.keySet()) {
             String group;
             String dependsOn = null;
             switch (key) {
-                case "enableDecay", "enableNutritionEating", "enableCalorieSaturationBlock", "enableEffects", "enableCalorieTracking", "enableSleepBonus",
+                case "enableDecay", "enableNutritionEating", "enableCalorieSaturationBlock", "blockHeavyMeals", "blockLightFood",
+                     "enableEffects", "enableCalorieTracking", "enableSleepBonus",
                      "enableSynergies", "enableMilestones", "enableSeasonHooks", "enableAbsorptionModifiers" -> group = "core";
                 case "enableHUD", "enableDietScreen", "enableFoodTooltips", "enableToasts", "enableCriticalToasts" -> group = "ui";
                 default -> group = "other";

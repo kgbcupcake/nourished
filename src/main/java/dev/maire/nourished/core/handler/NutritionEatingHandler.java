@@ -11,7 +11,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
@@ -38,20 +37,14 @@ public class NutritionEatingHandler {
         if (food == null) {
             return;
         }
-        if (ModuleCache.enableCalorieSaturationBlock && !food.canAlwaysEat()) {
-            DietData diet = player.getData(DietAttachment.DIET.get());
-            if (diet.calories >= diet.maxCalories && !player.canEat(false)) {
-                event.setCanceled(true);
-                return;
-            }
-        }
         if (food.canAlwaysEat()) {
             return;
         }
         if (player.canEat(false)) {
             return;
         }
-        if (!qualifiesNutritionBypass(player, stack, food)) {
+        if (shouldBlockNutritionOnlyAtFullHunger(stack)) {
+            event.setCanceled(true);
             return;
         }
 
@@ -66,14 +59,14 @@ public class NutritionEatingHandler {
         server.execute(() -> performNutritionOnlyConsume(player, hand));
     }
 
-    private static boolean qualifiesNutritionBypass(ServerPlayer player, ItemStack stack, FoodProperties food) {
-        if (player.getFoodData().getFoodLevel() < 18) {
-            return false;
+    /**
+     * When vanilla hunger is full, optionally block nutrition-only eating for tagged items.
+     */
+    private static boolean shouldBlockNutritionOnlyAtFullHunger(ItemStack stack) {
+        if (ModuleCache.enableBlockHeavyMeals && stack.is(NourishedItemTags.MEAL)) {
+            return true;
         }
-        if (stack.is(NourishedItemTags.MEAL)) {
-            return false;
-        }
-        return food.nutrition() <= 2 || stack.is(NourishedItemTags.LIGHT_FOOD);
+        return ModuleCache.enableBlockLightFood && stack.is(NourishedItemTags.LIGHT_FOOD);
     }
 
     private static void performNutritionOnlyConsume(ServerPlayer player, InteractionHand hand) {
@@ -88,10 +81,10 @@ public class NutritionEatingHandler {
             return;
         }
         FoodProperties foodNow = stack.getItem().getFoodProperties(stack, player);
-        if (foodNow == null || foodNow.canAlwaysEat() || player.canEat(false)) {
+        if (foodNow == null || foodNow.canAlwaysEat()) {
             return;
         }
-        if (!qualifiesNutritionBypass(player, stack, foodNow)) {
+        if (shouldBlockNutritionOnlyAtFullHunger(stack)) {
             return;
         }
 
