@@ -222,6 +222,8 @@ public class DietScreen extends Screen {
         int x  = leftPos + PAD;
         int y  = topPos + 20;
         int bw = SPLIT - PAD * 2;   // box inner width
+        // Hard floor for left-panel content; sections that would overflow are skipped wholesale.
+        int maxY = topPos + HEIGHT - PAD;
 
         // "Today" header
         String todayText = Component.translatable("nourished.screen.diet.today").getString();
@@ -294,68 +296,79 @@ public class DietScreen extends Screen {
 
         List<String> recentIds = ClientDietCache.getRecentFoodIds();
         if (!recentIds.isEmpty()) {
-            g.drawString(font, Component.translatable("nourished.screen.diet.recent_label"),
-                    x, y, COL_HEADER, false);
-            y += 10;
+            int recentHeight = 10 + (recentIds.size() * 14);
+            if (y + recentHeight <= maxY) {
+                g.drawString(font, Component.translatable("nourished.screen.diet.recent_label"),
+                        x, y, COL_HEADER, false);
+                y += 10;
 
-            for (String id : recentIds) {
-                ItemStack recent = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id)));
-                PoseStack poseRecent = g.pose();
-                poseRecent.pushPose();
-                poseRecent.translate(x, y, 0);
-                poseRecent.scale(0.75f, 0.75f, 1f);
-                g.renderItem(recent, 0, 0);
-                poseRecent.popPose();
+                for (String id : recentIds) {
+                    ItemStack recent = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id)));
+                    PoseStack poseRecent = g.pose();
+                    poseRecent.pushPose();
+                    poseRecent.translate(x, y, 0);
+                    poseRecent.scale(0.75f, 0.75f, 1f);
+                    g.renderItem(recent, 0, 0);
+                    poseRecent.popPose();
 
-                String name = recent.getHoverName().getString();
-                String truncated = font.plainSubstrByWidth(name, bw - 18);
-                g.drawString(font, truncated, x + 16, y + 3, COL_WHITE, false);
-                y += 14;
+                    String name = recent.getHoverName().getString();
+                    String truncated = font.plainSubstrByWidth(name, bw - 18);
+                    g.drawString(font, truncated, x + 16, y + 3, COL_WHITE, false);
+                    y += 14;
+                }
             }
         }
 
         List<String> neglected = ClientDietCache.getNeglectedCategories();
         if (!neglected.isEmpty()) {
-            drawRoundedBox(g, x - 2, y - 2, bw + 4, 46);
-            String suggestionHeader = Component.translatable("nourished.screen.diet.suggestion_label").getString();
-            g.drawString(font, font.plainSubstrByWidth(suggestionHeader, bw),
-                    x, y, COL_HEADER, false);
-            y += 10;
+            int suggestionHeight = 50;
+            if (y + suggestionHeight <= maxY) {
+                drawRoundedBox(g, x - 2, y - 2, bw + 4, 46);
+                String suggestionHeader = Component.translatable("nourished.screen.diet.suggestion_label").getString();
+                g.drawString(font, font.plainSubstrByWidth(suggestionHeader, bw),
+                        x, y, COL_HEADER, false);
+                y += 10;
 
-            for (int col = 0; col < Math.min(2, neglected.size()); col++) {
-                String categoryKey = neglected.get(col);
-                TagKey<Item> tag = TagKey.create(Registries.ITEM,
-                        ResourceLocation.parse("nourished:nutrients/" + categoryKey));
-                Item exampleItem = null;
-                for (Item item : BuiltInRegistries.ITEM) {
-                    if (item.builtInRegistryHolder().is(tag)) {
-                        exampleItem = item;
-                        break;
+                for (int col = 0; col < Math.min(2, neglected.size()); col++) {
+                    String categoryKey = neglected.get(col);
+                    TagKey<Item> tag = TagKey.create(Registries.ITEM,
+                            ResourceLocation.parse("nourished:nutrients/" + categoryKey));
+                    Item exampleItem = null;
+                    for (Item item : BuiltInRegistries.ITEM) {
+                        if (item.builtInRegistryHolder().is(tag)) {
+                            exampleItem = item;
+                            break;
+                        }
                     }
-                }
-                if (exampleItem == null) continue;
+                    if (exampleItem == null) continue;
 
-                int suggestionColW = (bw - 4) / 2;
-                int colX = x + col * suggestionColW;
-                g.renderItem(new ItemStack(exampleItem), colX, y);
-                String label = Component.translatable("nourished.screen.diet.bar." + categoryKey).getString();
-                int labelMaxWidth = Math.max(0, suggestionColW - 20);
-                g.drawString(font,
-                        font.plainSubstrByWidth(label, labelMaxWidth),
-                        colX + 18,
-                        y + 4,
-                        NutrientUiColors.baseColorArgb(categoryKey),
-                        false);
+                    int suggestionColW = (bw - 4) / 2;
+                    int colX = x + col * suggestionColW;
+                    g.renderItem(new ItemStack(exampleItem), colX, y);
+                    String label = Component.translatable("nourished.screen.diet.bar." + categoryKey).getString();
+                    int labelMaxWidth = Math.max(0, suggestionColW - 20);
+                    g.drawString(font,
+                            font.plainSubstrByWidth(label, labelMaxWidth),
+                            colX + 18,
+                            y + 4,
+                            NutrientUiColors.baseColorArgb(categoryKey),
+                            false);
+                }
+                y += 36 + 4;
             }
-            y += 36 + 4;
         }
 
         // ── Active effects ────────────────────────────────────────────────
-        drawActiveEffects(g, x, y, bw);
+        Minecraft mc = Minecraft.getInstance();
+        int effectCount = (mc.player != null) ? mc.player.getActiveEffects().size() : 0;
+        int effectsHeight = 10 + (Math.min(3, effectCount) * 9);
+        if (y + effectsHeight <= maxY) {
+            drawActiveEffects(g, x, y, bw, maxY);
+        }
 
     }
 
-    private void drawActiveEffects(GuiGraphics g, int x, int y, int bw) {
+    private void drawActiveEffects(GuiGraphics g, int x, int y, int bw, int maxY) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 
@@ -373,6 +386,7 @@ public class DietScreen extends Screen {
         int count = 0;
         for (MobEffectInstance effect : effects) {
             if (count >= 3) break; // cap at 3 to avoid overflow
+            if (y + 9 > maxY) break; // stop if next line would clip past the panel
             MobEffect type = effect.getEffect().value();
             String name = Component.translatable(type.getDescriptionId()).getString();
             int amplifier = effect.getAmplifier();
@@ -537,11 +551,12 @@ public class DietScreen extends Screen {
         g.drawCenteredString(font, Component.translatable("nourished.screen.diet.legend"), x + w / 2, y + 3, dimLegend(COL_HEADER));
 
         int colLeft = x + 6;
-        int colW = (w - 12) / 3;
+        int colW = (w - 12) / 4;
         int lineTop = y + 12;
         int lineBottom = y + h - 4;
         g.fill(colLeft + colW, lineTop, colLeft + colW + 1, lineBottom, COL_DIVIDER);
         g.fill(colLeft + colW * 2, lineTop, colLeft + colW * 2 + 1, lineBottom, COL_DIVIDER);
+        g.fill(colLeft + colW * 3, lineTop, colLeft + colW * 3 + 1, lineBottom, COL_DIVIDER);
 
         drawLegendEntry(g, colLeft, y + 14, colW, dimLegend(COL_GREEN), "Good", "40 - 80%", 0, -3, -2, dimLegend(COL_GREEN));
         drawLegendEntry(g, colLeft + colW + 1, y + 14, colW, dimLegend(0xFFE8C24F), "Low", "25 - 40%", 0, -3, 0, dimLegend(0xFFE8C24F));
@@ -557,6 +572,19 @@ public class DietScreen extends Screen {
                 0,
                 0,
                 dimLegend(COL_RED)
+        );
+        drawLegendEntry(
+                g,
+                colLeft + colW * 3 - 2,
+                y + 14,
+                colW,
+                dimLegend(COL_ORANGE),
+                Component.translatable("nourished.screen.diet.legend_excess").getString(),
+                Component.translatable("nourished.screen.diet.legend_excess_range").getString(),
+                0,
+                0,
+                0,
+                dimLegend(COL_ORANGE)
         );
     }
 

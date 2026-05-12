@@ -18,7 +18,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # git-cliff needs full history
+          fetch-depth: 0
 
       # ── Java ────────────────────────────────────────────────────────────────
       - name: Set up Java 21
@@ -55,18 +55,16 @@ jobs:
         with:
           tool: git-cliff
 
-      - name: Generate release changelog
-        id: changelog
+      - name: Generate release notes
         run: |
-          # Generate changelog for this tag only (since last tag)
           git-cliff --config cliff.toml --latest --strip header > RELEASE_NOTES.md
           cat RELEASE_NOTES.md
 
       - name: Update full CHANGELOG.md
         run: |
-          git-cliff --config cliff.toml --output CHANGELOG.md
+          git-cliff --config cliff.toml --bump --output CHANGELOG.md
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md
           git diff --staged --quiet || git commit -m "chore(changelog): update for ${{ github.ref_name }} [skip ci]"
           git push origin HEAD:main || true
@@ -86,8 +84,7 @@ jobs:
       - name: Upload to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          modrinth-id: YOUR_MODRINTH_PROJECT_ID        # ← replace this
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }} # ← add this secret in GitHub repo settings
+          modrinth-id: gXy6YNys          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           files: ${{ steps.jar.outputs.path }}
           name: "Nourished ${{ github.ref_name }}"
           changelog-file: RELEASE_NOTES.md

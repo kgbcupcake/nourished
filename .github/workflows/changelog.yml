@@ -1,4 +1,5 @@
-name: Changelog
+- name: Generate changelog
+  run: git cliff --config cliff.toml --bump -o CHANGELOG.md
 
 on:
     push:
