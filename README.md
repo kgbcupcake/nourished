@@ -1,23 +1,59 @@
-# Nourished
+🌿 Nourished — Food variety finally matters.
 
-> **Food variety now matters.**
-> **The nutrition engine for the NeoForge food ecosystem.**
+Stop surviving on nothing but steak and golden carrots.
 
-Minecraft tracks hunger. Nourished tracks _what_ you ate. Six food groups, real consequences, and a HUD you can actually read - without turning survival into a spreadsheet.
+Nourished adds a lightweight nutrition system that rewards eating a wider variety of food — naturally, through gameplay, without turning survival into a chore. Keep your six food groups fed and gain passive bonuses. Let them slip and you'll start to feel it.
+
+No micromanagement. No realism simulator. No spreadsheets.
+
+Just eat.
 
 ![Main Menu](Assets/MainGui.png)
 
 ---
 
-## What it does
+## 🎮 What it feels like
 
-Eat steak all day and your protein bar fills up - but your fruits, grains, and dairy start to slip. Let them drop too low and you'll feel it. Keep a balanced diet and the game rewards you.
+You've been living off bread for days. Your grains bar is full — but proteins and fruits have quietly bottomed out. Suddenly Mining Fatigue kicks in. Unluck too.
 
-That's it. No menus to dig through, no math to do. Just eat varied food and the system takes care of itself.
+You didn't notice it happening. That's the point.
 
-For mod and modpack authors, Nourished is a platform. Register custom nutrients, hook into diet events, define food synergies, and build addon mods on top of a stable public API - without touching Nourished internals.
+Later you eat some cooked salmon and a handful of berries you found while exploring. Within minutes the penalties disappear and your diet starts recovering naturally.
+
+No constant menu management. Just eating something different.
 
 ---
+
+
+## ❤️ What you gain
+
+When all six food groups stay above 75%, you get:
+
+- **Health Boost I** — passively while balanced
+- **Regeneration I** — passively while balanced
+
+Let any single group drop below 25% and a debuff kicks in:
+
+| Group | Neglect Penalty |
+|-------|----------------|
+| 🌾 Grains | Weakness I |
+| 🥦 Vegetables | Slowness I |
+| 🥩 Proteins | Mining Fatigue I |
+| 🍎 Fruits | Unluck I |
+
+---
+
+## 🍽️ Eating at full hunger
+
+Even at full vanilla hunger, light foods can still be eaten for nutrition — berries, fruits, and snacks contribute to your nutrient bars without restoring hunger. Heavy meals follow vanilla rules by default.
+
+Both behaviors are configurable: `blockHeavyMeals` and `blockLightFood` toggles give server admins full control.
+
+All effects are fully configurable and can be disabled per-module.
+
+Diminishing returns apply - eating the same food repeatedly gives less credit each time, encouraging real variety.
+---
+
 
 ## The HUD
 
@@ -41,20 +77,6 @@ Note: The HUD and Diet Screen screenshots were taken using the PureBDCraft resou
 
 ---
 
-## Effects
-
-| Condition                   | Effect                                            |
-| --------------------------- | ------------------------------------------------- |
-| Any group < 25%             | Debuff (fatigue, weakness, slowness, or bad luck) |
-| All groups > 75% + balanced | Regeneration                                      |
-| All groups > 75%            | Health Boost                                      |
-
-All effects are fully configurable and can be disabled per-module.
-
-Diminishing returns apply - eating the same food repeatedly gives less credit each time, encouraging real variety.
-
----
-
 ## Modularity
 
 Every feature in Nourished is a module toggle. Turn off decay, effects, the HUD, toasts, calorie tracking, or the diet screen independently. Modpack authors can lock modules server-side.
@@ -70,44 +92,31 @@ Everything ships with sensible defaults. Everything can be changed:
 - Control eating behavior with `blockHeavyMeals` and `blockLightFood` toggles
 - Save and share full config snapshots with a single share code
   
-
 ---
 
-## Compatibility
+## 🤝 Broad Mod Compatibility
+
+If a mod adds food with `FoodProperties`, Nourished handles it automatically. No data files to write, no configs to edit.
 
 | Mod | Status |
-| --- | --- |
-| Ars Flavor's Delight | ✅ Datapack compat included |
-| AutoChef's Delight | ✅ Datapack compat included |
-| Botany Pots | ✅ Datapack compat included |
-| Cataclysm Delight | ✅ Datapack compat included |
-| Cold Sweat | ✅ Datapack compat included |
-| Create: Food | ✅ Datapack compat included |
-| Crop Critters | ✅ Datapack compat included |
-| Croptopia / Farmer's Croptopia | ✅ Datapack compat included |
-| Croptopia Delight | ✅ Datapack compat included |
-| Ecliptic Seasons | ✅ Datapack compat included |
-| Ender's Delight / End's Delight | ✅ Datapack compat included |
-| Expanded Delight | ✅ Datapack compat included |
-| Farmer's Delight | ✅ Datapack compat included |
-| Farming for Blockheads | ✅ Datapack compat included |
-| Let's Do: Bakery | ✅ Datapack compat included |
-| Let's Do: Brewery | ✅ Datapack compat included |
-| Let's Do: Farm & Charm | ✅ Datapack compat included |
-| Let's Do: HerbalBrews | ✅ Datapack compat included |
-| Legendary Survival Overhaul | ⚠️ Effects disabled - LSO takes priority |
-| Mama's Herbs | ✅ Datapack compat included |
-| More Delight | ✅ Datapack compat included |
-| Naturalist | ✅ Datapack compat included |
-| Ocean's Delight | ✅ Datapack compat included |
-| Pam's HarvestCraft 2: Crops | ✅ Datapack compat included |
-| Pam's HarvestCraft 2: Food Core | ✅ Datapack compat included |
-| Pam's HarvestCraft 2: Food Extended | ✅ Datapack compat included |
-| Pam's HarvestCraft 2: Trees | ✅ Datapack compat included |
-| Serene Seasons | ✅ Datapack compat included |
-| Spice of Life: Onion | ✅ Datapack compat included |
-| Tough As Nails | ✅ Datapack compat included |
-| Any unknown food mod | ✅ Auto-detected at startup |
+|-----|--------|
+| Farmer's Delight | ✅ Full |
+| Pam's HarvestCraft 2 | ✅ Full |
+| Create: Food | ✅ Full |
+| Croptopia | ✅ Full |
+| Farmer's Croptopia | ✅ Full |
+| Croptopia Delight | ✅ Full |
+| Farm & Charm | ✅ Full |
+| Ender's Delight | ✅ Full |
+| L_Ender's Delight | ✅ Full |
+| Ars Delight | ✅ Full |
+| Autochef's Delight | ✅ Full |
+| Spice of Life: Onion | ✅ Full |
+| KubeJS | ✅ Full scripting support |
+| Peak Stamina | ✅ Nutrition affects stamina |
+| JEI / REI / EMI | ✅ Tooltips in recipe viewers |
+| Legendary Survival Overhaul | ⚠️ Effects disabled (LSO takes priority) |
+| Any mod with FoodProperties | ✅ Auto-classified |
 
 ---
 
@@ -125,7 +134,6 @@ API elements are marked `@Stable`, `@Experimental`, or `@Internal` so you know e
 
 
 Read [`API.md`](API.md) for the full public API and [`PHILOSOPHY.md`](PHILOSOPHY.md) for compatibility and stability guarantees. Addons can register custom nutrients, food classifications, and diet events through Java or KubeJS, and can also ship datapack-only integrations without writing Java code. See the example addon project for a minimal end-to-end integration pattern.
-
 
 ---
 
