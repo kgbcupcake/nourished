@@ -34,12 +34,12 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/build.gradle') }}-${{ github.ref_name }}
           restore-keys: gradle-
 
       # ── Build ────────────────────────────────────────────────────────────────
       - name: Build mod jar
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build --no-daemon --no-build-cache
 
       # ── Find jar ─────────────────────────────────────────────────────────────
       - name: Locate built jar
