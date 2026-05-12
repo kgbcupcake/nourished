@@ -1,46 +1,45 @@
-- name: Generate changelog
-  run: git cliff --config cliff.toml --bump -o CHANGELOG.md
+name: Changelog
 
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
 
 permissions:
-    contents: write
+  contents: write
 
 concurrency:
-    group: changelog
-    cancel-in-progress: false
+  group: changelog
+  cancel-in-progress: false
 
 jobs:
-    update-changelog:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-                  ref: main
-                  token: ${{ secrets.GITHUB_TOKEN }}
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Install git-cliff
-              uses: taiki-e/install-action@v2
-              with:
-                  tool: git-cliff
+      - name: Install git-cliff
+        uses: taiki-e/install-action@v2
+        with:
+          tool: git-cliff
 
-            - name: Generate changelog
-              run: git cliff -o CHANGELOG.md
+      - name: Generate changelog
+        run: git cliff --config cliff.toml --bump -o CHANGELOG.md
 
-            - name: Commit and push if changed
-              run: |
-                  set -euo pipefail
-                  git config user.name "github-actions[bot]"
-                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                  git add CHANGELOG.md
-                  if git diff --staged --quiet; then
-                    echo "CHANGELOG.md unchanged; nothing to commit."
-                  else
-                    git commit -m "chore: update changelog [skip ci]"
-                    git push origin main
-                  fi
+      - name: Commit and push if changed
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          if git diff --staged --quiet; then
+            echo "CHANGELOG.md unchanged; nothing to commit."
+          else
+            git commit -m "chore: update changelog [skip ci]"
+            git push origin main
+          fi
