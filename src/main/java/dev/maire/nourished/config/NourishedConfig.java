@@ -202,7 +202,7 @@ public final class NourishedConfig {
         builder.push("food_memory");
         memoryWindowMinutes = builder
                 .comment("How long (in minutes) before a food memory entry expires.")
-                .defineInRange("memoryWindowMinutes", ConfigDefaultsLoader.getInt(defaults, "memoryWindowMinutes", 30), 1, 120);
+                .defineInRange("memoryWindowMinutes", ConfigDefaultsLoader.getInt(defaults, "memoryWindowMinutes", 60), 1, 120);
         memoryWindowCount = builder
                 .comment("Maximum number of distinct food entries tracked in memory.")
                 .defineInRange("memoryWindowCount", ConfigDefaultsLoader.getInt(defaults, "memoryWindowCount", 50), 1, 200);
@@ -220,12 +220,12 @@ public final class NourishedConfig {
                 .defineInRange("diminishingSteepness", ConfigDefaultsLoader.getDouble(defaults, "diminishingSteepness", 0.8), 0.1, 3.0);
         diminishingMidpoint = builder
                 .comment("Midpoint of the logistic curve (eat count where multiplier = 0.5).")
-                .defineInRange("diminishingMidpoint", ConfigDefaultsLoader.getDouble(defaults, "diminishingMidpoint", 3.0), 1.0, 10.0);
+                .defineInRange("diminishingMidpoint", ConfigDefaultsLoader.getDouble(defaults, "diminishingMidpoint", 2.0), 1.0, 10.0);
 
         // Streak settings
         streakWindowMs = builder
                 .comment("Time window (ms) for streak detection. Eating same food within window increases penalty faster.")
-                .defineInRange("streakWindowMs", ConfigDefaultsLoader.getInt(defaults, "streakWindowMs", 300000), 10000, 1800000);
+                .defineInRange("streakWindowMs", ConfigDefaultsLoader.getInt(defaults, "streakWindowMs", 600000), 10000, 1800000);
         streakWeight = builder
                 .comment("Multiplier for eat count increment when within streak window (e.g., 2.0 = double penalty).")
                 .defineInRange("streakWeight", ConfigDefaultsLoader.getDouble(defaults, "streakWeight", 2.0), 1.0, 5.0);

@@ -18,6 +18,14 @@ import dev.maire.nourished.api.ApiStatus;
 @ApiStatus.Internal
 public record FoodMemoryEntry(float eatCount, long lastEatenTick) {
 
+    /**
+     * Grace period (ms) before exponential decay begins after an eat. Within this window,
+     * {@link #decayedEatCount(long, long)} returns the stored count unchanged so that rapid
+     * eating sprees fully accumulate before decay starts eroding them. Decay timing is then
+     * measured from the end of the grace period, not from {@link #lastEatenTick}.
+     */
+    private static final long DECAY_GRACE_MS = 60_000L;
+
     public static final Codec<FoodMemoryEntry> CODEC = Codec.of(
             FoodMemoryEntry::encode,
             FoodMemoryEntry::decode
@@ -57,17 +65,25 @@ public record FoodMemoryEntry(float eatCount, long lastEatenTick) {
 
     /**
      * Computes the effective eat count after exponential decay.
-     * Formula: eatCount * 2^(-elapsed / halfLife)
+     * <p>
+     * Behavior:
+     * <ul>
+     *   <li>If {@code halfLifeMs <= 0}, decay is disabled and the stored count is returned as-is.</li>
+     *   <li>For the first {@link #DECAY_GRACE_MS} after {@link #lastEatenTick}, no decay is applied.
+     *       This protects rapid eating sprees so the count can accumulate fully before erosion begins.</li>
+     *   <li>After the grace period, decay is exponential with the given half-life, measured from the
+     *       end of the grace window: {@code eatCount * 2^(-(elapsed - grace) / halfLife)}.</li>
+     * </ul>
      *
-     * @param halfLifeMs  time in ms for eat count to halve
+     * @param halfLifeMs  time in ms for eat count to halve once decay starts
      * @param currentTimeMs current game time in ms
      * @return decayed eat count, always >= 0
      */
     public float decayedEatCount(long halfLifeMs, long currentTimeMs) {
         if (halfLifeMs <= 0) return eatCount;
         long elapsed = currentTimeMs - lastEatenTick;
-        if (elapsed <= 0) return eatCount;
-        double decayFactor = Math.pow(2.0, -(double) elapsed / halfLifeMs);
+        if (elapsed <= DECAY_GRACE_MS) return eatCount;
+        double decayFactor = Math.pow(2.0, -(double) (elapsed - DECAY_GRACE_MS) / halfLifeMs);
         return (float) (eatCount * decayFactor);
     }
 
