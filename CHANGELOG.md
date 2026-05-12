@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to Nourished will be documented here.
+## [0.1.5-beta] - 2026-05-12
+
+### 🐛 Bug Fixes
+
+- Improve diminishing returns memory window and decay grace period
+
 ## [0.1.3-beta] - 2026-05-12
 
 ### 🚜 Refactor
