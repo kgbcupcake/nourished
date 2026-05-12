@@ -551,12 +551,11 @@ public class DietScreen extends Screen {
         g.drawCenteredString(font, Component.translatable("nourished.screen.diet.legend"), x + w / 2, y + 3, dimLegend(COL_HEADER));
 
         int colLeft = x + 6;
-        int colW = (w - 12) / 4;
+        int colW = (w - 12) / 3;
         int lineTop = y + 12;
         int lineBottom = y + h - 4;
         g.fill(colLeft + colW, lineTop, colLeft + colW + 1, lineBottom, COL_DIVIDER);
         g.fill(colLeft + colW * 2, lineTop, colLeft + colW * 2 + 1, lineBottom, COL_DIVIDER);
-        g.fill(colLeft + colW * 3, lineTop, colLeft + colW * 3 + 1, lineBottom, COL_DIVIDER);
 
         drawLegendEntry(g, colLeft, y + 14, colW, dimLegend(COL_GREEN), "Good", "40 - 80%", 0, -3, -2, dimLegend(COL_GREEN));
         drawLegendEntry(g, colLeft + colW + 1, y + 14, colW, dimLegend(0xFFE8C24F), "Low", "25 - 40%", 0, -3, 0, dimLegend(0xFFE8C24F));
@@ -572,19 +571,6 @@ public class DietScreen extends Screen {
                 0,
                 0,
                 dimLegend(COL_RED)
-        );
-        drawLegendEntry(
-                g,
-                colLeft + colW * 3 - 2,
-                y + 14,
-                colW,
-                dimLegend(COL_ORANGE),
-                Component.translatable("nourished.screen.diet.legend_excess").getString(),
-                Component.translatable("nourished.screen.diet.legend_excess_range").getString(),
-                0,
-                0,
-                0,
-                dimLegend(COL_ORANGE)
         );
     }
 
