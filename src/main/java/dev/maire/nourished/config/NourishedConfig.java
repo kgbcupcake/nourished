@@ -130,8 +130,8 @@ public final class NourishedConfig {
         builder.push("modules");
         enableDecay = defineModuleToggle(builder, "enableDecay", "When false, NutritionDecayHandler does nothing", ConfigDefaultsLoader.getBoolean(defaults, "enableDecay", true));
         defineModuleToggle(builder, "enableNutritionEating", "When false, nutrition-only eating at full vanilla hunger is disabled.", ConfigDefaultsLoader.getBoolean(defaults, "enableNutritionEating", true));
-        defineModuleToggle(builder, "blockHeavyMeals", "When true, items tagged nourished:meal cannot be eaten at full vanilla hunger", ConfigDefaultsLoader.getBoolean(defaults, "blockHeavyMeals", false));
-        defineModuleToggle(builder, "blockLightFood", "When true, items tagged nourished:light_food cannot be eaten at full vanilla hunger", ConfigDefaultsLoader.getBoolean(defaults, "blockLightFood", false));
+        defineModuleToggle(builder, "blockHeavyMeals", "When true, prevents eating heavy foods at full vanilla hunger. If Spice of Life: Onion is installed, uses nutrition threshold (heavyMealNutritionThreshold) to determine heavy meals. Otherwise requires items to be tagged nourished:meal via datapack.", ConfigDefaultsLoader.getBoolean(defaults, "blockHeavyMeals", false));
+        defineModuleToggle(builder, "blockLightFood", "When true, prevents eating light foods at full vanilla hunger. Requires items to be tagged nourished:light_food via datapack.", ConfigDefaultsLoader.getBoolean(defaults, "blockLightFood", false));
         heavyMealNutritionThreshold = builder
                 .comment("Nutrition (FoodProperties) at or above this counts as a heavy meal when solonion is loaded and blockHeavyMeals is true. Also used if mod_compat omits solonion's threshold.")
                 .defineInRange("heavyMealNutritionThreshold", ConfigDefaultsLoader.getInt(defaults, "heavyMealNutritionThreshold", 6), 1, 20);
