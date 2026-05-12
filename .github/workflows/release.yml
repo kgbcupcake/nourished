@@ -39,8 +39,7 @@ jobs:
 
       # ── Build ────────────────────────────────────────────────────────────────
       - name: Build mod jar
-        run: ./gradlew build --no-daemon --no-build-cache
-
+      run: ./gradlew clean build --no-daemon
       # ── Find jar ─────────────────────────────────────────────────────────────
       - name: Locate built jar
         id: jar
