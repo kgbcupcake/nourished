@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to Nourished will be documented here.
+## [0.1.2-beta.1] - 2026-05-12
+
+### 🚜 Refactor
+
+- Simplify DietScreen layout and remove excess legend entries
+
 ## [0.1.1-beta] - 2026-05-12
 
 ### 🐛 Bug Fixes
