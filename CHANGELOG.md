@@ -7,6 +7,8 @@ All notable changes to Nourished will be documented here.
 
 - Improve diminishing returns memory window and decay grace period
 
+- Improve diminishing returns memory window and decay grace period
+
 ## [0.1.5-beta] - 2026-05-12
 
 ### 🐛 Bug Fixes
