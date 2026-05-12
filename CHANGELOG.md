@@ -1,12 +1,6 @@
 # Changelog
 
 All notable changes to Nourished will be documented here.
-## [0.1.1-beta.1] - 2026-05-12
-
-### 🐛 Bug Fixes
-
-- Release workflow indentation
-
 ## [0.1.1-beta] - 2026-05-12
 
 ### 🐛 Bug Fixes
@@ -14,6 +8,8 @@ All notable changes to Nourished will be documented here.
 - Update memory window configuration values
 
 - Improve mod logo loading logic in NourishedConfigScreen
+
+- Release workflow indentation
 
 
 ### 🚀 Features
