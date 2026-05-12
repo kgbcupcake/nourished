@@ -80,11 +80,12 @@ jobs:
           prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') }}
           files: ${{ steps.jar.outputs.path }}
 
-      # ── Modrinth Upload ──────────────────────────────────────────────────────
+   # ── Modrinth Upload ──────────────────────────────────────────────────────
       - name: Upload to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          modrinth-id: gXy6YNys          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-id: gXy6YNys
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           files: ${{ steps.jar.outputs.path }}
           name: "Nourished ${{ github.ref_name }}"
           changelog-file: RELEASE_NOTES.md
