@@ -35,6 +35,7 @@ public final class ModuleCache {
     public static boolean enableMilestones = true;
     public static boolean enableSeasonHooks = true;
     public static boolean enableAbsorptionModifiers = true;
+    public static boolean enableDebugLogging = false;
 
     private ModuleCache() {}
 
@@ -65,5 +66,6 @@ public final class ModuleCache {
         enableMilestones = config.isModuleEnabled("enableMilestones");
         enableSeasonHooks = config.isModuleEnabled("enableSeasonHooks");
         enableAbsorptionModifiers = config.isModuleEnabled("enableAbsorptionModifiers");
+        enableDebugLogging = config.isModuleEnabled("enableDebugLogging");
     }
 }

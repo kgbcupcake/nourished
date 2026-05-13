@@ -21,6 +21,7 @@
   "debtThreshold": 4.0,
   "debtDecayRate": 0.003,
   "debugMemoryLogging": false,
+  "enableDebugLogging": false,
   "nutrientGainScale": 5.0,
   "nutrientGainPerBiteMax": 0.2,
   "scannerEnableRecipeInheritance": true,

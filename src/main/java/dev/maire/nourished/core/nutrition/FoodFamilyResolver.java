@@ -79,6 +79,7 @@ public final class FoodFamilyResolver {
 
     private static Set<String> tokenize(String path) {
         String[] parts = path.split("_");
+        if (parts.length > 64) return Set.of();
         Set<String> tokens = new HashSet<>(parts.length);
         for (String part : parts) {
             if (!part.isEmpty()) {

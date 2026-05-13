@@ -238,6 +238,9 @@
     { "id": "croptopia:tomato", "required": false },
     { "id": "croptopia:turnip", "required": false },
     { "id": "croptopia:yam", "required": false },
-    { "id": "croptopia:zucchini", "required": false }
+    { "id": "croptopia:zucchini", "required": false },
+    { "id": "biomeswevegone:cooked_oddion_bulb", "required": false},
+    { "id": "biomeswevegone:cooked_white_puffball_cap", "required": false},
+    { "id": "biomeswevegone:cooked_yucca_fruit", "required": false}
   ]
 }

@@ -41,6 +41,8 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -83,6 +85,18 @@ public class NourishedCommand {
                     "diet_profiles",
                     "compat"
             ), builder);
+
+    @SubscribeEvent
+    public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp) {
+            ACTIVE_PROFILES.remove(sp.getUUID());
+        }
+    }
+
+    @SubscribeEvent
+    public void onServerStopped(ServerStoppedEvent event) {
+        ACTIVE_PROFILES.clear();
+    }
 
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {

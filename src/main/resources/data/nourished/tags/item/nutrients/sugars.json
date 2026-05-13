@@ -447,6 +447,8 @@
     "pamhc2foodextended:cherryicecreamitem",
     { "id": "bakery:waffle_block", "required": false },
     { "id": "croptopia:cheese_cake", "required": false },
-    { "id": "croptopia:rhubarb_crisp", "required": false }
+    { "id": "croptopia:rhubarb_crisp", "required": false },
+    { "id": "biomeswevegone:blueberry_pie", "required": false},
+    { "id": "biomeswevegone:green_apple_pie", "required": false}
   ]
 }

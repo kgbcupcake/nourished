@@ -4,6 +4,7 @@ import dev.maire.nourished.client.ClientDietCache;
 import dev.maire.nourished.client.NourishedToastManager;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.diet.FoodMemoryEntry;
 import dev.maire.nourished.core.Nourished;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -19,6 +20,8 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import io.netty.buffer.ByteBuf;
 
+import io.netty.handler.codec.DecoderException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +46,7 @@ public class ModNetworking {
         );
     }
 
-    /** Send lightweight display-only update. Call on every food eat and decay tick. */
+    /** Send lightweight client sync. Call on every food eat and decay tick. */
     public static void syncDietDelta(ServerPlayer player, DietData diet) {
         PacketDistributor.sendToPlayer(player, diet.toDeltaPayload());
     }
@@ -70,6 +73,36 @@ public class ModNetworking {
             ClientDietCache.applyDelta(payload);
             NourishedToastManager.onClientDietUpdated(payload);
         });
+    }
+
+    private static void encodeFoodMemoryMap(FriendlyByteBuf buf, Map<String, FoodMemoryEntry> map) {
+        buf.writeVarInt(map.size());
+        for (Map.Entry<String, FoodMemoryEntry> e : map.entrySet()) {
+            buf.writeUtf(e.getKey());
+            FoodMemoryEntry entry = e.getValue();
+            buf.writeFloat(entry.eatCount());
+            buf.writeLong(entry.lastEatenTick());
+        }
+    }
+
+    private static LinkedHashMap<String, FoodMemoryEntry> decodeLinkedFoodMemoryMap(FriendlyByteBuf buf) {
+        int size = buf.readVarInt();
+        if (size > 256) throw new DecoderException("food memory map exceeds 256 entries: " + size);
+        LinkedHashMap<String, FoodMemoryEntry> map = new LinkedHashMap<>(Math.max(16, size * 2));
+        for (int i = 0; i < size; i++) {
+            map.put(buf.readUtf(), new FoodMemoryEntry(buf.readFloat(), buf.readLong()));
+        }
+        return map;
+    }
+
+    private static HashMap<String, FoodMemoryEntry> decodeHashFoodMemoryMap(FriendlyByteBuf buf) {
+        int size = buf.readVarInt();
+        if (size > 256) throw new DecoderException("food memory map exceeds 256 entries: " + size);
+        HashMap<String, FoodMemoryEntry> map = new HashMap<>(Math.max(16, size * 2));
+        for (int i = 0; i < size; i++) {
+            map.put(buf.readUtf(), new FoodMemoryEntry(buf.readFloat(), buf.readLong()));
+        }
+        return map;
     }
 
     // ── Full Sync Payload ────────────────────────────────────────────────────────
@@ -102,7 +135,11 @@ public class ModNetworking {
             float balanceScore,
             List<String> recentFoodIds,
             List<String> neglectedCategories,
-            List<String> fatiguedFamilies
+            List<String> fatiguedFamilies,
+            Map<String, FoodMemoryEntry> foodMemory,
+            Map<String, FoodMemoryEntry> categoryMemory,
+            Map<String, FoodMemoryEntry> familyMemory,
+            long lastTickTime
     ) implements CustomPacketPayload {
 
         public static final CustomPacketPayload.Type<SyncDietDeltaPayload> TYPE =
@@ -120,6 +157,7 @@ public class ModNetworking {
                         },
                         buf -> {
                             int size = buf.readVarInt();
+                            if (size > 64) throw new DecoderException("nutrient map exceeds 64 entries: " + size);
                             Map<String, Float> map = new LinkedHashMap<>(size);
                             for (int i = 0; i < size; i++) {
                                 map.put(buf.readUtf(), buf.readFloat());
@@ -129,11 +167,11 @@ public class ModNetworking {
                 );
 
         private static final StreamCodec<ByteBuf, List<String>> RECENT_FOOD_IDS_CODEC =
-                ByteBufCodecs.<ByteBuf, String>list().apply(ByteBufCodecs.STRING_UTF8);
+                ByteBufCodecs.<ByteBuf, String>list(8).apply(ByteBufCodecs.STRING_UTF8);
         private static final StreamCodec<ByteBuf, List<String>> NEGLECTED_CATEGORIES_CODEC =
-                ByteBufCodecs.<ByteBuf, String>list().apply(ByteBufCodecs.STRING_UTF8);
+                ByteBufCodecs.<ByteBuf, String>list(8).apply(ByteBufCodecs.STRING_UTF8);
         private static final StreamCodec<ByteBuf, List<String>> FATIGUED_FAMILIES_CODEC =
-                ByteBufCodecs.<ByteBuf, String>list().apply(ByteBufCodecs.STRING_UTF8);
+                ByteBufCodecs.<ByteBuf, String>list(8).apply(ByteBufCodecs.STRING_UTF8);
 
         public static final StreamCodec<FriendlyByteBuf, SyncDietDeltaPayload> STREAM_CODEC =
                 StreamCodec.of(
@@ -146,6 +184,10 @@ public class ModNetworking {
                             RECENT_FOOD_IDS_CODEC.encode(buf, payload.recentFoodIds());
                             NEGLECTED_CATEGORIES_CODEC.encode(buf, payload.neglectedCategories());
                             FATIGUED_FAMILIES_CODEC.encode(buf, payload.fatiguedFamilies());
+                            ModNetworking.encodeFoodMemoryMap(buf, payload.foodMemory());
+                            ModNetworking.encodeFoodMemoryMap(buf, payload.categoryMemory());
+                            ModNetworking.encodeFoodMemoryMap(buf, payload.familyMemory());
+                            buf.writeLong(payload.lastTickTime());
                         },
                         buf -> new SyncDietDeltaPayload(
                                 NUTRIENT_MAP_CODEC.decode(buf),
@@ -155,7 +197,11 @@ public class ModNetworking {
                                 buf.readFloat(),
                                 RECENT_FOOD_IDS_CODEC.decode(buf),
                                 NEGLECTED_CATEGORIES_CODEC.decode(buf),
-                                FATIGUED_FAMILIES_CODEC.decode(buf)
+                                FATIGUED_FAMILIES_CODEC.decode(buf),
+                                ModNetworking.decodeLinkedFoodMemoryMap(buf),
+                                ModNetworking.decodeHashFoodMemoryMap(buf),
+                                ModNetworking.decodeHashFoodMemoryMap(buf),
+                                buf.readLong()
                         )
                 );
 

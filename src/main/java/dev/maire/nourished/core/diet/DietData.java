@@ -218,7 +218,12 @@ public class DietData {
 
     public void addNutrient(String key, float amount) {
         if (!nutrients.containsKey(key)) return;
-        nutrients.put(key, Mth.clamp(nutrients.get(key) + amount, 0f, 1f));
+        float newValue = Mth.clamp(nutrients.get(key) + amount, 0f, 1f);
+        if (Float.isNaN(newValue)) {
+            Nourished.LOGGER.error("[Nourished] NaN nutrient value detected for key={} — resetting to 0", key);
+            newValue = 0f;
+        }
+        nutrients.put(key, newValue);
     }
 
     /** Balance score in [0, 1]: higher when all bars are closer to each other. */
@@ -233,7 +238,7 @@ public class DietData {
         return 1f - Math.min(1f, dev / (avg * keys.size() * 2f));
     }
 
-    /** Extracts display-only state for lightweight network sync. */
+    /** Extracts client-sync state for lightweight network sync (bars, calories, memory, time anchor). */
     public SyncDietDeltaPayload toDeltaPayload() {
         List<String> recentFoodIds = foodMemory.entrySet().stream()
                 .sorted((a, b) -> Long.compare(b.getValue().lastEatenTick(), a.getValue().lastEatenTick()))
@@ -250,7 +255,11 @@ public class DietData {
                 getBalanceScore(),
                 recentFoodIds,
                 neglectedCategories,
-                fatiguedFamilies
+                fatiguedFamilies,
+                Map.copyOf(foodMemory),
+                Map.copyOf(categoryMemory),
+                Map.copyOf(familyMemory),
+                lastTickTime
         );
     }
 

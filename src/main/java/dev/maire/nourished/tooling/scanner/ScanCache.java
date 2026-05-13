@@ -119,7 +119,7 @@ public final class ScanCache {
      */
     private static String computeModListHash() {
         try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
             StringBuilder sb = new StringBuilder();
 
             ModList.get().getMods().stream()

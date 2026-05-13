@@ -197,6 +197,7 @@ public final class NourishedConfig {
         calorieDisplayMax = builder
                 .comment("Maximum calorie value for display purposes")
                 .defineInRange("calorieDisplayMax", ConfigDefaultsLoader.getInt(defaults, "calorieDisplayMax", 2000), 100, 100000);
+        defineModuleToggle(builder, "enableDebugLogging", "When true, writes detailed nutrition diagnostics to config/nourished/debug/", ConfigDefaultsLoader.getBoolean(defaults, "enableDebugLogging", false));
         builder.pop();
 
         builder.push("food_memory");

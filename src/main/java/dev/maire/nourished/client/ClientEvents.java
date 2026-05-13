@@ -93,7 +93,7 @@ public final class ClientEvents {
             return;
         }
 
-        var matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, false);
+        var matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, false, level);
         DietDelta delta = FoodNutritionRegistry.computeDietDelta(
                 stack, level, food.nutrition(), food.saturation(), matchedBars);
 
@@ -141,7 +141,33 @@ public final class ClientEvents {
             lines.add(Component.translatable("nourished.tooltip.fresh")
                     .withStyle(ChatFormatting.GREEN));
         }
-        if (NourishedConfig.get().debugMemoryLogging()) {
+        if (ModuleCache.enableDebugLogging) {
+            var breakdown = diet.getMultiplierBreakdown(itemId, dominantCategory, familyKey, gameTimeMs);
+            float fin = breakdown.finalMultiplier();
+            String itemPct = fin > 1e-6f ? (int) ((breakdown.itemContribution() / fin) * 100) + "%" : "0%";
+            String categoryPct = fin > 1e-6f ? (int) ((breakdown.categoryContribution() / fin) * 100) + "%" : "0%";
+            String familyPct = fin > 1e-6f ? (int) ((breakdown.familyContribution() / fin) * 100) + "%" : "0%";
+
+            lines.add(Component.empty());
+            lines.add(Component.literal("  Weights: item " + String.format(Locale.ROOT, "%.2f", breakdown.itemWeight())
+                            + "  category " + String.format(Locale.ROOT, "%.2f", breakdown.categoryWeight())
+                            + "  family " + String.format(Locale.ROOT, "%.2f", breakdown.familyWeight()))
+                    .withStyle(Style.EMPTY.withColor(0xFF666666)));
+            lines.add(Component.literal("  Item memory:     " + itemPct)
+                    .withStyle(Style.EMPTY.withColor(0xFF666666)));
+            lines.add(Component.literal("  Category (" + (dominantCategory != null ? dominantCategory : "none") + "): " + categoryPct)
+                    .withStyle(Style.EMPTY.withColor(0xFF666666)));
+            lines.add(Component.literal("  Family (" + (familyKey != null ? familyKey : "none") + "): " + familyPct)
+                    .withStyle(Style.EMPTY.withColor(0xFF666666)));
+            lines.add(Component.literal("  Novelty on item path: x" + String.format(Locale.ROOT, "%.3f", breakdown.noveltyContribution()))
+                    .withStyle(Style.EMPTY.withColor(0xFF666666)));
+            lines.add(Component.literal("  Blend: item " + String.format(Locale.ROOT, "%.3f", breakdown.itemContribution())
+                            + "  cat " + String.format(Locale.ROOT, "%.3f", breakdown.categoryContribution())
+                            + "  fam " + String.format(Locale.ROOT, "%.3f", breakdown.familyContribution()))
+                    .withStyle(Style.EMPTY.withColor(0xFF666666)));
+            lines.add(Component.literal("  \u2192 " + (int) (breakdown.finalMultiplier() * 100) + "% nutrition gain")
+                    .withStyle(breakdown.finalMultiplier() < 1.0f ? ChatFormatting.GOLD : ChatFormatting.GREEN));
+        } else if (NourishedConfig.get().debugMemoryLogging()) {
             var breakdown = diet.getMultiplierBreakdown(itemId, dominantCategory, familyKey, gameTimeMs);
             String itemPct = (int) ((breakdown.itemContribution() / breakdown.finalMultiplier()) * 100) + "%";
             String categoryPct = (int) ((breakdown.categoryContribution() / breakdown.finalMultiplier()) * 100) + "%";
@@ -158,24 +184,29 @@ public final class ClientEvents {
                     .withStyle(breakdown.finalMultiplier() < 1.0f ? ChatFormatting.GOLD : ChatFormatting.GREEN));
         }
 
+        String fmt = multiplier < 1.0f ? "%.2f" : "%.1f";
         boolean renderedAny = false;
         for (String key : NutrientRegistry.getKeys()) {
-            float v = delta.nutrients().getOrDefault(key, 0f);
-            if (v < minLine) {
+            float base = delta.nutrients().getOrDefault(key, 0f);
+            if (base < minLine) {
                 continue;
             }
+            float display = base * multiplier;
             renderedAny = true;
             String label = NourishedRegistryUtils.capitalizeFirst(key);
-            String text = "  " + label + "  +" + String.format(Locale.ROOT, "%.1f", v * multiplier);
+            String gain = String.format(Locale.ROOT, fmt, display);
+            String text = "  " + label + "  +" + gain;
             int color = NutrientUiColors.baseColorArgb(key);
             MutableComponent line = Component.literal(text).withStyle(Style.EMPTY.withColor(color));
             lines.add(line);
         }
 
         if (!renderedAny && highestKey != null && highestValue > 0f) {
-            float v = Math.max(0f, delta.nutrients().getOrDefault(highestKey, 0f)) * multiplier;
+            float base = Math.max(0f, delta.nutrients().getOrDefault(highestKey, 0f));
+            float display = base * multiplier;
             String label = NourishedRegistryUtils.capitalizeFirst(highestKey);
-            String text = "  " + label + "  +" + String.format(Locale.ROOT, "%.1f", v);
+            String gain = String.format(Locale.ROOT, fmt, display);
+            String text = "  " + label + "  +" + gain;
             int color = NutrientUiColors.baseColorArgb(highestKey);
             MutableComponent line = Component.literal(text).withStyle(Style.EMPTY.withColor(color));
             lines.add(line);

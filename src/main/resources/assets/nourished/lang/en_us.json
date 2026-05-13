@@ -111,6 +111,8 @@
   "nourished.config.heavyMealNutritionThreshold.desc": "With Spice of Life: Onion, foods with FoodProperties nutrition at or above this value count as heavy meals for the block toggle. mod_compat.json can override this for solonion when that field is set.",
   "nourished.config.blockLightFood": "Block light food at full hunger",
   "nourished.config.blockLightFood.desc": "When true, items tagged nourished:light_food cannot be eaten at full vanilla hunger (including nutrition-only eating).",
+  "config.nourished.enableDebugLogging": "Debug Logging",
+  "config.nourished.enableDebugLogging.desc": "When enabled, writes detailed nutrition diagnostics to config/nourished/debug/",
   "config.nourished.enableToasts": "Enable Toasts",
   "config.nourished.enableToasts.desc": "Show pop-up notifications for nutrient events.",
   "config.nourished.enableFoodTooltips": "Enable Food Tooltips",

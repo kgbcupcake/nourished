@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.util.NourishedValidation;
 import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
 import dev.maire.nourished.tooling.scanner.ClassificationResult;
 import dev.maire.nourished.tooling.scanner.ClassificationSignal;
@@ -22,6 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.fml.loading.FMLPaths;
 
 import javax.annotation.Nullable;
@@ -119,18 +121,15 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             }
         }
 
-        String levelName = mc.getLevelSource() != null ? mc.getLevelSource().getName() : server.getWorldData().getLevelName();
-        Path packRoot = Path.of(
-                FMLPaths.GAMEDIR.get().toAbsolutePath().toString(),
-                "saves",
-                levelName,
-                "datapacks",
-                "nourished-generated"
-        );
+        Path packRoot = server.getWorldPath(LevelResource.DATAPACK_DIR).resolve("nourished-generated");
         Path tagsDir = packRoot.resolve("data").resolve("nourished").resolve("tags").resolve("item").resolve("nutrients");
         String outputPath = packRoot.toAbsolutePath().toString();
 
         try {
+            NourishedValidation.assertPathUnder(
+                    packRoot.normalize(),
+                    server.getWorldPath(LevelResource.ROOT).normalize(),
+                    "writeDatapack");
             int writtenCount = 0;
             Path packMetaPath = packRoot.resolve("pack.mcmeta");
             Files.createDirectories(packMetaPath.getParent());

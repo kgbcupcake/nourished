@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -33,6 +34,25 @@ import java.util.function.Function;
 @ApiStatus.Internal
 public final class RecipeInheritanceResolver {
 
+    /**
+     * One ingredient lookup during recipe inheritance (for debug / telemetry).
+     *
+     * @param ingredientId    ingredient item id
+     * @param depth           recursion depth (0 = direct recipe ingredients)
+     * @param decayFactor     {@code pow(0.5, depth + 1)} applied to this hop
+     * @param nutrientContributions per-nutrient weighted contribution from this hop (after decay and ingredient count split)
+     */
+    public record RecipeInheritanceStep(
+            ResourceLocation ingredientId,
+            int depth,
+            float decayFactor,
+            Map<String, Float> nutrientContributions
+    ) {
+        public RecipeInheritanceStep {
+            nutrientContributions = Map.copyOf(nutrientContributions);
+        }
+    }
+
     private static final int MAX_DEPTH = 2;
     private static final int MAX_INGREDIENTS = 8;
     private static final float DECAY_PER_LEVEL = 0.5f;
@@ -43,7 +63,7 @@ public final class RecipeInheritanceResolver {
 
     public RecipeInheritanceResolver(@Nullable RecipeManager recipeManager) {
         this.recipeManager = recipeManager;
-        this.recipeCache = new HashMap<>();
+        this.recipeCache = new ConcurrentHashMap<>();
     }
 
     /**
@@ -57,6 +77,18 @@ public final class RecipeInheritanceResolver {
             Item item,
             Function<ResourceLocation, ClassificationResult> classifiedLookup
     ) {
+        return resolve(item, classifiedLookup, null);
+    }
+
+    /**
+     * Same as {@link #resolve(Item, Function)}; when {@code traceOut} is non-null, appends a
+     * {@link RecipeInheritanceStep} for each ingredient branch that resolves from a confident classification.
+     */
+    public Map<String, Float> resolve(
+            Item item,
+            Function<ResourceLocation, ClassificationResult> classifiedLookup,
+            @Nullable List<RecipeInheritanceStep> traceOut
+    ) {
         if (recipeManager == null) {
             return Map.of();
         }
@@ -66,14 +98,15 @@ public final class RecipeInheritanceResolver {
             return Map.of();
         }
 
-        return resolveRecursive(itemId, classifiedLookup, 0, new HashMap<>());
+        return resolveRecursive(itemId, classifiedLookup, 0, new HashMap<>(), traceOut);
     }
 
     private Map<String, Float> resolveRecursive(
             ResourceLocation itemId,
             Function<ResourceLocation, ClassificationResult> classifiedLookup,
             int depth,
-            Map<ResourceLocation, Boolean> visited
+            Map<ResourceLocation, Boolean> visited,
+            @Nullable List<RecipeInheritanceStep> traceOut
     ) {
         if (depth >= MAX_DEPTH) {
             return Map.of();
@@ -91,18 +124,24 @@ public final class RecipeInheritanceResolver {
 
         Map<String, Float> contributions = new HashMap<>();
         float decayFactor = (float) Math.pow(DECAY_PER_LEVEL, depth + 1);
+        int n = ingredients.size();
 
         for (ResourceLocation ingredientId : ingredients) {
             ClassificationResult result = classifiedLookup.apply(ingredientId);
             if (result != null && !result.uncertain()) {
+                Map<String, Float> stepContribs = new HashMap<>();
                 for (Map.Entry<String, Float> e : result.scores().entrySet()) {
-                    float contribution = e.getValue() * decayFactor / ingredients.size();
+                    float contribution = e.getValue() * decayFactor / n;
                     contributions.merge(e.getKey(), contribution, Float::sum);
+                    stepContribs.put(e.getKey(), contribution);
+                }
+                if (traceOut != null) {
+                    traceOut.add(new RecipeInheritanceStep(ingredientId, depth, decayFactor, stepContribs));
                 }
             } else {
-                Map<String, Float> inherited = resolveRecursive(ingredientId, classifiedLookup, depth + 1, visited);
+                Map<String, Float> inherited = resolveRecursive(ingredientId, classifiedLookup, depth + 1, visited, traceOut);
                 for (Map.Entry<String, Float> e : inherited.entrySet()) {
-                    contributions.merge(e.getKey(), e.getValue() / ingredients.size(), Float::sum);
+                    contributions.merge(e.getKey(), e.getValue() / n, Float::sum);
                 }
             }
         }

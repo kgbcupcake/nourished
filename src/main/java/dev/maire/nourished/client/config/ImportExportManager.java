@@ -15,6 +15,7 @@ import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.util.NourishedJsonUtils;
+import dev.maire.nourished.core.util.NourishedValidation;
 import dev.maire.nourished.core.reload.NourishedReloadPipeline;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -137,6 +138,9 @@ public final class ImportExportManager {
         }
         String b64 = flat.substring(SHARE_PREFIX.length());
         byte[] decoded = Base64.getDecoder().decode(b64);
+        if (decoded.length > 65536) {
+            throw new IOException("share code payload too large: " + decoded.length + " bytes");
+        }
         String json = gunzipUtf8(decoded);
         JsonObject obj = GSON_COMPACT.fromJson(json, JsonObject.class);
         if (obj == null) {
@@ -371,25 +375,29 @@ public final class ImportExportManager {
         }
         if (o.has("nutrientDecayOverrides") && o.get("nutrientDecayOverrides").isJsonObject()) {
             JsonObject map = o.getAsJsonObject("nutrientDecayOverrides");
+            NourishedValidation.requireBoundedMap(map.asMap(), 64, "applyGeneral.nutrientDecayOverrides");
             for (String key : NutrientRegistry.getKeys()) {
                 if (!map.has(key)) {
                     continue;
                 }
                 ModConfigSpec.DoubleValue spec = c.nutrientDecayRateOverrides().get(key);
                 if (spec != null) {
-                    spec.set(map.get(key).getAsDouble());
+                    double v = map.get(key).getAsDouble();
+                    spec.set(Double.isFinite(v) ? clamp(v, 0d, 1d) : 0d);
                 }
             }
         }
         if (o.has("nutrientCriticalOverrides") && o.get("nutrientCriticalOverrides").isJsonObject()) {
             JsonObject map = o.getAsJsonObject("nutrientCriticalOverrides");
+            NourishedValidation.requireBoundedMap(map.asMap(), 64, "applyGeneral.nutrientCriticalOverrides");
             for (String key : NutrientRegistry.getKeys()) {
                 if (!map.has(key)) {
                     continue;
                 }
                 ModConfigSpec.DoubleValue spec = c.nutrientCriticalThresholdOverrides().get(key);
                 if (spec != null) {
-                    spec.set(map.get(key).getAsDouble());
+                    double v = map.get(key).getAsDouble();
+                    spec.set(Double.isFinite(v) ? clamp(v, 0d, 1d) : 0d);
                 }
             }
         }
@@ -418,27 +426,39 @@ public final class ImportExportManager {
             c.setDefaultEffectDurationTicks(clampInt(o.get("defaultEffectDurationTicks").getAsInt(), 20, 72000));
         }
         if (o.has("definitions") && o.get("definitions").isJsonArray()) {
-            List<EffectRegistry.EffectDef> defs = parseEffectDefs(o.getAsJsonArray("definitions"));
+            JsonArray arr = o.getAsJsonArray("definitions");
+            NourishedValidation.requireBoundedArray(arr, 256, "applyEffects.definitions");
+            List<EffectRegistry.EffectDef> defs = parseEffectDefs(arr);
             EffectRegistry.saveAll(defs);
         }
     }
 
-    private static List<EffectRegistry.EffectDef> parseEffectDefs(JsonArray arr) {
+    @com.google.common.annotations.VisibleForTesting
+    static List<EffectRegistry.EffectDef> parseEffectDefs(JsonArray arr) throws IOException {
         List<EffectRegistry.EffectDef> out = new ArrayList<>();
         for (JsonElement el : arr) {
             if (!el.isJsonObject()) {
                 continue;
             }
             JsonObject obj = el.getAsJsonObject();
+            if (!obj.has("id")) throw new IOException("missing required field: id in effect definition");
+            if (!obj.has("effect")) throw new IOException("missing required field: effect in effect definition");
+            if (!obj.has("nutrient")) throw new IOException("missing required field: nutrient in effect definition");
             String id = obj.get("id").getAsString();
             String effect = obj.get("effect").getAsString();
             String nutrient = obj.get("nutrient").getAsString();
-            String trigger = obj.get("trigger").getAsString();
+            NourishedValidation.requireBoundedString(id, 256, "parseEffectDefs.id");
+            NourishedValidation.requireBoundedString(effect, 256, "parseEffectDefs.effect");
+            NourishedValidation.requireBoundedString(nutrient, 256, "parseEffectDefs.nutrient");
+            String trigger = obj.has("trigger") ? obj.get("trigger").getAsString() : "below";
+            NourishedValidation.requireBoundedString(trigger, 256, "parseEffectDefs.trigger");
             double threshold = NourishedJsonUtils.getOptionalDouble(obj, "threshold", 0.25d);
+            threshold = clamp(threshold, 0d, 1d);
             int amplifier = NourishedJsonUtils.getOptionalInt(obj, "amplifier", 0);
             int durationTicks = NourishedJsonUtils.getOptionalInt(obj, "duration_ticks", 140);
             boolean enabled = NourishedJsonUtils.getOptionalBoolean(obj, "enabled", true);
             double thresholdMax = NourishedJsonUtils.getOptionalDouble(obj, "threshold_max", 1.0d);
+            thresholdMax = clamp(thresholdMax, 0d, 1d);
             boolean ambient = NourishedJsonUtils.getOptionalBoolean(obj, "ambient", true);
             boolean showParticles = NourishedJsonUtils.getOptionalBoolean(obj, "show_particles", false);
             out.add(new EffectRegistry.EffectDef(
@@ -474,6 +494,7 @@ public final class ImportExportManager {
             return;
         }
         JsonArray arr = el.getAsJsonArray();
+        NourishedValidation.requireBoundedArray(arr, 256, "applyFoodValues");
         if (arr.isEmpty()) {
             return;
         }
@@ -483,14 +504,19 @@ public final class ImportExportManager {
             }
             JsonObject obj = row.getAsJsonObject();
             String category = obj.get("category").getAsString();
-            float protein = NourishedJsonUtils.getOptionalFloat(obj, "protein", 0.2f);
-            float carbs = NourishedJsonUtils.getOptionalFloat(obj, "carbs", 0.2f);
-            float fats = NourishedJsonUtils.getOptionalFloat(obj, "fats", 0.2f);
-            float vitamins = NourishedJsonUtils.getOptionalFloat(obj, "vitamins", 0.2f);
-            float hydration = NourishedJsonUtils.getOptionalFloat(obj, "hydration", 0.2f);
+            NourishedValidation.requireBoundedString(category, 256, "applyFoodValues.category");
+            float protein = clampF(NourishedJsonUtils.getOptionalFloat(obj, "protein", 0.2f), 0f, 10f);
+            float carbs = clampF(NourishedJsonUtils.getOptionalFloat(obj, "carbs", 0.2f), 0f, 10f);
+            float fats = clampF(NourishedJsonUtils.getOptionalFloat(obj, "fats", 0.2f), 0f, 10f);
+            float vitamins = clampF(NourishedJsonUtils.getOptionalFloat(obj, "vitamins", 0.2f), 0f, 10f);
+            float hydration = clampF(NourishedJsonUtils.getOptionalFloat(obj, "hydration", 0.2f), 0f, 10f);
             FoodValueRegistry.setCategory(category, protein, carbs, fats, vitamins, hydration);
         }
         FoodValueRegistry.save();
+    }
+
+    private static float clampF(float v, float min, float max) {
+        return Float.isFinite(v) ? Math.min(max, Math.max(min, v)) : min;
     }
 
     private static double clamp(double v, double min, double max) {
@@ -509,11 +535,22 @@ public final class ImportExportManager {
         return baos.toByteArray();
     }
 
-    private static String gunzipUtf8(byte[] data) throws IOException {
+    @com.google.common.annotations.VisibleForTesting
+    static String gunzipUtf8(byte[] data) throws IOException {
+        final int maxBytes = 1_048_576;
         try (GZIPInputStream in = new GZIPInputStream(new ByteArrayInputStream(data));
              Reader r = new InputStreamReader(in, StandardCharsets.UTF_8);
              StringWriter sw = new StringWriter()) {
-            r.transferTo(sw);
+            char[] buf = new char[8192];
+            int total = 0;
+            int n;
+            while ((n = r.read(buf)) != -1) {
+                total += n;
+                if (total > maxBytes) {
+                    throw new IOException("decompressed payload exceeds 1 MiB");
+                }
+                sw.write(buf, 0, n);
+            }
             return sw.toString();
         }
     }

@@ -94,7 +94,7 @@ public final class NourishedConfigScreen {
         addNutrientsCategory(config, builder, entryBuilder, decayOverrides, criticalOverrides);
         addFoodValuesCategory(builder, entryBuilder, foodValuePending);
         addScannerCategory(config, builder, entryBuilder);
-        addAdvancedCategory(config, builder, entryBuilder);
+        addAdvancedCategory(config, builder, entryBuilder, modulePending);
         addCompatibilityCategory(config, builder, entryBuilder, compatPending);
 
         builder.setSavingRunnable(() -> {
@@ -193,7 +193,9 @@ public final class NourishedConfigScreen {
             } else {
                 editableModuleKeys.add(key);
             }
-            groupedEntries.getOrDefault(meta.group, groupedEntries.get("other")).add(entry);
+            if (!"enableDebugLogging".equals(key)) {
+                groupedEntries.getOrDefault(meta.group, groupedEntries.get("other")).add(entry);
+            }
         }
 
         if (!editableModuleKeys.isEmpty()) {
@@ -657,8 +659,29 @@ public final class NourishedConfigScreen {
         addReloadButton(category, eb);
     }
 
-    private static void addAdvancedCategory(NourishedConfig config, ConfigBuilder builder, ConfigEntryBuilder eb) {
+    private static void addAdvancedCategory(
+            NourishedConfig config,
+            ConfigBuilder builder,
+            ConfigEntryBuilder eb,
+            Map<String, AtomicBoolean> modulePending
+    ) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.advanced"));
+
+        AtomicBoolean debugLogPending = modulePending.get("enableDebugLogging");
+        if (debugLogPending != null && !LockRegistry.isLocked("enableDebugLogging")) {
+            var debugEntry = new ModuleToggleListEntry(
+                    moduleToggleTitle("enableDebugLogging"),
+                    moduleToggleDescription("enableDebugLogging"),
+                    debugLogPending,
+                    "other",
+                    null,
+                    modulePending);
+            boolean editable = !(LockRegistry.isServerOnly("enableDebugLogging") && isMultiplayer());
+            if (!editable) {
+                debugEntry.setEditable(false);
+            }
+            category.addEntry(debugEntry);
+        }
 
         if (!LockRegistry.isLocked("calorieDisplayMax")) {
             category.addEntry(
@@ -1552,7 +1575,7 @@ public final class NourishedConfigScreen {
                         continue;
                     }
                     totalFood++;
-                    Map<String, Float> bars = FoodNutritionRegistry.resolveNutrientBars(stack, false);
+                    Map<String, Float> bars = FoodNutritionRegistry.resolveNutrientBars(stack, false, Minecraft.getInstance().level);
                     if (bars != null && !bars.isEmpty()) {
                         classified++;
                     }

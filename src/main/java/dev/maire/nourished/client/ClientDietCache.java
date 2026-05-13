@@ -75,9 +75,9 @@ public class ClientDietCache {
     }
 
     /**
-     * Apply a lightweight delta update — display fields only.
-     * Does NOT touch foodMemory, categoryMemory, familyMemory — these are server-side only
-     * and never exist on the client. The client DietData's memory maps are always empty.
+     * Applies incoming delta from the server: nutrients, calories, and food-memory state used for
+     * client-side previews (e.g. tooltips). Memory maps replace the previous snapshot so
+     * {@link DietData#peekMultiplier} matches the server after each eat or decay sync.
      */
     public static void applyDelta(SyncDietDeltaPayload payload) {
         Snapshot prev = current;
@@ -93,6 +93,13 @@ public class ClientDietCache {
         nextDiet.lastNutrients.putAll(payload.lastNutrients());
         nextDiet.calories = payload.calories();
         nextDiet.maxCalories = payload.maxCalories();
+        nextDiet.foodMemory.clear();
+        nextDiet.foodMemory.putAll(payload.foodMemory());
+        nextDiet.categoryMemory.clear();
+        nextDiet.categoryMemory.putAll(payload.categoryMemory());
+        nextDiet.familyMemory.clear();
+        nextDiet.familyMemory.putAll(payload.familyMemory());
+        nextDiet.lastTickTime = payload.lastTickTime();
         current = Snapshot.fromDelta(nextDiet, payload);
     }
 

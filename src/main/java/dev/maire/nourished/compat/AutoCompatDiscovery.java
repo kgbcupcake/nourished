@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import dev.maire.nourished.api.CompatDefinition;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.util.NourishedValidation;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -136,6 +137,10 @@ public final class AutoCompatDiscovery {
             int foodItemCount,
             Map<ResourceLocation, String> hintedMappings
     ) {
+        if (!NourishedValidation.sanitizeModId(modId)) {
+            Nourished.LOGGER.warn("[Nourished] AutoCompat: invalid modId '{}' — skipping stub write", modId);
+            return;
+        }
         Path stubPath = autoCompatDir.resolve(modId + ".json");
         if (Files.exists(stubPath)) {
             return;

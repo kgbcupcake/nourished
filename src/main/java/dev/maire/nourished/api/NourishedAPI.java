@@ -186,6 +186,11 @@ public final class NourishedAPI {
      */
     public static void registerFoodClassification(ResourceLocation foodId, String nutrientKey, float amount) {
         if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        dev.maire.nourished.core.util.NourishedValidation.requireNonNullId(foodId, "NourishedAPI.registerFoodClassification");
+        dev.maire.nourished.core.util.NourishedValidation.requireFinite(amount, -10f, 10f, "NourishedAPI.registerFoodClassification.amount");
+        if (!net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(foodId)) {
+            org.slf4j.LoggerFactory.getLogger(NourishedAPI.class).warn("[NourishedAPI] registerFoodClassification: item '{}' not found in BuiltInRegistries.ITEM", foodId);
+        }
         NourishedRegistryUtils.requireNutrientKey(nutrientKey, "NourishedAPI.registerFoodClassification");
         dev.maire.nourished.core.nutrition.FoodNutritionRegistry.registerClassification(foodId, nutrientKey, amount);
     }

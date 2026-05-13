@@ -179,6 +179,9 @@ public final class PresetRegistry {
     }
 
     public static ParsedPreset parseFile(Path file) throws IOException {
+        if (Files.size(file) > 65536) {
+            throw new IOException("preset file too large: " + file);
+        }
         String stem = fileNameStem(file);
         try (Reader r = Files.newBufferedReader(file)) {
             return parseReader(stem, file, r);

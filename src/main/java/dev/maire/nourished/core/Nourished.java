@@ -34,8 +34,10 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.handler.ConfigReloadHandler;
 import dev.maire.nourished.core.handler.DietPlayerEvents;
 import dev.maire.nourished.core.handler.FoodEatenHandler;
+import dev.maire.nourished.core.handler.NourishedGuideJoinHandler;
 import dev.maire.nourished.core.handler.NutritionDecayHandler;
 import dev.maire.nourished.core.handler.NutritionEatingHandler;
+import dev.maire.nourished.core.handler.NutritionRecipeServerHandler;
 import dev.maire.nourished.core.handler.NutritionEffectsHandler;
 import dev.maire.nourished.core.handler.SleepBonusHandler;
 import dev.maire.nourished.core.network.ModNetworking;
@@ -82,6 +84,7 @@ public class Nourished {
             ClientEventRegistrar.register(modEventBus);
         }
         modEventBus.addListener(ModNetworking::register);
+        NeoForge.EVENT_BUS.register(new NutritionRecipeServerHandler());
         NeoForge.EVENT_BUS.register(new NutritionEatingHandler());
         NeoForge.EVENT_BUS.register(new FoodEatenHandler());
         NeoForge.EVENT_BUS.register(new NutritionEffectsHandler());
@@ -101,6 +104,7 @@ public class Nourished {
                 NourishedAPIState.close();
             });
         });
+        NeoForge.EVENT_BUS.register(new NourishedGuideJoinHandler());
         NeoForge.EVENT_BUS.register(new DietPlayerEvents());
         NeoForge.EVENT_BUS.register(new SleepBonusHandler());
         NeoForge.EVENT_BUS.register(new ConfigReloadHandler());

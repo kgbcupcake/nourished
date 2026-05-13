@@ -1,5 +1,7 @@
 package dev.maire.nourished.core.diet;
 
+import com.mojang.serialization.Codec;
+
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.FoodMemoryView;
 import dev.maire.nourished.core.impl.DietDataFoodMemoryView;
@@ -26,6 +28,18 @@ public final class DietAttachment {
             ATTACHMENT_TYPES.register("diet", () ->
                     AttachmentType.builder(DietData::new)
                             .serialize(DietData.CODEC)
+                            .build()
+            );
+
+    /**
+     * One-time grant of the Patchouli {@code nourished:nourished_guide} book on first server login
+     * (replaces unreliable {@code give_on_first_join} on NeoForge 1.21.1 singleplayer).
+     */
+    public static final Supplier<AttachmentType<Boolean>> RECEIVED_NOURISHED_GUIDE =
+            ATTACHMENT_TYPES.register("received_nourished_guide", () ->
+                    AttachmentType.<Boolean>builder(() -> Boolean.FALSE)
+                            .serialize(Codec.BOOL)
+                            .copyOnDeath()
                             .build()
             );
 
