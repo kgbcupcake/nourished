@@ -5,7 +5,6 @@ All notable changes to Nourished will be documented here.
 
 ### 🚀 Features
 
-Added
 
 - Recipe inheritance for multi-ingredient foods
   
@@ -59,6 +58,32 @@ Security
 
 - Update food group entries and effects in the Nourished guide
 
+
+## [0.1.6-beta] - 2026-05-13
+
+## 🚀 Features
+
+- Added
+  
+- Expanded all six food group entries with vanilla food source lists, farming tips, and rotation strategy pages
+
+- New Tips & Tricks chapter with Daily Routine, Efficient Farming, Emergency Recovery, Multiplayer & Adventure, and Reading Tooltips entries
+
+- New Compat Mods chapter covering Croptopia, Farmer's Delight, Pam's HarvestCraft 2, Herbs & Harvest, Farm & Charm, Legendary Survival Overhaul, Spice of Life: Onion, and Peak Stamina
+
+- JEI tag search tip explaining nourished:nutrients/ filter
+
+- Cross-link from Your First Day entry to Tips & Tricks chapter
+
+- Changed
+
+- Effects entry in Getting Started expanded with full per-group bonus and penalty breakdown
+
+- Diminishing Returns entry expanded with three-tier DR system explanation and novelty bonus details
+
+
+
+
 ## [0.1.5-beta] - 2026-05-12
 
 ### 🐛 Bug Fixes
@@ -69,11 +94,38 @@ Security
 
 - Improve diminishing returns memory window and decay grace period
 
+
+
+[0.1.4-beta] 
+
+- fix
+-  remove example datapack files shipping with main mod"
+
+
+
+
+
+
+
+
+
 ## [0.1.3-beta] - 2026-05-12
 
 ### 🚜 Refactor
 
 - Simplify DietScreen layout and remove excess legend entries
+
+
+## [Nourished v0.1.2-beta] - 2026-05-11
+
+🐛 Bug Fixes
+
+Clarify blockHeavyMeals and blockLightFood config descriptions for servers without Spice of Life: Onion
+
+
+
+
+
 
 ## [0.1.1-beta] - 2026-05-12
 
