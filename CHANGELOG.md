@@ -7,11 +7,17 @@ All notable changes to Nourished will be documented here.
 
 - Add security group to commit parsers
 
-## [0.1.9-beta] - 2026-05-13
+## [0.1.8-beta] - 2026-05-13
 
 ### 🚀 Features
 
-- Enhance nutrition system with recipe inheritance and debug logging
+- Improved tooltip display in ClientEvents and NourishedFoodTooltipHelper to handle unclassified items.
+
+- Refined logic for determining dominant nutrient categories in food items.
+
+- Added new localization entry for unclassified tooltip in en_us.json."
+
+
 
 ## [0.1.7-beta] - 2026-05-13
 
