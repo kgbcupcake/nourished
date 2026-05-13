@@ -69,11 +69,12 @@ final class FoodNutrientPipeline {
             externalClassification.forEach((key, value) -> nutrientDeltas.merge(key, value, Float::sum));
         }
 
-        String dominantCategory = matchedBars.isEmpty() ? "grains" :
-                matchedBars.entrySet().stream()
+        String dominantCategory = matchedBars.isEmpty()
+                ? null
+                : matchedBars.entrySet().stream()
                         .max(Map.Entry.comparingByValue())
                         .map(Map.Entry::getKey)
-                        .orElse("grains");
+                        .orElse(null);
         String familyKey = FoodFamilyResolver.resolve(
                 NourishedRegistryUtils.itemKey(stack));
 

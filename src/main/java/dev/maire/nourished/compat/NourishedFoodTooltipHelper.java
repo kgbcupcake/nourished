@@ -55,11 +55,8 @@ public final class NourishedFoodTooltipHelper {
         for (float weight : matchedBars.values()) {
             matchedWeightTotal += Math.max(0f, weight);
         }
-        if (matchedWeightTotal <= 0f) {
-            matchedWeightTotal = 1f;
-        }
         float burst = food.nutrition() * 0.008f + food.saturation() * 0.010f + 0.004f;
-        float totalBurst = burst * matchedWeightTotal;
+        float totalBurst = burst * Math.max(matchedWeightTotal, 1e-6f);
         for (Map.Entry<String, Float> entry : matchedBars.entrySet()) {
             float weight = Math.max(0f, entry.getValue());
             if (weight <= 0f) {
@@ -69,6 +66,10 @@ public final class NourishedFoodTooltipHelper {
         }
 
         lines.add(Component.literal("✦ Nourished").withStyle(ChatFormatting.GOLD));
+
+        if (matchedBars.isEmpty()) {
+            lines.add(Component.translatable("nourished.tooltip.unclassified").withStyle(ChatFormatting.GRAY));
+        }
 
         for (Map.Entry<String, Float> entry : nutrients.entrySet()) {
             float value = entry.getValue();
