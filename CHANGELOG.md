@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to Nourished will be documented here.
+## [0.1.7-beta.1] - 2026-05-13
+
+### 🚀 Features
+
+- Enhance nutrition system with recipe inheritance and debug logging
+
 ## [0.1.7-beta] - 2026-05-13
 
 ### 📖 Documentation
