@@ -166,14 +166,14 @@ public final class ClientEvents {
             }
             renderedAny = true;
             String label = NourishedRegistryUtils.capitalizeFirst(key);
-            String text = "  " + label + "  +" + String.format(Locale.ROOT, "%.1f", v);
+            String text = "  " + label + "  +" + String.format(Locale.ROOT, "%.1f", v * multiplier);
             int color = NutrientUiColors.baseColorArgb(key);
             MutableComponent line = Component.literal(text).withStyle(Style.EMPTY.withColor(color));
             lines.add(line);
         }
 
         if (!renderedAny && highestKey != null && highestValue > 0f) {
-            float v = Math.max(0f, delta.nutrients().getOrDefault(highestKey, 0f));
+            float v = Math.max(0f, delta.nutrients().getOrDefault(highestKey, 0f)) * multiplier;
             String label = NourishedRegistryUtils.capitalizeFirst(highestKey);
             String text = "  " + label + "  +" + String.format(Locale.ROOT, "%.1f", v);
             int color = NutrientUiColors.baseColorArgb(highestKey);
