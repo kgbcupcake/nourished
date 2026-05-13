@@ -53,5 +53,6 @@ commit_parsers = [
   { message = "^content", group = "🍎 Content" },
   { message = "^tags",    group = "🏷️ Food Tags" },
   { message = "^docs",    group = "📖 Documentation" },
+  { message = "^security", group = "🔒 Security" },
   { message = ".*",       skip = true },
 ]
