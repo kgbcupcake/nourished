@@ -1,19 +1,6 @@
 # Changelog
 
 All notable changes to Nourished will be documented here.
-
-## [0.1.8-beta]
-
-Updated version in build.gradle to 0.1.8-beta.
-
-Improved tooltip display in ClientEvents and NourishedFoodTooltipHelper to handle unclassified items.
-
-Refined logic for determining dominant nutrient categories in food items.
-
-Added new localization entry for unclassified tooltip in en_us.json."
-
-
-
 ## [0.1.7-beta] - 2026-05-13
 
 ### 📖 Documentation
