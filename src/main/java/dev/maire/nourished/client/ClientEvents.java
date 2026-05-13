@@ -1,6 +1,7 @@
 package dev.maire.nourished.client;
 
 import java.util.Locale;
+import java.util.Map;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -12,12 +13,10 @@ import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry.DietDelta;
-import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.util.NourishedItemTags;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -101,11 +100,13 @@ public final class ClientEvents {
         final float minLine = 0.05f;
         String highestKey = null;
         float highestValue = Float.NEGATIVE_INFINITY;
-        for (String key : NutrientRegistry.getKeys()) {
-            float v = delta.nutrients().getOrDefault(key, 0f);
-            if (v > highestValue) {
-                highestValue = v;
-                highestKey = key;
+        if (!matchedBars.isEmpty()) {
+            for (String key : NutrientRegistry.getKeys()) {
+                float v = delta.nutrients().getOrDefault(key, 0f);
+                if (v > highestValue) {
+                    highestValue = v;
+                    highestKey = key;
+                }
             }
         }
 
@@ -113,9 +114,18 @@ public final class ClientEvents {
         lines.add(Component.empty());
         lines.add(Component.literal("✦ Nourished").withStyle(ChatFormatting.GOLD));
 
+        if (matchedBars.isEmpty()) {
+            lines.add(Component.translatable("nourished.tooltip.unclassified").withStyle(ChatFormatting.GRAY));
+        }
+
         String itemId = NourishedRegistryUtils.itemKey(stack).toString();
         DietData diet = ClientDietCache.get();
-        String dominantCategory = highestKey; // already resolved above from matchedBars
+        String dominantCategory = matchedBars.isEmpty()
+                ? null
+                : matchedBars.entrySet().stream()
+                        .max(Map.Entry.comparingByValue())
+                        .map(Map.Entry::getKey)
+                        .orElse(null);
         String familyKey = FoodFamilyResolver.resolve(
                 NourishedRegistryUtils.itemKey(stack));
         long gameTimeMs = ClientDietCache.get().lastTickTime > 0
@@ -140,7 +150,7 @@ public final class ClientEvents {
             lines.add(Component.empty());
             lines.add(Component.literal("  Item memory:     " + itemPct)
                     .withStyle(Style.EMPTY.withColor(0xFF666666)));
-            lines.add(Component.literal("  Category (" + dominantCategory + "): " + categoryPct)
+            lines.add(Component.literal("  Category (" + (dominantCategory != null ? dominantCategory : "none") + "): " + categoryPct)
                     .withStyle(Style.EMPTY.withColor(0xFF666666)));
             lines.add(Component.literal("  Family (" + (familyKey != null ? familyKey : "none") + "): " + familyPct)
                     .withStyle(Style.EMPTY.withColor(0xFF666666)));
@@ -162,7 +172,7 @@ public final class ClientEvents {
             lines.add(line);
         }
 
-        if (!renderedAny && highestKey != null) {
+        if (!renderedAny && highestKey != null && highestValue > 0f) {
             float v = Math.max(0f, delta.nutrients().getOrDefault(highestKey, 0f));
             String label = NourishedRegistryUtils.capitalizeFirst(highestKey);
             String text = "  " + label + "  +" + String.format(Locale.ROOT, "%.1f", v);

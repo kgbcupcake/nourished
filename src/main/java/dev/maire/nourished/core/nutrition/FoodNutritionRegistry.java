@@ -15,6 +15,10 @@ import com.mojang.logging.LogUtils;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.tooling.scanner.ClassificationResult;
+import dev.maire.nourished.tooling.scanner.FoodClassifier;
+import dev.maire.nourished.tooling.scanner.ScanCache;
+import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
 
 import net.minecraft.core.component.DataComponents;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
@@ -26,13 +30,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 /**
- * Food nutrient values and diet-bar classification are driven only by datapack item tags under
- * {@code data/nourished/tags/item/nutrients/} (see {@code nourished:nutrients/*}).
+ * Food nutrient values and diet-bar classification primarily use datapack item tags under
+ * {@code data/nourished/tags/item/nutrients/} (see {@code nourished:nutrients/*}). Items without
+ * matching tags may resolve bars via {@link #resolveNutrientBars} (scanner cache and classifier).
  */
 @ApiStatus.Internal
 public class FoodNutritionRegistry {
 
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    /** Scores at or below this are treated as no signal (unknown classification). */
+    private static final float CLASSIFICATION_SCORE_EPS = 1e-5f;
 
     private static final Set<String> WARNED_ITEMS = new HashSet<>();
 
@@ -60,8 +68,8 @@ public class FoodNutritionRegistry {
     public record DietDelta(float calories, Map<String, Float> nutrients) {}
 
     /**
-     * Called after {@link NutrientRegistry#load()} (and on reload). Classification uses only datapack tags;
-     * nothing is rebuilt here.
+     * Called after {@link NutrientRegistry#load()} (and on reload). No registry rebuild here;
+     * tagless bar resolution uses the scanner cache and classifier at query time in {@link #resolveNutrientBars}.
      */
     public static void init() {
         // Intentionally empty — kept for API compatibility with {@link NutrientRegistry#reload()}.
@@ -70,9 +78,10 @@ public class FoodNutritionRegistry {
     /**
      * Resolves all matching diet nutrient keys for an item stack using {@code nourished:nutrients/*} tags.
      * Iterates over NutrientRegistry.getAll() dynamically.
-     * If none match, defaults to first registered nutrient.
+     * If none match, uses {@link UnassignedFoodScanner} cache and/or a lightweight {@link FoodClassifier} pass
+     * (no recipe inheritance, no namespace peers). If classification has no usable signal, returns an empty map.
      *
-     * @param warnIfUnmatched when true, logs a WARN for modpack authors when defaulting
+     * @param warnIfUnmatched when true, logs a WARN for modpack authors when no nutrient tags match
      * @return map of nutrient bar key -> match weight
      */
     public static Map<String, Float> resolveNutrientBars(ItemStack stack, boolean warnIfUnmatched) {
@@ -110,13 +119,103 @@ public class FoodNutritionRegistry {
             }
         }
 
-        List<String> keys = NutrientRegistry.getKeys();
-        String defaultKey = keys.stream().findFirst().orElse("");
-        if (defaultKey.isEmpty()) {
-            return matches;
+        return resolveUntaggedNutrientBars(item, itemId);
+    }
+
+    private static float scannerConfidenceSpreadThreshold() {
+        try {
+            return (float) NourishedConfig.get().scannerConfidenceSpreadThreshold();
+        } catch (IllegalStateException ignored) {
+            return 0f;
         }
-        matches.put(defaultKey, 1.0f);
-        return matches;
+    }
+
+    /**
+     * Tagless resolution: scan cache first, then inline classifier (single pass, no recipe/peers).
+     */
+    private static Map<String, Float> resolveUntaggedNutrientBars(Item item, ResourceLocation itemId) {
+        List<String> validKeys = NutrientRegistry.getKeys();
+        if (validKeys.isEmpty()) {
+            return Map.of();
+        }
+        Set<String> validKeySet = Set.copyOf(validKeys);
+
+        ScanCache cache = UnassignedFoodScanner.getCache();
+        ClassificationResult cached = cache != null ? cache.get(itemId) : null;
+        if (cached != null) {
+            return nutrientBarsFromClassification(cached, validKeySet);
+        }
+
+        FoodProperties food = item.components().get(DataComponents.FOOD);
+        if (food == null || food.nutrition() <= 0) {
+            return new LinkedHashMap<>();
+        }
+
+        FoodClassifier classifier = new FoodClassifier(
+                validKeys,
+                false,
+                scannerConfidenceSpreadThreshold(),
+                null
+        );
+        ClassificationResult result = classifier.classify(item, id -> null, Map.of());
+        return nutrientBarsFromClassification(result, validKeySet);
+    }
+
+    /**
+     * Maps a classification to bar weights: confident → dominant only; uncertain → normalized positive scores;
+     * no usable score mass → empty map.
+     */
+    private static Map<String, Float> nutrientBarsFromClassification(
+            ClassificationResult result,
+            Set<String> validNutrientKeys
+    ) {
+        float maxScore = 0f;
+        for (String key : validNutrientKeys) {
+            maxScore = Math.max(maxScore, result.scores().getOrDefault(key, 0f));
+        }
+        if (maxScore <= CLASSIFICATION_SCORE_EPS) {
+            return new LinkedHashMap<>();
+        }
+
+        if (!result.uncertain()) {
+            String dominant = result.dominant();
+            if (dominant != null
+                    && validNutrientKeys.contains(dominant)
+                    && result.scores().getOrDefault(dominant, 0f) > CLASSIFICATION_SCORE_EPS) {
+                Map<String, Float> single = new LinkedHashMap<>();
+                single.put(dominant, 1.0f);
+                return single;
+            }
+        }
+
+        float noiseFloor = maxScore * 0.02f;
+        float sum = 0f;
+        for (String key : validNutrientKeys) {
+            float s = Math.max(0f, result.scores().getOrDefault(key, 0f));
+            if (s >= noiseFloor) {
+                sum += s;
+            }
+        }
+        if (sum <= CLASSIFICATION_SCORE_EPS) {
+            String dominant = result.dominant();
+            if (dominant != null
+                    && validNutrientKeys.contains(dominant)
+                    && result.scores().getOrDefault(dominant, 0f) > CLASSIFICATION_SCORE_EPS) {
+                Map<String, Float> single = new LinkedHashMap<>();
+                single.put(dominant, 1.0f);
+                return single;
+            }
+            return new LinkedHashMap<>();
+        }
+
+        Map<String, Float> weighted = new LinkedHashMap<>();
+        for (String key : validNutrientKeys) {
+            float s = Math.max(0f, result.scores().getOrDefault(key, 0f));
+            if (s >= noiseFloor) {
+                weighted.put(key, s / sum);
+            }
+        }
+        return weighted;
     }
 
     /**
@@ -158,13 +257,12 @@ public class FoodNutritionRegistry {
         for (float weight : matchedBars.values()) {
             matchedWeightTotal += Math.max(0f, weight);
         }
-        String defaultKey = NutrientRegistry.getKeys().stream().findFirst().orElse("");
-        if (defaultKey.isEmpty()) {
-            return new DietDelta(calories, Map.of());
-        }
         if (matchedWeightTotal <= 0f) {
-            matchedBars = Map.of(defaultKey, 1.0f);
-            matchedWeightTotal = 1.0f;
+            Map<String, Float> zeros = new HashMap<>();
+            for (String key : NutrientRegistry.getKeys()) {
+                zeros.put(key, 0f);
+            }
+            return new DietDelta(calories, zeros);
         }
 
         float burst = foodNutrition * 0.008f + foodSaturation * 0.010f + 0.004f;
@@ -215,7 +313,7 @@ public class FoodNutritionRegistry {
     private static String resolvePrimaryNutrientBar(ItemStack stack, boolean warnIfUnmatched) {
         Map<String, Float> bars = resolveNutrientBars(stack, warnIfUnmatched);
         if (!bars.isEmpty()) return bars.keySet().iterator().next();
-        return NutrientRegistry.getKeys().stream().findFirst().orElse("");
+        return "";
     }
 
     private static float configuredNutrientGainScale() {
