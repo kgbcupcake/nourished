@@ -1,45 +1,31 @@
 🌿 Nourished — Food variety finally matters.
 
-Stop surviving on nothing but steak and golden carrots.
+ I got sick of Minecraft food system, and I know that there are other nutrition mods out there, but none of them did what I wanted them to do or they weren’t updated for modern Minecraft so I decided to build my own nutritional mod.
+ 
+The project was built with AI assistance, but the architecture and systems design were designed entirely by me.
 
-Nourished adds a lightweight nutrition system that rewards eating a wider variety of food — naturally, through gameplay, without turning survival into a chore. Keep your six food groups fed and gain passive bonuses. Let them slip and you'll start to feel it.
-
-No micromanagement. No realism simulator. No spreadsheets.
-
-Just eat.
 
 ![Main Menu](Assets/MainGui.png)
 
 ---
 
-## 🎮 What it feels like
 
-You've been living off bread for days. Your grains bar is full — but proteins and fruits have quietly bottomed out. Suddenly Mining Fatigue kicks in. Unluck too.
+❤️ What you gain
+When you have all six food groups are above 75%, you get:
 
-You didn't notice it happening. That's the point.
-
-Later you eat some cooked salmon and a handful of berries you found while exploring. Within minutes the penalties disappear and your diet starts recovering naturally.
-
-No constant menu management. Just eating something different.
-
----
-
-
-## ❤️ What you gain
-
-When all six food groups stay above 75%, you get:
-
-- **Health Boost I** — passively while balanced
-- **Regeneration I** — passively while balanced
+Health Boost I — passively while balanced
+Regeneration I — passively while balanced
 
 Let any single group drop below 25% and a debuff kicks in:
 
 | Group | Neglect Penalty |
-|-------|----------------|
+|---|---|
 | 🌾 Grains | Weakness I |
 | 🥦 Vegetables | Slowness I |
 | 🥩 Proteins | Mining Fatigue I |
 | 🍎 Fruits | Unluck I |
+| 🍬 Sugars | — |
+| 🥛 Dairy | — |
 
 ---
 
@@ -52,6 +38,17 @@ Both behaviors are configurable: `blockHeavyMeals` and `blockLightFood` toggles 
 All effects are fully configurable and can be disabled per-module.
 
 Diminishing returns apply - eating the same food repeatedly gives less credit each time, encouraging real variety.
+
+Sugars and Dairy have no penalty effect by default — these groups are tracked and affect your balance score but do not apply a debuff when depleted. This is configurable.
+
+---
+
+## 🍽️ Eating at full hunger
+
+Vanilla hunger prevents you from eating at full hunger, so I implemented a system
+
+Both behaviors are configurable: `blockHeavyMeals` and `blockLightFood` toggles give server admins full control.
+
 ---
 
 
