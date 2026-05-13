@@ -1,0 +1,34 @@
+{
+  "name": "Croptopia",
+  "category": "nourished:compat_mods",
+  "icon": "croptopia:strawberry",
+  "flag": "mod:croptopia",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Croptopia",
+      "text": "Croptopia massively expands the crop roster and touches every food group. Its biggest impact is on $(bold)Fruits$() and $(bold)Vegetables$(), where it adds dozens of new families that make rotation trivially easy.\n\nWith Croptopia installed, maintaining a diverse diet becomes natural rather than deliberate."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Fruits — Croptopia",
+      "text": "Croptopia adds many distinct fruit families. Key ones to grow:\n\n$(bold)Strawberry$() — fast-growing, excellent nutrition.\n$(bold)Peach / Mango / Kiwi$() — tree fruits, slower but high value.\n$(bold)Grape$() — vine crop; good density per plot.\n$(bold)Pineapple$() — tropical; high nutrition per harvest.\n$(bold)Tomato$() — fast, pairs well with vegetable rotation."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Vegetables — Croptopia",
+      "text": "Croptopia vegetable additions include:\n\n$(bold)Corn$() — high-yield crop; excellent base vegetable.\n$(bold)Onion / Leek$() — fast-growing alliums; distinct family.\n$(bold)Spinach / Lettuce$() — leafy greens; quick crop cycle.\n$(bold)Pepper / Chili$() — spicy vegetables; unique family.\n$(bold)Artichoke / Asparagus$() — slow but high nutrition value."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Proteins & Grains",
+      "text": "Croptopia also adds to Proteins and Grains:\n\n$(bold)Almonds / Peanuts / Cashews$() — nut-family proteins; no animal farm needed.\n$(bold)Tofu$() — plant-based protein made from soybeans.\n$(bold)Rice$() — adds a Grains family distinct from wheat.\n$(bold)Oats / Corn Flour$() — alternative grain crops.\n\nNuts make a great supplemental protein for players who prefer less combat-heavy farming."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Rotation Advice",
+      "text": "With Croptopia, the main risk is $(bold)over-focusing$() on a few favourite crops and ignoring the rest. The mod gives you so many options that it is easy to default to strawberries for Fruits every day.\n\nSet up a multi-crop farm covering at least 3 distinct families per group. Croptopia's crop variety is only an advantage if you actually use it."
+    }
+  ]
+}

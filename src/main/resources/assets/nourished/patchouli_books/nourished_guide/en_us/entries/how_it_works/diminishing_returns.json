@@ -11,8 +11,28 @@
     },
     {
       "type": "patchouli:text",
+      "title": "How It Works",
+      "text": "Each food item tracks a decayed eat count. The more times you eat it in a given window, the lower your multiplier drops — from $(#52c252)full or bonus$() for fresh foods down to a floor of roughly $(#e05252)15%$() for heavily repeated ones.\n\nThe multiplier applies to all nutrition that food would normally give, so saturated foods become nearly worthless."
+    },
+    {
+      "type": "patchouli:text",
       "title": "How It Resets",
       "text": "Diminishing returns are tracked per food item and reset each in-game day. By the next morning, every food is back to full nutritional value.\n\nThe best strategy is to rotate through several different foods within each group rather than eating one food to exhaustion."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Food Families & DR",
+      "text": "Diminishing returns are tracked at three levels simultaneously:\n\n$(bold)Item level$() — specific food (e.g. Apple).\n$(bold)Family level$() — food family (e.g. Apple family).\n$(bold)Category level$() — food group (e.g. Fruits).\n\nEating many different apple-type foods (apple, golden apple, enchanted apple) still accumulates family-level diminishing returns. Switch to melons or berries for true variety."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "The Novelty Bonus",
+      "text": "The first time you eat a completely $(#52c252)new food$() — one you have not eaten recently — you receive a $(#52c252)novelty bonus$() that pushes the multiplier slightly above 1.0.\n\nThis incentivizes genuinely diverse diets. Eating a food you have never had today gives more nutrition than eating a familiar one. The tooltip will show $(#52c252)Fresh$() when the novelty bonus is active."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Checking Your Status",
+      "text": "The food tooltip shows your current freshness for any item:\n\n$(#52c252)Fresh$() — full or bonus nutrition, first eat today.\n$(#E8C24F)Reduced$() — diminishing returns active.\n$(#e05252)Saturated$() — near-floor nutrition, heavily repeated.\n\nCheck this before eating if you are trying to efficiently top up a specific bar."
     }
   ]
 }

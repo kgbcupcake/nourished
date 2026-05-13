@@ -11,18 +11,38 @@
       "text": "Dairy foods strengthen bones and body. $(#e05252)Penalty:$() reduced knockback resistance when depleted. $(#52c252)Bonus:$() increased armor toughness when maintained. A single cow pen keeps this group topped up easily."
     },
     {
+      "type": "patchouli:text",
+      "title": "Vanilla Dairy Sources",
+      "text": "$(bold)Milk Bucket$() — the primary vanilla dairy source. Bucket a cow whenever passing by.\n\nVanilla has only one dairy item, which means this group has almost no rotation options without a food mod installed. The upside: there is nothing to overthink. Keep a cow, bucket regularly."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Armor Toughness Bonus",
+      "text": "The Dairy bonus — increased armor toughness — makes incoming damage more predictable and reduces the effectiveness of high-damage hits.\n\nThis makes Dairy especially valuable in combat-heavy playthroughs. Players who fight frequently or play on hard difficulty should treat this group as a high priority."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Knockback Resistance Penalty",
+      "text": "The Dairy penalty — reduced knockback resistance — means depleted Dairy makes you easier to push around in combat. This is especially dangerous around ledges, lava, or enemies that spam attacks.\n\nKeep this group above zero before entering any dungeon or boss fight."
+    },
+    {
       "type": "patchouli:spotlight",
       "item": "herbsandharvest:aged_swiss",
       "flag": "mod:herbsandharvest",
       "title": "Dairy — Herbs & Harvest",
-      "text": "Herbs & Harvest adds aged cheeses including Swiss, cheddar, and brie. These provide significantly higher dairy nutrition than plain milk and are worth crafting once your farm is established."
+      "text": "Herbs & Harvest adds aged cheeses including Swiss, cheddar, and brie. These provide significantly higher dairy nutrition than plain milk and introduce distinct cheese families for rotation. See the $(bold)Compat Mods$() chapter for more."
     },
     {
       "type": "patchouli:spotlight",
       "item": "minecraft:milk_bucket",
       "flag": "!mod:herbsandharvest",
       "title": "Dairy — Vanilla",
-      "text": "Without Herbs & Harvest, milk bucket is your primary dairy source. Keep at least one cow nearby and bucket up regularly — it is one of the easiest groups to maintain in a vanilla world."
+      "text": "Without Herbs & Harvest, milk bucket is your only dairy source. Since there is no rotation possible, diminishing returns do not apply the same way — just bucket a cow every morning and evening and this group stays healthy with minimal effort."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Farming Tips",
+      "text": "Two cows is the minimum for a sustainable dairy setup — one to breed from, one to milk. Three or more ensures you always have milk available without waiting.\n\nKeep your cow pen close to your base. Dairy is the easiest group to maintain once you have any cows at all — the challenge is remembering to actually bucket them each day."
     }
   ]
 }

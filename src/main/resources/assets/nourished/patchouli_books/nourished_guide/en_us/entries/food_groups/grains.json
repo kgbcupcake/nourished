@@ -11,10 +11,30 @@
       "text": "Grains are staple foods that form the backbone of any diet. $(#e05252)Penalty:$() reduced hunger restoration when depleted. $(#52c252)Bonus:$() faster experience gain when maintained. Bread is your most reliable source."
     },
     {
+      "type": "patchouli:text",
+      "title": "Vanilla Grain Sources",
+      "text": "$(bold)Bread$() — crafted from 3 wheat; the most cost-efficient grain per crop.\n$(bold)Cookie$() — 8 cookies per craft; high volume, lower nutrition per piece.\n$(bold)Cake$() — placed block; each slice gives grain nutrition. Good for group eating.\n$(bold)Pumpkin Pie$() — excellent nutrition value; worth the pumpkin investment."
+    },
+    {
       "type": "patchouli:spotlight",
       "item": "minecraft:pumpkin_pie",
       "title": "Grains — Baked Goods",
-      "text": "Pumpkin pie and other baked goods also count toward Grains. They provide higher nutrition values than plain bread, making them worth crafting once you have a reliable pumpkin and sugar supply."
+      "text": "Pumpkin pie and other baked goods also count toward Grains. They provide higher nutrition values than plain bread, making them worth crafting once you have a reliable pumpkin and sugar supply.\n\nKeep a pumpkin farm and you always have access to pie as a high-value grain top-up."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Farming Tips",
+      "text": "Wheat is the most fundamental farm crop and the backbone of the Grains group. A moderate wheat farm covers this group indefinitely with bread alone.\n\nAutomating a bread farm — harvest wheat, craft bread, store — is one of the easiest and most impactful nutrition automations you can build early in a world."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Rotation Strategy",
+      "text": "Bread, cookie, and pumpkin pie are all distinct grain families. Rotating between them gives better nutrition than eating only bread each day.\n\nCake is a special case — each slice of the same cake is the same item, so eating an entire cake counts as eating the same food repeatedly. Pair cake slices with other grain foods on the same day for best efficiency."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Experience Bonus",
+      "text": "The Grains bonus — faster experience gain — is one of the most impactful in the game for combat and enchanting progression.\n\nPrioritizing Grains early is especially worthwhile if you plan to enchant gear or grind XP. The bonus stacks with other XP sources and applies passively while it is active."
     }
   ]
 }

@@ -38,6 +38,11 @@
       "type": "patchouli:text",
       "title": "End of Day One",
       "text": "Sleep when all six bars are above their threshold and wake up with the $(#52c252)Sleep Bonus$(). This is the ideal daily rhythm Nourished is designed around.\n\nWith a bit of preparation, staying balanced becomes second nature."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Next Steps",
+      "text": "Once you are past day one, check out the $(bold)Tips & Tricks$() chapter for deeper strategies:\n\n$(bold)Daily Routine$() — the ideal loop for keeping all bars healthy.\n$(bold)Efficient Farming$() — the minimum farm that covers all six groups.\n$(bold)Emergency Recovery$() — what to do when multiple bars crash.\n$(bold)Reading Tooltips$() — food tooltips and JEI tag search."
     }
   ]
 }

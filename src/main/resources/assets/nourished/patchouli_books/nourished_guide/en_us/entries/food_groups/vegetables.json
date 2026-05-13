@@ -11,18 +11,38 @@
       "text": "Vegetables are hearty, grounding foods. $(#e05252)Penalty:$() reduced movement speed when depleted. $(#52c252)Bonus:$() improved hunger saturation when maintained. Carrots, potatoes, and beetroot all qualify."
     },
     {
+      "type": "patchouli:text",
+      "title": "Vanilla Vegetable Sources",
+      "text": "$(bold)Carrot$() — found in village farms or zombie drops; very easy to obtain early.\n$(bold)Potato$() — also found in villages; bake for higher nutrition value.\n$(bold)Baked Potato$() — cook any potato for a significant nutrition boost.\n$(bold)Beetroot$() — grown from seeds; lower yield than carrots but still reliable."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Golden Carrot",
+      "text": "$(bold)Golden Carrot$() is the single highest-nutrition vanilla vegetable. It fills the bar noticeably more than a plain carrot and also provides excellent hunger saturation.\n\nIf you have a gold surplus, a small stock of golden carrots makes a great emergency top-up for the Vegetables group."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Farming Tips",
+      "text": "Carrots and potatoes are the most efficient vanilla vegetables to farm — they replant themselves and grow quickly with irrigation.\n\nA mixed row of carrots, potatoes, and beetroot covers three distinct vegetable families. Plant them side by side in alternating rows to make rotating your diet effortless."
+    },
+    {
       "type": "patchouli:spotlight",
       "item": "farm_and_charm:tomato",
       "flag": "mod:farm_and_charm",
       "title": "Vegetables — Farm & Charm",
-      "text": "Farm & Charm adds tomatoes, onions, peppers, and more. Growing these alongside vanilla crops gives excellent variety within the Vegetables group and makes maintaining it effortless."
+      "text": "Farm & Charm adds tomatoes, onions, peppers, and more. These introduce new vegetable families and significantly expand rotation options. See the $(bold)Compat Mods$() chapter for the full Farm & Charm food list."
     },
     {
       "type": "patchouli:spotlight",
       "item": "minecraft:beetroot",
       "flag": "!mod:farm_and_charm",
       "title": "Vegetables — Vanilla",
-      "text": "Without Farm & Charm, beetroot is your best secondary vegetable alongside carrots and potatoes. A small mixed crop farm covers this group reliably from early game onward."
+      "text": "Without Farm & Charm, beetroot is your best secondary vegetable alongside carrots and potatoes. A small mixed crop farm covers this group reliably from early game onward.\n\nBeetroot soup counts as Vegetables and provides more nutrition per craft than raw beetroot alone."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Rotation Strategy",
+      "text": "The main vanilla vegetable families are Carrot, Potato, and Beetroot. Rotating through all three maximizes your nutrition gain compared to eating only one type.\n\nNoting that $(bold)baked potato$() and $(bold)raw potato$() share a family — cooking improves nutrition value but does not count as variety. Use both baked and raw in a pinch, but branch out to carrots and beetroot for best results."
     }
   ]
 }
