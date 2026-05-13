@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to Nourished will be documented here.
+## [0.1.5-beta.1] - 2026-05-13
+
+### 🚜 Refactor
+
+- Update food group entries and effects in the Nourished guide
+
 ## [0.1.5-beta] - 2026-05-12
 
 ### 🐛 Bug Fixes
