@@ -1,8 +1,10 @@
 🌿 Nourished — Food variety finally matters.
 
- I got sick of Minecraft food system, and I know that there are other nutrition mods out there, but none of them did what I wanted them to do or they weren’t updated for modern Minecraft so I decided to build my own nutritional mod.
- 
+I got sick of Minecraft's food system. There are other nutrition mods out there, but none of them did what I wanted or were updated for modern Minecraft, so I decided to build my own.
+
 The project was built with AI assistance, but the architecture and systems design were designed entirely by me.
+
+
 
 
 ![Main Menu](Assets/MainGui.png)
@@ -16,7 +18,7 @@ When you have all six food groups are above 75%, you get:
 Health Boost I — passively while balanced
 Regeneration I — passively while balanced
 
-Let any single group drop below 25% and a debuff kicks in:
+When all six food groups are above 75%, you get:
 
 | Group | Neglect Penalty |
 |---|---|
@@ -45,7 +47,7 @@ Sugars and Dairy have no penalty effect by default — these groups are tracked 
 
 ## 🍽️ Eating at full hunger
 
-Vanilla hunger prevents you from eating at full hunger, so I implemented a system
+Vanilla hunger prevents eating at full hunger, so Nourished allows foods to still provide nutrition even when your hunger bar is full.
 
 Both behaviors are configurable: `blockHeavyMeals` and `blockLightFood` toggles give server admins full control.
 
