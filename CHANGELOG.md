@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to Nourished will be documented here.
+## [0.1.9-beta.1] - 2026-05-13
+
+### 🚀 Features
+
+- Add security group to commit parsers
+
 ## [0.1.9-beta] - 2026-05-13
 
 ### 🚀 Features
