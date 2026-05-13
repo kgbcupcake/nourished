@@ -3,6 +3,16 @@
 All notable changes to Nourished will be documented here.
 ## [0.1.5-beta.1] - 2026-05-13
 
+### 📖 Documentation
+
+- Update Patchouli guide
+
+
+### 🚀 Features
+
+- Add new food items to grains and proteins categories
+
+
 ### 🚜 Refactor
 
 - Update food group entries and effects in the Nourished guide
