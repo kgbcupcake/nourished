@@ -5,13 +5,43 @@ All notable changes to Nourished will be documented here.
 
 ### 🚀 Features
 
-- Add security group to commit parsers
+Added
 
-## [0.1.9-beta] - 2026-05-13
+- Recipe inheritance for multi-ingredient foods
+  
+- Debug logging system with classifier accuracy tracking
+
+- Nourished Guide given to players on first join
+  
+- Crafting recipe for Nourished Guide
+  
+Fixed
+
+-Tooltip now correctly shows diminishing returns value
+
+-Tag match returns immediately without running classifier
+
+Security
+
+- Path traversal fix in FoodScannerWidget
+  
+- NaN/Infinity hardening across all external inputs
+  
+- Packet size limits to prevent malicious server OOM
+  
+- SHA-256 replaces MD5 in mod list hashing
+
+
+## [0.1.8-beta] - 2026-05-13
 
 ### 🚀 Features
 
-- Enhance nutrition system with recipe inheritance and debug logging
+- Improved tooltip display in ClientEvents and NourishedFoodTooltipHelper to handle unclassified items.
+
+- Refined logic for determining dominant nutrient categories in food items.
+
+- Added new localization entry for unclassified tooltip in en_us.json."
+
 
 ## [0.1.7-beta] - 2026-05-13
 
