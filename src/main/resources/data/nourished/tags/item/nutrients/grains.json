@@ -428,6 +428,7 @@
     { "id": "croptopia:rice", "required": false },
     { "id": "croptopia:oatmeal", "required": false },
     { "id": "croptopia:blackbean", "required": false },
-    { "id": "croptopia:soybean", "required": false }
+    { "id": "croptopia:soybean", "required": false },
+    { "id": "starcatcher_delight:blossom_toast", "required": false}
   ]
 }
