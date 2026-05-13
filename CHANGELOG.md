@@ -86,7 +86,7 @@ Security
 
 ## [0.1.5-beta] - 2026-05-12
 
-### 🐛 Bug Fixes
+## 🐛 Bug Fixes
 
 - Improve diminishing returns memory window and decay grace period
 
@@ -96,17 +96,11 @@ Security
 
 
 
-[0.1.4-beta] 
+## [0.1.4-beta] 
 
-- fix
+## 🐛 Bug Fixes
+
 -  remove example datapack files shipping with main mod"
-
-
-
-
-
-
-
 
 
 ## [0.1.3-beta] - 2026-05-12
