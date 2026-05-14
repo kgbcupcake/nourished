@@ -6,6 +6,7 @@ package dev.maire.nourished.core.nutrition;
 public enum ResolutionStage {
     COMMUNITY_TAG,
     KEYWORD_SUFFIX,
+    COMPOSITE,
     RECIPE_INHERITANCE,
     NAMESPACE_PEER,
     HARD_FALLBACK

@@ -26,6 +26,7 @@
   "nutrientGainPerBiteMax": 0.2,
   "scannerEnableRecipeInheritance": true,
   "scannerConfidenceSpreadThreshold": 3.0,
+  "compositeRatioThreshold": 0.50,
   "enableDecay": true,
   "enableNutritionEating": true,
   "blockHeavyMeals": false,

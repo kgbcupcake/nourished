@@ -1,8 +1,14 @@
 {
   "replace": false,
   "values": [
-    "#c:foods/vegetable",
-    "#c:foods/soup",
+    {
+      "id": "#c:foods/vegetable",
+      "required": false
+    },
+    {
+      "id": "#c:foods/soup",
+      "required": false
+    },
     "minecraft:carrot",
     "minecraft:golden_carrot",
     "minecraft:beetroot",
@@ -38,63 +44,231 @@
     "aquaculture:algae",
     "aquaculture:brown_shrooma",
     "aquaculture:red_shrooma",
-    "arsdelight:arch_soup",
-    "biomeswevegone:aloe_vera_juice",
-    "biomeswevegone:blooming_oddion",
-    "biomeswevegone:blueberries",
-    "biomeswevegone:oddion_bulb",
-    "biomeswevegone:white_puffball_cap",
-    "bountifulfares:apple_stew",
-    "bountifulfares:arid_medley",
-    "bountifulfares:berry_stuffed_potato",
-    "bountifulfares:bountiful_stew",
-    "bountifulfares:coastal_medley",
-    "bountifulfares:coconut_stew",
-    "bountifulfares:crimson_chow",
-    "bountifulfares:dirt_stew",
-    "bountifulfares:elderberries",
-    "bountifulfares:forest_medley",
-    "bountifulfares:lapisberries",
-    "bountifulfares:mire_medley",
-    "bountifulfares:stone_stew",
-    "bountifulfares:tropical_medley",
-    "bountifulfares:warped_chow",
-    "createfood:leather_soup_bowl",
-    "createfood:sliced_crimson_fungus",
-    "createfood:sliced_warped_fungus",
-    "croptopia:ajvar",
-    "croptopia:blt",
-    "croptopia:chili_relleno",
-    "croptopia:crema",
-    "croptopia:fajitas",
-    "croptopia:fruit_salad",
-    "croptopia:kale_smoothie",
-    "croptopia:nether_wart_stew",
-    "croptopia:salsa",
-    "croptopia:stuffed_poblanos",
-    "croptopia:tomato_juice",
-    "doggytalents:miso_soup",
-    "endersdelight:amberveil_stew",
-    "endersdelight:ender_paella",
-    "endersdelight:veil_of_flames_risotto",
-    "expandeddelight:cranberries",
-    "expandeddelight:peperonata",
+    {
+      "id": "arsdelight:arch_soup",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:aloe_vera_juice",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:blooming_oddion",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:blueberries",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:oddion_bulb",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:white_puffball_cap",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:apple_stew",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:arid_medley",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:berry_stuffed_potato",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:bountiful_stew",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:coastal_medley",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:coconut_stew",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:crimson_chow",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:dirt_stew",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:elderberries",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:forest_medley",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:lapisberries",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:mire_medley",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:stone_stew",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:tropical_medley",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:warped_chow",
+      "required": false
+    },
+    {
+      "id": "createfood:leather_soup_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:sliced_crimson_fungus",
+      "required": false
+    },
+    {
+      "id": "createfood:sliced_warped_fungus",
+      "required": false
+    },
+    {
+      "id": "croptopia:ajvar",
+      "required": false
+    },
+    {
+      "id": "croptopia:blt",
+      "required": false
+    },
+    {
+      "id": "croptopia:chili_relleno",
+      "required": false
+    },
+    {
+      "id": "croptopia:crema",
+      "required": false
+    },
+    {
+      "id": "croptopia:fajitas",
+      "required": false
+    },
+    {
+      "id": "croptopia:fruit_salad",
+      "required": false
+    },
+    {
+      "id": "croptopia:kale_smoothie",
+      "required": false
+    },
+    {
+      "id": "croptopia:nether_wart_stew",
+      "required": false
+    },
+    {
+      "id": "croptopia:salsa",
+      "required": false
+    },
+    {
+      "id": "croptopia:stuffed_poblanos",
+      "required": false
+    },
+    {
+      "id": "croptopia:tomato_juice",
+      "required": false
+    },
+    {
+      "id": "doggytalents:miso_soup",
+      "required": false
+    },
+    {
+      "id": "endersdelight:amberveil_stew",
+      "required": false
+    },
+    {
+      "id": "endersdelight:ender_paella",
+      "required": false
+    },
+    {
+      "id": "endersdelight:veil_of_flames_risotto",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:cranberries",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:peperonata",
+      "required": false
+    },
     "farmersdelight:fruit_salad",
-    "fruitsdelight:bayberry_soup",
-    "fruitsdelight:mango_salad",
-    "herbsandharvest:cup_water",
-    "herbsandharvest:fresh_bay_leaf",
-    "herbsandharvest:fresh_chive",
-    "herbsandharvest:fresh_cilantro",
-    "herbsandharvest:fresh_dill",
-    "herbsandharvest:fresh_lemongrass",
-    "herbsandharvest:fresh_mustard",
-    "herbsandharvest:fresh_parsley",
-    "herbsandharvest:guacamole",
-    "herbsandharvest:ketchup",
-    "herbsandharvest:mustard",
-    "lendersdelight:coral_and_void",
-    "lendersdelight:red_coral_stew",
+    {
+      "id": "fruitsdelight:bayberry_soup",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:mango_salad",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:cup_water",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:fresh_bay_leaf",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:fresh_chive",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:fresh_cilantro",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:fresh_dill",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:fresh_lemongrass",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:fresh_mustard",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:fresh_parsley",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:guacamole",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:ketchup",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:mustard",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:coral_and_void",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:red_coral_stew",
+      "required": false
+    },
     "pamhc2crops:aloeitem",
     "pamhc2crops:arrowrootitem",
     "pamhc2crops:bakedarrowrootitem",
@@ -169,70 +343,250 @@
     "pamhc2foodextended:theatreboxitem",
     "pamhc2foodextended:toadintheholeitem",
     "pamhc2foodextended:zeppoleitem",
-    "rootsclassic:blackcurrant",
-    "rootsclassic:elderberry",
-    "rootsclassic:fruit_salad",
-    "rootsclassic:redcurrant",
-    "rootsclassic:whitecurrant",
-    "sushigocrafting:wakame_gunkan",
-    "twilightdelight:glow_113",
-    "twilightdelight:glowstew",
-    "twilightdelight:mushgloom_sauce",
-    "twilightdelight:naga_chip",
-    "twilightdelight:thousand_plant_stew",
-    "twilightdelight:twilight_spring",
-    "undergardendelight:droopstew",
-    "undergardendelight:glitterdish",
-    "undergardendelight:gloomgourd_slice",
-    "undergardendelight:gronglunch",
-    "undergardendelight:scintling_stew",
-    "undergardendelight:stuffed_gloomgourd_bowl",
-    "vinery:creepers_crush",
-    "vinery:eiswein",
-    "vinery:jo_special_mixture",
-    "vinery:villagers_fright",
+    {
+      "id": "rootsclassic:blackcurrant",
+      "required": false
+    },
+    {
+      "id": "rootsclassic:elderberry",
+      "required": false
+    },
+    {
+      "id": "rootsclassic:fruit_salad",
+      "required": false
+    },
+    {
+      "id": "rootsclassic:redcurrant",
+      "required": false
+    },
+    {
+      "id": "rootsclassic:whitecurrant",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:wakame_gunkan",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:glow_113",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:glowstew",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:mushgloom_sauce",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:naga_chip",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:thousand_plant_stew",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:twilight_spring",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:droopstew",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:glitterdish",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:gloomgourd_slice",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:gronglunch",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:scintling_stew",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:stuffed_gloomgourd_bowl",
+      "required": false
+    },
+    {
+      "id": "vinery:creepers_crush",
+      "required": false
+    },
+    {
+      "id": "vinery:eiswein",
+      "required": false
+    },
+    {
+      "id": "vinery:jo_special_mixture",
+      "required": false
+    },
+    {
+      "id": "vinery:villagers_fright",
+      "required": false
+    },
     "pamhc2crops:sesameseedsitem",
     "pamhc2crops:mustardseedsitem",
     "pamhc2foodextended:groundcinnamonitem",
     "pamhc2foodextended:gardensoupitem",
     "pamhc2foodextended:creamofavocadosoupitem",
-    { "id": "croptopia:artichoke", "required": false },
-    { "id": "croptopia:asparagus", "required": false },
-    { "id": "croptopia:bellpepper", "required": false },
-    { "id": "croptopia:broccoli", "required": false },
-    { "id": "croptopia:cabbage", "required": false },
-    { "id": "croptopia:cauliflower", "required": false },
-    { "id": "croptopia:celery", "required": false },
-    { "id": "croptopia:chile_pepper", "required": false },
-    { "id": "croptopia:corn", "required": false },
-    { "id": "croptopia:cucumber", "required": false },
-    { "id": "croptopia:eggplant", "required": false },
-    { "id": "croptopia:garlic", "required": false },
-    { "id": "croptopia:greenbean", "required": false },
-    { "id": "croptopia:greenonion", "required": false },
-    { "id": "croptopia:kale", "required": false },
-    { "id": "croptopia:leek", "required": false },
-    { "id": "croptopia:lettuce", "required": false },
-    { "id": "croptopia:olive", "required": false },
-    { "id": "croptopia:onion", "required": false },
-    { "id": "croptopia:radish", "required": false },
-    { "id": "croptopia:rutabaga", "required": false },
-    { "id": "croptopia:sea_lettuce", "required": false },
-    { "id": "croptopia:spinach", "required": false },
-    { "id": "croptopia:squash", "required": false },
-    { "id": "croptopia:sweetpotato", "required": false },
-    { "id": "croptopia:tomatillo", "required": false },
-    { "id": "croptopia:tomato", "required": false },
-    { "id": "croptopia:turnip", "required": false },
-    { "id": "croptopia:yam", "required": false },
-    { "id": "croptopia:zucchini", "required": false },
-    { "id": "biomeswevegone:cooked_oddion_bulb", "required": false},
-    { "id": "biomeswevegone:cooked_white_puffball_cap", "required": false},
-    { "id": "biomeswevegone:cooked_yucca_fruit", "required": false},
-    { "id": "oceansdelight:braised_sea_pickle", "required": false },
-    { "id": "croptopia:steamed_green_beans", "required": false },
-    { "id": "croptopia:stir_fry", "required": false },
-    { "id": "minecolonies:kimchi", "required": false },
-    { "id": "pamhc2foodextended:kimchiitem", "required": false }
+    {
+      "id": "croptopia:artichoke",
+      "required": false
+    },
+    {
+      "id": "croptopia:asparagus",
+      "required": false
+    },
+    {
+      "id": "croptopia:bellpepper",
+      "required": false
+    },
+    {
+      "id": "croptopia:broccoli",
+      "required": false
+    },
+    {
+      "id": "croptopia:cabbage",
+      "required": false
+    },
+    {
+      "id": "croptopia:cauliflower",
+      "required": false
+    },
+    {
+      "id": "croptopia:celery",
+      "required": false
+    },
+    {
+      "id": "croptopia:chile_pepper",
+      "required": false
+    },
+    {
+      "id": "croptopia:corn",
+      "required": false
+    },
+    {
+      "id": "croptopia:cucumber",
+      "required": false
+    },
+    {
+      "id": "croptopia:eggplant",
+      "required": false
+    },
+    {
+      "id": "croptopia:garlic",
+      "required": false
+    },
+    {
+      "id": "croptopia:greenbean",
+      "required": false
+    },
+    {
+      "id": "croptopia:greenonion",
+      "required": false
+    },
+    {
+      "id": "croptopia:kale",
+      "required": false
+    },
+    {
+      "id": "croptopia:leek",
+      "required": false
+    },
+    {
+      "id": "croptopia:lettuce",
+      "required": false
+    },
+    {
+      "id": "croptopia:olive",
+      "required": false
+    },
+    {
+      "id": "croptopia:onion",
+      "required": false
+    },
+    {
+      "id": "croptopia:radish",
+      "required": false
+    },
+    {
+      "id": "croptopia:rutabaga",
+      "required": false
+    },
+    {
+      "id": "croptopia:sea_lettuce",
+      "required": false
+    },
+    {
+      "id": "croptopia:spinach",
+      "required": false
+    },
+    {
+      "id": "croptopia:squash",
+      "required": false
+    },
+    {
+      "id": "croptopia:sweetpotato",
+      "required": false
+    },
+    {
+      "id": "croptopia:tomatillo",
+      "required": false
+    },
+    {
+      "id": "croptopia:tomato",
+      "required": false
+    },
+    {
+      "id": "croptopia:turnip",
+      "required": false
+    },
+    {
+      "id": "croptopia:yam",
+      "required": false
+    },
+    {
+      "id": "croptopia:zucchini",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:cooked_oddion_bulb",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:cooked_white_puffball_cap",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:cooked_yucca_fruit",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:braised_sea_pickle",
+      "required": false
+    },
+    {
+      "id": "croptopia:steamed_green_beans",
+      "required": false
+    },
+    {
+      "id": "croptopia:stir_fry",
+      "required": false
+    },
+    {
+      "id": "minecolonies:kimchi",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:kimchiitem",
+      "required": false
+    }
   ]
 }

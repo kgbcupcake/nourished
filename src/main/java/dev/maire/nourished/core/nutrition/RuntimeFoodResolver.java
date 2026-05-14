@@ -133,6 +133,7 @@ public final class RuntimeFoodResolver {
 
         if (result.stage() == ResolutionStage.COMMUNITY_TAG
                 || result.stage() == ResolutionStage.KEYWORD_SUFFIX
+                || result.stage() == ResolutionStage.COMPOSITE
                 || result.stage() == ResolutionStage.RECIPE_INHERITANCE) {
             namespacePeers.computeIfAbsent(itemId.getNamespace(), k -> new RunningAverage())
                     .add(result.nutrients());

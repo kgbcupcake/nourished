@@ -5,6 +5,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.maire.nourished.core.nutrition.CacheStats;
 import dev.maire.nourished.core.nutrition.ResolutionResult;
+import dev.maire.nourished.core.nutrition.ResolutionStage;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.ChatFormatting;
@@ -147,7 +148,7 @@ public final class NourishedDebugCommand {
 
         sendHeader(source);
         sendKeyValue(source, "Item:       ", itemName);
-        sendKeyValue(source, "Stage:      ", result.stage().name());
+        sendStageLine(source, result.stage());
         sendKeyValue(source, "Confidence: ", fmt(result.confidence()));
         sendKeyValue(source, "Reason:     ", result.debugReason());
         sendCacheLine(source, result.cacheHit());
@@ -195,6 +196,13 @@ public final class NourishedDebugCommand {
     private static void sendKeyValue(CommandSourceStack source, String label, String value) {
         MutableComponent line = Component.literal(label).withStyle(ChatFormatting.GRAY)
                 .append(Component.literal(value).withStyle(ChatFormatting.WHITE));
+        source.sendSuccess(() -> line, false);
+    }
+
+    private static void sendStageLine(CommandSourceStack source, ResolutionStage stage) {
+        ChatFormatting color = stage == ResolutionStage.COMPOSITE ? ChatFormatting.AQUA : ChatFormatting.WHITE;
+        MutableComponent line = Component.literal("Stage:      ").withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(stage.name()).withStyle(color));
         source.sendSuccess(() -> line, false);
     }
 

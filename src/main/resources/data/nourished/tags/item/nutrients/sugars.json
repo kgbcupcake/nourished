@@ -1,7 +1,10 @@
 {
   "replace": false,
   "values": [
-    { "id": "#c:foods/sweet", "required": false },
+    {
+      "id": "#c:foods/sweet",
+      "required": false
+    },
     "minecraft:cake",
     "minecraft:pumpkin_pie",
     "minecraft:honey_bottle",
@@ -24,269 +27,1043 @@
     "pamhc2foodcore:jellybeansitem",
     "pamhc2foodcore:melonpieitem",
     "pamhc2foodcore:honeymuffinitem",
-    "allthemodium:allthemodium_apple",
-    "allthemodium:ancient_soulberries",
-    "ars_nouveau:source_berry_pie",
-    "arsdelight:arch_sauce",
-    "arsdelight:source_berry_cookie",
-    "arsdelight:source_berry_cupcake",
-    "arsdelight:source_berry_jam",
-    "arsdelight:source_berry_jelly",
-    "arsdelight:source_berry_pie_slice",
-    "biomeswevegone:blueberry_pie",
-    "biomeswevegone:green_apple_pie",
-    "bountifulfares:apple_compote_jar",
-    "bountifulfares:candied_apple",
-    "bountifulfares:candied_lemon",
-    "bountifulfares:candied_orange",
-    "bountifulfares:candied_plum",
-    "bountifulfares:hoary_compote_jar",
-    "bountifulfares:lemon_compote_jar",
-    "bountifulfares:orange_compote_jar",
-    "bountifulfares:plum_compote_jar",
-    "bountifulfares:spongekin_slice",
-    "bountifulfares:stuffed_hoary_apple",
-    "bountifulfares:walnut_cookie",
-    "create:chocolate_glazed_berries",
-    "createfood:apple_cheesecake_slice",
-    "createfood:apple_cream_cake_slice",
-    "createfood:apple_cream_chocolate",
-    "createfood:apple_cream_chocolate_cupcake",
-    "createfood:apple_cream_chocolate_donut",
-    "createfood:apple_cream_chocolate_pastry",
-    "createfood:apple_cream_chocolate_sweet_roll",
-    "createfood:apple_cream_cupcake",
-    "createfood:apple_cream_dark_chocolate",
-    "createfood:apple_cream_donut",
-    "createfood:apple_cream_mini_waffle",
-    "createfood:apple_cream_pastry",
-    "createfood:apple_cream_sweet_roll",
-    "createfood:apple_cream_white_chocolate",
-    "createfood:apple_ice_cream_bowl",
-    "createfood:apple_ice_cream_cone",
-    "createfood:apple_ice_cream_sandwich",
-    "createfood:apple_ice_cream_stick",
-    "createfood:apple_popsicle",
-    "createfood:berry_cream_cake_slice",
-    "createfood:berry_cream_cake_slice_chorus_fruit",
-    "createfood:berry_cream_cake_slice_glow_berry",
-    "createfood:berry_cream_cake_slice_sweet_berry",
-    "createfood:berry_cream_chocolate",
-    "createfood:berry_cream_chocolate_cupcake",
-    "createfood:berry_cream_chocolate_donut",
-    "createfood:berry_cream_chocolate_pastry",
-    "createfood:berry_cream_chocolate_sweet_roll",
-    "createfood:berry_cream_chocolate_sweet_roll_sweet_berry",
-    "createfood:berry_cream_cupcake",
-    "createfood:berry_cream_dark_chocolate",
-    "createfood:berry_cream_donut",
-    "createfood:berry_cream_mini_waffle",
-    "createfood:berry_cream_mini_waffle_sweet_berry",
-    "createfood:berry_cream_pastry",
-    "createfood:berry_cream_sweet_roll",
-    "createfood:berry_cream_sweet_roll_sweet_berry",
-    "createfood:berry_cream_white_chocolate",
-    "createfood:berry_ice_cream_bowl",
-    "createfood:berry_ice_cream_cone",
-    "createfood:berry_ice_cream_sandwich",
-    "createfood:berry_ice_cream_stick",
-    "createfood:berry_pie_slice",
-    "createfood:berry_popsicle",
-    "createfood:caramel_apple",
-    "createfood:caramel_apple_slice",
-    "createfood:caramel_berries",
-    "createfood:chocolate_apple",
-    "createfood:chocolate_apple_slice",
-    "createfood:chorus_fruit_cheesecake_slice",
-    "createfood:chorus_fruit_cookie",
-    "createfood:chorus_fruit_cream_cake_slice",
-    "createfood:chorus_fruit_cream_cake_slice_chorus_fruit",
-    "createfood:chorus_fruit_cream_cake_slice_glow_berry",
-    "createfood:chorus_fruit_cream_cake_slice_sweet_berry",
-    "createfood:chorus_fruit_cream_chocolate",
-    "createfood:chorus_fruit_cream_chocolate_cupcake",
-    "createfood:chorus_fruit_cream_chocolate_donut",
-    "createfood:chorus_fruit_cream_chocolate_pastry",
-    "createfood:chorus_fruit_cream_chocolate_sweet_roll",
-    "createfood:chorus_fruit_cream_chocolate_sweet_roll_chorus_fruit",
-    "createfood:chorus_fruit_cream_cupcake",
-    "createfood:chorus_fruit_cream_dark_chocolate",
-    "createfood:chorus_fruit_cream_donut",
-    "createfood:chorus_fruit_cream_mini_waffle",
-    "createfood:chorus_fruit_cream_mini_waffle_chorus_fruit",
-    "createfood:chorus_fruit_cream_pastry",
-    "createfood:chorus_fruit_cream_sweet_roll",
-    "createfood:chorus_fruit_cream_sweet_roll_chorus_fruit",
-    "createfood:chorus_fruit_cream_white_chocolate",
-    "createfood:chorus_fruit_ice_cream_bowl",
-    "createfood:chorus_fruit_ice_cream_cone",
-    "createfood:chorus_fruit_ice_cream_sandwich",
-    "createfood:chorus_fruit_ice_cream_stick",
-    "createfood:chorus_fruit_pie_slice",
-    "createfood:chorus_fruit_popsicle",
-    "createfood:cream_cake_slice_chorus_fruit",
-    "createfood:cream_cake_slice_glow_berry",
-    "createfood:cream_chocolate_sweet_roll_chorus_fruit",
-    "createfood:cream_chocolate_sweet_roll_glow_berry",
-    "createfood:cream_chocolate_sweet_roll_sweet_berry",
-    "createfood:cream_mini_waffle_chorus_fruit",
-    "createfood:cream_mini_waffle_glow_berry",
-    "createfood:cream_mini_waffle_sweet_berry",
-    "createfood:cream_sweet_roll_chorus_fruit",
-    "createfood:cream_sweet_roll_glow_berry",
-    "createfood:cream_sweet_roll_sweet_berry",
-    "createfood:dark_chocolate_apple",
-    "createfood:dark_chocolate_apple_slice",
-    "createfood:dark_chocolate_berries",
-    "createfood:glow_berry_cheesecake_slice",
-    "createfood:glow_berry_cookie",
-    "createfood:glow_berry_cream_cake_slice",
-    "createfood:glow_berry_cream_cake_slice_chorus_fruit",
-    "createfood:glow_berry_cream_cake_slice_glow_berry",
-    "createfood:glow_berry_cream_cake_slice_sweet_berry",
-    "createfood:glow_berry_cream_chocolate",
-    "createfood:glow_berry_cream_chocolate_cupcake",
-    "createfood:glow_berry_cream_chocolate_donut",
-    "createfood:glow_berry_cream_chocolate_pastry",
-    "createfood:glow_berry_cream_chocolate_sweet_roll",
-    "createfood:glow_berry_cream_chocolate_sweet_roll_glow_berry",
-    "createfood:glow_berry_cream_cupcake",
-    "createfood:glow_berry_cream_dark_chocolate",
-    "createfood:glow_berry_cream_donut",
-    "createfood:glow_berry_cream_mini_waffle",
-    "createfood:glow_berry_cream_mini_waffle_glow_berry",
-    "createfood:glow_berry_cream_pastry",
-    "createfood:glow_berry_cream_sweet_roll",
-    "createfood:glow_berry_cream_sweet_roll_glow_berry",
-    "createfood:glow_berry_cream_white_chocolate",
-    "createfood:glow_berry_ice_cream_bowl",
-    "createfood:glow_berry_ice_cream_cone",
-    "createfood:glow_berry_ice_cream_sandwich",
-    "createfood:glow_berry_ice_cream_stick",
-    "createfood:glow_berry_pie_slice",
-    "createfood:glow_berry_popsicle",
-    "createfood:honeyed_apple_slice",
-    "createfood:honeyed_berries",
-    "createfood:lime_gelatin_dessert_slice",
-    "createfood:melon_cream_cake_slice",
-    "createfood:melon_cream_chocolate",
-    "createfood:melon_cream_chocolate_cupcake",
-    "createfood:melon_cream_chocolate_donut",
-    "createfood:melon_cream_chocolate_pastry",
-    "createfood:melon_cream_chocolate_sweet_roll",
-    "createfood:melon_cream_cupcake",
-    "createfood:melon_cream_dark_chocolate",
-    "createfood:melon_cream_donut",
-    "createfood:melon_cream_mini_waffle",
-    "createfood:melon_cream_pastry",
-    "createfood:melon_cream_sweet_roll",
-    "createfood:melon_cream_white_chocolate",
-    "createfood:melon_ice_cream_bowl",
-    "createfood:melon_ice_cream_cone",
-    "createfood:melon_ice_cream_sandwich",
-    "createfood:melon_ice_cream_stick",
-    "createfood:orange_gelatin_dessert_slice",
-    "createfood:peanut_butter_apple_jam_sandwich",
-    "createfood:peanut_butter_chorus_fruit_jam_sandwich",
-    "createfood:peanut_butter_melon_jam_sandwich",
-    "createfood:smore",
-    "createfood:toffee_apple",
-    "createfood:toffee_apple_slice",
-    "createfood:toffee_berries",
-    "createfood:white_chocolate_apple",
-    "createfood:white_chocolate_apple_slice",
-    "createfood:white_chocolate_berries",
-    "croptopia:apple_pie",
-    "croptopia:apricot_jam",
-    "croptopia:blackberry_jam",
-    "croptopia:blueberry_jam",
-    "croptopia:candied_kumquats",
-    "croptopia:cherry_jam",
-    "croptopia:cherry_pie",
-    "croptopia:churros",
-    "croptopia:elderberry_jam",
-    "croptopia:eton_mess",
-    "croptopia:figgy_pudding",
-    "croptopia:fruit_cake",
-    "croptopia:grape_jam",
-    "croptopia:lemon_coconut_bar",
-    "croptopia:mango_ice_cream",
-    "croptopia:meringue",
-    "croptopia:nougat",
-    "croptopia:peach_jam",
-    "croptopia:pecan_ice_cream",
-    "croptopia:pecan_pie",
-    "croptopia:raisins",
-    "croptopia:raspberry_jam",
-    "croptopia:snicker_doodle",
-    "croptopia:strawberry_ice_cream",
-    "croptopia:strawberry_jam",
-    "croptopia:trifle",
-    "deeperdarker:bloom_berries",
-    "enderio:enderios",
-    "ends_delight:chorus_fruit_popsicle",
-    "expandeddelight:cranberry_cobbler_slice",
-    "expandeddelight:cranberry_jelly",
-    "expandeddelight:glow_berry_jelly",
-    "expandeddelight:glow_berry_juice",
-    "expandeddelight:snickerdoodle",
-    "expandeddelight:sweet_berry_jelly",
-    "expandeddelight:sweet_berry_juice",
+    {
+      "id": "allthemodium:allthemodium_apple",
+      "required": false
+    },
+    {
+      "id": "allthemodium:ancient_soulberries",
+      "required": false
+    },
+    {
+      "id": "ars_nouveau:source_berry_pie",
+      "required": false
+    },
+    {
+      "id": "arsdelight:arch_sauce",
+      "required": false
+    },
+    {
+      "id": "arsdelight:source_berry_cookie",
+      "required": false
+    },
+    {
+      "id": "arsdelight:source_berry_cupcake",
+      "required": false
+    },
+    {
+      "id": "arsdelight:source_berry_jam",
+      "required": false
+    },
+    {
+      "id": "arsdelight:source_berry_jelly",
+      "required": false
+    },
+    {
+      "id": "arsdelight:source_berry_pie_slice",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:blueberry_pie",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:green_apple_pie",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:apple_compote_jar",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:candied_apple",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:candied_lemon",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:candied_orange",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:candied_plum",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:hoary_compote_jar",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:lemon_compote_jar",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:orange_compote_jar",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:plum_compote_jar",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:spongekin_slice",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:stuffed_hoary_apple",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:walnut_cookie",
+      "required": false
+    },
+    {
+      "id": "create:chocolate_glazed_berries",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_cake_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_chocolate_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_chocolate_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_chocolate_pastry",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_chocolate_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_dark_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_mini_waffle",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_pastry",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_white_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_ice_cream_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_ice_cream_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_ice_cream_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_ice_cream_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_popsicle",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_cake_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_cake_slice_chorus_fruit",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_cake_slice_glow_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_cake_slice_sweet_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_chocolate_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_chocolate_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_chocolate_pastry",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_chocolate_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_chocolate_sweet_roll_sweet_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_dark_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_mini_waffle",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_mini_waffle_sweet_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_pastry",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_sweet_roll_sweet_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_white_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_ice_cream_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_ice_cream_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_ice_cream_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_ice_cream_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_pie_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_popsicle",
+      "required": false
+    },
+    {
+      "id": "createfood:caramel_apple",
+      "required": false
+    },
+    {
+      "id": "createfood:caramel_apple_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:caramel_berries",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_apple",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_apple_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cookie",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_cake_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_cake_slice_chorus_fruit",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_cake_slice_glow_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_cake_slice_sweet_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_chocolate_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_chocolate_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_chocolate_pastry",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_chocolate_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_chocolate_sweet_roll_chorus_fruit",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_dark_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_mini_waffle",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_mini_waffle_chorus_fruit",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_pastry",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_sweet_roll_chorus_fruit",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_white_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_ice_cream_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_ice_cream_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_ice_cream_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_ice_cream_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_pie_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_popsicle",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_cake_slice_chorus_fruit",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_cake_slice_glow_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_chocolate_sweet_roll_chorus_fruit",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_chocolate_sweet_roll_glow_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_chocolate_sweet_roll_sweet_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_mini_waffle_chorus_fruit",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_mini_waffle_glow_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_mini_waffle_sweet_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_sweet_roll_chorus_fruit",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_sweet_roll_glow_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_sweet_roll_sweet_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:dark_chocolate_apple",
+      "required": false
+    },
+    {
+      "id": "createfood:dark_chocolate_apple_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:dark_chocolate_berries",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cookie",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_cake_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_cake_slice_chorus_fruit",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_cake_slice_glow_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_cake_slice_sweet_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_chocolate_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_chocolate_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_chocolate_pastry",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_chocolate_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_chocolate_sweet_roll_glow_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_dark_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_mini_waffle",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_mini_waffle_glow_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_pastry",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_sweet_roll_glow_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_white_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_ice_cream_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_ice_cream_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_ice_cream_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_ice_cream_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_pie_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_popsicle",
+      "required": false
+    },
+    {
+      "id": "createfood:honeyed_apple_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:honeyed_berries",
+      "required": false
+    },
+    {
+      "id": "createfood:lime_gelatin_dessert_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_cake_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_chocolate_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_chocolate_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_chocolate_pastry",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_chocolate_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_dark_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_mini_waffle",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_pastry",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_white_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_ice_cream_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_ice_cream_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_ice_cream_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_ice_cream_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:orange_gelatin_dessert_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:peanut_butter_apple_jam_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:peanut_butter_chorus_fruit_jam_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:peanut_butter_melon_jam_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:smore",
+      "required": false
+    },
+    {
+      "id": "createfood:toffee_apple",
+      "required": false
+    },
+    {
+      "id": "createfood:toffee_apple_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:toffee_berries",
+      "required": false
+    },
+    {
+      "id": "createfood:white_chocolate_apple",
+      "required": false
+    },
+    {
+      "id": "createfood:white_chocolate_apple_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:white_chocolate_berries",
+      "required": false
+    },
+    {
+      "id": "croptopia:apple_pie",
+      "required": false
+    },
+    {
+      "id": "croptopia:apricot_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:blackberry_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:blueberry_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:candied_kumquats",
+      "required": false
+    },
+    {
+      "id": "croptopia:cherry_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:cherry_pie",
+      "required": false
+    },
+    {
+      "id": "croptopia:churros",
+      "required": false
+    },
+    {
+      "id": "croptopia:elderberry_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:eton_mess",
+      "required": false
+    },
+    {
+      "id": "croptopia:figgy_pudding",
+      "required": false
+    },
+    {
+      "id": "croptopia:fruit_cake",
+      "required": false
+    },
+    {
+      "id": "croptopia:grape_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:lemon_coconut_bar",
+      "required": false
+    },
+    {
+      "id": "croptopia:mango_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:meringue",
+      "required": false
+    },
+    {
+      "id": "croptopia:nougat",
+      "required": false
+    },
+    {
+      "id": "croptopia:peach_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:pecan_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:pecan_pie",
+      "required": false
+    },
+    {
+      "id": "croptopia:raisins",
+      "required": false
+    },
+    {
+      "id": "croptopia:raspberry_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:snicker_doodle",
+      "required": false
+    },
+    {
+      "id": "croptopia:strawberry_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:strawberry_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:trifle",
+      "required": false
+    },
+    {
+      "id": "deeperdarker:bloom_berries",
+      "required": false
+    },
+    {
+      "id": "enderio:enderios",
+      "required": false
+    },
+    {
+      "id": "ends_delight:chorus_fruit_popsicle",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:cranberry_cobbler_slice",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:cranberry_jelly",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:glow_berry_jelly",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:glow_berry_juice",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:snickerdoodle",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:sweet_berry_jelly",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:sweet_berry_juice",
+      "required": false
+    },
     "farm_and_charm:grandmothers_strawberry_cake",
     "farmersdelight:apple_pie_slice",
     "farmersdelight:melon_popsicle",
     "farmersdelight:sweet_berry_cheesecake_slice",
     "farmersdelight:sweet_berry_cookie",
-    "fruitsdelight:apple_jam",
-    "fruitsdelight:bayberry_cookie",
-    "fruitsdelight:bayberry_jam",
-    "fruitsdelight:blueberry_jam",
-    "fruitsdelight:cranberry_cookie",
-    "fruitsdelight:cranberry_jam",
-    "fruitsdelight:fig_jam",
-    "fruitsdelight:fig_pudding_slice",
-    "fruitsdelight:fig_tart",
-    "fruitsdelight:glowberry_jam",
-    "fruitsdelight:hawberry_jam",
-    "fruitsdelight:hawberry_stick",
-    "fruitsdelight:lemon_cookie",
-    "fruitsdelight:lemon_jam",
-    "fruitsdelight:lemon_tart",
-    "fruitsdelight:lychee_jam",
-    "fruitsdelight:mango_jam",
-    "fruitsdelight:mangosteen_cake",
-    "fruitsdelight:mangosteen_jam",
-    "fruitsdelight:melon_jam",
-    "fruitsdelight:orange_jam",
-    "fruitsdelight:peach_jam",
-    "fruitsdelight:pear_jam",
-    "fruitsdelight:pineapple_jam",
-    "fruitsdelight:pineapple_pie",
-    "fruitsdelight:sweetberry_jam",
-    "fruitsdelight:sweetberry_jello",
-    "herbsandharvest:apple_pie_slice",
-    "herbsandharvest:blackberry_jam",
-    "herbsandharvest:blueberry_cheesecake_slice",
-    "herbsandharvest:blueberry_pie_slice",
-    "herbsandharvest:cherry_pie_slice",
-    "herbsandharvest:key_lime_pie_slice",
-    "herbsandharvest:lemon_meringue_pie_slice",
-    "herbsandharvest:peach_pie_slice",
-    "herbsandharvest:pineapple_cake_slice",
-    "herbsandharvest:plum_pudding_slice",
-    "herbsandharvest:raspberry_cheesecake_slice",
-    "herbsandharvest:raspberry_jam",
-    "herbsandharvest:strawberry_cake_slice",
-    "herbsandharvest:strawberry_cupcake",
-    "integrateddynamics:menril_berries",
-    "minecolonies:apple_pie",
-    "mysticalagradditions:imperium_apple",
-    "mysticalagradditions:inferium_apple",
-    "mysticalagradditions:insanium_apple",
-    "mysticalagradditions:prudentium_apple",
-    "mysticalagradditions:supremium_apple",
-    "mysticalagradditions:tertium_apple",
-    "nomansland:candied_pear",
+    {
+      "id": "fruitsdelight:apple_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:bayberry_cookie",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:bayberry_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:blueberry_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:cranberry_cookie",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:cranberry_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:fig_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:fig_pudding_slice",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:fig_tart",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:glowberry_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:hawberry_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:hawberry_stick",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:lemon_cookie",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:lemon_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:lemon_tart",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:lychee_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:mango_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:mangosteen_cake",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:mangosteen_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:melon_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:orange_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:peach_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:pear_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:pineapple_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:pineapple_pie",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:sweetberry_jam",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:sweetberry_jello",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:apple_pie_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:blackberry_jam",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:blueberry_cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:blueberry_pie_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:cherry_pie_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:key_lime_pie_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:lemon_meringue_pie_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:peach_pie_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:pineapple_cake_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:plum_pudding_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:raspberry_cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:raspberry_jam",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:strawberry_cake_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:strawberry_cupcake",
+      "required": false
+    },
+    {
+      "id": "integrateddynamics:menril_berries",
+      "required": false
+    },
+    {
+      "id": "minecolonies:apple_pie",
+      "required": false
+    },
+    {
+      "id": "mysticalagradditions:imperium_apple",
+      "required": false
+    },
+    {
+      "id": "mysticalagradditions:inferium_apple",
+      "required": false
+    },
+    {
+      "id": "mysticalagradditions:insanium_apple",
+      "required": false
+    },
+    {
+      "id": "mysticalagradditions:prudentium_apple",
+      "required": false
+    },
+    {
+      "id": "mysticalagradditions:supremium_apple",
+      "required": false
+    },
+    {
+      "id": "mysticalagradditions:tertium_apple",
+      "required": false
+    },
+    {
+      "id": "nomansland:candied_pear",
+      "required": false
+    },
     "pamhc2foodcore:appledonutitem",
     "pamhc2foodcore:applepieitem",
     "pamhc2foodcore:glowberrydonutitem",
@@ -404,25 +1181,82 @@
     "pamhc2foodextended:tamarindpieitem",
     "pamhc2foodextended:timtamitem",
     "pamhc2foodextended:turkishdelightitem",
-    "pickletweaks:diamond_apple",
-    "pickletweaks:emerald_apple",
-    "spawn:date_cookie",
-    "twilightdelight:berry_stick",
-    "twilightdelight:experiment_110",
-    "twilightdelight:experiment_113",
-    "twilightdelight:torchberry_cookie",
-    "twilightdelight:torchberry_juice",
-    "twilightdelight:torchberry_pie_slice",
-    "twilightforest:experiment_115",
-    "twilightforest:gelatinous_maze_slime_drop",
-    "twilightforest:gelatinous_slime_drop",
-    "twilightforest:shika_senbei",
-    "twilightforest:torchberries",
-    "undergarden:blisterberry",
-    "undergarden:blood_globule",
-    "undergarden:goo_ball",
-    "undergarden:rotten_blisterberry",
-    { "id": "farm_and_charm:grandmothers_strawberry_cake_block", "required": false },
+    {
+      "id": "pickletweaks:diamond_apple",
+      "required": false
+    },
+    {
+      "id": "pickletweaks:emerald_apple",
+      "required": false
+    },
+    {
+      "id": "spawn:date_cookie",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:berry_stick",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:experiment_110",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:experiment_113",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:torchberry_cookie",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:torchberry_juice",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:torchberry_pie_slice",
+      "required": false
+    },
+    {
+      "id": "twilightforest:experiment_115",
+      "required": false
+    },
+    {
+      "id": "twilightforest:gelatinous_maze_slime_drop",
+      "required": false
+    },
+    {
+      "id": "twilightforest:gelatinous_slime_drop",
+      "required": false
+    },
+    {
+      "id": "twilightforest:shika_senbei",
+      "required": false
+    },
+    {
+      "id": "twilightforest:torchberries",
+      "required": false
+    },
+    {
+      "id": "undergarden:blisterberry",
+      "required": false
+    },
+    {
+      "id": "undergarden:blood_globule",
+      "required": false
+    },
+    {
+      "id": "undergarden:goo_ball",
+      "required": false
+    },
+    {
+      "id": "undergarden:rotten_blisterberry",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:grandmothers_strawberry_cake_block",
+      "required": false
+    },
     "bakery:chocolate_cake_slice",
     "bakery:chocolate_gateau_slice",
     "bakery:bundt_cake_slice",
@@ -432,47 +1266,170 @@
     "bakery:chocolate_glazed_cookie",
     "bakery:chocolate_truffle",
     "bakery:jam_roll",
-    "createfood:sugar_cane_juice_bottle",
-    "createfood:blackstrap_molasses_bottle",
-    "createfood:apple_milkshake_bottle",
-    "createfood:berry_milkshake_bottle",
-    "createfood:melon_milkshake_bottle",
-    "createfood:glow_berry_milkshake_bottle",
-    "createfood:chorus_fruit_milkshake_bottle",
-    "createfood:sliced_crimson_fungus_salt",
-    "createfood:sliced_warped_fungus_salt",
-    "cropcritters:seed_bar",
-    "occultism:datura",
-    "draconicadditions:hermal",
+    {
+      "id": "createfood:sugar_cane_juice_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:blackstrap_molasses_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:sliced_crimson_fungus_salt",
+      "required": false
+    },
+    {
+      "id": "createfood:sliced_warped_fungus_salt",
+      "required": false
+    },
+    {
+      "id": "cropcritters:seed_bar",
+      "required": false
+    },
+    {
+      "id": "occultism:datura",
+      "required": false
+    },
+    {
+      "id": "draconicadditions:hermal",
+      "required": false
+    },
     "pamhc2foodextended:cherryicecreamitem",
-    { "id": "bakery:waffle_block", "required": false },
-    { "id": "croptopia:cheese_cake", "required": false },
-    { "id": "croptopia:rhubarb_crisp", "required": false },
-    { "id": "biomeswevegone:blueberry_pie", "required": false},
-    { "id": "biomeswevegone:green_apple_pie", "required": false},
-    { "id": "bakery:strawberry_cake_slice", "required": false },
-    { "id": "bakery:sweetberry_cake_slice", "required": false },
-    { "id": "bakery:apple_pie_slice", "required": false },
-    { "id": "bakery:glowberry_pie_slice", "required": false },
-    { "id": "bakery:strawberry_glazed_cookie", "required": false },
-    { "id": "bakery:sweetberry_glazed_cookie", "required": false },
-    { "id": "bakery:strawberry_cupcake", "required": false },
-    { "id": "bakery:sweetberry_cupcake", "required": false },
-    { "id": "bakery:apple_cupcake", "required": false },
-    { "id": "croptopia:banana_cream_pie", "required": false },
-    { "id": "fruitsdelight:mango_milkshake", "required": false },
-    { "id": "croptopia:cinnamon_roll", "required": false },
-    { "id": "herbsandharvest:cinnamon_roll", "required": false },
-    { "id": "expandeddelight:berry_sweet_roll", "required": false },
-    { "id": "expandeddelight:glow_berry_sweet_roll", "required": false },
-    { "id": "pamhc2foodextended:cinnamonrollitem", "required": false },
-    { "id": "pamhc2foodextended:dangoitem", "required": false },
-    { "id": "pamhc2foodextended:imagawayakiitem", "required": false },
-    { "id": "pamhc2foodextended:mochiitem", "required": false },
-    { "id": "pamhc2foodextended:sesameballitem", "required": false },
-    { "id": "pamhc2foodextended:taiyakiitem", "required": false },
-    { "id": "pamhc2foodextended:fruitcreamfestivalbreaditem", "required": false },
-    { "id": "fruitsdelight:blueberry_muffin", "required": false },
-    { "id": "fruitsdelight:cranberry_muffin", "required": false }
+    {
+      "id": "bakery:waffle_block",
+      "required": false
+    },
+    {
+      "id": "croptopia:cheese_cake",
+      "required": false
+    },
+    {
+      "id": "croptopia:rhubarb_crisp",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:blueberry_pie",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:green_apple_pie",
+      "required": false
+    },
+    {
+      "id": "bakery:strawberry_cake_slice",
+      "required": false
+    },
+    {
+      "id": "bakery:sweetberry_cake_slice",
+      "required": false
+    },
+    {
+      "id": "bakery:apple_pie_slice",
+      "required": false
+    },
+    {
+      "id": "bakery:glowberry_pie_slice",
+      "required": false
+    },
+    {
+      "id": "bakery:strawberry_glazed_cookie",
+      "required": false
+    },
+    {
+      "id": "bakery:sweetberry_glazed_cookie",
+      "required": false
+    },
+    {
+      "id": "bakery:strawberry_cupcake",
+      "required": false
+    },
+    {
+      "id": "bakery:sweetberry_cupcake",
+      "required": false
+    },
+    {
+      "id": "bakery:apple_cupcake",
+      "required": false
+    },
+    {
+      "id": "croptopia:banana_cream_pie",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:mango_milkshake",
+      "required": false
+    },
+    {
+      "id": "croptopia:cinnamon_roll",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:cinnamon_roll",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:berry_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:glow_berry_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cinnamonrollitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:dangoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:imagawayakiitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mochiitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sesameballitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:taiyakiitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:fruitcreamfestivalbreaditem",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:blueberry_muffin",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:cranberry_muffin",
+      "required": false
+    }
   ]
 }

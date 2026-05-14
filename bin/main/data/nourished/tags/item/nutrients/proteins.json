@@ -1,8 +1,14 @@
 {
   "replace": false,
   "values": [
-    { "id": "#c:foods/meat", "required": false },
-    { "id": "#c:foods/fish", "required": false },
+    {
+      "id": "#c:foods/meat",
+      "required": false
+    },
+    {
+      "id": "#c:foods/fish",
+      "required": false
+    },
     "minecraft:beef",
     "minecraft:cooked_beef",
     "minecraft:chicken",
@@ -96,7 +102,10 @@
     "farm_and_charm:beef_patty_with_vegetables",
     "farm_and_charm:sausage_with_oat_patty",
     "farm_and_charm:barley_patties_with_potatoes",
-    "brewery:sausage",
+    {
+      "id": "brewery:sausage",
+      "required": false
+    },
     "bakery:grilled_salmon_sandwich",
     "bakery:grilled_bacon_sandwich",
     "bakery:sandwich",
@@ -122,103 +131,388 @@
     "aquaculture:synodontis",
     "aquaculture:tambaqui",
     "aquaculture:turtle_soup",
-    "ars_nouveau:source_berry_roll",
-    "arsdelight:chimera_skewer",
-    "arsdelight:grilled_chimera_skewer",
-    "arsdelight:grilled_wilden_skewer",
-    "arsdelight:horn_roll",
-    "arsdelight:wilden_sauce",
-    "arsdelight:wilden_skewer",
-    "arsdelight:wilden_stew",
-    "biomeswevegone:cooked_oddion_bulb",
-    "biomeswevegone:cooked_white_puffball_cap",
-    "biomeswevegone:cooked_yucca_fruit",
-    "bountifulfares:foul_flesh",
-    "cropcritters:puffbomb_slice",
-    "croptopia:almond_brittle",
-    "croptopia:candied_nuts",
-    "croptopia:carnitas",
-    "croptopia:peanut",
-    "croptopia:protein_bar",
-    "croptopia:roasted_nuts",
-    "croptopia:sushi",
-    "doggytalents:aburaage",
-    "doggytalents:edamame_unpodded",
-    "doggytalents:golden_a_five_wagyu",
-    "doggytalents:gyudon",
-    "doggytalents:hot_dog",
-    "doggytalents:natto",
-    "doggytalents:oyakodon",
-    "endersdelight:crispy_skewer",
-    "ends_delight:end_barbecue_stick",
-    "evilcraft:flesh_humanoid",
-    "evilcraft:flesh_werewolf",
-    "expandeddelight:peanut",
+    {
+      "id": "ars_nouveau:source_berry_roll",
+      "required": false
+    },
+    {
+      "id": "arsdelight:chimera_skewer",
+      "required": false
+    },
+    {
+      "id": "arsdelight:grilled_chimera_skewer",
+      "required": false
+    },
+    {
+      "id": "arsdelight:grilled_wilden_skewer",
+      "required": false
+    },
+    {
+      "id": "arsdelight:horn_roll",
+      "required": false
+    },
+    {
+      "id": "arsdelight:wilden_sauce",
+      "required": false
+    },
+    {
+      "id": "arsdelight:wilden_skewer",
+      "required": false
+    },
+    {
+      "id": "arsdelight:wilden_stew",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:cooked_oddion_bulb",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:cooked_white_puffball_cap",
+      "required": false
+    },
+    {
+      "id": "biomeswevegone:cooked_yucca_fruit",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:foul_flesh",
+      "required": false
+    },
+    {
+      "id": "cropcritters:puffbomb_slice",
+      "required": false
+    },
+    {
+      "id": "croptopia:almond_brittle",
+      "required": false
+    },
+    {
+      "id": "croptopia:candied_nuts",
+      "required": false
+    },
+    {
+      "id": "croptopia:carnitas",
+      "required": false
+    },
+    {
+      "id": "croptopia:peanut",
+      "required": false
+    },
+    {
+      "id": "croptopia:protein_bar",
+      "required": false
+    },
+    {
+      "id": "croptopia:roasted_nuts",
+      "required": false
+    },
+    {
+      "id": "croptopia:sushi",
+      "required": false
+    },
+    {
+      "id": "doggytalents:aburaage",
+      "required": false
+    },
+    {
+      "id": "doggytalents:edamame_unpodded",
+      "required": false
+    },
+    {
+      "id": "doggytalents:golden_a_five_wagyu",
+      "required": false
+    },
+    {
+      "id": "doggytalents:gyudon",
+      "required": false
+    },
+    {
+      "id": "doggytalents:hot_dog",
+      "required": false
+    },
+    {
+      "id": "doggytalents:natto",
+      "required": false
+    },
+    {
+      "id": "doggytalents:oyakodon",
+      "required": false
+    },
+    {
+      "id": "endersdelight:crispy_skewer",
+      "required": false
+    },
+    {
+      "id": "ends_delight:end_barbecue_stick",
+      "required": false
+    },
+    {
+      "id": "evilcraft:flesh_humanoid",
+      "required": false
+    },
+    {
+      "id": "evilcraft:flesh_werewolf",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:peanut",
+      "required": false
+    },
     "farmersdelight:barbecue_stick",
-    "forbidden_arcanus:bat_soup",
-    "forbidden_arcanus:bat_wing",
-    "forbidden_arcanus:cooked_tentacle",
-    "forbidden_arcanus:tentacle",
-    "fruitsdelight:durian_flesh",
-    "fruitsdelight:hawberry_roll",
-    "fruitsdelight:pear_with_rock_sugar",
-    "herbsandharvest:charcuterie_plate_delftware",
-    "herbsandharvest:charcuterie_plate_holiday",
-    "herbsandharvest:charcuterie_plate_plain",
-    "herbsandharvest:peanut",
-    "herbsandharvest:peanuts",
-    "herbsandharvest:roast_plate_delftware",
-    "herbsandharvest:roast_plate_holiday",
-    "herbsandharvest:roast_plate_plain",
-    "herbsandharvest:salami",
-    "herbsandharvest:salami_slice",
-    "herbsandharvest:wellington_plate_delftware",
-    "herbsandharvest:wellington_plate_holiday",
-    "herbsandharvest:wellington_plate_plain",
-    "lendersdelight:berserker",
-    "lendersdelight:berserker_stick",
-    "lendersdelight:cindaria_hat",
-    "lendersdelight:cooked_berserker",
-    "lendersdelight:cooked_leviathan",
-    "lendersdelight:coral_chunk_red_slice",
-    "lendersdelight:crystallized_coral_roll",
-    "lendersdelight:ender_guardian_crystal",
-    "lendersdelight:hippocamtus",
-    "lendersdelight:ignis",
-    "lendersdelight:leviathan",
-    "lendersdelight:maledictus_heart",
-    "lendersdelight:maledictus_heart_slice",
-    "lendersdelight:maledictus_heart_stew",
-    "lendersdelight:scylla_snake",
-    "lendersdelight:symbiocto_tentacle",
-    "lendersdelight:urchinkin",
-    "lendersdelight:watcher_heart",
-    "lilis_lucky_lures:puffer_plater",
-    "lilis_lucky_lures:uncooked_puffer_plater",
-    "minecolonies:schnitzel",
-    "minecolonies:sushi_roll",
+    {
+      "id": "forbidden_arcanus:bat_soup",
+      "required": false
+    },
+    {
+      "id": "forbidden_arcanus:bat_wing",
+      "required": false
+    },
+    {
+      "id": "forbidden_arcanus:cooked_tentacle",
+      "required": false
+    },
+    {
+      "id": "forbidden_arcanus:tentacle",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:durian_flesh",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:hawberry_roll",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:pear_with_rock_sugar",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:charcuterie_plate_delftware",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:charcuterie_plate_holiday",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:charcuterie_plate_plain",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:peanut",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:peanuts",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:roast_plate_delftware",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:roast_plate_holiday",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:roast_plate_plain",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:salami",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:salami_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:wellington_plate_delftware",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:wellington_plate_holiday",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:wellington_plate_plain",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:berserker",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:berserker_stick",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:cindaria_hat",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:cooked_berserker",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:cooked_leviathan",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:coral_chunk_red_slice",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:crystallized_coral_roll",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:ender_guardian_crystal",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:hippocamtus",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:ignis",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:leviathan",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:maledictus_heart",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:maledictus_heart_slice",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:maledictus_heart_stew",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:scylla_snake",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:symbiocto_tentacle",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:urchinkin",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:watcher_heart",
+      "required": false
+    },
+    {
+      "id": "lilis_lucky_lures:puffer_plater",
+      "required": false
+    },
+    {
+      "id": "lilis_lucky_lures:uncooked_puffer_plater",
+      "required": false
+    },
+    {
+      "id": "minecolonies:schnitzel",
+      "required": false
+    },
+    {
+      "id": "minecolonies:sushi_roll",
+      "required": false
+    },
     "minecraft:spider_eye",
-    "naturalist:bass",
-    "naturalist:cooked_bass",
-    "naturalist:cooked_duck",
-    "naturalist:cooked_lizard_tail",
-    "naturalist:duck",
-    "naturalist:lizard_tail",
-    "oceansdelight:baked_tentacle_on_a_stick",
-    "oceansdelight:bowl_of_guardian_soup",
-    "oceansdelight:cooked_elder_guardian_slice",
-    "oceansdelight:cooked_guardian_tail",
-    "oceansdelight:cooked_stuffed_squid",
-    "oceansdelight:cut_tentacles",
-    "oceansdelight:elder_guardian_roll",
-    "oceansdelight:elder_guardian_slab",
-    "oceansdelight:elder_guardian_slice",
-    "oceansdelight:fugu_roll",
-    "oceansdelight:guardian_tail",
-    "oceansdelight:squid_rings",
-    "oceansdelight:stuffed_squid",
-    "oceansdelight:tentacle_on_a_stick",
-    "oceansdelight:tentacles",
+    {
+      "id": "naturalist:bass",
+      "required": false
+    },
+    {
+      "id": "naturalist:cooked_bass",
+      "required": false
+    },
+    {
+      "id": "naturalist:cooked_duck",
+      "required": false
+    },
+    {
+      "id": "naturalist:cooked_lizard_tail",
+      "required": false
+    },
+    {
+      "id": "naturalist:duck",
+      "required": false
+    },
+    {
+      "id": "naturalist:lizard_tail",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:baked_tentacle_on_a_stick",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:bowl_of_guardian_soup",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:cooked_elder_guardian_slice",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:cooked_guardian_tail",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:cooked_stuffed_squid",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:cut_tentacles",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:elder_guardian_roll",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:elder_guardian_slab",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:elder_guardian_slice",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:fugu_roll",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:guardian_tail",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:squid_rings",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:stuffed_squid",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:tentacle_on_a_stick",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:tentacles",
+      "required": false
+    },
     "pamhc2crops:peanutitem",
     "pamhc2crops:roastedkohlrabiitem",
     "pamhc2crops:roastedpeanutitem",
@@ -263,78 +557,279 @@
     "pamhc2trees:roastedpinenutitem",
     "pamhc2trees:roastedpistachioitem",
     "pamhc2trees:roastedwalnutitem",
-    "spawn:canned_herring",
-    "spawn:cooked_dodo",
-    "spawn:cooked_herring",
-    "spawn:cooked_herring_slice",
-    "spawn:dodo",
-    "spawn:escargot",
-    "spawn:herring",
-    "spawn:herring_roll",
-    "spawn:herring_slice",
-    "twilightdelight:cooked_insect",
-    "twilightdelight:cooked_meef_slice",
-    "twilightdelight:cooked_tomahawk_smeak",
-    "twilightdelight:fried_insect",
-    "twilightdelight:plate_of_meef_wellington",
-    "twilightdelight:raw_insect",
-    "twilightdelight:raw_meef_slice",
-    "twilightdelight:raw_tomahawk_smeak",
-    "twilightforest:cooked_meef",
-    "twilightforest:hydra_chop",
-    "twilightforest:raw_meef",
-    "undergarden:cooked_gwibling",
-    "undergarden:gloomper_leg",
-    "undergarden:gronglet",
-    "undergarden:raw_gloomper_leg",
-    "undergarden:raw_gwibling",
-    "undergarden:rogdoric_gronglet",
-    "undergarden:utheric_gronglet",
-    "undergardendelight:cooked_gloomper_cuts",
-    "undergardendelight:cooked_gwibling_fillet",
-    "undergardendelight:gronglet_roll",
-    "undergardendelight:raw_gloomper_cuts",
-    "undergardendelight:raw_gwibling_fillet",
-    "undergardendelight:roasted_underbean_on_a_stick",
+    {
+      "id": "spawn:canned_herring",
+      "required": false
+    },
+    {
+      "id": "spawn:cooked_dodo",
+      "required": false
+    },
+    {
+      "id": "spawn:cooked_herring",
+      "required": false
+    },
+    {
+      "id": "spawn:cooked_herring_slice",
+      "required": false
+    },
+    {
+      "id": "spawn:dodo",
+      "required": false
+    },
+    {
+      "id": "spawn:escargot",
+      "required": false
+    },
+    {
+      "id": "spawn:herring",
+      "required": false
+    },
+    {
+      "id": "spawn:herring_roll",
+      "required": false
+    },
+    {
+      "id": "spawn:herring_slice",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:cooked_insect",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:cooked_meef_slice",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:cooked_tomahawk_smeak",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:fried_insect",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:plate_of_meef_wellington",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:raw_insect",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:raw_meef_slice",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:raw_tomahawk_smeak",
+      "required": false
+    },
+    {
+      "id": "twilightforest:cooked_meef",
+      "required": false
+    },
+    {
+      "id": "twilightforest:hydra_chop",
+      "required": false
+    },
+    {
+      "id": "twilightforest:raw_meef",
+      "required": false
+    },
+    {
+      "id": "undergarden:cooked_gwibling",
+      "required": false
+    },
+    {
+      "id": "undergarden:gloomper_leg",
+      "required": false
+    },
+    {
+      "id": "undergarden:gronglet",
+      "required": false
+    },
+    {
+      "id": "undergarden:raw_gloomper_leg",
+      "required": false
+    },
+    {
+      "id": "undergarden:raw_gwibling",
+      "required": false
+    },
+    {
+      "id": "undergarden:rogdoric_gronglet",
+      "required": false
+    },
+    {
+      "id": "undergarden:utheric_gronglet",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:cooked_gloomper_cuts",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:cooked_gwibling_fillet",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:gronglet_roll",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:raw_gloomper_cuts",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:raw_gwibling_fillet",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:roasted_underbean_on_a_stick",
+      "required": false
+    },
     "farmersdelight:steak_and_potatoes",
     "pamhc2foodextended:misopasteitem",
     "pamhc2foodextended:seedsoupitem",
     "pamhc2foodextended:pambitsboxitem",
-    "sushigocrafting:salmon_nigiri",
-    "sushigocrafting:salmon_maki",
-    "sushigocrafting:salmon_temaki",
-    "sushigocrafting:salmon_california",
-    "sushigocrafting:salmon_cheese_california",
-    "sushigocrafting:salmon_cucumber_california",
-    "sushigocrafting:salmon_gunkan",
-    "sushigocrafting:tuna_nigiri",
-    "sushigocrafting:tuna_maki",
-    "sushigocrafting:tuna_temaki",
-    "sushigocrafting:tuna_california",
-    "sushigocrafting:tuna_cheese_california",
-    "sushigocrafting:tuna_cucumber_california",
-    "sushigocrafting:tuna_gunkan",
-    "sushigocrafting:shrimp_nigiri",
-    "sushigocrafting:shrimp_temaki",
-    "sushigocrafting:crab_california",
-    "sushigocrafting:crab_cheese_california",
-    "sushigocrafting:crab_cucumber_california",
-    "sushigocrafting:crab_maki",
-    "sushigocrafting:chicken_temaki",
-    "sushigocrafting:tobiko_crab_california",
-    "sushigocrafting:tobiko_crab_cheese_california",
-    "sushigocrafting:tobiko_crab_cucumber_california",
-    "sushigocrafting:tobiko_salmon_california",
-    "sushigocrafting:tobiko_salmon_cheese_california",
-    "sushigocrafting:tobiko_salmon_cucumber_california",
-    "sushigocrafting:tobiko_tuna_california",
-    "sushigocrafting:tobiko_tuna_cheese_california",
-    "sushigocrafting:tobiko_tuna_cucumber_california",
+    {
+      "id": "sushigocrafting:salmon_nigiri",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:salmon_maki",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:salmon_temaki",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:salmon_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:salmon_cheese_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:salmon_cucumber_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:salmon_gunkan",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tuna_nigiri",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tuna_maki",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tuna_temaki",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tuna_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tuna_cheese_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tuna_cucumber_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tuna_gunkan",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:shrimp_nigiri",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:shrimp_temaki",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:crab_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:crab_cheese_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:crab_cucumber_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:crab_maki",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:chicken_temaki",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tobiko_crab_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tobiko_crab_cheese_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tobiko_crab_cucumber_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tobiko_salmon_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tobiko_salmon_cheese_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tobiko_salmon_cucumber_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tobiko_tuna_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tobiko_tuna_cheese_california",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tobiko_tuna_cucumber_california",
+      "required": false
+    },
     "farmersdelight:dog_food",
-    "lendersdelight:improved_dog_food",
-    "croptopia:tofu",
-    "doggytalents:tofu",
-    "minecolonies:tofu",
+    {
+      "id": "lendersdelight:improved_dog_food",
+      "required": false
+    },
+    {
+      "id": "croptopia:tofu",
+      "required": false
+    },
+    {
+      "id": "doggytalents:tofu",
+      "required": false
+    },
+    {
+      "id": "minecolonies:tofu",
+      "required": false
+    },
     "pamhc2foodextended:firmtofuitem",
     "pamhc2foodextended:silkentofuitem",
     "pamhc2foodextended:rawtofuttonitem",
@@ -348,355 +843,1401 @@
     "pamhc2foodextended:walnutbutteritem",
     "pamhc2foodextended:peanutbutterbananapancakesitem",
     "pamhc2foodextended:peanutbutterbananasandwichitem",
-    { "id": "farm_and_charm:baked_lamb_ham_block", "required": false },
-    { "id": "farm_and_charm:potato_with_roast_meat_block", "required": false },
-    { "id": "farm_and_charm:stuffed_chicken_block", "required": false },
-    { "id": "farm_and_charm:stuffed_rabbit_block", "required": false },
-    "brewery:pork_knuckle",
-    "brewery:fried_chicken",
-    "brewery:half_chicken",
-    { "id": "croptopia:anchovy", "required": false },
-    { "id": "croptopia:calamari", "required": false },
-    { "id": "croptopia:clam", "required": false },
-    { "id": "croptopia:crab", "required": false },
-    { "id": "croptopia:glowing_calamari", "required": false },
-    { "id": "croptopia:oyster", "required": false },
-    { "id": "croptopia:roe", "required": false },
-    { "id": "croptopia:shrimp", "required": false },
-    { "id": "croptopia:tuna", "required": false },
-    { "id": "croptopia:tuna_sandwich", "required": false },
-    { "id": "croptopia:frog_legs", "required": false },
-    { "id": "croptopia:fried_frog_legs", "required": false },
-    { "id": "croptopia:raw_ravager_meat", "required": false },
-    { "id": "ends_delight:shulker_meat", "required": false },
-    { "id": "ends_delight:shulker_meat_slice", "required": false },
-    { "id": "ends_delight:dragon_leg", "required": false },
-    { "id": "ends_delight:raw_dragon_meat", "required": false },
-    { "id": "ends_delight:raw_dragon_meat_cuts", "required": false },
-    { "id": "ends_delight:raw_ender_mite_meat", "required": false },
-    { "id": "ends_delight:enderman_gristle", "required": false },
-    { "id": "ends_delight:dragon_leg_with_sauce", "required": false },
-    { "id": "ends_delight:dragon_meat_stew", "required": false },
-    { "id": "ends_delight:grilled_shulker", "required": false },
-    { "id": "ends_delight:steamed_dragon_egg", "required": false },
-    { "id": "endersdelight:shulker_mollusk", "required": false },
-    { "id": "endersdelight:shulker_filet", "required": false },
-    { "id": "endersdelight:mite_crust", "required": false },
-    { "id": "endersdelight:stuffed_shulker_bowl", "required": false },
-    { "id": "endersdelight:steak_fries", "required": false },
-    { "id": "pamhc2foodextended:mushroomsteakitem", "required": false },
-    { "id": "ends_delight:roasted_dragon_steak", "required": false },
-    { "id": "createfood:beef_bun_cheese", "required": false },
-    { "id": "createfood:beef_bun_onion_bacon_lettuce", "required": false },
-    { "id": "butchery:calamari", "required": false},
-    { "id": "butchery:cooked_bat_meat", "required": false},
-    { "id": "butchery:cooked_bee_back_meat", "required": false},
-    { "id": "butchery:cooked_beef_mince", "required": false},
-    { "id": "butchery:cooked_blood_sausage", "required": false},
-    { "id": "butchery:cooked_blue_axolotl_fillet", "required": false},
-    { "id": "butchery:cooked_brown_axolotl_fillet", "required": false},
-    { "id": "butchery:cooked_camel_meat", "required": false},
-    { "id": "butchery:cooked_cat_meat", "required": false},
-    { "id": "butchery:cooked_cave_spider_leg", "required": false},
-    { "id": "butchery:cooked_chicken_leg", "required": false},
-    { "id": "butchery:cooked_chicken_wing", "required": false},
-    { "id": "butchery:cooked_chuck_steak", "required": false},
-    { "id": "butchery:cooked_cod_fillet", "required": false},
-    { "id": "butchery:cooked_creeper_leg", "required": false},
-    { "id": "butchery:cooked_creeper_steak", "required": false},
-    { "id": "butchery:cooked_cyan_axolotl_fillet", "required": false},
-    { "id": "butchery:cooked_dolphin_meat", "required": false},
-    { "id": "butchery:cooked_donkey_steak", "required": false},
-    { "id": "butchery:cooked_dragon_meat", "required": false},
-    { "id": "butchery:cooked_elder_guardian_meat", "required": false},
-    { "id": "butchery:cooked_enderman_intestines", "required": false},
-    { "id": "butchery:cooked_enderman_kidney", "required": false},
-    { "id": "butchery:cooked_enderman_liver", "required": false},
-    { "id": "butchery:cooked_enderman_lungs", "required": false},
-    { "id": "butchery:cooked_enderman_steak", "required": false},
-    { "id": "butchery:cooked_enderman_stomach", "required": false},
-    { "id": "butchery:cooked_endermite_chunks", "required": false},
-    { "id": "butchery:cooked_evoker_meat", "required": false},
-    { "id": "butchery:cooked_fox_meat", "required": false},
-    { "id": "butchery:cooked_gold_axolotl_fillet", "required": false},
-    { "id": "butchery:cooked_gray_frog_leg", "required": false},
-    { "id": "butchery:cooked_green_frog_leg", "required": false},
-    { "id": "butchery:cooked_guardian_meat", "required": false},
-    { "id": "butchery:cooked_ham", "required": false},
-    { "id": "butchery:cooked_heart", "required": false},
-    { "id": "butchery:cooked_hoglin_chunk", "required": false},
-    { "id": "butchery:cooked_horse_meat", "required": false},
-    { "id": "butchery:cooked_intestines", "required": false},
-    { "id": "butchery:cooked_kidney", "required": false},
-    { "id": "butchery:cooked_lamb_loin", "required": false},
-    { "id": "butchery:cooked_lamb_mince", "required": false},
-    { "id": "butchery:cooked_lamb_rib", "required": false},
-    { "id": "butchery:cooked_lamb_shoulder", "required": false},
-    { "id": "butchery:cooked_lamb_sirloin", "required": false},
-    { "id": "butchery:cooked_leg_of_lamb", "required": false},
-    { "id": "butchery:cooked_liver", "required": false},
-    { "id": "butchery:cooked_llama_steak", "required": false},
-    { "id": "butchery:cooked_lungs", "required": false},
-    { "id": "butchery:cooked_mule_steak", "required": false},
-    { "id": "butchery:cooked_ocelot_meat", "required": false},
-    { "id": "butchery:cooked_orange_frog_leg", "required": false},
-    { "id": "butchery:cooked_panda_steak", "required": false},
-    { "id": "butchery:cooked_pillager_meat", "required": false},
-    { "id": "butchery:cooked_pink_axolotl_fillet", "required": false},
-    { "id": "butchery:cooked_polar_bear_meat", "required": false},
-    { "id": "butchery:cooked_pork_belly", "required": false},
-    { "id": "butchery:cooked_pork_leg", "required": false},
-    { "id": "butchery:cooked_pork_loin", "required": false},
-    { "id": "butchery:cooked_pork_shoulder", "required": false},
-    { "id": "butchery:cooked_pufferfish", "required": false},
-    { "id": "butchery:cooked_ravager_meat", "required": false},
-    { "id": "butchery:cooked_ribeye_steak", "required": false},
-    { "id": "butchery:cooked_rump_steak", "required": false},
-    { "id": "butchery:cooked_salmon", "required": false},
-    { "id": "butchery:cooked_sausage", "required": false},
-    { "id": "butchery:cooked_shulker_meat", "required": false},
-    { "id": "butchery:cooked_silverfish_chunks", "required": false},
-    { "id": "butchery:cooked_sirloin_steak", "required": false},
-    { "id": "butchery:cooked_sniffer_steak", "required": false},
-    { "id": "butchery:cooked_spider_leg", "required": false},
-    { "id": "butchery:cooked_stomach", "required": false},
-    { "id": "butchery:cooked_strider_meat", "required": false},
-    { "id": "butchery:cooked_tbone_steak", "required": false},
-    { "id": "butchery:cooked_turtle_meat", "required": false},
-    { "id": "butchery:cooked_villager_steak", "required": false},
-    { "id": "butchery:cooked_vindicator_meat", "required": false},
-    { "id": "butchery:cooked_warden_meat", "required": false},
-    { "id": "butchery:cooked_witch_meat", "required": false},
-    { "id": "butchery:cooked_wolf_meat", "required": false},
-    { "id": "butchery:cookedhumanmeat", "required": false},
-    { "id": "butchery:crackling", "required": false},
-    { "id": "butchery:enderman_intestines", "required": false},
-    { "id": "butchery:enderman_kidney", "required": false},
-    { "id": "butchery:enderman_liver", "required": false},
-    { "id": "butchery:enderman_lungs", "required": false},
-    { "id": "butchery:enderman_stomach", "required": false},
-    { "id": "butchery:heart", "required": false},
-    { "id": "butchery:honey_stomach", "required": false},
-    { "id": "butchery:intestines", "required": false},
-    { "id": "butchery:kidney", "required": false},
-    { "id": "butchery:liver", "required": false},
-    { "id": "butchery:lungs", "required": false},
-    { "id": "butchery:raw_bat_meat", "required": false},
-    { "id": "butchery:raw_bee_back_meat", "required": false},
-    { "id": "butchery:raw_beef_mince", "required": false},
-    { "id": "butchery:raw_blood_sausage", "required": false},
-    { "id": "butchery:raw_blue_axolotl_fillet", "required": false},
-    { "id": "butchery:raw_brown_axolotl_fillet", "required": false},
-    { "id": "butchery:raw_camel_meat", "required": false},
-    { "id": "butchery:raw_cat_meat", "required": false},
-    { "id": "butchery:raw_cave_spider_leg", "required": false},
-    { "id": "butchery:raw_chicken_leg", "required": false},
-    { "id": "butchery:raw_chicken_wing", "required": false},
-    { "id": "butchery:raw_chuck_steak", "required": false},
-    { "id": "butchery:raw_cod_fillet", "required": false},
-    { "id": "butchery:raw_creeper_leg", "required": false},
-    { "id": "butchery:raw_creeper_steak", "required": false},
-    { "id": "butchery:raw_cyan_axolotl_fillet", "required": false},
-    { "id": "butchery:raw_dolphin_meat", "required": false},
-    { "id": "butchery:raw_donkey_steak", "required": false},
-    { "id": "butchery:raw_dragon_meat", "required": false},
-    { "id": "butchery:raw_elder_guardian_meat", "required": false},
-    { "id": "butchery:raw_enderman_steak", "required": false},
-    { "id": "butchery:raw_endermite_chunks", "required": false},
-    { "id": "butchery:raw_evoker_meat", "required": false},
-    { "id": "butchery:raw_fox_meat", "required": false},
-    { "id": "butchery:raw_gold_axolotl_fillet", "required": false},
-    { "id": "butchery:raw_gray_frog_leg", "required": false},
-    { "id": "butchery:raw_green_frog_leg", "required": false},
-    { "id": "butchery:raw_guardian_meat", "required": false},
-    { "id": "butchery:raw_ham", "required": false},
-    { "id": "butchery:raw_hoglin_chunk", "required": false},
-    { "id": "butchery:raw_horse_meat", "required": false},
-    { "id": "butchery:raw_lamb_loin", "required": false},
-    { "id": "butchery:raw_lamb_mince", "required": false},
-    { "id": "butchery:raw_lamb_rib", "required": false},
-    { "id": "butchery:raw_lamb_shoulder", "required": false},
-    { "id": "butchery:raw_lamb_sirloin", "required": false},
-    { "id": "butchery:raw_leg_of_lamb", "required": false},
-    { "id": "butchery:raw_llama_steak", "required": false},
-    { "id": "butchery:raw_mule_steak", "required": false},
-    { "id": "butchery:raw_ocelot_meat", "required": false},
-    { "id": "butchery:raw_orange_frog_leg", "required": false},
-    { "id": "butchery:raw_panda_steak", "required": false},
-    { "id": "butchery:raw_pillager_meat", "required": false},
-    { "id": "butchery:raw_pink_axolotl_fillet", "required": false},
-    { "id": "butchery:raw_polar_bear_meat", "required": false},
-    { "id": "butchery:raw_pork_belly", "required": false},
-    { "id": "butchery:raw_pork_leg", "required": false},
-    { "id": "butchery:raw_pork_loin", "required": false},
-    { "id": "butchery:raw_pork_shoulder", "required": false},
-    { "id": "butchery:raw_pufferfish", "required": false},
-    { "id": "butchery:raw_ravager_meat", "required": false},
-    { "id": "butchery:raw_ribeye_steak", "required": false},
-    { "id": "butchery:raw_rump_steak", "required": false},
-    { "id": "butchery:raw_salmon", "required": false},
-    { "id": "butchery:raw_sausage", "required": false},
-    { "id": "butchery:raw_shulker_meat", "required": false},
-    { "id": "butchery:raw_silverfish_chunks", "required": false},
-    { "id": "butchery:raw_sirloin_steak", "required": false},
-    { "id": "butchery:raw_sniffer_steak", "required": false},
-    { "id": "butchery:raw_spider_leg", "required": false},
-    { "id": "butchery:raw_strider_meat", "required": false},
-    { "id": "butchery:raw_tbone_steak", "required": false},
-    { "id": "butchery:raw_turtle_meat", "required": false},
-    { "id": "butchery:raw_villager_steak", "required": false},
-    { "id": "butchery:raw_vindicator_meat", "required": false},
-    { "id": "butchery:raw_warden_meat", "required": false},
-    { "id": "butchery:raw_witch_meat", "required": false},
-    { "id": "butchery:raw_wolf_meat", "required": false},
-    { "id": "butchery:rawhumanmeat", "required": false},
-    { "id": "butchery:rotten_heart", "required": false},
-    { "id": "butchery:rotten_intestines", "required": false},
-    { "id": "butchery:rotten_kidney", "required": false},
-    { "id": "butchery:rotten_liver", "required": false},
-    { "id": "butchery:rotten_lungs", "required": false},
-    { "id": "butchery:rotten_stomach", "required": false},
-    { "id": "butchery:stomach", "required": false},
-    { "id": "butchery:tentacles", "required": false},
-    { "id": "butchery:withered_heart", "required": false},
-    { "id": "starcatcher:agave_bream", "required": false},
-    { "id": "starcatcher:amethystback", "required": false},
-    { "id": "starcatcher:aquamarine_pike", "required": false},
-    { "id": "starcatcher:aurora", "required": false},
-    { "id": "starcatcher:azure_crystalback_minnow", "required": false},
-    { "id": "starcatcher:bigeye_tuna", "required": false},
-    { "id": "starcatcher:blossomfish", "required": false},
-    { "id": "starcatcher:blue_crystal_fin", "required": false},
-    { "id": "starcatcher:blue_herring", "required": false},
-    { "id": "starcatcher:bluegigi", "required": false},
-    { "id": "starcatcher:boreal", "required": false},
-    { "id": "starcatcher:bright_amethyst_snapper", "required": false},
-    { "id": "starcatcher:cactifish", "required": false},
-    { "id": "starcatcher:carpenjoe", "required": false},
-    { "id": "starcatcher:charfish", "required": false},
-    { "id": "starcatcher:chorus_crab", "required": false},
-    { "id": "starcatcher:cooked_starcaught_fish", "required": false},
-    { "id": "starcatcher:crystalback_boreal", "required": false},
-    { "id": "starcatcher:crystalback_minnow", "required": false},
-    { "id": "starcatcher:crystalback_sturgeon", "required": false},
-    { "id": "starcatcher:crystalback_trout", "required": false},
-    { "id": "starcatcher:dark_amethyst_snapper", "required": false},
-    { "id": "starcatcher:deepjaw_herring", "required": false},
-    { "id": "starcatcher:deepslatefish", "required": false},
-    { "id": "starcatcher:downfall_bream", "required": false},
-    { "id": "starcatcher:driftfin", "required": false},
-    { "id": "starcatcher:drifting_bream", "required": false},
-    { "id": "starcatcher:dripfin", "required": false},
-    { "id": "starcatcher:dusktail_snapper", "required": false},
-    { "id": "starcatcher:elderscale", "required": false},
-    { "id": "starcatcher:end_glow", "required": false},
-    { "id": "starcatcher:fossilized_angelfish", "required": false},
-    { "id": "starcatcher:frostgill_chub", "required": false},
-    { "id": "starcatcher:frostjaw_trout", "required": false},
-    { "id": "starcatcher:garnet_mackerel", "required": false},
-    { "id": "starcatcher:ghostly_pike", "required": false},
-    { "id": "starcatcher:glowing_dark", "required": false},
-    { "id": "starcatcher:gold_fan", "required": false},
-    { "id": "starcatcher:hollowbelly_darter", "required": false},
-    { "id": "starcatcher:icetooth_sturgeon", "required": false},
-    { "id": "starcatcher:ironjaw_herring", "required": false},
-    { "id": "starcatcher:joel", "required": false},
-    { "id": "starcatcher:lightning_bass", "required": false},
-    { "id": "starcatcher:lily_snapper", "required": false},
-    { "id": "starcatcher:lush_pike", "required": false},
-    { "id": "starcatcher:mirage_carp", "required": false},
-    { "id": "starcatcher:mistback_chub", "required": false},
-    { "id": "starcatcher:morganite", "required": false},
-    { "id": "starcatcher:obidontiee", "required": false},
-    { "id": "starcatcher:pale_carp", "required": false},
-    { "id": "starcatcher:pale_pinfish", "required": false},
-    { "id": "starcatcher:peakdweller", "required": false},
-    { "id": "starcatcher:petaldrift_carp", "required": false},
-    { "id": "starcatcher:pinfish", "required": false},
-    { "id": "starcatcher:pink_koi", "required": false},
-    { "id": "starcatcher:redscaled_tuna", "required": false},
-    { "id": "starcatcher:rockgill", "required": false},
-    { "id": "starcatcher:rose_siamese_fish", "required": false},
-    { "id": "starcatcher:sage_catfish", "required": false},
-    { "id": "starcatcher:sandtail", "required": false},
-    { "id": "starcatcher:scorchfish", "required": false},
-    { "id": "starcatcher:sculkfish", "required": false},
-    { "id": "starcatcher:sea_bass", "required": false},
-    { "id": "starcatcher:shroomfish", "required": false},
-    { "id": "starcatcher:silverfin_pike", "required": false},
-    { "id": "starcatcher:silverveil_perch", "required": false},
-    { "id": "starcatcher:sludge_catfish", "required": false},
-    { "id": "starcatcher:sporefish", "required": false},
-    { "id": "starcatcher:stonefish", "required": false},
-    { "id": "starcatcher:sun_seeking_carp", "required": false},
-    { "id": "starcatcher:sunny_sturgeon", "required": false},
-    { "id": "starcatcher:the_quarrish", "required": false},
-    { "id": "starcatcher:thunder_bass", "required": false},
-    { "id": "starcatcher:twilight_koi", "required": false},
-    { "id": "starcatcher:vesani", "required": false},
-    { "id": "starcatcher:vivid_moss", "required": false},
-    { "id": "starcatcher:voidbiter", "required": false},
-    { "id": "starcatcher:ward", "required": false},
-    { "id": "starcatcher:whiteveil", "required": false},
-    { "id": "starcatcher:willow_bream", "required": false},
-    { "id": "starcatcher:wintery_pike", "required": false},
-    { "id": "starcatcher:yellowstone_fish", "required": false},
-    { "id": "starcatcher_delight:cactifish_stew", "required": false},
-    { "id": "starcatcher_delight:fish_and_chips", "required": false},
-    { "id": "starcatcher_delight:fish_and_chips_common", "required": false},
-    { "id": "starcatcher_delight:fish_and_chips_epic", "required": false},
-    { "id": "starcatcher_delight:fish_and_chips_legendary", "required": false},
-    { "id": "starcatcher_delight:fish_and_chips_rare", "required": false},
-    { "id": "starcatcher_delight:fish_and_chips_uncommon", "required": false},
-    { "id": "starcatcher_delight:fish_salad", "required": false},
-    { "id": "starcatcher_delight:fish_salad_common", "required": false},
-    { "id": "starcatcher_delight:fish_salad_epic", "required": false},
-    { "id": "starcatcher_delight:fish_salad_legendary", "required": false},
-    { "id": "starcatcher_delight:fish_salad_rare", "required": false},
-    { "id": "starcatcher_delight:fish_salad_uncommon", "required": false},
-    { "id": "starcatcher_delight:futomaki", "required": false},
-    { "id": "starcatcher_delight:futomaki_common", "required": false},
-    { "id": "starcatcher_delight:futomaki_epic", "required": false},
-    { "id": "starcatcher_delight:futomaki_legendary", "required": false},
-    { "id": "starcatcher_delight:futomaki_rare", "required": false},
-    { "id": "starcatcher_delight:futomaki_uncommon", "required": false},
-    { "id": "starcatcher_delight:grilled_shroomfish", "required": false},
-    { "id": "starcatcher_delight:healthy_fish_omelette", "required": false},
-    { "id": "starcatcher_delight:healthy_fish_omelette_common", "required": false},
-    { "id": "starcatcher_delight:healthy_fish_omelette_epic", "required": false},
-    { "id": "starcatcher_delight:healthy_fish_omelette_legendary", "required": false},
-    { "id": "starcatcher_delight:healthy_fish_omelette_rare", "required": false},
-    { "id": "starcatcher_delight:healthy_fish_omelette_uncommon", "required": false},
-    { "id": "starcatcher_delight:magma_fish_balls", "required": false},
-    { "id": "starcatcher_delight:nigiri", "required": false},
-    { "id": "starcatcher_delight:nigiri_common", "required": false},
-    { "id": "starcatcher_delight:nigiri_epic", "required": false},
-    { "id": "starcatcher_delight:nigiri_legendary", "required": false},
-    { "id": "starcatcher_delight:nigiri_rare", "required": false},
-    { "id": "starcatcher_delight:nigiri_uncommon", "required": false},
-    { "id": "starcatcher_delight:sludge_stew", "required": false},
-    { "id": "starcatcher_delight:starcaught_fillet", "required": false},
-    { "id": "starcatcher_delight:starcaught_fillet_common", "required": false},
-    { "id": "starcatcher_delight:starcaught_fillet_epic", "required": false},
-    { "id": "starcatcher_delight:starcaught_fillet_legendary", "required": false},
-    { "id": "starcatcher_delight:starcaught_fillet_rare", "required": false},
-    { "id": "starcatcher_delight:starcaught_fillet_uncommon", "required": false},
-    { "id": "starcatcher_delight:steamed_redscaled_tuna", "required": false},
-    { "id": "moredelight:omelette", "required": false },
-    { "id": "doggytalents:onsen_tamago", "required": false },
-    { "id": "sushigocrafting:tobiko", "required": false },
-    { "id": "oceansdelight:fugu_slice", "required": false },
-    { "id": "pamhc2foodextended:cevicheitem", "required": false },
-    { "id": "twilightdelight:grilled_ghast", "required": false },
-    { "id": "twilightdelight:grilled_tomahawk_smeak", "required": false },
-    { "id": "twilightdelight:plate_of_fiery_snakes", "required": false },
-    { "id": "lendersdelight:ender_blood", "required": false },
-    { "id": "pamhc2foodextended:kohlundpinkelitem", "required": false },
-    { "id": "pamhc2foodextended:pinkelitem", "required": false },
-    { "id": "pamhc2foodextended:pitepaltitem", "required": false },
-    { "id": "pamhc2foodextended:timpanoitem", "required": false },
-    { "id": "croptopia:croque_madame", "required": false },
-    { "id": "croptopia:croque_monsieur", "required": false }
-
+    {
+      "id": "farm_and_charm:baked_lamb_ham_block",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:potato_with_roast_meat_block",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:stuffed_chicken_block",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:stuffed_rabbit_block",
+      "required": false
+    },
+    {
+      "id": "brewery:pork_knuckle",
+      "required": false
+    },
+    {
+      "id": "brewery:fried_chicken",
+      "required": false
+    },
+    {
+      "id": "brewery:half_chicken",
+      "required": false
+    },
+    {
+      "id": "croptopia:anchovy",
+      "required": false
+    },
+    {
+      "id": "croptopia:calamari",
+      "required": false
+    },
+    {
+      "id": "croptopia:clam",
+      "required": false
+    },
+    {
+      "id": "croptopia:crab",
+      "required": false
+    },
+    {
+      "id": "croptopia:glowing_calamari",
+      "required": false
+    },
+    {
+      "id": "croptopia:oyster",
+      "required": false
+    },
+    {
+      "id": "croptopia:roe",
+      "required": false
+    },
+    {
+      "id": "croptopia:shrimp",
+      "required": false
+    },
+    {
+      "id": "croptopia:tuna",
+      "required": false
+    },
+    {
+      "id": "croptopia:tuna_sandwich",
+      "required": false
+    },
+    {
+      "id": "croptopia:frog_legs",
+      "required": false
+    },
+    {
+      "id": "croptopia:fried_frog_legs",
+      "required": false
+    },
+    {
+      "id": "croptopia:raw_ravager_meat",
+      "required": false
+    },
+    {
+      "id": "ends_delight:shulker_meat",
+      "required": false
+    },
+    {
+      "id": "ends_delight:shulker_meat_slice",
+      "required": false
+    },
+    {
+      "id": "ends_delight:dragon_leg",
+      "required": false
+    },
+    {
+      "id": "ends_delight:raw_dragon_meat",
+      "required": false
+    },
+    {
+      "id": "ends_delight:raw_dragon_meat_cuts",
+      "required": false
+    },
+    {
+      "id": "ends_delight:raw_ender_mite_meat",
+      "required": false
+    },
+    {
+      "id": "ends_delight:enderman_gristle",
+      "required": false
+    },
+    {
+      "id": "ends_delight:dragon_leg_with_sauce",
+      "required": false
+    },
+    {
+      "id": "ends_delight:dragon_meat_stew",
+      "required": false
+    },
+    {
+      "id": "ends_delight:grilled_shulker",
+      "required": false
+    },
+    {
+      "id": "ends_delight:steamed_dragon_egg",
+      "required": false
+    },
+    {
+      "id": "endersdelight:shulker_mollusk",
+      "required": false
+    },
+    {
+      "id": "endersdelight:shulker_filet",
+      "required": false
+    },
+    {
+      "id": "endersdelight:mite_crust",
+      "required": false
+    },
+    {
+      "id": "endersdelight:stuffed_shulker_bowl",
+      "required": false
+    },
+    {
+      "id": "endersdelight:steak_fries",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mushroomsteakitem",
+      "required": false
+    },
+    {
+      "id": "ends_delight:roasted_dragon_steak",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_onion_bacon_lettuce",
+      "required": false
+    },
+    {
+      "id": "butchery:calamari",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_bat_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_bee_back_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_beef_mince",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_blood_sausage",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_blue_axolotl_fillet",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_brown_axolotl_fillet",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_camel_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_cat_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_cave_spider_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_chicken_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_chicken_wing",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_chuck_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_cod_fillet",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_creeper_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_creeper_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_cyan_axolotl_fillet",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_dolphin_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_donkey_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_dragon_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_elder_guardian_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_enderman_intestines",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_enderman_kidney",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_enderman_liver",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_enderman_lungs",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_enderman_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_enderman_stomach",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_endermite_chunks",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_evoker_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_fox_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_gold_axolotl_fillet",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_gray_frog_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_green_frog_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_guardian_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_ham",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_heart",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_hoglin_chunk",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_horse_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_intestines",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_kidney",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_lamb_loin",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_lamb_mince",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_lamb_rib",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_lamb_shoulder",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_lamb_sirloin",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_leg_of_lamb",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_liver",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_llama_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_lungs",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_mule_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_ocelot_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_orange_frog_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_panda_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_pillager_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_pink_axolotl_fillet",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_polar_bear_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_pork_belly",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_pork_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_pork_loin",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_pork_shoulder",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_pufferfish",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_ravager_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_ribeye_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_rump_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_salmon",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_sausage",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_shulker_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_silverfish_chunks",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_sirloin_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_sniffer_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_spider_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_stomach",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_strider_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_tbone_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_turtle_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_villager_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_vindicator_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_warden_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_witch_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cooked_wolf_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:cookedhumanmeat",
+      "required": false
+    },
+    {
+      "id": "butchery:crackling",
+      "required": false
+    },
+    {
+      "id": "butchery:enderman_intestines",
+      "required": false
+    },
+    {
+      "id": "butchery:enderman_kidney",
+      "required": false
+    },
+    {
+      "id": "butchery:enderman_liver",
+      "required": false
+    },
+    {
+      "id": "butchery:enderman_lungs",
+      "required": false
+    },
+    {
+      "id": "butchery:enderman_stomach",
+      "required": false
+    },
+    {
+      "id": "butchery:heart",
+      "required": false
+    },
+    {
+      "id": "butchery:honey_stomach",
+      "required": false
+    },
+    {
+      "id": "butchery:intestines",
+      "required": false
+    },
+    {
+      "id": "butchery:kidney",
+      "required": false
+    },
+    {
+      "id": "butchery:liver",
+      "required": false
+    },
+    {
+      "id": "butchery:lungs",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_bat_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_bee_back_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_beef_mince",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_blood_sausage",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_blue_axolotl_fillet",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_brown_axolotl_fillet",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_camel_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_cat_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_cave_spider_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_chicken_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_chicken_wing",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_chuck_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_cod_fillet",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_creeper_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_creeper_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_cyan_axolotl_fillet",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_dolphin_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_donkey_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_dragon_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_elder_guardian_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_enderman_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_endermite_chunks",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_evoker_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_fox_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_gold_axolotl_fillet",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_gray_frog_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_green_frog_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_guardian_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_ham",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_hoglin_chunk",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_horse_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_lamb_loin",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_lamb_mince",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_lamb_rib",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_lamb_shoulder",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_lamb_sirloin",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_leg_of_lamb",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_llama_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_mule_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_ocelot_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_orange_frog_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_panda_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_pillager_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_pink_axolotl_fillet",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_polar_bear_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_pork_belly",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_pork_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_pork_loin",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_pork_shoulder",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_pufferfish",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_ravager_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_ribeye_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_rump_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_salmon",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_sausage",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_shulker_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_silverfish_chunks",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_sirloin_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_sniffer_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_spider_leg",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_strider_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_tbone_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_turtle_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_villager_steak",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_vindicator_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_warden_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_witch_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:raw_wolf_meat",
+      "required": false
+    },
+    {
+      "id": "butchery:rawhumanmeat",
+      "required": false
+    },
+    {
+      "id": "butchery:rotten_heart",
+      "required": false
+    },
+    {
+      "id": "butchery:rotten_intestines",
+      "required": false
+    },
+    {
+      "id": "butchery:rotten_kidney",
+      "required": false
+    },
+    {
+      "id": "butchery:rotten_liver",
+      "required": false
+    },
+    {
+      "id": "butchery:rotten_lungs",
+      "required": false
+    },
+    {
+      "id": "butchery:rotten_stomach",
+      "required": false
+    },
+    {
+      "id": "butchery:stomach",
+      "required": false
+    },
+    {
+      "id": "butchery:tentacles",
+      "required": false
+    },
+    {
+      "id": "butchery:withered_heart",
+      "required": false
+    },
+    {
+      "id": "starcatcher:agave_bream",
+      "required": false
+    },
+    {
+      "id": "starcatcher:amethystback",
+      "required": false
+    },
+    {
+      "id": "starcatcher:aquamarine_pike",
+      "required": false
+    },
+    {
+      "id": "starcatcher:aurora",
+      "required": false
+    },
+    {
+      "id": "starcatcher:azure_crystalback_minnow",
+      "required": false
+    },
+    {
+      "id": "starcatcher:bigeye_tuna",
+      "required": false
+    },
+    {
+      "id": "starcatcher:blossomfish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:blue_crystal_fin",
+      "required": false
+    },
+    {
+      "id": "starcatcher:blue_herring",
+      "required": false
+    },
+    {
+      "id": "starcatcher:bluegigi",
+      "required": false
+    },
+    {
+      "id": "starcatcher:boreal",
+      "required": false
+    },
+    {
+      "id": "starcatcher:bright_amethyst_snapper",
+      "required": false
+    },
+    {
+      "id": "starcatcher:cactifish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:carpenjoe",
+      "required": false
+    },
+    {
+      "id": "starcatcher:charfish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:chorus_crab",
+      "required": false
+    },
+    {
+      "id": "starcatcher:cooked_starcaught_fish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:crystalback_boreal",
+      "required": false
+    },
+    {
+      "id": "starcatcher:crystalback_minnow",
+      "required": false
+    },
+    {
+      "id": "starcatcher:crystalback_sturgeon",
+      "required": false
+    },
+    {
+      "id": "starcatcher:crystalback_trout",
+      "required": false
+    },
+    {
+      "id": "starcatcher:dark_amethyst_snapper",
+      "required": false
+    },
+    {
+      "id": "starcatcher:deepjaw_herring",
+      "required": false
+    },
+    {
+      "id": "starcatcher:deepslatefish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:downfall_bream",
+      "required": false
+    },
+    {
+      "id": "starcatcher:driftfin",
+      "required": false
+    },
+    {
+      "id": "starcatcher:drifting_bream",
+      "required": false
+    },
+    {
+      "id": "starcatcher:dripfin",
+      "required": false
+    },
+    {
+      "id": "starcatcher:dusktail_snapper",
+      "required": false
+    },
+    {
+      "id": "starcatcher:elderscale",
+      "required": false
+    },
+    {
+      "id": "starcatcher:end_glow",
+      "required": false
+    },
+    {
+      "id": "starcatcher:fossilized_angelfish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:frostgill_chub",
+      "required": false
+    },
+    {
+      "id": "starcatcher:frostjaw_trout",
+      "required": false
+    },
+    {
+      "id": "starcatcher:garnet_mackerel",
+      "required": false
+    },
+    {
+      "id": "starcatcher:ghostly_pike",
+      "required": false
+    },
+    {
+      "id": "starcatcher:glowing_dark",
+      "required": false
+    },
+    {
+      "id": "starcatcher:gold_fan",
+      "required": false
+    },
+    {
+      "id": "starcatcher:hollowbelly_darter",
+      "required": false
+    },
+    {
+      "id": "starcatcher:icetooth_sturgeon",
+      "required": false
+    },
+    {
+      "id": "starcatcher:ironjaw_herring",
+      "required": false
+    },
+    {
+      "id": "starcatcher:joel",
+      "required": false
+    },
+    {
+      "id": "starcatcher:lightning_bass",
+      "required": false
+    },
+    {
+      "id": "starcatcher:lily_snapper",
+      "required": false
+    },
+    {
+      "id": "starcatcher:lush_pike",
+      "required": false
+    },
+    {
+      "id": "starcatcher:mirage_carp",
+      "required": false
+    },
+    {
+      "id": "starcatcher:mistback_chub",
+      "required": false
+    },
+    {
+      "id": "starcatcher:morganite",
+      "required": false
+    },
+    {
+      "id": "starcatcher:obidontiee",
+      "required": false
+    },
+    {
+      "id": "starcatcher:pale_carp",
+      "required": false
+    },
+    {
+      "id": "starcatcher:pale_pinfish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:peakdweller",
+      "required": false
+    },
+    {
+      "id": "starcatcher:petaldrift_carp",
+      "required": false
+    },
+    {
+      "id": "starcatcher:pinfish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:pink_koi",
+      "required": false
+    },
+    {
+      "id": "starcatcher:redscaled_tuna",
+      "required": false
+    },
+    {
+      "id": "starcatcher:rockgill",
+      "required": false
+    },
+    {
+      "id": "starcatcher:rose_siamese_fish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:sage_catfish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:sandtail",
+      "required": false
+    },
+    {
+      "id": "starcatcher:scorchfish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:sculkfish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:sea_bass",
+      "required": false
+    },
+    {
+      "id": "starcatcher:shroomfish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:silverfin_pike",
+      "required": false
+    },
+    {
+      "id": "starcatcher:silverveil_perch",
+      "required": false
+    },
+    {
+      "id": "starcatcher:sludge_catfish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:sporefish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:stonefish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:sun_seeking_carp",
+      "required": false
+    },
+    {
+      "id": "starcatcher:sunny_sturgeon",
+      "required": false
+    },
+    {
+      "id": "starcatcher:the_quarrish",
+      "required": false
+    },
+    {
+      "id": "starcatcher:thunder_bass",
+      "required": false
+    },
+    {
+      "id": "starcatcher:twilight_koi",
+      "required": false
+    },
+    {
+      "id": "starcatcher:vesani",
+      "required": false
+    },
+    {
+      "id": "starcatcher:vivid_moss",
+      "required": false
+    },
+    {
+      "id": "starcatcher:voidbiter",
+      "required": false
+    },
+    {
+      "id": "starcatcher:ward",
+      "required": false
+    },
+    {
+      "id": "starcatcher:whiteveil",
+      "required": false
+    },
+    {
+      "id": "starcatcher:willow_bream",
+      "required": false
+    },
+    {
+      "id": "starcatcher:wintery_pike",
+      "required": false
+    },
+    {
+      "id": "starcatcher:yellowstone_fish",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:cactifish_stew",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:fish_and_chips",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:fish_and_chips_common",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:fish_and_chips_epic",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:fish_and_chips_legendary",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:fish_and_chips_rare",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:fish_and_chips_uncommon",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:fish_salad",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:fish_salad_common",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:fish_salad_epic",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:fish_salad_legendary",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:fish_salad_rare",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:fish_salad_uncommon",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:futomaki",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:futomaki_common",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:futomaki_epic",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:futomaki_legendary",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:futomaki_rare",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:futomaki_uncommon",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:grilled_shroomfish",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:healthy_fish_omelette",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:healthy_fish_omelette_common",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:healthy_fish_omelette_epic",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:healthy_fish_omelette_legendary",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:healthy_fish_omelette_rare",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:healthy_fish_omelette_uncommon",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:magma_fish_balls",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:nigiri",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:nigiri_common",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:nigiri_epic",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:nigiri_legendary",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:nigiri_rare",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:nigiri_uncommon",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:sludge_stew",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:starcaught_fillet",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:starcaught_fillet_common",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:starcaught_fillet_epic",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:starcaught_fillet_legendary",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:starcaught_fillet_rare",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:starcaught_fillet_uncommon",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:steamed_redscaled_tuna",
+      "required": false
+    },
+    {
+      "id": "moredelight:omelette",
+      "required": false
+    },
+    {
+      "id": "doggytalents:onsen_tamago",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:tobiko",
+      "required": false
+    },
+    {
+      "id": "oceansdelight:fugu_slice",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cevicheitem",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:grilled_ghast",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:grilled_tomahawk_smeak",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:plate_of_fiery_snakes",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:ender_blood",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:kohlundpinkelitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pinkelitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pitepaltitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:timpanoitem",
+      "required": false
+    },
+    {
+      "id": "croptopia:croque_madame",
+      "required": false
+    },
+    {
+      "id": "croptopia:croque_monsieur",
+      "required": false
+    }
   ]
 }

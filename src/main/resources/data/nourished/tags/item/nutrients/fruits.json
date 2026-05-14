@@ -1,7 +1,10 @@
 {
   "replace": false,
   "values": [
-    "#c:foods/fruit",
+    {
+      "id": "#c:foods/fruit",
+      "required": false
+    },
     "minecraft:apple",
     "minecraft:golden_apple",
     "minecraft:enchanted_golden_apple",
@@ -44,76 +47,286 @@
     "farm_and_charm:strawberry_tea",
     "farm_and_charm:nettle_tea",
     "farm_and_charm:ribwort_tea",
-    "ars_nouveau:sourceberry_bush",
-    "bountifulfares:coconut_half",
-    "bountifulfares:passion_fruit",
-    "bountifulfares:walnut",
-    "createfood:apple_slice",
-    "createfood:chorus_fruit_slice",
-    "createfood:small_slimeballs",
-    "croptopia:almond",
-    "croptopia:apple_juice",
-    "croptopia:avocado",
-    "croptopia:banana_smoothie",
-    "croptopia:cashew",
-    "croptopia:coconut",
-    "croptopia:cranberry_juice",
-    "croptopia:date",
-    "croptopia:fruit_smoothie",
-    "croptopia:grape_juice",
-    "croptopia:melon_juice",
-    "croptopia:nutmeg",
-    "croptopia:orange_juice",
-    "croptopia:pecan",
-    "croptopia:pineapple_juice",
-    "croptopia:strawberry_smoothie",
-    "croptopia:walnut",
-    "endersdelight:chorus_juice",
-    "ends_delight:chorus_sauce",
-    "ends_delight:chorus_succulent",
-    "evilcraft:darkened_apple",
-    "expandeddelight:apple_juice",
-    "expandeddelight:cinnamon_apples",
-    "expandeddelight:cranberry_juice",
-    "fruitsdelight:apple_jello",
-    "fruitsdelight:baked_durian",
-    "fruitsdelight:baked_pear",
-    "fruitsdelight:bayberry_jello",
-    "fruitsdelight:blueberry_jello",
-    "fruitsdelight:chorus_jello",
-    "fruitsdelight:cranberry_jello",
-    "fruitsdelight:dried_persimmon",
-    "fruitsdelight:durian_jello",
-    "fruitsdelight:fig_jello",
-    "fruitsdelight:glowberry_jello",
-    "fruitsdelight:hawberry_jello",
-    "fruitsdelight:hawberry_sheet",
-    "fruitsdelight:kiwi_jello",
-    "fruitsdelight:kiwi_juice",
-    "fruitsdelight:lemon_jello",
-    "fruitsdelight:lemon_juice",
-    "fruitsdelight:lemon_slice",
-    "fruitsdelight:lychee_jello",
-    "fruitsdelight:mango_jello",
-    "fruitsdelight:mangosteen_jello",
-    "fruitsdelight:melon_jello",
-    "fruitsdelight:orange_jello",
-    "fruitsdelight:orange_juice",
-    "fruitsdelight:orange_slice",
-    "fruitsdelight:peach_jello",
-    "fruitsdelight:pear_jello",
-    "fruitsdelight:pear_juice",
-    "fruitsdelight:persimmon_jello",
-    "fruitsdelight:pineapple_jello",
-    "fruitsdelight:pineapple_slice",
-    "herbsandharvest:cup_apple",
-    "herbsandharvest:cup_berry",
-    "herbsandharvest:cup_fruit_punch",
-    "herbsandharvest:cup_grape",
-    "herbsandharvest:cup_orange",
-    "herbsandharvest:pears_plate_delftware",
-    "herbsandharvest:pears_plate_holiday",
-    "herbsandharvest:pears_plate_plain",
+    {
+      "id": "ars_nouveau:sourceberry_bush",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:coconut_half",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:passion_fruit",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:walnut",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:small_slimeballs",
+      "required": false
+    },
+    {
+      "id": "croptopia:almond",
+      "required": false
+    },
+    {
+      "id": "croptopia:apple_juice",
+      "required": false
+    },
+    {
+      "id": "croptopia:avocado",
+      "required": false
+    },
+    {
+      "id": "croptopia:banana_smoothie",
+      "required": false
+    },
+    {
+      "id": "croptopia:cashew",
+      "required": false
+    },
+    {
+      "id": "croptopia:coconut",
+      "required": false
+    },
+    {
+      "id": "croptopia:cranberry_juice",
+      "required": false
+    },
+    {
+      "id": "croptopia:date",
+      "required": false
+    },
+    {
+      "id": "croptopia:fruit_smoothie",
+      "required": false
+    },
+    {
+      "id": "croptopia:grape_juice",
+      "required": false
+    },
+    {
+      "id": "croptopia:melon_juice",
+      "required": false
+    },
+    {
+      "id": "croptopia:nutmeg",
+      "required": false
+    },
+    {
+      "id": "croptopia:orange_juice",
+      "required": false
+    },
+    {
+      "id": "croptopia:pecan",
+      "required": false
+    },
+    {
+      "id": "croptopia:pineapple_juice",
+      "required": false
+    },
+    {
+      "id": "croptopia:strawberry_smoothie",
+      "required": false
+    },
+    {
+      "id": "croptopia:walnut",
+      "required": false
+    },
+    {
+      "id": "endersdelight:chorus_juice",
+      "required": false
+    },
+    {
+      "id": "ends_delight:chorus_sauce",
+      "required": false
+    },
+    {
+      "id": "ends_delight:chorus_succulent",
+      "required": false
+    },
+    {
+      "id": "evilcraft:darkened_apple",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:apple_juice",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:cinnamon_apples",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:cranberry_juice",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:apple_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:baked_durian",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:baked_pear",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:bayberry_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:blueberry_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:chorus_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:cranberry_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:dried_persimmon",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:durian_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:fig_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:glowberry_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:hawberry_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:hawberry_sheet",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:kiwi_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:kiwi_juice",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:lemon_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:lemon_juice",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:lemon_slice",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:lychee_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:mango_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:mangosteen_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:melon_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:orange_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:orange_juice",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:orange_slice",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:peach_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:pear_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:pear_juice",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:persimmon_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:pineapple_jello",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:pineapple_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:cup_apple",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:cup_berry",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:cup_fruit_punch",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:cup_grape",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:cup_orange",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:pears_plate_delftware",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:pears_plate_holiday",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:pears_plate_plain",
+      "required": false
+    },
     "pamhc2crops:blackberryitem",
     "pamhc2crops:blueberryitem",
     "pamhc2crops:candleberryitem",
@@ -266,109 +479,414 @@
     "pamhc2trees:starfruititem",
     "pamhc2trees:tamarinditem",
     "pamhc2trees:walnutitem",
-    "quark:ancient_fruit",
-    "spawn:dates",
-    "sushigocrafting:avocado_maki",
-    "sushigocrafting:avocado_slices",
-    "twilightdelight:phytochemical_juice",
-    "twilightforest:berry_medley",
-    "twilightforest:blackberry",
-    "twilightforest:blightberry",
-    "twilightforest:blueberry",
-    "twilightforest:duskberry",
-    "twilightforest:maloberry",
-    "twilightforest:raspberry",
-    "twilightforest:skyberry",
-    "twilightforest:stingberry",
-    "undergardendelight:shimmerpearl",
-    "vinery:apple_mash",
-    "vinery:cherry",
-    "vinery:jungle_grapes_red",
-    "vinery:jungle_grapes_white",
-    "vinery:red_grape",
-    "vinery:rotten_cherry",
-    "vinery:savanna_grapes_red",
-    "vinery:savanna_grapes_white",
-    "vinery:taiga_grapes_red",
-    "vinery:taiga_grapes_white",
-    "vinery:white_grape",
-    "yungscavebiomes:prickly_peach",
-    "arsdelight:activated_bastion_jam",
-    "arsdelight:activated_mendosteen_jam",
-    "arsdelight:neutralized_bombegrante_jam",
-    "arsdelight:neutralized_frostaya_jam",
-    "alshanex_familiars:crystal_berry",
-    "bhc:relic_apple",
-    "bountifulfares:elderberry_wine_bottle",
-    "createfood:apple_jam_bottle",
-    "createfood:apple_juice_bottle",
-    "createfood:apple_custard_bottle",
-    "createfood:apple_cream_frosting_bottle",
-    "createfood:berry_jam_bottle",
-    "createfood:berry_juice_bottle",
-    "createfood:berry_custard_bottle",
-    "createfood:berry_cream_frosting_bottle",
-    "createfood:glow_berry_jam_bottle",
-    "createfood:glow_berry_juice_bottle",
-    { "id": "createfood:glow_berry_custard_bottle", "required": false },
-    "createfood:glow_berry_cream_frosting_bottle",
-    "createfood:melon_jam_bottle",
-    "createfood:melon_custard_bottle",
-    "createfood:melon_cream_frosting_bottle",
-    "createfood:chorus_fruit_jam_bottle",
-    "createfood:chorus_fruit_juice_bottle",
-    "createfood:chorus_fruit_custard_bottle",
-    "createfood:chorus_fruit_cream_frosting_bottle",
-    "createfood:fruit_smoothie_bottle",
-    "createfood:creme_brulee_bottle",
-    "nomansland:maple_mead_bottle",
-    "bountifulfares:mead_bottle",
-    "bountifulfares:lapisberry_wine_bottle",
-    "createfood:butterscotch_apple",
-    "createfood:butterscotch_apple_slice",
-    "createfood:butterscotch_berries",
+    {
+      "id": "quark:ancient_fruit",
+      "required": false
+    },
+    {
+      "id": "spawn:dates",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:avocado_maki",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:avocado_slices",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:phytochemical_juice",
+      "required": false
+    },
+    {
+      "id": "twilightforest:berry_medley",
+      "required": false
+    },
+    {
+      "id": "twilightforest:blackberry",
+      "required": false
+    },
+    {
+      "id": "twilightforest:blightberry",
+      "required": false
+    },
+    {
+      "id": "twilightforest:blueberry",
+      "required": false
+    },
+    {
+      "id": "twilightforest:duskberry",
+      "required": false
+    },
+    {
+      "id": "twilightforest:maloberry",
+      "required": false
+    },
+    {
+      "id": "twilightforest:raspberry",
+      "required": false
+    },
+    {
+      "id": "twilightforest:skyberry",
+      "required": false
+    },
+    {
+      "id": "twilightforest:stingberry",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:shimmerpearl",
+      "required": false
+    },
+    {
+      "id": "vinery:apple_mash",
+      "required": false
+    },
+    {
+      "id": "vinery:cherry",
+      "required": false
+    },
+    {
+      "id": "vinery:jungle_grapes_red",
+      "required": false
+    },
+    {
+      "id": "vinery:jungle_grapes_white",
+      "required": false
+    },
+    {
+      "id": "vinery:red_grape",
+      "required": false
+    },
+    {
+      "id": "vinery:rotten_cherry",
+      "required": false
+    },
+    {
+      "id": "vinery:savanna_grapes_red",
+      "required": false
+    },
+    {
+      "id": "vinery:savanna_grapes_white",
+      "required": false
+    },
+    {
+      "id": "vinery:taiga_grapes_red",
+      "required": false
+    },
+    {
+      "id": "vinery:taiga_grapes_white",
+      "required": false
+    },
+    {
+      "id": "vinery:white_grape",
+      "required": false
+    },
+    {
+      "id": "yungscavebiomes:prickly_peach",
+      "required": false
+    },
+    {
+      "id": "arsdelight:activated_bastion_jam",
+      "required": false
+    },
+    {
+      "id": "arsdelight:activated_mendosteen_jam",
+      "required": false
+    },
+    {
+      "id": "arsdelight:neutralized_bombegrante_jam",
+      "required": false
+    },
+    {
+      "id": "arsdelight:neutralized_frostaya_jam",
+      "required": false
+    },
+    {
+      "id": "alshanex_familiars:crystal_berry",
+      "required": false
+    },
+    {
+      "id": "bhc:relic_apple",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:elderberry_wine_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_jam_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_juice_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_custard_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_cream_frosting_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_jam_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_juice_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_custard_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_cream_frosting_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_jam_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_juice_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_custard_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_cream_frosting_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_jam_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_custard_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_cream_frosting_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_jam_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_juice_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_custard_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_cream_frosting_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:fruit_smoothie_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:creme_brulee_bottle",
+      "required": false
+    },
+    {
+      "id": "nomansland:maple_mead_bottle",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:mead_bottle",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:lapisberry_wine_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:butterscotch_apple",
+      "required": false
+    },
+    {
+      "id": "createfood:butterscotch_apple_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:butterscotch_berries",
+      "required": false
+    },
     "farmersdelight:glow_berry_custard",
-    "expandeddelight:cranberry_goat_cheese_toast",
-    "ends_delight:dragon_breath_soda",
-    "bountifulfares:bellflower_tea_bottle",
-    "bountifulfares:black_tea_bottle",
-    "bountifulfares:citrus_essence",
-    "bountifulfares:coconut_milk_bottle",
-    "bountifulfares:green_tea_bottle",
-    "bountifulfares:torchflower_tea_bottle",
-
-    { "id": "croptopia:blackberry", "required": false },
-    { "id": "croptopia:blueberry", "required": false },
-    { "id": "croptopia:cantaloupe", "required": false },
-    { "id": "croptopia:cherry", "required": false },
-    { "id": "croptopia:cranberry", "required": false },
-    { "id": "croptopia:currant", "required": false },
-    { "id": "croptopia:dragonfruit", "required": false },
-    { "id": "croptopia:elderberry", "required": false },
-    { "id": "croptopia:grape", "required": false },
-    { "id": "croptopia:honeydew", "required": false },
-    { "id": "croptopia:kiwi", "required": false },
-    { "id": "croptopia:kumquat", "required": false },
-    { "id": "croptopia:lemon", "required": false },
-    { "id": "croptopia:lime", "required": false },
-    { "id": "croptopia:mango", "required": false },
-    { "id": "croptopia:nectarine", "required": false },
-    { "id": "croptopia:orange", "required": false },
-    { "id": "croptopia:peach", "required": false },
-    { "id": "croptopia:pear", "required": false },
-    { "id": "croptopia:persimmon", "required": false },
-    { "id": "croptopia:pineapple", "required": false },
-    { "id": "croptopia:plum", "required": false },
-    { "id": "croptopia:raspberry", "required": false },
-    { "id": "croptopia:rhubarb", "required": false },
-    { "id": "croptopia:saguaro", "required": false },
-    { "id": "croptopia:starfruit", "required": false },
-    { "id": "croptopia:strawberry", "required": false },
-    { "id": "croptopia:banana", "required": false },
-    { "id": "croptopia:apricot", "required": false },
-    { "id": "croptopia:fig", "required": false },
-    { "id": "croptopia:grapefruit", "required": false },
-    { "id": "ends_delight:chorus_fruit_pie_slice", "required": false },
-    { "id": "endersdelight:chorus_pie_slice", "required": false }
+    {
+      "id": "expandeddelight:cranberry_goat_cheese_toast",
+      "required": false
+    },
+    {
+      "id": "ends_delight:dragon_breath_soda",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:bellflower_tea_bottle",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:black_tea_bottle",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:citrus_essence",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:coconut_milk_bottle",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:green_tea_bottle",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:torchflower_tea_bottle",
+      "required": false
+    },
+    {
+      "id": "croptopia:blackberry",
+      "required": false
+    },
+    {
+      "id": "croptopia:blueberry",
+      "required": false
+    },
+    {
+      "id": "croptopia:cantaloupe",
+      "required": false
+    },
+    {
+      "id": "croptopia:cherry",
+      "required": false
+    },
+    {
+      "id": "croptopia:cranberry",
+      "required": false
+    },
+    {
+      "id": "croptopia:currant",
+      "required": false
+    },
+    {
+      "id": "croptopia:dragonfruit",
+      "required": false
+    },
+    {
+      "id": "croptopia:elderberry",
+      "required": false
+    },
+    {
+      "id": "croptopia:grape",
+      "required": false
+    },
+    {
+      "id": "croptopia:honeydew",
+      "required": false
+    },
+    {
+      "id": "croptopia:kiwi",
+      "required": false
+    },
+    {
+      "id": "croptopia:kumquat",
+      "required": false
+    },
+    {
+      "id": "croptopia:lemon",
+      "required": false
+    },
+    {
+      "id": "croptopia:lime",
+      "required": false
+    },
+    {
+      "id": "croptopia:mango",
+      "required": false
+    },
+    {
+      "id": "croptopia:nectarine",
+      "required": false
+    },
+    {
+      "id": "croptopia:orange",
+      "required": false
+    },
+    {
+      "id": "croptopia:peach",
+      "required": false
+    },
+    {
+      "id": "croptopia:pear",
+      "required": false
+    },
+    {
+      "id": "croptopia:persimmon",
+      "required": false
+    },
+    {
+      "id": "croptopia:pineapple",
+      "required": false
+    },
+    {
+      "id": "croptopia:plum",
+      "required": false
+    },
+    {
+      "id": "croptopia:raspberry",
+      "required": false
+    },
+    {
+      "id": "croptopia:rhubarb",
+      "required": false
+    },
+    {
+      "id": "croptopia:saguaro",
+      "required": false
+    },
+    {
+      "id": "croptopia:starfruit",
+      "required": false
+    },
+    {
+      "id": "croptopia:strawberry",
+      "required": false
+    },
+    {
+      "id": "croptopia:banana",
+      "required": false
+    },
+    {
+      "id": "croptopia:apricot",
+      "required": false
+    },
+    {
+      "id": "croptopia:fig",
+      "required": false
+    },
+    {
+      "id": "croptopia:grapefruit",
+      "required": false
+    },
+    {
+      "id": "ends_delight:chorus_fruit_pie_slice",
+      "required": false
+    },
+    {
+      "id": "endersdelight:chorus_pie_slice",
+      "required": false
+    }
   ]
 }

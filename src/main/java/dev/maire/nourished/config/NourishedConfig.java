@@ -112,6 +112,7 @@ public final class NourishedConfig {
     // Scanner configuration
     private final ModConfigSpec.BooleanValue scannerEnableRecipeInheritance;
     private final ModConfigSpec.DoubleValue scannerConfidenceSpreadThreshold;
+    private final ModConfigSpec.DoubleValue compositeRatioThreshold;
 
     private final Map<String, ModConfigSpec.DoubleValue> nutrientDecayRateOverrides;
     private final Map<String, ModConfigSpec.DoubleValue> nutrientCriticalThresholdOverrides;
@@ -269,6 +270,9 @@ public final class NourishedConfig {
         scannerConfidenceSpreadThreshold = builder
                 .comment("Minimum spread between dominant and secondary scores for confident classification (higher = stricter)")
                 .defineInRange("confidenceSpreadThreshold", ConfigDefaultsLoader.getDouble(defaults, "scannerConfidenceSpreadThreshold", 3.0d), 0.0d, 20.0d);
+        compositeRatioThreshold = builder
+                .comment("Minimum ratio (second / top) to trigger composite multi-nutrient output instead of single dominant")
+                .defineInRange("compositeRatioThreshold", ConfigDefaultsLoader.getDouble(defaults, "compositeRatioThreshold", 0.50d), 0.0d, 1.0d);
         builder.pop();
 
         nutrientDecayRateOverrides = new LinkedHashMap<>();
@@ -650,6 +654,14 @@ public final class NourishedConfig {
 
     public void setScannerConfidenceSpreadThreshold(double value) {
         scannerConfidenceSpreadThreshold.set(value);
+    }
+
+    public float compositeRatioThreshold() {
+        return compositeRatioThreshold.get().floatValue();
+    }
+
+    public void setCompositeRatioThreshold(double value) {
+        compositeRatioThreshold.set(value);
     }
 
     private ModConfigSpec.BooleanValue defineModuleToggle(

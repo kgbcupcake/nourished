@@ -1,14 +1,38 @@
 {
   "replace": false,
   "values": [
-    "herbsandharvest:aged_swiss",
-    "herbsandharvest:caravane",
-    "herbsandharvest:caravane_wedge",
-    "herbsandharvest:chevre",
-    "herbsandharvest:chevre_wedge",
-    "herbsandharvest:feta",
-    "herbsandharvest:feta_wedge",
-    "herbsandharvest:swiss_wedge",
+    {
+      "id": "herbsandharvest:aged_swiss",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:caravane",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:caravane_wedge",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:chevre",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:chevre_wedge",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:feta",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:feta_wedge",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:swiss_wedge",
+      "required": false
+    },
     "farm_and_charm:butter",
     "pamhc2foodcore:freshmilkitem",
     "pamhc2foodcore:appleyogurtitem",
@@ -16,13 +40,34 @@
     "pamhc2foodcore:melonyogurtitem",
     "pamhc2foodcore:sweetberryyogurtitem",
     "pamhc2foodcore:mayonaiseitem",
-    "croptopia:yoghurt",
-    "minecolonies:yogurt_with_berries",
-    "fruitsdelight:blueberry_custard",
-    "createfood:yogurt_bowl_berry",
-    "createfood:yogurt_bowl_chorus_fruit",
-    "createfood:yogurt_bowl_glow_berry",
-    "ends_delight:chorus_fruit_milk_tea",
+    {
+      "id": "croptopia:yoghurt",
+      "required": false
+    },
+    {
+      "id": "minecolonies:yogurt_with_berries",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:blueberry_custard",
+      "required": false
+    },
+    {
+      "id": "createfood:yogurt_bowl_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:yogurt_bowl_chorus_fruit",
+      "required": false
+    },
+    {
+      "id": "createfood:yogurt_bowl_glow_berry",
+      "required": false
+    },
+    {
+      "id": "ends_delight:chorus_fruit_milk_tea",
+      "required": false
+    },
     "pamhc2foodextended:apricotyogurtitem",
     "pamhc2foodextended:bananayogurtitem",
     "pamhc2foodextended:blackberryyogurtitem",
@@ -63,6 +108,9 @@
     "pamhc2foodextended:tamarindyogurtitem",
     "pamhc2foodextended:paneeritem",
     "pamhc2foodextended:paneertikkamasalaitem",
-    { "id": "herbsandharvest:mayo", "required": false }
+    {
+      "id": "herbsandharvest:mayo",
+      "required": false
+    }
   ]
 }

@@ -1,7 +1,10 @@
 {
   "replace": false,
   "values": [
-    "#c:foods/bread",
+    {
+      "id": "#c:foods/bread",
+      "required": false
+    },
     "minecraft:bread",
     "minecraft:baked_potato",
     "minecraft:cookie",
@@ -19,159 +22,588 @@
     "farm_and_charm:corn_grits",
     "farm_and_charm:pasta_with_onion_sauce",
     "farm_and_charm:oatmeal_with_strawberries",
-    "brewery:pretzel",
+    {
+      "id": "brewery:pretzel",
+      "required": false
+    },
     "bakery:cake_dough",
     "bakery:sweet_dough",
     "bakery:croissant",
     "bakery:misslilitu_biscuit",
     "bakery:cornet",
     "bakery:vegetable_sandwich",
-    "actuallyadditions:coffee_cup",
-    "arsdelight:bastion_hornbeer",
-    "arsdelight:bastion_tea",
-    "arsdelight:bombegrante_hornbeer",
-    "arsdelight:bombegrante_tea",
-    "arsdelight:frostaya_hornbeer",
-    "arsdelight:frostaya_tea",
-    "arsdelight:mendosteen_hornbeer",
-    "arsdelight:mendosteen_tea",
-    "arsdelight:source_berry_hornbeer",
-    "arsdelight:source_berry_tea",
-    "arsdelight:unstable_cocktail",
+    {
+      "id": "actuallyadditions:coffee_cup",
+      "required": false
+    },
+    {
+      "id": "arsdelight:bastion_hornbeer",
+      "required": false
+    },
+    {
+      "id": "arsdelight:bastion_tea",
+      "required": false
+    },
+    {
+      "id": "arsdelight:bombegrante_hornbeer",
+      "required": false
+    },
+    {
+      "id": "arsdelight:bombegrante_tea",
+      "required": false
+    },
+    {
+      "id": "arsdelight:frostaya_hornbeer",
+      "required": false
+    },
+    {
+      "id": "arsdelight:frostaya_tea",
+      "required": false
+    },
+    {
+      "id": "arsdelight:mendosteen_hornbeer",
+      "required": false
+    },
+    {
+      "id": "arsdelight:mendosteen_tea",
+      "required": false
+    },
+    {
+      "id": "arsdelight:source_berry_hornbeer",
+      "required": false
+    },
+    {
+      "id": "arsdelight:source_berry_tea",
+      "required": false
+    },
+    {
+      "id": "arsdelight:unstable_cocktail",
+      "required": false
+    },
     "bakery:baguette",
     "bakery:bun",
-    "bountifulfares:apple_cider_jar",
-    "bountifulfares:hoary_cider_jar",
-    "bountifulfares:meadow_medley",
-    "bountifulfares:pickled_spongekin",
-    "bountifulfares:plum_cider_jar",
-    "brewery:beer_haley",
-    "brewery:beer_hops",
-    "brewery:beer_nettle",
-    "brewery:whiskey_ak",
-    "brewery:whiskey_carrasconlabel",
-    "brewery:whiskey_cristelwalker",
-    "brewery:whiskey_highland_hearth",
-    "brewery:whiskey_jojannik",
-    "brewery:whiskey_lilitusinglemalt",
-    "brewery:whiskey_maggoallan",
-    "brewery:whiskey_smokey_reverie",
-    "create:builders_tea",
-    "createfood:apple_jam_sandwich",
-    "createfood:berry_jam_sandwich",
-    "createfood:bread_slice_apple_jam",
-    "createfood:bread_slice_berry_jam",
-    "createfood:bread_slice_chorus_fruit_jam",
-    "createfood:bread_slice_glow_berry_jam",
-    "createfood:bread_slice_melon_jam",
-    "createfood:breakfast_bar",
-    "createfood:breakfast_plate",
-    "createfood:bun",
-    "createfood:chorus_fruit_jam_sandwich",
-    "createfood:glow_berry_jam_sandwich",
-    "createfood:hash_brown_plate",
-    "createfood:hash_browns",
-    "createfood:melon_jam_sandwich",
-    "createfood:nacho_bowl",
-    "createfood:pasta_plate_slime",
-    "createfood:pasta_plate_slimeballs",
-    "createfood:pastry_base",
-    "createfood:pita_chip_bowl",
-    "createfood:pita_chips",
-    "createfood:scone_apple_jam",
-    "createfood:scone_berry_jam",
-    "createfood:scone_chorus_fruit_jam",
-    "createfood:scone_glow_berry_jam",
-    "createfood:scone_melon_jam",
-    "createfood:tater_tots",
-    "croptopia:avocado_toast",
-    "croptopia:baked_beans",
-    "croptopia:beer",
-    "croptopia:borscht",
-    "croptopia:chimichanga",
-    "croptopia:coffee",
-    "croptopia:coffee_beans",
-    "croptopia:enchilada",
-    "croptopia:french_fries",
-    "croptopia:goulash",
-    "croptopia:hashed_brown",
-    "croptopia:horchata",
-    "croptopia:lemonade",
-    "croptopia:limeade",
-    "croptopia:mead",
-    "croptopia:pineapple_pepperoni_pizza",
-    "croptopia:quesadilla",
-    "croptopia:quiche",
-    "croptopia:refried_beans",
-    "croptopia:rum",
-    "croptopia:saguaro_juice",
-    "croptopia:saucy_chips",
-    "croptopia:tamales",
-    "croptopia:tea",
-    "croptopia:the_big_breakfast",
-    "croptopia:tostada",
-    "croptopia:transcendental_breakfast",
-    "croptopia:wine",
-    "doggytalents:onigiri",
-    "doggytalents:sake",
-    "endersdelight:amberveiled_curry",
-    "endersdelight:pearl_pasta",
-    "ends_delight:bubble_tea",
-    "ends_delight:chorus_flower_tea",
-    "ends_delight:chorus_fruit_grain",
-    "ends_delight:chorus_fruit_wine",
-    "ends_delight:ender_congee",
-    "expandeddelight:cranberry_jelly_sandwich",
-    "expandeddelight:glow_berry_jelly_sandwich",
-    "expandeddelight:sweet_berry_jelly_sandwich",
+    {
+      "id": "bountifulfares:apple_cider_jar",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:hoary_cider_jar",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:meadow_medley",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:pickled_spongekin",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:plum_cider_jar",
+      "required": false
+    },
+    {
+      "id": "brewery:beer_haley",
+      "required": false
+    },
+    {
+      "id": "brewery:beer_hops",
+      "required": false
+    },
+    {
+      "id": "brewery:beer_nettle",
+      "required": false
+    },
+    {
+      "id": "brewery:whiskey_ak",
+      "required": false
+    },
+    {
+      "id": "brewery:whiskey_carrasconlabel",
+      "required": false
+    },
+    {
+      "id": "brewery:whiskey_cristelwalker",
+      "required": false
+    },
+    {
+      "id": "brewery:whiskey_highland_hearth",
+      "required": false
+    },
+    {
+      "id": "brewery:whiskey_jojannik",
+      "required": false
+    },
+    {
+      "id": "brewery:whiskey_lilitusinglemalt",
+      "required": false
+    },
+    {
+      "id": "brewery:whiskey_maggoallan",
+      "required": false
+    },
+    {
+      "id": "brewery:whiskey_smokey_reverie",
+      "required": false
+    },
+    {
+      "id": "create:builders_tea",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_jam_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_jam_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_apple_jam",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_berry_jam",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_chorus_fruit_jam",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_glow_berry_jam",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_melon_jam",
+      "required": false
+    },
+    {
+      "id": "createfood:breakfast_bar",
+      "required": false
+    },
+    {
+      "id": "createfood:breakfast_plate",
+      "required": false
+    },
+    {
+      "id": "createfood:bun",
+      "required": false
+    },
+    {
+      "id": "createfood:chorus_fruit_jam_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:glow_berry_jam_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:hash_brown_plate",
+      "required": false
+    },
+    {
+      "id": "createfood:hash_browns",
+      "required": false
+    },
+    {
+      "id": "createfood:melon_jam_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:nacho_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_slime",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_slimeballs",
+      "required": false
+    },
+    {
+      "id": "createfood:pastry_base",
+      "required": false
+    },
+    {
+      "id": "createfood:pita_chip_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:pita_chips",
+      "required": false
+    },
+    {
+      "id": "createfood:scone_apple_jam",
+      "required": false
+    },
+    {
+      "id": "createfood:scone_berry_jam",
+      "required": false
+    },
+    {
+      "id": "createfood:scone_chorus_fruit_jam",
+      "required": false
+    },
+    {
+      "id": "createfood:scone_glow_berry_jam",
+      "required": false
+    },
+    {
+      "id": "createfood:scone_melon_jam",
+      "required": false
+    },
+    {
+      "id": "createfood:tater_tots",
+      "required": false
+    },
+    {
+      "id": "croptopia:avocado_toast",
+      "required": false
+    },
+    {
+      "id": "croptopia:baked_beans",
+      "required": false
+    },
+    {
+      "id": "croptopia:beer",
+      "required": false
+    },
+    {
+      "id": "croptopia:borscht",
+      "required": false
+    },
+    {
+      "id": "croptopia:chimichanga",
+      "required": false
+    },
+    {
+      "id": "croptopia:coffee",
+      "required": false
+    },
+    {
+      "id": "croptopia:coffee_beans",
+      "required": false
+    },
+    {
+      "id": "croptopia:enchilada",
+      "required": false
+    },
+    {
+      "id": "croptopia:french_fries",
+      "required": false
+    },
+    {
+      "id": "croptopia:goulash",
+      "required": false
+    },
+    {
+      "id": "croptopia:hashed_brown",
+      "required": false
+    },
+    {
+      "id": "croptopia:horchata",
+      "required": false
+    },
+    {
+      "id": "croptopia:lemonade",
+      "required": false
+    },
+    {
+      "id": "croptopia:limeade",
+      "required": false
+    },
+    {
+      "id": "croptopia:mead",
+      "required": false
+    },
+    {
+      "id": "croptopia:pineapple_pepperoni_pizza",
+      "required": false
+    },
+    {
+      "id": "croptopia:quesadilla",
+      "required": false
+    },
+    {
+      "id": "croptopia:quiche",
+      "required": false
+    },
+    {
+      "id": "croptopia:refried_beans",
+      "required": false
+    },
+    {
+      "id": "croptopia:rum",
+      "required": false
+    },
+    {
+      "id": "croptopia:saguaro_juice",
+      "required": false
+    },
+    {
+      "id": "croptopia:saucy_chips",
+      "required": false
+    },
+    {
+      "id": "croptopia:tamales",
+      "required": false
+    },
+    {
+      "id": "croptopia:tea",
+      "required": false
+    },
+    {
+      "id": "croptopia:the_big_breakfast",
+      "required": false
+    },
+    {
+      "id": "croptopia:tostada",
+      "required": false
+    },
+    {
+      "id": "croptopia:transcendental_breakfast",
+      "required": false
+    },
+    {
+      "id": "croptopia:wine",
+      "required": false
+    },
+    {
+      "id": "doggytalents:onigiri",
+      "required": false
+    },
+    {
+      "id": "doggytalents:sake",
+      "required": false
+    },
+    {
+      "id": "endersdelight:amberveiled_curry",
+      "required": false
+    },
+    {
+      "id": "endersdelight:pearl_pasta",
+      "required": false
+    },
+    {
+      "id": "ends_delight:bubble_tea",
+      "required": false
+    },
+    {
+      "id": "ends_delight:chorus_flower_tea",
+      "required": false
+    },
+    {
+      "id": "ends_delight:chorus_fruit_grain",
+      "required": false
+    },
+    {
+      "id": "ends_delight:chorus_fruit_wine",
+      "required": false
+    },
+    {
+      "id": "ends_delight:ender_congee",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:cranberry_jelly_sandwich",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:glow_berry_jelly_sandwich",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:sweet_berry_jelly_sandwich",
+      "required": false
+    },
     "farm_and_charm:farmers_breakfast",
     "farmersdelight:apple_cider",
-    "fruitsdelight:bellini_cocktail",
-    "fruitsdelight:bowl_of_pineapple_fried_rice",
-    "fruitsdelight:hawberry_tea",
-    "fruitsdelight:lychee_cherry_tea",
-    "fruitsdelight:mango_tea",
-    "fruitsdelight:mangosteen_tea",
-    "fruitsdelight:peach_tea",
-    "herbalbrews:black_tea",
-    "herbalbrews:coffee",
-    "herbalbrews:coffee_beans",
-    "herbalbrews:dried_black_tea",
-    "herbalbrews:dried_green_tea",
-    "herbalbrews:dried_oolong_tea",
-    "herbalbrews:green_tea",
-    "herbalbrews:hibiscus_tea",
-    "herbalbrews:lavender_tea",
-    "herbalbrews:oolong_tea",
-    "herbalbrews:rooibos_leaf",
-    "herbalbrews:rooibos_tea",
-    "herbalbrews:tea_blossom",
-    "herbalbrews:yerba_mate_leaf",
-    "herbalbrews:yerba_mate_tea",
-    "herbsandharvest:apple_muffin",
-    "herbsandharvest:avocado_toast",
-    "herbsandharvest:blueberry_muffin",
-    "herbsandharvest:chips",
-    "herbsandharvest:cup_lemonade",
-    "herbsandharvest:guacamole_chips",
-    "herbsandharvest:lasagna_plate_delftware",
-    "herbsandharvest:lasagna_plate_holiday",
-    "herbsandharvest:lasagna_plate_plain",
-    "herbsandharvest:sweet_berry_muffin",
-    "minecolonies:borscht",
-    "minecolonies:chickpea",
-    "minecolonies:congee",
-    "minecolonies:durum",
-    "minecolonies:kebab",
-    "minecolonies:pea_soup",
-    "minecolonies:peas",
-    "minecolonies:pita_hummus",
-    "minecolonies:polenta",
-    "minecolonies:ramen",
-    "minecolonies:soybean",
-    "moredelight:toast_with_blueberries",
-    "moredelight:toast_with_glow_berries",
-    "moredelight:toast_with_sweet_berries",
+    {
+      "id": "fruitsdelight:bellini_cocktail",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:bowl_of_pineapple_fried_rice",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:hawberry_tea",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:lychee_cherry_tea",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:mango_tea",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:mangosteen_tea",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:peach_tea",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:black_tea",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:coffee",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:coffee_beans",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:dried_black_tea",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:dried_green_tea",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:dried_oolong_tea",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:green_tea",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:hibiscus_tea",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:lavender_tea",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:oolong_tea",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:rooibos_leaf",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:rooibos_tea",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:tea_blossom",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:yerba_mate_leaf",
+      "required": false
+    },
+    {
+      "id": "herbalbrews:yerba_mate_tea",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:apple_muffin",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:avocado_toast",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:blueberry_muffin",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:chips",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:cup_lemonade",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:guacamole_chips",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:lasagna_plate_delftware",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:lasagna_plate_holiday",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:lasagna_plate_plain",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:sweet_berry_muffin",
+      "required": false
+    },
+    {
+      "id": "minecolonies:borscht",
+      "required": false
+    },
+    {
+      "id": "minecolonies:chickpea",
+      "required": false
+    },
+    {
+      "id": "minecolonies:congee",
+      "required": false
+    },
+    {
+      "id": "minecolonies:durum",
+      "required": false
+    },
+    {
+      "id": "minecolonies:kebab",
+      "required": false
+    },
+    {
+      "id": "minecolonies:pea_soup",
+      "required": false
+    },
+    {
+      "id": "minecolonies:peas",
+      "required": false
+    },
+    {
+      "id": "minecolonies:pita_hummus",
+      "required": false
+    },
+    {
+      "id": "minecolonies:polenta",
+      "required": false
+    },
+    {
+      "id": "minecolonies:ramen",
+      "required": false
+    },
+    {
+      "id": "minecolonies:soybean",
+      "required": false
+    },
+    {
+      "id": "moredelight:toast_with_blueberries",
+      "required": false
+    },
+    {
+      "id": "moredelight:toast_with_glow_berries",
+      "required": false
+    },
+    {
+      "id": "moredelight:toast_with_sweet_berries",
+      "required": false
+    },
     "pamhc2crops:agaveitem",
     "pamhc2crops:alfalfaitem",
     "pamhc2crops:cattailitem",
@@ -349,69 +781,255 @@
     "pamhc2foodextended:wontonsoupitem",
     "pamhc2trees:acornitem",
     "pamhc2trees:breadfruititem",
-    "pneumaticcraft:chips",
-    "refurbished_furniture:glow_berry_jam_toast",
-    "refurbished_furniture:sweet_berry_jam_toast",
-    "sushigocrafting:onigiri",
-    "twilightdelight:borer_tear_soup",
-    "twilightdelight:glacier_ice_tea",
-    "twilightdelight:tear_drink",
-    "twilightdelight:thorn_rose_tea",
-    "sushigocrafting:sesame_seed",
-    "sushigocrafting:soy_sauce",
-    "sushigocrafting:wasabi_paste",
-    "sushigocrafting:cucumber_maki",
-    "solonion:lunchbox",
-    "solonion:lunchbag",
-    "solonion:golden_lunchbox",
-    "cropcritters:puffbomb_mushroom",
-    "spawn:roasted_sunflower_seeds",
-    "croptopia:roasted_sunflower_seeds",
+    {
+      "id": "pneumaticcraft:chips",
+      "required": false
+    },
+    {
+      "id": "refurbished_furniture:glow_berry_jam_toast",
+      "required": false
+    },
+    {
+      "id": "refurbished_furniture:sweet_berry_jam_toast",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:onigiri",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:borer_tear_soup",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:glacier_ice_tea",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:tear_drink",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:thorn_rose_tea",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:sesame_seed",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:soy_sauce",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:wasabi_paste",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:cucumber_maki",
+      "required": false
+    },
+    {
+      "id": "solonion:lunchbox",
+      "required": false
+    },
+    {
+      "id": "solonion:lunchbag",
+      "required": false
+    },
+    {
+      "id": "solonion:golden_lunchbox",
+      "required": false
+    },
+    {
+      "id": "cropcritters:puffbomb_mushroom",
+      "required": false
+    },
+    {
+      "id": "spawn:roasted_sunflower_seeds",
+      "required": false
+    },
+    {
+      "id": "croptopia:roasted_sunflower_seeds",
+      "required": false
+    },
     "pamhc2foodextended:peachesandcreamoatmealitem",
     "pamhc2foodcore:cocoapowderitem",
-    "vinery:aegis_wine",
-    "vinery:apple_cider",
-    "vinery:apple_wine",
-    "vinery:bolvar_wine",
-    "vinery:chenet_wine",
-    "vinery:cherry_wine",
-    "vinery:chorus_wine",
-    "vinery:clark_wine",
-    "vinery:cristel_wine",
-    "vinery:glowing_wine",
-    "vinery:jellie_wine",
-    "vinery:kelp_cider",
-    "vinery:lilitu_wine",
-    "vinery:magnetic_wine",
-    "vinery:mead",
-    "vinery:mellohi_wine",
-    "vinery:noir_wine",
-    "vinery:red_wine",
-    "vinery:solaris_wine",
-    "vinery:stal_wine",
-    "vinery:strad_wine",
-    { "id": "farm_and_charm:farmers_bread_block", "required": false },
-    { "id": "farm_and_charm:roasted_corn_block", "required": false },
-    "brewery:dumplings",
-    "brewery:mashed_potatoes",
-    "brewery:potato_salad",
-    { "id": "bakery:crusty_bread_block", "required": false },
-    { "id": "bakery:bread_block", "required": false },
-    { "id": "bakery:baguette_block", "required": false },
-    { "id": "bakery:toast_block", "required": false },
-    { "id": "bakery:braided_bread_block", "required": false },
-    { "id": "bakery:bun_block", "required": false },
-    { "id": "farm_and_charm:oat_pancake_block", "required": false },
-    { "id": "farm_and_charm:farmers_breakfast_block", "required": false },
-    { "id": "croptopia:barley", "required": false },
-    { "id": "croptopia:oat", "required": false },
-    { "id": "croptopia:rice", "required": false },
-    { "id": "croptopia:oatmeal", "required": false },
-    { "id": "croptopia:blackbean", "required": false },
-    { "id": "croptopia:soybean", "required": false },
-    { "id": "starcatcher_delight:blossom_toast", "required": false},
-    { "id": "croptopia:banana_nut_bread", "required": false },
-    { "id": "croptopia:trail_mix", "required": false },
-    { "id": "bakery:bread_with_jam", "required": false }
+    {
+      "id": "vinery:aegis_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:apple_cider",
+      "required": false
+    },
+    {
+      "id": "vinery:apple_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:bolvar_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:chenet_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:cherry_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:chorus_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:clark_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:cristel_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:glowing_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:jellie_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:kelp_cider",
+      "required": false
+    },
+    {
+      "id": "vinery:lilitu_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:magnetic_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:mead",
+      "required": false
+    },
+    {
+      "id": "vinery:mellohi_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:noir_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:red_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:solaris_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:stal_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:strad_wine",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:farmers_bread_block",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:roasted_corn_block",
+      "required": false
+    },
+    {
+      "id": "brewery:dumplings",
+      "required": false
+    },
+    {
+      "id": "brewery:mashed_potatoes",
+      "required": false
+    },
+    {
+      "id": "brewery:potato_salad",
+      "required": false
+    },
+    {
+      "id": "bakery:crusty_bread_block",
+      "required": false
+    },
+    {
+      "id": "bakery:bread_block",
+      "required": false
+    },
+    {
+      "id": "bakery:baguette_block",
+      "required": false
+    },
+    {
+      "id": "bakery:toast_block",
+      "required": false
+    },
+    {
+      "id": "bakery:braided_bread_block",
+      "required": false
+    },
+    {
+      "id": "bakery:bun_block",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:oat_pancake_block",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:farmers_breakfast_block",
+      "required": false
+    },
+    {
+      "id": "croptopia:barley",
+      "required": false
+    },
+    {
+      "id": "croptopia:oat",
+      "required": false
+    },
+    {
+      "id": "croptopia:rice",
+      "required": false
+    },
+    {
+      "id": "croptopia:oatmeal",
+      "required": false
+    },
+    {
+      "id": "croptopia:blackbean",
+      "required": false
+    },
+    {
+      "id": "croptopia:soybean",
+      "required": false
+    },
+    {
+      "id": "starcatcher_delight:blossom_toast",
+      "required": false
+    },
+    {
+      "id": "croptopia:banana_nut_bread",
+      "required": false
+    },
+    {
+      "id": "croptopia:trail_mix",
+      "required": false
+    },
+    {
+      "id": "bakery:bread_with_jam",
+      "required": false
+    }
   ]
 }
