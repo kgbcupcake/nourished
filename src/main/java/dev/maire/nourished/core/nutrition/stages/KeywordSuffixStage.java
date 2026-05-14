@@ -5,6 +5,7 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.ResolutionResult;
 import dev.maire.nourished.core.nutrition.ResolutionStage;
 import dev.maire.nourished.core.nutrition.StageContext;
+import dev.maire.nourished.tooling.scanner.ArchetypePattern;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry.Multipliers;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry.ScannerSpec;
@@ -85,6 +86,7 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
         m.put("fajitas", "fajita");
         m.put("enchiladas", "enchilada");
         m.put("macarons", "macaron");
+        m.put("hamburger", "burger");
         STEMS = Collections.unmodifiableMap(m);
     }
 
@@ -93,8 +95,8 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
     private static final float TERTIARY_TOKEN_WEIGHT  = 0.3f;
 
     private static final Set<String> PREPARATION_TOKENS = Set.of(
-            "pie", "tart", "stew", "soup", "salad", "sandwich", "burger",
-            "cake", "cookie", "smoothie", "juice", "jam", "roast",
+            "pie", "tart", "salad", "sandwich",
+            "cake", "cookie", "smoothie", "juice", "jam",
             "bake", "baked", "fried", "smoked", "cooked"
     );
 
@@ -119,7 +121,7 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
     @Override
     @Nullable
     public ResolutionResult resolve(ResourceLocation itemId, StageContext ctx) {
-        ScoreResult sr = scoreWithTokens(itemId);
+        ScoreResult sr = scoreWithTokens(itemId, ctx);
         if (sr.scores.isEmpty()) return null;
 
         float compositeThreshold = compositeRatioThreshold();
@@ -249,10 +251,10 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
     ) {}
 
     Map<String, Float> score(ResourceLocation itemId) {
-        return scoreWithTokens(itemId).scores;
+        return scoreWithTokens(itemId, new StageContext(null, itemId, null, Map.of(), Set.copyOf(NutrientRegistry.getKeys()))).scores;
     }
 
-    private ScoreResult scoreWithTokens(ResourceLocation itemId) {
+    private ScoreResult scoreWithTokens(ResourceLocation itemId, StageContext ctx) {
         ScannerSpec spec = ScannerSpecRegistry.get();
         Multipliers mult = spec.multipliers();
         Map<String, Map<String, Float>> suffixWeights = spec.suffixWeights();
@@ -263,6 +265,12 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
         Map<String, Float> scores = new HashMap<>();
         for (String key : validKeys) {
             scores.put(key, 0f);
+        }
+
+        for (Map.Entry<String, Float> e : ctx.communityTagSignal().entrySet()) {
+            if (scores.containsKey(e.getKey())) {
+                scores.merge(e.getKey(), e.getValue() * mult.communityTag(), Float::sum);
+            }
         }
 
         String path = itemId.getPath();
@@ -329,6 +337,18 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
                 for (Map.Entry<String, Float> e : neg.entrySet()) {
                     if (scores.containsKey(e.getKey())) {
                         scores.merge(e.getKey(), e.getValue() * finalWeight, Float::sum);
+                    }
+                }
+            }
+        }
+
+        // Archetype pass — substring match on full item path, bypasses tokenization
+        List<ArchetypePattern> archetypes = spec.archetypes();
+        for (ArchetypePattern archetype : archetypes) {
+            if (archetype.matches(path)) {
+                for (Map.Entry<String, Float> e : archetype.contributions().entrySet()) {
+                    if (scores.containsKey(e.getKey())) {
+                        scores.merge(e.getKey(), e.getValue() * mult.archetype(), Float::sum);
                     }
                 }
             }

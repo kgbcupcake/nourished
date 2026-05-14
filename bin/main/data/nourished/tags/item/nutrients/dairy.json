@@ -254,9 +254,6 @@
       "required": false
     },
     "minecraft:milk_bucket",
-    "minecraft:milk_bucket",
-    "minecraft:milk_bucket",
-    "minecraft:milk_bucket",
     {
       "id": "mynethersdelight:dried_ghast_with_milk",
       "required": false

@@ -2,7 +2,6 @@ package dev.maire.nourished.core.nutrition.stages;
 
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.ResolutionResult;
-import dev.maire.nourished.core.nutrition.ResolutionStage;
 import dev.maire.nourished.core.nutrition.StageContext;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry.ScannerSpec;
@@ -13,7 +12,6 @@ import net.minecraft.world.item.Item;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,15 +44,8 @@ public final class CommunityTagStage implements ResolutionStageHandler {
 
         if (contributions.isEmpty()) return null;
 
-        StageMath.NormalizationOutcome outcome = StageMath.normalizeWithRejections(contributions, ctx.validKeys());
-        if (outcome.normalized().isEmpty()) return null;
-
-        float totalScore = 0f;
-        for (float v : contributions.values()) totalScore += v;
-        return new ResolutionResult(
-                outcome.normalized(), Map.copyOf(contributions),
-                List.of(), Map.of(), outcome.rejectedSignals(),
-                false, totalScore, ResolutionStage.COMMUNITY_TAG,
-                "community tag match");
+        // Deposit into context for KeywordSuffixStage to merge — do not return early
+        ctx.communityTagSignal().putAll(contributions);
+        return null;
     }
 }

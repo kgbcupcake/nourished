@@ -24,9 +24,11 @@ import net.minecraft.core.component.DataComponents;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 
@@ -42,6 +44,16 @@ public class FoodNutritionRegistry {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    /**
+     * Milk buckets consume like food for effects but omit {@link DataComponents#FOOD}. Used for nutrient math everywhere
+     * (consumption pipeline, HUD tooltips, JEI helper) so tag-based dairy gains match.
+     */
+    public static final FoodProperties MILK_BUCKET_FOOD_PROPERTIES = new FoodProperties.Builder()
+            .nutrition(0)
+            .saturationModifier(0f)
+            .alwaysEdible()
+            .build();
+
     /** @GuardedBy("itself — ConcurrentHashSet") */
     private static final Set<String> WARNED_ITEMS = ConcurrentHashMap.newKeySet();
 
@@ -49,6 +61,24 @@ public class FoodNutritionRegistry {
 
     /** @GuardedBy("itself — ConcurrentHashMap") */
     private static final Map<ResourceLocation, Map<String, Float>> EXTERNAL_CLASSIFICATIONS = new ConcurrentHashMap<>();
+
+    /**
+     * {@link FoodProperties} used when applying or previewing nourishment for an item stack. Vanilla milk buckets
+     * participate in tagging but never report food properties.
+     *
+     * @param entity contextual entity for modded hooks; nullable on client previews
+     */
+    @Nullable
+    public static FoodProperties foodPropertiesForNutrition(ItemStack stack, @Nullable LivingEntity entity) {
+        FoodProperties base = stack.getItem().getFoodProperties(stack, entity);
+        if (base != null) {
+            return base;
+        }
+        if (stack.is(Items.MILK_BUCKET)) {
+            return MILK_BUCKET_FOOD_PROPERTIES;
+        }
+        return null;
+    }
 
     @Nullable
     private static volatile RecipeInheritanceResolver serverRecipeInheritanceResolver;
@@ -272,7 +302,7 @@ public class FoodNutritionRegistry {
      *               tooltips / JEI where tags may not be committed yet).
      */
     public static NutrientValues getNutrients(ItemStack stack, Level level, boolean silent) {
-        FoodProperties food = stack.getItem().components().get(DataComponents.FOOD);
+        FoodProperties food = foodPropertiesForNutrition(stack, null);
         if (food == null) {
             return new NutrientValues(0.2f, 0.2f, 0.2f, 0.2f, 0.2f);
         }
@@ -294,11 +324,10 @@ public class FoodNutritionRegistry {
 
     public static DietDelta computeDietDelta(
             ItemStack stack,
-            Level level,
+            @Nullable Level level,
             int foodNutrition,
             float foodSaturation,
             Map<String, Float> matchedBars) {
-        Objects.requireNonNull(level, "level");
         int calories = Math.max(0, Math.round(foodNutrition * 25f));
         Objects.requireNonNull(matchedBars, "matchedBars");
 
@@ -350,7 +379,7 @@ public class FoodNutritionRegistry {
         return new DietDelta(calories, scaledNutrients);
     }
 
-    public static DietDelta computeDietDelta(ItemStack stack, Level level, int foodNutrition, float foodSaturation) {
+    public static DietDelta computeDietDelta(ItemStack stack, @Nullable Level level, int foodNutrition, float foodSaturation) {
         return computeDietDelta(
                 stack,
                 level,

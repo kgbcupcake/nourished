@@ -44,6 +44,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
@@ -1108,11 +1109,7 @@ public final class NourishedConfigScreen {
             Minecraft mc = Minecraft.getInstance();
             var server = mc.getSingleplayerServer();
             if (mc.level != null && server != null) {
-                String worldName = server.getWorldData().getLevelName();
-                targetFolder = FMLPaths.GAMEDIR.get()
-                        .resolve("saves")
-                        .resolve(worldName)
-                        .resolve("datapacks")
+                targetFolder = server.getWorldPath(LevelResource.DATAPACK_DIR)
                         .resolve("nourished-generated");
             } else {
                 targetFolder = FMLPaths.CONFIGDIR.get()
@@ -1123,9 +1120,21 @@ public final class NourishedConfigScreen {
                 if (!Files.exists(targetFolder)) {
                     Files.createDirectories(targetFolder);
                 }
-                Util.getPlatform().openPath(targetFolder);
+                openPathCrossPlatform(targetFolder);
             } catch (IOException e) {
                 Nourished.LOGGER.error("[Compat Config] Failed to open datapack folder: {}", targetFolder, e);
+            }
+        }
+
+        private static void openPathCrossPlatform(Path path) {
+            try {
+                if (Util.getPlatform() == Util.OS.LINUX) {
+                    new ProcessBuilder("xdg-open", path.toAbsolutePath().toString()).start();
+                } else {
+                    Util.getPlatform().openPath(path);
+                }
+            } catch (Exception e) {
+                Nourished.LOGGER.error("[Compat Config] Failed to open path {}", path, e);
             }
         }
 
@@ -1570,7 +1579,7 @@ public final class NourishedConfigScreen {
                         continue;
                     }
                     ItemStack stack = item.getDefaultInstance();
-                    FoodProperties food = stack.getFoodProperties(null);
+                    FoodProperties food = FoodNutritionRegistry.foodPropertiesForNutrition(stack, null);
                     if (food == null) {
                         continue;
                     }

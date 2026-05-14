@@ -88,12 +88,12 @@ public final class ClientEvents {
         if (player == null) {
             player = mc.player;
         }
-        FoodProperties food = stack.getItem().getFoodProperties(stack, player);
+        FoodProperties food = FoodNutritionRegistry.foodPropertiesForNutrition(stack, player);
         if (food == null) {
             return;
         }
 
-        var matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, false, level);
+        Map<String, Float> matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, false, level);
         DietDelta delta = FoodNutritionRegistry.computeDietDelta(
                 stack, level, food.nutrition(), food.saturation(), matchedBars);
 

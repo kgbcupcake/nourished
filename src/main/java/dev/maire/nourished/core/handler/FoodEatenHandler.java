@@ -3,8 +3,8 @@ package dev.maire.nourished.core.handler;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -20,8 +20,9 @@ public class FoodEatenHandler {
             return;
         }
         ItemStack stack = event.getItem();
-        FoodProperties food = stack.getItem().getFoodProperties(stack, player);
-        if (food == null) return;
+        if (FoodNutritionRegistry.foodPropertiesForNutrition(stack, player) == null) {
+            return;
+        }
 
         DietData diet = player.getData(DietAttachment.DIET.get());
         long gameTimeMs = player.level().getGameTime() * 50L;

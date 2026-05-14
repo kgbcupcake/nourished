@@ -10,68 +10,20 @@
       "required": false
     },
     "minecraft:beef",
-    "minecraft:beef",
-    "minecraft:beef",
-    "minecraft:beef",
-    "minecraft:cooked_beef",
-    "minecraft:cooked_beef",
-    "minecraft:cooked_beef",
     "minecraft:cooked_beef",
     "minecraft:chicken",
-    "minecraft:chicken",
-    "minecraft:chicken",
-    "minecraft:chicken",
-    "minecraft:cooked_chicken",
-    "minecraft:cooked_chicken",
-    "minecraft:cooked_chicken",
     "minecraft:cooked_chicken",
     "minecraft:porkchop",
-    "minecraft:porkchop",
-    "minecraft:porkchop",
-    "minecraft:porkchop",
-    "minecraft:cooked_porkchop",
-    "minecraft:cooked_porkchop",
-    "minecraft:cooked_porkchop",
     "minecraft:cooked_porkchop",
     "minecraft:mutton",
-    "minecraft:mutton",
-    "minecraft:mutton",
-    "minecraft:mutton",
-    "minecraft:cooked_mutton",
-    "minecraft:cooked_mutton",
-    "minecraft:cooked_mutton",
     "minecraft:cooked_mutton",
     "minecraft:rabbit",
-    "minecraft:rabbit",
-    "minecraft:rabbit",
-    "minecraft:rabbit",
-    "minecraft:cooked_rabbit",
-    "minecraft:cooked_rabbit",
-    "minecraft:cooked_rabbit",
     "minecraft:cooked_rabbit",
     "minecraft:salmon",
-    "minecraft:salmon",
-    "minecraft:salmon",
-    "minecraft:salmon",
-    "minecraft:cooked_salmon",
-    "minecraft:cooked_salmon",
-    "minecraft:cooked_salmon",
     "minecraft:cooked_salmon",
     "minecraft:cod",
-    "minecraft:cod",
-    "minecraft:cod",
-    "minecraft:cod",
-    "minecraft:cooked_cod",
-    "minecraft:cooked_cod",
-    "minecraft:cooked_cod",
     "minecraft:cooked_cod",
     "minecraft:tropical_fish",
-    "minecraft:tropical_fish",
-    "minecraft:tropical_fish",
-    "minecraft:tropical_fish",
-    "minecraft:rotten_flesh",
-    "minecraft:rotten_flesh",
-    "minecraft:rotten_flesh",
     "minecraft:rotten_flesh",
     {
       "id": "pamhc2foodcore:basichamburgeritem",
@@ -785,9 +737,6 @@
       "id": "minecolonies:sushi_roll",
       "required": false
     },
-    "minecraft:spider_eye",
-    "minecraft:spider_eye",
-    "minecraft:spider_eye",
     "minecraft:spider_eye",
     {
       "id": "naturalist:bass",
@@ -2913,8 +2862,19 @@
       "id": "mynethersdelight:spicy_hoglin_stew",
       "required": false
     },
+
     {
       "id": "mynethersdelight:dried_ghast_with_milk",
+      "required": false
+    },
+
+    {
+      "id": "farmersdelight:hamburger",
+      "required": false
+    },
+
+    {
+      "id": "mynethersdelight:nether_burger",
       "required": false
     }
   ]

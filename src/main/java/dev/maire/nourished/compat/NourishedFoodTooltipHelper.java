@@ -1,30 +1,40 @@
 package dev.maire.nourished.compat;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.api.FoodSynergyDefinition;
-import dev.maire.nourished.api.NutrientMilestoneDefinition;
-import dev.maire.nourished.api.registry.MilestoneRegistry;
-import dev.maire.nourished.api.registry.SynergyRegistry;
-import dev.maire.nourished.client.NutrientUiColors;
-import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.api.FoodSynergyDefinition;
+import dev.maire.nourished.api.NutrientMilestoneDefinition;
+import dev.maire.nourished.api.registry.MilestoneRegistry;
+import dev.maire.nourished.api.registry.SynergyRegistry;
+import dev.maire.nourished.client.ClientDietCache;
+import dev.maire.nourished.client.NutrientUiColors;
+import dev.maire.nourished.config.ModuleCache;
+import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry.DietDelta;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.util.NourishedItemTags;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 /**
  * Shared food tooltip formatter used by JEI/REI/EMI integrations.
@@ -40,8 +50,9 @@ public final class NourishedFoodTooltipHelper {
             return lines;
         }
 
-        Item item = stack.getItem();
-        FoodProperties food = item.components().get(net.minecraft.core.component.DataComponents.FOOD);
+        Minecraft mc = Minecraft.getInstance();
+
+        FoodProperties food = FoodNutritionRegistry.foodPropertiesForNutrition(stack, mc.player);
         if (food == null) {
             return lines;
         }
@@ -49,21 +60,25 @@ public final class NourishedFoodTooltipHelper {
             return lines;
         }
 
-        Map<String, Float> matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, false);
-        Map<String, Float> nutrients = new java.util.LinkedHashMap<>();
-        float matchedWeightTotal = 0f;
-        for (float weight : matchedBars.values()) {
-            matchedWeightTotal += Math.max(0f, weight);
-        }
-        float burst = food.nutrition() * 0.008f + food.saturation() * 0.010f + 0.004f;
-        float totalBurst = burst * Math.max(matchedWeightTotal, 1e-6f);
-        for (Map.Entry<String, Float> entry : matchedBars.entrySet()) {
-            float weight = Math.max(0f, entry.getValue());
-            if (weight <= 0f) {
-                continue;
-            }
-            nutrients.put(entry.getKey(), totalBurst * (weight / matchedWeightTotal));
-        }
+        Level level = mc.level;
+        Map<String, Float> matchedBars = level != null
+                ? FoodNutritionRegistry.resolveNutrientBars(stack, false, level)
+                : FoodNutritionRegistry.resolveNutrientBars(stack, false);
+        DietDelta delta = FoodNutritionRegistry.computeDietDelta(
+                stack, level, food.nutrition(), food.saturation(), matchedBars);
+
+        Player player = mc.player;
+        String itemId = NourishedRegistryUtils.itemKey(stack).toString();
+        String dominantCategory = matchedBars.isEmpty()
+                ? null
+                : matchedBars.entrySet().stream()
+                        .max(Map.Entry.comparingByValue())
+                        .map(Map.Entry::getKey)
+                        .orElse(null);
+        String familyKey = FoodFamilyResolver.resolve(NourishedRegistryUtils.itemKey(stack));
+        DietData diet = ClientDietCache.get();
+        long gameTimeMs = diet.lastTickTime > 0 ? diet.lastTickTime : 0L;
+        float multiplier = player != null ? diet.peekMultiplier(itemId, dominantCategory, familyKey, gameTimeMs) : 1.0f;
 
         lines.add(Component.literal("✦ Nourished").withStyle(ChatFormatting.GOLD));
 
@@ -71,25 +86,80 @@ public final class NourishedFoodTooltipHelper {
             lines.add(Component.translatable("nourished.tooltip.unclassified").withStyle(ChatFormatting.GRAY));
         }
 
-        for (Map.Entry<String, Float> entry : nutrients.entrySet()) {
-            float value = entry.getValue();
-            if (value <= 0f) {
+        if (multiplier < 1.0f && player != null) {
+            String pct = (int) (multiplier * 100) + "%";
+            lines.add(Component.translatable("nourished.tooltip.diminished", pct).withStyle(ChatFormatting.YELLOW));
+        } else if (player != null) {
+            lines.add(Component.translatable("nourished.tooltip.fresh").withStyle(ChatFormatting.GREEN));
+        }
+
+        final float minLine = 0.05f;
+        String fmt = multiplier < 1.0f ? "%.2f" : "%.1f";
+        String highestKey = null;
+        float highestValue = Float.NEGATIVE_INFINITY;
+        if (!matchedBars.isEmpty()) {
+            for (String key : NutrientRegistry.getKeys()) {
+                float v = delta.nutrients().getOrDefault(key, 0f);
+                if (v > highestValue) {
+                    highestValue = v;
+                    highestKey = key;
+                }
+            }
+        }
+
+        boolean renderedAny = false;
+        for (String key : NutrientRegistry.getKeys()) {
+            float base = delta.nutrients().getOrDefault(key, 0f);
+            if (base < minLine) {
                 continue;
             }
-            String key = entry.getKey();
-            String nutrientName = NourishedRegistryUtils.capitalizeFirst(key);
+            float display = base * multiplier;
+            renderedAny = true;
+            String label = NourishedRegistryUtils.capitalizeFirst(key);
+            String gain = String.format(Locale.ROOT, fmt, display);
             int color = NutrientUiColors.baseColorArgb(key);
-            MutableComponent line = Component.literal(nutrientName + ": +" + String.format(Locale.ROOT, "%.2f", value))
+            MutableComponent line = Component.literal("  " + label + "  +" + gain)
                     .withStyle(Style.EMPTY.withColor(color));
             lines.add(line);
         }
 
-        ResourceLocation thisItem = NourishedRegistryUtils.itemKey(item);
+        if (!renderedAny && highestKey != null && highestValue > 0f) {
+            float base = Math.max(0f, delta.nutrients().getOrDefault(highestKey, 0f));
+            float display = base * multiplier;
+            String label = NourishedRegistryUtils.capitalizeFirst(highestKey);
+            String gain = String.format(Locale.ROOT, fmt, display);
+            int color = NutrientUiColors.baseColorArgb(highestKey);
+            lines.add(Component.literal("  " + label + "  +" + gain).withStyle(Style.EMPTY.withColor(color)));
+        }
+
+        if (ModuleCache.enableDebugLogging && player != null) {
+            var breakdown = diet.getMultiplierBreakdown(itemId, dominantCategory, familyKey, gameTimeMs);
+            float fin = breakdown.finalMultiplier();
+            lines.add(Component.empty());
+            lines.add(Component.literal(
+                    "  → " + (int) (fin * 100) + "% nutrition gain (memory blend)")
+                    .withStyle(fin < 1.0f ? ChatFormatting.GOLD : ChatFormatting.GREEN));
+        } else if (NourishedConfig.get().debugMemoryLogging() && player != null) {
+            var breakdown = diet.getMultiplierBreakdown(itemId, dominantCategory, familyKey, gameTimeMs);
+            lines.add(Component.empty());
+            lines.add(Component.literal("  → " + (int) (breakdown.finalMultiplier() * 100) + "% nutrition gain")
+                    .withStyle(breakdown.finalMultiplier() < 1.0f ? ChatFormatting.GOLD : ChatFormatting.GREEN));
+        }
+
+        if (ModuleCache.enableDecay && ModuleCache.enableNutritionEating) {
+            boolean bypassEligible =
+                    (food.nutrition() <= 2 || stack.is(NourishedItemTags.LIGHT_FOOD)) && !stack.is(NourishedItemTags.MEAL);
+            if (bypassEligible) {
+                lines.add(Component.translatable("nourished.tooltip.light_food").withStyle(ChatFormatting.GRAY));
+            }
+        }
+
+        ResourceLocation thisItem = NourishedRegistryUtils.itemKey(stack);
         if (ModuleCache.enableSynergies) {
             addFoodSynergyLine(lines, thisItem);
         }
-        if (ModuleCache.enableMilestones) {
-            addMilestoneLine(lines, nutrients.keySet());
+        if (ModuleCache.enableMilestones && !matchedBars.isEmpty()) {
+            addMilestoneLine(lines, matchedBars.keySet());
         }
         return lines;
     }

@@ -65,7 +65,7 @@ final class FoodNutrientPipeline {
         Map<String, Float> matchedBars;
         ResourceLocation foodResourceId = NourishedRegistryUtils.itemKey(stack);
         NutrientResolutionDiagnostic diagnostic = null;
-        FoodProperties foodProps = stack.getItem().getFoodProperties(stack, player);
+        FoodProperties foodProps = FoodNutritionRegistry.foodPropertiesForNutrition(stack, player);
 
         if (override.isPresent()) {
             FoodOverrideRegistry.FoodOverride ov = override.get();
