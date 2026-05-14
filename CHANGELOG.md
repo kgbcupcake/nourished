@@ -1,6 +1,26 @@
 # Changelog
 
 All notable changes to Nourished will be documented here.
+
+## [o.2.0-beta] - 2026-5-14
+
+feat: Enhance nutrient resolution and debugging capabilities in RuntimeFoodResolver
+
+- Added new metrics to CacheStats for average resolution time, slowest resolution time, and recipe timeouts.
+  
+- Updated ResolutionResult to include raw scores, tokens, token weights, and rejected signals.
+  
+- Improved normalization process in StageMath to provide rejection reasons for missing nutrients.
+ 
+- Integrated debug commands in NourishedCommand for better diagnostics.
+  
+- Enhanced various resolution stages to utilize new data structures for improved nutrient scoring and rejection handling.
+
+
+
+
+
+
 ## [0.1.9-beta.1] - 2026-05-13
 
 ### 🚀 Features
