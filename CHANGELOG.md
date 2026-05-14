@@ -16,6 +16,8 @@ feat: Enhance nutrient resolution and debugging capabilities in RuntimeFoodResol
   
 - Enhanced various resolution stages to utilize new data structures for improved nutrient scoring and rejection handling.
 
+- Fixed Patchouli Crafting recipe for Nourished Guide
+
 
 
 
