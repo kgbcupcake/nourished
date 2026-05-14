@@ -62,6 +62,7 @@
     "pamhc2foodextended:strawberryyogurtitem",
     "pamhc2foodextended:tamarindyogurtitem",
     "pamhc2foodextended:paneeritem",
-    "pamhc2foodextended:paneertikkamasalaitem"
+    "pamhc2foodextended:paneertikkamasalaitem",
+    { "id": "herbsandharvest:mayo", "required": false }
   ]
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
-    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="NutritionalBalance"></stringAttribute>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="NutritionalBalance-Nourished"></stringAttribute>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="net.neoforged.devlaunch.Main"></stringAttribute>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value=" @/home/only/RiderProjects/Nourished/build/moddev/gameTestServerRunProgramArgs.txt"></stringAttribute>
     <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value=" @/home/only/RiderProjects/Nourished/build/moddev/gameTestServerRunVmArgs.txt -Dfml.modFolders=nourished%%/home/only/RiderProjects/Nourished/bin/main"></stringAttribute>
