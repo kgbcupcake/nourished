@@ -9,7 +9,10 @@
     }
   ],
   "result": {
-    "id": "nourished:nourished_guide",
-    "count": 1
+    "id": "patchouli:guide_book",
+    "count": 1,
+    "components": {
+      "patchouli:book": "nourished:nourished_guide"
+    }
   }
 }

@@ -3,7 +3,8 @@
   "category": "nourished:getting_started",
   "icon": "minecraft:book",
   "sortnum": 0,
-  "pages": [
+  "pages":
+  [
     {
       "type": "patchouli:text",
       "title": "Welcome to Nourished",
@@ -13,6 +14,13 @@
       "type": "patchouli:text",
       "title": "The Core Idea",
       "text": "There are $(bold)six food groups$(): Fruits, Vegetables, Proteins, Grains, Sugars, and Dairy.\n\nMaintaining each group provides $(#52c252)bonuses$(), while neglecting them causes $(#e05252)penalties$(). Balance is everything."
+    },
+
+    {
+      "type": "patchouli:crafting",
+      "recipe": "nourished:nourished_guide",
+      "title": "Crafting This Book",
+      "text": "Combine a book with wheat to craft the Nourished Guide."
     }
   ]
 }
