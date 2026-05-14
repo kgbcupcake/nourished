@@ -2,6 +2,7 @@ package dev.maire.nourished.core.nutrition;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.diagnostics.NourishedUnknownFoodLogger;
 import dev.maire.nourished.core.nutrition.cache.BoundedLRU;
 import dev.maire.nourished.core.nutrition.cache.RunningAverage;
 import dev.maire.nourished.core.nutrition.stages.CommunityTagStage;
@@ -25,15 +26,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Runtime inference pipeline that classifies untagged food items through a 5-stage cascade.
- * Runs after {@code nourished:nutrients/*} tag checks fail. All signal weights are loaded from
- * the scanner spec registry — zero hardcoded nutrient strings.
- *
- * <p>Thread-safe singleton. Server-side recipe stage is gated on a non-null {@link RecipeManager};
- * client callers pass {@code null} to skip it.</p>
- */
 @ApiStatus.Internal
 public final class RuntimeFoodResolver {
 
@@ -48,6 +43,10 @@ public final class RuntimeFoodResolver {
     private final ConcurrentHashMap<String, RunningAverage> namespacePeers = new ConcurrentHashMap<>();
     private final AtomicInteger cacheHits = new AtomicInteger();
     private final AtomicInteger cacheMisses = new AtomicInteger();
+    private final AtomicLong totalResolveNanos = new AtomicLong(0);
+    private final AtomicLong slowestResolveNanos = new AtomicLong(0);
+    private final AtomicReference<ResourceLocation> slowestItem = new AtomicReference<>(null);
+    private final AtomicInteger recipeTimeouts = new AtomicInteger(0);
 
     private final List<ResolutionStageHandler> handlers;
 
@@ -61,13 +60,6 @@ public final class RuntimeFoodResolver {
         );
     }
 
-    /**
-     * Attempts to infer nutrient bar weights for an untagged food item through a 5-stage cascade.
-     *
-     * @param stack         the food item stack (must not be empty)
-     * @param recipeManager server recipe manager, or {@code null} to skip recipe inheritance
-     * @return inferred nutrient weights, or empty map if the item is not edible / registries are empty
-     */
     public Map<String, Float> resolve(ItemStack stack, @Nullable RecipeManager recipeManager) {
         if (stack.isEmpty() || stack.getItem() == null) return Map.of();
 
@@ -88,8 +80,38 @@ public final class RuntimeFoodResolver {
         }
 
         cacheMisses.incrementAndGet();
+        return resolveUncached(stack, itemId, recipeManager).toNutrientMap();
+    }
+
+    public @Nullable ResolutionResult resolveWithResult(ItemStack stack, @Nullable RecipeManager recipeManager) {
+        if (stack.isEmpty() || stack.getItem() == null) return null;
+
+        List<String> nutrientKeys = NutrientRegistry.getKeys();
+        if (nutrientKeys.isEmpty()) return null;
+
+        Item item = stack.getItem();
+        ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
+        if (itemId == null) return null;
+
+        FoodProperties food = item.components().get(DataComponents.FOOD);
+        if (food == null || food.nutrition() <= 0) return null;
+
+        ResolutionResult cached = resolvedCache.get(itemId);
+        if (cached != null) {
+            cacheHits.incrementAndGet();
+            return cached.withCacheHit(true);
+        }
+
+        cacheMisses.incrementAndGet();
+        return resolveUncached(stack, itemId, recipeManager);
+    }
+
+    private ResolutionResult resolveUncached(ItemStack stack, ResourceLocation itemId, @Nullable RecipeManager recipeManager) {
+        long start = System.nanoTime();
+
         Nourished.LOGGER.debug("[RuntimeFoodResolver] cache miss entering inference pipeline: {}", itemId);
 
+        List<String> nutrientKeys = NutrientRegistry.getKeys();
         Holder<Item> holder = stack.getItemHolder();
         Set<String> validKeys = Set.copyOf(nutrientKeys);
         StageContext ctx = new StageContext(holder, itemId, recipeManager, namespacePeers, validKeys);
@@ -101,10 +123,13 @@ public final class RuntimeFoodResolver {
         }
 
         if (result == null) {
-            result = new ResolutionResult(Map.of(), 0f, ResolutionStage.HARD_FALLBACK, "pipeline exhausted");
+            result = new ResolutionResult(
+                    Map.of(), Map.of(), List.of(), Map.of(), Map.of(),
+                    false, 0f, ResolutionStage.HARD_FALLBACK, "pipeline exhausted");
         }
 
         resolvedCache.put(itemId, result);
+        NourishedUnknownFoodLogger.log(result, itemId);
 
         if (result.stage() == ResolutionStage.COMMUNITY_TAG
                 || result.stage() == ResolutionStage.KEYWORD_SUFFIX
@@ -116,7 +141,32 @@ public final class RuntimeFoodResolver {
         Nourished.LOGGER.debug("[RuntimeFoodResolver] {} resolved via {} (confidence={}): {}",
                 itemId, result.stage(), String.format("%.2f", result.confidence()), result.debugReason());
 
-        return result.toNutrientMap();
+        long elapsed = System.nanoTime() - start;
+        recordTiming(elapsed, itemId);
+
+        return result;
+    }
+
+    private void recordTiming(long elapsedNanos, ResourceLocation itemId) {
+        totalResolveNanos.addAndGet(elapsedNanos);
+        for (; ; ) {
+            long prev = slowestResolveNanos.get();
+            if (elapsedNanos < prev) {
+                break;
+            }
+            if (slowestResolveNanos.compareAndSet(prev, elapsedNanos)) {
+                slowestItem.set(itemId);
+                break;
+            }
+        }
+    }
+
+    public static void recordRecipeTimeout() {
+        getInstance().incrementRecipeTimeoutsInternal();
+    }
+
+    void incrementRecipeTimeoutsInternal() {
+        recipeTimeouts.incrementAndGet();
     }
 
     public void invalidateCache() {
@@ -124,10 +174,24 @@ public final class RuntimeFoodResolver {
         resolvedCache.clear();
         recipeCache.clear();
         namespacePeers.clear();
+        totalResolveNanos.set(0);
+        slowestResolveNanos.set(0);
+        slowestItem.set(null);
+        recipeTimeouts.set(0);
         Nourished.LOGGER.info("[RuntimeFoodResolver] Cache invalidated. Was: {} entries", size);
     }
 
     public CacheStats getCacheStats() {
-        return new CacheStats(cacheHits.get(), cacheMisses.get(), resolvedCache.size());
+        int total = cacheMisses.get();
+        long avg = total == 0 ? 0L : totalResolveNanos.get() / total;
+        return new CacheStats(
+                cacheHits.get(),
+                cacheMisses.get(),
+                resolvedCache.size(),
+                avg,
+                slowestResolveNanos.get(),
+                slowestItem.get(),
+                recipeTimeouts.get()
+        );
     }
 }

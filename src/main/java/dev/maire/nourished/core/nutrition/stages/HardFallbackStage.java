@@ -7,6 +7,7 @@ import dev.maire.nourished.core.nutrition.ResolutionStage;
 import dev.maire.nourished.core.nutrition.StageContext;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,16 @@ public final class HardFallbackStage implements ResolutionStageHandler {
         List<String> keys = NutrientRegistry.getKeys();
         String fallbackKey = keys.get(0);
         Nourished.LOGGER.debug("[RuntimeFoodResolver] Fallback for {}, no stage produced confidence", itemId);
-        return new ResolutionResult(Map.of(fallbackKey, 1.0f), 0f, ResolutionStage.HARD_FALLBACK,
+        Map<String, String> rejected = new LinkedHashMap<>();
+        for (String key : keys) {
+            if (!key.equals(fallbackKey)) {
+                rejected.put(key, ResolutionResult.REJECT_NO_MATCHING_KEYWORDS);
+            }
+        }
+        return new ResolutionResult(
+                Map.of(fallbackKey, 1.0f), Map.of(fallbackKey, 1.0f),
+                List.of(), Map.of(), rejected,
+                false, 0f, ResolutionStage.HARD_FALLBACK,
                 "hard fallback to " + fallbackKey);
     }
 }

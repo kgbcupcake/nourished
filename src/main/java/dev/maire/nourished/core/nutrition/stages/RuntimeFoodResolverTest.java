@@ -92,6 +92,10 @@ final class RuntimeFoodResolverTest {
         if (stats.size() != 0) {
             throw new AssertionError("Cache should be empty after invalidation, size=" + stats.size());
         }
+        if (stats.avgResolveNanos() != 0L || stats.slowestResolveNanos() != 0L || stats.slowestItem() != null
+                || stats.recipeTimeouts() != 0) {
+            throw new AssertionError("Timing stats should reset after invalidation: " + stats);
+        }
     }
 
     private static void assertEquals(Object expected, Object actual, String label) {

@@ -13,6 +13,7 @@ import net.minecraft.world.item.Item;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,12 +46,15 @@ public final class CommunityTagStage implements ResolutionStageHandler {
 
         if (contributions.isEmpty()) return null;
 
-        Map<String, Float> normalized = StageMath.normalizeToBarMap(contributions, ctx.validKeys());
-        if (normalized.isEmpty()) return null;
+        StageMath.NormalizationOutcome outcome = StageMath.normalizeWithRejections(contributions, ctx.validKeys());
+        if (outcome.normalized().isEmpty()) return null;
 
         float totalScore = 0f;
         for (float v : contributions.values()) totalScore += v;
-        return new ResolutionResult(normalized, totalScore, ResolutionStage.COMMUNITY_TAG,
+        return new ResolutionResult(
+                outcome.normalized(), Map.copyOf(contributions),
+                List.of(), Map.of(), outcome.rejectedSignals(),
+                false, totalScore, ResolutionStage.COMMUNITY_TAG,
                 "community tag match");
     }
 }

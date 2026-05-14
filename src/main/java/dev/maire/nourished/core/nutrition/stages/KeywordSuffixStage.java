@@ -13,14 +13,11 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Stage 2: scores the item path tokens against scanner-spec keyword, suffix,
- * and negative-keyword weight tables. Owns the irregular-plural stem map.
- */
 public final class KeywordSuffixStage implements ResolutionStageHandler {
 
     private static final Set<String> STOP_WORDS = Set.of(
@@ -75,28 +72,69 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
         STEMS = Collections.unmodifiableMap(m);
     }
 
+    private static final float PRIMARY_TOKEN_WEIGHT   = 1.0f;
+    private static final float SECONDARY_TOKEN_WEIGHT = 0.6f;
+    private static final float TERTIARY_TOKEN_WEIGHT  = 0.3f;
+
+    private static final Set<String> PREPARATION_TOKENS = Set.of(
+            "pie", "tart", "stew", "soup", "salad", "sandwich", "burger",
+            "cake", "cookie", "smoothie", "juice", "jam", "roast",
+            "bake", "baked", "fried", "smoked", "cooked"
+    );
+
+    private static final Set<String> AMBIGUOUS_TOKENS = Set.of(
+            "deluxe", "hearty", "special", "meal", "feast", "platter",
+            "dish", "plate", "bowl", "medley", "mix", "blend", "assorted",
+            "classic", "traditional", "homemade", "rustic", "artisan",
+            "premium", "supreme", "grand", "mega", "ultra", "epic",
+            "exotic", "tropical", "seasonal", "gourmet", "fancy"
+    );
+
+    private static final float AMBIGUOUS_TOKEN_MULTIPLIER = 0.15f;
+
+    private static float weightForPosition(int index) {
+        return switch (index) {
+            case 0 -> PRIMARY_TOKEN_WEIGHT;
+            case 1 -> SECONDARY_TOKEN_WEIGHT;
+            default -> TERTIARY_TOKEN_WEIGHT;
+        };
+    }
+
     @Override
     @Nullable
     public ResolutionResult resolve(ResourceLocation itemId, StageContext ctx) {
-        Map<String, Float> scores = score(itemId);
-        if (scores.isEmpty()) return null;
+        ScoreResult sr = scoreWithTokens(itemId);
+        if (sr.scores.isEmpty()) return null;
 
-        float spread = StageMath.computeSpread(scores);
+        float spread = StageMath.computeSpread(sr.scores);
         float threshold = StageMath.scannerConfidenceSpreadThreshold();
         if (spread < threshold) return null;
 
-        Map<String, Float> normalized = StageMath.normalizeToBarMap(scores, ctx.validKeys());
-        if (normalized.isEmpty()) return null;
+        StageMath.NormalizationOutcome outcome = StageMath.normalizeWithRejections(sr.scores, ctx.validKeys());
+        if (outcome.normalized().isEmpty()) return null;
 
-        return new ResolutionResult(normalized, spread, ResolutionStage.KEYWORD_SUFFIX,
-                "keyword/suffix spread=" + String.format("%.2f", spread));
+        String dominant = sr.scores.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey).orElse("?");
+        String debugReason = String.format("tokens=%s dominant=%s spread=%.2f", sr.tokens, dominant, spread);
+
+        return new ResolutionResult(
+                outcome.normalized(), Map.copyOf(sr.scores),
+                sr.tokens, sr.tokenWeights, outcome.rejectedSignals(),
+                false, spread, ResolutionStage.KEYWORD_SUFFIX, debugReason);
     }
 
-    /**
-     * Raw keyword/suffix scoring without normalization or threshold gating.
-     * Package-private for test access.
-     */
+    private record ScoreResult(
+            Map<String, Float> scores,
+            List<String> tokens,
+            Map<String, Float> tokenWeights
+    ) {}
+
     Map<String, Float> score(ResourceLocation itemId) {
+        return scoreWithTokens(itemId).scores;
+    }
+
+    private ScoreResult scoreWithTokens(ResourceLocation itemId) {
         ScannerSpec spec = ScannerSpecRegistry.get();
         Multipliers mult = spec.multipliers();
         Map<String, Map<String, Float>> suffixWeights = spec.suffixWeights();
@@ -112,50 +150,74 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
         String path = itemId.getPath();
         String[] rawTokens = path.split("_");
         List<String> tokens = new ArrayList<>(rawTokens.length);
+        List<String> stemmedTokens = new ArrayList<>(rawTokens.length);
+        Map<String, Float> tokenWeightMap = new LinkedHashMap<>();
         for (int i = 0; i < rawTokens.length; i++) {
             String t = rawTokens[i].toLowerCase();
             if (STOP_WORDS.contains(t)) continue;
-            if (!t.isEmpty()) tokens.add(t);
+            if (!t.isEmpty()) {
+                String stemmed = stem(t);
+                tokens.add(t);
+                stemmedTokens.add(stemmed);
+                float positionalWeight = weightForPosition(tokens.size() - 1);
+                float semanticMult = PREPARATION_TOKENS.contains(stemmed) ? 0.5f : 1.0f;
+                float ambiguousMult = AMBIGUOUS_TOKENS.contains(stemmed) ? AMBIGUOUS_TOKEN_MULTIPLIER : 1.0f;
+                float finalWeight = positionalWeight * semanticMult * ambiguousMult;
+                tokenWeightMap.put(stemmed, finalWeight);
+            }
         }
 
         if (!tokens.isEmpty()) {
-            String lastToken = stem(tokens.get(tokens.size() - 1));
+            int lastIndex = stemmedTokens.size() - 1;
+            String lastToken = stemmedTokens.get(lastIndex);
             Map<String, Float> sw = suffixWeights.get(lastToken);
             if (sw != null) {
+                float positionalWeight = weightForPosition(lastIndex);
+                float semanticMult = PREPARATION_TOKENS.contains(lastToken) ? 0.5f : 1.0f;
+                float ambiguousMult = AMBIGUOUS_TOKENS.contains(lastToken) ? AMBIGUOUS_TOKEN_MULTIPLIER : 1.0f;
+                float suffixWeight = positionalWeight * semanticMult * ambiguousMult;
                 for (Map.Entry<String, Float> e : sw.entrySet()) {
                     if (scores.containsKey(e.getKey())) {
-                        scores.merge(e.getKey(), e.getValue() * mult.suffix(), Float::sum);
+                        scores.merge(e.getKey(), e.getValue() * mult.suffix() * suffixWeight, Float::sum);
                     }
                 }
             }
         }
 
-        for (String token : tokens) {
-            String stemmed = stem(token);
+        for (int i = 0; i < stemmedTokens.size(); i++) {
+            String stemmed = stemmedTokens.get(i);
+            float positionalWeight = weightForPosition(i);
+            float semanticMult = PREPARATION_TOKENS.contains(stemmed) ? 0.5f : 1.0f;
+            float ambiguousMult = AMBIGUOUS_TOKENS.contains(stemmed) ? AMBIGUOUS_TOKEN_MULTIPLIER : 1.0f;
+            float finalWeight = positionalWeight * semanticMult * ambiguousMult;
             Map<String, Float> kw = keywordWeights.get(stemmed);
             if (kw != null) {
                 for (Map.Entry<String, Float> e : kw.entrySet()) {
                     if (scores.containsKey(e.getKey())) {
-                        scores.merge(e.getKey(), e.getValue() * mult.keyword(), Float::sum);
+                        scores.merge(e.getKey(), e.getValue() * mult.keyword() * finalWeight, Float::sum);
                     }
                 }
             }
         }
 
-        for (String token : tokens) {
-            String stemmed = stem(token);
+        for (int i = 0; i < stemmedTokens.size(); i++) {
+            String stemmed = stemmedTokens.get(i);
+            float positionalWeight = weightForPosition(i);
+            float semanticMult = PREPARATION_TOKENS.contains(stemmed) ? 0.5f : 1.0f;
+            float ambiguousMult = AMBIGUOUS_TOKENS.contains(stemmed) ? AMBIGUOUS_TOKEN_MULTIPLIER : 1.0f;
+            float finalWeight = positionalWeight * semanticMult * ambiguousMult;
             Map<String, Float> neg = negativeKeywords.get(stemmed);
             if (neg != null) {
                 for (Map.Entry<String, Float> e : neg.entrySet()) {
                     if (scores.containsKey(e.getKey())) {
-                        scores.merge(e.getKey(), e.getValue(), Float::sum);
+                        scores.merge(e.getKey(), e.getValue() * finalWeight, Float::sum);
                     }
                 }
             }
         }
 
         scores.entrySet().removeIf(e -> e.getValue() <= 0f);
-        return scores;
+        return new ScoreResult(scores, List.copyOf(stemmedTokens), Map.copyOf(tokenWeightMap));
     }
 
     private static String stem(String token) {
@@ -163,7 +225,6 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
         return irregular != null ? irregular : token;
     }
 
-    /** Unmodifiable snapshot of the stem map for test assertions. */
     static Map<String, String> stemsSnapshot() {
         return STEMS;
     }

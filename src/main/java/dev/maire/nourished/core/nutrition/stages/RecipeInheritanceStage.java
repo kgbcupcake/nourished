@@ -6,6 +6,7 @@ import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.ResolutionResult;
 import dev.maire.nourished.core.nutrition.ResolutionStage;
+import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.nutrition.StageContext;
 import dev.maire.nourished.core.nutrition.cache.BoundedLRU;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
@@ -73,6 +74,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
 
             for (ResourceLocation ingredientId : ingredients) {
                 if (System.nanoTime() - start > TIMEOUT_NANOS) {
+                    RuntimeFoodResolver.recordRecipeTimeout();
                     Nourished.LOGGER.warn("[RuntimeFoodResolver] Recipe timeout for {}, aborting ({}ns)",
                             itemId, System.nanoTime() - start);
                     return null;
@@ -99,12 +101,15 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                 averaged.put(e.getKey(), e.getValue() / confirmed);
             }
 
-            Map<String, Float> normalized = StageMath.normalizeToBarMap(averaged, ctx.validKeys());
-            if (normalized.isEmpty()) return null;
+            StageMath.NormalizationOutcome outcome = StageMath.normalizeWithRejections(averaged, ctx.validKeys());
+            if (outcome.normalized().isEmpty()) return null;
 
             float totalScore = 0f;
             for (float v : averaged.values()) totalScore += v;
-            return new ResolutionResult(normalized, totalScore, ResolutionStage.RECIPE_INHERITANCE,
+            return new ResolutionResult(
+                    outcome.normalized(), Map.copyOf(averaged),
+                    List.of(), Map.of(), outcome.rejectedSignals(),
+                    false, totalScore, ResolutionStage.RECIPE_INHERITANCE,
                     "recipe ingredient inheritance");
 
         } catch (Exception e) {
@@ -123,6 +128,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
 
         for (RecipeHolder<?> holder : recipeManager.getRecipes()) {
             if (System.nanoTime() - startNanos > TIMEOUT_NANOS) {
+                RuntimeFoodResolver.recordRecipeTimeout();
                 Nourished.LOGGER.warn("[RuntimeFoodResolver] Recipe timeout for {}, aborting ({}ns)",
                         itemId, System.nanoTime() - startNanos);
                 return null;

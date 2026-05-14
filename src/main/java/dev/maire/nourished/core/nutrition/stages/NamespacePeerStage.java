@@ -7,6 +7,7 @@ import dev.maire.nourished.core.nutrition.cache.RunningAverage;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,10 +31,13 @@ public final class NamespacePeerStage implements ResolutionStageHandler {
         float spread = StageMath.computeSpread(avg);
         if (spread < MIN_SPREAD) return null;
 
-        Map<String, Float> normalized = StageMath.normalizeToBarMap(avg, ctx.validKeys());
-        if (normalized.isEmpty()) return null;
+        StageMath.NormalizationOutcome outcome = StageMath.normalizeWithRejections(avg, ctx.validKeys());
+        if (outcome.normalized().isEmpty()) return null;
 
-        return new ResolutionResult(normalized, spread, ResolutionStage.NAMESPACE_PEER,
+        return new ResolutionResult(
+                outcome.normalized(), Map.copyOf(avg),
+                List.of(), Map.of(), outcome.rejectedSignals(),
+                false, spread, ResolutionStage.NAMESPACE_PEER,
                 "namespace peer average (" + ns + ", n=" + peerAvg.count() + ")");
     }
 }

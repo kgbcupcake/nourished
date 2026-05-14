@@ -155,6 +155,8 @@ public class NourishedCommand {
                                         .executes(this::showSchemaTemplate)))
                         .then(Commands.literal("debug")
                                 .requires(s -> s.hasPermission(2))
+                                .then(NourishedDebugCommand.registerCache())
+                                .then(NourishedDebugCommand.registerHeld())
                                 .then(Commands.argument("player", EntityArgument.player())
                                         .executes(this::debugTarget)))
         );
