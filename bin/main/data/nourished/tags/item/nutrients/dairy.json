@@ -33,13 +33,34 @@
       "id": "herbsandharvest:swiss_wedge",
       "required": false
     },
-    "farm_and_charm:butter",
-    "pamhc2foodcore:freshmilkitem",
-    "pamhc2foodcore:appleyogurtitem",
-    "pamhc2foodcore:glowberryyogurtitem",
-    "pamhc2foodcore:melonyogurtitem",
-    "pamhc2foodcore:sweetberryyogurtitem",
-    "pamhc2foodcore:mayonaiseitem",
+    {
+      "id": "farm_and_charm:butter",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:freshmilkitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:appleyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:glowberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:melonyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sweetberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:mayonaiseitem",
+      "required": false
+    },
     {
       "id": "croptopia:yoghurt",
       "required": false
@@ -68,48 +89,184 @@
       "id": "ends_delight:chorus_fruit_milk_tea",
       "required": false
     },
-    "pamhc2foodextended:apricotyogurtitem",
-    "pamhc2foodextended:bananayogurtitem",
-    "pamhc2foodextended:blackberryyogurtitem",
-    "pamhc2foodextended:blueberryyogurtitem",
-    "pamhc2foodextended:breadfruityogurtitem",
-    "pamhc2foodextended:cactusfruityogurtitem",
-    "pamhc2foodextended:candleberryyogurtitem",
-    "pamhc2foodextended:cherryyogurtitem",
-    "pamhc2foodextended:cranberryyogurtitem",
-    "pamhc2foodextended:dateyogurtitem",
-    "pamhc2foodextended:elderberryyogurtitem",
-    "pamhc2foodextended:figyogurtitem",
-    "pamhc2foodextended:gooseberryyogurtitem",
-    "pamhc2foodextended:grapefruityogurtitem",
-    "pamhc2foodextended:grapeyogurtitem",
-    "pamhc2foodextended:greengrapeyogurtitem",
-    "pamhc2foodextended:guavayogurtitem",
-    "pamhc2foodextended:huckleberryyogurtitem",
-    "pamhc2foodextended:jackfruityogurtitem",
-    "pamhc2foodextended:juniperberryyogurtitem",
-    "pamhc2foodextended:lemonyogurtitem",
-    "pamhc2foodextended:limeyogurtitem",
-    "pamhc2foodextended:lycheeyogurtitem",
-    "pamhc2foodextended:mangoyogurtitem",
-    "pamhc2foodextended:mulberryyogurtitem",
-    "pamhc2foodextended:orangeyogurtitem",
-    "pamhc2foodextended:papayayogurtitem",
-    "pamhc2foodextended:passionfruityogurtitem",
-    "pamhc2foodextended:peachyogurtitem",
-    "pamhc2foodextended:pearyogurtitem",
-    "pamhc2foodextended:pineappleyogurtitem",
-    "pamhc2foodextended:plumyogurtitem",
-    "pamhc2foodextended:pomegranateyogurtitem",
-    "pamhc2foodextended:rambutanyogurtitem",
-    "pamhc2foodextended:raspberryyogurtitem",
-    "pamhc2foodextended:starfruityogurtitem",
-    "pamhc2foodextended:strawberryyogurtitem",
-    "pamhc2foodextended:tamarindyogurtitem",
-    "pamhc2foodextended:paneeritem",
-    "pamhc2foodextended:paneertikkamasalaitem",
+    {
+      "id": "pamhc2foodextended:apricotyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bananayogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blackberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blueberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:breadfruityogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cactusfruityogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:candleberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cherryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cranberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:dateyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:elderberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:figyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gooseberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapefruityogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapeyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greengrapeyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:guavayogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:huckleberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:jackfruityogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:juniperberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemonyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:limeyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lycheeyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mangoyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mulberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:orangeyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:papayayogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:passionfruityogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peachyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pearyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pineappleyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:plumyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pomegranateyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rambutanyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:raspberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:starfruityogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tamarindyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:paneeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:paneertikkamasalaitem",
+      "required": false
+    },
     {
       "id": "herbsandharvest:mayo",
+      "required": false
+    },
+    "minecraft:milk_bucket",
+    "minecraft:milk_bucket",
+    "minecraft:milk_bucket",
+    "minecraft:milk_bucket",
+    {
+      "id": "mynethersdelight:dried_ghast_with_milk",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:hot_cream",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:plate_of_ghasta_with_cream",
       "required": false
     }
   ]

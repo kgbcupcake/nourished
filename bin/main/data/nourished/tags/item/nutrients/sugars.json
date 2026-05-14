@@ -6,27 +6,105 @@
       "required": false
     },
     "minecraft:cake",
+    "minecraft:cake",
+    "minecraft:cake",
+    "minecraft:cake",
+    "minecraft:pumpkin_pie",
+    "minecraft:pumpkin_pie",
+    "minecraft:pumpkin_pie",
     "minecraft:pumpkin_pie",
     "minecraft:honey_bottle",
-    "pamhc2foodcore:chorusyogurtitem",
-    "pamhc2foodcore:icecreamitem",
-    "pamhc2foodcore:chocolateicecreamitem",
-    "pamhc2foodcore:caramelicecreamitem",
-    "pamhc2foodcore:cookiesandmilkitem",
-    "pamhc2foodcore:chocolatebaritem",
-    "pamhc2foodcore:hotchocolateitem",
-    "pamhc2foodcore:chocolaterollitem",
-    "pamhc2foodcore:chocolatecaramelfudgeitem",
-    "pamhc2foodcore:smoresitem",
-    "pamhc2foodcore:chocolatemilkitem",
-    "pamhc2foodcore:fudgesicleitem",
-    "pamhc2foodcore:caramelitem",
-    "pamhc2foodcore:marshmellowsitem",
-    "pamhc2foodcore:cottoncandyitem",
-    "pamhc2foodcore:gummycreepersitem",
-    "pamhc2foodcore:jellybeansitem",
-    "pamhc2foodcore:melonpieitem",
-    "pamhc2foodcore:honeymuffinitem",
+    "minecraft:honey_bottle",
+    "minecraft:honey_bottle",
+    "minecraft:honey_bottle",
+    "minecraft:cookie",
+    "minecraft:cookie",
+    "minecraft:cookie",
+    "minecraft:cookie",
+    "minecraft:sweet_berries",
+    "minecraft:sweet_berries",
+    "minecraft:sweet_berries",
+    "minecraft:sweet_berries",
+    "minecraft:glow_berries",
+    "minecraft:glow_berries",
+    "minecraft:glow_berries",
+    "minecraft:glow_berries",
+    {
+      "id": "pamhc2foodcore:chorusyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:icecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chocolateicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:caramelicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:cookiesandmilkitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chocolatebaritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:hotchocolateitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chocolaterollitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chocolatecaramelfudgeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:smoresitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chocolatemilkitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:fudgesicleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:caramelitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:marshmellowsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:cottoncandyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:gummycreepersitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:jellybeansitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:melonpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:honeymuffinitem",
+      "required": false
+    },
     {
       "id": "allthemodium:allthemodium_apple",
       "required": false
@@ -859,11 +937,26 @@
       "id": "expandeddelight:sweet_berry_juice",
       "required": false
     },
-    "farm_and_charm:grandmothers_strawberry_cake",
-    "farmersdelight:apple_pie_slice",
-    "farmersdelight:melon_popsicle",
-    "farmersdelight:sweet_berry_cheesecake_slice",
-    "farmersdelight:sweet_berry_cookie",
+    {
+      "id": "farm_and_charm:grandmothers_strawberry_cake",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:apple_pie_slice",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:melon_popsicle",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:sweet_berry_cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:sweet_berry_cookie",
+      "required": false
+    },
     {
       "id": "fruitsdelight:apple_jam",
       "required": false
@@ -1064,123 +1157,474 @@
       "id": "nomansland:candied_pear",
       "required": false
     },
-    "pamhc2foodcore:appledonutitem",
-    "pamhc2foodcore:applepieitem",
-    "pamhc2foodcore:glowberrydonutitem",
-    "pamhc2foodcore:glowberrypieitem",
-    "pamhc2foodcore:melondonutitem",
-    "pamhc2foodcore:sweetberrydonutitem",
-    "pamhc2foodcore:sweetberrypieitem",
-    "pamhc2foodextended:applefritteritem",
-    "pamhc2foodextended:apricotjellyitem",
-    "pamhc2foodextended:apricotpieitem",
-    "pamhc2foodextended:bakedalaskaitem",
-    "pamhc2foodextended:baklavaitem",
-    "pamhc2foodextended:bananajellyitem",
-    "pamhc2foodextended:bananapieitem",
-    "pamhc2foodextended:battenbergitem",
-    "pamhc2foodextended:berrymeringuenestitem",
-    "pamhc2foodextended:blackberrycobbleritem",
-    "pamhc2foodextended:blackberryjellyitem",
-    "pamhc2foodextended:blackberrypieitem",
-    "pamhc2foodextended:blueberryjellyitem",
-    "pamhc2foodextended:blueberrypieitem",
-    "pamhc2foodextended:cactusfruitjellyitem",
-    "pamhc2foodextended:cactusfruitpieitem",
-    "pamhc2foodextended:candiedlemonitem",
-    "pamhc2foodextended:candiedpecansitem",
-    "pamhc2foodextended:candiedwalnutsitem",
-    "pamhc2foodextended:candleberryjellyitem",
-    "pamhc2foodextended:candleberrypieitem",
-    "pamhc2foodextended:cherrycoconutchocolatebaritem",
-    "pamhc2foodextended:cherryjellyitem",
-    "pamhc2foodextended:cherrypieitem",
-    "pamhc2foodextended:chocolatecherryitem",
-    "pamhc2foodextended:chocolatecoconutbaritem",
-    "pamhc2foodextended:chocolateorangeitem",
-    "pamhc2foodextended:chocolatestrawberryitem",
-    "pamhc2foodextended:cranberryjellyitem",
-    "pamhc2foodextended:cranberrypieitem",
-    "pamhc2foodextended:datejellyitem",
-    "pamhc2foodextended:datepieitem",
-    "pamhc2foodextended:elderberryjellyitem",
-    "pamhc2foodextended:elderberrypieitem",
-    "pamhc2foodextended:etonmessitem",
-    "pamhc2foodextended:figjellyitem",
-    "pamhc2foodextended:figpieitem",
-    "pamhc2foodextended:fruitcakeitem",
-    "pamhc2foodextended:gooseberryjellyitem",
-    "pamhc2foodextended:gooseberrypieitem",
-    "pamhc2foodextended:grapefruitjellyitem",
-    "pamhc2foodextended:grapefruitpieitem",
-    "pamhc2foodextended:grapejellyitem",
-    "pamhc2foodextended:grapepieitem",
-    "pamhc2foodextended:greengrapejellyitem",
-    "pamhc2foodextended:greengrapepieitem",
-    "pamhc2foodextended:guavajellyitem",
-    "pamhc2foodextended:guavapieitem",
-    "pamhc2foodextended:hazelnutchocolateitem",
-    "pamhc2foodextended:huckleberryjellyitem",
-    "pamhc2foodextended:huckleberrypieitem",
-    "pamhc2foodextended:jackfruitjellyitem",
-    "pamhc2foodextended:jackfruitpieitem",
-    "pamhc2foodextended:juniperberryjellyitem",
-    "pamhc2foodextended:juniperberrypieitem",
-    "pamhc2foodextended:keylimepieitem",
-    "pamhc2foodextended:lamingtonitem",
-    "pamhc2foodextended:lemondrizzlecakeitem",
-    "pamhc2foodextended:lemonjellyitem",
-    "pamhc2foodextended:lemonmeringueitem",
-    "pamhc2foodextended:lemonpieitem",
-    "pamhc2foodextended:limejellyitem",
-    "pamhc2foodextended:limepieitem",
-    "pamhc2foodextended:lycheejellyitem",
-    "pamhc2foodextended:lycheepieitem",
-    "pamhc2foodextended:mangojellyitem",
-    "pamhc2foodextended:mangopieitem",
-    "pamhc2foodextended:marzipanitem",
-    "pamhc2foodextended:meringuebombeitem",
-    "pamhc2foodextended:meringueitem",
-    "pamhc2foodextended:meringuerouladeitem",
-    "pamhc2foodextended:mulberryjellyitem",
-    "pamhc2foodextended:mulberrypieitem",
-    "pamhc2foodextended:orangejellyitem",
-    "pamhc2foodextended:orangepieitem",
-    "pamhc2foodextended:papayajellyitem",
-    "pamhc2foodextended:papayapieitem",
-    "pamhc2foodextended:passionfruitjellyitem",
-    "pamhc2foodextended:passionfruitpieitem",
-    "pamhc2foodextended:pavlovaitem",
-    "pamhc2foodextended:peachcobbleritem",
-    "pamhc2foodextended:peachjellyitem",
-    "pamhc2foodextended:peachpieitem",
-    "pamhc2foodextended:pearjellyitem",
-    "pamhc2foodextended:pearpieitem",
-    "pamhc2foodextended:pecanpieitem",
-    "pamhc2foodextended:pineapplejellyitem",
-    "pamhc2foodextended:pineapplepieitem",
-    "pamhc2foodextended:pineappleupsidedowncakeitem",
-    "pamhc2foodextended:plumjellyitem",
-    "pamhc2foodextended:plumpieitem",
-    "pamhc2foodextended:pomegranatejellyitem",
-    "pamhc2foodextended:pomegranatepieitem",
-    "pamhc2foodextended:pralinesitem",
-    "pamhc2foodextended:raisinsitem",
-    "pamhc2foodextended:rambutanjellyitem",
-    "pamhc2foodextended:rambutanpieitem",
-    "pamhc2foodextended:raspberryjellyitem",
-    "pamhc2foodextended:raspberrypieitem",
-    "pamhc2foodextended:raspberrytrifleitem",
-    "pamhc2foodextended:starfruitjellyitem",
-    "pamhc2foodextended:starfruitpieitem",
-    "pamhc2foodextended:strawberryjellyitem",
-    "pamhc2foodextended:strawberrypieitem",
-    "pamhc2foodextended:strawberryrhubarbpieitem",
-    "pamhc2foodextended:strawberrysouffleitem",
-    "pamhc2foodextended:tamarindjellyitem",
-    "pamhc2foodextended:tamarindpieitem",
-    "pamhc2foodextended:timtamitem",
-    "pamhc2foodextended:turkishdelightitem",
+    {
+      "id": "pamhc2foodcore:appledonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:applepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:glowberrydonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:glowberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:melondonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sweetberrydonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sweetberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:applefritteritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:apricotjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:apricotpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bakedalaskaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:baklavaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bananajellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bananapieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:battenbergitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:berrymeringuenestitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blackberrycobbleritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blackberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blackberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blueberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blueberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cactusfruitjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cactusfruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:candiedlemonitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:candiedpecansitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:candiedwalnutsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:candleberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:candleberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cherrycoconutchocolatebaritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cherryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cherrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chocolatecherryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chocolatecoconutbaritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chocolateorangeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chocolatestrawberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cranberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cranberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:datejellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:datepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:elderberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:elderberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:etonmessitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:figjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:figpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:fruitcakeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gooseberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gooseberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapefruitjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapefruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapejellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greengrapejellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greengrapepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:guavajellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:guavapieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:hazelnutchocolateitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:huckleberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:huckleberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:jackfruitjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:jackfruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:juniperberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:juniperberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:keylimepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lamingtonitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemondrizzlecakeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemonjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemonmeringueitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemonpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:limejellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:limepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lycheejellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lycheepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mangojellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mangopieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:marzipanitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:meringuebombeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:meringueitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:meringuerouladeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mulberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mulberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:orangejellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:orangepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:papayajellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:papayapieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:passionfruitjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:passionfruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pavlovaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peachcobbleritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peachjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peachpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pearjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pearpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pecanpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pineapplejellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pineapplepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pineappleupsidedowncakeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:plumjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:plumpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pomegranatejellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pomegranatepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pralinesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:raisinsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rambutanjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rambutanpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:raspberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:raspberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:raspberrytrifleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:starfruitjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:starfruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberryrhubarbpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberrysouffleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tamarindjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tamarindpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:timtamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:turkishdelightitem",
+      "required": false
+    },
     {
       "id": "pickletweaks:diamond_apple",
       "required": false
@@ -1257,15 +1701,42 @@
       "id": "farm_and_charm:grandmothers_strawberry_cake_block",
       "required": false
     },
-    "bakery:chocolate_cake_slice",
-    "bakery:chocolate_gateau_slice",
-    "bakery:bundt_cake_slice",
-    "bakery:linzer_tart_slice",
-    "bakery:chocolate_tart_slice",
-    "bakery:pudding_slice",
-    "bakery:chocolate_glazed_cookie",
-    "bakery:chocolate_truffle",
-    "bakery:jam_roll",
+    {
+      "id": "bakery:chocolate_cake_slice",
+      "required": false
+    },
+    {
+      "id": "bakery:chocolate_gateau_slice",
+      "required": false
+    },
+    {
+      "id": "bakery:bundt_cake_slice",
+      "required": false
+    },
+    {
+      "id": "bakery:linzer_tart_slice",
+      "required": false
+    },
+    {
+      "id": "bakery:chocolate_tart_slice",
+      "required": false
+    },
+    {
+      "id": "bakery:pudding_slice",
+      "required": false
+    },
+    {
+      "id": "bakery:chocolate_glazed_cookie",
+      "required": false
+    },
+    {
+      "id": "bakery:chocolate_truffle",
+      "required": false
+    },
+    {
+      "id": "bakery:jam_roll",
+      "required": false
+    },
     {
       "id": "createfood:sugar_cane_juice_bottle",
       "required": false
@@ -1314,7 +1785,10 @@
       "id": "draconicadditions:hermal",
       "required": false
     },
-    "pamhc2foodextended:cherryicecreamitem",
+    {
+      "id": "pamhc2foodextended:cherryicecreamitem",
+      "required": false
+    },
     {
       "id": "bakery:waffle_block",
       "required": false
@@ -1429,6 +1903,30 @@
     },
     {
       "id": "fruitsdelight:cranberry_muffin",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:hot_cream",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:hot_cream_cone",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:tear_popsicle",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:magma_cake_slice",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:sizzling_pudding",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:spicy_cotton",
       "required": false
     }
   ]

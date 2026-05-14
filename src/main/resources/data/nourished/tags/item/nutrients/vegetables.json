@@ -16,34 +16,118 @@
     "minecraft:mushroom_stew",
     "minecraft:rabbit_stew",
     "minecraft:suspicious_stew",
-    "farmersdelight:vegetable_soup",
-    "farmersdelight:noodle_soup",
-    "farmersdelight:pumpkin_soup",
-    "pamhc2foodcore:glazedcarrotsitem",
-    "pamhc2foodcore:carrotsoupitem",
-    "pamhc2foodcore:pickledbeetsitem",
-    "pamhc2foodcore:pumpkinsoupitem",
-    "pamhc2foodcore:potatosoupitem",
-    "pamhc2foodcore:bakedvegetablemedlyitem",
-    "pamhc2foodcore:basicveggieburgeritem",
-    "pamhc2foodcore:veggiepotpieitem",
-    "pamhc2foodcore:grilledveggieskeweritem",
-    "pamhc2foodcore:vegetablenoodlesoupitem",
-    "pamhc2foodcore:stewitem",
-    "farm_and_charm:lettuce",
-    "farm_and_charm:onion",
-    "farm_and_charm:tomato",
-    "farm_and_charm:farmer_salad",
-    "farm_and_charm:simple_tomato_soup",
-    "farm_and_charm:onion_soup",
-    "farm_and_charm:potato_soup",
-    "farm_and_charm:barley_soup",
-    "farm_and_charm:nettle_tea_cup",
-    "farm_and_charm:ribwort_tea_cup",
-    "farm_and_charm:strawberry_tea_cup",
-    "aquaculture:algae",
-    "aquaculture:brown_shrooma",
-    "aquaculture:red_shrooma",
+    {
+      "id": "farmersdelight:vegetable_soup",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:noodle_soup",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:pumpkin_soup",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:glazedcarrotsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:carrotsoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:pickledbeetsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:pumpkinsoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:potatosoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:bakedvegetablemedlyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:basicveggieburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:veggiepotpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:grilledveggieskeweritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:vegetablenoodlesoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:stewitem",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:lettuce",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:onion",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:tomato",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:farmer_salad",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:simple_tomato_soup",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:onion_soup",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:potato_soup",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:barley_soup",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:nettle_tea_cup",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:ribwort_tea_cup",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:strawberry_tea_cup",
+      "required": false
+    },
+    {
+      "id": "aquaculture:algae",
+      "required": false
+    },
+    {
+      "id": "aquaculture:brown_shrooma",
+      "required": false
+    },
+    {
+      "id": "aquaculture:red_shrooma",
+      "required": false
+    },
     {
       "id": "arsdelight:arch_soup",
       "required": false
@@ -208,7 +292,10 @@
       "id": "expandeddelight:peperonata",
       "required": false
     },
-    "farmersdelight:fruit_salad",
+    {
+      "id": "farmersdelight:fruit_salad",
+      "required": false
+    },
     {
       "id": "fruitsdelight:bayberry_soup",
       "required": false
@@ -269,80 +356,302 @@
       "id": "lendersdelight:red_coral_stew",
       "required": false
     },
-    "pamhc2crops:aloeitem",
-    "pamhc2crops:arrowrootitem",
-    "pamhc2crops:bakedarrowrootitem",
-    "pamhc2crops:bakedcassavaitem",
-    "pamhc2crops:bakedjicamaitem",
-    "pamhc2crops:bakedrutabagaitem",
-    "pamhc2crops:bakedsunchokeitem",
-    "pamhc2crops:bakedtaroitem",
-    "pamhc2crops:bakedwaterchestnutitem",
-    "pamhc2crops:barrelcactusitem",
-    "pamhc2crops:bokchoyitem",
-    "pamhc2crops:brusselsproutitem",
-    "pamhc2crops:cactusfruititem",
-    "pamhc2crops:calabashitem",
-    "pamhc2crops:canolaitem",
-    "pamhc2crops:cassavaitem",
-    "pamhc2crops:chiaitem",
-    "pamhc2crops:elderberryitem",
-    "pamhc2crops:guaranaitem",
-    "pamhc2crops:jicamaitem",
-    "pamhc2crops:kohlrabiitem",
-    "pamhc2crops:lotusitem",
-    "pamhc2crops:nopalesitem",
-    "pamhc2crops:okraitem",
-    "pamhc2crops:rhubarbitem",
-    "pamhc2crops:rutabagaitem",
-    "pamhc2crops:scallionitem",
-    "pamhc2crops:spiceleafitem",
-    "pamhc2crops:sunchokeitem",
-    "pamhc2crops:taroitem",
-    "pamhc2crops:tomatilloitem",
-    "pamhc2crops:waterchestnutitem",
-    "pamhc2foodextended:babaganoushitem",
-    "pamhc2foodextended:bakedcactusitem",
-    "pamhc2foodextended:bangersandmashitem",
-    "pamhc2foodextended:berryvinaigrettesaladitem",
-    "pamhc2foodextended:bltitem",
-    "pamhc2foodextended:cactusfruitjuiceitem",
-    "pamhc2foodextended:cactusfruitsmoothieitem",
-    "pamhc2foodextended:cactussoupitem",
-    "pamhc2foodextended:cantonesegreensitem",
-    "pamhc2foodextended:carrotjuiceitem",
-    "pamhc2foodextended:cheezepuffsitem",
-    "pamhc2foodextended:chiliitem",
-    "pamhc2foodextended:chilipoppersitem",
-    "pamhc2foodextended:chocovoxelsitem",
-    "pamhc2foodextended:colasodaitem",
-    "pamhc2foodextended:coleslawitem",
-    "pamhc2foodextended:ediblerootitem",
-    "pamhc2foodextended:elderberryjuiceitem",
-    "pamhc2foodextended:elderberrysmoothieitem",
-    "pamhc2foodextended:energydrinkitem",
-    "pamhc2foodextended:epicbltitem",
-    "pamhc2foodextended:friedpecanokraitem",
-    "pamhc2foodextended:gravyitem",
-    "pamhc2foodextended:guacamoleitem",
-    "pamhc2foodextended:homestylelunchitem",
-    "pamhc2foodextended:hotandsoursoupitem",
-    "pamhc2foodextended:hotdishcasseroleitem",
-    "pamhc2foodextended:koreandinneritem",
-    "pamhc2foodextended:manjuuitem",
-    "pamhc2foodextended:mcpamitem",
-    "pamhc2foodextended:merveilleuxitem",
-    "pamhc2foodextended:misosoupitem",
-    "pamhc2foodextended:mozzerellasticksitem",
-    "pamhc2foodextended:okracreoleitem",
-    "pamhc2foodextended:omeletitem",
-    "pamhc2foodextended:poutineitem",
-    "pamhc2foodextended:salsaitem",
-    "pamhc2foodextended:sesamesnapsitem",
-    "pamhc2foodextended:spicygreensitem",
-    "pamhc2foodextended:theatreboxitem",
-    "pamhc2foodextended:toadintheholeitem",
-    "pamhc2foodextended:zeppoleitem",
+    {
+      "id": "pamhc2crops:aloeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:arrowrootitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:bakedarrowrootitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:bakedcassavaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:bakedjicamaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:bakedrutabagaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:bakedsunchokeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:bakedtaroitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:bakedwaterchestnutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:barrelcactusitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:bokchoyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:brusselsproutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:cactusfruititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:calabashitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:canolaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:cassavaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:chiaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:elderberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:guaranaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:jicamaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:kohlrabiitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:lotusitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:nopalesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:okraitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:rhubarbitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:rutabagaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:scallionitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:spiceleafitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:sunchokeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:taroitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:tomatilloitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:waterchestnutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:babaganoushitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bakedcactusitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bangersandmashitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:berryvinaigrettesaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bltitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cactusfruitjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cactusfruitsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cactussoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cantonesegreensitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:carrotjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cheezepuffsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chiliitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chilipoppersitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chocovoxelsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:colasodaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:coleslawitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:ediblerootitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:elderberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:elderberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:energydrinkitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:epicbltitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:friedpecanokraitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gravyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:guacamoleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:homestylelunchitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:hotandsoursoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:hotdishcasseroleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:koreandinneritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:manjuuitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mcpamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:merveilleuxitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:misosoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mozzerellasticksitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:okracreoleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:omeletitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:poutineitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:salsaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sesamesnapsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:spicygreensitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:theatreboxitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:toadintheholeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:zeppoleitem",
+      "required": false
+    },
     {
       "id": "rootsclassic:blackcurrant",
       "required": false
@@ -431,11 +740,26 @@
       "id": "vinery:villagers_fright",
       "required": false
     },
-    "pamhc2crops:sesameseedsitem",
-    "pamhc2crops:mustardseedsitem",
-    "pamhc2foodextended:groundcinnamonitem",
-    "pamhc2foodextended:gardensoupitem",
-    "pamhc2foodextended:creamofavocadosoupitem",
+    {
+      "id": "pamhc2crops:sesameseedsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:mustardseedsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:groundcinnamonitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gardensoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:creamofavocadosoupitem",
+      "required": false
+    },
     {
       "id": "croptopia:artichoke",
       "required": false
@@ -586,6 +910,34 @@
     },
     {
       "id": "pamhc2foodextended:kimchiitem",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:stuffed_pepper",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:bullet_pepper",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:roast_ear",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:strider_with_grilled_fungus",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:ghast_salad",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:rock_soup",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:spicy_curry",
       "required": false
     }
   ]

@@ -25,112 +25,418 @@
     "minecraft:cooked_cod",
     "minecraft:tropical_fish",
     "minecraft:rotten_flesh",
-    "pamhc2foodcore:basichamburgeritem",
-    "pamhc2foodextended:cookedtofickenitem",
-    "farmersdelight:chicken_sandwich",
-    "farmersdelight:pasta_with_mutton_chop",
-    "farmersdelight:bacon_and_eggs",
-    "pamhc2foodextended:garlicsteakitem",
-    "pamhc2foodcore:boiledeggitem",
-    "pamhc2foodcore:friedeggitem",
-    "pamhc2foodcore:scrambledeggitem",
-    "pamhc2foodcore:friedchickenitem",
-    "pamhc2foodcore:groundchickenitem",
-    "pamhc2foodcore:cookedgroundchickenitem",
-    "pamhc2foodcore:chickennuggetitem",
-    "pamhc2foodcore:basicchickensandwichitem",
-    "pamhc2foodcore:chickenjerkyitem",
-    "pamhc2foodcore:chickendinneritem",
-    "pamhc2foodcore:chickenpotpieitem",
-    "pamhc2foodcore:grilledchickenskeweritem",
-    "pamhc2foodcore:chickennoodlesoupitem",
-    "pamhc2foodcore:potroastitem",
-    "pamhc2foodcore:groundbeefitem",
-    "pamhc2foodcore:cookedgroundbeefitem",
-    "pamhc2foodcore:basiccheeseburgeritem",
-    "pamhc2foodcore:baconcheeseburgeritem",
-    "pamhc2foodcore:beefjerkyitem",
-    "pamhc2foodcore:beefpotpieitem",
-    "pamhc2foodcore:grilledbeefskeweritem",
-    "pamhc2foodcore:beefnoodlesoupitem",
-    "pamhc2foodcore:groundporkitem",
-    "pamhc2foodcore:cookedgroundporkitem",
-    "pamhc2foodcore:basicporksandwichitem",
-    "pamhc2foodcore:porkjerkyitem",
-    "pamhc2foodcore:hotdogitem",
-    "pamhc2foodcore:baconandeggsitem",
-    "pamhc2foodcore:epicbaconitem",
-    "pamhc2foodcore:porkpotpieitem",
-    "pamhc2foodcore:grilledporkskeweritem",
-    "pamhc2foodcore:porknoodlesoupitem",
-    "pamhc2foodcore:groundfishitem",
-    "pamhc2foodcore:cookedgroundfishitem",
-    "pamhc2foodcore:fishsticksitem",
-    "pamhc2foodcore:basicfishsandwichitem",
-    "pamhc2foodcore:fishjerkyitem",
-    "pamhc2foodcore:fishandchipsitem",
-    "pamhc2foodcore:fishpotpieitem",
-    "pamhc2foodcore:grilledfishskeweritem",
-    "pamhc2foodcore:fishnoodlesoupitem",
-    "pamhc2foodcore:groundmuttonitem",
-    "pamhc2foodcore:cookedgroundmuttonitem",
-    "pamhc2foodcore:basicmuttonsandwichitem",
-    "pamhc2foodcore:muttonjerkyitem",
-    "pamhc2foodcore:muttonpotpieitem",
-    "pamhc2foodcore:grilledmuttonskeweritem",
-    "pamhc2foodcore:muttonnoodlesoupitem",
-    "pamhc2foodcore:groundrabbititem",
-    "pamhc2foodcore:cookedgroundrabbititem",
-    "pamhc2foodcore:basicrabbitsandwichitem",
-    "pamhc2foodcore:rabbitjerkyitem",
-    "pamhc2foodcore:rabbitpotpieitem",
-    "pamhc2foodcore:grilledrabbitskeweritem",
-    "pamhc2foodcore:rabbitnoodlesoupitem",
-    "pamhc2foodcore:meatloafitem",
-    "pamhc2foodcore:chocolatebaconitem",
-    "farm_and_charm:minced_beef",
-    "farm_and_charm:lamb_ham",
-    "farm_and_charm:chicken_parts",
-    "farm_and_charm:bacon",
-    "farm_and_charm:roasted_chicken",
-    "farm_and_charm:cooked_salmon",
-    "farm_and_charm:cooked_cod",
-    "farm_and_charm:chicken_wrapped_in_bacon",
-    "farm_and_charm:lamb_with_corn",
-    "farm_and_charm:bacon_with_eggs",
-    "farm_and_charm:goulash",
-    "farm_and_charm:beef_patty_with_vegetables",
-    "farm_and_charm:sausage_with_oat_patty",
-    "farm_and_charm:barley_patties_with_potatoes",
+    {
+      "id": "pamhc2foodcore:basichamburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cookedtofickenitem",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:chicken_sandwich",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:pasta_with_mutton_chop",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:bacon_and_eggs",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:garlicsteakitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:boiledeggitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:friedeggitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:scrambledeggitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:friedchickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:groundchickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:cookedgroundchickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chickennuggetitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:basicchickensandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chickenjerkyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chickendinneritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chickenpotpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:grilledchickenskeweritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chickennoodlesoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:potroastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:groundbeefitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:cookedgroundbeefitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:basiccheeseburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:baconcheeseburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:beefjerkyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:beefpotpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:grilledbeefskeweritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:beefnoodlesoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:groundporkitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:cookedgroundporkitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:basicporksandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:porkjerkyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:hotdogitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:baconandeggsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:epicbaconitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:porkpotpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:grilledporkskeweritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:porknoodlesoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:groundfishitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:cookedgroundfishitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:fishsticksitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:basicfishsandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:fishjerkyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:fishandchipsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:fishpotpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:grilledfishskeweritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:fishnoodlesoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:groundmuttonitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:cookedgroundmuttonitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:basicmuttonsandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:muttonjerkyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:muttonpotpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:grilledmuttonskeweritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:muttonnoodlesoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:groundrabbititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:cookedgroundrabbititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:basicrabbitsandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:rabbitjerkyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:rabbitpotpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:grilledrabbitskeweritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:rabbitnoodlesoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:meatloafitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chocolatebaconitem",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:minced_beef",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:lamb_ham",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:chicken_parts",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:bacon",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:roasted_chicken",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:cooked_salmon",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:cooked_cod",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:chicken_wrapped_in_bacon",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:lamb_with_corn",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:bacon_with_eggs",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:goulash",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:beef_patty_with_vegetables",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:sausage_with_oat_patty",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:barley_patties_with_potatoes",
+      "required": false
+    },
     {
       "id": "brewery:sausage",
       "required": false
     },
-    "bakery:grilled_salmon_sandwich",
-    "bakery:grilled_bacon_sandwich",
-    "bakery:sandwich",
-    "aquaculture:arapaima",
-    "aquaculture:atlantic_halibut",
-    "aquaculture:atlantic_herring",
-    "aquaculture:bayad",
-    "aquaculture:bluegill",
-    "aquaculture:boulti",
-    "aquaculture:brown_trout",
-    "aquaculture:capitaine",
-    "aquaculture:carp",
-    "aquaculture:gar",
-    "aquaculture:muskellunge",
-    "aquaculture:pacific_halibut",
-    "aquaculture:perch",
-    "aquaculture:piranha",
-    "aquaculture:pollock",
-    "aquaculture:rainbow_trout",
-    "aquaculture:red_grouper",
-    "aquaculture:smallmouth_bass",
-    "aquaculture:sushi",
-    "aquaculture:synodontis",
-    "aquaculture:tambaqui",
-    "aquaculture:turtle_soup",
+    {
+      "id": "bakery:grilled_salmon_sandwich",
+      "required": false
+    },
+    {
+      "id": "bakery:grilled_bacon_sandwich",
+      "required": false
+    },
+    {
+      "id": "bakery:sandwich",
+      "required": false
+    },
+    {
+      "id": "aquaculture:arapaima",
+      "required": false
+    },
+    {
+      "id": "aquaculture:atlantic_halibut",
+      "required": false
+    },
+    {
+      "id": "aquaculture:atlantic_herring",
+      "required": false
+    },
+    {
+      "id": "aquaculture:bayad",
+      "required": false
+    },
+    {
+      "id": "aquaculture:bluegill",
+      "required": false
+    },
+    {
+      "id": "aquaculture:boulti",
+      "required": false
+    },
+    {
+      "id": "aquaculture:brown_trout",
+      "required": false
+    },
+    {
+      "id": "aquaculture:capitaine",
+      "required": false
+    },
+    {
+      "id": "aquaculture:carp",
+      "required": false
+    },
+    {
+      "id": "aquaculture:gar",
+      "required": false
+    },
+    {
+      "id": "aquaculture:muskellunge",
+      "required": false
+    },
+    {
+      "id": "aquaculture:pacific_halibut",
+      "required": false
+    },
+    {
+      "id": "aquaculture:perch",
+      "required": false
+    },
+    {
+      "id": "aquaculture:piranha",
+      "required": false
+    },
+    {
+      "id": "aquaculture:pollock",
+      "required": false
+    },
+    {
+      "id": "aquaculture:rainbow_trout",
+      "required": false
+    },
+    {
+      "id": "aquaculture:red_grouper",
+      "required": false
+    },
+    {
+      "id": "aquaculture:smallmouth_bass",
+      "required": false
+    },
+    {
+      "id": "aquaculture:sushi",
+      "required": false
+    },
+    {
+      "id": "aquaculture:synodontis",
+      "required": false
+    },
+    {
+      "id": "aquaculture:tambaqui",
+      "required": false
+    },
+    {
+      "id": "aquaculture:turtle_soup",
+      "required": false
+    },
     {
       "id": "ars_nouveau:source_berry_roll",
       "required": false
@@ -259,7 +565,10 @@
       "id": "expandeddelight:peanut",
       "required": false
     },
-    "farmersdelight:barbecue_stick",
+    {
+      "id": "farmersdelight:barbecue_stick",
+      "required": false
+    },
     {
       "id": "forbidden_arcanus:bat_soup",
       "required": false
@@ -513,50 +822,182 @@
       "id": "oceansdelight:tentacles",
       "required": false
     },
-    "pamhc2crops:peanutitem",
-    "pamhc2crops:roastedkohlrabiitem",
-    "pamhc2crops:roastedpeanutitem",
-    "pamhc2crops:roastedrhubarbitem",
-    "pamhc2crops:roastedscallionitem",
-    "pamhc2foodextended:bolognaitem",
-    "pamhc2foodextended:bratwurstitem",
-    "pamhc2foodextended:bulgogiitem",
-    "pamhc2foodextended:californiarollitem",
-    "pamhc2foodextended:charsiuitem",
-    "pamhc2foodextended:chikorollitem",
-    "pamhc2foodextended:chilidogitem",
-    "pamhc2foodextended:chorizoitem",
-    "pamhc2foodextended:cookedtofabbititem",
-    "pamhc2foodextended:cookedtofaconitem",
-    "pamhc2foodextended:cookedtofeakitem",
-    "pamhc2foodextended:cracklinsitem",
-    "pamhc2foodextended:footlongitem",
-    "pamhc2foodextended:grilledskewersitem",
-    "pamhc2foodextended:gyudonitem",
-    "pamhc2foodextended:haggisitem",
-    "pamhc2foodextended:hotwingsitem",
-    "pamhc2foodextended:pemmicanitem",
-    "pamhc2foodextended:rawtofabbititem",
-    "pamhc2foodextended:rawtofaconitem",
-    "pamhc2foodextended:rawtofeakitem",
-    "pamhc2foodextended:rawtofickenitem",
-    "pamhc2foodextended:sauerbratenitem",
-    "pamhc2foodextended:schnitzelitem",
-    "pamhc2foodextended:slawdogitem",
-    "pamhc2foodextended:springrollitem",
-    "pamhc2foodextended:suaderoitem",
-    "pamhc2foodextended:sundayroastitem",
-    "pamhc2foodextended:surfandturfitem",
-    "pamhc2foodextended:sushiitem",
-    "pamhc2trees:roastedacornitem",
-    "pamhc2trees:roastedalmonditem",
-    "pamhc2trees:roastedcashewitem",
-    "pamhc2trees:roastedchestnutitem",
-    "pamhc2trees:roastedhazelnutitem",
-    "pamhc2trees:roastedpecanitem",
-    "pamhc2trees:roastedpinenutitem",
-    "pamhc2trees:roastedpistachioitem",
-    "pamhc2trees:roastedwalnutitem",
+    {
+      "id": "pamhc2crops:peanutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:roastedkohlrabiitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:roastedpeanutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:roastedrhubarbitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:roastedscallionitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bolognaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bratwurstitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bulgogiitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:californiarollitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:charsiuitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chikorollitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chilidogitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chorizoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cookedtofabbititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cookedtofaconitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cookedtofeakitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cracklinsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:footlongitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grilledskewersitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gyudonitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:haggisitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:hotwingsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pemmicanitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rawtofabbititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rawtofaconitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rawtofeakitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rawtofickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sauerbratenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:schnitzelitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:slawdogitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:springrollitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:suaderoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sundayroastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:surfandturfitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sushiitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:roastedacornitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:roastedalmonditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:roastedcashewitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:roastedchestnutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:roastedhazelnutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:roastedpecanitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:roastedpinenutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:roastedpistachioitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:roastedwalnutitem",
+      "required": false
+    },
     {
       "id": "spawn:canned_herring",
       "required": false
@@ -689,10 +1130,22 @@
       "id": "undergardendelight:roasted_underbean_on_a_stick",
       "required": false
     },
-    "farmersdelight:steak_and_potatoes",
-    "pamhc2foodextended:misopasteitem",
-    "pamhc2foodextended:seedsoupitem",
-    "pamhc2foodextended:pambitsboxitem",
+    {
+      "id": "farmersdelight:steak_and_potatoes",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:misopasteitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:seedsoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pambitsboxitem",
+      "required": false
+    },
     {
       "id": "sushigocrafting:salmon_nigiri",
       "required": false
@@ -813,7 +1266,10 @@
       "id": "sushigocrafting:tobiko_tuna_cucumber_california",
       "required": false
     },
-    "farmersdelight:dog_food",
+    {
+      "id": "farmersdelight:dog_food",
+      "required": false
+    },
     {
       "id": "lendersdelight:improved_dog_food",
       "required": false
@@ -830,19 +1286,58 @@
       "id": "minecolonies:tofu",
       "required": false
     },
-    "pamhc2foodextended:firmtofuitem",
-    "pamhc2foodextended:silkentofuitem",
-    "pamhc2foodextended:rawtofuttonitem",
-    "pamhc2foodextended:cookedtofuttonitem",
-    "pamhc2foodextended:almondbutteritem",
-    "pamhc2foodextended:cashewbutteritem",
-    "pamhc2foodextended:chestnutbutteritem",
-    "pamhc2foodextended:hazelnutbutteritem",
-    "pamhc2foodextended:pecanbutteritem",
-    "pamhc2foodextended:pistachiobutteritem",
-    "pamhc2foodextended:walnutbutteritem",
-    "pamhc2foodextended:peanutbutterbananapancakesitem",
-    "pamhc2foodextended:peanutbutterbananasandwichitem",
+    {
+      "id": "pamhc2foodextended:firmtofuitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:silkentofuitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rawtofuttonitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cookedtofuttonitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:almondbutteritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cashewbutteritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chestnutbutteritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:hazelnutbutteritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pecanbutteritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pistachiobutteritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:walnutbutteritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peanutbutterbananapancakesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peanutbutterbananasandwichitem",
+      "required": false
+    },
     {
       "id": "farm_and_charm:baked_lamb_ham_block",
       "required": false
@@ -2237,6 +2732,138 @@
     },
     {
       "id": "croptopia:croque_monsieur",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:hoglin_loin",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:cooked_loin",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:fried_hoglin_chop",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:hoglin_sausage",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:minced_strider",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:strider_slice",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:hot_wings",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:hot_wings_bucket",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:hotdog",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:chilidog",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:roasted_sausage",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:spicy_skewer",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:red_loin_on_a_stick",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:bacon-wrapped_sausage_on_a_stick",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:boiled_egg",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:deviled_egg",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:scotch_eggs",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:giant_takoyaki",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:bleeding_tartar",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:blue_tenderloin_steak",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:breakfast_sampler",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:plate_of_stuffed_hoglin",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:plate_of_stuffed_hoglin_ham",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:plate_of_stuffed_hoglin_snout",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:strider_egg",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:enchanted_golden_egg",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:golden_egg",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:egg_soup",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:crimson_stroganoff",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:spicy_curry",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:strider_stew",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:spicy_hoglin_stew",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:dried_ghast_with_milk",
       "required": false
     }
   ]

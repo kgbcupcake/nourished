@@ -11,42 +11,150 @@
     "minecraft:melon_slice",
     "minecraft:sweet_berries",
     "minecraft:glow_berries",
-    "pamhc2foodcore:applesauceitem",
-    "pamhc2foodextended:strawberryjellysandwichitem",
-    "pamhc2foodcore:applejuiceitem",
-    "pamhc2foodcore:applesmoothieitem",
-    "pamhc2foodcore:applepopsicleitem",
-    "pamhc2foodcore:applejellyitem",
-    "pamhc2foodcore:applejellytoastitem",
-    "pamhc2foodcore:chorusjuiceitem",
-    "pamhc2foodcore:chorussmoothieitem",
-    "pamhc2foodcore:choruspopsicleitem",
-    "pamhc2foodcore:chorusjellyitem",
-    "pamhc2foodcore:chorusjellytoastitem",
-    "pamhc2foodcore:melonjuiceitem",
-    "pamhc2foodcore:melonsmoothieitem",
-    "pamhc2foodcore:melonpopsicleitem",
-    "pamhc2foodcore:melonjellyitem",
-    "pamhc2foodcore:melonjellytoastitem",
-    "pamhc2foodcore:sweetberryjuiceitem",
-    "pamhc2foodcore:sweetberrysmoothieitem",
-    "pamhc2foodcore:sweetberrypopsicleitem",
-    "pamhc2foodcore:sweetberryjellyitem",
-    "pamhc2foodcore:sweetberryjellytoastitem",
-    "pamhc2foodcore:glowberryjuiceitem",
-    "pamhc2foodcore:glowberrysmoothieitem",
-    "pamhc2foodcore:glowberrypopsicleitem",
-    "pamhc2foodcore:glowberryjellyitem",
-    "pamhc2foodcore:glowberryjellytoastitem",
-    "pamhc2foodcore:caramelappleitem",
-    "pamhc2foodcore:fruitsaladitem",
-    "pamhc2foodcore:fruitpunchitem",
-    "pamhc2foodcore:p8juiceitem",
-    "pamhc2foodcore:carrotjuiceitem",
-    "farm_and_charm:strawberry",
-    "farm_and_charm:strawberry_tea",
-    "farm_and_charm:nettle_tea",
-    "farm_and_charm:ribwort_tea",
+    {
+      "id": "pamhc2foodcore:applesauceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:applejuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:applesmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:applepopsicleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:applejellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:applejellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chorusjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chorussmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:choruspopsicleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chorusjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chorusjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:melonjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:melonsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:melonpopsicleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:melonjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:melonjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sweetberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sweetberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sweetberrypopsicleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sweetberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sweetberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:glowberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:glowberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:glowberrypopsicleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:glowberryjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:glowberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:caramelappleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:fruitsaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:fruitpunchitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:p8juiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:carrotjuiceitem",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:strawberry",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:strawberry_tea",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:nettle_tea",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:ribwort_tea",
+      "required": false
+    },
     {
       "id": "ars_nouveau:sourceberry_bush",
       "required": false
@@ -327,158 +435,614 @@
       "id": "herbsandharvest:pears_plate_plain",
       "required": false
     },
-    "pamhc2crops:blackberryitem",
-    "pamhc2crops:blueberryitem",
-    "pamhc2crops:candleberryitem",
-    "pamhc2crops:cantaloupeitem",
-    "pamhc2crops:cloudberryitem",
-    "pamhc2crops:cranberryitem",
-    "pamhc2crops:grapeitem",
-    "pamhc2crops:greengrapeitem",
-    "pamhc2crops:huckleberryitem",
-    "pamhc2crops:juniperberryitem",
-    "pamhc2crops:kiwiitem",
-    "pamhc2crops:mulberryitem",
-    "pamhc2crops:pineappleitem",
-    "pamhc2crops:raspberryitem",
-    "pamhc2crops:strawberryitem",
-    "pamhc2crops:wolfberryitem",
-    "pamhc2foodextended:applesnowitem",
-    "pamhc2foodextended:apricotjuiceitem",
-    "pamhc2foodextended:apricotsmoothieitem",
-    "pamhc2foodextended:bananajuiceitem",
-    "pamhc2foodextended:bananasmoothieitem",
-    "pamhc2foodextended:bananasplititem",
-    "pamhc2foodextended:bbqjackfruititem",
-    "pamhc2foodextended:blackberryjuiceitem",
-    "pamhc2foodextended:blackberrysmoothieitem",
-    "pamhc2foodextended:blueberryjuiceitem",
-    "pamhc2foodextended:blueberrysmoothieitem",
-    "pamhc2foodextended:candleberryjuiceitem",
-    "pamhc2foodextended:candleberrysmoothieitem",
-    "pamhc2foodextended:cantaloupejuiceitem",
-    "pamhc2foodextended:cantaloupesmoothieitem",
-    "pamhc2foodextended:cherryjuiceitem",
-    "pamhc2foodextended:cherrysmoothieitem",
-    "pamhc2foodextended:cherrysodaitem",
-    "pamhc2foodextended:cranberryjuiceitem",
-    "pamhc2foodextended:cranberrysauceitem",
-    "pamhc2foodextended:cranberrysmoothieitem",
-    "pamhc2foodextended:datejuiceitem",
-    "pamhc2foodextended:datesmoothieitem",
-    "pamhc2foodextended:durianjuiceitem",
-    "pamhc2foodextended:duriansmoothieitem",
-    "pamhc2foodextended:figjuiceitem",
-    "pamhc2foodextended:figsmoothieitem",
-    "pamhc2foodextended:gooseberryjuiceitem",
-    "pamhc2foodextended:gooseberrysmoothieitem",
-    "pamhc2foodextended:grapefruitjuiceitem",
-    "pamhc2foodextended:grapefruitsmoothieitem",
-    "pamhc2foodextended:grapefruitsodaitem",
-    "pamhc2foodextended:grapejuiceitem",
-    "pamhc2foodextended:grapesmoothieitem",
-    "pamhc2foodextended:grapesodaitem",
-    "pamhc2foodextended:greengrapejuiceitem",
-    "pamhc2foodextended:greengrapesmoothieitem",
-    "pamhc2foodextended:guavajuiceitem",
-    "pamhc2foodextended:guavasmoothieitem",
-    "pamhc2foodextended:huckleberryjuiceitem",
-    "pamhc2foodextended:huckleberrysmoothieitem",
-    "pamhc2foodextended:jackfruitjuiceitem",
-    "pamhc2foodextended:jackfruitsmoothieitem",
-    "pamhc2foodextended:juniperberryjuiceitem",
-    "pamhc2foodextended:juniperberrysmoothieitem",
-    "pamhc2foodextended:kiwijuiceitem",
-    "pamhc2foodextended:kiwismoothieitem",
-    "pamhc2foodextended:lemonaideitem",
-    "pamhc2foodextended:lemonjuiceitem",
-    "pamhc2foodextended:lemonlimesodaitem",
-    "pamhc2foodextended:lemonsmoothieitem",
-    "pamhc2foodextended:limejuiceitem",
-    "pamhc2foodextended:limesmoothieitem",
-    "pamhc2foodextended:lycheejuiceitem",
-    "pamhc2foodextended:lycheesmoothieitem",
-    "pamhc2foodextended:mangochutneyitem",
-    "pamhc2foodextended:mangojuiceitem",
-    "pamhc2foodextended:mangosmoothieitem",
-    "pamhc2foodextended:mulberryjuiceitem",
-    "pamhc2foodextended:mulberrysmoothieitem",
-    "pamhc2foodextended:orangejuiceitem",
-    "pamhc2foodextended:orangesmoothieitem",
-    "pamhc2foodextended:orangesodaitem",
-    "pamhc2foodextended:papayajuiceitem",
-    "pamhc2foodextended:papayasmoothieitem",
-    "pamhc2foodextended:passionfruitjuiceitem",
-    "pamhc2foodextended:passionfruitsmoothieitem",
-    "pamhc2foodextended:pawpawjuiceitem",
-    "pamhc2foodextended:pawpawsmoothieitem",
-    "pamhc2foodextended:peachjuiceitem",
-    "pamhc2foodextended:peachsmoothieitem",
-    "pamhc2foodextended:pearjuiceitem",
-    "pamhc2foodextended:pearsmoothieitem",
-    "pamhc2foodextended:persimmonjuiceitem",
-    "pamhc2foodextended:persimmonsmoothieitem",
-    "pamhc2foodextended:pineapplejuiceitem",
-    "pamhc2foodextended:pineapplesmoothieitem",
-    "pamhc2foodextended:plumjuiceitem",
-    "pamhc2foodextended:plumsmoothieitem",
-    "pamhc2foodextended:poachedpearitem",
-    "pamhc2foodextended:pomegranatejuiceitem",
-    "pamhc2foodextended:pomegranatesmoothieitem",
-    "pamhc2foodextended:rambutanjuiceitem",
-    "pamhc2foodextended:rambutansmoothieitem",
-    "pamhc2foodextended:raspberryjuiceitem",
-    "pamhc2foodextended:raspberrysmoothieitem",
-    "pamhc2foodextended:soursopjuiceitem",
-    "pamhc2foodextended:soursopsmoothieitem",
-    "pamhc2foodextended:starfruitjuiceitem",
-    "pamhc2foodextended:starfruitsmoothieitem",
-    "pamhc2foodextended:strawberryjuiceitem",
-    "pamhc2foodextended:strawberrysmoothieitem",
-    "pamhc2foodextended:strawberrysodaitem",
-    "pamhc2foodextended:tamarindjuiceitem",
-    "pamhc2foodextended:tamarindsmoothieitem",
-    "pamhc2trees:almonditem",
-    "pamhc2trees:apricotitem",
-    "pamhc2trees:avocadoitem",
-    "pamhc2trees:bananaitem",
-    "pamhc2trees:candlenutitem",
-    "pamhc2trees:cashewitem",
-    "pamhc2trees:cherryitem",
-    "pamhc2trees:chestnutitem",
-    "pamhc2trees:cinnamonitem",
-    "pamhc2trees:coconutitem",
-    "pamhc2trees:dateitem",
-    "pamhc2trees:durianitem",
-    "pamhc2trees:figitem",
-    "pamhc2trees:gooseberryitem",
-    "pamhc2trees:grapefruititem",
-    "pamhc2trees:guavaitem",
-    "pamhc2trees:hazelnutitem",
-    "pamhc2trees:jackfruititem",
-    "pamhc2trees:lemonitem",
-    "pamhc2trees:limeitem",
-    "pamhc2trees:lycheeitem",
-    "pamhc2trees:mangoitem",
-    "pamhc2trees:nutmegitem",
-    "pamhc2trees:oliveitem",
-    "pamhc2trees:orangeitem",
-    "pamhc2trees:papayaitem",
-    "pamhc2trees:passionfruititem",
-    "pamhc2trees:pawpawitem",
-    "pamhc2trees:peachitem",
-    "pamhc2trees:pearitem",
-    "pamhc2trees:pecanitem",
-    "pamhc2trees:persimmonitem",
-    "pamhc2trees:pinenutitem",
-    "pamhc2trees:pistachioitem",
-    "pamhc2trees:plumitem",
-    "pamhc2trees:pomegranateitem",
-    "pamhc2trees:rambutanitem",
-    "pamhc2trees:soursopitem",
-    "pamhc2trees:starfruititem",
-    "pamhc2trees:tamarinditem",
-    "pamhc2trees:walnutitem",
+    {
+      "id": "pamhc2crops:blackberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:blueberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:candleberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:cantaloupeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:cloudberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:cranberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:grapeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:greengrapeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:huckleberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:juniperberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:kiwiitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:mulberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:pineappleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:raspberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:strawberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:wolfberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:applesnowitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:apricotjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:apricotsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bananajuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bananasmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bananasplititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bbqjackfruititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blackberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blackberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blueberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blueberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:candleberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:candleberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cantaloupejuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cantaloupesmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cherryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cherrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cherrysodaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cranberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cranberrysauceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cranberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:datejuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:datesmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:durianjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:duriansmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:figjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:figsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gooseberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gooseberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapefruitjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapefruitsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapefruitsodaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapejuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapesmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapesodaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greengrapejuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greengrapesmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:guavajuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:guavasmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:huckleberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:huckleberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:jackfruitjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:jackfruitsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:juniperberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:juniperberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:kiwijuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:kiwismoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemonaideitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemonjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemonlimesodaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemonsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:limejuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:limesmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lycheejuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lycheesmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mangochutneyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mangojuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mangosmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mulberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mulberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:orangejuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:orangesmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:orangesodaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:papayajuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:papayasmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:passionfruitjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:passionfruitsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pawpawjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pawpawsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peachjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peachsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pearjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pearsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:persimmonjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:persimmonsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pineapplejuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pineapplesmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:plumjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:plumsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:poachedpearitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pomegranatejuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pomegranatesmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rambutanjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rambutansmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:raspberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:raspberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:soursopjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:soursopsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:starfruitjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:starfruitsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberryjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberrysmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberrysodaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tamarindjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tamarindsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:almonditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:apricotitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:avocadoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:bananaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:candlenutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:cashewitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:cherryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:chestnutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:cinnamonitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:coconutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:dateitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:durianitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:figitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:gooseberryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:grapefruititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:guavaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:hazelnutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:jackfruititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:lemonitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:limeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:lycheeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:mangoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:nutmegitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:oliveitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:orangeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:papayaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:passionfruititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:pawpawitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:peachitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:pearitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:pecanitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:persimmonitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:pinenutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:pistachioitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:plumitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:pomegranateitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:rambutanitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:soursopitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:starfruititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:tamarinditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:walnutitem",
+      "required": false
+    },
     {
       "id": "quark:ancient_fruit",
       "required": false
@@ -723,7 +1287,10 @@
       "id": "createfood:butterscotch_berries",
       "required": false
     },
-    "farmersdelight:glow_berry_custard",
+    {
+      "id": "farmersdelight:glow_berry_custard",
+      "required": false
+    },
     {
       "id": "expandeddelight:cranberry_goat_cheese_toast",
       "required": false

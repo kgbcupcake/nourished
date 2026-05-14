@@ -6,32 +6,109 @@
       "required": false
     },
     "minecraft:bread",
+    "minecraft:bread",
+    "minecraft:bread",
+    "minecraft:bread",
+    "minecraft:baked_potato",
+    "minecraft:baked_potato",
+    "minecraft:baked_potato",
     "minecraft:baked_potato",
     "minecraft:cookie",
-    "pamhc2foodextended:jambalayaitem",
-    "pamhc2foodcore:butteredbakedpotatoitem",
-    "pamhc2foodcore:mashedpotatoesitem",
-    "pamhc2foodcore:friesitem",
-    "pamhc2foodcore:potatochipsitem",
-    "pamhc2foodcore:sunflowerseedsitem",
-    "pamhc2foodcore:roastedsunflowerseedsitem",
-    "pamhc2foodcore:trailmixitem",
-    "farm_and_charm:corn",
-    "farm_and_charm:dough",
-    "farm_and_charm:raw_pasta",
-    "farm_and_charm:corn_grits",
-    "farm_and_charm:pasta_with_onion_sauce",
-    "farm_and_charm:oatmeal_with_strawberries",
+    "minecraft:cookie",
+    "minecraft:cookie",
+    "minecraft:cookie",
+    "minecraft:cake",
+    "minecraft:cake",
+    "minecraft:cake",
+    "minecraft:cake",
+    "minecraft:pumpkin_pie",
+    "minecraft:pumpkin_pie",
+    "minecraft:pumpkin_pie",
+    "minecraft:pumpkin_pie",
+    {
+      "id": "pamhc2foodextended:jambalayaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:butteredbakedpotatoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:mashedpotatoesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:friesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:potatochipsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sunflowerseedsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:roastedsunflowerseedsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:trailmixitem",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:corn",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:dough",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:raw_pasta",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:corn_grits",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:pasta_with_onion_sauce",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:oatmeal_with_strawberries",
+      "required": false
+    },
     {
       "id": "brewery:pretzel",
       "required": false
     },
-    "bakery:cake_dough",
-    "bakery:sweet_dough",
-    "bakery:croissant",
-    "bakery:misslilitu_biscuit",
-    "bakery:cornet",
-    "bakery:vegetable_sandwich",
+    {
+      "id": "bakery:cake_dough",
+      "required": false
+    },
+    {
+      "id": "bakery:sweet_dough",
+      "required": false
+    },
+    {
+      "id": "bakery:croissant",
+      "required": false
+    },
+    {
+      "id": "bakery:misslilitu_biscuit",
+      "required": false
+    },
+    {
+      "id": "bakery:cornet",
+      "required": false
+    },
+    {
+      "id": "bakery:vegetable_sandwich",
+      "required": false
+    },
     {
       "id": "actuallyadditions:coffee_cup",
       "required": false
@@ -80,8 +157,14 @@
       "id": "arsdelight:unstable_cocktail",
       "required": false
     },
-    "bakery:baguette",
-    "bakery:bun",
+    {
+      "id": "bakery:baguette",
+      "required": false
+    },
+    {
+      "id": "bakery:bun",
+      "required": false
+    },
     {
       "id": "bountifulfares:apple_cider_jar",
       "required": false
@@ -418,8 +501,14 @@
       "id": "expandeddelight:sweet_berry_jelly_sandwich",
       "required": false
     },
-    "farm_and_charm:farmers_breakfast",
-    "farmersdelight:apple_cider",
+    {
+      "id": "farm_and_charm:farmers_breakfast",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:apple_cider",
+      "required": false
+    },
     {
       "id": "fruitsdelight:bellini_cocktail",
       "required": false
@@ -604,183 +693,714 @@
       "id": "moredelight:toast_with_sweet_berries",
       "required": false
     },
-    "pamhc2crops:agaveitem",
-    "pamhc2crops:alfalfaitem",
-    "pamhc2crops:cattailitem",
-    "pamhc2crops:coffeebeanitem",
-    "pamhc2crops:hotcoffeeitem",
-    "pamhc2crops:hotnettleteaitem",
-    "pamhc2crops:hotteaitem",
-    "pamhc2crops:nettlesitem",
-    "pamhc2crops:papyrusitem",
-    "pamhc2crops:peasitem",
-    "pamhc2crops:tealeafitem",
-    "pamhc2foodcore:applemuffinitem",
-    "pamhc2foodcore:glowberrymuffinitem",
-    "pamhc2foodcore:melonmuffinitem",
-    "pamhc2foodcore:sweetberrymuffinitem",
-    "pamhc2foodextended:aebleskiversitem",
-    "pamhc2foodextended:applecideritem",
-    "pamhc2foodextended:applejellysandwichitem",
-    "pamhc2foodextended:apricotjellysandwichitem",
-    "pamhc2foodextended:apricotjellytoastitem",
-    "pamhc2foodextended:avocadoburritoitem",
-    "pamhc2foodextended:avocadotoastitem",
-    "pamhc2foodextended:bakedbeansitem",
-    "pamhc2foodextended:bananajellysandwichitem",
-    "pamhc2foodextended:bananajellytoastitem",
-    "pamhc2foodextended:banananutbreaditem",
-    "pamhc2foodextended:bentoboxitem",
-    "pamhc2foodextended:bibimbapitem",
-    "pamhc2foodextended:blackberryjellysandwichitem",
-    "pamhc2foodextended:blackberryjellytoastitem",
-    "pamhc2foodextended:blueberryjellysandwichitem",
-    "pamhc2foodextended:blueberryjellytoastitem",
-    "pamhc2foodextended:breadfruitjellyitem",
-    "pamhc2foodextended:breadfruitjellysandwichitem",
-    "pamhc2foodextended:breadfruitjellytoastitem",
-    "pamhc2foodextended:breadfruitjuiceitem",
-    "pamhc2foodextended:breadfruitpieitem",
-    "pamhc2foodextended:breadfruitsmoothieitem",
-    "pamhc2foodextended:briochebunitem",
-    "pamhc2foodextended:cactusfruitjellysandwichitem",
-    "pamhc2foodextended:cactusfruitjellytoastitem",
-    "pamhc2foodextended:candleberryjellysandwichitem",
-    "pamhc2foodextended:candleberryjellytoastitem",
-    "pamhc2foodextended:chaiteaitem",
-    "pamhc2foodextended:cherryjellysandwichitem",
-    "pamhc2foodextended:cherryjellytoastitem",
-    "pamhc2foodextended:chimichangaitem",
-    "pamhc2foodextended:chipsanddipitem",
-    "pamhc2foodextended:chipsandsalsaitem",
-    "pamhc2foodextended:chocolateorangebiscuititem",
-    "pamhc2foodextended:cinnamonappleoatmealitem",
-    "pamhc2foodextended:coffeeconlecheitem",
-    "pamhc2foodextended:cookoutmealitem",
-    "pamhc2foodextended:couscousitem",
-    "pamhc2foodextended:cranberryjellysandwichitem",
-    "pamhc2foodextended:cranberryjellytoastitem",
-    "pamhc2foodextended:croissantitem",
-    "pamhc2foodextended:curryitem",
-    "pamhc2foodextended:damperitem",
-    "pamhc2foodextended:dandelionteaitem",
-    "pamhc2foodextended:datejellysandwichitem",
-    "pamhc2foodextended:datejellytoastitem",
-    "pamhc2foodextended:delightedmealitem",
-    "pamhc2foodextended:deluxenachoesitem",
-    "pamhc2foodextended:dhalitem",
-    "pamhc2foodextended:dimsumitem",
-    "pamhc2foodextended:driedsoupitem",
-    "pamhc2foodextended:earlgreyteaitem",
-    "pamhc2foodextended:elderberryjellysandwichitem",
-    "pamhc2foodextended:elderberryjellytoastitem",
-    "pamhc2foodextended:enchiladaitem",
-    "pamhc2foodextended:espressoitem",
-    "pamhc2foodextended:fiestacornsaladitem",
-    "pamhc2foodextended:figbaritem",
-    "pamhc2foodextended:figjellysandwichitem",
-    "pamhc2foodextended:figjellytoastitem",
-    "pamhc2foodextended:friedfeastitem",
-    "pamhc2foodextended:futomakiitem",
-    "pamhc2foodextended:gherkinitem",
-    "pamhc2foodextended:gooseberryjellysandwichitem",
-    "pamhc2foodextended:gooseberryjellytoastitem",
-    "pamhc2foodextended:grapefruitjellysandwichitem",
-    "pamhc2foodextended:grapefruitjellytoastitem",
-    "pamhc2foodextended:grapejellysandwichitem",
-    "pamhc2foodextended:grapejellytoastitem",
-    "pamhc2foodextended:greenbeancasseroleitem",
-    "pamhc2foodextended:greengrapejellysandwichitem",
-    "pamhc2foodextended:greengrapejellytoastitem",
-    "pamhc2foodextended:greenteaitem",
-    "pamhc2foodextended:gritsitem",
-    "pamhc2foodextended:guavajellysandwichitem",
-    "pamhc2foodextended:guavajellytoastitem",
-    "pamhc2foodextended:guisoitem",
-    "pamhc2foodextended:hashitem",
-    "pamhc2foodextended:hazelnutcoffeeitem",
-    "pamhc2foodextended:heartybreakfastitem",
-    "pamhc2foodextended:huckleberryjellysandwichitem",
-    "pamhc2foodextended:huckleberryjellytoastitem",
-    "pamhc2foodextended:hummusitem",
-    "pamhc2foodextended:jackfruitjellysandwichitem",
-    "pamhc2foodextended:jackfruitjellytoastitem",
-    "pamhc2foodextended:juniperberryjellysandwichitem",
-    "pamhc2foodextended:juniperberryjellytoastitem",
-    "pamhc2foodextended:lasagnaitem",
-    "pamhc2foodextended:lemonjellysandwichitem",
-    "pamhc2foodextended:lemonjellytoastitem",
-    "pamhc2foodextended:limejellysandwichitem",
-    "pamhc2foodextended:limejellytoastitem",
-    "pamhc2foodextended:lycheejellysandwichitem",
-    "pamhc2foodextended:lycheejellytoastitem",
-    "pamhc2foodextended:mangojellysandwichitem",
-    "pamhc2foodextended:mangojellytoastitem",
-    "pamhc2foodextended:meesuaitem",
-    "pamhc2foodextended:melonjellysandwichitem",
-    "pamhc2foodextended:mettbrotchenitem",
-    "pamhc2foodextended:mulberryjellysandwichitem",
-    "pamhc2foodextended:mulberryjellytoastitem",
-    "pamhc2foodextended:museliitem",
-    "pamhc2foodextended:musubiitem",
-    "pamhc2foodextended:naanitem",
-    "pamhc2foodextended:nachoesitem",
-    "pamhc2foodextended:okrachipsitem",
-    "pamhc2foodextended:onigiriitem",
-    "pamhc2foodextended:orangejellysandwichitem",
-    "pamhc2foodextended:orangejellytoastitem",
-    "pamhc2foodextended:padthaiitem",
-    "pamhc2foodextended:papayajellysandwichitem",
-    "pamhc2foodextended:papayajellytoastitem",
-    "pamhc2foodextended:passionfruitjellysandwichitem",
-    "pamhc2foodextended:passionfruitjellytoastitem",
-    "pamhc2foodextended:peachjellysandwichitem",
-    "pamhc2foodextended:peachjellytoastitem",
-    "pamhc2foodextended:pearjellysandwichitem",
-    "pamhc2foodextended:pearjellytoastitem",
-    "pamhc2foodextended:phoitem",
-    "pamhc2foodextended:picklesitem",
-    "pamhc2foodextended:pinacoladaitem",
-    "pamhc2foodextended:pineapplejellysandwichitem",
-    "pamhc2foodextended:pineapplejellytoastitem",
-    "pamhc2foodextended:ploughmanslunchitem",
-    "pamhc2foodextended:plumjellysandwichitem",
-    "pamhc2foodextended:plumjellytoastitem",
-    "pamhc2foodextended:pokebowlitem",
-    "pamhc2foodextended:pomegranatejellysandwichitem",
-    "pamhc2foodextended:pomegranatejellytoastitem",
-    "pamhc2foodextended:potstickersitem",
-    "pamhc2foodextended:quesadillaitem",
-    "pamhc2foodextended:rainbowcurryitem",
-    "pamhc2foodextended:rambutanjellysandwichitem",
-    "pamhc2foodextended:rambutanjellytoastitem",
-    "pamhc2foodextended:ramenitem",
-    "pamhc2foodextended:raspberryjellysandwichitem",
-    "pamhc2foodextended:raspberryjellytoastitem",
-    "pamhc2foodextended:refriedbeansitem",
-    "pamhc2foodextended:rootbeersodaitem",
-    "pamhc2foodextended:rosepetalteaitem",
-    "pamhc2foodextended:southernstylebreakfastitem",
-    "pamhc2foodextended:spagettiitem",
-    "pamhc2foodextended:spaghettidinneritem",
-    "pamhc2foodextended:spicebunitem",
-    "pamhc2foodextended:splitpeasoupitem",
-    "pamhc2foodextended:starfruitjellysandwichitem",
-    "pamhc2foodextended:starfruitjellytoastitem",
-    "pamhc2foodextended:strawberryjellytoastitem",
-    "pamhc2foodextended:succotashitem",
-    "pamhc2foodextended:sundayhighteaitem",
-    "pamhc2foodextended:sweetberryjellysandwichitem",
-    "pamhc2foodextended:tamarindjellysandwichitem",
-    "pamhc2foodextended:tamarindjellytoastitem",
-    "pamhc2foodextended:tatertotsitem",
-    "pamhc2foodextended:tiropitaitem",
-    "pamhc2foodextended:vindalooitem",
-    "pamhc2foodextended:walnutraisinbreaditem",
-    "pamhc2foodextended:weekendpicnicitem",
-    "pamhc2foodextended:wontonsoupitem",
-    "pamhc2trees:acornitem",
-    "pamhc2trees:breadfruititem",
+    {
+      "id": "pamhc2crops:agaveitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:alfalfaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:cattailitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:coffeebeanitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:hotcoffeeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:hotnettleteaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:hotteaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:nettlesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:papyrusitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:peasitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:tealeafitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:applemuffinitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:glowberrymuffinitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:melonmuffinitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sweetberrymuffinitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:aebleskiversitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:applecideritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:applejellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:apricotjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:apricotjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:avocadoburritoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:avocadotoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bakedbeansitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bananajellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bananajellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:banananutbreaditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bentoboxitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bibimbapitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blackberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blackberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blueberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blueberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:breadfruitjellyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:breadfruitjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:breadfruitjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:breadfruitjuiceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:breadfruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:breadfruitsmoothieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:briochebunitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cactusfruitjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cactusfruitjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:candleberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:candleberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chaiteaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cherryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cherryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chimichangaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chipsanddipitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chipsandsalsaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chocolateorangebiscuititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cinnamonappleoatmealitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:coffeeconlecheitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cookoutmealitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:couscousitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cranberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cranberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:croissantitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:curryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:damperitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:dandelionteaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:datejellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:datejellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:delightedmealitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:deluxenachoesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:dhalitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:dimsumitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:driedsoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:earlgreyteaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:elderberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:elderberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:enchiladaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:espressoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:fiestacornsaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:figbaritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:figjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:figjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:friedfeastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:futomakiitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gherkinitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gooseberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gooseberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapefruitjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapefruitjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapejellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapejellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greenbeancasseroleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greengrapejellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greengrapejellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greenteaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gritsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:guavajellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:guavajellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:guisoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:hashitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:hazelnutcoffeeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:heartybreakfastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:huckleberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:huckleberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:hummusitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:jackfruitjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:jackfruitjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:juniperberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:juniperberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lasagnaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemonjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemonjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:limejellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:limejellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lycheejellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lycheejellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mangojellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mangojellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:meesuaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:melonjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mettbrotchenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mulberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mulberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:museliitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:musubiitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:naanitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:nachoesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:okrachipsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:onigiriitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:orangejellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:orangejellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:padthaiitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:papayajellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:papayajellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:passionfruitjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:passionfruitjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peachjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peachjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pearjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pearjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:phoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:picklesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pinacoladaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pineapplejellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pineapplejellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:ploughmanslunchitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:plumjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:plumjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pokebowlitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pomegranatejellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pomegranatejellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:potstickersitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:quesadillaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rainbowcurryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rambutanjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rambutanjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:ramenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:raspberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:raspberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:refriedbeansitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rootbeersodaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rosepetalteaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:southernstylebreakfastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:spagettiitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:spaghettidinneritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:spicebunitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:splitpeasoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:starfruitjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:starfruitjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:succotashitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sundayhighteaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sweetberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tamarindjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tamarindjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tatertotsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tiropitaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:vindalooitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:walnutraisinbreaditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:weekendpicnicitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:wontonsoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:acornitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:breadfruititem",
+      "required": false
+    },
     {
       "id": "pneumaticcraft:chips",
       "required": false
@@ -853,8 +1473,14 @@
       "id": "croptopia:roasted_sunflower_seeds",
       "required": false
     },
-    "pamhc2foodextended:peachesandcreamoatmealitem",
-    "pamhc2foodcore:cocoapowderitem",
+    {
+      "id": "pamhc2foodextended:peachesandcreamoatmealitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:cocoapowderitem",
+      "required": false
+    },
     {
       "id": "vinery:aegis_wine",
       "required": false
@@ -1029,6 +1655,46 @@
     },
     {
       "id": "bakery:bread_with_jam",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:ghast_dough",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:ghast_sourdough",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:ghasta",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:fries_ghasta",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:slices_of_bread",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:toasts",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:burnt_roll",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:crimson_stroganoff",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:spicy_noodle_soup",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:nether_burger",
       "required": false
     }
   ]
