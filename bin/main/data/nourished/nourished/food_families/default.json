@@ -1,0 +1,20 @@
+{
+  "nourished_schema_version": 1,
+  "families": {
+    "berry": ["berry", "berries", "strawberry", "blueberry", "raspberry", "blackberry", "cranberry", "goji"],
+    "citrus": ["orange", "lemon", "lime", "grapefruit", "citrus", "tangerine", "mandarin"],
+    "apple": ["apple", "cider"],
+    "melon": ["melon", "watermelon", "cantaloupe", "honeydew"],
+    "tropical": ["banana", "mango", "pineapple", "coconut", "papaya", "kiwi", "passion"],
+    "stone_fruit": ["peach", "plum", "cherry", "apricot", "nectarine"],
+    "fish": ["fish", "salmon", "cod", "tuna", "trout", "bass", "carp", "mackerel", "sardine", "anchov"],
+    "shellfish": ["shrimp", "crab", "lobster", "clam", "mussel", "oyster", "scallop", "prawn"],
+    "poultry": ["chicken", "turkey", "duck", "goose", "poultry", "fowl"],
+    "red_meat": ["beef", "steak", "pork", "lamb", "mutton", "venison", "bison"],
+    "mushroom": ["mushroom", "fungus", "truffle", "shroom", "chanterelle", "morel", "portobello"],
+    "bread": ["bread", "loaf", "baguette", "roll", "bun", "toast", "sourdough"],
+    "pasta": ["pasta", "noodle", "spaghetti", "macaroni", "lasagna", "ravioli", "ramen", "udon"],
+    "rice": ["rice", "risotto", "sushi"],
+    "leafy_green": ["lettuce", "spinach", "kale", "cabbage", "chard", "arugula", "salad"]
+  }
+}

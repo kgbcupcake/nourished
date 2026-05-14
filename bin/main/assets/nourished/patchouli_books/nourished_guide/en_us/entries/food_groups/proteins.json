@@ -1,0 +1,45 @@
+{
+  "name": "Proteins",
+  "category": "nourished:food_groups",
+  "icon": "minecraft:cooked_beef",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:cooked_beef",
+      "title": "Proteins",
+      "text": "Proteins are rich, sustaining foods. $(#e05252)Penalty:$() reduced attack damage when depleted. $(#52c252)Bonus:$() increased max health when maintained. Cooked meats and fish are your primary sources."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Vanilla Meat Sources",
+      "text": "$(bold)Cooked Beef$() — highest nutrition of vanilla meats; keep a cow farm.\n$(bold)Cooked Porkchop$() — nearly equal to beef; pigs breed quickly.\n$(bold)Cooked Chicken$() — lower nutrition but very common and fast to farm.\n$(bold)Cooked Mutton$() — solid mid-tier protein from sheep.\n$(bold)Cooked Rabbit$() — lower yield but easy to obtain in the wild early on."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Fish Sources",
+      "text": "$(bold)Cooked Salmon$() and $(bold)Cooked Cod$() are excellent early-game proteins available near any river or ocean before you have an animal farm established.\n\nFishing also yields $(bold)Tropical Fish$() which counts as Proteins, though it has low nutrition. Use it as a supplement rather than a primary source."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "minecraft:cooked_salmon",
+      "title": "Proteins — Fish",
+      "text": "Cooked salmon and cod are excellent protein sources and easy to obtain near any river or ocean. A fishing rod from early game makes this group trivial to maintain before any farm is built.\n\nAuto-fishing farms are very effective for this group if you want a fully passive protein supply."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Non-Meat Proteins",
+      "text": "Not all proteins come from animals. Several plant-based and processed foods also count:\n\n$(bold)Cooked Chicken Egg$() (if enabled) — high nutrition density.\n$(bold)Mushroom Stew$() — counts as Proteins in many configurations.\n\nCheck tooltips on any food item to confirm which group it belongs to on your server."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Farming Tips",
+      "text": "A cow, pig, and chicken pen near your base covers three distinct protein families at once. Breed them regularly — you want a surplus, not just enough to survive.\n\nIf you are playing early-game without a farm, keep a fishing rod ready. Fishing covers Proteins reliably with no infrastructure required and also produces bonus loot."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Rotation Strategy",
+      "text": "Each animal type is its own protein family. Eating beef, then porkchop, then chicken gives better returns than eating three steaks in a row.\n\nFish counts as a separate family from land meat — switching between a cooked salmon and cooked beef at the same meal is an easy way to avoid diminishing returns on both."
+    }
+  ]
+}

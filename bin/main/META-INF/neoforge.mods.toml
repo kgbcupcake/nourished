@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="nourished"
+version="${file.jarVersion}"
+displayName="Nourished"
+authors="Marie"
+description='''
+Nourished adds a lightweight but sophisticated nutrition system to Minecraft that rewards dietary variety with meaningful gameplay benefits. Track six food groups, manage diminishing returns, and keep your diet balanced to earn passive bonuses.
+'''
+displayURL="https://modrinth.com/mod/nourished"
+logoFile="nourished_icon.png"
+
+[[dependencies.nourished]]
+    modId="neoforge"
+    type="required"
+    versionRange="[21.1,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.nourished]]
+    modId="minecraft"
+    type="required"
+    versionRange="[1.21.1,)"
+    ordering="NONE"
+    side="BOTH"

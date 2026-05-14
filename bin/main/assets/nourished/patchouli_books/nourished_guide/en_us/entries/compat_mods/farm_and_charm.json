@@ -1,0 +1,34 @@
+{
+  "name": "Farm & Charm",
+  "category": "nourished:compat_mods",
+  "icon": "farm_and_charm:tomato",
+  "flag": "mod:farm_and_charm",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Farm & Charm",
+      "text": "Farm & Charm adds a cozy farming and cooking experience with new crops, animals, and processed foods. It integrates deeply with Nourished, expanding $(bold)Vegetables$() and $(bold)Grains$() the most, with smaller contributions to Fruits and Proteins."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Vegetables — Farm & Charm",
+      "text": "Key Farm & Charm vegetables:\n\n$(bold)Tomato$() — fast-growing; distinct family from root vegetables.\n$(bold)Onion$() — quick crop; allium family.\n$(bold)Pepper$() — nightshade family alongside tomatoes.\n$(bold)Pumpkin$() (new variants) — expands the squash family.\n$(bold)Leek / Radish$() — root vegetables distinct from carrot and potato."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Grains — Farm & Charm",
+      "text": "Farm & Charm adds new grain options:\n\n$(bold)Oats$() — a distinct grain family; can be used in porridge recipes.\n$(bold)Rye Bread$() — made from rye flour; higher nutrition than wheat bread.\n$(bold)Cornbread$() — requires corn; another distinct baked grain family.\n\nThese give Grains more rotation depth and make it easier to avoid diminishing returns on plain wheat bread."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Processed Foods",
+      "text": "Farm & Charm's cooking system produces multi-ingredient meals that often provide higher nutrition than their raw components and may count for $(bold)multiple food groups at once$(). \n\nA vegetable stew might cover Vegetables and Grains in one item. Check tooltips on cooked meals to see all groups they contribute to — meals are often more efficient than eating ingredients separately."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Getting Started",
+      "text": "The earliest Farm & Charm crops to plant for Nourished are $(bold)tomatoes$() and $(bold)onions$() — both fast-growing and immediately useful for expanding Vegetable rotation.\n\nOnce you have a cooking station, prioritize recipes that cover multiple groups. A single stew that covers Vegetables + Proteins is more inventory-efficient than carrying separate items for each group."
+    }
+  ]
+}

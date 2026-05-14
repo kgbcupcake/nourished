@@ -1,0 +1,18 @@
+{
+  "name": "Notifications",
+  "category": "nourished:getting_started",
+  "icon": "minecraft:bell",
+  "sortnum": 6,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Critical Toasts",
+      "text": "When a food group drops critically low, Nourished sends a $(#e05252)toast notification$() in the top-right corner of your screen.\n\nToasts appear once per group when they cross the critical threshold — pay attention to them or your stats will suffer."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Staying Ahead",
+      "text": "You can disable notifications in the mod's config if you prefer to manage nutrition manually.\n\nThe HUD mini bars will still change color as groups reach critical levels, giving you a passive visual warning at all times."
+    }
+  ]
+}

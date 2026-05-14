@@ -1,0 +1,18 @@
+{
+  "name": "Food Families",
+  "category": "nourished:how_it_works",
+  "icon": "minecraft:apple",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Food Families",
+      "text": "Within each food group, foods are organized into $(bold)families$(). For example, all apple-type foods share the Apple family. Eating within the same family triggers diminishing returns faster than switching to a different family in the same group."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Why It Matters",
+      "text": "You can check a food's family in its tooltip. Ideally you want to rotate across $(bold)multiple families$() within each group, not just multiple foods.\n\nEating an apple, then a golden apple, then an enchanted golden apple is still all Apple family — variety means switching to melons or berries instead."
+    }
+  ]
+}

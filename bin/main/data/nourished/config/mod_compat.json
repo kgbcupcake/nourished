@@ -1,0 +1,17 @@
+{
+  "integrations": [
+    {
+      "modId": "solonion",
+      "heavyMealNutritionThreshold": 6,
+      "notes": "SOL:O uses nutrition-based Full-Course Meal categorization instead of item tags"
+    },
+    {
+      "modId": "legendarysurvivaloverhaul",
+      "notes": "LSO conflict: disable effects to avoid interaction with LSO's own effect system"
+    },
+    {
+      "modId": "peakstamina",
+      "notes": "Peak Stamina compat: stamina usage and penalty decay multipliers"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "Multiplayer & Adventure",
+  "category": "nourished:tips_and_tricks",
+  "icon": "minecraft:compass",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Traveling Far from Base",
+      "text": "When leaving base for extended exploration, pack food from all six groups — not just your usual hunger food. A nutrition emergency two thousand blocks from home is much worse than one in your base.\n\nA good travel kit: cooked beef, carrot, apple, bread, honey bottle, and a milk bucket. That covers all six groups in six inventory slots."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Shared Farms",
+      "text": "In multiplayer, a shared farm benefits everyone. Consider assigning different players to maintain different groups:\n\n$(bold)Farmer$() — wheat, carrots, potatoes, beetroot.\n$(bold)Rancher$() — cows, pigs, chickens, bees.\n$(bold)Forager$() — collects wild fruits, mushrooms, fishing.\n\nA well-organized community farm makes Nourished invisible for the whole server."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Long Dungeon Runs",
+      "text": "For long dungeon or nether runs where you cannot eat freely between fights, prioritize $(bold)pre-loading$() your bars before entering:\n\n— All six groups above 60%\n— Proteins and Dairy at or above bonus threshold\n— Milk bucket in hotbar for emergency debuff clear\n\nBars decay slowly enough that a two-hour session rarely causes a problem if you start fully topped up."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Trading for Nutrition",
+      "text": "Village trading is an underrated nutrition tool. Farmer villagers often sell:\n\n$(bold)Bread$() — cheap Grains in bulk.\n$(bold)Apple$() — easy early Fruits.\n$(bold)Cooked Chicken$() — decent Proteins trade.\n$(bold)Pumpkin Pie$() — excellent value Grains.\n\nEarly-game trading can cover multiple nutrition groups before your own farm is established."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Casual",
+  "description": "Slow decay, forgiving thresholds, and nutrition effects off for a relaxed play style.",
+  "author": "Nourished",
+  "locked": false,
+  "values": {
+    "decayRate": 0.025,
+    "criticalThreshold": 0.2,
+    "lowThreshold": 0.35,
+    "excessThreshold": 0.92,
+    "defaultEffectDurationTicks": 100,
+    "enableDecay": true,
+    "enableEffects": false
+  }
+}

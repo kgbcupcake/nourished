@@ -1,0 +1,39 @@
+{
+  "name": "Pam's HarvestCraft 2",
+  "category": "nourished:compat_mods",
+  "icon": "pamhc2crops:strawberryitem",
+  "flag": "mod:pamhc2crops",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Pam's HarvestCraft 2",
+      "text": "Pam's HarvestCraft 2 is one of the largest food content mods available, adding hundreds of crops, trees, and recipes across every food group. With Pam's installed, every Nourished group has so many options that diminishing returns become almost impossible to trigger."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Fruits — Pam's",
+      "text": "Pam's adds an enormous fruit roster — strawberries, raspberries, blueberries, blackberries, grapes, mangoes, papayas, figs, dates, and many more. Each is a distinct family.\n\nWith this many fruit options, the Fruits bar is one of the easiest to maintain. Grow a small orchard of 4–5 different fruit trees and you will never need to think about this group again."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Vegetables — Pam's",
+      "text": "Pam's vegetable list is equally massive — corn, tomatoes, peppers, cucumbers, zucchini, eggplant, leeks, scallions, and dozens more. Most are fast-growing row crops.\n\nA Pam's vegetable garden covering 6–8 different crops will completely eliminate any risk of diminishing returns on Vegetables and keep the bar perpetually full."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Proteins & Dairy — Pam's",
+      "text": "Pam's expands animal products significantly:\n\n$(bold)Proteins:$() tofu, various nut-based proteins, additional fish varieties, and egg dishes provide plant-based alternatives to meat.\n$(bold)Dairy:$() butter, cheese, cream, and yoghurt give the Dairy group rotation options comparable to what Herbs & Harvest provides — multiple distinct families beyond plain milk."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Grains & Sugars — Pam's",
+      "text": "$(bold)Grains:$() Pam's adds oats, rye, corn flour, and a range of baked goods — muffins, pies, pancakes — each a distinct grain family.\n\n$(bold)Sugars:$() maple syrup, jam, and candy items join honey as high-value sugar sources. Maple syrup in particular has excellent nutrition density and is worth setting up a maple tree farm for."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Getting Started",
+      "text": "With hundreds of options, the risk with Pam's is $(bold)analysis paralysis$() — too many choices leading to no clear plan. Keep it simple:\n\nPick $(bold)one crop per group$() to start with and build from there. A strawberry bush, a tomato plant, some oat seeds, and a cheese recipe covers four groups immediately and gives you a foundation to expand from."
+    }
+  ]
+}

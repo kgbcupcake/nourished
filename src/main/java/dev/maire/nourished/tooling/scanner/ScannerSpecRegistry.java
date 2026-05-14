@@ -163,8 +163,8 @@ public final class ScannerSpecRegistry {
         Map<String, Map<String, Float>> communityTags = parseStringFloatMap(getObj(root, "community_tags"));
         Map<String, Map<String, Float>> namespaces = parseStringFloatMap(getObj(root, "namespaces"));
         Map<String, Map<String, Float>> suffixes = parseStringFloatMap(getObj(root, "suffixes"));
-        Map<String, Map<String, Float>> keywords = parseStringFloatMap(getObj(root, "keywords"));
-        Map<String, Map<String, Float>> negatives = parseStringFloatMap(getObj(root, "negative_keywords"));
+        Map<String, Map<String, Float>> keywords = FoodTokenStemmer.stemMapKeys(parseStringFloatMap(getObj(root, "keywords")));
+        Map<String, Map<String, Float>> negatives = FoodTokenStemmer.stemMapKeys(parseStringFloatMap(getObj(root, "negative_keywords")));
         List<ArchetypePattern> archetypes = parseArchetypes(getArr(root, "archetypes"));
 
         return new ScannerSpec(mult, heur, communityTags, namespaces, suffixes, keywords, negatives, archetypes);

@@ -1,0 +1,10 @@
+{
+  "nourished_schema_version": 1,
+  "display_name": "Sugars",
+  "color": -2099927,
+  "default_decay_rate": 0.001,
+  "critical_threshold": 0.1,
+  "low_threshold": 0.3,
+  "excess_threshold": 0.9,
+  "icon": "minecraft:cake"
+}

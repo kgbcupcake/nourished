@@ -1,0 +1,22 @@
+{
+  "name": "The HUD",
+  "category": "nourished:getting_started",
+  "icon": "minecraft:filled_map",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:image",
+      "title": "Nutrition HUD",
+      "images": [
+        "nourished:textures/patchouli/mini_gui.png"
+      ],
+      "border": true,
+      "text": "The mini HUD displays your current nutrition levels at a glance."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Edit Mode",
+      "text": "Press $(bold)H$() to enter $(bold)edit mode$(). In edit mode you can drag the HUD to any position on your screen.\n\nPress $(bold)H$() again to lock it back in place. Your position is saved between sessions."
+    }
+  ]
+}

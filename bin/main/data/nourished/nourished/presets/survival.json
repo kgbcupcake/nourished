@@ -1,0 +1,15 @@
+{
+  "name": "Survival",
+  "description": "Default balanced experience matching mod defaults.",
+  "author": "Nourished",
+  "locked": false,
+  "values": {
+    "decayRate": 0.1,
+    "criticalThreshold": 0.25,
+    "lowThreshold": 0.4,
+    "excessThreshold": 0.9,
+    "defaultEffectDurationTicks": 140,
+    "enableDecay": true,
+    "enableEffects": true
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Hardcore",
+  "description": "Fast decay, strict thresholds, longer effect durations, and all nutrition-driven effects enabled.",
+  "author": "Nourished",
+  "locked": false,
+  "values": {
+    "decayRate": 0.28,
+    "criticalThreshold": 0.35,
+    "lowThreshold": 0.52,
+    "excessThreshold": 0.82,
+    "defaultEffectDurationTicks": 300,
+    "enableDecay": true,
+    "enableEffects": true
+  }
+}

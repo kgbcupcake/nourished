@@ -241,11 +241,12 @@ public final class FoodClassifier {
         String[] tokens = path.toLowerCase().split("_");
 
         for (String token : tokens) {
-            String cleaned = token.replaceAll("item$", "");
-            Map<String, Float> weights = keywordWeights.get(cleaned);
-            if (weights != null) {
-                for (Map.Entry<String, Float> e : weights.entrySet()) {
-                    contributions.merge(e.getKey(), e.getValue(), Float::sum);
+            for (String root : FoodTokenStemmer.stemAll(token)) {
+                Map<String, Float> weights = keywordWeights.get(root);
+                if (weights != null) {
+                    for (Map.Entry<String, Float> e : weights.entrySet()) {
+                        contributions.merge(e.getKey(), e.getValue(), Float::sum);
+                    }
                 }
             }
         }
@@ -260,11 +261,12 @@ public final class FoodClassifier {
         String[] tokens = path.toLowerCase().split("_");
 
         for (String token : tokens) {
-            String cleaned = token.replaceAll("item$", "");
-            Map<String, Float> weights = negativeKeywords.get(cleaned);
-            if (weights != null) {
-                for (Map.Entry<String, Float> e : weights.entrySet()) {
-                    contributions.merge(e.getKey(), e.getValue(), Float::sum);
+            for (String root : FoodTokenStemmer.stemAll(token)) {
+                Map<String, Float> weights = negativeKeywords.get(root);
+                if (weights != null) {
+                    for (Map.Entry<String, Float> e : weights.entrySet()) {
+                        contributions.merge(e.getKey(), e.getValue(), Float::sum);
+                    }
                 }
             }
         }

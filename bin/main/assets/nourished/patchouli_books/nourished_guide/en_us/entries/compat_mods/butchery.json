@@ -1,0 +1,34 @@
+{
+  "name": "Butchery",
+  "category": "nourished:compat_mods",
+  "icon": "butchery:cooked_ribeye_steak",
+  "flag": "mod:butchery",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Butchery",
+      "text": "Butchery is a meat processing mod that adds detailed cuts, organs, and exotic meats from nearly every mob in the game. Every Butchery item is fully classified as $(bold)Proteins$() in Nourished, making it the single largest expansion to that food group in any supported mod."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Conventional Cuts",
+      "text": "Butchery adds proper butcher cuts from vanilla animals — ribeye, sirloin, T-bone, rump steak, chuck steak, pork belly, pork loin, lamb loin, lamb rib, leg of lamb, chicken leg, chicken wing, ham, sausage, and more.\n\nEach cut is a distinct protein family, meaning rotating through different cuts of the same animal still gives better nutrition than eating the same cut repeatedly."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Organs & Offal",
+      "text": "Butchery adds organ meats including heart, liver, kidney, lungs, stomach, and intestines — all classified as Proteins.\n\nOrgan meats are distinct families from muscle cuts, so mixing organs into your protein rotation alongside steaks and chops gives excellent variety and keeps diminishing returns low."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Exotic Meats",
+      "text": "Butchery lets you process almost any mob — including hostile and boss mobs. These exotic meats are all classified as Proteins:\n\n$(bold)Cooked Enderman Steak / Liver / Kidney$() — hard to obtain but very high nutrition.\n$(bold)Cooked Warden Meat$() — extremely rare; treat as a luxury protein.\n$(bold)Cooked Dragon Meat$() — the ultimate exotic protein source.\n$(bold)Cooked Creeper, Spider, Shulker$() — common hostile mob proteins."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Rotation Strategy",
+      "text": "With Butchery installed, the Proteins group has more variety than any other group. The risk is $(bold)defaulting to one favourite cut$() and losing the benefit of all that variety.\n\nAim to rotate across at least three distinct families per day — for example a lamb cut, a fish fillet, and an organ meat. Use JEI and search $(bold)nourished:nutrients/proteins$() to see the full list of what's available."
+    }
+  ]
+}
