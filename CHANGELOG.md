@@ -2,7 +2,7 @@
 
 All notable changes to Nourished will be documented here.
 
-## [o.2.0-beta] - 2026-5-14
+## [0.2.0-beta] - 2026-5-14
 
 feat: Enhance nutrient resolution and debugging capabilities in RuntimeFoodResolver
 
