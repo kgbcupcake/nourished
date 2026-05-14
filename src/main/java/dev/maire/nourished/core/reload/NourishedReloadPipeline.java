@@ -1,6 +1,8 @@
 package dev.maire.nourished.core.reload;
 
 import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
+import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.registry.RegistryLifecycleManager;
 
 /**
@@ -16,5 +18,7 @@ public final class NourishedReloadPipeline {
 
     public static void reloadAll() {
         RegistryLifecycleManager.reloadAll();
+        FoodFamilyResolver.clearCache();
+        RuntimeFoodResolver.getInstance().invalidateCache();
     }
 }

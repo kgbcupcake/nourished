@@ -2,7 +2,6 @@ package dev.maire.nourished.core.nutrition;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,14 +17,10 @@ import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.tooling.scanner.ClassificationResult;
-import dev.maire.nourished.tooling.scanner.FoodClassifier;
 import dev.maire.nourished.tooling.scanner.RecipeInheritanceResolver;
 import dev.maire.nourished.tooling.scanner.RecipeInheritanceResolver.RecipeInheritanceStep;
-import dev.maire.nourished.tooling.scanner.ScanCache;
-import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
 
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -46,9 +41,6 @@ import javax.annotation.Nullable;
 public class FoodNutritionRegistry {
 
     private static final Logger LOGGER = LogUtils.getLogger();
-
-    /** Scores at or below this are treated as no signal (unknown classification). */
-    private static final float CLASSIFICATION_SCORE_EPS = 1e-5f;
 
     /** @GuardedBy("itself — ConcurrentHashSet") */
     private static final Set<String> WARNED_ITEMS = ConcurrentHashMap.newKeySet();
@@ -127,9 +119,10 @@ public class FoodNutritionRegistry {
     }
 
     /**
-     * Resolves diet nutrient bar weights from {@code nourished:nutrients/*} tags, optional scanner/classifier
-     * fallback when untagged, and (server-side only) weighted recipe ingredient inheritance when the item has
-     * no explicit tag matches. Any tag match is authoritative: classifier, cache, and recipe inheritance are skipped.
+     * Resolves diet nutrient bar weights from {@code nourished:nutrients/*} tags, with runtime inference
+     * fallback via {@link RuntimeFoodResolver} when untagged. Delegates to
+     * {@link #resolveNutrientBars(ItemStack, boolean, RecipeManager)} after extracting the recipe manager
+     * from the level (server-side only).
      *
      * @param warnIfUnmatched when true, logs a WARN when falling back from no nutrient tags
      * @param level when non-null and not client-side, recipe inheritance may run; client tooltips should pass a
@@ -137,17 +130,29 @@ public class FoodNutritionRegistry {
      * @return map of nutrient bar key -> match weight
      */
     public static Map<String, Float> resolveNutrientBars(ItemStack stack, boolean warnIfUnmatched, @Nullable Level level) {
+        RecipeManager rm = null;
+        if (level != null && !level.isClientSide() && level.getServer() != null) {
+            rm = level.getServer().getRecipeManager();
+        }
+        return resolveNutrientBars(stack, warnIfUnmatched, rm);
+    }
+
+    /**
+     * Core resolution: checks {@code nourished:nutrients/*} tags first, then falls back to
+     * {@link RuntimeFoodResolver} for untagged food items.
+     *
+     * @param warnIfUnmatched when true, logs a WARN when falling back from no nutrient tags
+     * @param recipeManager   server recipe manager for recipe inheritance, or {@code null} to skip it
+     * @return map of nutrient bar key -> match weight (never null)
+     */
+    public static Map<String, Float> resolveNutrientBars(ItemStack stack, boolean warnIfUnmatched, @Nullable RecipeManager recipeManager) {
         Item item = stack.getItem();
-        ResourceLocation itemId = item.builtInRegistryHolder().key().location();
         Map<String, Float> tagMatches = collectNutrientTagMatches(item);
 
         if (!tagMatches.isEmpty()) {
             return tagMatches;
         }
 
-        boolean allowRecipeInheritance = level != null && !level.isClientSide();
-
-        Map<String, Float> result = new LinkedHashMap<>();
         if (warnIfUnmatched) {
             String id = item.getDescriptionId();
             if (WARNED_ITEMS.add(id)) {
@@ -156,23 +161,21 @@ public class FoodNutritionRegistry {
                         id);
             }
         }
-        result.putAll(resolveUntaggedNutrientBars(item, itemId));
 
-        if (allowRecipeInheritance) {
-            mergeRecipeInheritedBars(item, result, null);
+        Map<String, Float> inferred = RuntimeFoodResolver.getInstance().resolve(stack, recipeManager);
+        if (!inferred.isEmpty()) {
+            return inferred;
         }
 
-        return result;
+        return Map.of();
     }
 
     /**
-     * Resolves nutrient bars and captures classification / recipe-inheritance detail for structured debug logs.
-     * Does not mutate caches. When {@code level} is client-side, recipe inheritance is skipped (same as
-     * {@link #resolveNutrientBars}).
+     * Resolves nutrient bars and captures diagnostic detail for structured debug logs.
+     * Uses the same {@link RuntimeFoodResolver} pipeline as the production path so diagnostics match gameplay.
      */
     public static NutrientResolutionDiagnostic resolveNutrientBarsDiagnostic(ItemStack stack, Level level) {
         Item item = stack.getItem();
-        ResourceLocation itemId = item.builtInRegistryHolder().key().location();
         Map<String, Float> tagMatches = collectNutrientTagMatches(item);
         List<String> matchedTagIds = collectExactMatchedNutrientTagIds(item, tagMatches);
 
@@ -187,61 +190,20 @@ public class FoodNutritionRegistry {
             );
         }
 
-        List<String> validKeys = NutrientRegistry.getKeys();
-        if (validKeys.isEmpty()) {
-            return new NutrientResolutionDiagnostic(
-                    Map.of(),
-                    "UNCLASSIFIED",
-                    List.of("none"),
-                    null,
-                    List.of(),
-                    false
-            );
-        }
-        Set<String> validKeySet = Set.copyOf(validKeys);
-
-        ScanCache cache = UnassignedFoodScanner.getCache();
-        ClassificationResult classification = null;
-        String path;
-        Map<String, Float> result = new LinkedHashMap<>();
-
-        if (cache != null && cache.get(itemId) != null) {
-            classification = cache.get(itemId);
-            result.putAll(nutrientBarsFromClassification(classification, validKeySet));
-            path = "CACHE_HIT";
-        } else {
-            FoodProperties food = item.components().get(DataComponents.FOOD);
-            if (food == null || food.nutrition() <= 0) {
-                path = "UNCLASSIFIED";
-            } else {
-                FoodClassifier classifier = new FoodClassifier(
-                        validKeys,
-                        false,
-                        scannerConfidenceSpreadThreshold(),
-                        null
-                );
-                classification = classifier.classify(item, id -> null, Map.of());
-                result.putAll(nutrientBarsFromClassification(classification, validKeySet));
-                path = "CLASSIFIER_RUN";
-            }
+        RecipeManager rm = null;
+        if (level != null && !level.isClientSide() && level.getServer() != null) {
+            rm = level.getServer().getRecipeManager();
         }
 
-        boolean allowRecipeInheritance = level != null && !level.isClientSide();
-        List<RecipeInheritanceStep> recipeTrace = new ArrayList<>();
-        if (allowRecipeInheritance) {
-            mergeRecipeInheritedBars(item, result, recipeTrace);
-        }
-
-        if (result.isEmpty()) {
-            path = "UNCLASSIFIED";
-        }
+        Map<String, Float> inferred = RuntimeFoodResolver.getInstance().resolve(stack, rm);
+        String path = inferred.isEmpty() ? "UNCLASSIFIED" : "RUNTIME_RESOLVER";
 
         return new NutrientResolutionDiagnostic(
-                new LinkedHashMap<>(result),
+                new LinkedHashMap<>(inferred),
                 path,
                 List.of("none"),
-                classification,
-                recipeTrace,
+                null,
+                List.of(),
                 false
         );
     }
@@ -278,7 +240,7 @@ public class FoodNutritionRegistry {
      * (no {@link Level} context).
      */
     public static Map<String, Float> resolveNutrientBars(ItemStack stack, boolean warnIfUnmatched) {
-        return resolveNutrientBars(stack, warnIfUnmatched, null);
+        return resolveNutrientBars(stack, warnIfUnmatched, (RecipeManager) null);
     }
 
     private static Map<String, Float> collectNutrientTagMatches(Item item) {
@@ -303,204 +265,6 @@ public class FoodNutritionRegistry {
         });
 
         return matches;
-    }
-
-    private static void mergeRecipeInheritedBars(Item item, Map<String, Float> out, @Nullable List<RecipeInheritanceStep> traceOut) {
-        RecipeInheritanceResolver resolver = serverRecipeInheritanceResolver;
-        if (resolver == null) {
-            return;
-        }
-
-        Set<String> existingKeys = new HashSet<>(out.keySet());
-        Set<String> validNutrientKeys = Set.copyOf(NutrientRegistry.getKeys());
-        if (validNutrientKeys.isEmpty()) {
-            return;
-        }
-
-        Map<String, Float> raw = resolver.resolve(item, FoodNutritionRegistry::lookupClassificationForRecipe, traceOut);
-        if (raw.isEmpty()) {
-            return;
-        }
-
-        Map<String, Float> additions = new LinkedHashMap<>();
-        for (Map.Entry<String, Float> e : raw.entrySet()) {
-            String key = e.getKey();
-            if (!validNutrientKeys.contains(key) || existingKeys.contains(key)) {
-                continue;
-            }
-            float v = Math.max(0f, e.getValue());
-            if (v > CLASSIFICATION_SCORE_EPS) {
-                additions.merge(key, v, Float::sum);
-            }
-        }
-
-        float sum = 0f;
-        for (float v : additions.values()) {
-            sum += v;
-        }
-        if (sum <= CLASSIFICATION_SCORE_EPS) {
-            return;
-        }
-
-        for (Map.Entry<String, Float> e : additions.entrySet()) {
-            out.merge(e.getKey(), e.getValue() / sum, Float::sum);
-        }
-    }
-
-    @Nullable
-    private static ClassificationResult lookupClassificationForRecipe(ResourceLocation itemId) {
-        if (!BuiltInRegistries.ITEM.containsKey(itemId)) {
-            return null;
-        }
-        Item ingredient = BuiltInRegistries.ITEM.get(itemId);
-        ClassificationResult tagBased = classificationFromNutrientTagsOnly(ingredient, itemId);
-        if (tagBased != null) {
-            return tagBased;
-        }
-
-        ScanCache cache = UnassignedFoodScanner.getCache();
-        if (cache != null) {
-            ClassificationResult cached = cache.get(itemId);
-            if (cached != null) {
-                return cached;
-            }
-        }
-
-        FoodProperties food = ingredient.components().get(DataComponents.FOOD);
-        if (food == null || food.nutrition() <= 0) {
-            return null;
-        }
-
-        List<String> validKeys = NutrientRegistry.getKeys();
-        if (validKeys.isEmpty()) {
-            return null;
-        }
-
-        FoodClassifier classifier = new FoodClassifier(
-                validKeys,
-                false,
-                scannerConfidenceSpreadThreshold(),
-                null
-        );
-        return classifier.classify(ingredient, FoodNutritionRegistry::lookupClassificationForRecipe, Map.of());
-    }
-
-    @Nullable
-    private static ClassificationResult classificationFromNutrientTagsOnly(Item item, ResourceLocation itemId) {
-        Map<String, Float> matches = collectNutrientTagMatches(item);
-        if (matches.isEmpty()) {
-            return null;
-        }
-        Map<String, Float> scores = new HashMap<>(matches);
-        String dominant = matches.entrySet().stream()
-                .max(Map.Entry.<String, Float>comparingByValue().thenComparing(Map.Entry.comparingByKey()))
-                .map(Map.Entry::getKey)
-                .orElse(matches.keySet().iterator().next());
-        return new ClassificationResult(
-                itemId,
-                scores,
-                dominant,
-                null,
-                1f,
-                List.of(),
-                false
-        );
-    }
-
-    private static float scannerConfidenceSpreadThreshold() {
-        try {
-            return (float) NourishedConfig.get().scannerConfidenceSpreadThreshold();
-        } catch (IllegalStateException ignored) {
-            return 0f;
-        }
-    }
-
-    /**
-     * Tagless resolution: scan cache first, then inline classifier (single pass, no recipe/peers).
-     */
-    private static Map<String, Float> resolveUntaggedNutrientBars(Item item, ResourceLocation itemId) {
-        List<String> validKeys = NutrientRegistry.getKeys();
-        if (validKeys.isEmpty()) {
-            return Map.of();
-        }
-        Set<String> validKeySet = Set.copyOf(validKeys);
-
-        ScanCache cache = UnassignedFoodScanner.getCache();
-        ClassificationResult cached = cache != null ? cache.get(itemId) : null;
-        if (cached != null) {
-            return nutrientBarsFromClassification(cached, validKeySet);
-        }
-
-        FoodProperties food = item.components().get(DataComponents.FOOD);
-        if (food == null || food.nutrition() <= 0) {
-            return new LinkedHashMap<>();
-        }
-
-        FoodClassifier classifier = new FoodClassifier(
-                validKeys,
-                false,
-                scannerConfidenceSpreadThreshold(),
-                null
-        );
-        ClassificationResult result = classifier.classify(item, id -> null, Map.of());
-        return nutrientBarsFromClassification(result, validKeySet);
-    }
-
-    /**
-     * Maps a classification to bar weights: confident → dominant only; uncertain → normalized positive scores;
-     * no usable score mass → empty map.
-     */
-    private static Map<String, Float> nutrientBarsFromClassification(
-            ClassificationResult result,
-            Set<String> validNutrientKeys
-    ) {
-        float maxScore = 0f;
-        for (String key : validNutrientKeys) {
-            maxScore = Math.max(maxScore, result.scores().getOrDefault(key, 0f));
-        }
-        if (maxScore <= CLASSIFICATION_SCORE_EPS) {
-            return new LinkedHashMap<>();
-        }
-
-        if (!result.uncertain()) {
-            String dominant = result.dominant();
-            if (dominant != null
-                    && validNutrientKeys.contains(dominant)
-                    && result.scores().getOrDefault(dominant, 0f) > CLASSIFICATION_SCORE_EPS) {
-                Map<String, Float> single = new LinkedHashMap<>();
-                single.put(dominant, 1.0f);
-                return single;
-            }
-        }
-
-        float noiseFloor = maxScore * 0.02f;
-        float sum = 0f;
-        for (String key : validNutrientKeys) {
-            float s = Math.max(0f, result.scores().getOrDefault(key, 0f));
-            if (s >= noiseFloor) {
-                sum += s;
-            }
-        }
-        if (sum <= CLASSIFICATION_SCORE_EPS) {
-            String dominant = result.dominant();
-            if (dominant != null
-                    && validNutrientKeys.contains(dominant)
-                    && result.scores().getOrDefault(dominant, 0f) > CLASSIFICATION_SCORE_EPS) {
-                Map<String, Float> single = new LinkedHashMap<>();
-                single.put(dominant, 1.0f);
-                return single;
-            }
-            return new LinkedHashMap<>();
-        }
-
-        Map<String, Float> weighted = new LinkedHashMap<>();
-        for (String key : validNutrientKeys) {
-            float s = Math.max(0f, result.scores().getOrDefault(key, 0f));
-            if (s >= noiseFloor) {
-                weighted.put(key, s / sum);
-            }
-        }
-        return weighted;
     }
 
     /**

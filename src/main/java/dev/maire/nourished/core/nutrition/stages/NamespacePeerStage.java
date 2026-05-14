@@ -1,0 +1,39 @@
+package dev.maire.nourished.core.nutrition.stages;
+
+import dev.maire.nourished.core.nutrition.ResolutionResult;
+import dev.maire.nourished.core.nutrition.ResolutionStage;
+import dev.maire.nourished.core.nutrition.StageContext;
+import dev.maire.nourished.core.nutrition.cache.RunningAverage;
+import net.minecraft.resources.ResourceLocation;
+
+import javax.annotation.Nullable;
+import java.util.Map;
+
+/**
+ * Stage 4: falls back to the running average of previously-resolved items
+ * in the same namespace, requiring at least 5 prior data points and a
+ * minimum spread of 2.0 to produce a result.
+ */
+public final class NamespacePeerStage implements ResolutionStageHandler {
+
+    private static final int MIN_PEER_COUNT = 5;
+    private static final float MIN_SPREAD = 2.0f;
+
+    @Override
+    @Nullable
+    public ResolutionResult resolve(ResourceLocation itemId, StageContext ctx) {
+        String ns = itemId.getNamespace();
+        RunningAverage peerAvg = ctx.namespacePeers().get(ns);
+        if (peerAvg == null || peerAvg.count() < MIN_PEER_COUNT) return null;
+
+        Map<String, Float> avg = peerAvg.average();
+        float spread = StageMath.computeSpread(avg);
+        if (spread < MIN_SPREAD) return null;
+
+        Map<String, Float> normalized = StageMath.normalizeToBarMap(avg, ctx.validKeys());
+        if (normalized.isEmpty()) return null;
+
+        return new ResolutionResult(normalized, spread, ResolutionStage.NAMESPACE_PEER,
+                "namespace peer average (" + ns + ", n=" + peerAvg.count() + ")");
+    }
+}
