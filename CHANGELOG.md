@@ -3,28 +3,42 @@
 [0.2.0-beta] - 2026-05-14
 Added
 
-Excluded items system — non-food items with FoodProperties (potions, soap, chicken feed, magic essences, etc.) are now explicitly excluded from classification and will not show a Nourished tooltip
-excluded_items array in scanner_spec.json — modpack creators and datapack authors can extend this list without code changes
-hamburger stem mapping and archetype entry for correct multi-nutrient resolution across all hamburger variants
-sandwich archetype entry to inject grains signal for sandwich-type foods
-Community tag signals now propagate into the keyword/archetype scoring pass via StageContext instead of short-circuiting the pipeline
-Average resolution time, slowest item, and recipe timeout tracking in CacheStats
-Raw scores, tokens, token weights, and rejected signal reasons added to ResolutionResult
-/nourished debug held command for in-game classifier inspection
+- Excluded items system — non-food items with FoodProperties (potions, soap, chicken feed, magic         essences, etc.) are now explicitly excluded from classification and will not show a Nourished
+     tooltip
+
+- excluded_items array in scanner_spec.json — modpack creators and datapack authors can extend this     list without code changes
+  
+-hamburger stem mapping and archetype entry for correct multi-nutrient resolution across all           hamburger variants
+
+- sandwich archetype entry to inject grains signal for sandwich-type foods
+
+- Community tag signals now propagate into the keyword/archetype scoring pass via StageContext          instead of short-circuiting the pipeline
+   
+- Average resolution time, slowest item, and recipe timeout tracking in CacheStats
+  
+- Raw scores, tokens, token weights, and rejected signal reasons added to ResolutionResult
+  
+- /nourished debug held command for in-game classifier inspection
 
 Fixed
 
-Tag matches are now authoritative in blend resolution — when an item has an explicit nutrient tag, the resolver can only contribute nutrients not already covered by the tag, preventing archetype heuristics from overriding curated data
-Resolver cache is now invalidated on level load, fixing stale classifications persisting across jar swaps and config changes
-stew, soup, burger, and roast removed from PREPARATION_TOKENS — they are composite food forms, not preparation methods, and were incorrectly penalizing their nutrient signals
-burger and hamburger archetypes now only contribute grains — proteins and vegetables are scored from ingredient keywords and recipe inheritance, not hardcoded in the archetype
-Patchouli crafting recipe for the Nourished Guide
+- Tag matches are now authoritative in blend resolution — when an item has an explicit nutrient tag,    the resolver can only contribute nutrients not already covered by the tag, preventing archetype       heuristics from overriding curated data
+
+- Resolver cache is now invalidated on level load, fixing stale classifications persisting across jar swaps and config changes
+  
+-stew, soup, burger, and roast removed from PREPARATION_TOKENS — they are composite food forms, not    preparation methods, and were incorrectly penalizing their nutrient signals
+
+- burger and hamburger archetypes now only contribute grains — proteins and vegetables are scored       from ingredient keywords and recipe inheritance, not hardcoded in the archetype
+
+- Patchouli crafting recipe for the Nourished Guide
 
 Changed
 
-Nutrient tag files updated — proteins, fruits, sugars, grains, and dairy now cover a significantly broader range of modded foods including beverages, composite dishes, and items previously falling through to hard fallback
-ScannerSpec extended with excludedItems set, parsed from scanner_spec.json and checked early in both the tooltip and resolver paths
-StageContext converted from record to mutable class to support inter-stage signal propagation
+- Nutrient tag files updated — proteins, fruits, sugars, grains, and dairy now cover a significantly    broader range of modded foods including beverages, composite dishes, and items previously falling     through to hard fallback
+
+-ScannerSpec extended with excludedItems set, parsed from scanner_spec.json and checked early in       both the tooltip and resolver paths
+
+- StageContext converted from record to mutable class to support inter-stage signal propagation
 
 ## [0.1.9-beta] - 2026-05-13
 
