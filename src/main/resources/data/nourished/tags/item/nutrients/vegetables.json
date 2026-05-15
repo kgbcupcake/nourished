@@ -955,6 +955,10 @@
     {
       "id": "minersdelight:vegan_patty",
       "required": false
+    },
+    {
+      "id": "moredelight:loaded_hamburger",
+      "required": false
     }
   ]
 }
