@@ -340,7 +340,7 @@
   },
   "archetypes": [
     { "pattern": "pie",       "contributions": { "grains": 2.0, "sugars": 2.0, "fruits": 1.0 } },
-    { "pattern": "burger",    "contributions": { "grains": 2.0, "proteins": 2.0 } },
+    { "pattern": "burger",    "contributions": { "proteins": 2.0, "vegetables": 2.0, "grains": 2.0 } },
     { "pattern": "hamburger", "contributions": { "proteins": 2.0, "vegetables": 2.0, "grains": 2.0 } },
     { "pattern": "sandwich",  "contributions": { "grains": 2.0, "proteins": 2.0 } },
     { "pattern": "pizza",     "contributions": { "grains": 3.0, "dairy": 2.0, "proteins": 1.0 } },

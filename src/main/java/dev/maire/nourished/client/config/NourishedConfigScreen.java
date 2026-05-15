@@ -46,6 +46,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.neoforge.common.ModConfigSpec;
+
+import javax.annotation.Nullable;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import org.lwjgl.glfw.GLFW;
@@ -152,7 +154,7 @@ public final class NourishedConfigScreen {
         PresetRegistry.ensureBuiltInFilesOnDisk();
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.presets"));
         category.addEntry(new PresetsWidget(reopenParent));
-        addReloadButton(category, eb);
+        addReloadButton(category, eb, false);
         category.addEntry(new ImportExportButtonsWidget(reopenParent));
     }
 
@@ -226,7 +228,7 @@ public final class NourishedConfigScreen {
             category.addEntry(new StyledChipTextEntry(Component.translatable("config.nourished.modules.dependencyHint"), 0xFFCC8844));
         }
 
-        addReloadButton(category, eb);
+        addReloadButton(category, eb, false);
     }
 
     private static void addModuleGroupSubcategory(
@@ -360,7 +362,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        addReloadButton(category, eb);
+        addReloadButton(category, eb, false);
     }
 
     private static void addThresholdCategory(
@@ -442,7 +444,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        addReloadButton(category, eb);
+        addReloadButton(category, eb, false);
     }
 
     private static void addEffectsCategory(NourishedConfig config, ConfigBuilder builder, ConfigEntryBuilder eb) {
@@ -461,7 +463,7 @@ public final class NourishedConfigScreen {
 
         category.addEntry(new EffectBuilderWidget());
 
-        addReloadButton(category, eb);
+        addReloadButton(category, eb, false);
     }
 
     private static void addHudAndDisplayCategory(NourishedConfig config, NourishedClientConfig client, ConfigBuilder builder, ConfigEntryBuilder eb) {
@@ -567,7 +569,7 @@ public final class NourishedConfigScreen {
             category.addEntry(row);
         }
 
-        addReloadButton(category, eb);
+        addReloadButton(category, eb, false);
     }
 
     private static void addNutrientsCategory(
@@ -630,7 +632,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        addReloadButton(nutrients, eb);
+        addReloadButton(nutrients, eb, false);
     }
 
     private static void addFoodValuesCategory(ConfigBuilder builder, ConfigEntryBuilder eb, Map<String, FoodValuePending> foodValuePending) {
@@ -657,7 +659,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        addReloadButton(category, eb);
+        addReloadButton(category, eb, false);
     }
 
     private static void addAdvancedCategory(
@@ -695,7 +697,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        addReloadButton(category, eb);
+        addReloadButton(category, eb, false);
     }
 
     private static void addScannerCategory(NourishedConfig config, ConfigBuilder builder, ConfigEntryBuilder eb) {
@@ -730,7 +732,7 @@ public final class NourishedConfigScreen {
         }
 
         category.addEntry(new FoodScannerWidget());
-        addReloadButton(category, eb);
+        addReloadButton(category, eb, false);
     }
 
     private static void addCompatibilityCategory(
@@ -747,7 +749,7 @@ public final class NourishedConfigScreen {
         }
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.compat"));
         category.addEntry(new CompatTabbedListEntry(config, compatPending));
-        addReloadButton(category, eb);
+        addReloadButton(category, eb, true);
     }
 
     private static String toTitleCase(String input) {
@@ -766,11 +768,37 @@ public final class NourishedConfigScreen {
         return result.toString().trim();
     }
 
-    private static void addReloadButton(ConfigCategory category, ConfigEntryBuilder eb) {
+    private static void addReloadButton(ConfigCategory category, ConfigEntryBuilder eb, boolean includeOpenDatapackFolder) {
         category.addEntry(
                 eb.startTextDescription(Component.empty()).build()
         );
-        category.addEntry(new ReloadConfigsListEntry());
+        category.addEntry(new ReloadConfigsListEntry(includeOpenDatapackFolder));
+    }
+
+    private static void openCompatDatapackFolder() {
+        Path targetFolder;
+        Minecraft mc = Minecraft.getInstance();
+        var server = mc.getSingleplayerServer();
+        if (mc.level != null && server != null) {
+            targetFolder = server.getWorldPath(LevelResource.DATAPACK_DIR)
+                    .resolve("nourished-generated");
+        } else {
+            targetFolder = FMLPaths.CONFIGDIR.get()
+                    .resolve("nourished")
+                    .resolve("auto_compat");
+        }
+        try {
+            if (!Files.exists(targetFolder)) {
+                Files.createDirectories(targetFolder);
+            }
+            try {
+                new ProcessBuilder("xdg-open", targetFolder.toAbsolutePath().toString()).start();
+            } catch (Exception e) {
+                Util.getPlatform().openPath(targetFolder);
+            }
+        } catch (IOException e) {
+            Nourished.LOGGER.error("[Compat Config] Failed to open datapack folder: {}", targetFolder, e);
+        }
     }
 
     private static String prettyKey(String key) {
@@ -899,7 +927,6 @@ public final class NourishedConfigScreen {
         private final Map<String, Button> tagButtons = new LinkedHashMap<>();
         private final Button builtInCodeButton;
         private final Button builtInTagButton;
-        private final Button openDatapackFolderButton;
         private final Map<String, CompatEntry> builtInByModId = new LinkedHashMap<>();
         private final Map<String, int[]> detectedFoodCounts = new LinkedHashMap<>();
         private final Map<String, ResourceLocation> modLogoCache = new LinkedHashMap<>();
@@ -983,9 +1010,6 @@ public final class NourishedConfigScreen {
                     .build();
             this.detectedSortCategoryButton = Button.builder(Component.literal("Category"), b -> cycleDetectedSortCategory())
                     .bounds(0, 0, 78, 18)
-                    .build();
-            this.openDatapackFolderButton = Button.builder(Component.literal("\uD83D\uDCC2 Open Datapack Folder"), b -> openDatapackFolder())
-                    .bounds(0, 0, 140, 18)
                     .build();
         }
 
@@ -1102,40 +1126,6 @@ public final class NourishedConfigScreen {
             detectedSortNameButton.setMessage(Component.literal(nameLabel));
             detectedSortStatusButton.setMessage(Component.literal(statusLabel));
             detectedSortCategoryButton.setMessage(Component.literal(categoryLabel));
-        }
-
-        private void openDatapackFolder() {
-            Path targetFolder;
-            Minecraft mc = Minecraft.getInstance();
-            var server = mc.getSingleplayerServer();
-            if (mc.level != null && server != null) {
-                targetFolder = server.getWorldPath(LevelResource.DATAPACK_DIR)
-                        .resolve("nourished-generated");
-            } else {
-                targetFolder = FMLPaths.CONFIGDIR.get()
-                        .resolve("nourished")
-                        .resolve("auto_compat");
-            }
-            try {
-                if (!Files.exists(targetFolder)) {
-                    Files.createDirectories(targetFolder);
-                }
-                openPathCrossPlatform(targetFolder);
-            } catch (IOException e) {
-                Nourished.LOGGER.error("[Compat Config] Failed to open datapack folder: {}", targetFolder, e);
-            }
-        }
-
-        private static void openPathCrossPlatform(Path path) {
-            try {
-                if (Util.getPlatform() == Util.OS.LINUX) {
-                    new ProcessBuilder("xdg-open", path.toAbsolutePath().toString()).start();
-                } else {
-                    Util.getPlatform().openPath(path);
-                }
-            } catch (Exception e) {
-                Nourished.LOGGER.error("[Compat Config] Failed to open path {}", path, e);
-            }
         }
 
         private List<CompatReportEntry> filteredAndSortedDetectedRows() {
@@ -1310,17 +1300,6 @@ public final class NourishedConfigScreen {
                 renderDetectedRows(graphics, detectedRowsY, mouseX, mouseY);
                 graphics.disableScissor();
 
-                int openBtnW = 140;
-                int openBtnH = 18;
-                int openBtnX = listX + listW - openBtnW - 4;
-                int openBtnY = listY + listH - openBtnH - 4;
-                openDatapackFolderButton.setX(openBtnX);
-                openDatapackFolderButton.setY(openBtnY);
-                openDatapackFolderButton.setWidth(openBtnW);
-                openDatapackFolderButton.setHeight(openBtnH);
-                openDatapackFolderButton.active = isEditable();
-                openDatapackFolderButton.render(graphics, mouseX, mouseY, delta);
-
                 if (hoveredDetectedIndex >= 0) {
                     List<CompatReportEntry> rows = filteredAndSortedDetectedRows();
                     if (hoveredDetectedIndex < rows.size()) {
@@ -1339,7 +1318,6 @@ public final class NourishedConfigScreen {
                 detectedSortNameButton.setY(-2000);
                 detectedSortStatusButton.setY(-2000);
                 detectedSortCategoryButton.setY(-2000);
-                openDatapackFolderButton.setY(-2000);
                 renderBuiltInRows(graphics, listY, mouseX, mouseY);
             } else {
                 detectedRowsY = -2000;
@@ -1349,7 +1327,6 @@ public final class NourishedConfigScreen {
                 detectedSortNameButton.setY(-2000);
                 detectedSortStatusButton.setY(-2000);
                 detectedSortCategoryButton.setY(-2000);
-                openDatapackFolderButton.setY(-2000);
                 renderSettingsRows(graphics, listY, mouseX, mouseY, delta);
                 builtInCodeButton.setY(-2000);
                 builtInTagButton.setY(-2000);
@@ -1853,7 +1830,6 @@ public final class NourishedConfigScreen {
             out.add(detectedSortNameButton);
             out.add(detectedSortStatusButton);
             out.add(detectedSortCategoryButton);
-            out.add(openDatapackFolderButton);
             out.add(builtInCodeButton);
             out.add(builtInTagButton);
             out.addAll(codeButtons.values());
@@ -1871,7 +1847,6 @@ public final class NourishedConfigScreen {
             out.add(detectedSortNameButton);
             out.add(detectedSortStatusButton);
             out.add(detectedSortCategoryButton);
-            out.add(openDatapackFolderButton);
             out.add(builtInCodeButton);
             out.add(builtInTagButton);
             out.addAll(codeButtons.values());
@@ -2553,14 +2528,26 @@ public final class NourishedConfigScreen {
     private static final class ReloadConfigsListEntry extends TooltipListEntry<Object> {
         private static final int BUTTON_WIDTH = 150;
         private static final int BUTTON_HEIGHT = 20;
+        private static final int OPEN_DATAPACK_FOLDER_WIDTH = 140;
+        private static final int RELOAD_ROW_GAP = 6;
 
         private final Button button;
+        @Nullable private final Button openDatapackFolderButton;
 
-        ReloadConfigsListEntry() {
+        ReloadConfigsListEntry(boolean includeOpenDatapackFolder) {
             super(
                     Component.translatable("config.nourished.reloadConfigs"),
                     () -> Optional.of(new Component[]{Component.translatable("config.nourished.reloadConfigs.desc")}),
                     false);
+            if (includeOpenDatapackFolder) {
+                this.openDatapackFolderButton = Button.builder(
+                                Component.literal("\uD83D\uDCC2 Open Datapack Folder"),
+                                b -> NourishedConfigScreen.openCompatDatapackFolder())
+                        .bounds(0, 0, OPEN_DATAPACK_FOLDER_WIDTH, BUTTON_HEIGHT)
+                        .build();
+            } else {
+                this.openDatapackFolderButton = null;
+            }
             this.button = Button.builder(Component.translatable("config.nourished.reloadConfigs"), b -> {
                         NourishedReloadPipeline.reloadAll();
                         Minecraft mc = Minecraft.getInstance();
@@ -2612,18 +2599,32 @@ public final class NourishedConfigScreen {
                 float delta) {
             button.active = isEditable();
             button.setY(y);
-            button.setX(x + entryWidth - BUTTON_WIDTH);
+            int reloadX = x + entryWidth - BUTTON_WIDTH;
+            button.setX(reloadX);
             button.setWidth(BUTTON_WIDTH);
+            if (openDatapackFolderButton != null) {
+                openDatapackFolderButton.active = isEditable();
+                openDatapackFolderButton.setY(y);
+                openDatapackFolderButton.setX(reloadX - RELOAD_ROW_GAP - OPEN_DATAPACK_FOLDER_WIDTH);
+                openDatapackFolderButton.setWidth(OPEN_DATAPACK_FOLDER_WIDTH);
+                openDatapackFolderButton.render(graphics, mouseX, mouseY, delta);
+            }
             button.render(graphics, mouseX, mouseY, delta);
         }
 
         @Override
         public List<? extends net.minecraft.client.gui.components.events.GuiEventListener> children() {
+            if (openDatapackFolderButton != null) {
+                return List.of(openDatapackFolderButton, button);
+            }
             return List.of(button);
         }
 
         @Override
         public List<? extends net.minecraft.client.gui.narration.NarratableEntry> narratables() {
+            if (openDatapackFolderButton != null) {
+                return List.of(openDatapackFolderButton, button);
+            }
             return List.of(button);
         }
     }

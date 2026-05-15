@@ -124,6 +124,8 @@ public class FoodNutritionRegistry {
 
     /**
      * Full resolution trace for debug logging (server-side recipe inheritance when {@code level} is a server level).
+     * {@code classifierPath} includes {@code TAG_AND_RUNTIME_BLEND} when tag matches and runtime resolver output
+     * are merged to match {@link #resolveNutrientBars}.
      */
     public record NutrientResolutionDiagnostic(
             Map<String, Float> matchedBars,
@@ -168,8 +170,9 @@ public class FoodNutritionRegistry {
     }
 
     /**
-     * Core resolution: checks {@code nourished:nutrients/*} tags first, then falls back to
-     * {@link RuntimeFoodResolver} for untagged food items.
+     * Core resolution: merges {@code nourished:nutrients/*} tag matches with
+     * {@link RuntimeFoodResolver} output when both are present; otherwise returns whichever side
+     * has matches (resolver-only still logs {@code warnIfUnmatched} when untagged).
      *
      * @param warnIfUnmatched when true, logs a WARN when falling back from no nutrient tags
      * @param recipeManager   server recipe manager for recipe inheritance, or {@code null} to skip it
@@ -178,38 +181,52 @@ public class FoodNutritionRegistry {
     public static Map<String, Float> resolveNutrientBars(ItemStack stack, boolean warnIfUnmatched, @Nullable RecipeManager recipeManager) {
         Item item = stack.getItem();
         Map<String, Float> tagMatches = collectNutrientTagMatches(item);
+        Map<String, Float> resolved = RuntimeFoodResolver.getInstance().resolve(stack, recipeManager);
 
-        if (!tagMatches.isEmpty()) {
+        if (tagMatches.isEmpty()) {
+            if (warnIfUnmatched) {
+                String id = item.getDescriptionId();
+                if (WARNED_ITEMS.add(id)) {
+                    LOGGER.warn(
+                            "Nourished: no nutrient tag for {} — attempting name-based guess. Add it to data/nourished/tags/item/nutrients/*.json for accurate classification.",
+                            id);
+                }
+            }
+            return resolved.isEmpty() ? Map.of() : resolved;
+        }
+        if (resolved.isEmpty()) {
             return tagMatches;
         }
-
-        if (warnIfUnmatched) {
-            String id = item.getDescriptionId();
-            if (WARNED_ITEMS.add(id)) {
-                LOGGER.warn(
-                        "Nourished: no nutrient tag for {} — attempting name-based guess. Add it to data/nourished/tags/item/nutrients/*.json for accurate classification.",
-                        id);
-            }
-        }
-
-        Map<String, Float> inferred = RuntimeFoodResolver.getInstance().resolve(stack, recipeManager);
-        if (!inferred.isEmpty()) {
-            return inferred;
-        }
-
-        return Map.of();
+        return blendTagAndResolverResults(tagMatches, resolved);
     }
 
     /**
      * Resolves nutrient bars and captures diagnostic detail for structured debug logs.
-     * Uses the same {@link RuntimeFoodResolver} pipeline as the production path so diagnostics match gameplay.
+     * Mirrors {@link #resolveNutrientBars(ItemStack, boolean, RecipeManager)}: tag-only, resolver-only,
+     * unclassified, or blended when both tag matches and resolver output are non-empty.
      */
     public static NutrientResolutionDiagnostic resolveNutrientBarsDiagnostic(ItemStack stack, Level level) {
-        Item item = stack.getItem();
-        Map<String, Float> tagMatches = collectNutrientTagMatches(item);
-        List<String> matchedTagIds = collectExactMatchedNutrientTagIds(item, tagMatches);
+        Map<String, Float> tagMatches = collectNutrientTagMatches(stack.getItem());
+        List<String> matchedTagIds = collectExactMatchedNutrientTagIds(stack.getItem(), tagMatches);
 
-        if (!tagMatches.isEmpty()) {
+        RecipeManager rm = null;
+        if (level != null && !level.isClientSide() && level.getServer() != null) {
+            rm = level.getServer().getRecipeManager();
+        }
+        Map<String, Float> resolved = RuntimeFoodResolver.getInstance().resolve(stack, rm);
+
+        if (tagMatches.isEmpty()) {
+            String path = resolved.isEmpty() ? "UNCLASSIFIED" : "RUNTIME_RESOLVER";
+            return new NutrientResolutionDiagnostic(
+                    new LinkedHashMap<>(resolved),
+                    path,
+                    List.of("none"),
+                    null,
+                    List.of(),
+                    false
+            );
+        }
+        if (resolved.isEmpty()) {
             return new NutrientResolutionDiagnostic(
                     new LinkedHashMap<>(tagMatches),
                     "TAG_HIT",
@@ -219,19 +236,11 @@ public class FoodNutritionRegistry {
                     false
             );
         }
-
-        RecipeManager rm = null;
-        if (level != null && !level.isClientSide() && level.getServer() != null) {
-            rm = level.getServer().getRecipeManager();
-        }
-
-        Map<String, Float> inferred = RuntimeFoodResolver.getInstance().resolve(stack, rm);
-        String path = inferred.isEmpty() ? "UNCLASSIFIED" : "RUNTIME_RESOLVER";
-
+        Map<String, Float> blended = blendTagAndResolverResults(tagMatches, resolved);
         return new NutrientResolutionDiagnostic(
-                new LinkedHashMap<>(inferred),
-                path,
-                List.of("none"),
+                new LinkedHashMap<>(blended),
+                "TAG_AND_RUNTIME_BLEND",
+                matchedTagIds,
                 null,
                 List.of(),
                 false
@@ -320,6 +329,18 @@ public class FoodNutritionRegistry {
     /** NutrientValues with primary macro weighting for the given diet bar, driven by FoodValueRegistry. */
     private static NutrientValues nutrientValuesForBar(String barKey, float pts) {
         return FoodValueRegistry.getValuesForCategory(barKey, pts);
+    }
+
+    private static Map<String, Float> blendTagAndResolverResults(
+            Map<String, Float> tagMatches,
+            Map<String, Float> resolved) {
+        Map<String, Float> merged = new LinkedHashMap<>(resolved);
+        tagMatches.forEach((k, v) -> merged.merge(k, v * 2.0f, Float::sum));
+        float total = merged.values().stream().reduce(0f, Float::sum);
+        if (total <= 0f) return tagMatches;
+        Map<String, Float> result = new LinkedHashMap<>();
+        merged.forEach((k, v) -> result.put(k, v / total));
+        return result;
     }
 
     public static DietDelta computeDietDelta(

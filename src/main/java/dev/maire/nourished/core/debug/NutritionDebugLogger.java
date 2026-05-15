@@ -147,7 +147,7 @@ public final class NutritionDebugLogger {
             root = new JsonObject();
         }
         String key = switch (classifierPath) {
-            case "TAG_HIT", "CACHE_HIT", "CLASSIFIER_RUN", "UNCLASSIFIED", "FOOD_OVERRIDE" -> classifierPath;
+            case "TAG_HIT", "TAG_AND_RUNTIME_BLEND", "CACHE_HIT", "CLASSIFIER_RUN", "RUNTIME_RESOLVER", "UNCLASSIFIED", "FOOD_OVERRIDE" -> classifierPath;
             default -> "OTHER";
         };
         int n = root.has(key) ? root.get(key).getAsInt() : 0;
