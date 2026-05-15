@@ -26,7 +26,7 @@ Fixed
 
 - Resolver cache is now invalidated on level load, fixing stale classifications persisting across jar swaps and config changes
   
--stew, soup, burger, and roast removed from PREPARATION_TOKENS — they are composite food forms, not    preparation methods, and were incorrectly penalizing their nutrient signals
+- stew, soup, burger, and roast removed from PREPARATION_TOKENS — they are composite food forms, not    preparation methods, and were incorrectly penalizing their nutrient signals
 
 - burger and hamburger archetypes now only contribute grains — proteins and vegetables are scored       from ingredient keywords and recipe inheritance, not hardcoded in the archetype
 
@@ -36,7 +36,7 @@ Changed
 
 - Nutrient tag files updated — proteins, fruits, sugars, grains, and dairy now cover a significantly    broader range of modded foods including beverages, composite dishes, and items previously falling     through to hard fallback
 
--ScannerSpec extended with excludedItems set, parsed from scanner_spec.json and checked early in       both the tooltip and resolver paths
+- ScannerSpec extended with excludedItems set, parsed from scanner_spec.json and checked early in       both the tooltip and resolver paths
 
 - StageContext converted from record to mutable class to support inter-stage signal propagation
 
