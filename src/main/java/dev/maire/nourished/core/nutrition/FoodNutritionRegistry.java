@@ -20,8 +20,10 @@ import dev.maire.nourished.tooling.scanner.ClassificationResult;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import dev.maire.nourished.tooling.scanner.RecipeInheritanceResolver;
 import dev.maire.nourished.tooling.scanner.RecipeInheritanceResolver.RecipeInheritanceStep;
+import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
 
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -62,6 +64,9 @@ public class FoodNutritionRegistry {
 
     /** @GuardedBy("itself — ConcurrentHashMap") */
     private static final Map<ResourceLocation, Map<String, Float>> EXTERNAL_CLASSIFICATIONS = new ConcurrentHashMap<>();
+
+    /** @GuardedBy("itself — ConcurrentHashMap") */
+    private static final Map<ResourceLocation, Map<String, Float>> SCANNER_CLASSIFICATIONS = new ConcurrentHashMap<>();
 
     /**
      * {@link FoodProperties} used when applying or previewing nourishment for an item stack. Vanilla milk buckets
@@ -112,10 +117,56 @@ public class FoodNutritionRegistry {
     }
 
     /**
-     * Returns externally registered classifications for a food item, or null if none.
+     * Replaces scanner-derived classifications from a dominant-category map (e.g. full food scan).
+     * Skips items with native nutrient tags, unknown item ids, API-registered {@link #EXTERNAL_CLASSIFICATIONS},
+     * or blank dominant keys.
+     */
+    public static void applyFromScanner(Map<ResourceLocation, String> dominantCategories, float amount) {
+        SCANNER_CLASSIFICATIONS.clear();
+        if (dominantCategories == null || dominantCategories.isEmpty()) {
+            LOGGER.info("[FoodNutritionRegistry] Scanner applied 0 classifications");
+            return;
+        }
+        int applied = 0;
+        for (Map.Entry<ResourceLocation, String> e : dominantCategories.entrySet()) {
+            ResourceLocation itemId = e.getKey();
+            String category = e.getValue();
+            if (category == null || category.isBlank()) {
+                continue;
+            }
+            Item item = BuiltInRegistries.ITEM.getOptional(itemId).orElse(null);
+            if (item == null) {
+                continue;
+            }
+            if (UnassignedFoodScanner.hasNutrientTag(new ItemStack(item))) {
+                continue;
+            }
+            if (EXTERNAL_CLASSIFICATIONS.containsKey(itemId)) {
+                continue;
+            }
+            ConcurrentHashMap<String, Float> inner = new ConcurrentHashMap<>();
+            inner.put(category, amount);
+            SCANNER_CLASSIFICATIONS.put(itemId, inner);
+            applied++;
+        }
+        LOGGER.info("[FoodNutritionRegistry] Scanner applied {} classifications", applied);
+    }
+
+    /** Clears scanner-derived classifications only. */
+    public static void clearScannerClassifications() {
+        SCANNER_CLASSIFICATIONS.clear();
+    }
+
+    /**
+     * Returns classifications for a food item: API {@link #registerClassification} first, then scanner-derived
+     * {@link #applyFromScanner} as fallback; {@code null} if neither applies.
      */
     public static Map<String, Float> getExternalClassification(ResourceLocation foodId) {
-        return EXTERNAL_CLASSIFICATIONS.get(foodId);
+        Map<String, Float> api = EXTERNAL_CLASSIFICATIONS.get(foodId);
+        if (api != null) {
+            return api;
+        }
+        return SCANNER_CLASSIFICATIONS.get(foodId);
     }
 
     public record NutrientValues(float protein, float carbs, float fats, float vitamins, float hydration) {}

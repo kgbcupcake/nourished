@@ -33,7 +33,7 @@ public class DietPlayerEvents {
         );
         player.sendSystemMessage(
                 Component.literal("⚠ ").withStyle(ChatFormatting.RED)
-                        .append(Component.literal("ALPHA NOTICE ").withStyle(style -> style.withColor(0xFF6B6B).withBold(true)))
+                .append(Component.literal("Beta NOTICE ").withStyle(style -> style.withColor(0xFF6B6B).withBold(true)))
                         .append(Component.literal("- features and balance may change.").withStyle(style -> style.withColor(0xFFC2C2)))
         );
     }

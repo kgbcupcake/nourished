@@ -3,6 +3,7 @@ package dev.maire.nourished.tooling.scanner;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.core.component.DataComponents;
@@ -42,6 +43,7 @@ public final class UnassignedFoodScanner {
 
     private static final float DEFAULT_SPREAD_THRESHOLD = 0f;
     private static final boolean DEFAULT_ENABLE_RECIPE_INHERITANCE = false;
+    private static final float SCANNER_CLASSIFICATION_AMOUNT = 0.15f;
 
     private static volatile ScanCache cache;
     private static volatile boolean initialized = false;
@@ -174,6 +176,40 @@ public final class UnassignedFoodScanner {
      */
     public static CompletableFuture<ScanResult> scanAsync(ScanOptions options) {
         return CompletableFuture.supplyAsync(() -> scanFull(options));
+    }
+
+    /**
+     * Runs a full scan off-thread, then applies only confident classifications to
+     * {@link FoodNutritionRegistry#applyFromScanner}.
+     */
+    public static void scanAndApply(RecipeManager recipeManager) {
+        ScanOptions options = ScanOptions.defaults()
+                .withRecipeManager(recipeManager)
+                .withReports(false)
+                .withRecommendations(false);
+        scanAsync(options)
+                .thenAccept(result -> {
+                    Map<ResourceLocation, String> dominantMap = new HashMap<>();
+                    int confident = 0;
+                    int uncertain = 0;
+                    for (ClassificationResult r : result.allResults()) {
+                        if (r.uncertain()) {
+                            uncertain++;
+                        } else {
+                            confident++;
+                            dominantMap.put(r.itemId(), r.dominant());
+                        }
+                    }
+                    FoodNutritionRegistry.applyFromScanner(dominantMap, SCANNER_CLASSIFICATION_AMOUNT);
+                    Nourished.LOGGER.info(
+                            "[UnassignedFoodScanner] scanAndApply complete: {} confident, {} uncertain",
+                            confident,
+                            uncertain);
+                })
+                .exceptionally(ex -> {
+                    Nourished.LOGGER.warn("[UnassignedFoodScanner] scanAndApply failed", ex);
+                    return null;
+                });
     }
 
     /**

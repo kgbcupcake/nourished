@@ -2873,6 +2873,202 @@
     {
       "id": "mynethersdelight:nether_burger",
       "required": false
+    },
+    {
+      "id": "createfood:baked_potato_butter_bacon",
+      "required": false
+    },
+    {
+      "id": "createfood:baked_potato_butter_fish",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_cheese_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_cheese_onion",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_cheese_onion_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_cheese_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_onion_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_bacon_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_onion_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_onion_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:chicken_bun_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:chicken_bun_cheese_bacon",
+      "required": false
+    },
+    {
+      "id": "createfood:chicken_bun_cheese_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:chicken_bun_cheese_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:chicken_bun_cheese_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:chicken_bun_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:chicken_wrap_onion_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:eggplant_bun_cheese_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:fish_wrap_kelp_onion",
+      "required": false
+    },
+    {
+      "id": "createfood:hamburger_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:hamburger_onion_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:macaroni_bowl_cheese_bacon",
+      "required": false
+    },
+    {
+      "id": "createfood:macaroni_bowl_cheese_sausage",
+      "required": false
+    },
+    {
+      "id": "createfood:sausage_biscuit_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:sausage_biscuit_cheese_bacon",
+      "required": false
+    },
+    {
+      "id": "createfood:sausage_biscuit_sandwich_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:sausage_roll_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:scrambled_eggs_plate_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:spicy_sausage_roll_cheese",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:silverfish_fried_rice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:chicken_berry_salad",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:lionfish_roll",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:sea_meat_salad",
+      "required": false
+    },
+    {
+      "id": "minecolonies:eggdrop_soup",
+      "required": false
+    },
+    {
+      "id": "minecolonies:veggie_quiche",
+      "required": false
+    },
+    {
+      "id": "minersdelight:pasta_with_veggieballs",
+      "required": false
+    },
+    {
+      "id": "moredelight:chicken_salad",
+      "required": false
+    },
+    {
+      "id": "moredelight:cooked_rice_with_porkchop",
+      "required": false
+    },
+    {
+      "id": "moredelight:diced_potatoes_with_porkchop",
+      "required": false
+    },
+    {
+      "id": "moredelight:hamburger_with_cheese",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bbqchickenpizzaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:eggrollitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:hamandpineapplepizzaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:meatfeastpizzaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:meatpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sausagerollitem",
+      "required": false
+    },
+    {
+      "id": "refurbished_furniture:meatlovers_pizza_slice",
+      "required": false
+    },
+    {
+      "id": "spawn:bluefish_roll",
+      "required": false
     }
   ]
 }
