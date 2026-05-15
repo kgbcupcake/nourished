@@ -2038,6 +2038,50 @@
     {
       "id": "rusticdelight:syrup_coffee",
       "required": false
+    },
+    {
+      "id": "bakery:cake_dough",
+      "required": false
+    },
+    {
+      "id": "bakery:sweet_dough",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sweetberrymuffinitem",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:sweet_berry_muffin",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:breadfruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chocolateorangebiscuititem",
+      "required": false
+    },
+    {
+      "id": "moredelight:toast_with_sweet_berries",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:sweet_berry_jelly_sandwich",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sweetberryjellysandwichitem",
+      "required": false
+    },
+    {
+      "id": "refurbished_furniture:sweet_berry_jam_toast",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:oat_pancake_block",
+      "required": false
     }
   ]
 }
