@@ -8,7 +8,7 @@ Added
 
 - excluded_items array in scanner_spec.json — modpack creators and datapack authors can extend this     list without code changes
   
--hamburger stem mapping and archetype entry for correct multi-nutrient resolution across all           hamburger variants
+- hamburger stem mapping and archetype entry for correct multi-nutrient resolution across all           hamburger variants
 
 - sandwich archetype entry to inject grains signal for sandwich-type foods
 
