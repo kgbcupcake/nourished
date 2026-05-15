@@ -1454,6 +1454,90 @@
     {
       "id": "endersdelight:chorus_pie_slice",
       "required": false
+    },
+    {
+      "id": "aethersdelight:ginger_ale",
+      "required": false
+    },
+    {
+      "id": "aethersdelight:peppermint_tea",
+      "required": false
+    },
+    {
+      "id": "crabbersdelight:kelp_shake",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:blueberry_juice",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:blueberry_wine",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:cherry_juice",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:cherry_wine",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:glow_berry_juice",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:glow_berry_wine",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:green_grape_juice",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:green_grape_wine",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:hard_cider",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:mead",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:melon_wine",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:raspberry_juice",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:raspberry_wine",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:red_grape_juice",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:red_grape_wine",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:sweet_berry_juice",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:sweet_berry_wine",
+      "required": false
+    },
+    {
+      "id": "vinery:bottle_mojang_noir",
+      "required": false
     }
   ]
 }

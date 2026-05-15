@@ -2862,17 +2862,14 @@
       "id": "mynethersdelight:spicy_hoglin_stew",
       "required": false
     },
-
     {
       "id": "mynethersdelight:dried_ghast_with_milk",
       "required": false
     },
-
     {
       "id": "farmersdelight:hamburger",
       "required": false
     },
-
     {
       "id": "mynethersdelight:nether_burger",
       "required": false
