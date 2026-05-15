@@ -939,6 +939,22 @@
     {
       "id": "mynethersdelight:spicy_curry",
       "required": false
+    },
+    {
+      "id": "minersdelight:vegan_hamburger",
+      "required": false
+    },
+    {
+      "id": "minersdelight:vegan_wrap",
+      "required": false
+    },
+    {
+      "id": "minersdelight:vegan_steak_and_potatoes",
+      "required": false
+    },
+    {
+      "id": "minersdelight:vegan_patty",
+      "required": false
     }
   ]
 }

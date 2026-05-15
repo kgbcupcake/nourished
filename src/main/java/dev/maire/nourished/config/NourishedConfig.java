@@ -272,7 +272,7 @@ public final class NourishedConfig {
                 .defineInRange("confidenceSpreadThreshold", ConfigDefaultsLoader.getDouble(defaults, "scannerConfidenceSpreadThreshold", 3.0d), 0.0d, 20.0d);
         compositeRatioThreshold = builder
                 .comment("Minimum ratio (second / top) to trigger composite multi-nutrient output instead of single dominant")
-                .defineInRange("compositeRatioThreshold", ConfigDefaultsLoader.getDouble(defaults, "compositeRatioThreshold", 0.50d), 0.0d, 1.0d);
+                .defineInRange("compositeRatioThreshold", ConfigDefaultsLoader.getDouble(defaults, "compositeRatioThreshold", 0.40d), 0.0d, 1.0d);
         builder.pop();
 
         nutrientDecayRateOverrides = new LinkedHashMap<>();

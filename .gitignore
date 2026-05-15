@@ -34,3 +34,6 @@ run/
 
 # Cursor
 .cursor/
+
+
+*.launch

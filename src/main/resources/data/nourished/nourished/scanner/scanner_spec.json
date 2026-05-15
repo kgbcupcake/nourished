@@ -317,7 +317,10 @@
     "enchilada":   { "grains": 2.0, "proteins": 2.0 },
     "fajita":      { "proteins": 2.0, "vegetables": 2.0 },
     "quesadilla":  { "grains": 2.0, "dairy": 2.0 },
-    "trail":       { "grains": 1.0, "fruits": 1.0 }
+    "trail":       { "grains": 1.0, "fruits": 1.0 },
+    "sandwich":    { "grains": 3.0, "proteins": 2.0 },
+    "burger":      { "grains": 2.0, "proteins": 2.0 },
+    "vegan":       { "vegetables": 2.0, "grains": 1.0 }
   },
   "negative_keywords": {
     "steak":     { "fruits": -4.0, "vegetables": -4.0, "dairy": -2.0 },

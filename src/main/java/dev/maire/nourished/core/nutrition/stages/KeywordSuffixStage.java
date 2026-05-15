@@ -95,7 +95,7 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
     private static final float TERTIARY_TOKEN_WEIGHT  = 0.3f;
 
     private static final Set<String> PREPARATION_TOKENS = Set.of(
-            "pie", "tart", "salad", "sandwich",
+            "pie", "tart", "salad",
             "cake", "cookie", "smoothie", "juice", "jam",
             "bake", "baked", "fried", "smoked", "cooked"
     );

@@ -35,6 +35,11 @@ public record ClassificationResult(
         signals = List.copyOf(signals);
     }
 
+    /** Nutrient weight scores from classification; same map as {@link #scores()}. */
+    public Map<String, Float> nutrients() {
+        return scores;
+    }
+
     /**
      * Returns the top N signals by total magnitude.
      */

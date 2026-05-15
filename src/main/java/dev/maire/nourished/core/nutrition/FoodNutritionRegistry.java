@@ -16,6 +16,7 @@ import com.mojang.logging.LogUtils;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.tooling.scanner.ClassificationResult;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import dev.maire.nourished.tooling.scanner.RecipeInheritanceResolver;
@@ -117,39 +118,28 @@ public class FoodNutritionRegistry {
     }
 
     /**
-     * Replaces scanner-derived classifications from a dominant-category map (e.g. full food scan).
-     * Skips items with native nutrient tags, unknown item ids, API-registered {@link #EXTERNAL_CLASSIFICATIONS},
-     * or blank dominant keys.
+     * Replaces scanner-derived classifications from per-item nutrient maps (e.g. full food scan).
+     * Skips API-registered items and items that already have nutrient tags.
      */
-    public static void applyFromScanner(Map<ResourceLocation, String> dominantCategories, float amount) {
+    public static void applyFromScanner(Map<ResourceLocation, Map<String, Float>> perItemNutrients) {
         SCANNER_CLASSIFICATIONS.clear();
-        if (dominantCategories == null || dominantCategories.isEmpty()) {
-            LOGGER.info("[FoodNutritionRegistry] Scanner applied 0 classifications");
-            return;
-        }
-        int applied = 0;
-        for (Map.Entry<ResourceLocation, String> e : dominantCategories.entrySet()) {
-            ResourceLocation itemId = e.getKey();
-            String category = e.getValue();
-            if (category == null || category.isBlank()) {
-                continue;
-            }
-            Item item = BuiltInRegistries.ITEM.getOptional(itemId).orElse(null);
-            if (item == null) {
-                continue;
-            }
-            if (UnassignedFoodScanner.hasNutrientTag(new ItemStack(item))) {
-                continue;
-            }
+        for (Map.Entry<ResourceLocation, Map<String, Float>> entry : perItemNutrients.entrySet()) {
+            ResourceLocation itemId = entry.getKey();
             if (EXTERNAL_CLASSIFICATIONS.containsKey(itemId)) {
                 continue;
             }
-            ConcurrentHashMap<String, Float> inner = new ConcurrentHashMap<>();
-            inner.put(category, amount);
-            SCANNER_CLASSIFICATIONS.put(itemId, inner);
-            applied++;
+            ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
+            if (UnassignedFoodScanner.hasNutrientTag(stack)) {
+                continue;
+            }
+            Map<String, Float> inner = entry.getValue();
+            if (inner == null || inner.isEmpty()) {
+                continue;
+            }
+            SCANNER_CLASSIFICATIONS.put(itemId, new ConcurrentHashMap<>(inner));
         }
-        LOGGER.info("[FoodNutritionRegistry] Scanner applied {} classifications", applied);
+        RuntimeFoodResolver.getInstance().invalidateCache();
+        Nourished.LOGGER.info("[FoodNutritionRegistry] Scanner applied {} classifications", SCANNER_CLASSIFICATIONS.size());
     }
 
     /** Clears scanner-derived classifications only. */

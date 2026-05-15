@@ -1,6 +1,7 @@
 package dev.maire.nourished.compat;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -64,6 +65,13 @@ public final class NourishedFoodTooltipHelper {
         Map<String, Float> matchedBars = level != null
                 ? FoodNutritionRegistry.resolveNutrientBars(stack, false, level)
                 : FoodNutritionRegistry.resolveNutrientBars(stack, false);
+        Map<String, Float> external = FoodNutritionRegistry.getExternalClassification(
+                NourishedRegistryUtils.itemKey(stack.getItem()));
+        if (external != null) {
+            Map<String, Float> merged = new LinkedHashMap<>(matchedBars);
+            external.forEach((k, v) -> merged.merge(k, v, Float::sum));
+            matchedBars = merged;
+        }
         DietDelta delta = FoodNutritionRegistry.computeDietDelta(
                 stack, level, food.nutrition(), food.saturation(), matchedBars);
 
@@ -93,7 +101,7 @@ public final class NourishedFoodTooltipHelper {
             lines.add(Component.translatable("nourished.tooltip.fresh").withStyle(ChatFormatting.GREEN));
         }
 
-        final float minLine = 0.05f;
+        final float minLine = 0.02f;
         String fmt = multiplier < 1.0f ? "%.2f" : "%.1f";
         String highestKey = null;
         float highestValue = Float.NEGATIVE_INFINITY;

@@ -1713,6 +1713,34 @@
     {
       "id": "expandeddelight:cranberry_goat_cheese_toast",
       "required": false
+    },
+    {
+      "id": "create:meatball_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:meatball_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:pork_meatball_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:rabbit_meatball_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:strider_meatball_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:endermite_meatball_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_meatball_sandwich",
+      "required": false
     }
   ]
 }

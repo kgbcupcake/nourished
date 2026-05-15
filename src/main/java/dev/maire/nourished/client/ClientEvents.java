@@ -97,7 +97,7 @@ public final class ClientEvents {
         DietDelta delta = FoodNutritionRegistry.computeDietDelta(
                 stack, level, food.nutrition(), food.saturation(), matchedBars);
 
-        final float minLine = 0.05f;
+        final float minLine = 0.02f;
         String highestKey = null;
         float highestValue = Float.NEGATIVE_INFINITY;
         if (!matchedBars.isEmpty()) {

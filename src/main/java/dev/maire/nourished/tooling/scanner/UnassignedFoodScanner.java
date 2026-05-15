@@ -189,7 +189,7 @@ public final class UnassignedFoodScanner {
                 .withRecommendations(false);
         scanAsync(options)
                 .thenAccept(result -> {
-                    Map<ResourceLocation, String> dominantMap = new HashMap<>();
+                    Map<ResourceLocation, Map<String, Float>> nutrientMap = new HashMap<>();
                     int confident = 0;
                     int uncertain = 0;
                     for (ClassificationResult r : result.allResults()) {
@@ -197,10 +197,28 @@ public final class UnassignedFoodScanner {
                             uncertain++;
                         } else {
                             confident++;
-                            dominantMap.put(r.itemId(), r.dominant());
+                            Map<String, Float> n = r.nutrients();
+                            Map<String, Float> filtered = new HashMap<>();
+                            if (n != null) {
+                                for (Map.Entry<String, Float> e : n.entrySet()) {
+                                    Float v = e.getValue();
+                                    if (v != null && v > 0f) {
+                                        filtered.put(e.getKey(), v);
+                                    }
+                                }
+                            }
+                            Map<String, Float> toApply;
+                            if (!filtered.isEmpty()) {
+                                toApply = filtered;
+                            } else if (r.dominant() != null) {
+                                toApply = Map.of(r.dominant(), SCANNER_CLASSIFICATION_AMOUNT);
+                            } else {
+                                continue;
+                            }
+                            nutrientMap.put(r.itemId(), toApply);
                         }
                     }
-                    FoodNutritionRegistry.applyFromScanner(dominantMap, SCANNER_CLASSIFICATION_AMOUNT);
+                    FoodNutritionRegistry.applyFromScanner(nutrientMap);
                     Nourished.LOGGER.info(
                             "[UnassignedFoodScanner] scanAndApply complete: {} confident, {} uncertain",
                             confident,
