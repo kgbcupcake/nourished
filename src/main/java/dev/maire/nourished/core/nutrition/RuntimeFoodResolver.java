@@ -12,6 +12,7 @@ import dev.maire.nourished.core.nutrition.stages.NamespacePeerStage;
 import dev.maire.nourished.core.nutrition.stages.RecipeInheritanceStage;
 import dev.maire.nourished.core.nutrition.stages.ResolutionStageHandler;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
@@ -107,6 +108,11 @@ public final class RuntimeFoodResolver {
     }
 
     private ResolutionResult resolveUncached(ItemStack stack, ResourceLocation itemId, @Nullable RecipeManager recipeManager) {
+        if (ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())) {
+            return new ResolutionResult(
+                    Map.of(), Map.of(), List.of(), Map.of(), Map.of(),
+                    false, 0f, ResolutionStage.HARD_FALLBACK, "excluded_items");
+        }
         long start = System.nanoTime();
 
         Nourished.LOGGER.debug("[RuntimeFoodResolver] cache miss entering inference pipeline: {}", itemId);

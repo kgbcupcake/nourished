@@ -24,8 +24,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Loads the scanner classification spec from JSON.
@@ -166,8 +168,9 @@ public final class ScannerSpecRegistry {
         Map<String, Map<String, Float>> keywords = FoodTokenStemmer.stemMapKeys(parseStringFloatMap(getObj(root, "keywords")));
         Map<String, Map<String, Float>> negatives = FoodTokenStemmer.stemMapKeys(parseStringFloatMap(getObj(root, "negative_keywords")));
         List<ArchetypePattern> archetypes = parseArchetypes(getArr(root, "archetypes"));
+        Set<String> excludedItems = parseStringSet(getArr(root, "excluded_items"));
 
-        return new ScannerSpec(mult, heur, communityTags, namespaces, suffixes, keywords, negatives, archetypes);
+        return new ScannerSpec(mult, heur, communityTags, namespaces, suffixes, keywords, negatives, archetypes, excludedItems);
     }
 
     private static Multipliers parseMultipliers(JsonObject obj) {
@@ -255,6 +258,17 @@ public final class ScannerSpecRegistry {
         return Collections.unmodifiableList(out);
     }
 
+    private static Set<String> parseStringSet(JsonArray arr) {
+        if (arr == null) return Set.of();
+        Set<String> out = new LinkedHashSet<>();
+        for (JsonElement el : arr) {
+            if (el != null && el.isJsonPrimitive()) {
+                out.add(el.getAsString());
+            }
+        }
+        return Collections.unmodifiableSet(out);
+    }
+
     private static JsonObject getObj(JsonObject parent, String key) {
         if (parent == null || !parent.has(key)) return null;
         JsonElement el = parent.get(key);
@@ -293,14 +307,16 @@ public final class ScannerSpecRegistry {
             Map<String, Map<String, Float>> suffixWeights,
             Map<String, Map<String, Float>> keywordWeights,
             Map<String, Map<String, Float>> negativeKeywords,
-            List<ArchetypePattern> archetypes
+            List<ArchetypePattern> archetypes,
+            Set<String> excludedItems
     ) {
         public static ScannerSpec empty() {
             return new ScannerSpec(
                     Multipliers.defaults(),
                     FoodPropertyHeuristics.defaults(),
                     Map.of(), Map.of(), Map.of(), Map.of(), Map.of(),
-                    List.of()
+                    List.of(),
+                    Set.of()
             );
         }
     }

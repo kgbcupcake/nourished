@@ -265,6 +265,18 @@
     {
       "id": "mynethersdelight:plate_of_ghasta_with_cream",
       "required": false
+    },
+    {
+      "id": "hearthandharvest:chocolate_milk_bottle",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:goat_milk_bottle",
+      "required": false
+    },
+    {
+      "id": "rusticdelight:milk_coffee",
+      "required": false
     }
   ]
 }

@@ -4,6 +4,7 @@ import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.registry.RegistryLifecycleManager;
+import dev.maire.nourished.core.reload.NourishedReloadPipeline;
 import dev.maire.nourished.tooling.data.NourishedDataManager;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -17,7 +18,7 @@ public class ConfigReloadHandler {
     @SubscribeEvent
     public void onLevelLoad(LevelEvent.Load event) {
         if (!event.getLevel().isClientSide()) {
-            RegistryLifecycleManager.reloadAll();
+            NourishedReloadPipeline.reloadAll();
         }
     }
 

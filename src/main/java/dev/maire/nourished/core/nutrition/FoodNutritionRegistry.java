@@ -17,6 +17,7 @@ import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.tooling.scanner.ClassificationResult;
+import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import dev.maire.nourished.tooling.scanner.RecipeInheritanceResolver;
 import dev.maire.nourished.tooling.scanner.RecipeInheritanceResolver.RecipeInheritanceStep;
 
@@ -180,6 +181,10 @@ public class FoodNutritionRegistry {
      */
     public static Map<String, Float> resolveNutrientBars(ItemStack stack, boolean warnIfUnmatched, @Nullable RecipeManager recipeManager) {
         Item item = stack.getItem();
+        ResourceLocation itemId = NourishedRegistryUtils.itemKey(stack.getItem());
+        if (itemId != null && ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())) {
+            return Map.of();
+        }
         Map<String, Float> tagMatches = collectNutrientTagMatches(item);
         Map<String, Float> resolved = RuntimeFoodResolver.getInstance().resolve(stack, recipeManager);
 
@@ -334,12 +339,21 @@ public class FoodNutritionRegistry {
     private static Map<String, Float> blendTagAndResolverResults(
             Map<String, Float> tagMatches,
             Map<String, Float> resolved) {
-        Map<String, Float> merged = new LinkedHashMap<>(resolved);
-        tagMatches.forEach((k, v) -> merged.merge(k, v * 2.0f, Float::sum));
-        float total = merged.values().stream().reduce(0f, Float::sum);
+        // Tags are authoritative — seed from them at full weight.
+        // Resolver may only contribute nutrients not already covered by tags,
+        // at 0.5x weight so heuristic signal supplements without competing.
+        Map<String, Float> merged = new LinkedHashMap<>(tagMatches);
+        resolved.forEach((k, v) -> {
+            if (!tagMatches.containsKey(k)) {
+                merged.merge(k, v * 0.5f, Float::sum);
+            }
+        });
+        float total = 0f;
+        for (float v : merged.values()) total += v;
         if (total <= 0f) return tagMatches;
-        Map<String, Float> result = new LinkedHashMap<>();
-        merged.forEach((k, v) -> result.put(k, v / total));
+        final float norm = total;
+        Map<String, Float> result = new LinkedHashMap<>(merged.size());
+        merged.forEach((k, v) -> result.put(k, v / norm));
         return result;
     }
 

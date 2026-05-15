@@ -340,8 +340,8 @@
   },
   "archetypes": [
     { "pattern": "pie",       "contributions": { "grains": 2.0, "sugars": 2.0, "fruits": 1.0 } },
-    { "pattern": "burger",    "contributions": { "proteins": 2.0, "vegetables": 2.0, "grains": 2.0 } },
-    { "pattern": "hamburger", "contributions": { "proteins": 2.0, "vegetables": 2.0, "grains": 2.0 } },
+    { "pattern": "burger",    "contributions": { "grains": 2.0 } },
+    { "pattern": "hamburger", "contributions": { "grains": 2.0 } },
     { "pattern": "sandwich",  "contributions": { "grains": 2.0, "proteins": 2.0 } },
     { "pattern": "pizza",     "contributions": { "grains": 3.0, "dairy": 2.0, "proteins": 1.0 } },
     { "pattern": "smoothie",  "contributions": { "fruits": 3.0 } },
@@ -374,5 +374,24 @@
     { "pattern": "quesadilla",  "contributions": { "grains": 2.0, "dairy": 2.0 } },
     { "pattern": "tamale",      "contributions": { "grains": 2.0, "proteins": 1.0 } },
     { "pattern": "dumpling",    "contributions": { "grains": 2.0, "proteins": 1.0 } }
+  ],
+  "excluded_items": [
+    "aether:healing_stone",
+    "alexsmobs:fish_oil",
+    "bountifulbaubles:potion_recall",
+    "bountifulbaubles:potion_wormhole",
+    "enigmaticlegacyplus:enchanted_ichor_bottle",
+    "enigmaticlegacyplus:ichor_bottle",
+    "enigmaticlegacyplus:ichor_curse_bottle",
+    "farm_and_charm:chicken_feed",
+    "immersive_weathering:azalea_flowers",
+    "immersive_weathering:ice_sickle",
+    "immersive_weathering:icicle",
+    "mob_grinding_utils:solid_xp_baby",
+    "occultism:demons_dream_essence",
+    "occultism:otherworld_essence",
+    "rootsclassic:healing_poultice",
+    "supplementaries:lumisene_bottle",
+    "supplementaries:soap"
   ]
 }

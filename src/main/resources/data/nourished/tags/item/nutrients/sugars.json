@@ -1910,6 +1910,134 @@
     {
       "id": "mynethersdelight:spicy_cotton",
       "required": false
+    },
+    {
+      "id": "brewinandchewin:beer",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:bloody_mary",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:dread_nog",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:egg_grog",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:glittering_grenadine",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:kombucha",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:mead",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:pale_jane",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:red_rum",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:rice_wine",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:saccharine_rum",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:salty_folly",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:steel_toe_stout",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:strongroot_ale",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:vodka",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:withering_dross",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:bloody_mary",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:bubblegunk",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:ghastly_spirits",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:necronog",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:putrid_spice_latte",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:skyberry_brew",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:spider_bubble_tea",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:spider_extract",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:taro_milk_tea",
+      "required": false
+    },
+    {
+      "id": "garnished:sugar_cube",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:moonshine",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:root_beer",
+      "required": false
+    },
+    {
+      "id": "rusticdelight:chocolate_coffee",
+      "required": false
+    },
+    {
+      "id": "rusticdelight:coffee",
+      "required": false
+    },
+    {
+      "id": "rusticdelight:dark_coffee",
+      "required": false
+    },
+    {
+      "id": "rusticdelight:syrup_coffee",
+      "required": false
     }
   ]
 }

@@ -1681,6 +1681,38 @@
     {
       "id": "mynethersdelight:nether_burger",
       "required": false
+    },
+    {
+      "id": "endersdelight:chorus_pie_slice",
+      "required": false
+    },
+    {
+      "id": "ends_delight:chorus_fruit_pie_slice",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:applejellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chorusjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:glowberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:melonjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sweetberryjellytoastitem",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:cranberry_goat_cheese_toast",
+      "required": false
     }
   ]
 }
