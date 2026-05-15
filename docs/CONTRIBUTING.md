@@ -13,7 +13,7 @@ Nourished targets **NeoForge 1.21.1** with mod id `nourished`.
 - If a food item already has an explicit `nourished:nutrients/*` item tag, that tag wins and the scanner is not needed for that item.
 - If there is **no** such tag, Nourished uses **weighted signals** from this file (keywords, suffixes, namespaces, archetypes, and a few other rules) to infer the best match at **runtime**.
 
-**Runtime and reloads**
+### Runtime and reloads
 
 - You do **not** need to recompile the mod to try changes.
 - For quick local testing, copy your edited file to **`config/nourished/scanner_spec.json`** and run **`/nourished reload`** in-game (cheats enabled; operator-level permission on a server).
@@ -34,14 +34,14 @@ Nourished targets **NeoForge 1.21.1** with mod id `nourished`.
 
 All six groups used by the scanner:
 
-| Key | Meaning |
-|-----|--------|
-| **fruits** | Fresh fruits, juices, smoothies |
-| **vegetables** | Vegetables, salads, herbs |
-| **proteins** | Meats, fish, eggs, legumes |
-| **grains** | Bread, pasta, rice, cereals |
-| **sugars** | Sweets, candy, desserts, honey |
-| **dairy** | Milk, cheese, cream, yogurt |
+| Key            | Meaning                         |
+| -------------- | ------------------------------- |
+| **fruits**     | Fresh fruits, juices, smoothies |
+| **vegetables** | Vegetables, salads, herbs       |
+| **proteins**   | Meats, fish, eggs, legumes      |
+| **grains**     | Bread, pasta, rice, cereals     |
+| **sugars**     | Sweets, candy, desserts, honey  |
+| **dairy**      | Milk, cheese, cream, yogurt     |
 
 ---
 
@@ -83,7 +83,7 @@ What each part means:
 "meatball": { "proteins": 3.0 }
 ```
 
-**Weight guide**
+### Weight guide
 
 - **3.0** — Strong, clear signal (for example beef → proteins).
 - **2.0** — Moderate signal (for example corn → grains, even though corn is vegetable-adjacent in real life).
@@ -171,7 +171,7 @@ Before you open a pull request:
 
 Before keyword lookup, item names are **normalized**: common English plurals and variants are folded toward a **canonical root** so you usually only define the singular keyword (`meatballs` → `meatball`, `tamales` → work with the same root as `tamale` when the rules line up).
 
-**When to add a PR note**
+### When to add a PR note
 
 - If play-testing shows that a plural or loanword **does not** land on the keyword you expect, add a short subsection to your PR titled something like **“Stem / irregular forms”** listing **from → to** pairs you need (for example unusual plurals not covered by the built-in rules).
 - Maintainers can then extend the shared normalization list; you do **not** duplicate the same keyword under every plural spelling in JSON unless there is a good reason.
@@ -188,5 +188,60 @@ Before keyword lookup, item names are **normalized**: common English plurals and
 6. Confirm **Stage**, **Confidence**, and **normalized** nutrient breakdowns look sensible for that item.
 
 ---
+
+---
+
+## 10. Explicit tag entries
+
+Sometimes the scanner cannot classify a food correctly because the key ingredient
+is not reflected in the item ID. For example, `pamhc2foodextended:honeysoyribsitem`
+contains garlic, but `garlic` does not appear in the name — the scanner will never
+score vegetables for it no matter how well the keyword weights are tuned.
+
+In these cases, add the item directly to the correct tag file under:
+
+`src/main/resources/data/nourished/tags/item/nutrients/`
+
+### Format
+
+```json
+{
+  "id": "modid:itemid",
+  "required": false
+}
+```
+
+`"required": false` is mandatory for all non-vanilla items. Without it, the mod
+will crash on startup if that mod is not installed.
+
+### Which file to edit
+
+| File              | Use for                         |
+| ----------------- | ------------------------------- |
+| `proteins.json`   | Meat, fish, eggs, nuts, legumes |
+| `vegetables.json` | Vegetables, herbs, fungi        |
+| `fruits.json`     | Fruits, berries                 |
+| `grains.json`     | Bread, pasta, rice, baked goods |
+| `dairy.json`      | Milk, cheese, yogurt, butter    |
+| `sugars.json`     | Candy, honey, jam, desserts     |
+
+### Finding the item ID
+
+Hold the item in your main hand and run `/nourished debug held`. The item ID
+is shown at the top of the output.
+
+### Tags vs scanner_spec
+
+Use **tag entries** when:
+
+- The ingredient causing the classification is not in the item name
+- The item is definitively one category with no ambiguity
+- You want to hard-override what the scanner guesses
+
+Use **scanner_spec** when:
+
+- A whole class of items from one mod is miscategorized
+- A keyword or suffix is missing that would fix many items at once
+- You want the scanner to learn a pattern, not just fix one item
 
 Thank you for helping players enjoy balanced diets in more modpacks. Every careful line of JSON makes the experience smoother for someone else.

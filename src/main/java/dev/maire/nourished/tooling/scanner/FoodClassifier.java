@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -211,22 +212,31 @@ public final class FoodClassifier {
             float secondarySuffixWeight
     ) {
         Map<String, Float> contributions = new HashMap<>();
-        String[] tokens = path.split("_");
+        List<String> raw = FoodTokenStemmer.rawSegmentsForPath(path);
+        String[] unders = path.split("_");
+        if (raw.isEmpty() && unders.length == 0) {
+            return contributions;
+        }
 
-        if (tokens.length > 0) {
-            String lastToken = tokens[tokens.length - 1].toLowerCase();
-            Map<String, Float> weights = suffixWeights.get(lastToken);
-            if (weights != null) {
-                contributions.putAll(weights);
-            }
+        String lastToken = !raw.isEmpty()
+            ? raw.get(raw.size() - 1).toLowerCase(Locale.ROOT)
+            : unders[unders.length - 1].toLowerCase(Locale.ROOT);
+        Map<String, Float> weights = suffixWeights.get(lastToken);
+        if (weights != null) {
+            contributions.putAll(weights);
+        }
 
-            if (tokens.length > 1) {
-                String secondLast = tokens[tokens.length - 2].toLowerCase();
-                Map<String, Float> secondWeights = suffixWeights.get(secondLast);
-                if (secondWeights != null) {
-                    for (Map.Entry<String, Float> e : secondWeights.entrySet()) {
-                        contributions.merge(e.getKey(), e.getValue() * secondarySuffixWeight, Float::sum);
-                    }
+        String secondLast = null;
+        if (raw.size() > 1) {
+            secondLast = raw.get(raw.size() - 2).toLowerCase(Locale.ROOT);
+        } else if (unders.length > 1) {
+            secondLast = unders[unders.length - 2].toLowerCase(Locale.ROOT);
+        }
+        if (secondLast != null) {
+            Map<String, Float> secondWeights = suffixWeights.get(secondLast);
+            if (secondWeights != null) {
+                for (Map.Entry<String, Float> e : secondWeights.entrySet()) {
+                    contributions.merge(e.getKey(), e.getValue() * secondarySuffixWeight, Float::sum);
                 }
             }
         }
@@ -238,15 +248,11 @@ public final class FoodClassifier {
             Map<String, Map<String, Float>> keywordWeights
     ) {
         Map<String, Float> contributions = new HashMap<>();
-        String[] tokens = path.toLowerCase().split("_");
-
-        for (String token : tokens) {
-            for (String root : FoodTokenStemmer.stemAll(token)) {
-                Map<String, Float> weights = keywordWeights.get(root);
-                if (weights != null) {
-                    for (Map.Entry<String, Float> e : weights.entrySet()) {
-                        contributions.merge(e.getKey(), e.getValue(), Float::sum);
-                    }
+        for (String root : FoodTokenStemmer.tokenizeForScoring(path)) {
+            Map<String, Float> weights = keywordWeights.get(root);
+            if (weights != null) {
+                for (Map.Entry<String, Float> e : weights.entrySet()) {
+                    contributions.merge(e.getKey(), e.getValue(), Float::sum);
                 }
             }
         }
@@ -258,15 +264,11 @@ public final class FoodClassifier {
             Map<String, Map<String, Float>> negativeKeywords
     ) {
         Map<String, Float> contributions = new HashMap<>();
-        String[] tokens = path.toLowerCase().split("_");
-
-        for (String token : tokens) {
-            for (String root : FoodTokenStemmer.stemAll(token)) {
-                Map<String, Float> weights = negativeKeywords.get(root);
-                if (weights != null) {
-                    for (Map.Entry<String, Float> e : weights.entrySet()) {
-                        contributions.merge(e.getKey(), e.getValue(), Float::sum);
-                    }
+        for (String root : FoodTokenStemmer.tokenizeForScoring(path)) {
+            Map<String, Float> weights = negativeKeywords.get(root);
+            if (weights != null) {
+                for (Map.Entry<String, Float> e : weights.entrySet()) {
+                    contributions.merge(e.getKey(), e.getValue(), Float::sum);
                 }
             }
         }
@@ -370,6 +372,10 @@ public final class FoodClassifier {
     }
 
     private String extractTrailingToken(String path) {
+        List<String> raw = FoodTokenStemmer.rawSegmentsForPath(path);
+        if (!raw.isEmpty()) {
+            return raw.get(raw.size() - 1);
+        }
         String[] tokens = path.split("_");
         return tokens.length > 0 ? tokens[tokens.length - 1] : path;
     }
@@ -389,7 +395,9 @@ public final class FoodClassifier {
 
         String dominant = sorted.get(0).getKey();
         String secondary = sorted.size() > 1 ? sorted.get(1).getKey() : null;
-        float spread = sorted.get(0).getValue() - (secondary != null ? sorted.get(1).getValue() : 0f);
+        float topScore = sorted.get(0).getValue();
+        float secondScore = sorted.size() > 1 ? sorted.get(1).getValue() : 0f;
+        float spread = topScore - secondScore;
         boolean uncertain = spread < confidenceSpreadThreshold;
 
         return new ClassificationResult(itemId, scores, dominant, secondary, spread, signals, uncertain);

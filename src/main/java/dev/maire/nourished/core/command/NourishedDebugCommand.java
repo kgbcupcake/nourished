@@ -3,10 +3,16 @@ package dev.maire.nourished.core.command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.maire.nourished.config.ModuleCache;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.CacheStats;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.NutrientResolutionTrace;
 import dev.maire.nourished.core.nutrition.ResolutionResult;
 import dev.maire.nourished.core.nutrition.ResolutionStage;
+import dev.maire.nourished.core.nutrition.RuntimeCascadeStage;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
+import dev.maire.nourished.core.nutrition.TagRuntimeBlend;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -17,7 +23,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.neoforged.fml.loading.FMLPaths;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -137,52 +152,164 @@ public final class NourishedDebugCommand {
 
         RecipeManager recipeManager = source.getServer().getRecipeManager();
         ResolutionResult result = RuntimeFoodResolver.getInstance().resolveWithResult(stack, recipeManager);
-
-        if (result == null) {
-            source.sendFailure(Component.literal("Could not classify item.").withStyle(ChatFormatting.RED));
-            return 0;
-        }
+        NutrientResolutionTrace trace = FoodNutritionRegistry.resolveHeldItemTrace(stack, recipeManager);
 
         ResourceLocation itemId = NourishedRegistryUtils.itemKey(stack.getItem());
         String itemName = itemId != null ? itemId.toString() : "unknown";
 
         sendHeader(source);
         sendKeyValue(source, "Item:       ", itemName);
-        sendStageLine(source, result.stage());
-        sendKeyValue(source, "Confidence: ", fmt(result.confidence()));
-        sendKeyValue(source, "Reason:     ", result.debugReason());
-        sendCacheLine(source, result.cacheHit());
-        sendBlank(source);
-
-        sendSection(source, "Tokens:");
-        if (result.tokens().isEmpty()) {
-            sendDarkGray(source, "  none");
-        } else {
-            for (String token : result.tokens()) {
-                Float weight = result.tokenWeights().get(token);
-                sendTokenLine(source, token, weight != null ? weight : 0f);
-            }
+        sendPipelineStageLine(source, trace.stage());
+        if (result != null) {
+            sendCascadeStageLine(source, result.stage());
+            sendKeyValue(source, "Confidence: ", fmt(result.confidence()));
+            sendKeyValue(source, "Reason:     ", result.debugReason());
+            sendCacheLine(source, result.cacheHit());
         }
         sendBlank(source);
 
-        sendSection(source, "Raw Scores:");
-        sendSortedMapDescending(source, result.rawScores());
-        sendBlank(source);
-
-        sendSection(source, "Normalized:");
-        sendSortedMapDescending(source, result.nutrients());
-        sendBlank(source);
-
-        sendSection(source, "Rejected Signals:");
-        if (result.rejectedSignals().isEmpty()) {
-            sendDarkGray(source, "  none");
-        } else {
-            for (Map.Entry<String, String> entry : result.rejectedSignals().entrySet()) {
-                sendRejectedLine(source, entry.getKey(), entry.getValue());
+        if (result != null) {
+            sendSection(source, "Tokens:");
+            if (result.tokens().isEmpty()) {
+                sendDarkGray(source, "  none");
+            } else {
+                for (String token : result.tokens()) {
+                    Float weight = result.tokenWeights().get(token);
+                    sendTokenLine(source, token, weight != null ? weight : 0f);
+                }
             }
+            sendBlank(source);
+
+            sendSection(source, "Raw Scores:");
+            sendSortedMapDescending(source, result.rawScores());
+            sendBlank(source);
+
+            sendSection(source, "Normalized:");
+            sendSortedMapDescending(source, result.nutrients());
+            sendBlank(source);
+
+            sendSection(source, "Rejected Signals:");
+            if (result.rejectedSignals().isEmpty()) {
+                sendDarkGray(source, "  none");
+            } else {
+                for (Map.Entry<String, String> entry : result.rejectedSignals().entrySet()) {
+                    sendRejectedLine(source, entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        sendBlank(source);
+        sendSection(source, "Final Bars:");
+        sendSortedMapDescending(source, trace.finalMergedBars());
+
+        if (ModuleCache.enableDebugLogging) {
+            sendBlank(source);
+            sendTraceDetails(source, trace);
+        }
+
+        Path dumpPath = writeTraceDump(trace, itemName, stack.getHoverName().getString());
+        if (dumpPath != null) {
+            sendBlank(source);
+            source.sendSuccess(() -> Component.literal("Trace written to: ")
+                    .withStyle(ChatFormatting.GRAY)
+                    .append(Component.literal(dumpPath.toString()).withStyle(ChatFormatting.WHITE)), false);
         }
 
         return 1;
+    }
+
+    private static void sendTraceDetails(CommandSourceStack source, NutrientResolutionTrace trace) {
+        sendSection(source, "Resolution Trace:");
+
+        sendKeyValue(source, "  Tag Raw:    ", mapKeysString(trace.tagDerivedRaw()));
+        sendKeyValue(source, "  Tag Filter: ", mapKeysString(trace.tagDerivedFiltered()));
+        if (!trace.strippedByCompat().isEmpty()) {
+            sendKeyValue(source, "  Stripped:   ", String.join(", ", trace.strippedByCompat()));
+        }
+        sendKeyValue(source, "  External:   ", trace.externalSource().name() + " " + mapKeysString(trace.externalMap()));
+        sendKeyValue(source, "  Resolver:   ", mapKeysString(trace.resolverNutrients()));
+
+        if (!trace.blendPrecedence().isEmpty()) {
+            sendBlank(source);
+            sendSection(source, "Blend Decisions:");
+            for (Map.Entry<String, TagRuntimeBlend.Precedence> e : trace.blendPrecedence().entrySet()) {
+                sendKeyValue(source, "  " + e.getKey() + ": ", e.getValue().name());
+            }
+        }
+
+        if (!trace.blendDiscardedResolver().isEmpty()) {
+            sendBlank(source);
+            sendSection(source, "Discarded (tag precedence):");
+            for (Map.Entry<String, Float> e : trace.blendDiscardedResolver().entrySet()) {
+                sendKeyValue(source, "  " + e.getKey() + ": ", fmt(e.getValue()));
+            }
+        }
+    }
+
+    private static String mapKeysString(Map<String, Float> map) {
+        if (map.isEmpty()) return "(none)";
+        return String.join(", ", map.keySet());
+    }
+
+    private static Path writeTraceDump(NutrientResolutionTrace trace, String itemIdStr, String displayName) {
+        try {
+            Path debugDir = FMLPaths.GAMEDIR.get().resolve("config").resolve("nourished").resolve("debug");
+            Files.createDirectories(debugDir);
+
+            Instant dumpedAt = Instant.now();
+            String sanitizedId = sanitizeForFilename(itemIdStr);
+            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
+                    .withZone(ZoneOffset.UTC)
+                    .format(dumpedAt);
+            String filename = "held_" + sanitizedId + "_" + timestamp + ".txt";
+            Path path = debugDir.resolve(filename);
+
+            try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+                writer.write("Item ID: ");
+                writer.write(itemIdStr);
+                writer.write("\nDisplay Name: ");
+                writer.write(singleLineForDump(displayName));
+                writer.write("\nTimestamp: ");
+                writer.write(DateTimeFormatter.ISO_INSTANT.format(dumpedAt));
+                writer.write("\n\n");
+                writer.write(trace.format());
+            }
+
+            return path;
+        } catch (IOException e) {
+            Nourished.LOGGER.warn("[NourishedDebugCommand] Failed to write trace dump: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /** Collapses line breaks so trace dump header stays single-line per field. */
+    private static String singleLineForDump(String s) {
+        return s == null ? "" : s.replace('\r', ' ').replace('\n', ' ');
+    }
+
+    private static String sanitizeForFilename(String s) {
+        StringBuilder sb = new StringBuilder(s.length());
+        for (char c : s.toCharArray()) {
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '-' || c == '.') {
+                sb.append(c);
+            } else {
+                sb.append('_');
+            }
+        }
+        return sb.toString();
+    }
+
+    private static void sendPipelineStageLine(CommandSourceStack source, ResolutionStage stage) {
+        ChatFormatting color = switch (stage) {
+            case TAG_MATCH -> ChatFormatting.GREEN;
+            case BLENDED -> ChatFormatting.AQUA;
+            case SCANNER_CLASSIFIED -> ChatFormatting.YELLOW;
+            case RUNTIME_RESOLVER -> ChatFormatting.WHITE;
+            case UNCLASSIFIED -> ChatFormatting.RED;
+        };
+        MutableComponent line = Component.literal("Stage:      ").withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(stage.name()).withStyle(color));
+        source.sendSuccess(() -> line, false);
     }
 
     private static void sendHeader(CommandSourceStack source) {
@@ -199,9 +326,9 @@ public final class NourishedDebugCommand {
         source.sendSuccess(() -> line, false);
     }
 
-    private static void sendStageLine(CommandSourceStack source, ResolutionStage stage) {
-        ChatFormatting color = stage == ResolutionStage.COMPOSITE ? ChatFormatting.AQUA : ChatFormatting.WHITE;
-        MutableComponent line = Component.literal("Stage:      ").withStyle(ChatFormatting.GRAY)
+    private static void sendCascadeStageLine(CommandSourceStack source, RuntimeCascadeStage stage) {
+        ChatFormatting color = stage == RuntimeCascadeStage.COMPOSITE ? ChatFormatting.AQUA : ChatFormatting.WHITE;
+        MutableComponent line = Component.literal("Cascade:    ").withStyle(ChatFormatting.GRAY)
                 .append(Component.literal(stage.name()).withStyle(color));
         source.sendSuccess(() -> line, false);
     }

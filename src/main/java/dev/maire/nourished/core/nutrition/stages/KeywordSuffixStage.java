@@ -3,12 +3,13 @@ package dev.maire.nourished.core.nutrition.stages;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.ResolutionResult;
-import dev.maire.nourished.core.nutrition.ResolutionStage;
+import dev.maire.nourished.core.nutrition.RuntimeCascadeStage;
 import dev.maire.nourished.core.nutrition.StageContext;
 import dev.maire.nourished.tooling.scanner.ArchetypePattern;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry.Multipliers;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry.ScannerSpec;
+import dev.maire.nourished.tooling.scanner.FoodTokenStemmer;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -18,6 +19,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,67 +30,6 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
             "with", "and", "of", "in", "on", "the", "a", "an",
             "or", "from", "de", "la", "le", "al"
     );
-
-    private static final Map<String, String> STEMS;
-    static {
-        Map<String, String> m = new HashMap<>();
-        m.put("tomatoes", "tomato");
-        m.put("berries", "berry");
-        m.put("meatballs", "meatball");
-        m.put("potatoes", "potato");
-        m.put("cherries", "cherry");
-        m.put("strawberries", "strawberry");
-        m.put("blueberries", "blueberry");
-        m.put("raspberries", "raspberry");
-        m.put("blackberries", "blackberry");
-        m.put("cranberries", "cranberry");
-        m.put("carrots", "carrot");
-        m.put("apples", "apple");
-        m.put("oranges", "orange");
-        m.put("lemons", "lemon");
-        m.put("melons", "melon");
-        m.put("onions", "onion");
-        m.put("mushrooms", "mushroom");
-        m.put("peppers", "pepper");
-        m.put("cookies", "cookie");
-        m.put("pies", "pie");
-        m.put("cakes", "cake");
-        m.put("steaks", "steak");
-        m.put("chops", "chop");
-        m.put("drumsticks", "drumstick");
-        m.put("loaves", "loaf");
-        m.put("rolls", "roll");
-        m.put("noodles", "noodle");
-        m.put("soups", "soup");
-        m.put("stews", "stew");
-        m.put("salads", "salad");
-        m.put("roasts", "roast");
-        m.put("fillets", "fillet");
-        m.put("slices", "slice");
-        m.put("grapes", "grape");
-        m.put("olives", "olive");
-        m.put("beans", "bean");
-        m.put("beets", "beet");
-        m.put("turnips", "turnip");
-        m.put("radishes", "radish");
-        m.put("peaches", "peach");
-        m.put("mangoes", "mango");
-        m.put("bananas", "banana");
-        m.put("oats", "oat");
-        m.put("dumplings", "dumpling");
-        m.put("prawns", "prawn");
-        m.put("clams", "clam");
-        m.put("oysters", "oyster");
-        m.put("tamales", "tamale");
-        m.put("churros", "churro");
-        m.put("scones", "scone");
-        m.put("carnitas", "carnita");
-        m.put("fajitas", "fajita");
-        m.put("enchiladas", "enchilada");
-        m.put("macarons", "macaron");
-        m.put("hamburger", "burger");
-        STEMS = Collections.unmodifiableMap(m);
-    }
 
     private static final float PRIMARY_TOKEN_WEIGHT   = 1.0f;
     private static final float SECONDARY_TOKEN_WEIGHT = 0.6f;
@@ -181,7 +122,7 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
             return new ResolutionResult(
                     nutrients, Map.copyOf(sr.scores),
                     sr.tokens, sr.tokenWeights, rejected,
-                    false, top, ResolutionStage.COMPOSITE, debugReason);
+                    false, top, RuntimeCascadeStage.COMPOSITE, debugReason);
         }
 
         float spread = StageMath.computeSpread(sr.scores);
@@ -222,7 +163,7 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
         return new ResolutionResult(
                 nutrients, Map.copyOf(sr.scores),
                 sr.tokens, sr.tokenWeights, rejected,
-                false, spread, ResolutionStage.KEYWORD_SUFFIX, debugReason);
+                false, spread, RuntimeCascadeStage.KEYWORD_SUFFIX, debugReason);
     }
 
     private static float compositeRatioThreshold() {
@@ -274,22 +215,23 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
         }
 
         String path = itemId.getPath();
-        String[] rawTokens = path.split("_");
-        List<String> tokens = new ArrayList<>(rawTokens.length);
-        List<String> stemmedTokens = new ArrayList<>(rawTokens.length);
+        List<String> rawSegments = FoodTokenStemmer.rawSegmentsForPath(path);
+        List<String> tokens = new ArrayList<>(rawSegments.size());
+        List<String> stemmedTokens = new ArrayList<>();
         Map<String, Float> tokenWeightMap = new LinkedHashMap<>();
-        for (int i = 0; i < rawTokens.length; i++) {
-            String t = rawTokens[i].toLowerCase();
-            if (STOP_WORDS.contains(t)) continue;
-            if (!t.isEmpty()) {
-                String stemmed = stem(t);
+        for (String raw : rawSegments) {
+            String t = raw.toLowerCase(Locale.ROOT);
+            if (STOP_WORDS.contains(t) || t.isEmpty()) continue;
+            List<String> chunkStems = FoodTokenStemmer.stemAll(raw);
+            if (chunkStems.isEmpty()) continue;
+            float positionalWeight = weightForPosition(stemmedTokens.size());
+            for (String stemmed : chunkStems) {
                 tokens.add(t);
                 stemmedTokens.add(stemmed);
-                float positionalWeight = weightForPosition(tokens.size() - 1);
                 float semanticMult = PREPARATION_TOKENS.contains(stemmed) ? 0.5f : 1.0f;
                 float ambiguousMult = AMBIGUOUS_TOKENS.contains(stemmed) ? AMBIGUOUS_TOKEN_MULTIPLIER : 1.0f;
                 float finalWeight = positionalWeight * semanticMult * ambiguousMult;
-                tokenWeightMap.put(stemmed, finalWeight);
+                tokenWeightMap.merge(stemmed, finalWeight, Float::max);
             }
         }
 
@@ -356,14 +298,5 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
 
         scores.entrySet().removeIf(e -> e.getValue() <= 0f);
         return new ScoreResult(scores, List.copyOf(stemmedTokens), Map.copyOf(tokenWeightMap));
-    }
-
-    private static String stem(String token) {
-        String irregular = STEMS.get(token);
-        return irregular != null ? irregular : token;
-    }
-
-    static Map<String, String> stemsSnapshot() {
-        return STEMS;
     }
 }

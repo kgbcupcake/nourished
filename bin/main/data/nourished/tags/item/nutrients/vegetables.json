@@ -955,6 +955,19 @@
     {
       "id": "minersdelight:vegan_patty",
       "required": false
+    },
+    {
+      "id": "moredelight:loaded_hamburger",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:honeyglazedcarrotsitem",
+      "required": false
+    },
+
+    {
+      "id": "pamhc2foodextended:honeysoyribsitem",
+      "required": false
     }
   ]
 }

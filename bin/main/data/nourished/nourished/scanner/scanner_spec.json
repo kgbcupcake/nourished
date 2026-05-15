@@ -246,6 +246,7 @@
     "scone":     { "grains": 2.0, "sugars": 1.0 },
     "churro":    { "grains": 2.0, "sugars": 2.0 },
     "macaron":   { "grains": 1.0, "sugars": 3.0 },
+    "muffin":    { "grains": 2.0 },
     "tamale":    { "grains": 2.0, "proteins": 1.0 },
 
     "sugar":       { "sugars": 3.0 },
@@ -269,8 +270,9 @@
     "donut":       { "sugars": 3.0 },
     "doughnut":    { "sugars": 3.0 },
     "lollipop":    { "sugars": 3.0 },
+    "glazed":      { "sugars": 1.0 },
     "gummy":       { "sugars": 3.0 },
-    "honey":       { "sugars": 3.0 },
+    "honey":       { "sugars": 1.5 },
     "syrup":       { "sugars": 3.0 },
     "jam":         { "sugars": 2.0, "fruits": 1.0 },
     "jelly":       { "sugars": 2.0, "fruits": 1.0 },

@@ -2,6 +2,7 @@ package dev.maire.nourished.core.nutrition.stages;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.tooling.scanner.FoodTokenStemmer;
 import dev.maire.nourished.core.nutrition.CacheStats;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
@@ -25,10 +26,7 @@ final class RuntimeFoodResolverTest {
     static String runAll() {
         int passed = 0;
 
-        testStemMapIsUnmodifiable();
-        passed++;
-
-        testStemMapContainsSpecExamples();
+        testStemmerSpecExamples();
         passed++;
 
         testCacheStatsInitiallyZero();
@@ -43,21 +41,10 @@ final class RuntimeFoodResolverTest {
         return "[RuntimeFoodResolverTest] " + passed + " validations passed";
     }
 
-    private static void testStemMapIsUnmodifiable() {
-        Map<String, String> stems = KeywordSuffixStage.stemsSnapshot();
-        try {
-            stems.put("__test__", "__test__");
-            throw new AssertionError("Stem map should be unmodifiable");
-        } catch (UnsupportedOperationException expected) {
-            // correct
-        }
-    }
-
-    private static void testStemMapContainsSpecExamples() {
-        Map<String, String> stems = KeywordSuffixStage.stemsSnapshot();
-        assertEquals("tomato", stems.get("tomatoes"), "tomatoes -> tomato");
-        assertEquals("berry", stems.get("berries"), "berries -> berry");
-        assertEquals("meatball", stems.get("meatballs"), "meatballs -> meatball");
+    private static void testStemmerSpecExamples() {
+        assertEquals("tomato", FoodTokenStemmer.stem("tomatoes"), "tomatoes -> tomato");
+        assertEquals("berry", FoodTokenStemmer.stem("berries"), "berries -> berry");
+        assertEquals("meatball", FoodTokenStemmer.stem("meatballs"), "meatballs -> meatball");
     }
 
     private static void testCacheStatsInitiallyZero() {

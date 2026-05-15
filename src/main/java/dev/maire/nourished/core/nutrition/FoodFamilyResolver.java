@@ -2,19 +2,22 @@ package dev.maire.nourished.core.nutrition;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.registry.AbstractRegistry;
+import dev.maire.nourished.tooling.scanner.FoodTokenStemmer;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Resolves food item IDs to logical food families based on token matching against the path.
- * The path is split on underscores into lowercase tokens, and each keyword must match a whole
- * token (not a substring) to avoid false positives like {@code seabass_soup} matching
- * {@code bass} or {@code scroll_of_food} matching {@code roll}.
+ * The path is tokenized the same way as scanner scoring ({@link FoodTokenStemmer#rawSegmentsForPath}:
+ * underscores split into segments; single CamelCase segments expand with a food dictionary).
+ * Each keyword must match a whole token (not a substring) to avoid false positives like
+ * {@code seabass_soup} matching {@code bass} or {@code scroll_of_food} matching {@code roll}.
  * Used by both {@link FoodNutritionRegistry} and {@link UnassignedFoodScanner}.
  * All resolutions are cached for O(1) repeated lookups.
  */
@@ -78,12 +81,12 @@ public final class FoodFamilyResolver {
     }
 
     private static Set<String> tokenize(String path) {
-        String[] parts = path.split("_");
-        if (parts.length > 64) return Set.of();
-        Set<String> tokens = new HashSet<>(parts.length);
-        for (String part : parts) {
+        List<String> segs = FoodTokenStemmer.rawSegmentsForPath(path);
+        if (segs.size() > 64) return Set.of();
+        Set<String> tokens = new HashSet<>(segs.size() * 2);
+        for (String part : segs) {
             if (!part.isEmpty()) {
-                tokens.add(part.toLowerCase());
+                tokens.add(part.toLowerCase(Locale.ROOT));
             }
         }
         return tokens;

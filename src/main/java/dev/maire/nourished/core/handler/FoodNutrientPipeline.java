@@ -226,6 +226,9 @@ final class FoodNutrientPipeline {
         root.addProperty("classifier_path", foodOverride
                 ? "FOOD_OVERRIDE"
                 : (diagnostic != null ? diagnostic.classifierPath() : "UNCLASSIFIED"));
+        root.addProperty("pipeline_stage", foodOverride
+                ? "FOOD_OVERRIDE"
+                : (diagnostic != null ? diagnostic.pipelineStage().name() : "UNCLASSIFIED"));
 
         JsonObject playerJo = new JsonObject();
         playerJo.addProperty("name", player.getName().getString());

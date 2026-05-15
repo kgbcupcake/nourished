@@ -911,6 +911,10 @@
       "required": false
     },
     {
+      "id": "pamhc2foodextended:honeysoyribsitem",
+      "required": false
+    },
+    {
       "id": "pamhc2foodextended:pemmicanitem",
       "required": false
     },

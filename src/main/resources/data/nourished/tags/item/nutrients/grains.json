@@ -739,6 +739,14 @@
       "required": false
     },
     {
+      "id": "pamhc2foodcore:honeymuffinitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:honeyglazeddonutitem",
+      "required": false
+    },
+    {
       "id": "pamhc2foodextended:aebleskiversitem",
       "required": false
     },

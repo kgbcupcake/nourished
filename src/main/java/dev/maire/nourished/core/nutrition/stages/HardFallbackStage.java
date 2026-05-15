@@ -2,7 +2,7 @@ package dev.maire.nourished.core.nutrition.stages;
 
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.ResolutionResult;
-import dev.maire.nourished.core.nutrition.ResolutionStage;
+import dev.maire.nourished.core.nutrition.RuntimeCascadeStage;
 import dev.maire.nourished.core.nutrition.StageContext;
 import net.minecraft.resources.ResourceLocation;
 
@@ -21,7 +21,7 @@ public final class HardFallbackStage implements ResolutionStageHandler {
         return new ResolutionResult(
                 Map.of(), Map.of(),
                 List.of(), Map.of(), Map.of(),
-                false, 0f, ResolutionStage.HARD_FALLBACK,
+                false, 0f, RuntimeCascadeStage.HARD_FALLBACK,
                 "unclassified");
     }
 }

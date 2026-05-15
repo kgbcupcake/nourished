@@ -15,7 +15,7 @@ public record ResolutionResult(
         Map<String, String> rejectedSignals,
         boolean cacheHit,
         float confidence,
-        ResolutionStage stage,
+        RuntimeCascadeStage stage,
         String debugReason
 ) {
 

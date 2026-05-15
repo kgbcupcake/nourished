@@ -111,7 +111,7 @@ public final class RuntimeFoodResolver {
         if (ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())) {
             return new ResolutionResult(
                     Map.of(), Map.of(), List.of(), Map.of(), Map.of(),
-                    false, 0f, ResolutionStage.HARD_FALLBACK, "excluded_items");
+                    false, 0f, RuntimeCascadeStage.HARD_FALLBACK, "excluded_items");
         }
         long start = System.nanoTime();
 
@@ -131,16 +131,16 @@ public final class RuntimeFoodResolver {
         if (result == null) {
             result = new ResolutionResult(
                     Map.of(), Map.of(), List.of(), Map.of(), Map.of(),
-                    false, 0f, ResolutionStage.HARD_FALLBACK, "pipeline exhausted");
+                    false, 0f, RuntimeCascadeStage.HARD_FALLBACK, "pipeline exhausted");
         }
 
         resolvedCache.put(itemId, result);
         NourishedUnknownFoodLogger.log(result, itemId);
 
-        if (result.stage() == ResolutionStage.COMMUNITY_TAG
-                || result.stage() == ResolutionStage.KEYWORD_SUFFIX
-                || result.stage() == ResolutionStage.COMPOSITE
-                || result.stage() == ResolutionStage.RECIPE_INHERITANCE) {
+        if (result.stage() == RuntimeCascadeStage.COMMUNITY_TAG
+                || result.stage() == RuntimeCascadeStage.KEYWORD_SUFFIX
+                || result.stage() == RuntimeCascadeStage.COMPOSITE
+                || result.stage() == RuntimeCascadeStage.RECIPE_INHERITANCE) {
             namespacePeers.computeIfAbsent(itemId.getNamespace(), k -> new RunningAverage())
                     .add(result.nutrients());
         }

@@ -1,7 +1,7 @@
 package dev.maire.nourished.core.nutrition.stages;
 
 import dev.maire.nourished.core.nutrition.ResolutionResult;
-import dev.maire.nourished.core.nutrition.ResolutionStage;
+import dev.maire.nourished.core.nutrition.RuntimeCascadeStage;
 import dev.maire.nourished.core.nutrition.StageContext;
 import dev.maire.nourished.core.nutrition.cache.RunningAverage;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +37,7 @@ public final class NamespacePeerStage implements ResolutionStageHandler {
         return new ResolutionResult(
                 outcome.normalized(), Map.copyOf(avg),
                 List.of(), Map.of(), outcome.rejectedSignals(),
-                false, spread, ResolutionStage.NAMESPACE_PEER,
+                false, spread, RuntimeCascadeStage.NAMESPACE_PEER,
                 "namespace peer average (" + ns + ", n=" + peerAvg.count() + ")");
     }
 }

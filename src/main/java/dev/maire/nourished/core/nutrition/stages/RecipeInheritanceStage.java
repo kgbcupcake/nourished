@@ -5,7 +5,7 @@ import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.ResolutionResult;
-import dev.maire.nourished.core.nutrition.ResolutionStage;
+import dev.maire.nourished.core.nutrition.RuntimeCascadeStage;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.nutrition.StageContext;
 import dev.maire.nourished.core.nutrition.cache.BoundedLRU;
@@ -109,7 +109,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             return new ResolutionResult(
                     outcome.normalized(), Map.copyOf(averaged),
                     List.of(), Map.of(), outcome.rejectedSignals(),
-                    false, totalScore, ResolutionStage.RECIPE_INHERITANCE,
+                    false, totalScore, RuntimeCascadeStage.RECIPE_INHERITANCE,
                     "recipe ingredient inheritance");
 
         } catch (Exception e) {

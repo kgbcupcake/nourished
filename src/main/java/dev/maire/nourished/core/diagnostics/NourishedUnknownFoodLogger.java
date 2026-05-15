@@ -3,7 +3,7 @@ package dev.maire.nourished.core.diagnostics;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.ResolutionResult;
-import dev.maire.nourished.core.nutrition.ResolutionStage;
+import dev.maire.nourished.core.nutrition.RuntimeCascadeStage;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -58,7 +58,7 @@ public final class NourishedUnknownFoodLogger {
         if (result.tokens() == null || result.rawScores() == null) {
             return;
         }
-        boolean isHardFallback = result.stage() == ResolutionStage.HARD_FALLBACK;
+        boolean isHardFallback = result.stage() == RuntimeCascadeStage.HARD_FALLBACK;
         float threshold = (float) NourishedConfig.get().scannerConfidenceSpreadThreshold();
         boolean belowThreshold = result.confidence() < threshold;
         if (!isHardFallback && !belowThreshold) {

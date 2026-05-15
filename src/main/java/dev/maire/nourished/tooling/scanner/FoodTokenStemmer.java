@@ -4,10 +4,14 @@ import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Domain-specific food vocabulary normalizer.
@@ -74,6 +78,65 @@ public final class FoodTokenStemmer {
         "plain", "simple", "basic", "classic"
     );
 
+    private static final Pattern CAMEL_BOUNDARY_LOWER_UPPER = Pattern.compile("(?<=[a-z])(?=[A-Z])");
+    private static final Pattern CAMEL_BOUNDARY_ACRONYM = Pattern.compile("(?<=[A-Z])(?=[A-Z][a-z])");
+
+    /** Longest-first greedy dictionary for ungluing lowercase run-on segments ({@code honeyglazedham}). */
+    private static final String[] FOOD_DICT_LONGEST_FIRST;
+
+    static {
+        Set<String> words = new HashSet<>();
+        for (var e : IRREGULAR_FORMS.entrySet()) {
+            if (e.getKey().length() >= 3) words.add(e.getKey());
+            if (e.getValue().length() >= 3) words.add(e.getValue());
+        }
+        for (var e : COMPOUND_SPLITS.entrySet()) {
+            if (e.getKey().length() >= 3) words.add(e.getKey());
+            for (String p : e.getValue()) {
+                if (p.length() >= 3) words.add(p);
+            }
+        }
+        String[] extra = {
+            "almond", "apple", "apricot", "avocado", "bacon", "bake", "baked", "banana", "barley",
+            "basil", "bbq", "bean", "beef", "beet", "berry", "biscuit", "blackberry", "blueberry",
+            "boil", "boiled", "bowl", "bread", "breast", "brownie", "burger", "burrito", "butter",
+            "cabbage", "cake", "candied", "caramel", "carrot", "cashew", "cauliflower", "celery",
+            "cheese", "cherry", "chicken", "chili", "chocolate", "chop", "chunk", "chunks",
+            "cilantro", "cinnamon", "clam", "cod", "cookie", "coriander", "corn", "crab",
+            "cranberry", "cream", "crisp", "croissant", "cucumber", "cumin", "curry", "cupcake",
+            "donut", "dough", "dried", "drumstick", "duck", "dumpling", "egg", "enchilada",
+            "fajita", "fillet", "fish", "flour", "fries", "fry", "fried", "fudge", "garlic",
+            "ginger", "glaze", "glazed", "goose", "grape", "gratin", "gravy", "grill", "grilled",
+            "ground", "guacamole", "halibut", "ham", "hamburger", "hash", "hazelnut", "herb",
+            "honey", "icing", "jalapeno", "jam", "julienne", "kebab", "ketchup", "lamb", "lasagna",
+            "leek", "lemon", "lentil", "lime", "lingon", "lobster", "lox", "macaroni",
+            "mango", "marinade", "marinated", "mashed", "mayo", "mead", "meat", "meatball",
+            "melon",    "milk",     "mint",     "muffin",   "mushroom", "mussel", "mustard",
+            "mutton",   "noodle",   "nut",      "oat",      "omelet",   "onion",  "orange",
+            "oregano",  "oyster",   "paella",   "pancake",  "paprika",  "parmesan", "parsley", "pasta", "pastry", "pea", "peach",
+            "peanut", "pear", "pepper", "perch", "pickle", "pickled", "pie", "pilaf", "pineapple",
+            "pistachio", "pizza", "plum", "poach", "poached", "polenta", "popcorn", "poppy",
+            "popsicle", "pork", "porridge", "potato", "poutine", "praline", "prawn", "pretzel",
+            "prosciutto", "pudding", "pumpkin", "quinoa", "radish", "raisin", "ramen", "raspberry",
+            "ravioli", "rhubarb", "rib", "ribs", "rice", "ricotta", "roast", "roasted", "roll",
+            "romaine", "rose", "saffron", "salad", "salami", "salmon", "salsa", "salt", "sandwich",
+            "sardine", "sauce", "sausage", "scallop", "scone", "scramble", "scrambled", "seabass",
+            "seed", "sesame", "shallot", "shell", "shrimp", "slice", "sliced", "smoke", "smoked",
+            "smoothie", "snack", "soup", "sour", "soy", "spaghetti", "spinach", "steak", "steam",
+            "steamed", "stew", "stir", "strawberry", "sugar", "sushi", "sweet", "syrup", "taco",
+            "tart", "tempeh", "teriyaki", "thigh", "toast", "toffee", "tofu", "tomato", "tortilla",
+            "trail", "truffle", "tuna", "turkey", "turnip", "vanilla", "veal", "venison", "vinegar",
+            "waffle", "walnut", "wasabi", "watermelon", "wheat", "whip", "whiskey", "wing", "wings",
+            "wrap", "yam", "yeast", "yogurt", "zest", "zucchini",
+        };
+        for (String x : extra) {
+            if (x.length() >= 3) words.add(x);
+        }
+        List<String> list = new ArrayList<>(words);
+        list.sort(Comparator.comparingInt(String::length).reversed().thenComparing(a -> a));
+        FOOD_DICT_LONGEST_FIRST = list.toArray(String[]::new);
+    }
+
     private FoodTokenStemmer() {}
 
     /**
@@ -94,7 +157,7 @@ public final class FoodTokenStemmer {
         if (token == null || token.isEmpty()) return List.of();
 
         // Lowercase + strip "item" suffix
-        String t = token.toLowerCase();
+        String t = token.toLowerCase(Locale.ROOT);
         if (t.endsWith("item") && t.length() > 4) {
             t = t.substring(0, t.length() - 4);
         }
@@ -152,9 +215,150 @@ public final class FoodTokenStemmer {
      */
     public static boolean isStopWord(String token) {
         if (token == null) return false;
-        String t = token.toLowerCase();
+        String t = token.toLowerCase(Locale.ROOT);
         if (t.endsWith("item") && t.length() > 4) t = t.substring(0, t.length() - 4);
         return STOP_WORDS.contains(t);
+    }
+
+    /**
+     * Resource path segment only: drops {@code namespace:} when present.
+     */
+    public static String localNamePart(String itemId) {
+        if (itemId == null || itemId.isEmpty()) return "";
+        int c = itemId.lastIndexOf(':');
+        return c >= 0 ? itemId.substring(c + 1) : itemId;
+    }
+
+    /**
+     * Raw path tokens for suffix-style signals (underscored paths split on underscores; CamelCase paths
+     * expanded and noise-stripped, not stemmed). Keys in unscored JSON maps match these segments.
+     */
+    public static List<String> rawSegmentsForPath(String itemId) {
+        return expandRawScoringTokens(localNamePart(itemId));
+    }
+
+    /**
+     * Single entry for keyword-style scoring: expands path tokens (underscore vs camel + food dictionary),
+     * then runs {@link #stemAll(String)} on each segment so classifier keywords align with spec stems.
+     */
+    public static List<String> tokenizeForScoring(String itemId) {
+        return runScoringStemPipeline(expandRawScoringTokens(localNamePart(itemId)));
+    }
+
+    private static boolean shouldApplyCamelPreprocessor(String localPath) {
+        return localPath != null && !localPath.contains("_");
+    }
+
+    private static boolean isResourceNoiseToken(String s) {
+        if (s == null || s.isEmpty()) return false;
+        String t = s.toLowerCase(Locale.ROOT);
+        return t.equals("item") || t.equals("block") || t.equals("food");
+    }
+
+    private static boolean hasUpperCaseAscii(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c >= 'A' && c <= 'Z') return true;
+        }
+        return false;
+    }
+
+    /**
+     * Strips trailing {@code item}, {@code block}, {@code food} (case-insensitive, repeatable).
+     */
+    private static String stripTrailingResourceNoise(String s) {
+        String cur = s;
+        while (!cur.isEmpty()) {
+            String lower = cur.toLowerCase(Locale.ROOT);
+            int trim = 0;
+            if (lower.endsWith("item") && cur.length() > 4) trim = 4;
+            else if (lower.endsWith("block") && cur.length() > 5) trim = 5;
+            else if (lower.endsWith("food") && cur.length() > 4) trim = 4;
+            if (trim == 0) break;
+            cur = cur.substring(0, cur.length() - trim);
+        }
+        return cur;
+    }
+
+    private static List<String> splitCamelCase(String s) {
+        List<String> out = new ArrayList<>();
+        for (String chunk : CAMEL_BOUNDARY_LOWER_UPPER.split(s)) {
+            if (chunk.isEmpty()) continue;
+            for (String piece : CAMEL_BOUNDARY_ACRONYM.split(chunk)) {
+                if (!piece.isEmpty()) out.add(piece);
+            }
+        }
+        return out;
+    }
+
+    private static List<String> expandRawScoringTokens(String local) {
+        if (local == null || local.isEmpty()) return List.of();
+        if (!shouldApplyCamelPreprocessor(local)) {
+            List<String> out = new ArrayList<>();
+            for (String p : local.split("_")) {
+                if (!p.isEmpty() && !isResourceNoiseToken(p)) out.add(p);
+            }
+            return out;
+        }
+        String stripped = stripTrailingResourceNoise(local);
+        if (stripped.isEmpty()) return List.of();
+        List<String> pieces = hasUpperCaseAscii(stripped) ? splitCamelCase(stripped) : List.of(stripped);
+        List<String> expanded = new ArrayList<>();
+        for (String seg : pieces) {
+            if (seg.isEmpty() || isResourceNoiseToken(seg)) continue;
+            String low = seg.toLowerCase(Locale.ROOT);
+            if (low.length() >= 6 && low.chars().allMatch(Character::isLetter)) {
+                expanded.addAll(greedyDictionarySplit(low));
+            } else {
+                expanded.add(seg);
+            }
+        }
+        expanded.removeIf(FoodTokenStemmer::isResourceNoiseToken);
+        return List.copyOf(expanded);
+    }
+
+    private static boolean startsWithDictWordAt(String segment, int i) {
+        int n = segment.length();
+        for (String w : FOOD_DICT_LONGEST_FIRST) {
+            if (n - i >= w.length() && segment.startsWith(w, i)) return true;
+        }
+        return false;
+    }
+
+    private static List<String> greedyDictionarySplit(String segment) {
+        List<String> parts = new ArrayList<>();
+        int i = 0;
+        int n = segment.length();
+        while (i < n) {
+            String matched = null;
+            for (String w : FOOD_DICT_LONGEST_FIRST) {
+                if (n - i >= w.length() && segment.startsWith(w, i)) {
+                    matched = w;
+                    break;
+                }
+            }
+            if (matched != null) {
+                parts.add(matched);
+                i += matched.length();
+            } else {
+                int j = i + 1;
+                while (j < n && !startsWithDictWordAt(segment, j)) {
+                    j++;
+                }
+                parts.add(segment.substring(i, j));
+                i = j;
+            }
+        }
+        return parts;
+    }
+
+    private static List<String> runScoringStemPipeline(List<String> rawTokens) {
+        List<String> out = new ArrayList<>();
+        for (String raw : rawTokens) {
+            if (raw == null || raw.isEmpty()) continue;
+            out.addAll(stemAll(raw));
+        }
+        return out;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -261,13 +465,6 @@ public final class FoodTokenStemmer {
             } else {
                 Nourished.LOGGER.debug("[Stemmer] {} → {} (rule: {})", original, result, rule);
             }
-        }
-    }
-
-    // Overload that accepts a List for compound split debug output
-    private static void debugLog(String original, List<String> roots, String rule) {
-        if (DEBUG) {
-            Nourished.LOGGER.debug("[Stemmer] {} → [{}] (rule: {})", original, String.join(", ", roots), rule);
         }
     }
 }

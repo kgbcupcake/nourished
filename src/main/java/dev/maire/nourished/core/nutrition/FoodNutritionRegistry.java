@@ -39,9 +39,38 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nullable;
 
 /**
- * Food nutrient values and diet-bar classification primarily use datapack item tags under
- * {@code data/nourished/tags/item/nutrients/} (see {@code nourished:nutrients/*}). Items without
- * matching tags may resolve bars via {@link #resolveNutrientBars} (scanner cache and classifier).
+ * <h2>Nutrient pipeline resolution order</h2>
+ * <p>End-to-end, bar weights and diet effects are derived in the following order. Higher steps
+ * supersede lower ones where the implementation enforces precedence (see {@link #resolveNutrientBars}
+ * and consumption/tooltip callers that merge {@link #getExternalClassification}).
+ *
+ * <ol>
+ *   <li><b>Exact nutrient tags</b> — Datapack item tags under {@code data/nourished/tags/item/nutrients/}
+ *       (bound to diet bars via {@link NutrientRegistry}). These are authoritative: any match from
+ *       this family wins over heuristic and scanner-supplied guesses for that item.</li>
+ *   <li><b>External compat registrations</b> — Classifications registered at runtime through the API
+ *       ({@link dev.maire.nourished.api.NourishedAPI#registerFoodClassification} /
+ *       {@link #registerClassification}). These take precedence over scanner-derived maps in
+ *       {@link #getExternalClassification}.</li>
+ *   <li><b>Scanner classifications</b> — Results from {@link UnassignedFoodScanner} (async scan on
+ *       world load), applied via {@link #applyFromScanner}. Scanner entries are skipped for
+ *       items that already have nutrient tags or an API registration so tags always override scanner
+ *       guesses.</li>
+ *   <li><b>Blended tag + resolver results</b> — When both exact tag matches and
+ *       {@link RuntimeFoodResolver} output are non-empty, {@link #blendTagAndResolverResults} merges
+ *       them: tags keep full weight; the resolver may only add nutrients <em>not</em> already keyed
+ *       by tags, at {@code 0.5f} weight before normalization.</li>
+ *   <li><b>Runtime resolver</b> — {@link RuntimeFoodResolver} heuristic classification (stages such as
+ *       community tags, keywords, recipe inheritance, peers, hard fallback). In
+ *       {@link #resolveNutrientBars}, this path supplies the full map only when there are no exact
+ *       nutrient tag matches; otherwise it participates only through the blend step above.</li>
+ *   <li><b>Unclassified fallback</b> — Empty map: no diet bars, and tooltips show no nutrient bar
+ *       lines (see unclassified messaging in {@link dev.maire.nourished.compat.NourishedFoodTooltipHelper}).</li>
+ * </ol>
+ *
+ * <p><b>Datapack note:</b> Cross-mod tag entries (anything outside the {@code minecraft:} namespace,
+ * including tag references like {@code #c:foods/...}) must use the object form with
+ * {@code "required": false} so missing optional mods do not break tag loading and the rest of the pipeline.
  */
 @ApiStatus.Internal
 public class FoodNutritionRegistry {
@@ -60,6 +89,9 @@ public class FoodNutritionRegistry {
 
     /** @GuardedBy("itself — ConcurrentHashSet") */
     private static final Set<String> WARNED_ITEMS = ConcurrentHashMap.newKeySet();
+
+    /** @GuardedBy("itself — ConcurrentHashSet") Per-reload dedupe for empty blend warnings. */
+    private static final Set<String> EMPTY_BLEND_WARNED = ConcurrentHashMap.newKeySet();
 
     private static final int EXTERNAL_CLASSIFICATION_CAP = 4096;
 
@@ -147,6 +179,12 @@ public class FoodNutritionRegistry {
         SCANNER_CLASSIFICATIONS.clear();
     }
 
+    /** Clears per-reload warning dedupe sets. Called after datapack/config reload. */
+    public static void clearPerReloadWarnings() {
+        WARNED_ITEMS.clear();
+        EMPTY_BLEND_WARNED.clear();
+    }
+
     /**
      * Returns classifications for a food item: API {@link #registerClassification} first, then scanner-derived
      * {@link #applyFromScanner} as fallback; {@code null} if neither applies.
@@ -157,6 +195,20 @@ public class FoodNutritionRegistry {
             return api;
         }
         return SCANNER_CLASSIFICATIONS.get(foodId);
+    }
+
+    /**
+     * Package-private: returns true if the given item has an API-registered external classification.
+     */
+    static boolean hasApiClassification(ResourceLocation foodId) {
+        return EXTERNAL_CLASSIFICATIONS.containsKey(foodId);
+    }
+
+    /**
+     * Package-private: returns true if the given item has a scanner-derived classification.
+     */
+    static boolean hasScannerClassification(ResourceLocation foodId) {
+        return SCANNER_CLASSIFICATIONS.containsKey(foodId);
     }
 
     public record NutrientValues(float protein, float carbs, float fats, float vitamins, float hydration) {}
@@ -172,6 +224,7 @@ public class FoodNutritionRegistry {
     public record NutrientResolutionDiagnostic(
             Map<String, Float> matchedBars,
             String classifierPath,
+            ResolutionStage pipelineStage,
             List<String> matchedNutrientTags,
             @Nullable ClassificationResult classification,
             List<RecipeInheritanceStep> recipeInheritance,
@@ -262,10 +315,12 @@ public class FoodNutritionRegistry {
         Map<String, Float> resolved = RuntimeFoodResolver.getInstance().resolve(stack, rm);
 
         if (tagMatches.isEmpty()) {
+            ResolutionStage stage = resolved.isEmpty() ? ResolutionStage.UNCLASSIFIED : ResolutionStage.RUNTIME_RESOLVER;
             String path = resolved.isEmpty() ? "UNCLASSIFIED" : "RUNTIME_RESOLVER";
             return new NutrientResolutionDiagnostic(
                     new LinkedHashMap<>(resolved),
                     path,
+                    stage,
                     List.of("none"),
                     null,
                     List.of(),
@@ -276,6 +331,7 @@ public class FoodNutritionRegistry {
             return new NutrientResolutionDiagnostic(
                     new LinkedHashMap<>(tagMatches),
                     "TAG_HIT",
+                    ResolutionStage.TAG_MATCH,
                     matchedTagIds,
                     null,
                     List.of(),
@@ -286,11 +342,182 @@ public class FoodNutritionRegistry {
         return new NutrientResolutionDiagnostic(
                 new LinkedHashMap<>(blended),
                 "TAG_AND_RUNTIME_BLEND",
+                ResolutionStage.BLENDED,
                 matchedTagIds,
                 null,
                 List.of(),
                 false
         );
+    }
+
+    /**
+     * Full resolution trace for held-item debugging via {@code /nourished debug held}.
+     * Builds the trace with all intermediate steps, precedence decisions, and the final merged result.
+     *
+     * <p>The final bar map includes external classification merged in the same way as tooltip display,
+     * so the trace reflects player-visible bar weights. Note: the server eat pipeline applies external
+     * to <em>deltas</em> only, so trace may differ from {@link dev.maire.nourished.core.handler.FoodNutrientPipeline}
+     * matched bars.</p>
+     *
+     * @param stack         the item to resolve
+     * @param recipeManager server recipe manager, or null for client/no-recipe-inheritance
+     * @return resolution trace with final stage, bars, and full trace pipeline
+     */
+    public static NutrientResolutionTrace resolveHeldItemTrace(ItemStack stack, @Nullable RecipeManager recipeManager) {
+        Item item = stack.getItem();
+        ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
+        String itemIdStr = itemId != null ? itemId.toString() : "unknown";
+
+        if (itemId != null && ScannerSpecRegistry.get().excludedItems().contains(itemIdStr)) {
+            return new NutrientResolutionTrace(
+                    itemIdStr,
+                    Map.of(), Map.of(), List.of(),
+                    Map.of(), NutrientResolutionTrace.ExternalSource.NONE,
+                    Map.of(), null, Map.of(),
+                    Map.of(), Map.of(), Map.of(), Map.of(),
+                    Map.of(),
+                    ResolutionStage.UNCLASSIFIED
+            );
+        }
+
+        Map<String, Float> tagRaw = collectNutrientTagMatchesRaw(item);
+        Map<String, Float> tagFiltered = collectNutrientTagMatches(item);
+
+        List<String> strippedByCompat = new ArrayList<>();
+        for (String key : tagRaw.keySet()) {
+            if (!tagFiltered.containsKey(key)) {
+                strippedByCompat.add(key);
+            }
+        }
+
+        Map<String, Float> external = itemId != null ? getExternalClassification(itemId) : null;
+        NutrientResolutionTrace.ExternalSource externalSource = NutrientResolutionTrace.ExternalSource.NONE;
+        if (itemId != null && hasApiClassification(itemId)) {
+            externalSource = NutrientResolutionTrace.ExternalSource.API;
+        } else if (itemId != null && hasScannerClassification(itemId)) {
+            externalSource = NutrientResolutionTrace.ExternalSource.SCANNER;
+        }
+        if (external == null) {
+            external = Map.of();
+        }
+
+        ResolutionResult resolverResult = RuntimeFoodResolver.getInstance().resolveWithResult(stack, recipeManager);
+        Map<String, Float> resolved = resolverResult != null ? resolverResult.nutrients() : Map.of();
+        RuntimeCascadeStage cascadeStage = resolverResult != null ? resolverResult.stage() : null;
+        Map<String, String> rejectedSignals = resolverResult != null ? resolverResult.rejectedSignals() : Map.of();
+
+        Map<String, Float> blendTagInput = Map.of();
+        Map<String, Float> blendResolverInput = Map.of();
+        Map<String, TagRuntimeBlend.Precedence> blendPrecedence = Map.of();
+        Map<String, Float> blendDiscarded = Map.of();
+        Map<String, Float> coreResult;
+
+        boolean didBlend = false;
+        if (tagFiltered.isEmpty()) {
+            coreResult = resolved.isEmpty() ? Map.of() : new LinkedHashMap<>(resolved);
+        } else if (resolved.isEmpty()) {
+            coreResult = new LinkedHashMap<>(tagFiltered);
+        } else {
+            TagRuntimeBlend.BlendOutcome blend = TagRuntimeBlend.blend(tagFiltered, resolved);
+            coreResult = new LinkedHashMap<>(blend.result());
+            blendTagInput = tagFiltered;
+            blendResolverInput = resolved;
+            blendPrecedence = blend.perKeyPrecedence();
+            blendDiscarded = blend.discardedResolver();
+            didBlend = true;
+        }
+
+        Map<String, Float> finalMerged = new LinkedHashMap<>(coreResult);
+        if (!external.isEmpty()) {
+            for (Map.Entry<String, Float> e : external.entrySet()) {
+                finalMerged.merge(e.getKey(), e.getValue(), Float::sum);
+            }
+        }
+
+        ResolutionStage stage;
+        if (finalMerged.isEmpty()) {
+            stage = ResolutionStage.UNCLASSIFIED;
+        } else if (didBlend) {
+            stage = ResolutionStage.BLENDED;
+        } else if (!tagFiltered.isEmpty()) {
+            stage = ResolutionStage.TAG_MATCH;
+        } else if (!resolved.isEmpty()) {
+            stage = external.isEmpty() ? ResolutionStage.RUNTIME_RESOLVER : ResolutionStage.RUNTIME_RESOLVER;
+        } else if (!external.isEmpty()) {
+            stage = ResolutionStage.SCANNER_CLASSIFIED;
+        } else {
+            stage = ResolutionStage.UNCLASSIFIED;
+        }
+
+        warnIfEmptyWithSignals(itemIdStr, stage, tagRaw, tagFiltered, resolved, external, blendDiscarded);
+
+        return new NutrientResolutionTrace(
+                itemIdStr,
+                tagRaw, tagFiltered, strippedByCompat,
+                external, externalSource,
+                resolved, cascadeStage, rejectedSignals,
+                blendTagInput, blendResolverInput, blendPrecedence, blendDiscarded,
+                finalMerged,
+                stage
+        );
+    }
+
+    /**
+     * Logs a WARN if at least one signal existed but the final result is empty.
+     * Only fires once per item per reload cycle to avoid log spam.
+     */
+    private static void warnIfEmptyWithSignals(
+            String itemIdStr,
+            ResolutionStage stage,
+            Map<String, Float> tagRaw,
+            Map<String, Float> tagFiltered,
+            Map<String, Float> resolved,
+            Map<String, Float> external,
+            Map<String, Float> blendDiscarded
+    ) {
+        if (stage != ResolutionStage.UNCLASSIFIED) {
+            return;
+        }
+
+        boolean hadSignal = !tagRaw.isEmpty() || !tagFiltered.isEmpty()
+                || !resolved.isEmpty() || !external.isEmpty();
+        if (!hadSignal) {
+            return;
+        }
+
+        if (!EMPTY_BLEND_WARNED.add(itemIdStr)) {
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("[FoodNutritionRegistry] Empty resolution despite signals for ").append(itemIdStr).append(":\n");
+        sb.append("  tagRaw=").append(tagRaw.keySet()).append("\n");
+        sb.append("  tagFiltered=").append(tagFiltered.keySet()).append("\n");
+        sb.append("  resolved=").append(resolved.keySet()).append("\n");
+        sb.append("  external=").append(external.keySet()).append("\n");
+        sb.append("  blendDiscarded=").append(blendDiscarded.keySet()).append("\n");
+        sb.append("  stage=").append(stage.name());
+
+        LOGGER.warn(sb.toString());
+    }
+
+    /**
+     * Collects raw tag matches <em>before</em> compat filter, for trace comparison.
+     */
+    private static Map<String, Float> collectNutrientTagMatchesRaw(Item item) {
+        Map<String, Float> matches = new LinkedHashMap<>();
+        var holder = new ItemStack(item).getItemHolder();
+
+        for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
+            for (String tagStr : def.tags()) {
+                var tagKey = NourishedRegistryUtils.itemTagKey(tagStr);
+                if (holder.is(tagKey)) {
+                    matches.put(def.key(), 1.0f);
+                    break;
+                }
+            }
+        }
+        return matches;
     }
 
     /**
