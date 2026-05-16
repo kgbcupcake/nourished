@@ -1,44 +1,60 @@
 # Changelog
 
-[0.2.0-beta] - 2026-05-14
-Added
+[0.2.0-beta] - 2026-05-15
 
-- Excluded items system — non-food items with FoodProperties (potions, soap, chicken feed, magic         essences, etc.) are now explicitly excluded from classification and will not show a Nourished
-     tooltip
+⚠️ Upgrading from 0.1.x? Delete config/nourished/scanner_spec.json before launching. It will regenerate automatically with the new defaults. Keeping the old file will cause missing archetypes and incorrect classifications.
 
-- excluded_items array in scanner_spec.json — modpack creators and datapack authors can extend this     list without code changes
-  
-- hamburger stem mapping and archetype entry for correct multi-nutrient resolution across all           hamburger variants
+---
 
-- sandwich archetype entry to inject grains signal for sandwich-type foods
+## Added
 
-- Community tag signals now propagate into the keyword/archetype scoring pass via StageContext          instead of short-circuiting the pipeline
-   
-- Average resolution time, slowest item, and recipe timeout tracking in CacheStats
-  
+- Excluded items system — non-food items with FoodProperties (potions, soap, chicken feed, magic essences, etc.) are now explicitly excluded from classification and will not show a Nourished tooltip
+
+- excluded_items array in scanner_spec.json — modpack creators and datapack authors can extend this list without code changes
+
+- hamburger stem mapping and archetype entry for correct multi-nutrient resolution across all hamburger variants; sandwich archetype entry to inject grains signal for sandwich-type foods
+
+- sandwich, burger, and vegan keyword entries in scanner_spec.json for improved composite classification
+
+- Community tag signals now propagate into the keyword/archetype scoring pass via StageContext instead of short-circuiting the pipeline
+
+- Async scanner classification on server start — untagged foods are resolved off-thread and applied to both tooltip and eating paths; average resolution time, slowest item, and recipe timeout tracking in CacheStats
+
 - Raw scores, tokens, token weights, and rejected signal reasons added to ResolutionResult
-  
-- /nourished debug held command for in-game classifier inspection
 
-Fixed
+- /nourished debug held command for in-game classifier inspection; full pipeline trace written to config/nourished/debug/
 
-- Tag matches are now authoritative in blend resolution — when an item has an explicit nutrient tag,    the resolver can only contribute nutrients not already covered by the tag, preventing archetype       heuristics from overriding curated data
+- /nourished invalidatecache command for operators to force a fresh scan without restarting
+
+- Croptopia compatibility — full nutrient tag coverage for 200+ items including meals, produce, seafood, desserts, and drinks
+
+- Pam's HarvestCraft 2 compatibility — 700+ items tagged across all six nutrient categories
+
+- camelCase token splitting for mods that use concatenated item names (e.g. pamhc2foodextended) — improves scanner classification for previously unresolvable items
+
+## Fixed
+
+- Tag matches are now authoritative in blend resolution — when an item has an explicit nutrient tag, the resolver can only contribute nutrients not already covered by the tag, preventing archetype heuristics from overriding curated data
 
 - Resolver cache is now invalidated on level load, fixing stale classifications persisting across jar swaps and config changes
-  
-- stew, soup, burger, and roast removed from PREPARATION_TOKENS — they are composite food forms, not    preparation methods, and were incorrectly penalizing their nutrient signals
 
-- burger and hamburger archetypes now only contribute grains — proteins and vegetables are scored       from ingredient keywords and recipe inheritance, not hardcoded in the archetype
+- stew, soup, burger, and roast removed from PREPARATION_TOKENS — they are composite food forms, not preparation methods
+
+- burger and hamburger archetypes now only contribute grains — proteins and vegetables are scored from ingredient keywords and recipe inheritance
 
 - Patchouli crafting recipe for the Nourished Guide
 
-Changed
+## Changed
 
-- Nutrient tag files updated — proteins, fruits, sugars, grains, and dairy now cover a significantly    broader range of modded foods including beverages, composite dishes, and items previously falling     through to hard fallback
+- Nutrient tag files updated — proteins, fruits, sugars, grains, and dairy now cover a significantly broader range of modded foods including beverages, composite dishes, and items previously falling through to hard fallback
 
-- ScannerSpec extended with excludedItems set, parsed from scanner_spec.json and checked early in       both the tooltip and resolver paths
+- compositeRatioThreshold default lowered from 0.5 to 0.4 for better composite detection on borderline foods
+
+- ScannerSpec extended with excludedItems set, parsed from scanner_spec.json and checked early in both the tooltip and resolver paths
 
 - StageContext converted from record to mutable class to support inter-stage signal propagation
+
+- Scanner classifications now store full nutrient maps instead of single dominant keys, and are merged into tooltip rendering as well as eating
 
 ## [0.1.9-beta] - 2026-05-13
 
