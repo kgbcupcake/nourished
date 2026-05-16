@@ -940,6 +940,18 @@
       "required": false
     },
     {
+      "id": "farmersdelight:honey_cookie",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:chocolate_pie",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cooking/hot_cocoa",
+      "required": false
+    },
+    {
       "id": "fruitsdelight:apple_jam",
       "required": false
     },
@@ -2081,6 +2093,398 @@
     },
     {
       "id": "farm_and_charm:oat_pancake_block",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chilichocolateitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chocolatechippancakesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chocolatemilkshakeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chocolatepeanutbaritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cinnamonsugardonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:crispyricepuffbarsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:crispyricepuffcerealitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:custarditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:fortunecookieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:frosteddonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gingersnapsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:holidaycakeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:honeybunitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:honeycombchocolatebaritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lavendershortbreaditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:maplecandiedbaconitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:maplesyruppancakesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:maplesyrupwafflesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mincepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mintchocolatechipicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mochicakeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mochidessertitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mochaicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:neapolitanicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:nuttoppedicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:oatmealraisincookiesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peanutbuttercookiesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peanutbuttercupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:powdereddonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:redvelvetcupcakeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rivermudcakeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rootbeerfloatitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:saltedcaramelitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sorbetitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sprinklescupcakeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sweetteaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:vanillaicecreamitem",
+      "required": false
+    },
+    {
+      "id": "croptopia:almond_brittle",
+      "required": false
+    },
+    {
+      "id": "croptopia:apricot_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:apple_pie",
+      "required": false
+    },
+    {
+      "id": "croptopia:banana_cream_pie",
+      "required": false
+    },
+    {
+      "id": "croptopia:blackberry_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:blueberry_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:brownies",
+      "required": false
+    },
+    {
+      "id": "croptopia:candied_nuts",
+      "required": false
+    },
+    {
+      "id": "croptopia:candy_corn",
+      "required": false
+    },
+    {
+      "id": "croptopia:caramel",
+      "required": false
+    },
+    {
+      "id": "croptopia:cheese_cake",
+      "required": false
+    },
+    {
+      "id": "croptopia:cherry_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:cherry_pie",
+      "required": false
+    },
+    {
+      "id": "croptopia:chocolate",
+      "required": false
+    },
+    {
+      "id": "croptopia:chocolate_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:chocolate_milkshake",
+      "required": false
+    },
+    {
+      "id": "croptopia:churros",
+      "required": false
+    },
+    {
+      "id": "croptopia:cinnamon_roll",
+      "required": false
+    },
+    {
+      "id": "croptopia:doughnut",
+      "required": false
+    },
+    {
+      "id": "croptopia:elderberry_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:eton_mess",
+      "required": false
+    },
+    {
+      "id": "croptopia:figgy_pudding",
+      "required": false
+    },
+    {
+      "id": "croptopia:fruit_cake",
+      "required": false
+    },
+    {
+      "id": "croptopia:grape_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:kiwi_sorbet",
+      "required": false
+    },
+    {
+      "id": "croptopia:lemon_coconut_bar",
+      "required": false
+    },
+    {
+      "id": "croptopia:macaron",
+      "required": false
+    },
+    {
+      "id": "croptopia:mango_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:mead",
+      "required": false
+    },
+    {
+      "id": "croptopia:meringue",
+      "required": false
+    },
+    {
+      "id": "croptopia:molasses",
+      "required": false
+    },
+    {
+      "id": "croptopia:nether_star_cake",
+      "required": false
+    },
+    {
+      "id": "croptopia:nougat",
+      "required": false
+    },
+    {
+      "id": "croptopia:nutty_cookie",
+      "required": false
+    },
+    {
+      "id": "croptopia:peach_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:pecan_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:pecan_pie",
+      "required": false
+    },
+    {
+      "id": "croptopia:pumpkin_bars",
+      "required": false
+    },
+    {
+      "id": "croptopia:pumpkin_spice_latte",
+      "required": false
+    },
+    {
+      "id": "croptopia:raisin_oatmeal_cookie",
+      "required": false
+    },
+    {
+      "id": "croptopia:raspberry_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:rhubarb_crisp",
+      "required": false
+    },
+    {
+      "id": "croptopia:rhubarb_pie",
+      "required": false
+    },
+    {
+      "id": "croptopia:rum",
+      "required": false
+    },
+    {
+      "id": "croptopia:rum_raisin_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:snicker_doodle",
+      "required": false
+    },
+    {
+      "id": "croptopia:sticky_toffee_pudding",
+      "required": false
+    },
+    {
+      "id": "croptopia:strawberry_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:strawberry_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:treacle_tart",
+      "required": false
+    },
+    {
+      "id": "croptopia:tres_leche_cake",
+      "required": false
+    },
+    {
+      "id": "croptopia:trifle",
+      "required": false
+    },
+    {
+      "id": "croptopia:vanilla",
+      "required": false
+    },
+    {
+      "id": "croptopia:vanilla_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:wine",
+      "required": false
+    },
+    {
+      "id": "croptopia:yam_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:beer",
+      "required": false
+    },
+    {
+      "id": "croptopia:trail_mix",
+      "required": false
+    },
+    {
+      "id": "croptopia:peanut_butter_and_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:roasted_pumpkin_seeds",
+      "required": false
+    },
+    {
+      "id": "croptopia:roasted_sunflower_seeds",
       "required": false
     }
   ]

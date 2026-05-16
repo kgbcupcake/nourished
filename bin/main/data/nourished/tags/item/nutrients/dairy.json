@@ -277,6 +277,10 @@
     {
       "id": "rusticdelight:milk_coffee",
       "required": false
+    },
+    {
+      "id": "moredelight:hamburger_with_egg",
+      "required": false
     }
   ]
 }

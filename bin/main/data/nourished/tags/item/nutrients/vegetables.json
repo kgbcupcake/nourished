@@ -29,6 +29,10 @@
       "required": false
     },
     {
+      "id": "farmersdelight:hamburger",
+      "required": false
+    },
+    {
       "id": "pamhc2foodcore:glazedcarrotsitem",
       "required": false
     },
@@ -967,6 +971,18 @@
 
     {
       "id": "pamhc2foodextended:honeysoyribsitem",
+      "required": false
+    },
+    {
+      "id": "moredelight:hamburger_with_egg",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greeneggsandhamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:hamsweetpicklesandwichitem",
       "required": false
     }
   ]

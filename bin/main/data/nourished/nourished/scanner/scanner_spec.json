@@ -290,6 +290,7 @@
     "cauliflower": { "vegetables": 3.0 },
     "celery":      { "vegetables": 3.0 },
     "cucumber":    { "vegetables": 3.0 },
+    "pickle":      { "vegetables": 3.0 },
     "lettuce":     { "vegetables": 3.0 },
     "spinach":     { "vegetables": 3.0 },
     "kale":        { "vegetables": 3.0 },

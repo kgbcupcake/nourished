@@ -29,6 +29,38 @@
       "required": false
     },
     {
+      "id": "farmersdelight:hamburger",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:mutton_wrap",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:mixed_salad",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:nether_salad",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cooking/ratatouille",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cooking/beetroot_soup",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cooking/onion_soup",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cooking/rabbit_stew",
+      "required": false
+    },
+    {
       "id": "pamhc2foodcore:glazedcarrotsitem",
       "required": false
     },
@@ -964,9 +996,476 @@
       "id": "pamhc2foodextended:honeyglazedcarrotsitem",
       "required": false
     },
-
     {
       "id": "pamhc2foodextended:honeysoyribsitem",
+      "required": false
+    },
+    {
+      "id": "moredelight:hamburger_with_egg",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greeneggsandhamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:hamsweetpicklesandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:capresesaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:ceasarsaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:citrussaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:coleslawburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cornedbeefandcabbageitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:creamedbroccolisoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cucumbersandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:eggsaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:friedgreentomatoesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:friedonionsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:garlicmashedpotatoesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:kalechipsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:loadedbakedpotatoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mashedsweetpotatoesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mixedflowerssaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:nopalessaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:oldworldveggiesoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:ovenroastedcaulifloweritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:potatoandleeksoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:potatosaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:roastedrootveggiemedleyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:roastpotatoesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:scallionbakedpotatoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:spinachpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:springsaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:stuffedchilipeppersitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:stuffedeggplantitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:stuffedmushroomitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:stuffedpepperitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:summersquashwithradishitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sunflowerbroccolisaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sweetpickleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:szechuaneggplantitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:threebeansaladitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tomatosoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:veggiestirfryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:zestyzucchiniitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:zucchinibakeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:zucchinifriesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:potatocakesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:potatoesobrienitem",
+      "required": false
+    },
+    {
+      "id": "croptopia:artichoke",
+      "required": false
+    },
+    {
+      "id": "croptopia:asparagus",
+      "required": false
+    },
+    {
+      "id": "croptopia:basil",
+      "required": false
+    },
+    {
+      "id": "croptopia:bellpepper",
+      "required": false
+    },
+    {
+      "id": "croptopia:broccoli",
+      "required": false
+    },
+    {
+      "id": "croptopia:cabbage",
+      "required": false
+    },
+    {
+      "id": "croptopia:cauliflower",
+      "required": false
+    },
+    {
+      "id": "croptopia:celery",
+      "required": false
+    },
+    {
+      "id": "croptopia:chile_pepper",
+      "required": false
+    },
+    {
+      "id": "croptopia:cinnamon",
+      "required": false
+    },
+    {
+      "id": "croptopia:corn",
+      "required": false
+    },
+    {
+      "id": "croptopia:cucumber",
+      "required": false
+    },
+    {
+      "id": "croptopia:eggplant",
+      "required": false
+    },
+    {
+      "id": "croptopia:garlic",
+      "required": false
+    },
+    {
+      "id": "croptopia:ginger",
+      "required": false
+    },
+    {
+      "id": "croptopia:greenbean",
+      "required": false
+    },
+    {
+      "id": "croptopia:greenonion",
+      "required": false
+    },
+    {
+      "id": "croptopia:kale",
+      "required": false
+    },
+    {
+      "id": "croptopia:leek",
+      "required": false
+    },
+    {
+      "id": "croptopia:lettuce",
+      "required": false
+    },
+    {
+      "id": "croptopia:mustard",
+      "required": false
+    },
+    {
+      "id": "croptopia:nutmeg",
+      "required": false
+    },
+    {
+      "id": "croptopia:onion",
+      "required": false
+    },
+    {
+      "id": "croptopia:pepper",
+      "required": false
+    },
+    {
+      "id": "croptopia:radish",
+      "required": false
+    },
+    {
+      "id": "croptopia:rutabaga",
+      "required": false
+    },
+    {
+      "id": "croptopia:sea_lettuce",
+      "required": false
+    },
+    {
+      "id": "croptopia:spinach",
+      "required": false
+    },
+    {
+      "id": "croptopia:squash",
+      "required": false
+    },
+    {
+      "id": "croptopia:sweetpotato",
+      "required": false
+    },
+    {
+      "id": "croptopia:tea_leaves",
+      "required": false
+    },
+    {
+      "id": "croptopia:tomatillo",
+      "required": false
+    },
+    {
+      "id": "croptopia:tomato",
+      "required": false
+    },
+    {
+      "id": "croptopia:turmeric",
+      "required": false
+    },
+    {
+      "id": "croptopia:turnip",
+      "required": false
+    },
+    {
+      "id": "croptopia:yam",
+      "required": false
+    },
+    {
+      "id": "croptopia:zucchini",
+      "required": false
+    },
+    {
+      "id": "croptopia:artichoke_dip",
+      "required": false
+    },
+    {
+      "id": "croptopia:ajvar",
+      "required": false
+    },
+    {
+      "id": "croptopia:ajvar_toast",
+      "required": false
+    },
+    {
+      "id": "croptopia:avocado_toast",
+      "required": false
+    },
+    {
+      "id": "croptopia:baked_sweet_potato",
+      "required": false
+    },
+    {
+      "id": "croptopia:baked_yam",
+      "required": false
+    },
+    {
+      "id": "croptopia:beetroot_salad",
+      "required": false
+    },
+    {
+      "id": "croptopia:borscht",
+      "required": false
+    },
+    {
+      "id": "croptopia:buttered_green_beans",
+      "required": false
+    },
+    {
+      "id": "croptopia:caesar_salad",
+      "required": false
+    },
+    {
+      "id": "croptopia:cheesy_asparagus",
+      "required": false
+    },
+    {
+      "id": "croptopia:cucumber_salad",
+      "required": false
+    },
+    {
+      "id": "croptopia:eggplant_parmesan",
+      "required": false
+    },
+    {
+      "id": "croptopia:grilled_eggplant",
+      "required": false
+    },
+    {
+      "id": "croptopia:kale_chips",
+      "required": false
+    },
+    {
+      "id": "croptopia:kale_smoothie",
+      "required": false
+    },
+    {
+      "id": "croptopia:leafy_salad",
+      "required": false
+    },
+    {
+      "id": "croptopia:leek_soup",
+      "required": false
+    },
+    {
+      "id": "croptopia:potato_soup",
+      "required": false
+    },
+    {
+      "id": "croptopia:ratatouille",
+      "required": false
+    },
+    {
+      "id": "croptopia:roasted_asparagus",
+      "required": false
+    },
+    {
+      "id": "croptopia:roasted_radishes",
+      "required": false
+    },
+    {
+      "id": "croptopia:roasted_squash",
+      "required": false
+    },
+    {
+      "id": "croptopia:roasted_turnips",
+      "required": false
+    },
+    {
+      "id": "croptopia:salsa",
+      "required": false
+    },
+    {
+      "id": "croptopia:steamed_broccoli",
+      "required": false
+    },
+    {
+      "id": "croptopia:steamed_green_beans",
+      "required": false
+    },
+    {
+      "id": "croptopia:stuffed_artichoke",
+      "required": false
+    },
+    {
+      "id": "croptopia:stuffed_poblanos",
+      "required": false
+    },
+    {
+      "id": "croptopia:tomato_juice",
+      "required": false
+    },
+    {
+      "id": "croptopia:veggie_salad",
+      "required": false
+    },
+    {
+      "id": "croptopia:pumpkin_soup",
+      "required": false
+    },
+    {
+      "id": "croptopia:spaghetti_squash",
+      "required": false
+    },
+    {
+      "id": "croptopia:refried_beans",
+      "required": false
+    },
+    {
+      "id": "croptopia:stir_fry",
+      "required": false
+    },
+    {
+      "id": "croptopia:nether_wart_stew",
       "required": false
     }
   ]

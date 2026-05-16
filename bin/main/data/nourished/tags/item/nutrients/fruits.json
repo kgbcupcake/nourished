@@ -1538,6 +1538,10 @@
     {
       "id": "vinery:bottle_mojang_noir",
       "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bakedhamitem",
+      "required": false
     }
   ]
 }

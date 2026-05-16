@@ -21,8 +21,10 @@ import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.reload.NourishedReloadPipeline;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.commands.CommandSourceStack;
@@ -147,6 +149,9 @@ public class NourishedCommand {
                         .then(Commands.literal("reload")
                                 .requires(s -> s.hasPermission(2))
                                 .executes(this::reloadAll))
+                        .then(Commands.literal("invalidatecache")
+                                .requires(s -> s.hasPermission(2))
+                                .executes(this::invalidateCache))
                         .then(Commands.literal("diagnostics")
                                 .executes(this::showDiagnostics))
                         .then(Commands.literal("schema")
@@ -160,6 +165,15 @@ public class NourishedCommand {
                                 .then(Commands.argument("player", EntityArgument.player())
                                         .executes(this::debugTarget)))
         );
+    }
+
+    private int invalidateCache(CommandContext<CommandSourceStack> ctx) {
+        CommandSourceStack source = ctx.getSource();
+        RuntimeFoodResolver.getInstance().invalidateCache();
+        FoodNutritionRegistry.clearScannerClassifications();
+        UnassignedFoodScanner.scanAndApply(source.getServer().getRecipeManager());
+        source.sendSuccess(() -> Component.literal("Nourished cache invalidated. Scanner will reapply on next tick."), false);
+        return 1;
     }
 
     private int reportSelf(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
