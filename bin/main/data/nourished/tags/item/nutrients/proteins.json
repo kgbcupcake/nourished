@@ -3653,6 +3653,10 @@
     {
       "id": "croptopia:anchovy_pizza",
       "required": false
+    },
+    {
+      "id": "farmersdelight:stuffed_potato",
+      "required": false
     }
   ]
 }

@@ -1615,6 +1615,14 @@
     {
       "id": "croptopia:fried_chicken",
       "required": false
+    },
+    {
+      "id": "farmersdelight:bacon_sandwich",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:chicken_sandwich",
+      "required": false
     }
   ]
 }

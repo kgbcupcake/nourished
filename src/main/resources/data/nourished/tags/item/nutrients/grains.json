@@ -2149,6 +2149,10 @@
     {
       "id": "croptopia:peanut_butter_and_jam",
       "required": false
+    },
+    {
+      "id": "farmersdelight:stuffed_potato",
+      "required": false
     }
   ]
 }
