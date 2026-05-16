@@ -495,6 +495,42 @@
       "required": false
     },
     {
+      "id": "farmersdelight:cod_roll",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:kelp_roll",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:salmon_roll",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:pie_crust",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cooking/cooked_rice",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cooking/fried_rice",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cooking/mushroom_rice",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cooking/squid_ink_pasta",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cooking/vegetable_noodles",
+      "required": false
+    },
+    {
       "id": "fruitsdelight:bellini_cocktail",
       "required": false
     },
@@ -1748,6 +1784,230 @@
     },
     {
       "id": "createfood:beef_meatball_sandwich",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cantonesenoodlesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cinnamonbreaditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cinnamontoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cornbreaditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cornflakesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cornishpastyitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cornmealitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:festivalbreaditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:frenchtoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grandmasmacaronicasseroleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mushroomrisottoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:omuriceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pancakesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pastagardeniaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:ricecakeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:ricepuddingitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:stuffingitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sunflowerwheatrollsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tortillachipsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tortillaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:wafflesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:vanillaconchasbreaditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:cornonthecobitem",
+      "required": false
+    },
+    {
+      "id": "croptopia:barley",
+      "required": false
+    },
+    {
+      "id": "croptopia:corn_bread",
+      "required": false
+    },
+    {
+      "id": "croptopia:dough",
+      "required": false
+    },
+    {
+      "id": "croptopia:flour",
+      "required": false
+    },
+    {
+      "id": "croptopia:hops",
+      "required": false
+    },
+    {
+      "id": "croptopia:noodle",
+      "required": false
+    },
+    {
+      "id": "croptopia:oat",
+      "required": false
+    },
+    {
+      "id": "croptopia:oatmeal",
+      "required": false
+    },
+    {
+      "id": "croptopia:popcorn",
+      "required": false
+    },
+    {
+      "id": "croptopia:ravioli",
+      "required": false
+    },
+    {
+      "id": "croptopia:rice",
+      "required": false
+    },
+    {
+      "id": "croptopia:steamed_rice",
+      "required": false
+    },
+    {
+      "id": "croptopia:toast",
+      "required": false
+    },
+    {
+      "id": "croptopia:toast_sandwich",
+      "required": false
+    },
+    {
+      "id": "croptopia:tortilla",
+      "required": false
+    },
+    {
+      "id": "croptopia:buttered_toast",
+      "required": false
+    },
+    {
+      "id": "croptopia:cheese_pizza",
+      "required": false
+    },
+    {
+      "id": "croptopia:chili_relleno",
+      "required": false
+    },
+    {
+      "id": "croptopia:dauphine_potatoes",
+      "required": false
+    },
+    {
+      "id": "croptopia:french_fries",
+      "required": false
+    },
+    {
+      "id": "croptopia:hashed_brown",
+      "required": false
+    },
+    {
+      "id": "croptopia:mashed_potatoes",
+      "required": false
+    },
+    {
+      "id": "croptopia:pizza",
+      "required": false
+    },
+    {
+      "id": "croptopia:pineapple_pepperoni_pizza",
+      "required": false
+    },
+    {
+      "id": "croptopia:potato_chips",
+      "required": false
+    },
+    {
+      "id": "croptopia:saucy_chips",
+      "required": false
+    },
+    {
+      "id": "croptopia:scones",
+      "required": false
+    },
+    {
+      "id": "croptopia:supreme_pizza",
+      "required": false
+    },
+    {
+      "id": "croptopia:sweet_potato_fries",
+      "required": false
+    },
+    {
+      "id": "croptopia:toast_with_jam",
+      "required": false
+    },
+    {
+      "id": "croptopia:banana_nut_bread",
+      "required": false
+    },
+    {
+      "id": "croptopia:baked_crepes",
+      "required": false
+    },
+    {
+      "id": "croptopia:sweet_crepes",
       "required": false
     }
   ]

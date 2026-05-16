@@ -3145,6 +3145,514 @@
     {
       "id": "spawn:bluefish_roll",
       "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cashewchickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chickenalfredoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chickenandwafflesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chickenbiscuititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chickencelerycasseroleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chickenchowmeinitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chickencordonbleuitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chickencurryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chickengumboitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chickenkatsuitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chickenparmasanitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chickentendersitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:corndogitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cornedbeefitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cornedbeefandcabbageitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cottagepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:deviledeggitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:fajitaburritoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:fishcakesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:fishdinneritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:fishlettucewrapitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:fishtacoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:garlicchickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:generaltsochickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gingerchickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gourmetbeefburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gourmetmuttonburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gourmetporkburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:hamandcheesesandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:honeylemonlambitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:kungpaochickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lambbarleysoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lambkebabitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lambwithmintsauceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:liverandonionsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:meatloafsandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:onionhamburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:orangechickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:orangegingerbeefitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:roastchickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:salisburysteakitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:saucedlambkebabitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tacoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:teriyakichickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:yorkshirepuddingitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:cornedbeefhashitem",
+      "required": false
+    },
+    {
+      "id": "croptopia:anchovy",
+      "required": false
+    },
+    {
+      "id": "croptopia:bacon",
+      "required": false
+    },
+    {
+      "id": "croptopia:blackbean",
+      "required": false
+    },
+    {
+      "id": "croptopia:clam",
+      "required": false
+    },
+    {
+      "id": "croptopia:cooked_anchovy",
+      "required": false
+    },
+    {
+      "id": "croptopia:cooked_bacon",
+      "required": false
+    },
+    {
+      "id": "croptopia:cooked_calamari",
+      "required": false
+    },
+    {
+      "id": "croptopia:cooked_ravager_meat",
+      "required": false
+    },
+    {
+      "id": "croptopia:cooked_shrimp",
+      "required": false
+    },
+    {
+      "id": "croptopia:cooked_tuna",
+      "required": false
+    },
+    {
+      "id": "croptopia:crab",
+      "required": false
+    },
+    {
+      "id": "croptopia:crab_legs",
+      "required": false
+    },
+    {
+      "id": "croptopia:dumpling",
+      "required": false
+    },
+    {
+      "id": "croptopia:egg_roll",
+      "required": false
+    },
+    {
+      "id": "croptopia:frog_legs",
+      "required": false
+    },
+    {
+      "id": "croptopia:fried_calamari",
+      "required": false
+    },
+    {
+      "id": "croptopia:fried_chicken",
+      "required": false
+    },
+    {
+      "id": "croptopia:fried_frog_legs",
+      "required": false
+    },
+    {
+      "id": "croptopia:glowing_calamari",
+      "required": false
+    },
+    {
+      "id": "croptopia:ground_pork",
+      "required": false
+    },
+    {
+      "id": "croptopia:oyster",
+      "required": false
+    },
+    {
+      "id": "croptopia:peanut",
+      "required": false
+    },
+    {
+      "id": "croptopia:peanut_butter",
+      "required": false
+    },
+    {
+      "id": "croptopia:pepperoni",
+      "required": false
+    },
+    {
+      "id": "croptopia:roe",
+      "required": false
+    },
+    {
+      "id": "croptopia:sausage",
+      "required": false
+    },
+    {
+      "id": "croptopia:shrimp",
+      "required": false
+    },
+    {
+      "id": "croptopia:soybean",
+      "required": false
+    },
+    {
+      "id": "croptopia:tofu",
+      "required": false
+    },
+    {
+      "id": "croptopia:tuna",
+      "required": false
+    },
+    {
+      "id": "croptopia:beef_jerky",
+      "required": false
+    },
+    {
+      "id": "croptopia:beef_stew",
+      "required": false
+    },
+    {
+      "id": "croptopia:beef_stir_fry",
+      "required": false
+    },
+    {
+      "id": "croptopia:beef_wellington",
+      "required": false
+    },
+    {
+      "id": "croptopia:blt",
+      "required": false
+    },
+    {
+      "id": "croptopia:burrito",
+      "required": false
+    },
+    {
+      "id": "croptopia:carnitas",
+      "required": false
+    },
+    {
+      "id": "croptopia:cashew_chicken",
+      "required": false
+    },
+    {
+      "id": "croptopia:cheeseburger",
+      "required": false
+    },
+    {
+      "id": "croptopia:chicken_and_dumplings",
+      "required": false
+    },
+    {
+      "id": "croptopia:chicken_and_noodles",
+      "required": false
+    },
+    {
+      "id": "croptopia:chicken_and_rice",
+      "required": false
+    },
+    {
+      "id": "croptopia:chimichanga",
+      "required": false
+    },
+    {
+      "id": "croptopia:cornish_pasty",
+      "required": false
+    },
+    {
+      "id": "croptopia:deep_fried_shrimp",
+      "required": false
+    },
+    {
+      "id": "croptopia:enchilada",
+      "required": false
+    },
+    {
+      "id": "croptopia:fajitas",
+      "required": false
+    },
+    {
+      "id": "croptopia:fish_and_chips",
+      "required": false
+    },
+    {
+      "id": "croptopia:grilled_oysters",
+      "required": false
+    },
+    {
+      "id": "croptopia:goulash",
+      "required": false
+    },
+    {
+      "id": "croptopia:ham_sandwich",
+      "required": false
+    },
+    {
+      "id": "croptopia:hamburger",
+      "required": false
+    },
+    {
+      "id": "croptopia:lemon_chicken",
+      "required": false
+    },
+    {
+      "id": "croptopia:pork_and_beans",
+      "required": false
+    },
+    {
+      "id": "croptopia:pork_jerky",
+      "required": false
+    },
+    {
+      "id": "croptopia:protein_bar",
+      "required": false
+    },
+    {
+      "id": "croptopia:quesadilla",
+      "required": false
+    },
+    {
+      "id": "croptopia:quiche",
+      "required": false
+    },
+    {
+      "id": "croptopia:scrambled_eggs",
+      "required": false
+    },
+    {
+      "id": "croptopia:shepherds_pie",
+      "required": false
+    },
+    {
+      "id": "croptopia:steamed_clams",
+      "required": false
+    },
+    {
+      "id": "croptopia:steamed_crab",
+      "required": false
+    },
+    {
+      "id": "croptopia:sushi",
+      "required": false
+    },
+    {
+      "id": "croptopia:taco",
+      "required": false
+    },
+    {
+      "id": "croptopia:tamales",
+      "required": false
+    },
+    {
+      "id": "croptopia:tofu_and_dumplings",
+      "required": false
+    },
+    {
+      "id": "croptopia:tofuburger",
+      "required": false
+    },
+    {
+      "id": "croptopia:tostada",
+      "required": false
+    },
+    {
+      "id": "croptopia:tuna_roll",
+      "required": false
+    },
+    {
+      "id": "croptopia:tuna_sandwich",
+      "required": false
+    },
+    {
+      "id": "croptopia:baked_beans",
+      "required": false
+    },
+    {
+      "id": "croptopia:cabbage_roll",
+      "required": false
+    },
+    {
+      "id": "croptopia:calamari",
+      "required": false
+    },
+    {
+      "id": "croptopia:cashew",
+      "required": false
+    },
+    {
+      "id": "croptopia:dragon_egg_omelette",
+      "required": false
+    },
+    {
+      "id": "croptopia:sunny_side_eggs",
+      "required": false
+    },
+    {
+      "id": "croptopia:the_big_breakfast",
+      "required": false
+    },
+    {
+      "id": "croptopia:transcendental_breakfast",
+      "required": false
+    },
+    {
+      "id": "croptopia:croque_madame",
+      "required": false
+    },
+    {
+      "id": "croptopia:croque_monsieur",
+      "required": false
+    },
+    {
+      "id": "croptopia:anchovy_pizza",
+      "required": false
     }
   ]
 }

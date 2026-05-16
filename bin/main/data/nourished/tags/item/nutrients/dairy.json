@@ -38,6 +38,14 @@
       "required": false
     },
     {
+      "id": "farmersdelight:milk_bottle",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cooking/glow_berry_custard",
+      "required": false
+    },
+    {
       "id": "pamhc2foodcore:freshmilkitem",
       "required": false
     },
@@ -280,6 +288,70 @@
     },
     {
       "id": "moredelight:hamburger_with_egg",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cheesedanishitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cheeseontoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:crackersandcheeseitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:custarditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:eggnogitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:herbcheeseballitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:soymilkitem",
+      "required": false
+    },
+    {
+      "id": "croptopia:butter",
+      "required": false
+    },
+    {
+      "id": "croptopia:cheese",
+      "required": false
+    },
+    {
+      "id": "croptopia:crema",
+      "required": false
+    },
+    {
+      "id": "croptopia:grilled_cheese",
+      "required": false
+    },
+    {
+      "id": "croptopia:horchata",
+      "required": false
+    },
+    {
+      "id": "croptopia:milk_bottle",
+      "required": false
+    },
+    {
+      "id": "croptopia:soy_milk",
+      "required": false
+    },
+    {
+      "id": "croptopia:whipping_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:yoghurt",
       "required": false
     }
   ]
