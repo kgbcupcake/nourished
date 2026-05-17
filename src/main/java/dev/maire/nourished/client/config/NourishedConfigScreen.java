@@ -133,10 +133,16 @@ public final class NourishedConfigScreen {
             for (Map.Entry<String, AtomicBoolean> entry : modulePending.entrySet()) {
                 config.setModuleEnabled(entry.getKey(), entry.getValue().get());
             }
-            // Dependency guard: critical toasts only makes sense when toasts are enabled.
+            // Dependency guards for module toggles with parent modules.
             AtomicBoolean toastsPending = modulePending.get("enableToasts");
             if (toastsPending != null && !toastsPending.get()) {
                 config.setModuleEnabled("enableCriticalToasts", false);
+            }
+            AtomicBoolean staminaPending = modulePending.get("enableStamina");
+            if (staminaPending != null && !staminaPending.get()) {
+                config.setModuleEnabled("enablePSStaminaUsage", false);
+                config.setModuleEnabled("enablePSPenaltyDecay", false);
+                config.setModuleEnabled("enablePSExhaustionDuration", false);
             }
             FoodValueRegistry.save();
             ColorRegistry.save();
@@ -173,7 +179,7 @@ public final class NourishedConfigScreen {
         List<ModuleMeta> metas = moduleMetas(config.moduleToggles());
         List<String> editableModuleKeys = new ArrayList<>();
         Map<String, List<AbstractConfigListEntry>> groupedEntries = new LinkedHashMap<>();
-        for (String group : List.of("core", "ui", "other")) {
+        for (String group : List.of("core", "rawfood", "stamina", "peakstamina", "spiceoflife", "lso", "ui", "other")) {
             groupedEntries.put(group, new ArrayList<>());
         }
         for (ModuleMeta meta : metas) {
@@ -207,6 +213,11 @@ public final class NourishedConfigScreen {
         }
 
         addModuleGroupSubcategory(category, eb, "core", groupedEntries.get("core"));
+        addModuleGroupSubcategory(category, eb, "rawfood", groupedEntries.get("rawfood"));
+        addModuleGroupSubcategory(category, eb, "stamina", groupedEntries.get("stamina"));
+        addModuleGroupSubcategory(category, eb, "peakstamina", groupedEntries.get("peakstamina"));
+        addModuleGroupSubcategory(category, eb, "spiceoflife", groupedEntries.get("spiceoflife"));
+        addModuleGroupSubcategory(category, eb, "lso", groupedEntries.get("lso"));
         addModuleGroupSubcategory(category, eb, "ui", groupedEntries.get("ui"));
         addModuleGroupSubcategory(category, eb, "other", groupedEntries.get("other"));
 
@@ -248,13 +259,34 @@ public final class NourishedConfigScreen {
     }
 
     private static Component groupTitle(String group) {
-        return Component.translatable("config.nourished.modules.group." + group);
+        return Component.translatable(switch (group) {
+            case "rawfood" -> "config.nourished.modules.group.rawfood";
+            case "stamina" -> "config.nourished.modules.group.stamina";
+            case "peakstamina" -> "config.nourished.modules.group.peakstamina";
+            case "spiceoflife" -> "config.nourished.modules.group.spiceoflife";
+            case "lso" -> "config.nourished.modules.group.lso";
+            default -> "config.nourished.modules.group." + group;
+        });
     }
 
     private static Component moduleToggleTitle(String key) {
         return Component.translatable(switch (key) {
             case "blockHeavyMeals" -> "nourished.config.blockHeavyMeals";
             case "blockLightFood" -> "nourished.config.blockLightFood";
+            case "enableRawFoodPenalty" -> "config.nourished.enableRawFoodPenalty";
+            case "enableStamina" -> "config.nourished.enableStamina";
+            case "enablePSStaminaUsage" -> "config.nourished.enablePSStaminaUsage";
+            case "enablePSPenaltyDecay" -> "config.nourished.enablePSPenaltyDecay";
+            case "enablePSExhaustionDuration" -> "config.nourished.enablePSExhaustionDuration";
+            case "enableSOLDiversityHealth" -> "config.nourished.enableSOLDiversityHealth";
+            case "enableSOLDiversityPenalty" -> "config.nourished.enableSOLDiversityPenalty";
+            case "enableLSOThermalResistance" -> "config.nourished.enableLSOThermalResistance";
+            case "enableLSOBrokenHeartResilience" -> "config.nourished.enableLSOBrokenHeartResilience";
+            case "enableLSOThirstSaturation" -> "config.nourished.enableLSOThirstSaturation";
+            case "enableSynergies" -> "config.nourished.enableSynergies";
+            case "enableMilestones" -> "config.nourished.enableMilestones";
+            case "enableSeasonHooks" -> "config.nourished.enableSeasonHooks";
+            case "enableAbsorptionModifiers" -> "config.nourished.enableAbsorptionModifiers";
             default -> "config.nourished." + key;
         });
     }
@@ -263,6 +295,20 @@ public final class NourishedConfigScreen {
         return Component.translatable(switch (key) {
             case "blockHeavyMeals" -> "nourished.config.blockHeavyMeals.desc";
             case "blockLightFood" -> "nourished.config.blockLightFood.desc";
+            case "enableRawFoodPenalty" -> "config.nourished.enableRawFoodPenalty.desc";
+            case "enableStamina" -> "config.nourished.enableStamina.desc";
+            case "enablePSStaminaUsage" -> "config.nourished.enablePSStaminaUsage.desc";
+            case "enablePSPenaltyDecay" -> "config.nourished.enablePSPenaltyDecay.desc";
+            case "enablePSExhaustionDuration" -> "config.nourished.enablePSExhaustionDuration.desc";
+            case "enableSOLDiversityHealth" -> "config.nourished.enableSOLDiversityHealth.desc";
+            case "enableSOLDiversityPenalty" -> "config.nourished.enableSOLDiversityPenalty.desc";
+            case "enableLSOThermalResistance" -> "config.nourished.enableLSOThermalResistance.desc";
+            case "enableLSOBrokenHeartResilience" -> "config.nourished.enableLSOBrokenHeartResilience.desc";
+            case "enableLSOThirstSaturation" -> "config.nourished.enableLSOThirstSaturation.desc";
+            case "enableSynergies" -> "config.nourished.enableSynergies.desc";
+            case "enableMilestones" -> "config.nourished.enableMilestones.desc";
+            case "enableSeasonHooks" -> "config.nourished.enableSeasonHooks.desc";
+            case "enableAbsorptionModifiers" -> "config.nourished.enableAbsorptionModifiers.desc";
             default -> "config.nourished." + key + ".desc";
         });
     }
@@ -276,11 +322,35 @@ public final class NourishedConfigScreen {
                 case "enableDecay", "enableNutritionEating", "blockHeavyMeals", "blockLightFood",
                      "enableEffects", "enableCalorieTracking", "enableSleepBonus",
                      "enableSynergies", "enableMilestones", "enableSeasonHooks", "enableAbsorptionModifiers" -> group = "core";
+                case "enableRawFoodPenalty" -> group = "rawfood";
+                case "enableStamina" -> group = "stamina";
+                case "enablePSStaminaUsage", "enablePSPenaltyDecay", "enablePSExhaustionDuration" -> {
+                    if (!ModList.get().isLoaded("peakstamina")) {
+                        continue;
+                    }
+                    group = "peakstamina";
+                }
+                case "enableSOLDiversityHealth", "enableSOLDiversityPenalty" -> {
+                    if (!ModList.get().isLoaded("solonion")) {
+                        continue;
+                    }
+                    group = "spiceoflife";
+                }
+                case "enableLSOThermalResistance", "enableLSOBrokenHeartResilience", "enableLSOThirstSaturation" -> {
+                    if (!ModList.get().isLoaded("legendarysurvivaloverhaul")) {
+                        continue;
+                    }
+                    group = "lso";
+                }
                 case "enableHUD", "enableDietScreen", "enableFoodTooltips", "enableToasts", "enableCriticalToasts" -> group = "ui";
                 default -> group = "other";
             }
             if ("enableCriticalToasts".equals(key)) {
                 dependsOn = "enableToasts";
+            } else if ("enablePSStaminaUsage".equals(key)
+                    || "enablePSPenaltyDecay".equals(key)
+                    || "enablePSExhaustionDuration".equals(key)) {
+                dependsOn = "enableStamina";
             }
             out.add(new ModuleMeta(key, group, dependsOn));
         }
@@ -2109,11 +2179,15 @@ public final class NourishedConfigScreen {
                         "enableSeasonHooks",
                         "enableAbsorptionModifiers");
             }
-            // Dependency guard.
+            // Dependency guards.
             AtomicBoolean toasts = modulePending.get("enableToasts");
             AtomicBoolean crit = modulePending.get("enableCriticalToasts");
             if (toasts != null && crit != null && !toasts.get()) {
                 crit.set(false);
+            }
+            AtomicBoolean stamina = modulePending.get("enableStamina");
+            if (stamina != null && !stamina.get()) {
+                setModules(false, "enablePSStaminaUsage", "enablePSPenaltyDecay", "enablePSExhaustionDuration");
             }
         }
 

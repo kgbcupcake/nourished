@@ -2,13 +2,17 @@ package dev.maire.nourished.modules.RawFood.rawInfo;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.util.NourishedItemTags;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,6 +64,27 @@ public final class RawFoodClassifier {
 
         float cookedness = CookednessResolver.resolve(itemId);
         RawSeverity severity = mapCookednessToSeverity(cookedness);
+
+        if (severity == RawSeverity.FINE) {
+            String itemPath = itemId.getPath();
+            String displayName = new ItemStack(stack.getItem()).getHoverName().getString().toLowerCase(Locale.ROOT);
+
+            RawSeverity fallbackSeverity = RawFoodConfig.classifyByTokens(itemPath, displayName);
+            if (fallbackSeverity != RawSeverity.FINE) {
+                Map<String, Float> bars = FoodNutritionRegistry.resolveNutrientBars(stack, false, level);
+                if (!bars.isEmpty()) {
+                    Nourished.LOGGER.debug(
+                            "[RawFoodClassifier] {} → {} (token+bar fallback, path='{}', displayName='{}')",
+                            itemId,
+                            fallbackSeverity,
+                            itemPath,
+                            displayName
+                    );
+                    SEVERITY_CACHE.put(itemId, fallbackSeverity);
+                    return fallbackSeverity;
+                }
+            }
+        }
 
         Nourished.LOGGER.debug("[RawFoodClassifier] {} → {} (cookedness={})", itemId, severity, cookedness);
 

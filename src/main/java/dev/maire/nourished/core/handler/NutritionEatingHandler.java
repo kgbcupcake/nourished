@@ -17,7 +17,6 @@ import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.UUID;
 
 @ApiStatus.Internal
@@ -26,7 +25,7 @@ public class NutritionEatingHandler {
     private static final int NUTRITION_ONLY_EAT_COOLDOWN_TICKS = 20;
     private static final HashMap<UUID, Long> LAST_NUTRITION_ONLY_EAT_GAME_TIME = new HashMap<>();
     /** ServerPlayer UUIDs waiting for {@link LivingEntityUseItemEvent.Finish} after {@link ServerPlayer#startUsingItem}. */
-    private static final HashSet<UUID> PENDING_NUTRITION_ONLY_FINISH = new HashSet<>();
+    private static final HashMap<UUID, PendingNutritionOnlyFinish> PENDING_NUTRITION_ONLY_FINISH = new HashMap<>();
 
     @SubscribeEvent
     public void onRightClick(PlayerInteractEvent.RightClickItem event) {
@@ -60,10 +59,15 @@ public class NutritionEatingHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        if (!PENDING_NUTRITION_ONLY_FINISH.contains(player.getUUID())) {
+        PendingNutritionOnlyFinish pending = PENDING_NUTRITION_ONLY_FINISH.get(player.getUUID());
+        if (pending == null) {
             return;
         }
         ItemStack stack = event.getItem();
+        if (!pending.matches(stack)) {
+            PENDING_NUTRITION_ONLY_FINISH.remove(player.getUUID());
+            return;
+        }
         FoodProperties food = stack.getItem().getFoodProperties(stack, player);
         if (food == null) {
             PENDING_NUTRITION_ONLY_FINISH.remove(player.getUUID());
@@ -87,7 +91,12 @@ public class NutritionEatingHandler {
     }
 
     public static boolean isNutritionOnlyPipelinePending(ServerPlayer player) {
-        return PENDING_NUTRITION_ONLY_FINISH.contains(player.getUUID());
+        return PENDING_NUTRITION_ONLY_FINISH.containsKey(player.getUUID());
+    }
+
+    public static boolean isNutritionOnlyPipelinePending(ServerPlayer player, ItemStack stack) {
+        PendingNutritionOnlyFinish pending = PENDING_NUTRITION_ONLY_FINISH.get(player.getUUID());
+        return pending != null && pending.matches(stack);
     }
 
     /**
@@ -108,6 +117,7 @@ public class NutritionEatingHandler {
     }
 
     private static boolean performNutritionOnlyConsume(ServerPlayer player, ItemStack stack, InteractionHand hand) {
+        PENDING_NUTRITION_ONLY_FINISH.remove(player.getUUID());
         if (!ModuleCache.enableDecay || !ModuleCache.enableNutritionEating) {
             return false;
         }
@@ -135,7 +145,13 @@ public class NutritionEatingHandler {
         if (!player.isUsingItem()) {
             return false;
         }
-        PENDING_NUTRITION_ONLY_FINISH.add(player.getUUID());
+        PENDING_NUTRITION_ONLY_FINISH.put(player.getUUID(), new PendingNutritionOnlyFinish(stack.copy()));
         return true;
+    }
+
+    private record PendingNutritionOnlyFinish(ItemStack stack) {
+        private boolean matches(ItemStack candidate) {
+            return !candidate.isEmpty() && ItemStack.isSameItemSameComponents(stack, candidate);
+        }
     }
 }

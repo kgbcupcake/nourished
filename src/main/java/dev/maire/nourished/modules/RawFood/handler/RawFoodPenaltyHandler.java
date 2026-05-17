@@ -49,32 +49,34 @@ public class RawFoodPenaltyHandler {
     public void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
         if (!ModuleCache.enableRawFoodPenalty) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (NutritionEatingHandler.isNutritionOnlyPipelinePending(player)) {
+        ItemStack stack = event.getItem();
+        ResourceLocation itemId = NourishedRegistryUtils.itemKey(stack);
+        RawSeverity severity = RawFoodClassifier.classify(stack, player.level());
+        float resistance = RawFoodResistanceResolver.resolve(player, severity);
+        float penaltyScale = 1.0f - resistance;
+        Nourished.LOGGER.debug(
+                "[RawFoodPenaltyHandler] item={}, severity={}, resistance={}, penaltyScale={}",
+                itemId, severity, resistance, penaltyScale);
+
+        if (NutritionEatingHandler.isNutritionOnlyPipelinePending(player, stack)) {
+            Nourished.LOGGER.debug("[RawFoodPenaltyHandler] skipped {} because nutrition-only pipeline is pending", itemId);
             return;
         }
-        ItemStack stack = event.getItem();
         if (FoodNutritionRegistry.foodPropertiesForNutrition(stack, player) == null) {
             return;
         }
-
-        RawSeverity severity = RawFoodClassifier.classify(stack, player.level());
         if (severity == RawSeverity.FINE) {
             return;
         }
 
-        float resistance = RawFoodResistanceResolver.resolve(player, severity);
-        float penaltyScale = 1.0f - resistance;
-
         if (penaltyScale <= 0.0f) {
-            String itemId = NourishedRegistryUtils.itemKey(stack).toString();
             Nourished.LOGGER.debug("[RawFoodPenaltyHandler] {} ate {} — fully resisted (severity={})",
                     player.getName().getString(), itemId, severity);
             return;
         }
 
         RawFoodTierDef tierDef = RawFoodConfig.getTier(severity);
-        String itemId = NourishedRegistryUtils.itemKey(stack).toString();
-        boolean repeatedRawEat = updateRawEatTimestamp(player, itemId);
+        boolean repeatedRawEat = updateRawEatTimestamp(player, itemId.toString());
 
         applyRawFoodEffect(player, severity, tierDef, repeatedRawEat);
         applyNutrientPenalty(player, stack, tierDef, penaltyScale);

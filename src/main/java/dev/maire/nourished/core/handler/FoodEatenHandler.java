@@ -16,10 +16,10 @@ public class FoodEatenHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (NutritionEatingHandler.isNutritionOnlyPipelinePending(player)) {
+        ItemStack stack = event.getItem();
+        if (NutritionEatingHandler.isNutritionOnlyPipelinePending(player, stack)) {
             return;
         }
-        ItemStack stack = event.getItem();
         if (FoodNutritionRegistry.foodPropertiesForNutrition(stack, player) == null) {
             return;
         }

@@ -41,6 +41,7 @@
   "enableCriticalToasts": true,
   "enableSleepBonus": true,
   "enableRawFoodPenalty": true,
+  "enableStamina": true,
   "enableSynergies": true,
   "enableMilestones": true,
   "enableSeasonHooks": true,

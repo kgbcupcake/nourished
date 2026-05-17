@@ -9,6 +9,9 @@ import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthSyncPayload;
+import dev.maire.nourished.modules.Stamina.Core.StaminaAttachment;
+import dev.maire.nourished.modules.Stamina.Core.StaminaData;
+import dev.maire.nourished.modules.Stamina.Core.StaminaSyncPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
@@ -54,6 +57,13 @@ public class ModNetworking {
                 GutHealthSyncPayload.STREAM_CODEC,
                 ModNetworking::handleSyncGutHealth
         );
+
+        // Stamina sync — stamina module
+        registrar.playToClient(
+                StaminaSyncPayload.TYPE,
+                StaminaSyncPayload.STREAM_CODEC,
+                ModNetworking::handleSyncStamina
+        );
     }
 
     /** Send lightweight client sync. Call on every food eat and decay tick. */
@@ -90,12 +100,49 @@ public class ModNetworking {
         PacketDistributor.sendToPlayer(player, new GutHealthSyncPayload(gut.getGutHealth(), gut.getSensitivity()));
     }
 
+    /** Send stamina sync to client. Call when stamina state changes. */
+    public static void syncStamina(ServerPlayer player, StaminaData data) {
+        PacketDistributor.sendToPlayer(player, new StaminaSyncPayload(
+                data.getPhysicalStamina(),
+                data.getPhysicalMax(),
+                data.getPhysicalFatiguePenalty(),
+                data.getPhysicalBonusStamina(),
+                data.getPhysicalDebt(),
+                data.getMentalStamina(),
+                data.getMentalMax(),
+                data.getMentalFatiguePenalty(),
+                data.getMentalBonusStamina(),
+                data.getMentalDebt()
+        ));
+    }
+
     private static void handleSyncGutHealth(GutHealthSyncPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player != null) {
                 GutHealthData gut = GutHealthData.fromSync(payload.gutHealth(), payload.sensitivity());
                 player.setData(GutHealthAttachment.GUT.get(), gut);
+            }
+        });
+    }
+
+    private static void handleSyncStamina(StaminaSyncPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            LocalPlayer player = Minecraft.getInstance().player;
+            if (player != null) {
+                StaminaData stamina = StaminaData.fromSync(
+                        payload.physicalStamina(),
+                        payload.physicalMax(),
+                        payload.physicalFatiguePenalty(),
+                        payload.physicalBonusStamina(),
+                        payload.physicalDebt(),
+                        payload.mentalStamina(),
+                        payload.mentalMax(),
+                        payload.mentalFatiguePenalty(),
+                        payload.mentalBonusStamina(),
+                        payload.mentalDebt()
+                );
+                player.setData(StaminaAttachment.STAMINA.get(), stamina);
             }
         });
     }

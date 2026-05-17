@@ -71,8 +71,22 @@ public class RawFoodConfig {
         }
 
         String itemPath = NourishedRegistryUtils.itemKey(stack).getPath().toLowerCase(Locale.ROOT);
+        return classifyByTokens(itemPath, "");
+    }
+
+    /**
+     * Classifies severity by token matching against item path and display name.
+     * Returns FINE if no tokens match.
+     * Called by RawFoodClassifier as a fallback for items not in the scanner cache.
+     *
+     * @param itemPath    the item registry path (e.g. "beef", "porkchop")
+     * @param displayName lowercased display name (e.g. "raw beef")
+     * @return the matched severity, or FINE if no match
+     */
+    public static RawSeverity classifyByTokens(String itemPath, String displayName) {
         for (Map.Entry<String, RawSeverity> entry : TOKEN_MAP.entrySet()) {
-            if (itemPath.contains(entry.getKey())) {
+            String token = entry.getKey();
+            if (displayName.contains(token) || itemPath.contains(token)) {
                 return entry.getValue();
             }
         }

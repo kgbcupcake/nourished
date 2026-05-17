@@ -45,6 +45,8 @@ import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthRecoveryHandler;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthTickHandler;
 import dev.maire.nourished.modules.RawFood.handler.RawFoodPenaltyHandler;
+import dev.maire.nourished.modules.Stamina.Core.StaminaAttachment;
+import dev.maire.nourished.modules.Stamina.Core.StaminaConfig;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import net.neoforged.api.distmarker.Dist;
@@ -85,6 +87,7 @@ public class Nourished {
         FoodNutritionRegistry.init();
         DietAttachment.register(modEventBus);
         GutHealthAttachment.register(modEventBus);
+        StaminaAttachment.register(modEventBus);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modContainer.registerExtensionPoint(IConfigScreenFactory.class, (minecraft, parent) -> NourishedConfigScreen.create(parent));
             ClientEventRegistrar.register(modEventBus);
@@ -154,6 +157,8 @@ public class Nourished {
                 "EffectRegistry", EffectRegistry::load, EffectRegistry::reload, EffectRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
                 "RawFoodConfig", RawFoodConfig::load, RawFoodConfig::reload, RawFoodConfig::loadFromDatapack);
+        RegistryLifecycleManager.registerRegistry(
+                "StaminaConfig", StaminaConfig::load, StaminaConfig::reload, StaminaConfig::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
                 "FoodValueRegistry", FoodValueRegistry::load, FoodValueRegistry::reload, FoodValueRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
