@@ -230,12 +230,16 @@ public class DietData {
     public float getBalanceScore() {
         List<String> keys = barOrder();
         float sum = 0f;
-        for (String k : keys) sum += nutrients.getOrDefault(k, 0f);
+        for (String k : keys) sum += effectiveWellnessValue(k, nutrients.getOrDefault(k, 0f));
         float avg = sum / keys.size();
         if (avg <= 0.0001f) return 1f;
         float dev = 0f;
-        for (String k : keys) dev += Math.abs(nutrients.getOrDefault(k, 0f) - avg);
+        for (String k : keys) dev += Math.abs(effectiveWellnessValue(k, nutrients.getOrDefault(k, 0f)) - avg);
         return 1f - Math.min(1f, dev / (avg * keys.size() * 2f));
+    }
+
+    private static float effectiveWellnessValue(String key, float value) {
+        return NutrientRegistry.isBeneficial(key) ? value : 1f - value;
     }
 
     /** Extracts client-sync state for lightweight network sync (bars, calories, memory, time anchor). */
@@ -645,7 +649,7 @@ public class DietData {
      */
     public List<String> getMostNeglectedCategories(int n) {
         return nutrients.entrySet().stream()
-                .sorted(Comparator.comparingDouble(Map.Entry::getValue))
+                .sorted(Comparator.comparingDouble(e -> effectiveWellnessValue(e.getKey(), e.getValue())))
                 .limit(n)
                 .map(Map.Entry::getKey)
                 .toList();

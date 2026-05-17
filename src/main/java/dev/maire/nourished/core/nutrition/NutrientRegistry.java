@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NutrientDefinition;
+import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.registry.AbstractRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -24,9 +25,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Loads nutrient definitions from config/nourished/nutrients.json.
@@ -97,6 +100,18 @@ public class NutrientRegistry {
     private static final float DEFAULT_CRITICAL_THRESHOLD = 0f;
     private static final float DEFAULT_LOW_THRESHOLD = 0f;
     private static final float DEFAULT_EXCESS_THRESHOLD = 1f;
+    private static final Set<String> REQUIRED_FIELDS = Collections.unmodifiableSet(new LinkedHashSet<>(List.of(
+            "key",
+            "display_name",
+            "color",
+            "default_decay_rate",
+            "critical_threshold",
+            "low_threshold",
+            "excess_threshold",
+            "beneficial",
+            "icon",
+            "tags"
+    )));
 
     private static final class Core extends AbstractRegistry<String, NutrientDef> {
         Core() {
@@ -192,6 +207,10 @@ public class NutrientRegistry {
                 writeDefaults(file);
                 Nourished.LOGGER.info("[NutrientRegistry] Wrote default nutrients.json");
             }
+            try (Reader r = Files.newBufferedReader(file)) {
+                JsonArray arr = GSON.fromJson(r, JsonArray.class);
+                validateSchema(file, arr);
+            }
             parse(file);
             Nourished.LOGGER.info("[NutrientRegistry] Loaded {} nutrients from {}", INSTANCE.size(), file);
         } catch (IOException e) {
@@ -211,6 +230,43 @@ public class NutrientRegistry {
     }
 
     // ── Internals ─────────────────────────────────────────────────────────────
+
+    private static void validateSchema(Path file, JsonArray arr) throws IOException {
+        if (!isSchemaMismatch(arr)) {
+            return;
+        }
+        Nourished.LOGGER.info("[NutrientRegistry] nutrients.json schema mismatch detected — regenerating");
+        Files.delete(file);
+        writeDefaults(file);
+        Nourished.LOGGER.info("[NutrientRegistry] Wrote updated nutrients.json");
+    }
+
+    private static boolean isSchemaMismatch(JsonArray arr) {
+        if (arr == null) {
+            return false;
+        }
+
+        List<String> mismatches = new ArrayList<>();
+        for (JsonElement el : arr) {
+            JsonObject obj = el.getAsJsonObject();
+            List<String> missing = REQUIRED_FIELDS.stream()
+                    .filter(field -> !obj.has(field))
+                    .toList();
+            if (missing.isEmpty()) {
+                continue;
+            }
+
+            String key = obj.has("key") ? obj.get("key").getAsString() : "<missing key>";
+            mismatches.add("entry '" + key + "': missing " + missing);
+        }
+
+        if (ModuleCache.enableDebugLogging) {
+            for (String mismatch : mismatches) {
+                Nourished.LOGGER.debug("[NutrientRegistry] nutrients.json schema mismatch: {}", mismatch);
+            }
+        }
+        return !mismatches.isEmpty();
+    }
 
     private static void parse(Path file) throws IOException {
         INSTANCE.reset();
