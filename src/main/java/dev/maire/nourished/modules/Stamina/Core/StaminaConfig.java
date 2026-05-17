@@ -14,6 +14,7 @@ import net.neoforged.fml.loading.FMLPaths;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -272,6 +273,132 @@ public final class StaminaConfig {
         return useItemCost;
     }
 
+    public static void setEnableSprint(boolean value) {
+        enableSprint = value;
+    }
+
+    public static void setSprintCost(float value) {
+        sprintCost = value;
+        sanitize();
+    }
+
+    public static void setEnableJump(boolean value) {
+        enableJump = value;
+    }
+
+    public static void setJumpCost(float value) {
+        jumpCost = value;
+        sanitize();
+    }
+
+    public static void setEnableAttack(boolean value) {
+        enableAttack = value;
+    }
+
+    public static void setAttackCost(float value) {
+        attackCost = value;
+        sanitize();
+    }
+
+    public static void setEnableMissedAttack(boolean value) {
+        enableMissedAttack = value;
+    }
+
+    public static void setMissedAttackCost(float value) {
+        missedAttackCost = value;
+        sanitize();
+    }
+
+    public static void setEnableElytra(boolean value) {
+        enableElytra = value;
+    }
+
+    public static void setElytraCost(float value) {
+        elytraCost = value;
+        sanitize();
+    }
+
+    public static void setEnableSwim(boolean value) {
+        enableSwim = value;
+    }
+
+    public static void setSwimCost(float value) {
+        swimCost = value;
+        sanitize();
+    }
+
+    public static void setEnableClimb(boolean value) {
+        enableClimb = value;
+    }
+
+    public static void setClimbCost(float value) {
+        climbCost = value;
+        sanitize();
+    }
+
+    public static void setEnableTakeDamage(boolean value) {
+        enableTakeDamage = value;
+    }
+
+    public static void setTakeDamageCost(float value) {
+        takeDamageCost = value;
+        sanitize();
+    }
+
+    public static void setEnableMine(boolean value) {
+        enableMine = value;
+    }
+
+    public static void setMineCost(float value) {
+        mineCost = value;
+        sanitize();
+    }
+
+    public static void setEnablePlace(boolean value) {
+        enablePlace = value;
+    }
+
+    public static void setPlaceCost(float value) {
+        placeCost = value;
+        sanitize();
+    }
+
+    public static void setEnableFish(boolean value) {
+        enableFish = value;
+    }
+
+    public static void setFishCost(float value) {
+        fishCost = value;
+        sanitize();
+    }
+
+    public static void setEnableEat(boolean value) {
+        enableEat = value;
+    }
+
+    public static void setEatCost(float value) {
+        eatCost = value;
+        sanitize();
+    }
+
+    public static void setEnableRawEatPenalty(boolean value) {
+        enableRawEatPenalty = value;
+    }
+
+    public static void setRawEatCostMultiplier(float value) {
+        rawEatCostMultiplier = value;
+        sanitize();
+    }
+
+    public static void setEnableUseItem(boolean value) {
+        enableUseItem = value;
+    }
+
+    public static void setUseItemCost(float value) {
+        useItemCost = value;
+        sanitize();
+    }
+
     public static void load() {
         Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
         Path file = configDir.resolve("stamina.json");
@@ -314,6 +441,19 @@ public final class StaminaConfig {
     public static void reload() {
         Nourished.LOGGER.info("[StaminaConfig] Reloading stamina.json");
         load();
+    }
+
+    public static void save() {
+        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
+        Path file = configDir.resolve("stamina.json");
+        sanitize();
+        try {
+            Files.createDirectories(configDir);
+            writeCurrent(file);
+            Nourished.LOGGER.info("[StaminaConfig] Saved stamina.json");
+        } catch (IOException e) {
+            Nourished.LOGGER.error("[StaminaConfig] Failed to save stamina.json", e);
+        }
     }
 
     private static void parse(Path file) throws IOException {
@@ -499,6 +639,60 @@ public final class StaminaConfig {
                 throw new IOException("Missing bundled " + DEFAULT_RESOURCE_PATH);
             }
             Files.copy(in, file, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    private static void writeCurrent(Path file) throws IOException {
+        JsonObject root = new JsonObject();
+        root.addProperty("initialPhysicalMax", initialPhysicalMax);
+        root.addProperty("initialMentalMax", initialMentalMax);
+        root.addProperty("minStamina", minStamina);
+        root.addProperty("maxStamina", maxStamina);
+        root.addProperty("maxFatiguePenalty", maxFatiguePenalty);
+        root.addProperty("fatigueThreshold", fatigueThreshold);
+        root.addProperty("fatigueBuildRate", fatigueBuildRate);
+        root.addProperty("fatigueDecayRate", fatigueDecayRate);
+        root.addProperty("fatigueDurationTicks", fatigueDurationTicks);
+        root.addProperty("maxDebt", maxDebt);
+        root.addProperty("debtRepayRate", debtRepayRate);
+        root.addProperty("bonusDecayRate", bonusDecayRate);
+        root.addProperty("minNutritionModifier", minNutritionModifier);
+        root.addProperty("maxNutritionModifier", maxNutritionModifier);
+        root.addProperty("minGutModifier", minGutModifier);
+        root.addProperty("basePhysicalRegen", basePhysicalRegen);
+        root.addProperty("baseMentalRegen", baseMentalRegen);
+        root.addProperty("regenDelay", regenDelay);
+        root.addProperty("regenRestMultiplier", regenRestMultiplier);
+        root.addProperty("enableSprint", enableSprint);
+        root.addProperty("sprintCost", sprintCost);
+        root.addProperty("enableJump", enableJump);
+        root.addProperty("jumpCost", jumpCost);
+        root.addProperty("enableAttack", enableAttack);
+        root.addProperty("attackCost", attackCost);
+        root.addProperty("enableMissedAttack", enableMissedAttack);
+        root.addProperty("missedAttackCost", missedAttackCost);
+        root.addProperty("enableElytra", enableElytra);
+        root.addProperty("elytraCost", elytraCost);
+        root.addProperty("enableSwim", enableSwim);
+        root.addProperty("swimCost", swimCost);
+        root.addProperty("enableClimb", enableClimb);
+        root.addProperty("climbCost", climbCost);
+        root.addProperty("enableTakeDamage", enableTakeDamage);
+        root.addProperty("takeDamageCost", takeDamageCost);
+        root.addProperty("enableMine", enableMine);
+        root.addProperty("mineCost", mineCost);
+        root.addProperty("enablePlace", enablePlace);
+        root.addProperty("placeCost", placeCost);
+        root.addProperty("enableFish", enableFish);
+        root.addProperty("fishCost", fishCost);
+        root.addProperty("enableEat", enableEat);
+        root.addProperty("eatCost", eatCost);
+        root.addProperty("enableRawEatPenalty", enableRawEatPenalty);
+        root.addProperty("rawEatCostMultiplier", rawEatCostMultiplier);
+        root.addProperty("enableUseItem", enableUseItem);
+        root.addProperty("useItemCost", useItemCost);
+        try (Writer writer = Files.newBufferedWriter(file)) {
+            GSON.toJson(root, writer);
         }
     }
 }

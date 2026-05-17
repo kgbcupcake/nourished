@@ -25,11 +25,17 @@ import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.PresetRegistry;
+import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
+import dev.maire.nourished.modules.RawFood.core.RawFoodTierDef;
+import dev.maire.nourished.modules.RawFood.core.RawSeverity;
+import dev.maire.nourished.modules.Stamina.Core.StaminaConfig;
 
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
+import me.shedaniel.clothconfig2.gui.entries.BooleanListEntry;
+import me.shedaniel.clothconfig2.gui.entries.IntegerSliderEntry;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -69,6 +75,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public final class NourishedConfigScreen {
 
@@ -147,6 +155,8 @@ public final class NourishedConfigScreen {
             FoodValueRegistry.save();
             ColorRegistry.save();
             EffectRegistry.save();
+            StaminaConfig.save();
+            RawFoodConfig.save();
             NutrientUiColors.clearOverrides();
             NourishedClientConfig.saveNow();
             NourishedConfig.saveNow();
@@ -212,9 +222,12 @@ public final class NourishedConfigScreen {
             category.addEntry(new ModuleBulkToggleListEntry(editableModuleKeys, modulePending));
         }
 
+        addRawFoodConfigEntries(groupedEntries.get("rawfood"), eb);
+        // addStaminaConfigEntries(groupedEntries.get("stamina"), eb); // STAMINA_SHELVED
+
         addModuleGroupSubcategory(category, eb, "core", groupedEntries.get("core"));
         addModuleGroupSubcategory(category, eb, "rawfood", groupedEntries.get("rawfood"));
-        addModuleGroupSubcategory(category, eb, "stamina", groupedEntries.get("stamina"));
+        // addModuleGroupSubcategory(category, eb, "stamina", groupedEntries.get("stamina")); // STAMINA_SHELVED
         addModuleGroupSubcategory(category, eb, "peakstamina", groupedEntries.get("peakstamina"));
         addModuleGroupSubcategory(category, eb, "spiceoflife", groupedEntries.get("spiceoflife"));
         addModuleGroupSubcategory(category, eb, "lso", groupedEntries.get("lso"));
@@ -240,6 +253,146 @@ public final class NourishedConfigScreen {
         }
 
         addReloadButton(category, eb, false);
+    }
+
+    @SuppressWarnings("unused")
+    private static void addStaminaConfigEntries(List<AbstractConfigListEntry> entries, ConfigEntryBuilder eb) {
+        if (entries == null) {
+            return;
+        }
+
+        List<AbstractConfigListEntry> physicalActions = new ArrayList<>();
+        addStaminaAction(physicalActions, eb, "enableSprint", StaminaConfig.enableSprint(), true, StaminaConfig::setEnableSprint,
+                "sprintCost", StaminaConfig.sprintCost(), 0.0f, 10.0f, 0.05f, 0.15f, StaminaConfig::setSprintCost);
+        addStaminaAction(physicalActions, eb, "enableJump", StaminaConfig.enableJump(), true, StaminaConfig::setEnableJump,
+                "jumpCost", StaminaConfig.jumpCost(), 0.0f, 10.0f, 0.05f, 0.85f, StaminaConfig::setJumpCost);
+        addStaminaAction(physicalActions, eb, "enableAttack", StaminaConfig.enableAttack(), true, StaminaConfig::setEnableAttack,
+                "attackCost", StaminaConfig.attackCost(), 0.0f, 20.0f, 0.05f, 3.45f, StaminaConfig::setAttackCost);
+        addStaminaAction(physicalActions, eb, "enableMissedAttack", StaminaConfig.enableMissedAttack(), true, StaminaConfig::setEnableMissedAttack,
+                "missedAttackCost", StaminaConfig.missedAttackCost(), 0.0f, 10.0f, 0.05f, 1.0f, StaminaConfig::setMissedAttackCost);
+        addStaminaAction(physicalActions, eb, "enableElytra", StaminaConfig.enableElytra(), true, StaminaConfig::setEnableElytra,
+                "elytraCost", StaminaConfig.elytraCost(), 0.0f, 10.0f, 0.05f, 0.25f, StaminaConfig::setElytraCost);
+        addStaminaAction(physicalActions, eb, "enableSwim", StaminaConfig.enableSwim(), true, StaminaConfig::setEnableSwim,
+                "swimCost", StaminaConfig.swimCost(), 0.0f, 10.0f, 0.05f, 0.05f, StaminaConfig::setSwimCost);
+        addStaminaAction(physicalActions, eb, "enableClimb", StaminaConfig.enableClimb(), true, StaminaConfig::setEnableClimb,
+                "climbCost", StaminaConfig.climbCost(), 0.0f, 10.0f, 0.05f, 0.7f, StaminaConfig::setClimbCost);
+        addStaminaAction(physicalActions, eb, "enableTakeDamage", StaminaConfig.enableTakeDamage(), true, StaminaConfig::setEnableTakeDamage,
+                "takeDamageCost", StaminaConfig.takeDamageCost(), 0.0f, 10.0f, 0.05f, 0.5f, StaminaConfig::setTakeDamageCost);
+
+        List<AbstractConfigListEntry> mentalActions = new ArrayList<>();
+        addStaminaAction(mentalActions, eb, "enableMine", StaminaConfig.enableMine(), true, StaminaConfig::setEnableMine,
+                "mineCost", StaminaConfig.mineCost(), 0.0f, 10.0f, 0.05f, 0.3f, StaminaConfig::setMineCost);
+        addStaminaAction(mentalActions, eb, "enablePlace", StaminaConfig.enablePlace(), true, StaminaConfig::setEnablePlace,
+                "placeCost", StaminaConfig.placeCost(), 0.0f, 10.0f, 0.05f, 0.2f, StaminaConfig::setPlaceCost);
+        addStaminaAction(mentalActions, eb, "enableFish", StaminaConfig.enableFish(), true, StaminaConfig::setEnableFish,
+                "fishCost", StaminaConfig.fishCost(), 0.0f, 10.0f, 0.05f, 0.5f, StaminaConfig::setFishCost);
+        addStaminaAction(mentalActions, eb, "enableEat", StaminaConfig.enableEat(), true, StaminaConfig::setEnableEat,
+                "eatCost", StaminaConfig.eatCost(), 0.0f, 10.0f, 0.05f, 0.3f, StaminaConfig::setEatCost);
+        addStaminaAction(mentalActions, eb, "enableRawEatPenalty", StaminaConfig.enableRawEatPenalty(), true, StaminaConfig::setEnableRawEatPenalty,
+                "rawEatCostMultiplier", StaminaConfig.rawEatCostMultiplier(), 1.0f, 5.0f, 0.1f, 2.0f, StaminaConfig::setRawEatCostMultiplier);
+        addStaminaAction(mentalActions, eb, "enableUseItem", StaminaConfig.enableUseItem(), true, StaminaConfig::setEnableUseItem,
+                "useItemCost", StaminaConfig.useItemCost(), 0.0f, 10.0f, 0.05f, 0.2f, StaminaConfig::setUseItemCost);
+
+        entries.add(eb.startSubCategory(Component.literal("Physical Actions"), physicalActions).setExpanded(false).build());
+        entries.add(eb.startSubCategory(Component.literal("Mental Actions"), mentalActions).setExpanded(false).build());
+    }
+
+    private static void addStaminaAction(
+            List<AbstractConfigListEntry> entries,
+            ConfigEntryBuilder eb,
+            String toggleKey,
+            boolean toggleValue,
+            boolean defaultToggleValue,
+            Consumer<Boolean> toggleSaveConsumer,
+            String sliderKey,
+            float sliderValue,
+            float min,
+            float max,
+            float step,
+            float defaultValue,
+            Consumer<Float> sliderSaveConsumer
+    ) {
+        BooleanListEntry toggleEntry = eb.startBooleanToggle(
+                        Component.translatable("config.nourished.stamina." + toggleKey),
+                        toggleValue)
+                .setDefaultValue(defaultToggleValue)
+                .setTooltip(Component.translatable("config.nourished.stamina." + toggleKey + ".desc"))
+                .setSaveConsumer(toggleSaveConsumer)
+                .build();
+        entries.add(toggleEntry);
+        entries.add(buildSteppedFloatSlider(
+                Component.translatable("config.nourished.stamina." + sliderKey),
+                sliderValue,
+                min,
+                max,
+                step,
+                defaultValue,
+                sliderSaveConsumer,
+                toggleEntry::getValue,
+                Component.translatable("config.nourished.stamina." + sliderKey + ".desc")
+        ));
+    }
+
+    private static void addRawFoodConfigEntries(List<AbstractConfigListEntry> entries, ConfigEntryBuilder eb) {
+        if (entries == null) {
+            return;
+        }
+        entries.add(rawFoodTierSubcategory(eb, RawSeverity.MILD, "mild", 600, -0.03f, 0.15f));
+        entries.add(rawFoodTierSubcategory(eb, RawSeverity.MEDIUM, "medium", 1200, -0.05f, 0.35f));
+        entries.add(rawFoodTierSubcategory(eb, RawSeverity.SEVERE, "severe", 1200, -0.08f, 0.60f));
+        entries.add(
+                eb.startIntSlider(Component.translatable("config.nourished.rawfood.memorySecs"), Math.round(RawFoodConfig.memorySecs() / 10.0f), 1, 60)
+                        .setDefaultValue(12)
+                        .setTextGetter(v -> Component.literal((v * 10) + " seconds"))
+                        .setTooltip(Component.translatable("config.nourished.rawfood.memorySecs.desc"))
+                        .setSaveConsumer(v -> RawFoodConfig.setMemorySecs(v * 10))
+                        .build()
+        );
+    }
+
+    private static AbstractConfigListEntry rawFoodTierSubcategory(
+            ConfigEntryBuilder eb,
+            RawSeverity severity,
+            String keyPrefix,
+            int defaultDurationTicks,
+            float defaultNutrientPenalty,
+            float defaultMissedOpportunity
+    ) {
+        RawFoodTierDef tier = RawFoodConfig.getTier(severity);
+        List<AbstractConfigListEntry> tierEntries = new ArrayList<>();
+        tierEntries.add(
+                eb.startIntSlider(Component.translatable("config.nourished.rawfood." + keyPrefix + "Duration"), Math.round(tier.durationTicks() / 20.0f), 1, 300)
+                        .setDefaultValue(defaultDurationTicks / 20)
+                        .setTextGetter(v -> Component.literal((v * 20) + " ticks"))
+                        .setTooltip(Component.translatable("config.nourished.rawfood." + keyPrefix + "Duration.desc"))
+                        .setSaveConsumer(v -> RawFoodConfig.setDurationTicks(severity, v * 20))
+                        .build()
+        );
+        tierEntries.add(buildSteppedFloatSlider(
+                Component.translatable("config.nourished.rawfood." + keyPrefix + "NutrientPenalty"),
+                tier.nutrientPenalty(),
+                -0.5f,
+                0.0f,
+                0.01f,
+                defaultNutrientPenalty,
+                v -> RawFoodConfig.setNutrientPenalty(severity, v),
+                () -> true,
+                Component.translatable("config.nourished.rawfood." + keyPrefix + "NutrientPenalty.desc")
+        ));
+        tierEntries.add(buildSteppedFloatSlider(
+                Component.translatable("config.nourished.rawfood." + keyPrefix + "MissedOpportunity"),
+                tier.missedOpportunityMultiplier(),
+                0.0f,
+                1.0f,
+                0.05f,
+                defaultMissedOpportunity,
+                v -> RawFoodConfig.setMissedOpportunityMultiplier(severity, v),
+                () -> true,
+                Component.translatable("config.nourished.rawfood." + keyPrefix + "MissedOpportunity.desc")
+        ));
+        return eb.startSubCategory(Component.literal(severity.name() + " Tier"), tierEntries)
+                .setExpanded(false)
+                .build();
     }
 
     private static void addModuleGroupSubcategory(
@@ -316,6 +469,9 @@ public final class NourishedConfigScreen {
     private static List<ModuleMeta> moduleMetas(Map<String, ModConfigSpec.BooleanValue> moduleMap) {
         List<ModuleMeta> out = new ArrayList<>();
         for (String key : moduleMap.keySet()) {
+            if ("enableStamina".equals(key)) {
+                continue;
+            }
             String group;
             String dependsOn = null;
             switch (key) {
@@ -323,7 +479,7 @@ public final class NourishedConfigScreen {
                      "enableEffects", "enableCalorieTracking", "enableSleepBonus",
                      "enableSynergies", "enableMilestones", "enableSeasonHooks", "enableAbsorptionModifiers" -> group = "core";
                 case "enableRawFoodPenalty" -> group = "rawfood";
-                case "enableStamina" -> group = "stamina";
+                // case "enableStamina" -> group = "stamina"; // STAMINA_SHELVED
                 case "enablePSStaminaUsage", "enablePSPenaltyDecay", "enablePSExhaustionDuration" -> {
                     if (!ModList.get().isLoaded("peakstamina")) {
                         continue;
@@ -350,7 +506,7 @@ public final class NourishedConfigScreen {
             } else if ("enablePSStaminaUsage".equals(key)
                     || "enablePSPenaltyDecay".equals(key)
                     || "enablePSExhaustionDuration".equals(key)) {
-                dependsOn = "enableStamina";
+                // dependsOn = "enableStamina"; // STAMINA_SHELVED
             }
             out.add(new ModuleMeta(key, group, dependsOn));
         }
@@ -919,6 +1075,65 @@ public final class NourishedConfigScreen {
                 .setTooltip(tooltip)
                 .setSaveConsumer(v -> saveConsumer.accept(v / (float) scale))
                 .build();
+    }
+
+    private static AbstractConfigListEntry buildSteppedFloatSlider(
+            Component label,
+            float value,
+            float min,
+            float max,
+            float step,
+            float defaultValue,
+            Consumer<Float> saveConsumer,
+            Supplier<Boolean> enabledSupplier,
+            Component... tooltip
+    ) {
+        int scale = Math.round(1.0f / step);
+        int minScaled = Math.round(min * scale);
+        int maxScaled = Math.round(max * scale);
+        int valueScaled = Math.round(Math.max(min, Math.min(max, value)) * scale);
+        int defaultScaled = Math.round(Math.max(min, Math.min(max, defaultValue)) * scale);
+        return new DependentIntegerSliderEntry(
+                label,
+                valueScaled,
+                minScaled,
+                maxScaled,
+                Component.empty(),
+                () -> defaultScaled,
+                v -> saveConsumer.accept(v / (float) scale),
+                () -> Optional.of(tooltip),
+                false,
+                v -> Component.literal(String.format(Locale.ROOT, "%.2f", v / (float) scale)),
+                enabledSupplier
+        );
+    }
+
+    private static final class DependentIntegerSliderEntry extends IntegerSliderEntry {
+        private final Supplier<Boolean> enabledSupplier;
+
+        private DependentIntegerSliderEntry(
+                Component fieldName,
+                int value,
+                int minimum,
+                int maximum,
+                Component resetButtonKey,
+                Supplier<Integer> defaultValue,
+                Consumer<Integer> saveConsumer,
+                Supplier<Optional<Component[]>> tooltipSupplier,
+                boolean requiresRestart,
+                java.util.function.Function<Integer, Component> textGetter,
+                Supplier<Boolean> enabledSupplier
+        ) {
+            super(fieldName, value, minimum, maximum, resetButtonKey, defaultValue, saveConsumer, tooltipSupplier, requiresRestart);
+            this.enabledSupplier = enabledSupplier;
+            setTextGetter(textGetter);
+        }
+
+        @Override
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float delta) {
+            setEditable(enabledSupplier.get());
+            super.render(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, hovered, delta);
+        }
     }
 
     private static final class PendingOverride {

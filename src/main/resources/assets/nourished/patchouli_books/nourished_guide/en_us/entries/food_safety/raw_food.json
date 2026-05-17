@@ -1,0 +1,38 @@
+{
+  "name": "Raw Food",
+  "category": "nourished:food_safety",
+  "icon": "minecraft:beef",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Eating Raw Food",
+      "text": "Eating raw meat and other uncooked foods $(#e05252)isn't free$(). Nourished tracks what you eat and penalizes you when you skip the campfire.\n\nThe penalty scales with how raw the food is — there are three tiers: $(bold)Mild$(), $(bold)Medium$(), and $(bold)Severe$()."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Mild",
+      "text": "$(#E8C24F)Mild$() penalties apply to foods that are technically edible raw but clearly not ideal — lightly processed or borderline items.\n\nYou take a small nutrient penalty and miss out on a portion of the nutrition the cooked version would have given. Not a disaster, but it adds up."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Medium",
+      "text": "$(#e05252)Medium$() penalties apply to clearly raw foods — standard raw meats like beef, pork, and chicken.\n\nThe nutrient penalty is larger and a significant portion of the nutrition is lost compared to eating the cooked version. You are also more likely to trigger gut flora damage at this tier."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Severe",
+      "text": "$(#e05252)Severe$() penalties apply to foods that should never be eaten raw under any circumstances.\n\nNutrient bars take a meaningful hit, nearly all of the cooked nutrition is denied, and your gut flora takes the hardest damage. Just cook it."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Missed Opportunity",
+      "text": "Every tier includes a $(bold)missed opportunity$() multiplier. This is the fraction of nutrition the cooked version would have given that you simply don't get.\n\nEating raw doesn't just hurt you — it wastes the food. A raw beef gives far less Protein than a cooked one, even before the penalty kicks in."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Memory",
+      "text": "Nourished remembers recent raw food events for a short window. If you eat something raw and then eat the same thing cooked shortly after, the system won't reroll the penalty.\n\nThis prevents the system from double-punishing you during the same eating session."
+    }
+  ]
+}

@@ -2,7 +2,7 @@ package dev.maire.nourished.client;
 
 import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.modules.Stamina.HUD.StaminaHUD;
+// import dev.maire.nourished.modules.Stamina.HUD.StaminaHUD; // STAMINA_SHELVED
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
@@ -17,7 +17,7 @@ public final class ClientEventRegistrar {
         NeoForge.EVENT_BUS.addListener(ClientEvents::onItemTooltip);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onKeyInput);
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onRenderGuiPost);
-        NeoForge.EVENT_BUS.addListener(StaminaHUD::onRenderGuiPost);
+        // NeoForge.EVENT_BUS.addListener(StaminaHUD::onRenderGuiPost); // STAMINA_SHELVED
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onKeyInput);
         bootstrapCompatPlugins();
     }

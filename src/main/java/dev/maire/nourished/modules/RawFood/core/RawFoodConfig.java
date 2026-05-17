@@ -21,6 +21,7 @@ import net.neoforged.fml.loading.FMLPaths;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -103,6 +104,47 @@ public class RawFoodConfig {
 
     public static int memorySecs() {
         return memorySecs;
+    }
+
+    public static void setMemorySecs(int value) {
+        memorySecs = Math.max(0, value);
+    }
+
+    public static void setDurationTicks(RawSeverity severity, int durationTicks) {
+        RawFoodTierDef tier = getTier(severity);
+        setTier(severity, new RawFoodTierDef(
+                tier.effectPool(),
+                Math.max(0, durationTicks),
+                tier.amplifier(),
+                tier.nutrientPenalty(),
+                tier.missedOpportunityMultiplier()
+        ));
+    }
+
+    public static void setNutrientPenalty(RawSeverity severity, float nutrientPenalty) {
+        RawFoodTierDef tier = getTier(severity);
+        setTier(severity, new RawFoodTierDef(
+                tier.effectPool(),
+                tier.durationTicks(),
+                tier.amplifier(),
+                nutrientPenalty,
+                tier.missedOpportunityMultiplier()
+        ));
+    }
+
+    public static void setMissedOpportunityMultiplier(RawSeverity severity, float missedOpportunityMultiplier) {
+        RawFoodTierDef tier = getTier(severity);
+        setTier(severity, new RawFoodTierDef(
+                tier.effectPool(),
+                tier.durationTicks(),
+                tier.amplifier(),
+                tier.nutrientPenalty(),
+                missedOpportunityMultiplier
+        ));
+    }
+
+    private static void setTier(RawSeverity severity, RawFoodTierDef tier) {
+        TIERS.put(severity, tier);
     }
 
     // ── Gut Config Getters ────────────────────────────────────────────────────
@@ -196,6 +238,19 @@ public class RawFoodConfig {
     public static void reload() {
         Nourished.LOGGER.info("[RawFoodConfig] Reloading raw_food.json");
         load();
+    }
+
+    public static void save() {
+        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
+        Path file = configDir.resolve("raw_food.json");
+        ensureAllTiers();
+        try {
+            Files.createDirectories(configDir);
+            writeCurrent(file);
+            Nourished.LOGGER.info("[RawFoodConfig] Saved raw_food.json");
+        } catch (IOException e) {
+            Nourished.LOGGER.error("[RawFoodConfig] Failed to save raw_food.json", e);
+        }
     }
 
     private static void parse(Path file) throws IOException {
@@ -388,5 +443,82 @@ public class RawFoodConfig {
             }
             Files.copy(in, file, StandardCopyOption.REPLACE_EXISTING);
         }
+    }
+
+    private static void writeCurrent(Path file) throws IOException {
+        JsonObject root = new JsonObject();
+        root.addProperty("memory_secs", memorySecs);
+        root.add("tokens", tokensToJson());
+        root.add("tiers", tiersToJson());
+        root.add("gut", gutToJson());
+        try (Writer writer = Files.newBufferedWriter(file)) {
+            GSON.toJson(root, writer);
+        }
+    }
+
+    private static JsonObject tokensToJson() {
+        JsonObject tokens = new JsonObject();
+        for (RawSeverity severity : RawSeverity.values()) {
+            if (severity == RawSeverity.FINE) {
+                continue;
+            }
+            JsonArray arr = new JsonArray();
+            for (Map.Entry<String, RawSeverity> entry : TOKEN_MAP.entrySet()) {
+                if (entry.getValue() == severity) {
+                    arr.add(entry.getKey());
+                }
+            }
+            tokens.add(severity.name().toLowerCase(Locale.ROOT), arr);
+        }
+        return tokens;
+    }
+
+    private static JsonObject tiersToJson() {
+        JsonObject tiers = new JsonObject();
+        for (RawSeverity severity : RawSeverity.values()) {
+            RawFoodTierDef tier = getTier(severity);
+            JsonObject obj = new JsonObject();
+            JsonArray effectPool = new JsonArray();
+            for (String effect : tier.effectPool()) {
+                effectPool.add(effect);
+            }
+            obj.add("effect_pool", effectPool);
+            obj.addProperty("duration_ticks", tier.durationTicks());
+            obj.addProperty("amplifier", tier.amplifier());
+            obj.addProperty("nutrient_penalty", tier.nutrientPenalty());
+            obj.addProperty("missed_opportunity_multiplier", tier.missedOpportunityMultiplier());
+
+            RawFoodResistanceConfig resistance = RESISTANCE_CONFIGS.get(severity);
+            if (resistance != null) {
+                obj.add("resistance", resistanceToJson(resistance));
+            }
+            tiers.add(severity.name().toLowerCase(Locale.ROOT), obj);
+        }
+        return tiers;
+    }
+
+    private static JsonObject resistanceToJson(RawFoodResistanceConfig resistance) {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("threshold", resistance.resistanceThreshold());
+        obj.addProperty("max_resistance", resistance.maxResistance());
+        JsonObject weights = new JsonObject();
+        for (Map.Entry<String, Float> entry : resistance.nutrientWeights().entrySet()) {
+            weights.addProperty(entry.getKey(), entry.getValue());
+        }
+        obj.add("nutrient_weights", weights);
+        return obj;
+    }
+
+    private static JsonObject gutToJson() {
+        JsonObject gut = new JsonObject();
+        gut.addProperty("tick_interval", gutTickInterval);
+        gut.addProperty("base_recovery_rate", baseRecoveryRate);
+        gut.addProperty("cooked_food_recovery_rate", cookedFoodRecoveryRate);
+        gut.addProperty("diversity_threshold", diversityThreshold);
+        gut.addProperty("diversity_bonus_rate", diversityBonusRate);
+        gut.addProperty("sensitivity_decay_rate", sensitivityDecayRate);
+        gut.addProperty("max_sensitivity_multiplier", maxSensitivityMultiplier);
+        gut.addProperty("sensitivity_increment_per_raw_eat", sensitivityIncrementPerRawEat);
+        return gut;
     }
 }

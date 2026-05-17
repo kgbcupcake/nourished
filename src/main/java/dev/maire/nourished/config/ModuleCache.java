@@ -24,7 +24,8 @@ public final class ModuleCache {
     public static boolean enableCriticalToasts = true;
     public static boolean enableSleepBonus = true;
     public static boolean enableRawFoodPenalty = true;
-    public static boolean enableStamina = true;
+    // public static boolean enableStamina = true; // STAMINA_SHELVED
+    public static boolean enableStamina = false;
     public static boolean enablePSStaminaUsage = true;
     public static boolean enablePSPenaltyDecay = true;
     public static boolean enablePSExhaustionDuration = true;
@@ -57,7 +58,7 @@ public final class ModuleCache {
         enableCriticalToasts = config.isModuleEnabled("enableCriticalToasts");
         enableSleepBonus = config.isModuleEnabled("enableSleepBonus");
         enableRawFoodPenalty = config.isModuleEnabled("enableRawFoodPenalty");
-        enableStamina = config.isModuleEnabled("enableStamina");
+        // enableStamina = config.isModuleEnabled("enableStamina"); // STAMINA_SHELVED
         enablePSStaminaUsage = config.isModuleEnabled("enablePSStaminaUsage");
         enablePSPenaltyDecay = config.isModuleEnabled("enablePSPenaltyDecay");
         enablePSExhaustionDuration = config.isModuleEnabled("enablePSExhaustionDuration");

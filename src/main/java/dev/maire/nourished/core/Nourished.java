@@ -45,13 +45,13 @@ import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthRecoveryHandler;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthTickHandler;
 import dev.maire.nourished.modules.RawFood.handler.RawFoodPenaltyHandler;
-import dev.maire.nourished.modules.Stamina.Core.StaminaAttachment;
+// import dev.maire.nourished.modules.Stamina.Core.StaminaAttachment; // STAMINA_SHELVED
 import dev.maire.nourished.modules.Stamina.Core.StaminaConfig;
-import dev.maire.nourished.modules.Stamina.Handler.StaminaCombatHandler;
-import dev.maire.nourished.modules.Stamina.Handler.StaminaFoodHandler;
-import dev.maire.nourished.modules.Stamina.Handler.StaminaMovementHandler;
-import dev.maire.nourished.modules.Stamina.Handler.StaminaTickHandler;
-import dev.maire.nourished.modules.Stamina.Handler.StaminaWorldHandler;
+// import dev.maire.nourished.modules.Stamina.Handler.StaminaCombatHandler; // STAMINA_SHELVED
+// import dev.maire.nourished.modules.Stamina.Handler.StaminaFoodHandler; // STAMINA_SHELVED
+// import dev.maire.nourished.modules.Stamina.Handler.StaminaMovementHandler; // STAMINA_SHELVED
+// import dev.maire.nourished.modules.Stamina.Handler.StaminaTickHandler; // STAMINA_SHELVED
+// import dev.maire.nourished.modules.Stamina.Handler.StaminaWorldHandler; // STAMINA_SHELVED
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import net.neoforged.api.distmarker.Dist;
@@ -92,7 +92,7 @@ public class Nourished {
         FoodNutritionRegistry.init();
         DietAttachment.register(modEventBus);
         GutHealthAttachment.register(modEventBus);
-        StaminaAttachment.register(modEventBus);
+        // StaminaAttachment.register(modEventBus); // STAMINA_SHELVED
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modContainer.registerExtensionPoint(IConfigScreenFactory.class, (minecraft, parent) -> NourishedConfigScreen.create(parent));
             ClientEventRegistrar.register(modEventBus);
@@ -104,11 +104,11 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new RawFoodPenaltyHandler());
         NeoForge.EVENT_BUS.register(new GutHealthTickHandler());
         NeoForge.EVENT_BUS.register(new GutHealthRecoveryHandler());
-        NeoForge.EVENT_BUS.register(new StaminaMovementHandler());
-        NeoForge.EVENT_BUS.register(new StaminaCombatHandler());
-        NeoForge.EVENT_BUS.register(new StaminaWorldHandler());
-        NeoForge.EVENT_BUS.register(new StaminaFoodHandler());
-        NeoForge.EVENT_BUS.register(new StaminaTickHandler());
+        // NeoForge.EVENT_BUS.register(new StaminaMovementHandler()); // STAMINA_SHELVED
+        // NeoForge.EVENT_BUS.register(new StaminaCombatHandler()); // STAMINA_SHELVED
+        // NeoForge.EVENT_BUS.register(new StaminaWorldHandler()); // STAMINA_SHELVED
+        // NeoForge.EVENT_BUS.register(new StaminaFoodHandler()); // STAMINA_SHELVED
+        // NeoForge.EVENT_BUS.register(new StaminaTickHandler()); // STAMINA_SHELVED
         NeoForge.EVENT_BUS.register(new NutritionEffectsHandler());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
             event.enqueueWork(() -> {

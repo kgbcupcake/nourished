@@ -60,11 +60,11 @@ public class ModNetworking {
         );
 
         // Stamina sync — stamina module
-        registrar.playToClient(
-                StaminaSyncPayload.TYPE,
-                StaminaSyncPayload.STREAM_CODEC,
-                ModNetworking::handleSyncStamina
-        );
+        // registrar.playToClient( // STAMINA_SHELVED
+        //         StaminaSyncPayload.TYPE, // STAMINA_SHELVED
+        //         StaminaSyncPayload.STREAM_CODEC, // STAMINA_SHELVED
+        //         ModNetworking::handleSyncStamina // STAMINA_SHELVED
+        // ); // STAMINA_SHELVED
     }
 
     /** Send lightweight client sync. Call on every food eat and decay tick. */
@@ -127,6 +127,7 @@ public class ModNetworking {
         });
     }
 
+    @SuppressWarnings("unused")
     private static void handleSyncStamina(StaminaSyncPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             StaminaHUD.updateFromPayload(payload);
