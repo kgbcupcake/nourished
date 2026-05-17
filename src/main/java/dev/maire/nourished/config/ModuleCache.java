@@ -23,6 +23,7 @@ public final class ModuleCache {
     public static boolean enableDietScreen = true;
     public static boolean enableCriticalToasts = true;
     public static boolean enableSleepBonus = true;
+    public static boolean enableRawFoodPenalty = true;
     public static boolean enablePSStaminaUsage = true;
     public static boolean enablePSPenaltyDecay = true;
     public static boolean enablePSExhaustionDuration = true;
@@ -54,6 +55,7 @@ public final class ModuleCache {
         enableDietScreen = config.isModuleEnabled("enableDietScreen");
         enableCriticalToasts = config.isModuleEnabled("enableCriticalToasts");
         enableSleepBonus = config.isModuleEnabled("enableSleepBonus");
+        enableRawFoodPenalty = config.isModuleEnabled("enableRawFoodPenalty");
         enablePSStaminaUsage = config.isModuleEnabled("enablePSStaminaUsage");
         enablePSPenaltyDecay = config.isModuleEnabled("enablePSPenaltyDecay");
         enablePSExhaustionDuration = config.isModuleEnabled("enablePSExhaustionDuration");

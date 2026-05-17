@@ -337,14 +337,21 @@ final class FoodNutrientPipeline {
         for (String key : NutrientRegistry.getKeys()) {
             float current = diet.nutrients.getOrDefault(key, 0f);
             float previous = diet.lastNutrients.getOrDefault(key, 0f);
+            boolean beneficial = NutrientRegistry.isBeneficial(key);
 
             float criticalThreshold = (float) config.criticalThresholdFor(key);
 
-            if (current <= criticalThreshold && previous > criticalThreshold) {
-                NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientCriticalEvent(player, key));
-            }
-            if (current >= excessThreshold && previous < excessThreshold) {
-                NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientExcessEvent(player, key));
+            if (beneficial) {
+                if (current <= criticalThreshold && previous > criticalThreshold) {
+                    NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientCriticalEvent(player, key));
+                }
+                if (current >= excessThreshold && previous < excessThreshold) {
+                    NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientExcessEvent(player, key));
+                }
+            } else {
+                if (current >= excessThreshold && previous < excessThreshold) {
+                    NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientCriticalEvent(player, key));
+                }
             }
         }
     }

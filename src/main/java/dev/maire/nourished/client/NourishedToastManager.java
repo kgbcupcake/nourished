@@ -56,10 +56,24 @@ public final class NourishedToastManager {
 
         if (ModuleCache.enableEffects && ModuleCache.enableToasts && ModuleCache.enableCriticalToasts && mc.player != null) {
             for (String key : keys) {
-                double crit = config.criticalThresholdFor(key);
                 float before = lastNutrients.getOrDefault(key, 0f);
                 float after = nextNutrients.getOrDefault(key, 0f);
-                if (before >= crit && after < crit) {
+                boolean beneficial = NutrientRegistry.isBeneficial(key);
+
+                boolean showToast = false;
+                if (beneficial) {
+                    double crit = config.criticalThresholdFor(key);
+                    if (before >= crit && after < crit) {
+                        showToast = true;
+                    }
+                } else {
+                    double excess = config.excessThreshold();
+                    if (before < excess && after >= excess) {
+                        showToast = true;
+                    }
+                }
+
+                if (showToast) {
                     ItemStack icon = new ItemStack(
                             BuiltInRegistries.ITEM.get(ResourceLocation.parse(NutrientRegistry.getIcon(key))));
                     mc.getToasts().addToast(new CriticalNutrientToast(key, icon));

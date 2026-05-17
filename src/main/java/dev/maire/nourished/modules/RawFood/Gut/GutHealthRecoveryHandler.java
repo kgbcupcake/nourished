@@ -1,0 +1,52 @@
+package dev.maire.nourished.modules.RawFood.Gut;
+
+import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.config.ModuleCache;
+import dev.maire.nourished.core.network.ModNetworking;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
+import dev.maire.nourished.modules.RawFood.rawInfo.CookednessResolver;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+
+/**
+ * Handles immediate gut recovery from eating cooked food.
+ *
+ * <p>Subscribes to {@link LivingEntityUseItemEvent.Finish}. When the player
+ * eats food with cookedness >= 0.5, applies recovery proportional to the
+ * cookedness level.</p>
+ */
+@ApiStatus.Internal
+public class GutHealthRecoveryHandler {
+
+    @SubscribeEvent
+    public void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
+        if (!ModuleCache.enableRawFoodPenalty) return;
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        ItemStack stack = event.getItem();
+        if (FoodNutritionRegistry.foodPropertiesForNutrition(stack, player) == null) {
+            return;
+        }
+
+        ResourceLocation itemId = NourishedRegistryUtils.itemKey(stack);
+        float cookedness = CookednessResolver.resolve(itemId);
+
+        if (cookedness < 0.5f) {
+            return;
+        }
+
+        float recoveryAmount = RawFoodConfig.cookedFoodRecoveryRate() * cookedness;
+
+        GutHealthData gut = player.getData(GutHealthAttachment.GUT.get());
+        gut.applyRecovery(recoveryAmount);
+        gut.setLastUpdateMs(player.level().getGameTime() * 50L);
+
+        player.setData(GutHealthAttachment.GUT.get(), gut);
+        ModNetworking.syncGutHealth(player, gut);
+    }
+}

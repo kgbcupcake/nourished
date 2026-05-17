@@ -10,6 +10,10 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.item.crafting.SmokingRecipe;
+import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -204,6 +208,71 @@ public final class RecipeInheritanceResolver {
 
         recipeCache.put(itemId, ingredients);
         return ingredients;
+    }
+
+    /**
+     * Finds what the given raw item cooks into by checking furnace, smoker, and campfire recipes.
+     * Returns the first cooked output found, or {@code null} if no cooking recipe exists.
+     *
+     * @param rawItemId the raw item's registry ID
+     * @return the cooked output item ID, or {@code null} if no cooking recipe found
+     */
+    @Nullable
+    public ResourceLocation findCookedOutput(ResourceLocation rawItemId) {
+        if (recipeManager == null) {
+            return null;
+        }
+
+        Item rawItem = BuiltInRegistries.ITEM.get(rawItemId);
+        if (rawItem == null) {
+            return null;
+        }
+
+        ItemStack rawStack = new ItemStack(rawItem);
+
+        // Check smelting recipes (furnace)
+        for (RecipeHolder<SmeltingRecipe> holder : recipeManager.getAllRecipesFor(RecipeType.SMELTING)) {
+            try {
+                SmeltingRecipe recipe = holder.value();
+                if (recipe.getIngredients().stream().anyMatch(ing -> ing.test(rawStack))) {
+                    ItemStack result = recipe.getResultItem(null);
+                    if (result != null && !result.isEmpty()) {
+                        return NourishedRegistryUtils.itemKey(result);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        // Check smoking recipes
+        for (RecipeHolder<SmokingRecipe> holder : recipeManager.getAllRecipesFor(RecipeType.SMOKING)) {
+            try {
+                SmokingRecipe recipe = holder.value();
+                if (recipe.getIngredients().stream().anyMatch(ing -> ing.test(rawStack))) {
+                    ItemStack result = recipe.getResultItem(null);
+                    if (result != null && !result.isEmpty()) {
+                        return NourishedRegistryUtils.itemKey(result);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        // Check campfire recipes
+        for (RecipeHolder<CampfireCookingRecipe> holder : recipeManager.getAllRecipesFor(RecipeType.CAMPFIRE_COOKING)) {
+            try {
+                CampfireCookingRecipe recipe = holder.value();
+                if (recipe.getIngredients().stream().anyMatch(ing -> ing.test(rawStack))) {
+                    ItemStack result = recipe.getResultItem(null);
+                    if (result != null && !result.isEmpty()) {
+                        return NourishedRegistryUtils.itemKey(result);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        return null;
     }
 
     /**

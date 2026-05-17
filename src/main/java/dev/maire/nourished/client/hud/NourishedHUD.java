@@ -466,16 +466,30 @@ public final class NourishedHUD {
 
     private static int barFillColor(String key, float v) {
         NourishedConfig cfg = NourishedConfig.get();
-        if (v < cfg.criticalThresholdFor(key)) return COL_RED;
-        if (v < cfg.lowThreshold()) return COL_GOLD;
-        return NutrientUiColors.baseColorArgb(key);
+        boolean beneficial = NutrientRegistry.isBeneficial(key);
+        if (beneficial) {
+            if (v < cfg.criticalThresholdFor(key)) return COL_RED;
+            if (v < cfg.lowThreshold()) return COL_GOLD;
+            return NutrientUiColors.baseColorArgb(key);
+        } else {
+            if (v > cfg.excessThreshold()) return COL_RED;
+            if (v > cfg.lowThreshold()) return COL_GOLD;
+            return NutrientUiColors.baseColorArgb(key);
+        }
     }
 
     private static int pctColor(String key, float v) {
         NourishedConfig cfg = NourishedConfig.get();
-        if (v < cfg.criticalThresholdFor(key)) return COL_PCT_CRIT;
-        if (v < cfg.lowThreshold()) return COL_PCT_LOW;
-        return COL_PCT_GOOD;
+        boolean beneficial = NutrientRegistry.isBeneficial(key);
+        if (beneficial) {
+            if (v < cfg.criticalThresholdFor(key)) return COL_PCT_CRIT;
+            if (v < cfg.lowThreshold()) return COL_PCT_LOW;
+            return COL_PCT_GOOD;
+        } else {
+            if (v > cfg.excessThreshold()) return COL_PCT_CRIT;
+            if (v > cfg.lowThreshold()) return COL_PCT_LOW;
+            return COL_PCT_GOOD;
+        }
     }
 
     // ── Utilities ────────────────────────────────────────────────────────────

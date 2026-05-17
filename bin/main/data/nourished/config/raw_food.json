@@ -1,0 +1,24 @@
+{
+  "memory_secs": 120,
+  "tokens": {
+    "mild": ["fresh", "unripe"],
+    "medium": ["raw", "uncooked"],
+    "severe": ["rotten", "spoiled", "crude"]
+  },
+  "tiers": {
+    "fine": { "effect_pool": [], "duration_ticks": 0, "amplifier": 0, "nutrient_penalty": 0.0, "missed_opportunity_multiplier": 0.0 },
+    "mild": { "effect_pool": ["minecraft:hunger"], "duration_ticks": 600, "amplifier": 0, "nutrient_penalty": -0.03, "missed_opportunity_multiplier": 0.15 },
+    "medium": { "effect_pool": ["minecraft:slowness", "minecraft:weakness"], "duration_ticks": 1200, "amplifier": 0, "nutrient_penalty": -0.05, "missed_opportunity_multiplier": 0.35 },
+    "severe": { "effect_pool": ["minecraft:poison", "minecraft:nausea", "minecraft:blindness"], "duration_ticks": 1200, "amplifier": 1, "nutrient_penalty": -0.08, "missed_opportunity_multiplier": 0.60 }
+  },
+  "gut": {
+    "tick_interval": 100,
+    "base_recovery_rate": 0.001,
+    "cooked_food_recovery_rate": 0.02,
+    "diversity_threshold": 0.6,
+    "diversity_bonus_rate": 0.0005,
+    "sensitivity_decay_rate": 0.0002,
+    "max_sensitivity_multiplier": 2.0,
+    "sensitivity_increment_per_raw_eat": 0.05
+  }
+}

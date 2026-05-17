@@ -6,6 +6,9 @@ import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.core.diet.FoodMemoryEntry;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
+import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
+import dev.maire.nourished.modules.RawFood.Gut.GutHealthSyncPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
@@ -44,6 +47,13 @@ public class ModNetworking {
                 SyncDietDeltaPayload.STREAM_CODEC,
                 ModNetworking::handleSyncDietDelta
         );
+
+        // Gut health sync — raw food module
+        registrar.playToClient(
+                GutHealthSyncPayload.TYPE,
+                GutHealthSyncPayload.STREAM_CODEC,
+                ModNetworking::handleSyncGutHealth
+        );
     }
 
     /** Send lightweight client sync. Call on every food eat and decay tick. */
@@ -72,6 +82,21 @@ public class ModNetworking {
         context.enqueueWork(() -> {
             ClientDietCache.applyDelta(payload);
             NourishedToastManager.onClientDietUpdated(payload);
+        });
+    }
+
+    /** Send gut health sync to client. Call on raw food eat, cooked food recovery, and gut tick. */
+    public static void syncGutHealth(ServerPlayer player, GutHealthData gut) {
+        PacketDistributor.sendToPlayer(player, new GutHealthSyncPayload(gut.getGutHealth(), gut.getSensitivity()));
+    }
+
+    private static void handleSyncGutHealth(GutHealthSyncPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            LocalPlayer player = Minecraft.getInstance().player;
+            if (player != null) {
+                GutHealthData gut = GutHealthData.fromSync(payload.gutHealth(), payload.sensitivity());
+                player.setData(GutHealthAttachment.GUT.get(), gut);
+            }
         });
     }
 

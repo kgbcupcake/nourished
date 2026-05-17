@@ -120,6 +120,9 @@ public class FoodNutritionRegistry {
     }
 
     @Nullable
+    private static volatile RecipeManager serverRecipeManager;
+
+    @Nullable
     private static volatile RecipeInheritanceResolver serverRecipeInheritanceResolver;
 
     /**
@@ -127,7 +130,16 @@ public class FoodNutritionRegistry {
      * Called from server lifecycle and after datapack reload; pass {@code null} on server stop.
      */
     public static void bindServerRecipeManager(@Nullable RecipeManager recipeManager) {
+        serverRecipeManager = recipeManager;
         serverRecipeInheritanceResolver = recipeManager != null ? new RecipeInheritanceResolver(recipeManager) : null;
+    }
+
+    /**
+     * Returns the bound server recipe manager, or {@code null} if the server is not ready.
+     */
+    @Nullable
+    public static RecipeManager getServerRecipeManager() {
+        return serverRecipeManager;
     }
 
     /**

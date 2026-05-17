@@ -115,6 +115,7 @@ public final class NourishedFoodTooltipHelper {
             }
         }
 
+        NourishedConfig config = NourishedConfig.get();
         boolean renderedAny = false;
         for (String key : NutrientRegistry.getKeys()) {
             float base = delta.nutrients().getOrDefault(key, 0f);
@@ -125,7 +126,7 @@ public final class NourishedFoodTooltipHelper {
             renderedAny = true;
             String label = NourishedRegistryUtils.capitalizeFirst(key);
             String gain = String.format(Locale.ROOT, fmt, display);
-            int color = NutrientUiColors.baseColorArgb(key);
+            int color = computeTooltipColor(key, diet, display, config);
             MutableComponent line = Component.literal("  " + label + "  +" + gain)
                     .withStyle(Style.EMPTY.withColor(color));
             lines.add(line);
@@ -136,7 +137,7 @@ public final class NourishedFoodTooltipHelper {
             float display = base * multiplier;
             String label = NourishedRegistryUtils.capitalizeFirst(highestKey);
             String gain = String.format(Locale.ROOT, fmt, display);
-            int color = NutrientUiColors.baseColorArgb(highestKey);
+            int color = computeTooltipColor(highestKey, diet, display, config);
             lines.add(Component.literal("  " + label + "  +" + gain).withStyle(Style.EMPTY.withColor(color)));
         }
 
@@ -208,6 +209,29 @@ public final class NourishedFoodTooltipHelper {
                 lines.add(Component.literal("✦ Counts toward: " + name).withStyle(ChatFormatting.YELLOW));
                 return;
             }
+        }
+    }
+
+    private static final int COL_CRITICAL = 0xFFFF5555;
+    private static final int COL_WARNING = 0xFFFFAA00;
+    private static final int COL_GOOD = 0xFF55FF55;
+
+    private static int computeTooltipColor(String key, DietData diet, float gain, NourishedConfig config) {
+        boolean beneficial = NutrientRegistry.isBeneficial(key);
+        float current = diet.nutrients.getOrDefault(key, 0f);
+        float projected = current + gain;
+
+        if (beneficial) {
+            return NutrientUiColors.baseColorArgb(key);
+        } else {
+            float excess = (float) config.excessThreshold();
+            float low = (float) config.lowThreshold();
+            if (projected > excess) {
+                return COL_CRITICAL;
+            } else if (projected > low) {
+                return COL_WARNING;
+            }
+            return COL_GOOD;
         }
     }
 }

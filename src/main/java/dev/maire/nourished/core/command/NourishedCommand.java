@@ -24,6 +24,8 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.reload.NourishedReloadPipeline;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.modules.RawFood.rawInfo.CookedVersionResolver;
+import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
 import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -171,6 +173,8 @@ public class NourishedCommand {
         CommandSourceStack source = ctx.getSource();
         RuntimeFoodResolver.getInstance().invalidateCache();
         FoodNutritionRegistry.clearScannerClassifications();
+        RawFoodClassifier.invalidate();
+        CookedVersionResolver.invalidate();
         UnassignedFoodScanner.scanAndApply(source.getServer().getRecipeManager());
         source.sendSuccess(() -> Component.literal("Nourished cache invalidated. Scanner will reapply on next tick."), false);
         return 1;

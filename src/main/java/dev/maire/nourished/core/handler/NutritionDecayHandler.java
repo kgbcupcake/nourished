@@ -43,9 +43,11 @@ public class NutritionDecayHandler {
                     NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientChangedEvent(
                             player, key, current, newValue));
 
-                    float criticalThreshold = (float) config.criticalThresholdFor(key);
-                    if (newValue <= criticalThreshold && current > criticalThreshold) {
-                        NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientCriticalEvent(player, key));
+                    if (NutrientRegistry.isBeneficial(key)) {
+                        float criticalThreshold = (float) config.criticalThresholdFor(key);
+                        if (newValue <= criticalThreshold && current > criticalThreshold) {
+                            NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientCriticalEvent(player, key));
+                        }
                     }
                 }
             }

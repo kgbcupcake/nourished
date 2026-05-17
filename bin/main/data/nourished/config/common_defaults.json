@@ -40,6 +40,7 @@
   "enableDietScreen": true,
   "enableCriticalToasts": true,
   "enableSleepBonus": true,
+  "enableRawFoodPenalty": true,
   "enableSynergies": true,
   "enableMilestones": true,
   "enableSeasonHooks": true,

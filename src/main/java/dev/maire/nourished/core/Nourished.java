@@ -40,6 +40,11 @@ import dev.maire.nourished.core.handler.NutritionEatingHandler;
 import dev.maire.nourished.core.handler.NutritionRecipeServerHandler;
 import dev.maire.nourished.core.handler.NutritionEffectsHandler;
 import dev.maire.nourished.core.handler.SleepBonusHandler;
+import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
+import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
+import dev.maire.nourished.modules.RawFood.Gut.GutHealthRecoveryHandler;
+import dev.maire.nourished.modules.RawFood.Gut.GutHealthTickHandler;
+import dev.maire.nourished.modules.RawFood.handler.RawFoodPenaltyHandler;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import net.neoforged.api.distmarker.Dist;
@@ -79,6 +84,7 @@ public class Nourished {
         modEventBus.addListener(NourishedClientConfig::onModConfigReloading);
         FoodNutritionRegistry.init();
         DietAttachment.register(modEventBus);
+        GutHealthAttachment.register(modEventBus);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modContainer.registerExtensionPoint(IConfigScreenFactory.class, (minecraft, parent) -> NourishedConfigScreen.create(parent));
             ClientEventRegistrar.register(modEventBus);
@@ -87,6 +93,9 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new NutritionRecipeServerHandler());
         NeoForge.EVENT_BUS.register(new NutritionEatingHandler());
         NeoForge.EVENT_BUS.register(new FoodEatenHandler());
+        NeoForge.EVENT_BUS.register(new RawFoodPenaltyHandler());
+        NeoForge.EVENT_BUS.register(new GutHealthTickHandler());
+        NeoForge.EVENT_BUS.register(new GutHealthRecoveryHandler());
         NeoForge.EVENT_BUS.register(new NutritionEffectsHandler());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
             event.enqueueWork(() -> {
@@ -143,6 +152,8 @@ public class Nourished {
                 "ColorRegistry", ColorRegistry::load, ColorRegistry::reload, ColorRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
                 "EffectRegistry", EffectRegistry::load, EffectRegistry::reload, EffectRegistry::loadFromDatapack);
+        RegistryLifecycleManager.registerRegistry(
+                "RawFoodConfig", RawFoodConfig::load, RawFoodConfig::reload, RawFoodConfig::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
                 "FoodValueRegistry", FoodValueRegistry::load, FoodValueRegistry::reload, FoodValueRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(

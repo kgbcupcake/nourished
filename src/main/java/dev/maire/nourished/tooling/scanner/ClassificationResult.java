@@ -60,6 +60,25 @@ public record ClassificationResult(
     }
 
     /**
+     * Normalized confidence score based on spread relative to top score.
+     * Returns {@code confidenceSpread / topScore}, clamped to [0.0, 1.0].
+     * Returns 0.0 when scores are empty or top score is non-positive.
+     */
+    public float confidenceScore() {
+        if (scores.isEmpty()) {
+            return 0.0f;
+        }
+        float topScore = scores.values().stream()
+                .max(Float::compare)
+                .orElse(0.0f);
+        if (topScore <= 0.0f) {
+            return 0.0f;
+        }
+        float ratio = confidenceSpread / topScore;
+        return Math.max(0.0f, Math.min(1.0f, ratio));
+    }
+
+    /**
      * Creates an empty/default result for items that couldn't be classified.
      */
     public static ClassificationResult empty(ResourceLocation itemId, String fallbackNutrient) {

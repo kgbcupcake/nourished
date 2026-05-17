@@ -32,6 +32,7 @@ public final class NutrientDefinition {
     private final float excessThreshold;
     @Nullable
     private final NutrientRenderer customRenderer;
+    private final boolean beneficial;
 
     private NutrientDefinition(
             String id,
@@ -41,7 +42,8 @@ public final class NutrientDefinition {
             float criticalThreshold,
             float lowThreshold,
             float excessThreshold,
-            @Nullable NutrientRenderer customRenderer
+            @Nullable NutrientRenderer customRenderer,
+            boolean beneficial
     ) {
         this.id = id;
         this.displayName = displayName;
@@ -51,6 +53,7 @@ public final class NutrientDefinition {
         this.lowThreshold = lowThreshold;
         this.excessThreshold = excessThreshold;
         this.customRenderer = customRenderer;
+        this.beneficial = beneficial;
     }
 
     /**
@@ -138,6 +141,16 @@ public final class NutrientDefinition {
     }
 
     /**
+     * Returns whether this nutrient is beneficial (high values are good).
+     * When false, high values are treated as bad (e.g. sugars).
+     *
+     * @return {@code true} if high values are good, {@code false} if high values are bad
+     */
+    public boolean isBeneficial() {
+        return beneficial;
+    }
+
+    /**
      * Builder for constructing {@link NutrientDefinition} instances.
      */
     public static final class Builder {
@@ -151,6 +164,7 @@ public final class NutrientDefinition {
         private float excessThreshold = 0.9f;
         @Nullable
         private NutrientRenderer customRenderer;
+        private boolean beneficial = true;
 
         private Builder(String id) {
             this.id = id;
@@ -234,6 +248,19 @@ public final class NutrientDefinition {
         }
 
         /**
+         * Sets whether this nutrient is beneficial (high values are good).
+         * When false, high values are treated as bad (e.g. sugars).
+         * Default: true.
+         *
+         * @param beneficial {@code true} if high values are good, {@code false} if high values are bad
+         * @return this builder for chaining
+         */
+        public Builder beneficial(boolean beneficial) {
+            this.beneficial = beneficial;
+            return this;
+        }
+
+        /**
          * Builds and returns the immutable {@link NutrientDefinition}.
          *
          * @return the constructed definition
@@ -254,7 +281,8 @@ public final class NutrientDefinition {
                     criticalThreshold,
                     lowThreshold,
                     excessThreshold,
-                    customRenderer
+                    customRenderer,
+                    beneficial
             );
         }
     }

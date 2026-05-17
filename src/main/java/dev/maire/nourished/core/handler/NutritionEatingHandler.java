@@ -86,7 +86,7 @@ public class NutritionEatingHandler {
         PENDING_NUTRITION_ONLY_FINISH.remove(player.getUUID());
     }
 
-    static boolean isNutritionOnlyPipelinePending(ServerPlayer player) {
+    public static boolean isNutritionOnlyPipelinePending(ServerPlayer player) {
         return PENDING_NUTRITION_ONLY_FINISH.contains(player.getUUID());
     }
 

@@ -45,7 +45,8 @@ public class NutrientRegistry {
             float lowThreshold,
             float excessThreshold,
             String icon,
-            List<String> tags
+            List<String> tags,
+            boolean beneficial
     ) {
         public static NutrientDef fromDefinition(NutrientDefinition definition) {
             String key = Objects.requireNonNull(definition.getId(), "definition id");
@@ -60,7 +61,8 @@ public class NutrientRegistry {
                     definition.getLowThreshold(),
                     definition.getExcessThreshold(),
                     icon,
-                    tags
+                    tags,
+                    definition.isBeneficial()
             );
         }
 
@@ -74,7 +76,8 @@ public class NutrientRegistry {
                     DEFAULT_LOW_THRESHOLD,
                     DEFAULT_EXCESS_THRESHOLD,
                     icon,
-                    tags
+                    tags,
+                    true
             );
         }
     }
@@ -137,6 +140,23 @@ public class NutrientRegistry {
     /** All registered nutrient definitions in order. */
     public static List<NutrientDef> getAll() {
         return INSTANCE.values();
+    }
+
+    /**
+     * Returns whether a nutrient is beneficial (high values are good).
+     * When false, high values are treated as bad (e.g. sugars).
+     * <p>
+     * Note: This flag affects display/threshold interpretation only (HUD colors,
+     * critical toasts, tooltips). It does NOT affect effect triggers — modpack makers
+     * control those via explicit trigger types (above, below, all_above, etc.) in effects JSON.
+     *
+     * @param key the nutrient key
+     * @return {@code true} if high values are good, {@code false} if high values are bad;
+     *         defaults to {@code true} if the nutrient is not found
+     */
+    public static boolean isBeneficial(String key) {
+        NutrientDef def = INSTANCE.get(key);
+        return def == null || def.beneficial();
     }
 
     public static void registerExternal(NutrientDefinition definition) {
@@ -211,6 +231,7 @@ public class NutrientRegistry {
                 float criticalThreshold = obj.has("critical_threshold") ? obj.get("critical_threshold").getAsFloat() : DEFAULT_CRITICAL_THRESHOLD;
                 float lowThreshold = obj.has("low_threshold") ? obj.get("low_threshold").getAsFloat() : DEFAULT_LOW_THRESHOLD;
                 float excessThreshold = obj.has("excess_threshold") ? obj.get("excess_threshold").getAsFloat() : DEFAULT_EXCESS_THRESHOLD;
+                boolean beneficial = !obj.has("beneficial") || obj.get("beneficial").getAsBoolean();
                 List<String> tags = new ArrayList<>();
                 if (obj.has("tags")) {
                     for (JsonElement t : obj.getAsJsonArray("tags")) {
@@ -226,7 +247,8 @@ public class NutrientRegistry {
                         lowThreshold,
                         excessThreshold,
                         icon,
-                        Collections.unmodifiableList(tags)
+                        Collections.unmodifiableList(tags),
+                        beneficial
                 ));
             }
         }
@@ -257,6 +279,7 @@ public class NutrientRegistry {
             obj.addProperty("critical_threshold", def.criticalThreshold());
             obj.addProperty("low_threshold", def.lowThreshold());
             obj.addProperty("excess_threshold", def.excessThreshold());
+            obj.addProperty("beneficial", def.beneficial());
             obj.addProperty("icon", def.icon());
             JsonArray tags = new JsonArray();
             for (String t : def.tags()) tags.add(t);
@@ -305,9 +328,10 @@ public class NutrientRegistry {
                     float criticalThreshold = obj.has("critical_threshold") ? obj.get("critical_threshold").getAsFloat() : DEFAULT_CRITICAL_THRESHOLD;
                     float lowThreshold = obj.has("low_threshold") ? obj.get("low_threshold").getAsFloat() : DEFAULT_LOW_THRESHOLD;
                     float excessThreshold = obj.has("excess_threshold") ? obj.get("excess_threshold").getAsFloat() : DEFAULT_EXCESS_THRESHOLD;
+                    boolean beneficial = !obj.has("beneficial") || obj.get("beneficial").getAsBoolean();
                     String icon = obj.has("icon") ? obj.get("icon").getAsString() : resolveIcon(key);
                     List<String> tags = List.of("nourished:nutrients/" + key);
-                    defaults.add(new NutrientDef(key, displayName, color, defaultDecayRate, criticalThreshold, lowThreshold, excessThreshold, icon, tags));
+                    defaults.add(new NutrientDef(key, displayName, color, defaultDecayRate, criticalThreshold, lowThreshold, excessThreshold, icon, tags, beneficial));
                 }
             } catch (IOException ignored) {
                 // Keep fallback loading resilient.
