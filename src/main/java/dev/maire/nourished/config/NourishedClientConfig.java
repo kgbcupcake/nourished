@@ -26,6 +26,8 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.EnumValue<HudAnchor> hudAnchor;
     private final ModConfigSpec.IntValue hudOffsetX;
     private final ModConfigSpec.IntValue hudOffsetY;
+    private final ModConfigSpec.IntValue staminaHudOffsetX;
+    private final ModConfigSpec.IntValue staminaHudOffsetY;
     private final ModConfigSpec.IntValue hudBarWidth;
     private final ModConfigSpec.DoubleValue hudScale;
     private final ModConfigSpec.IntValue hudReservedBottom;
@@ -44,6 +46,8 @@ public final class NourishedClientConfig {
         );
         hudOffsetX = builder.defineInRange("hudOffsetX", ConfigDefaultsLoader.getInt(defaults, "hudOffsetX", 0), -2000, 2000);
         hudOffsetY = builder.defineInRange("hudOffsetY", ConfigDefaultsLoader.getInt(defaults, "hudOffsetY", 0), -2000, 2000);
+        staminaHudOffsetX = builder.defineInRange("staminaHudOffsetX", ConfigDefaultsLoader.getInt(defaults, "staminaHudOffsetX", -10), -2000, 2000);
+        staminaHudOffsetY = builder.defineInRange("staminaHudOffsetY", ConfigDefaultsLoader.getInt(defaults, "staminaHudOffsetY", -60), -2000, 2000);
         hudBarWidth = builder.defineInRange("hudBarWidth", ConfigDefaultsLoader.getInt(defaults, "hudBarWidth", 60), 40, 120);
         hudScale = builder.defineInRange("hudScale", ConfigDefaultsLoader.getDouble(defaults, "hudScale", 1.0d), 0.5d, 1.5d);
         hudReservedBottom = builder.defineInRange("hudReservedBottom", ConfigDefaultsLoader.getInt(defaults, "hudReservedBottom", 52), 30, 100);
@@ -141,6 +145,22 @@ public final class NourishedClientConfig {
 
     public void setHudOffsetY(int value) {
         hudOffsetY.set(value);
+    }
+
+    public int staminaHudOffsetX() {
+        return staminaHudOffsetX.get();
+    }
+
+    public void setStaminaHudOffsetX(int value) {
+        staminaHudOffsetX.set(value);
+    }
+
+    public int staminaHudOffsetY() {
+        return staminaHudOffsetY.get();
+    }
+
+    public void setStaminaHudOffsetY(int value) {
+        staminaHudOffsetY.set(value);
     }
 
     public int hudBarWidth() {

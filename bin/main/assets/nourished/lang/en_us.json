@@ -301,13 +301,13 @@
   "config.nourished.enableLSOThirstSaturation": "LSO: Thirst Saturation",
   "config.nourished.enableLSOThirstSaturation.desc": "Eating nutritious food adds a small LSO thirst saturation bonus",
   "config.nourished.enablePSExhaustionDuration": "Peak Stamina: Exhaustion Duration",
-  "config.nourished.enablePSExhaustionDuration.desc": "Applies exhaustion_duration_multiplier attribute modifier based on nutrition",
+  "config.nourished.enablePSExhaustionDuration.desc": "Applies exhaustion_duration_multiplier attribute modifier based on nutrition level",
   "config.nourished.enablePSPenaltyDecay": "Peak Stamina: Penalty Decay",
-  "config.nourished.enablePSPenaltyDecay.desc": "Applies penalty_decay_multiplier attribute modifier based on nutrition",
+  "config.nourished.enablePSPenaltyDecay.desc": "Applies penalty_decay_multiplier attribute modifier based on nutrition level",
   "config.nourished.enablePSStaminaUsage": "Peak Stamina: Usage Modifier",
-  "config.nourished.enablePSStaminaUsage.desc": "Applies stamina_usage attribute modifier based on nutrition",
-  "config.nourished.enableSOLDiversityHealth": "SoL: Diversity Health Bonus",
-  "config.nourished.enableSOLDiversityHealth.desc": "High dietary diversity grants a max health bonus",
-  "config.nourished.enableSOLDiversityPenalty": "SoL: Diversity Health Penalty",
-  "config.nourished.enableSOLDiversityPenalty.desc": "Low dietary diversity applies a max health penalty"
+  "config.nourished.enablePSStaminaUsage.desc": "Applies stamina_usage attribute modifier based on nutrition level",
+  "config.nourished.enableSOLDiversityHealth": "Spice of Life: Diversity Health Bonus",
+  "config.nourished.enableSOLDiversityHealth.desc": "High dietary diversity grants a max health bonus via Spice of Life: Onion",
+  "config.nourished.enableSOLDiversityPenalty": "Spice of Life: Diversity Health Penalty",
+  "config.nourished.enableSOLDiversityPenalty.desc": "Low dietary diversity applies a max health penalty via Spice of Life: Onion"
 }

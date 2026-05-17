@@ -12,6 +12,7 @@ import dev.maire.nourished.modules.RawFood.Gut.GutHealthSyncPayload;
 import dev.maire.nourished.modules.Stamina.Core.StaminaAttachment;
 import dev.maire.nourished.modules.Stamina.Core.StaminaData;
 import dev.maire.nourished.modules.Stamina.Core.StaminaSyncPayload;
+import dev.maire.nourished.modules.Stamina.HUD.StaminaHUD;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
@@ -128,6 +129,7 @@ public class ModNetworking {
 
     private static void handleSyncStamina(StaminaSyncPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
+            StaminaHUD.updateFromPayload(payload);
             LocalPlayer player = Minecraft.getInstance().player;
             if (player != null) {
                 StaminaData stamina = StaminaData.fromSync(
