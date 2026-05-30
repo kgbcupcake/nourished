@@ -41,4 +41,8 @@ final class ConfigDefaultsLoader {
     static boolean getBoolean(JsonObject obj, String key, boolean fallback) {
         return NourishedJsonUtils.getOptionalBoolean(obj, key, fallback);
     }
+
+    static String getString(JsonObject obj, String key, String fallback) {
+        return NourishedJsonUtils.getOptionalString(obj, key, fallback);
+    }
 }

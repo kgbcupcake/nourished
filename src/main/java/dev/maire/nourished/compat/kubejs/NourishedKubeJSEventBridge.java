@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.event.KubeEvent;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.NourishedEvents;
 import dev.maire.nourished.api.NutrientModifierEvent;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -49,7 +50,7 @@ public final class NourishedKubeJSEventBridge {
     }
 
     public static final class NutrientChangedKubeEvent implements KubeEvent {
-        public Object player;
+        public ServerPlayer player;
         public String nutrientKey;
         public float oldValue;
         public float newValue;
@@ -57,7 +58,7 @@ public final class NourishedKubeJSEventBridge {
         public NutrientChangedKubeEvent() {}
 
         NutrientChangedKubeEvent(NourishedEvents.NutrientChangedEvent event) {
-            this.player = event.getPlayer();
+            this.player = (ServerPlayer) event.getPlayer();
             this.nutrientKey = event.getNutrientKey();
             this.oldValue = event.getOldValue();
             this.newValue = event.getNewValue();
@@ -65,19 +66,19 @@ public final class NourishedKubeJSEventBridge {
     }
 
     public static final class NutrientCriticalKubeEvent implements KubeEvent {
-        public Object player;
+        public ServerPlayer player;
         public String nutrientKey;
 
         public NutrientCriticalKubeEvent() {}
 
         NutrientCriticalKubeEvent(NourishedEvents.NutrientCriticalEvent event) {
-            this.player = event.getPlayer();
+            this.player = (ServerPlayer) event.getPlayer();
             this.nutrientKey = event.getNutrientKey();
         }
     }
 
     public static final class FoodEatenKubeEvent implements KubeEvent {
-        public Object player;
+        public ServerPlayer player;
         public String foodId;
         public String nutrientKey;
         public float amount;
@@ -85,7 +86,7 @@ public final class NourishedKubeJSEventBridge {
         public FoodEatenKubeEvent() {}
 
         FoodEatenKubeEvent(NourishedEvents.FoodEatenEvent event) {
-            this.player = event.getPlayer();
+            this.player = (ServerPlayer) event.getPlayer();
             this.foodId = event.getFoodId().toString();
             this.nutrientKey = event.getNutrientKey();
             this.amount = event.getAmount();
@@ -93,7 +94,7 @@ public final class NourishedKubeJSEventBridge {
     }
 
     public static final class NutrientModifierKubeEvent implements KubeEvent {
-        public Object player;
+        public ServerPlayer player;
         public String foodId;
         public String nutrientKey;
         public float amount;
@@ -102,7 +103,7 @@ public final class NourishedKubeJSEventBridge {
         public NutrientModifierKubeEvent() {}
 
         NutrientModifierKubeEvent(NutrientModifierEvent event) {
-            this.player = event.getPlayer();
+            this.player = (ServerPlayer) event.getPlayer();
             this.foodId = event.getFoodId().toString();
             this.nutrientKey = event.getNutrientKey();
             this.amount = event.getAmount();

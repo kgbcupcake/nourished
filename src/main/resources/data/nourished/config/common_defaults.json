@@ -1,4 +1,7 @@
 {
+  "showJoinMessage": true,
+  "joinMessageLine1": "Welcome to the nutrition engine.",
+  "joinMessageLine2": "Beta NOTICE - features and balance may change.",
   "decayRate": 0.1,
   "decayIntervalTicks": 1200,
   "startingNutrientValue": 0.5,

@@ -21,7 +21,9 @@ import dev.maire.nourished.tooling.data.SchemaDefinition;
 import dev.maire.nourished.tooling.datapack.SchemaTemplateGenerator;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
@@ -379,6 +381,8 @@ public class NourishedCommand {
         float old = data.nutrients.getOrDefault(key, 0f);
         data.nutrients.put(key, value);
         player.setData(DietAttachment.DIET.get(), data);
+        ModNetworking.syncDiet(player, data);
+        NutritionEffectApplier.apply(player, data);
         NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientChangedEvent(player, key, old, value));
         ctx.getSource().sendSuccess(() -> Component.literal(String.format(Locale.ROOT, "Set %s for %s: %.2f -> %.2f", key, player.getName().getString(), old, value)), true);
         return 1;

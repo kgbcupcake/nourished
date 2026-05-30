@@ -57,6 +57,9 @@ public final class NourishedConfig {
     private final ModConfigSpec.IntValue heavyMealNutritionThreshold;
 
     // General
+    private final ModConfigSpec.BooleanValue showJoinMessage;
+    private final ModConfigSpec.ConfigValue<String> joinMessageLine1;
+    private final ModConfigSpec.ConfigValue<String> joinMessageLine2;
     private final ModConfigSpec.DoubleValue decayRate;
     private final ModConfigSpec.IntValue decayIntervalTicks;
     // config.nourished.startingNutrientValue
@@ -161,6 +164,15 @@ public final class NourishedConfig {
         builder.pop();
 
         builder.push("general");
+        showJoinMessage = builder
+                .comment("When false, welcome and beta notice chat messages are not sent on player join")
+                .define("showJoinMessage", ConfigDefaultsLoader.getBoolean(defaults, "showJoinMessage", true));
+        joinMessageLine1 = builder
+                .comment("Second line of the join welcome message (after the NOURISHED header)")
+                .define("joinMessageLine1", ConfigDefaultsLoader.getString(defaults, "joinMessageLine1", "Welcome to the nutrition engine."));
+        joinMessageLine2 = builder
+                .comment("Beta or secondary notice shown on player join")
+                .define("joinMessageLine2", ConfigDefaultsLoader.getString(defaults, "joinMessageLine2", "Beta NOTICE - features and balance may change."));
         decayRate = builder
                 .comment("Base decay rate per interval for all nutrients")
                 .defineInRange("decayRate", ConfigDefaultsLoader.getDouble(defaults, "decayRate", defaultDecayRateFromRegistry()), 0.0d, 1.0d);
@@ -356,6 +368,30 @@ public final class NourishedConfig {
 
     public static ModConfigSpec spec() {
         return SPEC;
+    }
+
+    public boolean showJoinMessage() {
+        return showJoinMessage.get();
+    }
+
+    public void setShowJoinMessage(boolean value) {
+        showJoinMessage.set(value);
+    }
+
+    public String joinMessageLine1() {
+        return joinMessageLine1.get();
+    }
+
+    public void setJoinMessageLine1(String value) {
+        joinMessageLine1.set(value);
+    }
+
+    public String joinMessageLine2() {
+        return joinMessageLine2.get();
+    }
+
+    public void setJoinMessageLine2(String value) {
+        joinMessageLine2.set(value);
     }
 
     public double decayRate() {

@@ -1,13 +1,48 @@
 # Changelog
+
+<!-- markdownlint-disable MD013 -->
+
+## [0.2.2-beta] - 2026-05-30
+
+### Added
+
+- Configurable player join messages under `[general]` in `nourished-common.toml`:
+  - `showJoinMessage` — toggle welcome and notice chat lines on login (default: `true`)
+  - `joinMessageLine1` — welcome text after the NOURISHED header (default: `Welcome to the nutrition engine.`)
+  - `joinMessageLine2` — secondary notice line (default: `Beta NOTICE - features and balance may change.`)
+- Matching defaults in `data/nourished/config/common_defaults.json` for modpack and datapack overrides.
+- KubeJS 2101 plugin discovery via `kubejs.plugins.txt` plus a `META-INF/services` service entry as a backup path.
+- Manual KubeJS plugin bootstrap fallback when automatic discovery fails (for example under Architectury), invoked from mod initialization.
+- `NourishedEvents` KubeJS script binding so scripts can subscribe to the `NourishedEvents` event group.
+- `NourishedKubeJSEventBridge` — dedicated NeoForge → KubeJS bridge for runtime nutrition events.
+- `ConfigReloadHandler.isReloadInProgress()` so handlers can defer work during config and datapack reloads.
+
+### Changed
+
+- **KubeJS (2101 migration):**
+  - Migrated runtime events to the KubeJS 2101 `EventGroup` / `EventHandler` interface pattern.
+  - Moved NeoForge subscription and event wrapping out of `NourishedKubeJSEvents` into `NourishedKubeJSEventBridge`.
+  - Event payload `player` fields are now typed as `ServerPlayer` instead of `Object`.
+- Join welcome and beta notice messages now read from config while keeping the existing styled chat formatting (◆ NOURISHED ◆ header, ⚠ notice line, and bold/light split when `joinMessageLine2` contains ` - `).
+- Replaced hardcoded `"nourished"` mod id strings with `Nourished.MODID` across configs, registries, compat hooks, and tooling.
+- Registry reload pipeline hardened with read/write locks on `AbstractRegistry` and `ListRegistry` so reset → repopulate → freeze is atomic during `/reload`.
+- Datapack and config loaders now log warnings on swallowed `IOException`s instead of failing silently.
+
+### Fixed
+
+- **KubeJS integration not loading** on KubeJS 2101 — Nourished scripts and bindings were unavailable when plugin discovery missed the jar; fixed with `kubejs.plugins.txt`, service-loader entry, and manual bootstrap registration.
+- **KubeJS nutrition events not firing** after the 2101 API change — event registration and bridging now follow the current KubeJS event-group pattern.
+- **Nutrition effects applying during reload** — effect application and player-tick effect handlers now skip work while a config or datapack reload is in progress, avoiding inconsistent effect state mid-reload.
+
 ## [0.2.1-beta-HotFix] - 2026-05-29
 
-## Fixed
+### Fixed
 
 - Restored config screen left-sidebar navigation so **Modules**, **General**, and other category tabs respond to clicks again.
-  
+
 ## [0.2.1-beta] - 2026-05-29
 
-## Upgrade Notes
+### Upgrade Notes
 
 If upgrading from 0.2.0-beta or earlier, delete:
 
@@ -26,7 +61,7 @@ then:
 
 ---
 
-## Added
+### Added
 
 - Raw Food Penalties
 - Raw foods can now apply effects and nutrient penalties.
@@ -65,7 +100,7 @@ then:
 
 ---
 
-## Changed
+### Changed
 
 - Returned to five nutrient groups:
 - Fruits
@@ -83,19 +118,19 @@ then:
 
 ---
 
-## Fixed
+### Fixed
 
 - Raw vanilla meats now correctly trigger raw food penalties when appropriate.
 
 - Non-beneficial nutrients no longer trigger low or critical nutrient warnings while decaying.
-  
+
 ## [0.2.0-beta] - 2026-05-15
 
 ⚠️ Upgrading from 0.1.x? Delete config/nourished/scanner_spec.json before launching. It will regenerate automatically with the new defaults. Keeping the old file will cause missing archetypes and incorrect classifications.
 
 ---
 
-## Added
+### Added
 
 - Excluded items system — non-food items with FoodProperties (potions, soap, chicken feed, magic essences, etc.) are now explicitly excluded from classification and will not show a Nourished tooltip
 
@@ -121,7 +156,7 @@ then:
 
 - camelCase token splitting for mods that use concatenated item names (e.g. pamhc2foodextended) — improves scanner classification for previously unresolvable items
 
-## Fixed
+### Fixed
 
 - Tag matches are now authoritative in blend resolution — when an item has an explicit nutrient tag, the resolver can only contribute nutrients not already covered by the tag, preventing archetype heuristics from overriding curated data
 
@@ -133,7 +168,7 @@ then:
 
 - Patchouli crafting recipe for the Nourished Guide
 
-## Changed
+### Changed
 
 - Nutrient tag files updated — proteins, fruits, grains, and dairy now cover a significantly broader range of modded foods including beverages, composite dishes, and items previously falling through to hard fallback
 
