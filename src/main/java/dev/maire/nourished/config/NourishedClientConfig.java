@@ -37,7 +37,7 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.ConfigValue<List<? extends String>> dietBarOrder;
 
     private NourishedClientConfig(ModConfigSpec.Builder builder) {
-        JsonObject defaults = ConfigDefaultsLoader.loadOrEmpty("/data/nourished/config/client_defaults.json");
+        JsonObject defaults = ConfigDefaultsLoader.loadOrEmpty("/data/" + Nourished.MODID + "/config/client_defaults.json");
         builder.push("gui");
         hudAnchor = builder.defineEnum(
                 "hudAnchor",

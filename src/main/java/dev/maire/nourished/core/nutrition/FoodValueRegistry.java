@@ -56,7 +56,7 @@ public class FoodValueRegistry {
 
     private static final float[] DEFAULT_WEIGHTS = {0.2f, 0.2f, 0.2f, 0.2f, 0.2f};
 
-    private static final String DEFAULT_RESOURCE_PATH = "/data/nourished/config/food_values.json";
+    private static final String DEFAULT_RESOURCE_PATH = "/data/" + Nourished.MODID + "/config/food_values.json";
 
     /**
      * Returns NutrientValues scaled by the category's multipliers.
@@ -136,34 +136,42 @@ public class FoodValueRegistry {
         );
     }
 
-    private static void registerFoodValueRow(JsonObject obj) {
-        String category = obj.get("category").getAsString();
+    private static boolean registerFoodValueRow(JsonObject obj, int index) {
+        com.google.gson.JsonElement categoryEl = obj.get("category");
+        if (categoryEl == null || !categoryEl.isJsonPrimitive() || !categoryEl.getAsJsonPrimitive().isString()) {
+            Nourished.LOGGER.warn("[FoodValueRegistry] Skipping entry at index {} missing or invalid 'category'", index);
+            return false;
+        }
+        String category = categoryEl.getAsString();
         float protein = NourishedJsonUtils.getOptionalFloat(obj, "protein", 0.2f);
         float carbs = NourishedJsonUtils.getOptionalFloat(obj, "carbs", 0.2f);
         float fats = NourishedJsonUtils.getOptionalFloat(obj, "fats", 0.2f);
         float vitamins = NourishedJsonUtils.getOptionalFloat(obj, "vitamins", 0.2f);
         float hydration = NourishedJsonUtils.getOptionalFloat(obj, "hydration", 0.2f);
-        INSTANCE.register(category, new FoodValueDef(category, protein, carbs, fats, vitamins, hydration));
+        INSTANCE.registerUnlocked(category, new FoodValueDef(category, protein, carbs, fats, vitamins, hydration));
+        return true;
     }
 
     private static void parseFromReader(Reader reader) {
-        INSTANCE.reset();
         JsonArray arr = GSON.fromJson(reader, JsonArray.class);
-        if (arr == null || arr.isEmpty()) {
-            Nourished.LOGGER.warn("[FoodValueRegistry] Data was empty, using built-in defaults");
-            registerBundledDefaults();
-            return;
-        }
-        for (JsonElement el : arr) {
-            registerFoodValueRow(el.getAsJsonObject());
-        }
-        if (INSTANCE.size() == 0) {
-            Nourished.LOGGER.warn("[FoodValueRegistry] Data was empty, using built-in defaults");
-            INSTANCE.reset();
-            registerBundledDefaults();
-        } else {
-            INSTANCE.freeze();
-        }
+        INSTANCE.runWrite(() -> {
+            INSTANCE.resetUnlocked();
+            if (arr == null || arr.isEmpty()) {
+                Nourished.LOGGER.warn("[FoodValueRegistry] Data was empty, using built-in defaults");
+                registerBundledDefaultsUnlocked();
+                return;
+            }
+            for (int i = 0; i < arr.size(); i++) {
+                registerFoodValueRow(arr.get(i).getAsJsonObject(), i);
+            }
+            if (INSTANCE.valuesUnlocked().isEmpty()) {
+                Nourished.LOGGER.warn("[FoodValueRegistry] Data was empty, using built-in defaults");
+                INSTANCE.resetUnlocked();
+                registerBundledDefaultsUnlocked();
+            } else {
+                INSTANCE.freezeUnlocked();
+            }
+        });
     }
 
     /**
@@ -188,45 +196,52 @@ public class FoodValueRegistry {
         Objects.requireNonNull(category, "category");
         LinkedHashMap<String, FoodValueDef> next = new LinkedHashMap<>(INSTANCE.entries());
         next.put(category, new FoodValueDef(category, protein, carbs, fats, vitamins, hydration));
-        INSTANCE.reset();
-        for (Map.Entry<String, FoodValueDef> e : next.entrySet()) {
-            INSTANCE.register(e.getKey(), e.getValue());
-        }
-        INSTANCE.freeze();
+        INSTANCE.runWrite(() -> {
+            INSTANCE.resetUnlocked();
+            for (Map.Entry<String, FoodValueDef> e : next.entrySet()) {
+                INSTANCE.registerUnlocked(e.getKey(), e.getValue());
+            }
+            INSTANCE.freezeUnlocked();
+        });
     }
 
     private static void parse(Path file) throws IOException {
-        INSTANCE.reset();
+        JsonArray arr;
         try (Reader r = Files.newBufferedReader(file)) {
-            JsonArray arr = GSON.fromJson(r, JsonArray.class);
+            arr = GSON.fromJson(r, JsonArray.class);
+        }
+        INSTANCE.runWrite(() -> {
+            INSTANCE.resetUnlocked();
             if (arr == null) {
                 Nourished.LOGGER.warn("[FoodValueRegistry] food_values.json was empty, using built-in defaults");
-                registerBundledDefaults();
+                registerBundledDefaultsUnlocked();
                 return;
             }
-            for (JsonElement el : arr) {
-                registerFoodValueRow(el.getAsJsonObject());
+            for (int i = 0; i < arr.size(); i++) {
+                registerFoodValueRow(arr.get(i).getAsJsonObject(), i);
             }
-        }
-        if (INSTANCE.size() == 0) {
-            Nourished.LOGGER.warn("[FoodValueRegistry] food_values.json was empty, using built-in defaults");
-            INSTANCE.reset();
-            registerBundledDefaults();
-        } else {
-            INSTANCE.freeze();
-        }
+            if (INSTANCE.valuesUnlocked().isEmpty()) {
+                Nourished.LOGGER.warn("[FoodValueRegistry] food_values.json was empty, using built-in defaults");
+                INSTANCE.resetUnlocked();
+                registerBundledDefaultsUnlocked();
+            } else {
+                INSTANCE.freezeUnlocked();
+            }
+        });
     }
 
     private static void loadDefaults() {
-        INSTANCE.reset();
-        registerBundledDefaults();
+        INSTANCE.runWrite(() -> {
+            INSTANCE.resetUnlocked();
+            registerBundledDefaultsUnlocked();
+        });
     }
 
-    private static void registerBundledDefaults() {
+    private static void registerBundledDefaultsUnlocked() {
         for (FoodValueDef def : loadBundledDefaults()) {
-            INSTANCE.register(def.category(), def);
+            INSTANCE.registerUnlocked(def.category(), def);
         }
-        INSTANCE.freeze();
+        INSTANCE.freezeUnlocked();
     }
 
     private static void writeDefaults(Path file) throws IOException {
@@ -271,9 +286,14 @@ public class FoodValueRegistry {
                 if (arr == null) {
                     return defaults;
                 }
-                for (JsonElement el : arr) {
-                    JsonObject obj = el.getAsJsonObject();
-                    String category = obj.get("category").getAsString();
+                for (int i = 0; i < arr.size(); i++) {
+                    JsonObject obj = arr.get(i).getAsJsonObject();
+                    com.google.gson.JsonElement categoryEl = obj.get("category");
+                    if (categoryEl == null || !categoryEl.isJsonPrimitive() || !categoryEl.getAsJsonPrimitive().isString()) {
+                        Nourished.LOGGER.warn("[FoodValueRegistry] Skipping bundled default at index {} missing or invalid 'category'", i);
+                        continue;
+                    }
+                    String category = categoryEl.getAsString();
                     float protein = obj.has("protein") ? obj.get("protein").getAsFloat() : DEFAULT_WEIGHTS[0];
                     float carbs = obj.has("carbs") ? obj.get("carbs").getAsFloat() : DEFAULT_WEIGHTS[1];
                     float fats = obj.has("fats") ? obj.get("fats").getAsFloat() : DEFAULT_WEIGHTS[2];
@@ -282,8 +302,8 @@ public class FoodValueRegistry {
                     defaults.add(new FoodValueDef(category, protein, carbs, fats, vitamins, hydration));
                 }
             }
-        } catch (IOException ignored) {
-            // Keep load resilient if bundled defaults are unavailable.
+        } catch (IOException e) {
+            Nourished.LOGGER.warn("[FoodValueRegistry] Failed to load bundled food value defaults: {}", e.getMessage());
         }
         return defaults;
     }

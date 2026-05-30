@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventGroupRegistry;
 import dev.latvian.mods.kubejs.event.KubeEvent;
 import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.core.Nourished;
 
 /**
  * Startup event hook holder for Nourished KubeJS registration flows.
@@ -11,9 +12,9 @@ import dev.maire.nourished.api.ApiStatus;
 @ApiStatus.Internal
 public final class NourishedKubeJSStartupEvents {
 
-    public static final String REGISTER_NUTRIENTS = "nourished.startup.register_nutrients";
-    public static final String REGISTER_PROFILES = "nourished.startup.register_profiles";
-    public static final String REGISTER_MILESTONES = "nourished.startup.register_milestones";
+    public static final String REGISTER_NUTRIENTS = Nourished.MODID + ".startup.register_nutrients";
+    public static final String REGISTER_PROFILES = Nourished.MODID + ".startup.register_profiles";
+    public static final String REGISTER_MILESTONES = Nourished.MODID + ".startup.register_milestones";
 
     private static final EventGroup GROUP = EventGroup.of("NourishedStartupEvents");
 

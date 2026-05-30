@@ -15,10 +15,24 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 @ApiStatus.Internal
 public class ConfigReloadHandler {
 
+    private static volatile boolean reloadInProgress;
+
+    /**
+     * Returns {@code true} while a config or datapack reload triggered by this handler is underway.
+     */
+    public static boolean isReloadInProgress() {
+        return reloadInProgress || RegistryLifecycleManager.isReloadInProgress();
+    }
+
     @SubscribeEvent
     public void onLevelLoad(LevelEvent.Load event) {
         if (!event.getLevel().isClientSide()) {
-            NourishedReloadPipeline.reloadAll();
+            reloadInProgress = true;
+            try {
+                NourishedReloadPipeline.reloadAll();
+            } finally {
+                reloadInProgress = false;
+            }
         }
     }
 
@@ -27,12 +41,17 @@ public class ConfigReloadHandler {
         NourishedDataManager.registerReloadListener(event);
         event.addListener((preparationBarrier, resourceManager, profilerFiller, profilerFiller2, executor, executor2) ->
                 preparationBarrier.wait(net.minecraft.util.Unit.INSTANCE).thenRunAsync(() -> {
-                    RegistryLifecycleManager.loadAll(resourceManager);
-                    MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-                    if (server != null) {
-                        FoodNutritionRegistry.bindServerRecipeManager(server.getRecipeManager());
+                    reloadInProgress = true;
+                    try {
+                        RegistryLifecycleManager.loadAll(resourceManager);
+                        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+                        if (server != null) {
+                            FoodNutritionRegistry.bindServerRecipeManager(server.getRecipeManager());
+                        }
+                        Nourished.LOGGER.info("[Nourished] Datapack config reload complete");
+                    } finally {
+                        reloadInProgress = false;
                     }
-                    Nourished.LOGGER.info("[Nourished] Datapack config reload complete");
                 }, executor2)
         );
     }

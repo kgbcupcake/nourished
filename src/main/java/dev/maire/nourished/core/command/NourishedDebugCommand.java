@@ -253,7 +253,7 @@ public final class NourishedDebugCommand {
 
     private static Path writeTraceDump(NutrientResolutionTrace trace, String itemIdStr, String displayName) {
         try {
-            Path debugDir = FMLPaths.GAMEDIR.get().resolve("config").resolve("nourished").resolve("debug");
+            Path debugDir = FMLPaths.GAMEDIR.get().resolve("config").resolve(Nourished.MODID).resolve("debug");
             Files.createDirectories(debugDir);
 
             Instant dumpedAt = Instant.now();

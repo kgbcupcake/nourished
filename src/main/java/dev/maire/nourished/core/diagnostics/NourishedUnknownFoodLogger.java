@@ -129,7 +129,7 @@ public final class NourishedUnknownFoodLogger {
             return logPath;
         }
         try {
-            logPath = FMLPaths.GAMEDIR.get().resolve("config/nourished/unknown_foods.log");
+            logPath = FMLPaths.GAMEDIR.get().resolve("config").resolve(Nourished.MODID).resolve("unknown_foods.log");
             return logPath;
         } catch (Exception e) {
             Nourished.LOGGER.warn("[NourishedUnknownFoodLogger] Failed to resolve log path, disabling logger: {}", e.getMessage());

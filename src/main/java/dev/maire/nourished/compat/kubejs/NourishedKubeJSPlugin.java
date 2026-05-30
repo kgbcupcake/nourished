@@ -23,7 +23,7 @@ public final class NourishedKubeJSPlugin implements KubeJSPlugin {
         if (!ModList.get().isLoaded("kubejs")) {
             return;
         }
-        bindings.add("NourishedAPI", NourishedKubeJSBindings.createBindingObject());
+        bindings.add(NourishedKubeJSBindings.API_BINDING, NourishedKubeJSBindings.createBindingObject());
     }
 
     @Override

@@ -22,6 +22,7 @@ public class NutritionDecayHandler {
     @SubscribeEvent
     public void onPlayerTick(PlayerTickEvent.Post event) {
         if (!ModuleCache.enableDecay) return;
+        if (ConfigReloadHandler.isReloadInProgress()) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         NourishedConfig config = NourishedConfig.get();
         int interval = Math.max(1, config.decayIntervalTicks());

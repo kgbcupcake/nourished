@@ -101,7 +101,7 @@ public final class NutritionDebugLogger {
     }
 
     private static Path debugDir() throws IOException {
-        Path dir = FMLPaths.GAMEDIR.get().resolve("config").resolve("nourished").resolve("debug");
+        Path dir = FMLPaths.GAMEDIR.get().resolve("config").resolve(Nourished.MODID).resolve("debug");
         Files.createDirectories(dir);
         return dir;
     }

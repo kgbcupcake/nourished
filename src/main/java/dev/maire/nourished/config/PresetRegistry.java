@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.tooling.data.DatapackSchema;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
@@ -115,7 +116,7 @@ public final class PresetRegistry {
                 if (Files.exists(target)) {
                     continue;
                 }
-                String resource = "/data/nourished/nourished/presets/" + stem + ".json";
+                String resource = "/data/" + Nourished.MODID + "/" + DatapackSchema.ROOT + "/presets/" + stem + ".json";
                 try (InputStream in = Nourished.class.getResourceAsStream(resource)) {
                     if (in == null) {
                         Nourished.LOGGER.error("[PresetRegistry] Missing built-in resource {}", resource);

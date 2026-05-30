@@ -69,7 +69,7 @@ public final class TagRecommendationWriter {
 
         root.addProperty("generated", LocalDateTime.now().format(TIMESTAMP_FORMAT));
         root.addProperty("confidence_threshold", spreadThreshold);
-        root.addProperty("note", "Copy entries to data/nourished/tags/item/nutrients/<category>.json");
+        root.addProperty("note", "Copy entries to data/" + Nourished.MODID + "/tags/item/nutrients/<category>.json");
 
         JsonObject categories = new JsonObject();
 
@@ -78,7 +78,7 @@ public final class TagRecommendationWriter {
             List<ClassificationResult> items = entry.getValue();
 
             JsonObject categoryObj = new JsonObject();
-            categoryObj.addProperty("target_file", "data/nourished/tags/item/nutrients/" + category + ".json");
+            categoryObj.addProperty("target_file", "data/" + Nourished.MODID + "/tags/item/nutrients/" + category + ".json");
 
             JsonArray tagEntries = new JsonArray();
             for (ClassificationResult r : items) {
@@ -152,7 +152,7 @@ public final class TagRecommendationWriter {
             writer.write("Generated: " + LocalDateTime.now().format(TIMESTAMP_FORMAT) + "\n\n");
             writer.write("Instructions:\n");
             writer.write("  Copy the entries below into the appropriate tag file:\n");
-            writer.write("  data/nourished/tags/item/nutrients/<category>.json\n\n");
+            writer.write("  data/" + Nourished.MODID + "/tags/item/nutrients/<category>.json\n\n");
 
             for (Map.Entry<String, List<ClassificationResult>> entry : byCategory.entrySet()) {
                 String category = entry.getKey();
@@ -160,7 +160,7 @@ public final class TagRecommendationWriter {
 
                 writer.write("─────────────────────────────────────────────────────────────────────────────────\n");
                 writer.write("  " + category.toUpperCase() + " (" + items.size() + " items)\n");
-                writer.write("  Target: data/nourished/tags/item/nutrients/" + category + ".json\n");
+                writer.write("  Target: data/" + Nourished.MODID + "/tags/item/nutrients/" + category + ".json\n");
                 writer.write("─────────────────────────────────────────────────────────────────────────────────\n\n");
 
                 writer.write("  JSON entries to add to \"values\" array:\n\n");

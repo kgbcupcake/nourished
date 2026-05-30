@@ -129,7 +129,7 @@ public final class ScanReportWriter {
                 writer.write("                          UNCERTAIN (NEEDS REVIEW)\n");
                 writer.write("═══════════════════════════════════════════════════════════════════════════════\n\n");
                 writer.write("These items have low confidence spread and need manual classification.\n");
-                writer.write("Add them to data/nourished/tags/item/nutrients/<category>.json\n\n");
+                writer.write("Add them to data/" + Nourished.MODID + "/tags/item/nutrients/<category>.json\n\n");
 
                 Map<String, List<ClassificationResult>> uncertainByNs = groupByNamespace(uncertain);
                 for (Map.Entry<String, List<ClassificationResult>> nsEntry : uncertainByNs.entrySet()) {

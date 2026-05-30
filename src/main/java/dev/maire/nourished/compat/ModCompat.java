@@ -85,7 +85,7 @@ public final class ModCompat {
     }
 
     private static void loadTier1BuiltIn(Map<String, JsonCompatEntry> merged) {
-        try (InputStream is = ModCompat.class.getResourceAsStream("/data/nourished/compat/compat_registry.json")) {
+        try (InputStream is = ModCompat.class.getResourceAsStream("/data/" + Nourished.MODID + "/compat/compat_registry.json")) {
             if (is == null) {
                 LOGGER.warn("[Nourished] Built-in compat_registry.json not found in jar");
                 return;
@@ -111,7 +111,7 @@ public final class ModCompat {
         int count = 0;
         for (IModInfo modInfo : ModList.get().getMods()) {
             String modId = modInfo.getModId();
-            if ("minecraft".equals(modId) || "nourished".equals(modId) || "neoforge".equals(modId)) {
+            if ("minecraft".equals(modId) || Nourished.MODID.equals(modId) || "neoforge".equals(modId)) {
                 continue;
             }
 
@@ -131,6 +131,7 @@ public final class ModCompat {
                     }
                 }
             } catch (IOException e) {
+                Nourished.LOGGER.warn("[ModCompat] Failed to read compat file from mod {}: {}", modId, e.getMessage());
                 LOGGER.debug("[Nourished] No compat file from mod {}", modId);
             }
         }
@@ -140,7 +141,7 @@ public final class ModCompat {
     }
 
     private static void loadTier3ModpackOverride(Map<String, JsonCompatEntry> merged) {
-        Path overridePath = FMLPaths.CONFIGDIR.get().resolve("nourished").resolve("compat_overrides.json");
+        Path overridePath = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("compat_overrides.json");
         if (!Files.exists(overridePath)) {
             LOGGER.debug("[Nourished] Tier 3 (modpack override): no compat_overrides.json found");
             return;

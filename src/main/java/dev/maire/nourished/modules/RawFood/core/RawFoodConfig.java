@@ -37,7 +37,7 @@ import java.util.Map;
 public class RawFoodConfig {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final String DEFAULT_RESOURCE_PATH = "/data/nourished/config/raw_food.json";
+    private static final String DEFAULT_RESOURCE_PATH = "/data/" + Nourished.MODID + "/config/raw_food.json";
 
     private static final Map<RawSeverity, RawFoodTierDef> TIERS = new EnumMap<>(RawSeverity.class);
     private static final Map<String, RawSeverity> TOKEN_MAP = new LinkedHashMap<>();
@@ -388,6 +388,7 @@ public class RawFoodConfig {
         try {
             parseBundledDefaults();
         } catch (IOException e) {
+            Nourished.LOGGER.warn("[RawFoodConfig] Failed to load bundled raw food defaults: {}", e.getMessage());
             registerFallbackDefaults();
         }
         ensureAllTiers();

@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.registry.ListRegistry;
+import dev.maire.nourished.tooling.data.DatapackSchema;
 import dev.maire.nourished.core.util.NourishedJsonUtils;
 import dev.maire.nourished.core.util.NourishedResourceLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -94,12 +95,14 @@ public class EffectRegistry {
                 false
         );
         List<EffectDef> next = new ArrayList<>(INSTANCE.values());
-        INSTANCE.reset();
-        for (EffectDef d : next) {
-            INSTANCE.register(d);
-        }
-        INSTANCE.register(def);
-        INSTANCE.freeze();
+        INSTANCE.runWrite(() -> {
+            INSTANCE.resetUnlocked();
+            for (EffectDef d : next) {
+                INSTANCE.registerUnlocked(d);
+            }
+            INSTANCE.registerUnlocked(def);
+            INSTANCE.freezeUnlocked();
+        });
         Nourished.LOGGER.info("[EffectRegistry] Registered external effect: {}", def.id());
     }
 
@@ -183,10 +186,21 @@ public class EffectRegistry {
     }
 
     private static void parseJson(JsonArray arr) {
-        for (JsonElement el : arr) {
+        for (int i = 0; i < arr.size(); i++) {
+            JsonElement el = arr.get(i);
             JsonObject obj = el.getAsJsonObject();
-            String id = obj.get("id").getAsString();
-            String effect = obj.get("effect").getAsString();
+            com.google.gson.JsonElement idEl = obj.get("id");
+            if (idEl == null || !idEl.isJsonPrimitive() || !idEl.getAsJsonPrimitive().isString()) {
+                Nourished.LOGGER.warn("[EffectRegistry] Skipping entry at index {} missing or invalid 'id'", i);
+                continue;
+            }
+            com.google.gson.JsonElement effectEl = obj.get("effect");
+            if (effectEl == null || !effectEl.isJsonPrimitive() || !effectEl.getAsJsonPrimitive().isString()) {
+                Nourished.LOGGER.warn("[EffectRegistry] Skipping entry at index {} missing or invalid 'effect'", i);
+                continue;
+            }
+            String id = idEl.getAsString();
+            String effect = effectEl.getAsString();
             String nutrient = obj.get("nutrient").getAsString();
             String trigger = obj.get("trigger").getAsString();
             if (!obj.has("threshold") || !obj.has("amplifier") || !obj.has("duration_ticks")) {
@@ -200,7 +214,7 @@ public class EffectRegistry {
             double thresholdMax = NourishedJsonUtils.getOptionalDouble(obj, "threshold_max", 1.0);
             boolean ambient = NourishedJsonUtils.getOptionalBoolean(obj, "ambient", true);
             boolean showParticles = NourishedJsonUtils.getOptionalBoolean(obj, "show_particles", false);
-            INSTANCE.register(new EffectDef(id, effect, nutrient, trigger, threshold, amplifier, durationTicks, enabled, thresholdMax, ambient, showParticles));
+            INSTANCE.registerUnlocked(new EffectDef(id, effect, nutrient, trigger, threshold, amplifier, durationTicks, enabled, thresholdMax, ambient, showParticles));
         }
     }
 
@@ -211,48 +225,55 @@ public class EffectRegistry {
             loadDefaults();
             return;
         }
-        snapshotPreviousEffectIdsAndReset();
-        parseJson(arr);
-        if (INSTANCE.size() == 0) {
-            for (EffectDef def : loadBundledDefaults()) {
-                INSTANCE.register(def);
+        INSTANCE.runWrite(() -> {
+            snapshotPreviousEffectIdsAndResetUnlocked();
+            parseJson(arr);
+            if (INSTANCE.valuesUnlocked().isEmpty()) {
+                for (EffectDef def : loadBundledDefaults()) {
+                    INSTANCE.registerUnlocked(def);
+                }
             }
-        }
-        INSTANCE.freeze();
+            INSTANCE.freezeUnlocked();
+        });
     }
 
     private static void parse(Path file) throws IOException {
-        snapshotPreviousEffectIdsAndReset();
+        JsonArray arr;
         try (Reader r = Files.newBufferedReader(file)) {
-            JsonArray arr = GSON.fromJson(r, JsonArray.class);
+            arr = GSON.fromJson(r, JsonArray.class);
+        }
+        INSTANCE.runWrite(() -> {
+            snapshotPreviousEffectIdsAndResetUnlocked();
             if (arr != null) {
                 parseJson(arr);
             }
-        }
-        if (INSTANCE.size() == 0) {
-            Nourished.LOGGER.warn("[EffectRegistry] effects.json was empty, using built-in defaults");
-            for (EffectDef def : loadBundledDefaults()) {
-                INSTANCE.register(def);
+            if (INSTANCE.valuesUnlocked().isEmpty()) {
+                Nourished.LOGGER.warn("[EffectRegistry] effects.json was empty, using built-in defaults");
+                for (EffectDef def : loadBundledDefaults()) {
+                    INSTANCE.registerUnlocked(def);
+                }
             }
-        }
-        INSTANCE.freeze();
+            INSTANCE.freezeUnlocked();
+        });
     }
 
-    private static void snapshotPreviousEffectIdsAndReset() {
-        List<EffectDef> old = INSTANCE.values();
+    private static void snapshotPreviousEffectIdsAndResetUnlocked() {
+        List<EffectDef> old = INSTANCE.valuesUnlocked();
         previousEffectIds.clear();
         for (EffectDef def : old) {
             previousEffectIds.add(def.effect());
         }
-        INSTANCE.reset();
+        INSTANCE.resetUnlocked();
     }
 
     private static void loadDefaults() {
-        snapshotPreviousEffectIdsAndReset();
-        for (EffectDef def : loadBundledDefaults()) {
-            INSTANCE.register(def);
-        }
-        INSTANCE.freeze();
+        INSTANCE.runWrite(() -> {
+            snapshotPreviousEffectIdsAndResetUnlocked();
+            for (EffectDef def : loadBundledDefaults()) {
+                INSTANCE.registerUnlocked(def);
+            }
+            INSTANCE.freezeUnlocked();
+        });
     }
 
     private static void writeDefaults(Path file) throws IOException {
@@ -267,11 +288,13 @@ public class EffectRegistry {
         Path file = configDir.resolve("effects.json");
         Files.createDirectories(configDir);
         writeDefinitionsToPath(file, definitions);
-        INSTANCE.reset();
-        for (EffectDef def : definitions) {
-            INSTANCE.register(def);
-        }
-        INSTANCE.freeze();
+        INSTANCE.runWrite(() -> {
+            INSTANCE.resetUnlocked();
+            for (EffectDef def : definitions) {
+                INSTANCE.registerUnlocked(def);
+            }
+            INSTANCE.freezeUnlocked();
+        });
     }
 
     private static void writeDefinitionsToPath(Path file, List<EffectDef> definitions) throws IOException {
@@ -299,7 +322,7 @@ public class EffectRegistry {
     private static List<EffectDef> loadBundledDefaults() {
         List<EffectDef> defaults = new ArrayList<>();
         for (String stem : DEFAULT_EFFECT_RESOURCES) {
-            String resourcePath = "/data/nourished/nourished/effects/" + stem + ".json";
+            String resourcePath = "/data/" + Nourished.MODID + "/" + DatapackSchema.ROOT + "/effects/" + stem + ".json";
             try (InputStream in = EffectRegistry.class.getResourceAsStream(resourcePath)) {
                 if (in == null) {
                     continue;
@@ -330,8 +353,8 @@ public class EffectRegistry {
                             false
                     ));
                 }
-            } catch (IOException ignored) {
-                // Keep startup resilient.
+            } catch (IOException e) {
+                Nourished.LOGGER.warn("[EffectRegistry] Failed to load bundled effect {}: {}", stem, e.getMessage());
             }
         }
         return defaults;

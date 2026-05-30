@@ -13,7 +13,6 @@ import dev.maire.nourished.core.util.NourishedValidation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,6 +20,8 @@ import java.util.Map;
  */
 @ApiStatus.Internal
 public final class NourishedKubeJSBindings {
+
+    public static final String API_BINDING = "NourishedAPI";
 
     private NourishedKubeJSBindings() {}
 

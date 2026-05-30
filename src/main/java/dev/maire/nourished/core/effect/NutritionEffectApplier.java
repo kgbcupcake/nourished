@@ -2,6 +2,7 @@ package dev.maire.nourished.core.effect;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.config.ModuleCache;
+import dev.maire.nourished.core.handler.ConfigReloadHandler;
 import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -28,6 +29,9 @@ public final class NutritionEffectApplier {
 
     public static void apply(ServerPlayer player, DietData data) {
         if (!ModuleCache.enableEffects) {
+            return;
+        }
+        if (ConfigReloadHandler.isReloadInProgress()) {
             return;
         }
         Map<ResourceLocation, String> seenActiveEffects = new HashMap<>();

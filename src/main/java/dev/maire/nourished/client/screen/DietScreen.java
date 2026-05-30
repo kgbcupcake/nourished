@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import dev.maire.nourished.client.ClientDietCache;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.client.NutrientUiColors;
 import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.core.diet.DietData;
@@ -332,7 +333,7 @@ public class DietScreen extends Screen {
                 for (int col = 0; col < Math.min(2, neglected.size()); col++) {
                     String categoryKey = neglected.get(col);
                     TagKey<Item> tag = TagKey.create(Registries.ITEM,
-                            ResourceLocation.parse("nourished:nutrients/" + categoryKey));
+                            ResourceLocation.parse(Nourished.MODID + ":nutrients/" + categoryKey));
                     Item exampleItem = null;
                     for (Item item : BuiltInRegistries.ITEM) {
                         if (item.builtInRegistryHolder().is(tag)) {

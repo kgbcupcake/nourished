@@ -6,6 +6,7 @@ import java.util.Map;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.maire.nourished.client.screen.DietScreen;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
@@ -36,7 +37,7 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 public final class ClientEvents {
 
     private static final ResourceLocation DIET_BUTTON_TEXTURE =
-        ResourceLocation.fromNamespaceAndPath("nourished", "textures/gui/diet_button.png");
+        ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "textures/gui/diet_button.png");
 
     private ClientEvents() {}
 

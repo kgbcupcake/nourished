@@ -299,7 +299,7 @@ public class FoodNutritionRegistry {
                 String id = item.getDescriptionId();
                 if (WARNED_ITEMS.add(id)) {
                     LOGGER.warn(
-                            "Nourished: no nutrient tag for {} — attempting name-based guess. Add it to data/nourished/tags/item/nutrients/*.json for accurate classification.",
+                            "Nourished: no nutrient tag for {} — attempting name-based guess. Add it to data/" + Nourished.MODID + "/tags/item/nutrients/*.json for accurate classification.",
                             id);
                 }
             }

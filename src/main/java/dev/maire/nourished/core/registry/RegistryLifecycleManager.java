@@ -33,7 +33,17 @@ public final class RegistryLifecycleManager {
 
     private static final List<Entry> ENTRIES = new ArrayList<>();
 
+    private static volatile boolean reloadInProgress;
+
     private RegistryLifecycleManager() {}
+
+    /**
+     * Returns {@code true} while an in-game registry reload is underway.
+     * Gameplay code should skip registry reads and use safe defaults when this is set.
+     */
+    public static boolean isReloadInProgress() {
+        return reloadInProgress;
+    }
 
     /**
      * Registers a registry without a datapack-aware loader.
@@ -87,15 +97,20 @@ public final class RegistryLifecycleManager {
      * Failures are logged and rethrown so callers can surface them.
      */
     public static void reloadAll() {
-        for (Entry entry : ENTRIES) {
-            Nourished.LOGGER.info("[RegistryLifecycleManager] Reloading {}", entry.name());
-            try {
-                entry.reload().run();
-            } catch (RuntimeException e) {
-                Nourished.LOGGER.error("[RegistryLifecycleManager] Failed to reload {}", entry.name(), e);
-                throw e;
+        reloadInProgress = true;
+        try {
+            for (Entry entry : ENTRIES) {
+                Nourished.LOGGER.info("[RegistryLifecycleManager] Reloading {}", entry.name());
+                try {
+                    entry.reload().run();
+                } catch (RuntimeException e) {
+                    Nourished.LOGGER.error("[RegistryLifecycleManager] Failed to reload {}", entry.name(), e);
+                    throw e;
+                }
+                Nourished.LOGGER.info("[RegistryLifecycleManager] Reloaded {}", entry.name());
             }
-            Nourished.LOGGER.info("[RegistryLifecycleManager] Reloaded {}", entry.name());
+        } finally {
+            reloadInProgress = false;
         }
     }
 
@@ -104,19 +119,24 @@ public final class RegistryLifecycleManager {
      * are skipped. Per-registry failures are logged and rethrown.
      */
     public static void loadAll(ResourceManager resourceManager) {
-        for (Entry entry : ENTRIES) {
-            Consumer<ResourceManager> datapack = entry.datapackLoad();
-            if (datapack == null) {
-                continue;
+        reloadInProgress = true;
+        try {
+            for (Entry entry : ENTRIES) {
+                Consumer<ResourceManager> datapack = entry.datapackLoad();
+                if (datapack == null) {
+                    continue;
+                }
+                Nourished.LOGGER.info("[RegistryLifecycleManager] Datapack-loading {}", entry.name());
+                try {
+                    datapack.accept(resourceManager);
+                } catch (RuntimeException e) {
+                    Nourished.LOGGER.error("[RegistryLifecycleManager] Failed datapack-load of {}", entry.name(), e);
+                    throw e;
+                }
+                Nourished.LOGGER.info("[RegistryLifecycleManager] Datapack-loaded {}", entry.name());
             }
-            Nourished.LOGGER.info("[RegistryLifecycleManager] Datapack-loading {}", entry.name());
-            try {
-                datapack.accept(resourceManager);
-            } catch (RuntimeException e) {
-                Nourished.LOGGER.error("[RegistryLifecycleManager] Failed datapack-load of {}", entry.name(), e);
-                throw e;
-            }
-            Nourished.LOGGER.info("[RegistryLifecycleManager] Datapack-loaded {}", entry.name());
+        } finally {
+            reloadInProgress = false;
         }
     }
 

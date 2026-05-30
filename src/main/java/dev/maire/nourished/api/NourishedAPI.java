@@ -6,6 +6,7 @@ import dev.maire.nourished.api.registry.MilestoneRegistry;
 import dev.maire.nourished.api.registry.ReportProviderRegistry;
 import dev.maire.nourished.api.registry.SeasonHookRegistry;
 import dev.maire.nourished.api.registry.SynergyRegistry;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -31,7 +32,7 @@ import java.util.Map;
 @ApiStatus.Stable
 public final class NourishedAPI {
 
-    private static final ResourceLocation API_MODIFIER_SOURCE = ResourceLocation.fromNamespaceAndPath("nourished", "api");
+    private static final ResourceLocation API_MODIFIER_SOURCE = ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "api");
 
     private NourishedAPI() {}
 

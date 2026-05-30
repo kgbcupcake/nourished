@@ -23,7 +23,7 @@ import java.util.Objects;
 public final class LSOCompat {
 
     private static final String LSO_MOD_ID = "legendarysurvivaloverhaul";
-    private static final ResourceLocation MODIFIER_ID = ResourceLocation.fromNamespaceAndPath("nourished", "lso_nutrition_modifier");
+    private static final ResourceLocation MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "lso_nutrition_modifier");
     private static final ResourceLocation THERMAL_RESISTANCE_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath(
             "legendarysurvivaloverhaul",
             "thermal_resistance"

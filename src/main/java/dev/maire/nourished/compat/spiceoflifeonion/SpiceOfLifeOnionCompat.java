@@ -24,7 +24,7 @@ public final class SpiceOfLifeOnionCompat {
 
     private static final String SOL_ONION_MOD_ID = "solonion";
     private static final ResourceLocation MODIFIER_ID =
-            ResourceLocation.fromNamespaceAndPath("nourished", "sol_onion_nutrition_modifier");
+            ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "sol_onion_nutrition_modifier");
     private static final ResourceLocation MAX_HEALTH_ATTRIBUTE_ID =
             ResourceLocation.fromNamespaceAndPath("minecraft", "max_health");
 

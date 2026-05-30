@@ -36,7 +36,7 @@ import java.util.Set;
 public final class AutoCompatDiscovery {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Set<String> VANILLA_MOD_IDS = Set.of("minecraft", "neoforge", "nourished", "java", "forge");
+    private static final Set<String> VANILLA_MOD_IDS = Set.of("minecraft", "neoforge", Nourished.MODID, "java", "forge");
     private static final float DEFAULT_HINT_AMOUNT = 0.1f;
 
     private AutoCompatDiscovery() {}

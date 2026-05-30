@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Ordered list registry with optional comparator applied at {@link #freeze()} time.
@@ -18,6 +19,7 @@ public class ListRegistry<V> {
     private final String name;
     private final Comparator<? super V> freezeOrder;
     private final ArrayList<V> mutable = new ArrayList<>();
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private int duplicateAttemptCount;
 
     private volatile boolean frozen;
@@ -34,12 +36,90 @@ public class ListRegistry<V> {
     }
 
     /**
+     * Runs {@code action} while holding the write lock so reset → repopulate → freeze is atomic.
+     */
+    public final void runWrite(Runnable action) {
+        lock.writeLock().lock();
+        try {
+            action.run();
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    /**
      * Appends a value in registration order (sorting, if any, happens in {@link #freeze()}).
      *
      * @throws IllegalArgumentException if {@code value} is null
      * @throws IllegalStateException    if the registry is frozen
      */
     public final void register(V value) {
+        lock.writeLock().lock();
+        try {
+            registerUnlocked(value);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Same as {@link #values()} for list-shaped registries.
+     */
+    public final List<V> values() {
+        lock.readLock().lock();
+        try {
+            return valuesUnlocked();
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public final int size() {
+        lock.readLock().lock();
+        try {
+            return sizeUnlocked();
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public final void freeze() {
+        lock.writeLock().lock();
+        try {
+            freezeUnlocked();
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public final void reset() {
+        lock.writeLock().lock();
+        try {
+            resetUnlocked();
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public final boolean isFrozen() {
+        lock.readLock().lock();
+        try {
+            return frozen;
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public final RegistrySnapshot createSnapshot() {
+        lock.readLock().lock();
+        try {
+            return new RegistrySnapshot(name, sizeUnlocked(), freezeTime, duplicateAttemptCount);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public final void registerUnlocked(V value) {
         if (frozen) {
             throw new IllegalStateException(name + ": cannot register while frozen");
         }
@@ -50,24 +130,16 @@ public class ListRegistry<V> {
         mutable.add(value);
     }
 
-    /**
-     * Same as {@link #values()} for list-shaped registries.
-     */
-    public final List<V> values() {
-        if (frozen) {
-            return frozenList;
-        }
-        return Collections.unmodifiableList(new ArrayList<>(mutable));
+    public final void resetUnlocked() {
+        mutable.clear();
+        duplicateAttemptCount = 0;
+        frozen = false;
+        frozenList = List.of();
+        freezeTime = Instant.EPOCH;
+        onReset();
     }
 
-    public final int size() {
-        if (frozen) {
-            return frozenList.size();
-        }
-        return mutable.size();
-    }
-
-    public final void freeze() {
+    public final void freezeUnlocked() {
         if (frozen) {
             return;
         }
@@ -83,21 +155,18 @@ public class ListRegistry<V> {
         onFreeze();
     }
 
-    public final void reset() {
-        mutable.clear();
-        duplicateAttemptCount = 0;
-        frozen = false;
-        frozenList = List.of();
-        freezeTime = Instant.EPOCH;
-        onReset();
+    public final List<V> valuesUnlocked() {
+        if (frozen) {
+            return frozenList;
+        }
+        return Collections.unmodifiableList(new ArrayList<>(mutable));
     }
 
-    public final boolean isFrozen() {
-        return frozen;
-    }
-
-    public final RegistrySnapshot createSnapshot() {
-        return new RegistrySnapshot(name, size(), freezeTime, duplicateAttemptCount);
+    private int sizeUnlocked() {
+        if (frozen) {
+            return frozenList.size();
+        }
+        return mutable.size();
     }
 
     protected void validateEntry(V value) {}

@@ -1011,7 +1011,7 @@ public final class NourishedConfigScreen {
                     .resolve("nourished-generated");
         } else {
             targetFolder = FMLPaths.CONFIGDIR.get()
-                    .resolve("nourished")
+                    .resolve(Nourished.MODID)
                     .resolve("auto_compat");
         }
         try {
@@ -1726,7 +1726,7 @@ public final class NourishedConfigScreen {
             var modFile = modInfo.getOwningFile().getFile();
 
             ResourceLocation rl = ResourceLocation.fromNamespaceAndPath(
-                    "nourished", "mod_icon/" + modId.toLowerCase(Locale.ROOT));
+                    Nourished.MODID, "mod_icon/" + modId.toLowerCase(Locale.ROOT));
 
             List<String> candidates = new ArrayList<>(7);
             Optional<String> declared = modInfo.getLogoFile();

@@ -25,7 +25,7 @@ import java.util.Map;
 public final class ModCompatRegistry {
 
     private static final Gson GSON = new Gson();
-    private static final String RESOURCE_PATH = "/data/nourished/config/mod_compat.json";
+    private static final String RESOURCE_PATH = "/data/" + Nourished.MODID + "/config/mod_compat.json";
     private static final String SOLONION_MOD_ID = "solonion";
 
     private static final Map<String, IntegrationEntry> INTEGRATIONS = new LinkedHashMap<>();

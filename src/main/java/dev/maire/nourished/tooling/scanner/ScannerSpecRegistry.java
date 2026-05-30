@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.registry.AbstractRegistry;
+import dev.maire.nourished.tooling.data.DatapackSchema;
 import dev.maire.nourished.core.util.NourishedJsonUtils;
 import dev.maire.nourished.core.util.NourishedResourceLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -47,7 +48,7 @@ import java.util.Set;
 public final class ScannerSpecRegistry {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final String BUNDLED_RESOURCE_PATH = "/data/nourished/nourished/scanner/scanner_spec.json";
+    private static final String BUNDLED_RESOURCE_PATH = "/data/" + Nourished.MODID + "/" + DatapackSchema.ROOT + "/scanner/scanner_spec.json";
     private static final String CONFIG_FILE_NAME = "scanner_spec.json";
     private static final String SPEC_KEY = "active";
 

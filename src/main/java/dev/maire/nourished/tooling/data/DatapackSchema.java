@@ -1,5 +1,7 @@
 package dev.maire.nourished.tooling.data;
 
+import dev.maire.nourished.core.Nourished;
+
 /**
  * Constants describing Nourished datapack schema locations and keys.
  *
@@ -10,7 +12,7 @@ public final class DatapackSchema {
     private DatapackSchema() {}
 
     /** Base directory under a datapack namespace. */
-    public static final String ROOT = "nourished";
+    public static final String ROOT = Nourished.MODID;
     /** Optional integer key declaring datapack schema version. */
     public static final String KEY_SCHEMA_VERSION = "nourished_schema_version";
 

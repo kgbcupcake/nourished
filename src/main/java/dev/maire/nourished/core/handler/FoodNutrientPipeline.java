@@ -54,6 +54,9 @@ final class FoodNutrientPipeline {
     private FoodNutrientPipeline() {}
 
     static void process(ServerPlayer player, ItemStack stack, DietData diet, long gameTimeMs) {
+        if (ConfigReloadHandler.isReloadInProgress()) {
+            return;
+        }
         boolean debugEatLog = ModuleCache.enableDebugLogging;
         Map<String, Float> nutrientsBefore = debugEatLog ? snapshotNutrients(diet) : Map.of();
 
@@ -242,7 +245,7 @@ final class FoodNutrientPipeline {
 
         JsonArray tagMatch = new JsonArray();
         if (foodOverride) {
-            tagMatch.add("nourished:food_override");
+            tagMatch.add(Nourished.MODID + ":food_override");
         } else if (diagnostic == null || diagnostic.matchedNutrientTags().isEmpty()) {
             tagMatch.add("none");
         } else {

@@ -25,6 +25,7 @@ public class NutritionEffectsHandler {
     public void onPlayerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.level().getGameTime() % APPLY_INTERVAL_TICKS != 0) return;
+        if (ConfigReloadHandler.isReloadInProgress()) return;
 
         if (ModuleCache.enableEffects) {
             DietData data = player.getData(DietAttachment.DIET.get());

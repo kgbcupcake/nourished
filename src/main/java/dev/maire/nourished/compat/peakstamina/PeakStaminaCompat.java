@@ -21,7 +21,7 @@ import java.util.Objects;
 public final class PeakStaminaCompat {
 
     private static final String PEAK_STAMINA_MOD_ID = "peakstamina";
-    private static final ResourceLocation MODIFIER_ID = ResourceLocation.fromNamespaceAndPath("nourished", "peak_stamina_nutrition_modifier");
+    private static final ResourceLocation MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "peak_stamina_nutrition_modifier");
     private static final ResourceLocation STAMINA_REGEN_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peak_stamina", "stamina_regen");
     private static final ResourceLocation MAX_STAMINA_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peak_stamina", "max_stamina");
     private static final ResourceLocation STAMINA_USAGE_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peak_stamina", "stamina_usage");

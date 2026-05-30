@@ -123,7 +123,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         }
 
         Path packRoot = server.getWorldPath(LevelResource.DATAPACK_DIR).resolve("nourished-generated");
-        Path tagsDir = packRoot.resolve("data").resolve("nourished").resolve("tags").resolve("item").resolve("nutrients");
+        Path tagsDir = packRoot.resolve("data").resolve(Nourished.MODID).resolve("tags").resolve("item").resolve("nutrients");
         String outputPath = packRoot.toAbsolutePath().toString();
 
         try {

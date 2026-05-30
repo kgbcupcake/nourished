@@ -26,7 +26,7 @@ import java.nio.file.StandardCopyOption;
 public final class StaminaConfig {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final String DEFAULT_RESOURCE_PATH = "/data/nourished/config/stamina.json";
+    private static final String DEFAULT_RESOURCE_PATH = "/data/" + Nourished.MODID + "/config/stamina.json";
 
     private static float initialPhysicalMax = 100.0f;
     private static float initialMentalMax = 100.0f;
@@ -535,6 +535,7 @@ public final class StaminaConfig {
             parseBundledDefaults();
             sanitize();
         } catch (IOException e) {
+            Nourished.LOGGER.warn("[StaminaConfig] Failed to load bundled stamina defaults: {}", e.getMessage());
             sanitize();
         }
     }

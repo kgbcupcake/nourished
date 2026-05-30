@@ -19,7 +19,7 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 
 @ApiStatus.Internal
 public final class DietAttachment {
-    private static final String DIET_ATTACHMENT_NBT_PREFIX = "neoforge:attachments.nourished:diet";
+    private static final String DIET_ATTACHMENT_NBT_PREFIX = "neoforge:attachments." + Nourished.MODID + ":diet";
 
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
             DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, Nourished.MODID);

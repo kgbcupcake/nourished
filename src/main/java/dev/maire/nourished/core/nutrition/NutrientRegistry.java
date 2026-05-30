@@ -11,6 +11,7 @@ import dev.maire.nourished.api.NutrientDefinition;
 import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.registry.AbstractRegistry;
+import dev.maire.nourished.tooling.data.DatapackSchema;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLPaths;
@@ -54,7 +55,7 @@ public class NutrientRegistry {
         public static NutrientDef fromDefinition(NutrientDefinition definition) {
             String key = Objects.requireNonNull(definition.getId(), "definition id");
             String icon = resolveIcon(key);
-            List<String> tags = List.of("nourished:nutrients/" + key);
+            List<String> tags = List.of(Nourished.MODID + ":nutrients/" + key);
             return new NutrientDef(
                     key,
                     definition.getDisplayName(),
@@ -183,13 +184,15 @@ public class NutrientRegistry {
             Nourished.LOGGER.info("[NutrientRegistry] Registered external nutrient: {}", key);
             return;
         }
-        List<NutrientDef> prior = new ArrayList<>(INSTANCE.values());
-        INSTANCE.reset();
-        for (NutrientDef d : prior) {
-            INSTANCE.register(d.key(), d);
-        }
-        INSTANCE.register(key, NutrientDef.fromDefinition(definition));
-        INSTANCE.freeze();
+        INSTANCE.runWrite(() -> {
+            List<NutrientDef> prior = new ArrayList<>(INSTANCE.valuesUnlocked());
+            INSTANCE.resetUnlocked();
+            for (NutrientDef d : prior) {
+                INSTANCE.registerUnlocked(d.key(), d);
+            }
+            INSTANCE.registerUnlocked(key, NutrientDef.fromDefinition(definition));
+            INSTANCE.freezeUnlocked();
+        });
         Nourished.LOGGER.info("[NutrientRegistry] Registered external nutrient: {}", key);
     }
 
@@ -267,17 +270,26 @@ public class NutrientRegistry {
     }
 
     private static void parse(Path file) throws IOException {
-        INSTANCE.reset();
+        JsonArray arr;
         try (Reader r = Files.newBufferedReader(file)) {
-            JsonArray arr = GSON.fromJson(r, JsonArray.class);
+            arr = GSON.fromJson(r, JsonArray.class);
+        }
+        INSTANCE.runWrite(() -> {
+            INSTANCE.resetUnlocked();
             if (arr == null) {
                 Nourished.LOGGER.warn("[NutrientRegistry] nutrients.json was empty, using built-in defaults");
-                loadDefaults();
+                loadDefaultsUnlocked();
                 return;
             }
-            for (JsonElement el : arr) {
+            for (int i = 0; i < arr.size(); i++) {
+                JsonElement el = arr.get(i);
                 JsonObject obj = el.getAsJsonObject();
-                String key  = obj.get("key").getAsString();
+                com.google.gson.JsonElement keyEl = obj.get("key");
+                if (keyEl == null || !keyEl.isJsonPrimitive() || !keyEl.getAsJsonPrimitive().isString()) {
+                    Nourished.LOGGER.warn("[NutrientRegistry] Skipping entry at index {} missing or invalid 'key'", i);
+                    continue;
+                }
+                String key = keyEl.getAsString();
                 String icon = obj.has("icon") ? obj.get("icon").getAsString() : fallbackIconForKey(key);
                 String displayName = obj.has("display_name") ? obj.get("display_name").getAsString() : key;
                 int color = obj.has("color") ? obj.get("color").getAsInt() : DEFAULT_COLOR;
@@ -292,7 +304,7 @@ public class NutrientRegistry {
                         tags.add(t.getAsString());
                     }
                 }
-                INSTANCE.register(key, new NutrientDef(
+                INSTANCE.registerUnlocked(key, new NutrientDef(
                         key,
                         displayName,
                         color,
@@ -305,21 +317,25 @@ public class NutrientRegistry {
                         beneficial
                 ));
             }
+            if (INSTANCE.valuesUnlocked().isEmpty()) {
+                Nourished.LOGGER.warn("[NutrientRegistry] nutrients.json was empty, using built-in defaults");
+                loadDefaultsUnlocked();
+            } else {
+                INSTANCE.freezeUnlocked();
+            }
+        });
+    }
+
+    private static void loadDefaultsUnlocked() {
+        INSTANCE.resetUnlocked();
+        for (NutrientDef def : loadBundledDefaults()) {
+            INSTANCE.registerUnlocked(def.key(), def);
         }
-        if (INSTANCE.size() == 0) {
-            Nourished.LOGGER.warn("[NutrientRegistry] nutrients.json was empty, using built-in defaults");
-            loadDefaults();
-        } else {
-            INSTANCE.freeze();
-        }
+        INSTANCE.freezeUnlocked();
     }
 
     private static void loadDefaults() {
-        INSTANCE.reset();
-        for (NutrientDef def : loadBundledDefaults()) {
-            INSTANCE.register(def.key(), def);
-        }
-        INSTANCE.freeze();
+        INSTANCE.runWrite(NutrientRegistry::loadDefaultsUnlocked);
     }
 
     private static void writeDefaults(Path file) throws IOException {
@@ -365,7 +381,7 @@ public class NutrientRegistry {
     private static List<NutrientDef> loadBundledDefaults() {
         List<NutrientDef> defaults = new ArrayList<>();
         for (String path : DEFAULT_NUTRIENT_RESOURCES) {
-            String resource = "/data/nourished/nourished/nutrients/" + path + ".json";
+            String resource = "/data/" + Nourished.MODID + "/" + DatapackSchema.ROOT + "/nutrients/" + path + ".json";
             try (InputStream in = NutrientRegistry.class.getResourceAsStream(resource)) {
                 if (in == null) {
                     continue;
@@ -384,11 +400,11 @@ public class NutrientRegistry {
                     float excessThreshold = obj.has("excess_threshold") ? obj.get("excess_threshold").getAsFloat() : DEFAULT_EXCESS_THRESHOLD;
                     boolean beneficial = !obj.has("beneficial") || obj.get("beneficial").getAsBoolean();
                     String icon = obj.has("icon") ? obj.get("icon").getAsString() : resolveIcon(key);
-                    List<String> tags = List.of("nourished:nutrients/" + key);
+                    List<String> tags = List.of(Nourished.MODID + ":nutrients/" + key);
                     defaults.add(new NutrientDef(key, displayName, color, defaultDecayRate, criticalThreshold, lowThreshold, excessThreshold, icon, tags, beneficial));
                 }
-            } catch (IOException ignored) {
-                // Keep fallback loading resilient.
+            } catch (IOException e) {
+                Nourished.LOGGER.warn("[NutrientRegistry] Failed to load bundled nutrient {}: {}", path, e.getMessage());
             }
         }
         return defaults;

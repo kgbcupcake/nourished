@@ -4,9 +4,9 @@ import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.core.network.ModNetworking.SyncDietDeltaPayload;
 import net.minecraft.util.Mth;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientDietCache {
 
@@ -56,7 +56,7 @@ public class ClientDietCache {
         }
     }
 
-    private static final Map<String, Long> lastNutrientIncreaseMs = new HashMap<>();
+    private static final Map<String, Long> lastNutrientIncreaseMs = new ConcurrentHashMap<>();
     /** Skip recording flashes on the first sync (login) so zeros-to-values does not flash every bar. */
     private static boolean firstClientSync = true;
 

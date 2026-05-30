@@ -98,11 +98,13 @@ public final class FoodFamilyResolver {
     }
 
     public static void replaceFamilies(Map<String, List<String>> configuredFamilies) {
-        INSTANCE.reset();
-        for (Map.Entry<String, List<String>> entry : configuredFamilies.entrySet()) {
-            INSTANCE.register(entry.getKey(), entry.getValue().toArray(String[]::new));
-        }
-        INSTANCE.freeze();
+        INSTANCE.runWrite(() -> {
+            INSTANCE.resetUnlocked();
+            for (Map.Entry<String, List<String>> entry : configuredFamilies.entrySet()) {
+                INSTANCE.registerUnlocked(entry.getKey(), entry.getValue().toArray(String[]::new));
+            }
+            INSTANCE.freezeUnlocked();
+        });
         clearCache();
     }
 }

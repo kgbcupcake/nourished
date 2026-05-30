@@ -126,7 +126,7 @@ public final class NourishedConfig {
     private final Map<String, ModConfigSpec.BooleanValue> moduleToggles = new LinkedHashMap<>();
 
     private NourishedConfig(ModConfigSpec.Builder builder) {
-        JsonObject defaults = ConfigDefaultsLoader.loadOrEmpty("/data/nourished/config/common_defaults.json");
+        JsonObject defaults = ConfigDefaultsLoader.loadOrEmpty("/data/" + Nourished.MODID + "/config/common_defaults.json");
 
         builder.push("modules");
         enableDecay = defineModuleToggle(builder, "enableDecay", "When false, NutritionDecayHandler does nothing", ConfigDefaultsLoader.getBoolean(defaults, "enableDecay", true));

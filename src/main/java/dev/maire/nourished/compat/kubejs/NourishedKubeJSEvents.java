@@ -17,10 +17,10 @@ import net.neoforged.neoforge.common.NeoForge;
 @ApiStatus.Internal
 public final class NourishedKubeJSEvents {
 
-    public static final String NUTRIENT_CHANGED = "nourished.nutrient_changed";
-    public static final String NUTRIENT_CRITICAL = "nourished.nutrient_critical";
-    public static final String FOOD_EATEN = "nourished.food_eaten";
-    public static final String NUTRIENT_MODIFIER = "nourished.nutrient_modifier";
+    public static final String NUTRIENT_CHANGED = Nourished.MODID + ".nutrient_changed";
+    public static final String NUTRIENT_CRITICAL = Nourished.MODID + ".nutrient_critical";
+    public static final String FOOD_EATEN = Nourished.MODID + ".food_eaten";
+    public static final String NUTRIENT_MODIFIER = Nourished.MODID + ".nutrient_modifier";
 
     private static final EventGroup GROUP = EventGroup.of("NourishedEvents");
     private static final EventHandler NUTRIENT_CHANGED_HANDLER = GROUP.server(NUTRIENT_CHANGED, () -> NutrientChangedKubeEvent.class);
