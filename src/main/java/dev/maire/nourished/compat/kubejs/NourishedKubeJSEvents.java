@@ -30,6 +30,10 @@ public final class NourishedKubeJSEvents {
 
     private NourishedKubeJSEvents() {}
 
+    public static EventGroup getGroup() {
+        return GROUP;
+    }
+
     public static void register(EventGroupRegistry registry) {
         registry.register(GROUP);
     }

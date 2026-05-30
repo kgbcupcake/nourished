@@ -71,6 +71,10 @@ public class Nourished {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Nourished(IEventBus modEventBus, ModContainer modContainer) {
+        if (ModList.get().isLoaded("kubejs")) {
+            modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLConstructModEvent.class, event ->
+                    NourishedKubeJSPlugin.bootstrap());
+        }
         registerLifecycleEntries();
         RegistryLifecycleManager.loadAll();
         NourishedAttributes.register(modEventBus);
@@ -134,7 +138,11 @@ public class Nourished {
         if (ModList.get().isLoaded("kubejs")) {
             try {
                 NourishedKubeJSPlugin.bootstrap();
-                LOGGER.info("[Nourished] Enabled KubeJS integration bridge.");
+                if (NourishedKubeJSPlugin.isRegistered()) {
+                    LOGGER.info("[Nourished] Enabled KubeJS integration bridge.");
+                } else {
+                    LOGGER.warn("[Nourished] KubeJS is loaded but NourishedKubeJSPlugin was not registered.");
+                }
             } catch (Throwable t) {
                 LOGGER.warn("[Nourished] Failed to initialize KubeJS integration bridge.", t);
             }

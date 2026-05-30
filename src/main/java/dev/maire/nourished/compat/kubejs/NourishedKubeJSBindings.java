@@ -1,6 +1,8 @@
 package dev.maire.nourished.compat.kubejs;
 
 import com.google.gson.JsonObject;
+import dev.latvian.mods.kubejs.event.EventGroupWrapper;
+import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.api.DietProfileDefinition;
 import dev.maire.nourished.api.FoodSynergyDefinition;
@@ -16,17 +18,22 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.Map;
 
 /**
- * KubeJS-facing Nourished API bindings.
+ * KubeJS-facing Nourished API and event bindings.
  */
 @ApiStatus.Internal
 public final class NourishedKubeJSBindings {
 
     public static final String API_BINDING = "NourishedAPI";
+    public static final String EVENTS_BINDING = "NourishedEvents";
 
     private NourishedKubeJSBindings() {}
 
     public static Object createBindingObject() {
         return new ScriptApi();
+    }
+
+    public static Object createEventsBindingObject(ScriptType type) {
+        return new EventGroupWrapper(type, NourishedKubeJSEvents.getGroup());
     }
 
     public static final class ScriptApi {
