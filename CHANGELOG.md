@@ -83,8 +83,8 @@ then:
 - Raw vanilla meats now correctly trigger raw food penalties when appropriate.
 
 - Non-beneficial nutrients no longer trigger low or critical nutrient warnings while decaying.
-
-[0.2.0-beta] - 2026-05-15
+  
+## [0.2.0-beta] - 2026-05-15
 
 ⚠️ Upgrading from 0.1.x? Delete config/nourished/scanner_spec.json before launching. It will regenerate automatically with the new defaults. Keeping the old file will cause missing archetypes and incorrect classifications.
 
