@@ -8,7 +8,7 @@ This section defines the core concepts in Nourished and how they relate to each 
 
 ### Nutrient
 
-A single tracked value in a player's diet, represented as a float between `0.0` and `1.0`. Each nutrient corresponds to one of the six food groups: **Fruits, Vegetables, Proteins, Grains, Sugars, and Dairy**. These are the bars displayed on the Diet Screen. Nutrients are defined in `NutrientRegistry` and drive all buff and debuff calculations.
+A single tracked value in a player's diet, represented as a float between `0.0` and `1.0`. Each nutrient corresponds to one of the five food groups: **Fruits, Vegetables, Proteins, Grains, and Dairy**. These are the bars displayed on the Diet Screen. Nutrients are defined in `NutrientRegistry` and drive all buff and debuff calculations.
 
 > A nutrient is a bar. It goes up when you eat the right food. It decays over time.
 
@@ -18,7 +18,7 @@ A single tracked value in a player's diet, represented as a float between `0.0` 
 
 A nutrient key used as a logical label when processing food. When a food is eaten, it is assigned a **dominant category** — the nutrient it contributes to most strongly (e.g. `"proteins"`). Category is used in two places: adding to the nutrient bar, and tracking category-level fatigue in `DietData.categoryMemory`.
 
-> Category and nutrient refer to the same six groups, but from different angles. Nutrient is the value. Category is the label attached to a food.
+> Category and nutrient refer to the same five groups, but from different angles. Nutrient is the value. Category is the label attached to a food.
 
 ---
 
@@ -133,7 +133,7 @@ Each layer exists for a different reason and targets a different audience.
 
 ### Layer 1 — Bundled Defaults
 
-The mod ships with a set of item tag lists for each of the six food groups: `fruits.json`, `vegetables.json`, `proteins.json`, `grains.json`, `sugars.json`, and `dairy.json`. These were built by hand while playing a custom modpack — they represent real food items from real mods that Nourished has encountered and classified.
+The mod ships with a set of item tag lists for each of the five food groups: `fruits.json`, `vegetables.json`, `proteins.json`, `grains.json`, and `dairy.json`. These were built by hand while playing a custom modpack — they represent real food items from real mods that Nourished has encountered and classified.
 
 This layer exists so the mod works out of the box. A server owner should not need to configure anything for common food mods to work correctly.
 

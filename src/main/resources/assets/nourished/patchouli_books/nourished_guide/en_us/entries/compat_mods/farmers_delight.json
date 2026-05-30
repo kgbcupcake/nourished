@@ -28,7 +28,7 @@
     {
       "type": "patchouli:text",
       "title": "Rotation Advice",
-      "text": "Farmer's Delight meals each have their own food family, so rotating between different dishes avoids diminishing returns even when multiple dishes share a group.\n\nA good daily rotation might be: $(bold)Roast Chicken$() for lunch (Proteins + Veg), $(bold)Rice Bowl$() for dinner (Grains + Veg), and a $(bold)Honey Cookie$() for dessert (Sugars). Three meals covering five groups with zero repetition."
+      "text": "Farmer's Delight meals each have their own food family, so rotating between different dishes avoids diminishing returns even when multiple dishes share a group.\n\nA good daily rotation might be: $(bold)Roast Chicken$() for lunch (Proteins + Veg), $(bold)Rice Bowl$() for dinner (Grains + Veg), and a dairy item when needed. Three meals can cover every group with zero repetition."
     }
   ]
 }

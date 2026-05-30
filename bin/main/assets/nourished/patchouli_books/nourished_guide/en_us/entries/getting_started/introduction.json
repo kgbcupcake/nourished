@@ -13,7 +13,7 @@
     {
       "type": "patchouli:text",
       "title": "The Core Idea",
-      "text": "There are $(bold)six food groups$(): Fruits, Vegetables, Proteins, Grains, Sugars, and Dairy.\n\nMaintaining each group provides $(#52c252)bonuses$(), while neglecting them causes $(#e05252)penalties$(). Balance is everything."
+      "text": "There are $(bold)five food groups$(): Fruits, Vegetables, Proteins, Grains, and Dairy.\n\nMaintaining each group provides $(#52c252)bonuses$(), while neglecting them causes $(#e05252)penalties$(). Balance is everything."
     },
 
     {

@@ -12,7 +12,7 @@
     {
       "type": "patchouli:text",
       "title": "Quick Fix Foods",
-      "text": "Keep these high-nutrition emergency foods in your inventory for quick recovery:\n\n$(bold)Cooked Beef$() — fastest Proteins top-up per item.\n$(bold)Golden Carrot$() — fast Vegetables recovery.\n$(bold)Apple$() — widely available, decent Fruits nutrition.\n$(bold)Milk Bucket$() — instant Dairy coverage and also removes debuffs.\n$(bold)Honey Bottle$() — best Sugars + clears poison simultaneously."
+      "text": "Keep these high-nutrition emergency foods in your inventory for quick recovery:\n\n$(bold)Cooked Beef$() — fastest Proteins top-up per item.\n$(bold)Golden Carrot$() — fast Vegetables recovery.\n$(bold)Apple$() — widely available, decent Fruits nutrition.\n$(bold)Milk Bucket$() — instant Dairy coverage and also removes debuffs."
     },
     {
       "type": "patchouli:text",

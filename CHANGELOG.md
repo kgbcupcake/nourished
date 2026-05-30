@@ -1,5 +1,89 @@
 # Changelog
 
+## [0.2.1-beta] - 2026-05-29
+
+## Upgrade Notes
+
+If upgrading from 0.2.0-beta or earlier, delete:
+
+- `config/nourished/scanner_spec.json`
+- `config/nourished/nutrients.json`
+
+Both files will regenerate on launch.
+
+If your world contains an older `nourished-generated` datapack, run:
+
+`/nourished repair_generated_datapack`
+
+then:
+
+`/reload`
+
+---
+
+## Added
+
+- Raw Food Penalties
+- Raw foods can now apply effects and nutrient penalties.
+- Four severity levels: Fine, Mild, Medium, Severe.
+- Settings are configurable in `config/nourished/raw_food.json`.
+
+- Gut Flora
+- Repeated raw food consumption increases sensitivity to future penalties.
+- Recovery occurs through cooked and varied diets.
+- Stored separately from the nutrition system.
+
+- Non-Beneficial Nutrients
+- Nutrients can now be marked as harmful when accumulated in excess.
+- HUD indicators, toasts, and threshold checks account for this behavior.
+
+- Raw Food configuration options added to the Cloth Config screen.
+
+- Compat integrations now appear in dedicated config categories.
+- Large Stamina Overhaul
+- Peak Stamina
+- Spice of Life: Onion
+
+- New Food Safety chapter in the Patchouli guide.
+
+- Nutrient schema validation.
+- Outdated `nutrients.json` files are automatically regenerated when required fields are missing.
+
+- `/nourished repair_generated_datapack`
+- Repairs generated nutrient tags after nutrient definition changes.
+
+- Expanded nutrient tag coverage for vanilla and supported food mods.
+
+- Added:
+- `PHILOSOPHY.md`
+- `ARCHITECTURE.md`
+
+---
+
+## Changed
+
+- Returned to five nutrient groups:
+- Fruits
+- Vegetables
+- Proteins
+- Grains
+- Dairy
+
+- Removed the Sugars category.
+- Existing sugar-tagged foods have been reassigned.
+
+- Legacy player data containing removed nutrient keys is now migrated automatically.
+
+- Documentation updated for the five-group system.
+
+---
+
+## Fixed
+
+- Raw vanilla meats now correctly trigger raw food penalties when appropriate.
+
+- Non-beneficial nutrients no longer trigger low or critical nutrient warnings while decaying.
+
 [0.2.0-beta] - 2026-05-15
 
 ⚠️ Upgrading from 0.1.x? Delete config/nourished/scanner_spec.json before launching. It will regenerate automatically with the new defaults. Keeping the old file will cause missing archetypes and incorrect classifications.
@@ -46,7 +130,7 @@
 
 ## Changed
 
-- Nutrient tag files updated — proteins, fruits, sugars, grains, and dairy now cover a significantly broader range of modded foods including beverages, composite dishes, and items previously falling through to hard fallback
+- Nutrient tag files updated — proteins, fruits, grains, and dairy now cover a significantly broader range of modded foods including beverages, composite dishes, and items previously falling through to hard fallback
 
 - compositeRatioThreshold default lowered from 0.5 to 0.4 for better composite detection on borderline foods
 
@@ -59,40 +143,44 @@
 ## [0.1.9-beta] - 2026-05-13
 
 ### Added
+
 - Recipe inheritance for multi-ingredient foods
 - Debug logging with classifier accuracy tracking
 - Nourished Guide given to players on first join, with crafting recipe
 
 ### Fixed
+
 - Tooltip now correctly shows diminishing returns value
 - Tag-matched items return immediately without running the classifier
 
 ### Security
+
 - Path traversal fix in FoodScannerWidget
 - NaN/Infinity hardening across external inputs
 - Packet size limits added
 - SHA-256 replaces MD5 in mod list hashing
 
-
 ## [0.1.8-beta] - 2026-05-13
 
 ### Fixed
+
 - Unclassified items now display correctly in tooltips instead of showing no information
 - Dominant nutrient category logic refined
-
 
 ## [0.1.7-beta] - 2026-05-13
 
 ### Added
+
 - New food items added to grains and proteins tag lists
 
 ### Changed
-- Patchouli guide updated
 
+- Patchouli guide updated
 
 ## [0.1.6-beta] - 2026-05-13
 
 ### Added
+
 - All six food group entries expanded with vanilla food sources, farming tips, and rotation strategy
 - Tips & Tricks chapter covering daily routine, efficient farming, emergency recovery, multiplayer, and tooltip reading
 - Compat Mods chapter covering Croptopia, Farmer's Delight, Pam's HarvestCraft 2, Herbs & Harvest, Farm & Charm, LSO, Spice of Life: Onion, and Peak Stamina
@@ -100,49 +188,51 @@
 - Cross-link from Your First Day to Tips & Tricks
 
 ### Changed
+
 - Effects entry expanded with full per-group bonus and penalty breakdown
 - Diminishing Returns entry expanded with three-tier explanation and novelty bonus details
-
 
 ## [0.1.5-beta] - 2026-05-12
 
 ### Fixed
-- Diminishing returns memory window and decay grace period tuning
 
+- Diminishing returns memory window and decay grace period tuning
 
 ## [0.1.4-beta] - 2026-05-12
 
 ### Fixed
-- Example datapack files removed from main mod jar
 
+- Example datapack files removed from main mod jar
 
 ## [0.1.3-beta] - 2026-05-12
 
 ### Changed
-- DietScreen layout simplified, excess legend entries removed
 
+- DietScreen layout simplified, excess legend entries removed
 
 ## [0.1.2-beta] - 2026-05-11
 
 ### Fixed
-- Clarified blockHeavyMeals and blockLightFood config descriptions for servers without Spice of Life: Onion
 
+- Clarified blockHeavyMeals and blockLightFood config descriptions for servers without Spice of Life: Onion
 
 ## [0.1.1-beta] - 2026-05-11
 
 ### Added
+
 - Heavy meal nutrition threshold configuration
 - Datapack diagnostics and validation framework
 
 ### Fixed
+
 - Memory window configuration values
 - Mod logo loading in NourishedConfigScreen
 - Release workflow indentation
 
 ### Changed
+
 - Registry lifecycle management centralized
 - DietScreen layout improvements
-
 
 ## [0.1.0-beta] - 2026-05-11
 

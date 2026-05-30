@@ -27,8 +27,8 @@
     },
     {
       "type": "patchouli:text",
-      "title": "Grains & Sugars — Pam's",
-      "text": "$(bold)Grains:$() Pam's adds oats, rye, corn flour, and a range of baked goods — muffins, pies, pancakes — each a distinct grain family.\n\n$(bold)Sugars:$() maple syrup, jam, and candy items join honey as high-value sugar sources. Maple syrup in particular has excellent nutrition density and is worth setting up a maple tree farm for."
+      "title": "Grains — Pam's",
+      "text": "$(bold)Grains:$() Pam's adds oats, rye, corn flour, and a range of baked goods — muffins, pies, pancakes — each a distinct grain family."
     },
     {
       "type": "patchouli:text",

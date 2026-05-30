@@ -7,12 +7,12 @@ I got sick of Minecraft's food system. There are other nutrition mods out there,
 ---
 
 ❤️ What you gain
-When you have all six food groups are above 75%, you get:
+When you have all five food groups are above 75%, you get:
 
 Health Boost I — passively while balanced
 Regeneration I — passively while balanced
 
-When all six food groups are above 75%, you get:
+When all five food groups are above 75%, you get:
 
 | Group         | Neglect Penalty  |
 | ------------- | ---------------- |
@@ -20,7 +20,6 @@ When all six food groups are above 75%, you get:
 | 🥦 Vegetables | Slowness I       |
 | 🥩 Proteins   | Mining Fatigue I |
 | 🍎 Fruits     | Unluck I         |
-| 🍬 Sugars     | —                |
 | 🥛 Dairy      | —                |
 
 ---
@@ -35,13 +34,13 @@ All effects are fully configurable and can be disabled per-module.
 
 Diminishing returns apply - eating the same food repeatedly gives less credit each time, encouraging real variety.
 
-Sugars and Dairy have no penalty effect by default — these groups are tracked and affect your balance score but do not apply a debuff when depleted. This is configurable.
+Dairy has no penalty effect by default — this group is tracked and affects your balance score but does not apply a debuff when depleted. This is configurable.
 
 ---
 
 ## The HUD
 
-The HUD is the heart of the mod. Six color-coded bars sit on screen while you play - you always know where you stand without opening a menu.
+The HUD is the heart of the mod. Five color-coded bars sit on screen while you play - you always know where you stand without opening a menu.
 
 ![HUD Edit Mode](Assets/nourished-MiniHud.gif)
 

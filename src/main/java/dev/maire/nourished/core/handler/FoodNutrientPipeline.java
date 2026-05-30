@@ -138,7 +138,7 @@ final class FoodNutrientPipeline {
                 }
 
                 float finalDelta = modifierEvent.getAmount();
-                if (!Float.isFinite(finalDelta) || finalDelta < -1f || finalDelta > 1f) {
+                if (!Float.isFinite(finalDelta) || finalDelta < -10f || finalDelta > 100f) {
                     Nourished.LOGGER.warn("[Nourished] Invalid finalDelta {} for player={} item={} nutrient={} — skipping",
                             finalDelta, player.getName().getString(), itemId, key);
                     continue;

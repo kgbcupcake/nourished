@@ -1509,10 +1509,6 @@
       "required": false
     },
     {
-      "id": "croptopia:hamburger",
-      "required": false
-    },
-    {
       "id": "croptopia:blt",
       "required": false
     },
@@ -1623,6 +1619,376 @@
     {
       "id": "farmersdelight:chicken_sandwich",
       "required": false
+    },
+    {
+      "id": "croptopia:candy_corn",
+      "required": false
+    },
+    {
+      "id": "croptopia:pumpkin_spice_latte",
+      "required": false
+    },
+    {
+      "id": "croptopia:roasted_pumpkin_seeds",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:spongekin_slice",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:pickled_spongekin",
+      "required": false
+    },
+     {
+      "id": "aethersdelight:cooked_parsnip",
+      "required": false
+    },
+    {
+      "id": "aethersdelight:peppermint_leaf",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:gongylidia",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:sopa_de_macaco",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:maize_stuffed_potato",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:vegetable_omelet",
+      "required": false
+    },
+    {
+      "id": "crabbersdelight:jar_of_pickles",
+      "required": false
+    },
+    {
+      "id": "crabbersdelight:seafood_gumbo",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_crimson_fungus",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_warped_fungus",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_wrap_lettuce_beetroot",
+      "required": false
+    },
+    {
+      "id": "createfood:eggplant_bun",
+      "required": false
+    },
+    {
+      "id": "createfood:eggplant_cheeseburger",
+      "required": false
+    },
+    {
+      "id": "createfood:kelp_roll_beetroot",
+      "required": false
+    },
+    {
+      "id": "createfood:kelp_roll_brown_mushroom",
+      "required": false
+    },
+    {
+      "id": "createfood:kelp_roll_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:kelp_roll_red_mushroom",
+      "required": false
+    },
+    {
+      "id": "createfood:kelp_roll_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:mushroom_pizza_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:mushroom_taco",
+      "required": false
+    },
+    {
+      "id": "createfood:nacho_bowl_taco_sauce",
+      "required": false
+    },
+    {
+      "id": "createfood:onion_pizza_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_cheese_tomato_sauce",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_chicken_cut_tomato_sauce",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_endermite_meatballs_tomato_sauce",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_fish_tomato_sauce",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_strider_meatballs_tomato_sauce",
+      "required": false
+    },
+    {
+      "id": "createfood:pork_wrap_onion_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:scrambled_eggs_plate_onion",
+      "required": false
+    },
+    {
+      "id": "croptopia:peanut_butter_with_celery",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:arcane_chili",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:cob_n_candy",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:ghoulash",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:hydra_fricassee",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:ossobuco",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:rotgourd_slice",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:rubaboo",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:rubaboo_cup",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:salt_soaked_stew",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:salt_soaked_stew_cup",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:scaly_fiddlehead_risotto",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:sinigang",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:tower_boreito",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:roasted_corn",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cabbage",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cabbage_leaf",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:pumpkin_slice",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:ratatouille",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:stuffed_pumpkin",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:vegetable_noodles",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:elote",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:taco",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:burrito",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:fresh_oregano",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:fresh_peppercorn",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:fresh_rosemary",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:fresh_sage",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:fresh_thyme",
+      "required": false
+    },
+    {
+      "id": "immersive_weathering:azalea_flowers",
+      "required": false
+    },
+    {
+      "id": "immersive_weathering:enchanted_golden_moss_clump",
+      "required": false
+    },
+    {
+      "id": "immersive_weathering:golden_moss_clump",
+      "required": false
+    },
+    {
+      "id": "immersive_weathering:moss_clump",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:crystallized_coral_potato",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:urchinkin_pumpkin",
+      "required": false
+    },
+    {
+      "id": "minersdelight:bat_soup_cup",
+      "required": false
+    },
+    {
+      "id": "minersdelight:cave_soup_cup",
+      "required": false
+    },
+    {
+      "id": "minersdelight:insect_stew_cup",
+      "required": false
+    },
+    {
+      "id": "minersdelight:moss",
+      "required": false
+    },
+    {
+      "id": "minersdelight:rock_soup_cup",
+      "required": false
+    },
+    {
+      "id": "minersdelight:spicy_hoglin_stew_cup",
+      "required": false
+    },
+    {
+      "id": "minersdelight:strider_stew_cup",
+      "required": false
+    },
+    {
+      "id": "moredelight:diced_potatoes_with_chicken_cuts",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:sausage_and_potatoes",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:carrotdonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:noodlesoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:pumpkindonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:asparagusquicheitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:beancornmealitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:broccolimacitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:creamedcornitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:creamofmushroomitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mushroomketchupomeletitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:vegemiteitem",
+      "required": false
+    },
+    {
+      "id": "rootsclassic:old_root",
+      "required": false
+    },
+    {
+      "id": "rusticdelight:pumpkin_pancake",
+      "required": false
+    },
+    {
+      "id": "rusticdelight:vegetable_pancake",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:glitterwrap",
+      "required": false
     }
+
+
   ]
 }

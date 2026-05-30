@@ -7,7 +7,7 @@
     {
       "type": "patchouli:text",
       "title": "The Minimal Farm",
-      "text": "You do not need a mega-farm to stay healthy. A surprisingly small setup covers all six groups:\n\n$(bold)Wheat patch$() — covers Grains via bread.\n$(bold)Carrot + potato rows$() — covers Vegetables.\n$(bold)Melon or berry patch$() — covers Fruits.\n$(bold)Cow pen (2+)$() — covers Dairy.\n$(bold)Chicken or pig pen$() — covers Proteins.\n$(bold)2–3 bee hives$() — covers Sugars."
+      "text": "You do not need a mega-farm to stay healthy. A surprisingly small setup covers all five groups:\n\n$(bold)Wheat patch$() — covers Grains via bread.\n$(bold)Carrot + potato rows$() — covers Vegetables.\n$(bold)Melon or berry patch$() — covers Fruits.\n$(bold)Cow pen (2+)$() — covers Dairy.\n$(bold)Chicken or pig pen$() — covers Proteins."
     },
     {
       "type": "patchouli:text",
@@ -17,7 +17,7 @@
     {
       "type": "patchouli:text",
       "title": "Animal Priority",
-      "text": "If you can only keep one or two animal pens early on, choose:\n\n$(bold)Cows$() — cover both Dairy (milk) and Proteins (cooked beef). The single most efficient animal for Nourished.\n$(bold)Bees$() — passive sugar supply with zero daily effort once hives are set up. Worth building early.\n\nChickens are lower priority since their protein value is lower, but they breed quickly and are easy to maintain."
+      "text": "If you can only keep one or two animal pens early on, choose:\n\n$(bold)Cows$() — cover both Dairy (milk) and Proteins (cooked beef). The single most efficient animal for Nourished.\n$(bold)Bees$() — passive honey supply with zero daily effort once hives are set up. Useful for recipes even without a separate sweets group.\n\nChickens are lower priority since their protein value is lower, but they breed quickly and are easy to maintain."
     },
     {
       "type": "patchouli:text",

@@ -51,8 +51,7 @@ public final class FoodTokenStemmer {
     );
 
     // Phase 2 — Compound Splits
-    // Food compound words that carry two classification signals. Splitting both
-    // allows cheesecake to score dairy AND sugars simultaneously.
+    // Food compound words that carry two classification signals.
     private static final Map<String, String[]> COMPOUND_SPLITS = Map.of(
         "breadcrumb",  new String[]{"bread", "crumb"},
         "cheesecake",  new String[]{"cheese", "cake"},

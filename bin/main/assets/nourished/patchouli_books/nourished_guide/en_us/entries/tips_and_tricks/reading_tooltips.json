@@ -22,7 +22,7 @@
     {
       "type": "patchouli:text",
       "title": "JEI Tag Search",
-      "text": "If you have JEI installed, you can filter the entire item list by food group. Type any of these into the JEI search bar:\n\n$(bold)nourished:nutrients/fruits$()\n$(bold)nourished:nutrients/vegetables$()\n$(bold)nourished:nutrients/proteins$()\n$(bold)nourished:nutrients/grains$()\n$(bold)nourished:nutrients/sugars$()\n$(bold)nourished:nutrients/dairy$()"
+      "text": "If you have JEI installed, you can filter the entire item list by food group. Type any of these into the JEI search bar:\n\n$(bold)nourished:nutrients/fruits$()\n$(bold)nourished:nutrients/vegetables$()\n$(bold)nourished:nutrients/proteins$()\n$(bold)nourished:nutrients/grains$()\n$(bold)nourished:nutrients/dairy$()"
     },
     {
       "type": "patchouli:text",

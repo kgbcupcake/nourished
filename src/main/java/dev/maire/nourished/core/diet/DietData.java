@@ -16,11 +16,13 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.util.Mth;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Tracks daily-style diet totals. Nutrient keys are driven by {@link NutrientRegistry#getKeys()}.
@@ -31,6 +33,15 @@ import java.util.Map;
 @ApiStatus.Internal
 public class DietData {
     private static final String NUTRIENTS_CODEC_PREFIX = "nutrients.";
+    private static final String LAST_NUTRIENT_CODEC_PREFIX = "last_";
+    private static final Set<String> NON_NUTRIENT_CODEC_FIELDS = Set.of(
+            "calories",
+            "max_calories",
+            "food_memory",
+            "category_memory",
+            "family_memory",
+            "last_tick_time"
+    );
 
     /** Display / bar order — delegates to the registry so it stays in sync. */
     public static List<String> barOrder() {
@@ -73,7 +84,11 @@ public class DietData {
         data.calories    = decodeFloat(ops, map, "calories",     0f);
         data.maxCalories = decodeFloat(ops, map, "max_calories", 2000f);
 
-        for (String key : barOrder()) {
+        List<String> nutrientKeys = barOrder();
+        Set<String> registeredNutrientKeys = Set.copyOf(nutrientKeys);
+        logDroppedUnknownNutrients(ops, map, registeredNutrientKeys);
+
+        for (String key : nutrientKeys) {
             float nutrientValue = decodeFloatWithFallback(ops, map, getNutrientCodecKey(key), key, 0f);
             data.nutrients.put(key, nutrientValue);
             data.lastNutrients.put(key, decodeFloat(ops, map, "last_" + key, 0f));
@@ -127,6 +142,35 @@ public class DietData {
             return Codec.FLOAT.parse(ops, primary).result().orElse(fallback);
         }
         return decodeFloat(ops, map, fallbackField, fallback);
+    }
+
+    private static <T> void logDroppedUnknownNutrients(DynamicOps<T> ops, MapLike<T> map, Set<String> registeredNutrientKeys) {
+        Set<String> loggedUnknownKeys = new HashSet<>();
+        map.entries().forEach(entry ->
+                ops.getStringValue(entry.getFirst()).result()
+                        .map(DietData::extractSavedNutrientKey)
+                        .filter(key -> key != null && !registeredNutrientKeys.contains(key))
+                        .filter(loggedUnknownKeys::add)
+                        .ifPresent(key -> Nourished.LOGGER.debug(
+                                "[DietData] Dropping unknown nutrient key from saved data: {}",
+                                key
+                        ))
+        );
+    }
+
+    private static String extractSavedNutrientKey(String field) {
+        if (field.startsWith(NUTRIENTS_CODEC_PREFIX)) {
+            String key = field.substring(NUTRIENTS_CODEC_PREFIX.length());
+            return key.isBlank() ? null : key;
+        }
+        if (field.startsWith(LAST_NUTRIENT_CODEC_PREFIX)) {
+            String key = field.substring(LAST_NUTRIENT_CODEC_PREFIX.length());
+            return key.isBlank() ? null : key;
+        }
+        if (NON_NUTRIENT_CODEC_FIELDS.contains(field)) {
+            return null;
+        }
+        return field.isBlank() ? null : field;
     }
 
     private static String getNutrientCodecKey(String nutrientKey) {

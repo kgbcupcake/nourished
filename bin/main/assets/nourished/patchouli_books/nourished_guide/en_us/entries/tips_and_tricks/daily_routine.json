@@ -17,7 +17,7 @@
     {
       "type": "patchouli:text",
       "title": "Batch Eating",
-      "text": "You do not need to eat from all six groups at every meal. Instead, eat 2–3 groups per sitting and rotate which groups you cover each time.\n\nExample rotation:\n$(bold)Morning:$() Fruits + Proteins\n$(bold)Midday:$() Grains + Vegetables\n$(bold)Evening:$() Dairy + Sugars\n\nThis keeps all bars healthy without ever feeling like a chore."
+      "text": "You do not need to eat from all five groups at every meal. Instead, eat 2–3 groups per sitting and rotate which groups you cover each time.\n\nExample rotation:\n$(bold)Morning:$() Fruits + Proteins\n$(bold)Midday:$() Grains + Vegetables\n$(bold)Evening:$() Dairy\n\nThis keeps all bars healthy without ever feeling like a chore."
     },
     {
       "type": "patchouli:text",

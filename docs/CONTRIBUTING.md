@@ -8,7 +8,7 @@ Nourished targets **NeoForge 1.21.1** with mod id `nourished`.
 
 ## 1. What is `scanner_spec.json`?
 
-`scanner_spec.json` is a **data file** that tells Nourished’s automatic food classifier how to map foods to the six nutrient categories (fruits, vegetables, proteins, grains, sugars, dairy).
+`scanner_spec.json` is a **data file** that tells Nourished’s automatic food classifier how to map foods to the five nutrient categories (fruits, vegetables, proteins, grains, dairy).
 
 - If a food item already has an explicit `nourished:nutrients/*` item tag, that tag wins and the scanner is not needed for that item.
 - If there is **no** such tag, Nourished uses **weighted signals** from this file (keywords, suffixes, namespaces, archetypes, and a few other rules) to infer the best match at **runtime**.
@@ -32,7 +32,7 @@ Nourished targets **NeoForge 1.21.1** with mod id `nourished`.
 
 ## 2. Nutrient categories
 
-All six groups used by the scanner:
+All five groups used by the scanner:
 
 | Key            | Meaning                         |
 | -------------- | ------------------------------- |
@@ -40,7 +40,6 @@ All six groups used by the scanner:
 | **vegetables** | Vegetables, salads, herbs       |
 | **proteins**   | Meats, fish, eggs, legumes      |
 | **grains**     | Bread, pasta, rice, cereals     |
-| **sugars**     | Sweets, candy, desserts, honey  |
 | **dairy**      | Milk, cheese, cream, yogurt     |
 
 ---
@@ -223,7 +222,6 @@ will crash on startup if that mod is not installed.
 | `fruits.json`     | Fruits, berries                 |
 | `grains.json`     | Bread, pasta, rice, baked goods |
 | `dairy.json`      | Milk, cheese, yogurt, butter    |
-| `sugars.json`     | Candy, honey, jam, desserts     |
 
 ### Finding the item ID
 

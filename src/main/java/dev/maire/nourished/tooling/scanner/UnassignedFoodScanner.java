@@ -188,46 +188,87 @@ public final class UnassignedFoodScanner {
                 .withReports(false)
                 .withRecommendations(false);
         scanAsync(options)
-                .thenAccept(result -> {
-                    Map<ResourceLocation, Map<String, Float>> nutrientMap = new HashMap<>();
-                    int confident = 0;
-                    int uncertain = 0;
-                    for (ClassificationResult r : result.allResults()) {
-                        if (r.uncertain()) {
-                            uncertain++;
-                        } else {
-                            confident++;
-                            Map<String, Float> n = r.nutrients();
-                            Map<String, Float> filtered = new HashMap<>();
-                            if (n != null) {
-                                for (Map.Entry<String, Float> e : n.entrySet()) {
-                                    Float v = e.getValue();
-                                    if (v != null && v > 0f) {
-                                        filtered.put(e.getKey(), v);
-                                    }
-                                }
-                            }
-                            Map<String, Float> toApply;
-                            if (!filtered.isEmpty()) {
-                                toApply = filtered;
-                            } else if (r.dominant() != null) {
-                                toApply = Map.of(r.dominant(), SCANNER_CLASSIFICATION_AMOUNT);
-                            } else {
-                                continue;
-                            }
-                            nutrientMap.put(r.itemId(), toApply);
-                        }
-                    }
-                    FoodNutritionRegistry.applyFromScanner(nutrientMap);
-                    Nourished.LOGGER.info(
-                            "[UnassignedFoodScanner] scanAndApply complete: {} confident, {} uncertain",
-                            confident,
-                            uncertain);
-                })
+                .thenAccept(UnassignedFoodScanner::applyScanResult)
                 .exceptionally(ex -> {
                     Nourished.LOGGER.warn("[UnassignedFoodScanner] scanAndApply failed", ex);
                     return null;
                 });
+    }
+
+    /**
+     * Runs and applies the scanner on the calling thread. Intended for commands that
+     * need a report based on current classifications rather than a later async pass.
+     */
+    public static ScanResult scanAndApplyNow(RecipeManager recipeManager) {
+        ScanOptions options = ScanOptions.defaults()
+                .withRecipeManager(recipeManager)
+                .withReports(false)
+                .withRecommendations(false);
+        ScanResult result = scanFull(options);
+        applyScanResult(result);
+        return result;
+    }
+
+    private static void applyScanResult(ScanResult result) {
+        Map<ResourceLocation, Map<String, Float>> nutrientMap = new HashMap<>();
+        int confident = 0;
+        int uncertain = 0;
+        for (ClassificationResult r : result.allResults()) {
+            if (r.uncertain()) {
+                uncertain++;
+            } else {
+                confident++;
+                Map<String, Float> toApply;
+                if (isComposite(r) && r.nutrients() != null && !r.nutrients().isEmpty()) {
+                    float top = r.nutrients().values().stream().max(Float::compare).orElse(0f);
+                    float threshold = top * NourishedConfig.get().compositeRatioThreshold();
+                    Map<String, Float> composite = new HashMap<>();
+                    for (Map.Entry<String, Float> e : r.nutrients().entrySet()) {
+                        if (e.getValue() >= threshold) {
+                            composite.put(e.getKey(), e.getValue());
+                        }
+                    }
+                    toApply = composite.isEmpty()
+                            ? Map.of(r.dominant(), SCANNER_CLASSIFICATION_AMOUNT)
+                            : composite;
+                } else if (r.dominant() != null) {
+                    toApply = Map.of(r.dominant(), SCANNER_CLASSIFICATION_AMOUNT);
+                } else {
+                    continue;
+                }
+                nutrientMap.put(r.itemId(), toApply);
+            }
+        }
+        FoodNutritionRegistry.applyFromScanner(nutrientMap);
+        Nourished.LOGGER.info(
+                "[UnassignedFoodScanner] scanAndApply complete: {} confident, {} uncertain",
+                confident,
+                uncertain);
+    }
+
+    private static boolean isComposite(ClassificationResult result) {
+        Map<String, Float> nutrients = result.nutrients();
+        if (nutrients == null || nutrients.size() < 2) {
+            return false;
+        }
+
+        float top = 0f;
+        float second = 0f;
+        for (Float value : nutrients.values()) {
+            if (value == null || value <= 0f) {
+                continue;
+            }
+            if (value > top) {
+                second = top;
+                top = value;
+            } else if (value > second) {
+                second = value;
+            }
+        }
+
+        return top > 0f
+                && second > 0f
+                && second / top >= NourishedConfig.get().compositeRatioThreshold();
     }
 
     /**

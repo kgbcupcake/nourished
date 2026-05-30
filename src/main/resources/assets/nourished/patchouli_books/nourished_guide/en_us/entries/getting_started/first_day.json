@@ -17,7 +17,7 @@
     {
       "type": "patchouli:text",
       "title": "More Early Sources",
-      "text": "$(bold)Grains:$() Bread from village chests, or seeds to plant wheat immediately.\n$(bold)Sugars:$() Cookies, cake, or honey from bee nests — treat yourself early.\n$(bold)Dairy:$() A bucket of milk from any cow covers the dairy group in a pinch."
+      "text": "$(bold)Grains:$() Bread from village chests, or seeds to plant wheat immediately.\n$(bold)Dairy:$() A bucket of milk from any cow covers the dairy group in a pinch."
     },
     {
       "type": "patchouli:text",

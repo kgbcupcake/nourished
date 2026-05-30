@@ -142,7 +142,7 @@ public final class NutrientDefinition {
 
     /**
      * Returns whether this nutrient is beneficial (high values are good).
-     * When false, high values are treated as bad (e.g. sugars).
+     * When false, high values are treated as bad.
      *
      * @return {@code true} if high values are good, {@code false} if high values are bad
      */
@@ -249,7 +249,7 @@ public final class NutrientDefinition {
 
         /**
          * Sets whether this nutrient is beneficial (high values are good).
-         * When false, high values are treated as bad (e.g. sugars).
+         * When false, high values are treated as bad.
          * Default: true.
          *
          * @param beneficial {@code true} if high values are good, {@code false} if high values are bad

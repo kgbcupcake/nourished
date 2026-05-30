@@ -17,7 +17,7 @@
     {
       "type": "patchouli:text",
       "title": "Example Override",
-      "text": "To move $(bold)minecraft:pumpkin_pie$() from Grains to Sugars with a custom value, add its entry to $(bold)data/nourished/food_groups/sugars.json$() and remove it from $(bold)grains.json$().\n\nChanges apply on world load or when datapacks are reloaded with $(bold)/reload$()."
+      "text": "To move $(bold)minecraft:pumpkin_pie$() from Grains to Dairy with a custom value, add its entry to $(bold)data/nourished/food_groups/dairy.json$() and remove it from $(bold)grains.json$().\n\nChanges apply on world load or when datapacks are reloaded with $(bold)/reload$()."
     }
   ]
 }

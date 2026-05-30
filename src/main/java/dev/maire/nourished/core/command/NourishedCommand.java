@@ -2,7 +2,10 @@ package dev.maire.nourished.core.command;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -24,6 +27,7 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.reload.NourishedReloadPipeline;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.core.util.NourishedValidation;
 import dev.maire.nourished.modules.RawFood.rawInfo.CookedVersionResolver;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
 import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
@@ -41,6 +45,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
@@ -58,6 +63,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -154,6 +160,9 @@ public class NourishedCommand {
                         .then(Commands.literal("invalidatecache")
                                 .requires(s -> s.hasPermission(2))
                                 .executes(this::invalidateCache))
+                        .then(Commands.literal("repair_generated_datapack")
+                                .requires(s -> s.hasPermission(2))
+                                .executes(this::repairGeneratedDatapack))
                         .then(Commands.literal("diagnostics")
                                 .executes(this::showDiagnostics))
                         .then(Commands.literal("schema")
@@ -180,6 +189,100 @@ public class NourishedCommand {
         return 1;
     }
 
+    private int repairGeneratedDatapack(CommandContext<CommandSourceStack> ctx) {
+        CommandSourceStack source = ctx.getSource();
+        MinecraftServer server = source.getServer();
+        Path worldRoot = server.getWorldPath(LevelResource.ROOT).normalize();
+        Path packRoot = server.getWorldPath(LevelResource.DATAPACK_DIR).resolve("nourished-generated").normalize();
+        Path tagsDir = packRoot.resolve("data").resolve(Nourished.MODID).resolve("tags").resolve("item").resolve("nutrients");
+
+        try {
+            NourishedValidation.assertPathUnder(packRoot, worldRoot, "repairGeneratedDatapack");
+            if (!Files.isDirectory(tagsDir)) {
+                source.sendSuccess(() -> Component.literal("No nourished-generated datapack nutrient tags found."), false);
+                return 1;
+            }
+
+            RepairSummary summary = repairGeneratedTagDirectory(tagsDir);
+            source.sendSuccess(() -> Component.literal(String.format(Locale.ROOT,
+                    "Repaired nourished-generated datapack: %d files scanned, %d entries made optional, %d retired files deleted. Run /reload before retesting tags.",
+                    summary.filesScanned(), summary.entriesConverted(), summary.filesDeleted())).withStyle(ChatFormatting.GREEN), false);
+            return 1;
+        } catch (IOException | IllegalArgumentException | com.google.gson.JsonParseException ex) {
+            Nourished.LOGGER.error("[Nourished] Failed to repair generated datapack", ex);
+            source.sendFailure(Component.literal("Failed to repair nourished-generated datapack: " + ex.getMessage()));
+            return 0;
+        }
+    }
+
+    private static RepairSummary repairGeneratedTagDirectory(Path tagsDir) throws IOException {
+        Set<String> activeFiles = NutrientRegistry.getKeys().stream()
+                .map(key -> key + ".json")
+                .collect(java.util.stream.Collectors.toSet());
+        int filesScanned = 0;
+        int entriesConverted = 0;
+        int filesDeleted = 0;
+
+        try (var stream = Files.list(tagsDir)) {
+            for (Path tagFile : stream.toList()) {
+                String fileName = tagFile.getFileName().toString();
+                if (!Files.isRegularFile(tagFile) || !fileName.endsWith(".json")) {
+                    continue;
+                }
+                if (!activeFiles.contains(fileName)) {
+                    Files.delete(tagFile);
+                    filesDeleted++;
+                    continue;
+                }
+
+                filesScanned++;
+                JsonObject root = JsonParser.parseString(Files.readString(tagFile, StandardCharsets.UTF_8)).getAsJsonObject();
+                JsonArray values = root.has("values") && root.get("values").isJsonArray()
+                        ? root.getAsJsonArray("values")
+                        : new JsonArray();
+                JsonArray repairedValues = new JsonArray();
+                boolean changed = false;
+
+                for (JsonElement value : values) {
+                    if (value.isJsonPrimitive() && value.getAsJsonPrimitive().isString()) {
+                        JsonObject optionalEntry = new JsonObject();
+                        optionalEntry.addProperty("id", value.getAsString());
+                        optionalEntry.addProperty("required", false);
+                        repairedValues.add(optionalEntry);
+                        entriesConverted++;
+                        changed = true;
+                    } else if (value.isJsonObject()) {
+                        JsonObject entry = value.getAsJsonObject();
+                        if (entry.has("id")) {
+                            boolean needsRequired = !entry.has("required") || entry.get("required").getAsBoolean();
+                            if (needsRequired) {
+                                entry.addProperty("required", false);
+                                entriesConverted++;
+                                changed = true;
+                            }
+                        }
+                        repairedValues.add(entry);
+                    } else {
+                        repairedValues.add(value);
+                    }
+                }
+
+                if (!root.has("replace") || root.get("replace").getAsBoolean()) {
+                    root.addProperty("replace", false);
+                    changed = true;
+                }
+                if (changed) {
+                    root.add("values", repairedValues);
+                    Files.writeString(tagFile, GSON.toJson(root), StandardCharsets.UTF_8);
+                }
+            }
+        }
+
+        return new RepairSummary(filesScanned, entriesConverted, filesDeleted);
+    }
+
+    private record RepairSummary(int filesScanned, int entriesConverted, int filesDeleted) {}
+
     private int reportSelf(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer target = ctx.getSource().getPlayerOrException();
         return sendReport(ctx.getSource(), target);
@@ -201,6 +304,7 @@ public class NourishedCommand {
 
     private int showUnassignedFoods(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
+        UnassignedFoodScanner.scanAndApplyNow(ctx.getSource().getServer().getRecipeManager());
         Map<String, List<ResourceLocation>> byNamespace = new TreeMap<>();
 
         for (Item item : BuiltInRegistries.ITEM) {

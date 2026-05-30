@@ -24,7 +24,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.storage.LevelResource;
-import net.neoforged.fml.loading.FMLPaths;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -32,10 +31,12 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Cloth Config entry: scan unassigned foods with full heuristic classification,
@@ -136,12 +137,14 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             writePackMeta(packMetaPath);
             writtenCount++;
 
+            Files.createDirectories(tagsDir);
+            cleanRetiredTagFiles(tagsDir, byNutrient.keySet());
+
             for (Map.Entry<String, List<String>> e : byNutrient.entrySet()) {
                 if (e.getValue().isEmpty()) {
                     continue;
                 }
                 Path tagFile = tagsDir.resolve(e.getKey() + ".json");
-                Files.createDirectories(tagFile.getParent());
                 writeTagFile(tagFile, e.getValue());
                 writtenCount++;
             }
@@ -178,12 +181,37 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         }
     }
 
+    private static void cleanRetiredTagFiles(Path tagsDir, Set<String> activeNutrients) throws IOException {
+        if (!Files.isDirectory(tagsDir)) {
+            return;
+        }
+
+        Set<String> activeFiles = new HashSet<>();
+        for (String nutrient : activeNutrients) {
+            activeFiles.add(nutrient + ".json");
+        }
+
+        try (var stream = Files.list(tagsDir)) {
+            for (Path path : stream.toList()) {
+                if (Files.isRegularFile(path)
+                        && path.getFileName().toString().endsWith(".json")
+                        && !activeFiles.contains(path.getFileName().toString())) {
+                    Nourished.LOGGER.info("[NourishedScanner] Removed stale generated tag: {}", path.getFileName());
+                    Files.delete(path);
+                }
+            }
+        }
+    }
+
     private static void writeTagFile(Path path, List<String> itemIds) throws IOException {
         JsonObject obj = new JsonObject();
         obj.addProperty("replace", false);
         JsonArray values = new JsonArray();
         for (String id : itemIds) {
-            values.add(id);
+            JsonObject entry = new JsonObject();
+            entry.addProperty("id", id);
+            entry.addProperty("required", false);
+            values.add(entry);
         }
         obj.add("values", values);
         try (Writer w = Files.newBufferedWriter(path)) {

@@ -92,7 +92,6 @@ public class NutrientRegistry {
             "vegetables", "minecraft:carrot",
             "proteins", "minecraft:cooked_beef",
             "grains", "minecraft:wheat",
-            "sugars", "minecraft:sugar",
             "dairy", "minecraft:milk_bucket"
     );
     private static final int DEFAULT_COLOR = 0xFFFFFFFF;
@@ -126,7 +125,6 @@ public class NutrientRegistry {
             "vegetables",
             "proteins",
             "grains",
-            "sugars",
             "dairy"
     };
 
@@ -159,7 +157,7 @@ public class NutrientRegistry {
 
     /**
      * Returns whether a nutrient is beneficial (high values are good).
-     * When false, high values are treated as bad (e.g. sugars).
+     * When false, high values are treated as bad.
      * <p>
      * Note: This flag affects display/threshold interpretation only (HUD colors,
      * critical toasts, tooltips). It does NOT affect effect triggers — modpack makers

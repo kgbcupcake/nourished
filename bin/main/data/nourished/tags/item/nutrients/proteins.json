@@ -3657,6 +3657,799 @@
     {
       "id": "farmersdelight:stuffed_potato",
       "required": false
+    },
+    {
+      "id": "brewinandchewin:egg_grog",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:maplecandiedbaconitem",
+      "required": false
+    },
+    {
+      "id": "moredelight:loaded_hamburger",
+      "required": false
+    },
+    {
+     "id": "aethersdelight:cooked_moa",
+      "required": false
+    },
+    {
+      "id": "aethersdelight:cooked_moa_cuts",
+      "required": false
+    },
+    {
+      "id": "aethersdelight:raw_moa",
+      "required": false
+    },
+    {
+      "id": "aethersdelight:raw_moa_cuts",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:cooked_catfish",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:fish_oil",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:maggot",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:moose_ribs",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:raw_catfish",
+      "required": false
+    },
+    {
+      "id": "alexsmobs:sopa_de_macaco",
+      "required": false
+    },
+    {
+      "id": "aquaculturedelight:buckling",
+      "required": false
+    },
+    {
+      "id": "aquaculturedelight:catfish_barbecue",
+      "required": false
+    },
+    {
+      "id": "aquaculturedelight:crispy_fried_perch",
+      "required": false
+    },
+    {
+      "id": "aquaculturedelight:halibut_with_tartar_sauce",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:ham_and_cheese_sandwich",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:jerky",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:vegetable_omelet",
+      "required": false
+    },
+    {
+      "id": "butchery:bird_foot",
+      "required": false
+    },
+    {
+      "id": "butchery:bottle_of_blood",
+      "required": false
+    },
+    {
+      "id": "butchery:bottle_of_infected_blood",
+      "required": false
+    },
+    {
+      "id": "butchery:elder_guardian_eye",
+      "required": false
+    },
+    {
+      "id": "butchery:eye",
+      "required": false
+    },
+    {
+      "id": "butchery:flesh",
+      "required": false
+    },
+    {
+      "id": "butchery:frog_heart",
+      "required": false
+    },
+    {
+      "id": "butchery:magma_chunks",
+      "required": false
+    },
+    {
+      "id": "butchery:poison_sac",
+      "required": false
+    },
+    {
+      "id": "butchery:slime_chunks",
+      "required": false
+    },
+    {
+      "id": "central_heater:burnt_porkchop",
+      "required": false
+    },
+    {
+      "id": "crabbersdelight:clawster",
+      "required": false
+    },
+    {
+      "id": "crabbersdelight:cooked_frog_leg",
+      "required": false
+    },
+    {
+      "id": "crabbersdelight:cooked_pufferfish_slice",
+      "required": false
+    },
+    {
+      "id": "crabbersdelight:coral_crunch",
+      "required": false
+    },
+    {
+      "id": "crabbersdelight:frog_leg_kebab",
+      "required": false
+    },
+    {
+      "id": "crabbersdelight:pufferfish_slice",
+      "required": false
+    },
+    {
+      "id": "crabbersdelight:raw_frog_leg",
+      "required": false
+    },
+    {
+      "id": "crabbersdelight:seafood_gumbo",
+      "required": false
+    },
+    {
+      "id": "createfood:bacon_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:baked_potato_butter_fried_egg",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_cheese_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_cheese_onion_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_crimson_fungus",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_onion",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_warped_fungus",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_wrap_lettuce_beetroot",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_bacon_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_scrambled_egg",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_bacon_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_onion",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:chicken_cheeseburger_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:fish_rice_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:hamburger_bacon",
+      "required": false
+    },
+    {
+      "id": "createfood:hamburger_bacon_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:hamburger_bacon_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:hamburger_onion_bacon",
+      "required": false
+    },
+    {
+      "id": "createfood:hamburger_peanut_butter_bacon",
+      "required": false
+    },
+    {
+      "id": "createfood:kelp_roll_fish",
+      "required": false
+    },
+    {
+      "id": "createfood:kelp_roll_slice_fish",
+      "required": false
+    },
+    {
+      "id": "createfood:mutton_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_chicken_cut",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_chicken_cut_tomato_sauce",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_endermite_meatballs",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_endermite_meatballs_tomato_sauce",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_fish",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_fish_tomato_sauce",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_mutton_chop",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_strider_meatballs",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_strider_meatballs_tomato_sauce",
+      "required": false
+    },
+    {
+      "id": "createfood:pork_wrap_onion_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:sausage_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:scrambled_eggs_plate_onion",
+      "required": false
+    },
+    {
+      "id": "createfood:spicy_sausage_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:spicy_sausages",
+      "required": false
+    },
+    {
+      "id": "createfood:toast_fried_egg_plate",
+      "required": false
+    },
+    {
+      "id": "croptopia:peanut_butter_with_celery",
+      "required": false
+    },
+    {
+      "id": "deep_aether:cooked_quail",
+      "required": false
+    },
+    {
+      "id": "deep_aether:raw_quail",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:arcane_chili",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:bogged_brain",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:brains_in_a_brick",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:brined_flesh",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:bug_chops",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:candied_silverfish_sucker",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:candied_vex_sucker",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:cooked_sniffer_shank",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:cooked_snifferwurst",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:creeperilla",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:creeperilla_squib",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:croak_monster",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:fried_bug_chops",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:ghast_tentacle",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:ghoulash",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:gritty_flesh",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:guardian_angel",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:gyudon",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:haggis",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:hydra_fricassee",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:lutefisk",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:malicious_sandwich",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:meef_wellington",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:ossobuco",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:rotten_tripe",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:rubaboo",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:rubaboo_cup",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:salt_soaked_stew",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:salt_soaked_stew_cup",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:scaly_fiddlehead_risotto",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:shiokara",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:silverfish_abdomen",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:silverfish_and_chips",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:sinigang",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:slime_noodles",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:sniffer_shank",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:snifferwurst",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:snuffledog",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:soaked_skewer",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:spider_tanghulu",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:takoyaki",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:terrine_loaf",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:tower_boreito",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:venomous_onigiri",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:volaille",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:peanut_butter_sandwich",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:squid_ink_pasta",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:stuffed_pumpkin",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:peanut",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:peanut_butter_and_jelly_sandwich",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:roasted_peanuts",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:taco",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:trail_mix",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:bagel_with_salmon",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:biscuits_gravy",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:burrito",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:monte_cristo",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:pepperoni_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:reuben",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:salami_rye",
+      "required": false
+    },
+    {
+      "id": "iceandfire:cooked_rice_with_fire_dragon_meat",
+      "required": false
+    },
+    {
+      "id": "iceandfire:cooked_rice_with_ice_dragon_meat",
+      "required": false
+    },
+    {
+      "id": "iceandfire:cooked_rice_with_lightning_dragon_meat",
+      "required": false
+    },
+    {
+      "id": "iceandfire:fire_dragon_flesh",
+      "required": false
+    },
+    {
+      "id": "iceandfire:ice_dragon_flesh",
+      "required": false
+    },
+    {
+      "id": "iceandfire:lightning_dragon_flesh",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:coral_chunk_sandwich",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:crystallized_coral_potato",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:urchinkin_pumpkin",
+      "required": false
+    },
+    {
+      "id": "minersdelight:arthropod",
+      "required": false
+    },
+    {
+      "id": "minersdelight:baked_tentacles",
+      "required": false
+    },
+    {
+      "id": "minersdelight:bat_soup_cup",
+      "required": false
+    },
+    {
+      "id": "minersdelight:bone_broth_cup",
+      "required": false
+    },
+    {
+      "id": "minersdelight:cave_soup_cup",
+      "required": false
+    },
+    {
+      "id": "minersdelight:insect_sandwich",
+      "required": false
+    },
+    {
+      "id": "minersdelight:insect_stew_cup",
+      "required": false
+    },
+    {
+      "id": "minersdelight:spicy_hoglin_stew_cup",
+      "required": false
+    },
+    {
+      "id": "minersdelight:spider_leg",
+      "required": false
+    },
+    {
+      "id": "minersdelight:strider_stew_cup",
+      "required": false
+    },
+    {
+      "id": "minersdelight:takoyaki",
+      "required": false
+    },
+    {
+      "id": "minersdelight:tentacles_on_a_stick",
+      "required": false
+    },
+    {
+      "id": "moredelight:cooked_rice_with_beef",
+      "required": false
+    },
+    {
+      "id": "moredelight:cooked_rice_with_chicken_cuts",
+      "required": false
+    },
+    {
+      "id": "moredelight:creamy_pasta_with_chicken_cuts",
+      "required": false
+    },
+    {
+      "id": "moredelight:creamy_pasta_with_ham",
+      "required": false
+    },
+    {
+      "id": "moredelight:diced_potatoes_with_chicken_cuts",
+      "required": false
+    },
+    {
+      "id": "moredelight:porkchop_sandwich",
+      "required": false
+    },
+    {
+      "id": "moredelight:toast_with_egg",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:plate_of_cold_striderloaf",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:sausage_and_potatoes",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:twisted_ghasta",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:asparagusquicheitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:beansandriceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:beansontoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bolognasandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:creamofchickenitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:friedbolognasandwichitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mushroomketchupomeletitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peanutchocolatebaritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pepperonipizzaitem",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:cooked_tentacle",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:golden_hot_dog",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:pepperoni_burger",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:platinum_hot_dog",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:raw_tentacle",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:salted_raw_porkchop",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:salted_tentacle",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:silver_hot_dog",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:slice_of_turtle_sashimi",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:surume",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:turtle_skewers_1",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:turtle_skewers_2",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:turtle_skewers_3",
+      "required": false
     }
+
   ]
 }
