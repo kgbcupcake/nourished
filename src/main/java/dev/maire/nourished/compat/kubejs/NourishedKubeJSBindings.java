@@ -33,7 +33,7 @@ public final class NourishedKubeJSBindings {
     }
 
     public static Object createEventsBindingObject(ScriptType type) {
-        return new EventGroupWrapper(type, NourishedKubeJSEvents.getGroup());
+        return new EventGroupWrapper(type, NourishedKubeJSEvents.GROUP);
     }
 
     public static final class ScriptApi {

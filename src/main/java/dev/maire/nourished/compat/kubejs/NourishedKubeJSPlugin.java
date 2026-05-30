@@ -103,8 +103,8 @@ public final class NourishedKubeJSPlugin implements KubeJSPlugin {
         if (!ModList.get().isLoaded("kubejs")) {
             return;
         }
-        NourishedKubeJSEvents.register(registry);
-        NourishedKubeJSEvents.register();
+        registry.register(NourishedKubeJSEvents.GROUP);
+        NourishedKubeJSEventBridge.register();
         NourishedKubeJSStartupEvents.register(registry);
     }
 }
