@@ -163,6 +163,7 @@ public final class NourishedConfigScreen {
             ModuleCache.refresh();
         });
         builder.setAlwaysShowTabs(true);
+        builder.setAfterInitConsumer(NourishedConfigLeftCardsLayout::apply);
         return builder.build();
     }
 
