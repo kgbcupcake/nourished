@@ -638,5 +638,15 @@ public class DietScreen extends Screen {
     }
 
     @Override
+    public void renderBackground(GuiGraphics g, int mx, int my, float pt) {
+        // Suppress automatic background rendering
+    }
+
+    @Override
+    public void renderTransparentBackground(GuiGraphics g) {
+        // Suppress the default 1.21+ menu blur shader
+    }
+
+    @Override
     public boolean isPauseScreen() { return false; }
 }
