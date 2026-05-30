@@ -1,5 +1,10 @@
 # Changelog
+## [0.2.1-beta-HotFix] - 2026-05-29
 
+## Fixed
+
+- Restored config screen left-sidebar navigation so **Modules**, **General**, and other category tabs respond to clicks again.
+  
 ## [0.2.1-beta] - 2026-05-29
 
 ## Upgrade Notes
@@ -83,9 +88,6 @@ then:
 - Raw vanilla meats now correctly trigger raw food penalties when appropriate.
 
 - Non-beneficial nutrients no longer trigger low or critical nutrient warnings while decaying.
-  
-- - Config screen: **Modules** and **General** (and other sidebar categories) open correctly again after restoring left-sidebar tab click handling.
-
   
 ## [0.2.0-beta] - 2026-05-15
 
