@@ -50,15 +50,22 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
     private static final int VISIBLE_ROWS = 9;
     private static final int LIST_VIEWPORT_H = VISIBLE_ROWS * ROW_H;
     private static final int HEADER_H = 28;
+    private static final int ANALYSIS_ROW_H = 24;
+    private static final int STATUS_ROW_H = 14;
 
     private static final int COLOR_CONFIDENT = 0xFF90EE90;
     private static final int COLOR_UNCERTAIN = 0xFFFFD700;
     private static final int COLOR_DEFAULT = 0xFFFFFFFF;
 
     private final Button scanButton;
+    private final Button analysisButton;
     private final Button writeButton;
     private final List<Row> rows = new ArrayList<>();
     private boolean hasRunScan;
+    private boolean analysisRunning;
+
+    @Nullable
+    private Component analysisStatus;
 
     private int scroll;
     private int lastListX;
@@ -76,6 +83,9 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
                 false);
         this.scanButton = Button.builder(Component.translatable("config.nourished.foodScanner.scan"), b -> runScan())
                 .bounds(0, 0, 120, 20)
+                .build();
+        this.analysisButton = Button.builder(Component.translatable("config.nourished.foodScanner.runAnalysis"), b -> runAnalysis())
+                .bounds(0, 0, 140, 20)
                 .build();
         this.writeButton = Button.builder(Component.translatable("config.nourished.foodScanner.writeDatapack"), b -> writeDatapack())
                 .bounds(0, 0, 160, 20)
@@ -98,6 +108,48 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             rows.add(new Row(hit.itemId(), hit.fallbackNutrient(), dominant, uncertain, spread, signals, keys));
         }
         requestReferenceRebuilding();
+    }
+
+    private void runAnalysis() {
+        Minecraft mc = Minecraft.getInstance();
+        MinecraftServer server = mc.getSingleplayerServer();
+        if (server == null) {
+            mc.getToasts().addToast(new FoodScannerNoWorldToast());
+            return;
+        }
+        if (!canScan() || analysisRunning) {
+            return;
+        }
+
+        analysisRunning = true;
+        analysisStatus = Component.translatable("config.nourished.foodScanner.analysisStarting");
+        requestReferenceRebuilding();
+
+        UnassignedFoodScanner.ScanOptions options = UnassignedFoodScanner.ScanOptions.defaults()
+                .withRecipeManager(server.getRecipeManager())
+                .withReports(true)
+                .withRecommendations(true)
+                .withProgressCallback(msg -> mc.execute(() -> {
+                    analysisStatus = Component.literal(msg);
+                    requestReferenceRebuilding();
+                }));
+
+        UnassignedFoodScanner.scanAsync(options).whenComplete((result, ex) -> mc.execute(() -> {
+            analysisRunning = false;
+            if (ex != null) {
+                Nourished.LOGGER.error("[FoodScannerWidget] Analysis failed", ex);
+                analysisStatus = null;
+                mc.getToasts().addToast(new FoodScannerAnalysisErrorToast(
+                        Component.translatable("config.nourished.foodScanner.analysisFailed")));
+            } else {
+                analysisStatus = null;
+                Component msg = Component.translatable(
+                        "config.nourished.foodScanner.analysisWritten",
+                        "config/" + Nourished.MODID + "/scanner_analysis/");
+                mc.getToasts().addToast(new FoodScannerWriteToast(msg));
+            }
+            requestReferenceRebuilding();
+        }));
     }
 
     private void writeDatapack() {
@@ -227,6 +279,12 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         return Minecraft.getInstance().getSingleplayerServer() != null && !rows.isEmpty();
     }
 
+    private boolean canRunAnalysis() {
+        return canScan()
+                && Minecraft.getInstance().getSingleplayerServer() != null
+                && !analysisRunning;
+    }
+
     @Override
     public Object getValue() {
         return Boolean.FALSE;
@@ -248,14 +306,16 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
 
     @Override
     public int getItemHeight() {
-        int h = HEADER_H + PAD;
+        int h = HEADER_H + PAD + ANALYSIS_ROW_H;
+        if (analysisStatus != null || analysisRunning) {
+            h += STATUS_ROW_H;
+        }
         if (!rows.isEmpty()) {
             h += LIST_VIEWPORT_H + PAD + 24;
-        } else {
-            h += 14;
-            if (hasRunScan) {
-                h += 2;
-            }
+        } else if (!canScan()) {
+            h += STATUS_ROW_H;
+        } else if (hasRunScan) {
+            h += STATUS_ROW_H + 2;
         }
         return h;
     }
@@ -264,6 +324,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
     public List<? extends net.minecraft.client.gui.components.events.GuiEventListener> children() {
         List<net.minecraft.client.gui.components.events.GuiEventListener> out = new ArrayList<>();
         out.add(scanButton);
+        out.add(analysisButton);
         out.add(writeButton);
         for (Row row : rows) {
             out.add(row.nutrientButton);
@@ -275,6 +336,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
     public List<? extends net.minecraft.client.gui.narration.NarratableEntry> narratables() {
         List<net.minecraft.client.gui.narration.NarratableEntry> out = new ArrayList<>();
         out.add(scanButton);
+        out.add(analysisButton);
         out.add(writeButton);
         for (Row row : rows) {
             out.add(row.nutrientButton);
@@ -311,6 +373,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             float delta) {
         if (!isRowVisible(y, getItemHeight())) {
             scanButton.setY(-2000);
+            analysisButton.setY(-2000);
             writeButton.setY(-2000);
             for (Row row : rows) {
                 row.nutrientButton.setY(-2000);
@@ -329,15 +392,27 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         scanButton.setWidth(120);
         scanButton.active = isEditable() && canScan();
         scanButton.render(graphics, mouseX, mouseY, delta);
-        cy += 24;
+        cy += ANALYSIS_ROW_H;
+
+        analysisButton.setX(sx + innerW - 140);
+        analysisButton.setY(cy);
+        analysisButton.setWidth(140);
+        analysisButton.active = isEditable() && canRunAnalysis();
+        analysisButton.render(graphics, mouseX, mouseY, delta);
+        cy += ANALYSIS_ROW_H;
+
+        if (analysisStatus != null) {
+            graphics.drawString(mc.font, analysisStatus, sx, cy, 0xA0A0A0, false);
+            cy += STATUS_ROW_H;
+        }
 
         if (rows.isEmpty()) {
-            Component hint = canScan()
-                    ? (hasRunScan
-                    ? Component.translatable("config.nourished.foodScanner.noResults")
-                    : Component.translatable("config.nourished.foodScanner.emptyHint"))
-                    : Component.translatable("config.nourished.foodScanner.noWorld");
-            graphics.drawString(mc.font, hint, sx, cy, 0xA0A0A0, false);
+            Component hint = !canScan()
+                    ? Component.translatable("config.nourished.foodScanner.noWorld")
+                    : (hasRunScan ? Component.translatable("config.nourished.foodScanner.noResults") : null);
+            if (hint != null) {
+                graphics.drawString(mc.font, hint, sx, cy, 0xA0A0A0, false);
+            }
             writeButton.active = false;
             writeButton.setY(-2000);
             return;
@@ -481,6 +556,34 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             guiGraphics.fill(0, 0, width(), height(), 0xF0100010);
             guiGraphics.renderOutline(0, 0, width(), height(), 0xFF505078);
             guiGraphics.drawString(font, line, 8, 12, 0xFFFFFF, false);
+            return timeSinceLastVisible >= DISPLAY_MS ? Visibility.HIDE : Visibility.SHOW;
+        }
+    }
+
+    private static final class FoodScannerAnalysisErrorToast implements Toast {
+        private static final long DISPLAY_MS = 5000L;
+        private final Component line;
+
+        FoodScannerAnalysisErrorToast(Component line) {
+            this.line = line;
+        }
+
+        @Override
+        public int width() {
+            return Math.min(360, Math.max(200, Minecraft.getInstance().font.width(line) + 24));
+        }
+
+        @Override
+        public int height() {
+            return 32;
+        }
+
+        @Override
+        public Visibility render(GuiGraphics guiGraphics, ToastComponent toastComponent, long timeSinceLastVisible) {
+            var font = toastComponent.getMinecraft().font;
+            guiGraphics.fill(0, 0, width(), height(), 0xF0100010);
+            guiGraphics.renderOutline(0, 0, width(), height(), 0xFF784040);
+            guiGraphics.drawString(font, line, 8, 12, 0xFFAAAA, false);
             return timeSinceLastVisible >= DISPLAY_MS ? Visibility.HIDE : Visibility.SHOW;
         }
     }

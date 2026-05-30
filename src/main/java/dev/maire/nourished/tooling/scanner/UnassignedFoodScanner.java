@@ -6,6 +6,7 @@ import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.tooling.scanner.analysis.MultiNutrientAnalysisPipeline;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -409,6 +410,7 @@ public final class UnassignedFoodScanner {
             progress.accept("Writing tag recommendations...");
             try {
                 TagRecommendationWriter.writeRecommendations(allResults, options.confidenceSpreadThreshold());
+                MultiNutrientAnalysisPipeline.run(allResults, 0.15f, 0.35f, 0.10f);
             } catch (IOException e) {
                 Nourished.LOGGER.error("[UnassignedFoodScanner] Failed to write recommendations", e);
             }

@@ -33,6 +33,7 @@ import dev.maire.nourished.core.util.NourishedValidation;
 import dev.maire.nourished.modules.RawFood.rawInfo.CookedVersionResolver;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
 import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
+import dev.maire.nourished.tooling.scanner.analysis.MultiNutrientAnalysisPipeline;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.commands.CommandSourceStack;
@@ -167,6 +168,9 @@ public class NourishedCommand {
                                 .executes(this::repairGeneratedDatapack))
                         .then(Commands.literal("diagnostics")
                                 .executes(this::showDiagnostics))
+                        .then(Commands.literal("scan_analysis")
+                                .requires(s -> s.hasPermission(2))
+                                .executes(this::runScanAnalysis))
                         .then(Commands.literal("schema")
                                 .then(Commands.argument("type", StringArgumentType.word())
                                         .suggests(SCHEMA_TYPE_SUGGESTIONS)
@@ -462,6 +466,16 @@ public class NourishedCommand {
         for (String line : lines) {
             ctx.getSource().sendSuccess(() -> Component.literal(line).withStyle(ChatFormatting.GRAY), false);
         }
+        return 1;
+    }
+
+    private int runScanAnalysis(CommandContext<CommandSourceStack> ctx) {
+        MultiNutrientAnalysisPipeline.runFullRegistry(0.15f, 0.35f, 0.10f);
+        String outputPath = "config/" + Nourished.MODID + "/scanner_analysis/";
+        ctx.getSource().sendSuccess(
+                () -> Component.literal("Multi-nutrient analysis written to " + outputPath)
+                        .withStyle(ChatFormatting.GREEN),
+                true);
         return 1;
     }
 
