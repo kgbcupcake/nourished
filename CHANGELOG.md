@@ -84,6 +84,9 @@ then:
 
 - Non-beneficial nutrients no longer trigger low or critical nutrient warnings while decaying.
   
+- - Config screen: **Modules** and **General** (and other sidebar categories) open correctly again after restoring left-sidebar tab click handling.
+
+  
 ## [0.2.0-beta] - 2026-05-15
 
 ⚠️ Upgrading from 0.1.x? Delete config/nourished/scanner_spec.json before launching. It will regenerate automatically with the new defaults. Keeping the old file will cause missing archetypes and incorrect classifications.
