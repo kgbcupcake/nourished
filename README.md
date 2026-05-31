@@ -2,8 +2,6 @@
 
 I got sick of Minecraft's food system. There are other nutrition mods out there, but none of them did what I wanted or were updated for modern Minecraft, so I decided to build my own.
 
-![Main Menu](Assets/MainGui.png)
-
 ---
 
 ❤️ What you gain
