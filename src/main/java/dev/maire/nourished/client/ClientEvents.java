@@ -3,10 +3,7 @@ package dev.maire.nourished.client;
 import java.util.Locale;
 import java.util.Map;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import dev.maire.nourished.client.screen.DietScreen;
-import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
@@ -25,10 +22,10 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
@@ -36,8 +33,7 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 public final class ClientEvents {
 
-    private static final ResourceLocation DIET_BUTTON_TEXTURE =
-        ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "textures/gui/diet_button.png");
+    private static final ItemStack DIET_BUTTON_ICON = new ItemStack(Items.GOLDEN_APPLE);
 
     private ClientEvents() {}
 
@@ -50,11 +46,8 @@ public final class ClientEvents {
 
         @Override
         public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            graphics.blit(DIET_BUTTON_TEXTURE, getX() + 2, getY() + 2, 0, 0, 16, 16, 16, 16);
-            RenderSystem.disableBlend();
-            if (mouseX >= getX() && mouseX <= getX() + width && mouseY >= getY() && mouseY <= getY() + height) {
+            graphics.renderItem(DIET_BUTTON_ICON, getX() + 2, getY() + 2);
+            if (isHovered()) {
                 graphics.renderTooltip(Minecraft.getInstance().font,
                         Component.translatable("nourished.screen.diet.tooltip.nourish"),
                         mouseX, mouseY);

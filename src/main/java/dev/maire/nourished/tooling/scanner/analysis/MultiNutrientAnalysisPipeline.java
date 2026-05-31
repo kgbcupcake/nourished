@@ -4,7 +4,6 @@ import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.ClassifiedFoodCollector;
 import dev.maire.nourished.tooling.scanner.ClassificationResult;
-import net.minecraft.resources.ResourceLocation;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -67,14 +66,16 @@ public final class MultiNutrientAnalysisPipeline {
             float secondScore = resolveSecondScore(scores, dominant);
             float spread = dominantScore - secondScore;
 
-            if (spread < ambiguityThreshold) {
+            if (!r.tagClassified() && spread < ambiguityThreshold) {
                 ambiguous++;
                 ambiguousFoods.add(new AmbiguousFoodEntry(r.itemId(), scores, spread));
                 continue;
             }
 
-            List<String> qualifyingSecondaries = resolveQualifyingSecondaries(
-                    scores, dominant, dominantScore, absoluteThreshold, relativeThreshold);
+            List<String> qualifyingSecondaries = r.tagClassified()
+                    ? resolveTagQualifyingSecondaries(scores, dominant, absoluteThreshold)
+                    : resolveQualifyingSecondaries(
+                            scores, dominant, dominantScore, absoluteThreshold, relativeThreshold);
 
             if (qualifyingSecondaries.isEmpty()) {
                 singleNutrient++;
@@ -148,9 +149,8 @@ public final class MultiNutrientAnalysisPipeline {
             float relativeThreshold,
             float ambiguityThreshold
     ) {
-        Map<ResourceLocation, Map<String, Float>> registryFoods =
-                ClassifiedFoodCollector.collectAllClassifiedFoodScores();
-        if (registryFoods == null || registryFoods.isEmpty()) {
+        List<ClassificationResult> results = ClassifiedFoodCollector.collectAllClassifiedFoods();
+        if (results.isEmpty()) {
             Nourished.LOGGER.warn(
                     "[MultiNutrientAnalysisPipeline] Registry empty or unavailable — skipping full registry analysis");
             return;
@@ -158,12 +158,7 @@ public final class MultiNutrientAnalysisPipeline {
 
         Nourished.LOGGER.info(
                 "[MultiNutrientAnalysisPipeline] Pulled {} classified foods from registry",
-                registryFoods.size());
-
-        List<ClassificationResult> results = new ArrayList<>(registryFoods.size());
-        for (Map.Entry<ResourceLocation, Map<String, Float>> entry : registryFoods.entrySet()) {
-            results.add(fromRegistryScores(entry.getKey(), entry.getValue()));
-        }
+                results.size());
 
         MultiNutrientAnalysisResult result = analyze(
                 results, absoluteThreshold, relativeThreshold, ambiguityThreshold);
@@ -174,35 +169,24 @@ public final class MultiNutrientAnalysisPipeline {
         }
     }
 
-    private static ClassificationResult fromRegistryScores(
-            ResourceLocation itemId,
-            Map<String, Float> scores
+    private static List<String> resolveTagQualifyingSecondaries(
+            Map<String, Float> scores,
+            String dominant,
+            float absoluteThreshold
     ) {
-        List<Map.Entry<String, Float>> sorted = scores.entrySet().stream()
-                .sorted(Comparator
-                        .comparing(Map.Entry<String, Float>::getValue, Comparator.reverseOrder())
-                        .thenComparing(Map.Entry::getKey))
-                .toList();
-
-        if (sorted.isEmpty()) {
-            return ClassificationResult.empty(itemId, "");
+        List<String> secondaries = new ArrayList<>();
+        for (Map.Entry<String, Float> entry : scores.entrySet()) {
+            String key = entry.getKey();
+            float score = entry.getValue();
+            if (key.equals(dominant)) {
+                continue;
+            }
+            if (score >= absoluteThreshold) {
+                secondaries.add(key);
+            }
         }
-
-        String dominant = sorted.get(0).getKey();
-        String secondary = sorted.size() > 1 ? sorted.get(1).getKey() : null;
-        float topScore = sorted.get(0).getValue();
-        float secondScore = sorted.size() > 1 ? sorted.get(1).getValue() : 0f;
-        float spread = topScore - secondScore;
-
-        return new ClassificationResult(
-                itemId,
-                scores,
-                dominant,
-                secondary,
-                spread,
-                List.of(),
-                false
-        );
+        Collections.sort(secondaries);
+        return secondaries;
     }
 
     private static String resolveDominant(Map<String, Float> scores) {

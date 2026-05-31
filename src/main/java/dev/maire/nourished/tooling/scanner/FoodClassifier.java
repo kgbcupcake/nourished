@@ -400,7 +400,7 @@ public final class FoodClassifier {
         float spread = topScore - secondScore;
         boolean uncertain = spread < confidenceSpreadThreshold;
 
-        return new ClassificationResult(itemId, scores, dominant, secondary, spread, signals, uncertain);
+        return new ClassificationResult(itemId, scores, dominant, secondary, spread, signals, uncertain, false);
     }
 
     /**

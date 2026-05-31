@@ -67,7 +67,8 @@ public final class ConfidenceValidator {
                 secondary,
                 spread,
                 signals,
-                uncertain
+                uncertain,
+                false
         );
     }
 
