@@ -5082,6 +5082,11 @@
     {
       "id": "rusticdelight:cherry_blossom_pancake",
       "required": false
+    },
+    {
+      "id": "crabbersdelight:coconut_milk",
+      "required": false
     }
+
   ]
 }

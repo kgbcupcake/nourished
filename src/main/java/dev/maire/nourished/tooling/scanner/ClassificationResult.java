@@ -19,6 +19,7 @@ import java.util.Map;
  * @param confidenceSpread The difference between dominant and secondary scores
  * @param signals List of all signals that contributed to this classification
  * @param uncertain True if confidenceSpread is below the threshold
+ * @param tagClassified True when built from datapack/explicit nutrient tags (authoritative)
  */
 @ApiStatus.Internal
 public record ClassificationResult(
@@ -28,7 +29,8 @@ public record ClassificationResult(
         String secondary,
         float confidenceSpread,
         List<ClassificationSignal> signals,
-        boolean uncertain
+        boolean uncertain,
+        boolean tagClassified
 ) {
     public ClassificationResult {
         scores = Map.copyOf(scores);
@@ -89,7 +91,8 @@ public record ClassificationResult(
                 null,
                 0f,
                 Collections.emptyList(),
-                true
+                true,
+                false
         );
     }
 }

@@ -700,28 +700,24 @@ public final class NourishedConfigScreen {
         category.addEntry(
                 eb.startEnumSelector(Component.translatable("config.nourished.hudAnchor"), HudAnchor.class, client.hudAnchor())
                         .setDefaultValue(HudAnchor.BOTTOM_LEFT)
-                        .setTooltip(Component.translatable("config.nourished.hudAnchor.desc"))
                         .setSaveConsumer(client::setHudAnchor)
                         .build()
         );
         category.addEntry(
                 eb.startIntSlider(Component.translatable("config.nourished.hudOffsetX"), client.hudOffsetX(), -2000, 2000)
                         .setDefaultValue(0)
-                        .setTooltip(Component.translatable("config.nourished.hudOffsetX.desc"))
                         .setSaveConsumer(client::setHudOffsetX)
                         .build()
         );
         category.addEntry(
                 eb.startIntSlider(Component.translatable("config.nourished.hudOffsetY"), client.hudOffsetY(), -2000, 2000)
                         .setDefaultValue(0)
-                        .setTooltip(Component.translatable("config.nourished.hudOffsetY.desc"))
                         .setSaveConsumer(client::setHudOffsetY)
                         .build()
         );
         category.addEntry(
                 eb.startIntSlider(Component.translatable("config.nourished.hudBarWidth"), client.hudBarWidth(), 40, 120)
                         .setDefaultValue(60)
-                        .setTooltip(Component.translatable("config.nourished.hudBarWidth.desc"))
                         .setSaveConsumer(client::setHudBarWidth)
                         .build()
         );
@@ -733,36 +729,72 @@ public final class NourishedConfigScreen {
                         0.5d,
                         1.5d,
                         1.0d,
-                        client::setHudScale,
-                        Component.translatable("config.nourished.hudScale.desc")
+                        client::setHudScale
                 )
         );
         category.addEntry(
                 eb.startIntSlider(Component.translatable("config.nourished.hudReservedBottom"), client.hudReservedBottom(), 30, 100)
                         .setDefaultValue(52)
-                        .setTooltip(Component.translatable("config.nourished.hudReservedBottom.desc"))
                         .setSaveConsumer(client::setHudReservedBottom)
                         .build()
         );
         category.addEntry(
                 eb.startBooleanToggle(Component.translatable("config.nourished.hudDraggable"), client.hudDraggable())
                         .setDefaultValue(true)
-                        .setTooltip(Component.translatable("config.nourished.hudDraggable.desc"))
                         .setSaveConsumer(client::setHudDraggable)
                         .build()
         );
         category.addEntry(
                 eb.startBooleanToggle(Component.translatable("config.nourished.dietBarDragEnabled"), client.dietBarDragEnabled())
                         .setDefaultValue(true)
-                        .setTooltip(Component.translatable("config.nourished.dietBarDragEnabled.desc"))
                         .setSaveConsumer(client::setDietBarDragEnabled)
                         .build()
         );
         category.addEntry(
-                eb.startBooleanToggle(Component.translatable("config.nourished.hideZeroNutrients"), client.hideZeroNutrients())
-                        .setDefaultValue(true)
-                        .setTooltip(Component.translatable("config.nourished.hideZeroNutrients.desc"))
-                        .setSaveConsumer(client::setHideZeroNutrients)
+                eb.startBooleanToggle(Component.translatable("config.nourished.hudShowZeroBars"), client.hudShowZeroBars())
+                        .setDefaultValue(false)
+                        .setSaveConsumer(client::setHudShowZeroBars)
+                        .build()
+        );
+        category.addEntry(
+                buildDoubleSlider(
+                        eb,
+                        Component.translatable("config.nourished.hudHideAboveThreshold"),
+                        client.hudHideAboveThreshold(),
+                        0.0d,
+                        1.0d,
+                        1.0d,
+                        client::setHudHideAboveThreshold,
+                        Component.translatable("config.nourished.hudHideAboveThreshold.desc")
+                )
+        );
+        category.addEntry(
+                buildDoubleSlider(
+                        eb,
+                        Component.translatable("config.nourished.hudShowAboveThreshold"),
+                        client.hudShowAboveThreshold(),
+                        0.0d,
+                        1.0d,
+                        0.0d,
+                        client::setHudShowAboveThreshold,
+                        Component.translatable("config.nourished.hudShowAboveThreshold.desc")
+                )
+        );
+        category.addEntry(
+                buildFloatSlider(
+                        eb,
+                        Component.translatable("config.nourished.hudBackgroundOpacity"),
+                        (float) client.hudBackgroundOpacity(),
+                        0.0f,
+                        1.0f,
+                        204f / 255f,
+                        v -> client.setHudBackgroundOpacity(v)
+                )
+        );
+        category.addEntry(
+                eb.startBooleanToggle(Component.translatable("config.nourished.hudVerticalLayout"), client.hudVerticalLayout())
+                        .setDefaultValue(false)
+                        .setSaveConsumer(client::setHudVerticalLayout)
                         .build()
         );
         category.addEntry(
@@ -771,7 +803,6 @@ public final class NourishedConfigScreen {
                                 NourishedKeys.EDIT_HUD.getKey()
                         )
                         .setDefaultValue(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_H))
-                        .setTooltip(Component.translatable("config.nourished.hudEditHotkey.desc"))
                         .setKeySaveConsumer(key -> {
                             NourishedKeys.EDIT_HUD.setKey(key);
                             KeyMapping.resetMapping();
@@ -958,6 +989,21 @@ public final class NourishedConfigScreen {
             );
         }
 
+        if (!LockRegistry.isLocked("scanner.multiNutrientInheritanceThreshold")) {
+            category.addEntry(
+                    buildDoubleSlider(
+                            eb,
+                            Component.translatable("config.nourished.scanner.multiNutrientInheritanceThreshold"),
+                            config.multiNutrientInheritanceThreshold(),
+                            0.0d,
+                            1.0d,
+                            0.20d,
+                            config::setMultiNutrientInheritanceThreshold,
+                            Component.translatable("config.nourished.scanner.multiNutrientInheritanceThreshold.desc")
+                    )
+            );
+        }
+
         category.addEntry(new FoodScannerWidget());
         addReloadButton(category, eb, false);
     }
@@ -1047,12 +1093,14 @@ public final class NourishedConfigScreen {
         int maxScaled = (int) Math.round(max * scale);
         int valueScaled = (int) Math.round(Math.max(min, Math.min(max, value)) * scale);
         int defaultScaled = (int) Math.round(Math.max(min, Math.min(max, defaultValue)) * scale);
-        return eb.startIntSlider(label, valueScaled, minScaled, maxScaled)
+        var slider = eb.startIntSlider(label, valueScaled, minScaled, maxScaled)
                 .setDefaultValue(defaultScaled)
                 .setTextGetter(v -> Component.literal(String.format(Locale.ROOT, "%.3f", v / (double) scale)))
-                .setTooltip(tooltip)
-                .setSaveConsumer(v -> saveConsumer.accept(v / (double) scale))
-                .build();
+                .setSaveConsumer(v -> saveConsumer.accept(v / (double) scale));
+        if (tooltip.length > 0) {
+            slider.setTooltip(tooltip);
+        }
+        return slider.build();
     }
 
     private static AbstractConfigListEntry buildFloatSlider(
@@ -1070,12 +1118,14 @@ public final class NourishedConfigScreen {
         int maxScaled = Math.round(max * scale);
         int valueScaled = Math.round(Math.max(min, Math.min(max, value)) * scale);
         int defaultScaled = Math.round(Math.max(min, Math.min(max, defaultValue)) * scale);
-        return eb.startIntSlider(label, valueScaled, minScaled, maxScaled)
+        var slider = eb.startIntSlider(label, valueScaled, minScaled, maxScaled)
                 .setDefaultValue(defaultScaled)
                 .setTextGetter(v -> Component.literal(String.format(Locale.ROOT, "%.3f", v / (float) scale)))
-                .setTooltip(tooltip)
-                .setSaveConsumer(v -> saveConsumer.accept(v / (float) scale))
-                .build();
+                .setSaveConsumer(v -> saveConsumer.accept(v / (float) scale));
+        if (tooltip.length > 0) {
+            slider.setTooltip(tooltip);
+        }
+        return slider.build();
     }
 
     private static AbstractConfigListEntry buildSteppedFloatSlider(

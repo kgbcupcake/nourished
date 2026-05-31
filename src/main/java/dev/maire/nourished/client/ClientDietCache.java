@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientDietCache {
 
-    public static final int FLASH_MS = 600;
+    public static final int FLASH_MS = 2000;
     private static final float INCREASE_EPSILON = 0.005f;
 
     /**

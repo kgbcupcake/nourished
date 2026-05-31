@@ -3947,6 +3947,27 @@
     {
       "id": "undergardendelight:glitterwrap",
       "required": false
+    },
+    {
+      "id": "aether:blue_gummy_swet",
+      "required": false
+    },
+    {
+      "id": "aether:golden_gummy_swet",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:flaxen_cheese_wedge",
+      "required": false
+    },
+    {
+      "id": "brewinandchewin:scarlet_cheese_wedge",
+      "required": false
+    },
+    {
+      "id": "refurbished_furniture:cheese_sandwich",
+      "required": false
     }
+
   ]
 }

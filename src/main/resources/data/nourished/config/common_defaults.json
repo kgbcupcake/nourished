@@ -30,6 +30,7 @@
   "scannerEnableRecipeInheritance": true,
   "scannerConfidenceSpreadThreshold": 3.0,
   "compositeRatioThreshold": 0.40,
+  "multiNutrientInheritanceThreshold": 0.20,
   "enableDecay": true,
   "enableNutritionEating": true,
   "blockHeavyMeals": false,

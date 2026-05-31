@@ -1987,7 +1987,132 @@
     {
       "id": "undergardendelight:glitterwrap",
       "required": false
+    },
+    {
+      "id": "bountifulfares:chamomile_tea_bottle",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:honeysuckle_tea_bottle",
+      "required": false
+    },
+    {
+      "id": "butchery:bird_foot",
+      "required": false
+    },
+    {
+      "id": "butchery:eye",
+      "required": false
+    },
+    {
+      "id": "camping:marshmallow",
+      "required": false
+    },
+    {
+      "id": "camping:roasted_marshmallow",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_bacon_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:chicken_cheeseburger_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:hamburger_bacon_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:creeperilla",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:creeperilla_squib",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:liveroot_beer",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:sculk_mayo",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:silverfish_abdomen",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:slime_bar",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:torchberry_raisins",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:caramel",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:marshmallow_stick",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:peanut",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:raisins",
+      "required": false
+    },
+    {
+      "id": "minersdelight:baked_tentacles",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:egg_soup",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:spicy_noodle_soup",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:barleyseeditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:oatsseeditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:riceseeditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:ryeseeditem",
+      "required": false
+    },
+    {
+      "id": "rusticdelight:coffee_cookie",
+      "required": false
+    },
+    {
+      "id": "rusticdelight:honey_coffee",
+      "required": false
+    },
+    {
+      "id": "rusticdelight:syrup_cookie",
+      "required": false
+    },
+    {
+      "id": "tombstone:lollipop",
+      "required": false
     }
+
 
 
   ]

@@ -8,5 +8,9 @@
   "hudReservedBottom": 52,
   "hudDraggable": true,
   "dietBarDragEnabled": true,
-  "hideZeroNutrients": true
+  "hudHideAboveThreshold": 1.0,
+  "hudShowAboveThreshold": 0.0,
+  "hudShowZeroBars": false,
+  "hudBackgroundOpacity": 0.796078431372549,
+  "hudVerticalLayout": false
 }

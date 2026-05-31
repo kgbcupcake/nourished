@@ -10,7 +10,6 @@ import dev.maire.nourished.core.nutrition.stages.HardFallbackStage;
 import dev.maire.nourished.core.nutrition.stages.KeywordSuffixStage;
 import dev.maire.nourished.core.nutrition.stages.NamespacePeerStage;
 import dev.maire.nourished.core.nutrition.stages.RecipeInheritanceStage;
-import dev.maire.nourished.core.nutrition.stages.ResolutionStageHandler;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import net.minecraft.core.Holder;
@@ -49,16 +48,18 @@ public final class RuntimeFoodResolver {
     private final AtomicReference<ResourceLocation> slowestItem = new AtomicReference<>(null);
     private final AtomicInteger recipeTimeouts = new AtomicInteger(0);
 
-    private final List<ResolutionStageHandler> handlers;
+    private final CommunityTagStage communityTagStage;
+    private final KeywordSuffixStage keywordSuffixStage;
+    private final RecipeInheritanceStage recipeInheritanceStage;
+    private final NamespacePeerStage namespacePeerStage;
+    private final HardFallbackStage hardFallbackStage;
 
     private RuntimeFoodResolver() {
-        handlers = List.of(
-                new CommunityTagStage(),
-                new KeywordSuffixStage(),
-                new RecipeInheritanceStage(recipeCache),
-                new NamespacePeerStage(),
-                new HardFallbackStage()
-        );
+        communityTagStage = new CommunityTagStage();
+        keywordSuffixStage = new KeywordSuffixStage();
+        recipeInheritanceStage = new RecipeInheritanceStage(recipeCache);
+        namespacePeerStage = new NamespacePeerStage();
+        hardFallbackStage = new HardFallbackStage();
     }
 
     public Map<String, Float> resolve(ItemStack stack, @Nullable RecipeManager recipeManager) {
@@ -122,16 +123,17 @@ public final class RuntimeFoodResolver {
         Set<String> validKeys = Set.copyOf(nutrientKeys);
         StageContext ctx = new StageContext(holder, itemId, recipeManager, namespacePeers, validKeys);
 
-        ResolutionResult result = null;
-        for (ResolutionStageHandler handler : handlers) {
-            result = handler.resolve(itemId, ctx);
-            if (result != null) break;
-        }
+        communityTagStage.resolve(itemId, ctx);
+
+        ResolutionResult primary = keywordSuffixStage.resolve(itemId, ctx);
+        ResolutionResult recipeSupplement = recipeInheritanceStage.resolve(itemId, ctx);
+        ResolutionResult result = RuntimeResolutionMerge.mergePrimaryWithRecipeSupplement(primary, recipeSupplement);
 
         if (result == null) {
-            result = new ResolutionResult(
-                    Map.of(), Map.of(), List.of(), Map.of(), Map.of(),
-                    false, 0f, RuntimeCascadeStage.HARD_FALLBACK, "pipeline exhausted");
+            result = namespacePeerStage.resolve(itemId, ctx);
+        }
+        if (result == null) {
+            result = hardFallbackStage.resolve(itemId, ctx);
         }
 
         resolvedCache.put(itemId, result);
@@ -140,13 +142,15 @@ public final class RuntimeFoodResolver {
         if (result.stage() == RuntimeCascadeStage.COMMUNITY_TAG
                 || result.stage() == RuntimeCascadeStage.KEYWORD_SUFFIX
                 || result.stage() == RuntimeCascadeStage.COMPOSITE
+                || result.stage() == RuntimeCascadeStage.COMPOSITE_RECIPE
+                || result.stage() == RuntimeCascadeStage.KEYWORD_SUFFIX_RECIPE
                 || result.stage() == RuntimeCascadeStage.RECIPE_INHERITANCE) {
             namespacePeers.computeIfAbsent(itemId.getNamespace(), k -> new RunningAverage())
                     .add(result.nutrients());
         }
 
         Nourished.LOGGER.debug("[RuntimeFoodResolver] {} resolved via {} (confidence={}): {}",
-                itemId, result.stage(), String.format("%.2f", result.confidence()), result.debugReason());
+                itemId, result.stage().displayName(), String.format("%.2f", result.confidence()), result.debugReason());
 
         long elapsed = System.nanoTime() - start;
         recordTiming(elapsed, itemId);

@@ -567,6 +567,15 @@ public class FoodNutritionRegistry {
         return resolveNutrientBars(stack, warnIfUnmatched, (RecipeManager) null);
     }
 
+    /**
+     * Nutrient bar weights from datapack {@code nourished:nutrients/*} tags (compat-filtered).
+     * Used by tooling that snapshots the classified food registry.
+     */
+    public static Map<String, Float> getNutrientTagScores(Item item) {
+        Map<String, Float> matches = collectNutrientTagMatches(item);
+        return matches.isEmpty() ? Map.of() : Map.copyOf(matches);
+    }
+
     private static Map<String, Float> collectNutrientTagMatches(Item item) {
         ResourceLocation itemId = item.builtInRegistryHolder().key().location();
         Map<String, Float> matches = new LinkedHashMap<>();

@@ -2,6 +2,7 @@ package dev.maire.nourished.tooling.scanner;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.tooling.scanner.stages.RecipeInheritanceStage;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -149,17 +150,16 @@ public final class FoodClassifier {
             }
         }
 
-        if (enableRecipeInheritance && recipeResolver != null) {
-            Map<String, Float> recipeContribs = recipeResolver.resolve(item, classifiedLookup);
-            applySignal(scores, recipeContribs, mult.recipeInheritance());
-            if (!recipeContribs.isEmpty()) {
-                signals.add(new ClassificationSignal(
-                        ClassificationSignal.TYPE_RECIPE_INHERITANCE,
-                        "recipe_ingredients",
-                        scaleContributions(recipeContribs, mult.recipeInheritance())
-                ));
-            }
-        }
+        RecipeInheritanceStage.apply(
+                item,
+                itemId,
+                scores,
+                signals,
+                false,
+                enableRecipeInheritance ? recipeResolver : null,
+                classifiedLookup,
+                mult.recipeInheritance()
+        );
 
         Map<String, Float> peerAvg = namespaceAverages.get(namespace);
         if (peerAvg != null && !peerAvg.isEmpty()) {
@@ -400,7 +400,7 @@ public final class FoodClassifier {
         float spread = topScore - secondScore;
         boolean uncertain = spread < confidenceSpreadThreshold;
 
-        return new ClassificationResult(itemId, scores, dominant, secondary, spread, signals, uncertain);
+        return new ClassificationResult(itemId, scores, dominant, secondary, spread, signals, uncertain, false);
     }
 
     /**

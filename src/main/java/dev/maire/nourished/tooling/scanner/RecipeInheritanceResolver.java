@@ -1,6 +1,7 @@
 package dev.maire.nourished.tooling.scanner;
 
 import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.core.nutrition.MultiNutrientInheritance;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -102,7 +103,8 @@ public final class RecipeInheritanceResolver {
             return Map.of();
         }
 
-        return resolveRecursive(itemId, classifiedLookup, 0, new HashMap<>(), traceOut);
+        Map<String, Float> aggregated = resolveRecursive(itemId, classifiedLookup, 0, new HashMap<>(), traceOut);
+        return MultiNutrientInheritance.filterQualifyingNutrients(aggregated, MultiNutrientInheritance.threshold());
     }
 
     private Map<String, Float> resolveRecursive(

@@ -327,9 +327,11 @@ public final class NourishedDebugCommand {
     }
 
     private static void sendCascadeStageLine(CommandSourceStack source, RuntimeCascadeStage stage) {
-        ChatFormatting color = stage == RuntimeCascadeStage.COMPOSITE ? ChatFormatting.AQUA : ChatFormatting.WHITE;
+        ChatFormatting color = stage == RuntimeCascadeStage.COMPOSITE || stage == RuntimeCascadeStage.COMPOSITE_RECIPE
+                ? ChatFormatting.AQUA
+                : ChatFormatting.WHITE;
         MutableComponent line = Component.literal("Cascade:    ").withStyle(ChatFormatting.GRAY)
-                .append(Component.literal(stage.name()).withStyle(color));
+                .append(Component.literal(stage.displayName()).withStyle(color));
         source.sendSuccess(() -> line, false);
     }
 
