@@ -3,6 +3,7 @@ package dev.maire.nourished.core.nutrition.stages;
 import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.MultiNutrientInheritance;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.ResolutionResult;
 import dev.maire.nourished.core.nutrition.RuntimeCascadeStage;
@@ -101,14 +102,34 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                 averaged.put(e.getKey(), e.getValue() / confirmed);
             }
 
-            StageMath.NormalizationOutcome outcome = StageMath.normalizeWithRejections(averaged, ctx.validKeys());
-            if (outcome.normalized().isEmpty()) return null;
+            Map<String, Float> filtered = new LinkedHashMap<>();
+            for (Map.Entry<String, Float> e : averaged.entrySet()) {
+                if (ctx.validKeys().contains(e.getKey()) && e.getValue() > 0f) {
+                    filtered.put(e.getKey(), e.getValue());
+                }
+            }
+            if (filtered.isEmpty()) return null;
+
+            Map<String, Float> qualifying = MultiNutrientInheritance.filterQualifyingNutrients(
+                    filtered, MultiNutrientInheritance.threshold());
+            if (qualifying.isEmpty()) return null;
+
+            Map<String, String> rejectedSignals = new LinkedHashMap<>();
+            for (String key : ctx.validKeys()) {
+                if (!qualifying.containsKey(key)) {
+                    if (filtered.containsKey(key)) {
+                        rejectedSignals.put(key, ResolutionResult.REJECT_LOW_CONFIDENCE);
+                    } else {
+                        rejectedSignals.put(key, ResolutionResult.REJECT_NO_MATCHING_KEYWORDS);
+                    }
+                }
+            }
 
             float totalScore = 0f;
-            for (float v : averaged.values()) totalScore += v;
+            for (float v : filtered.values()) totalScore += v;
             return new ResolutionResult(
-                    outcome.normalized(), Map.copyOf(averaged),
-                    List.of(), Map.of(), outcome.rejectedSignals(),
+                    qualifying, Map.copyOf(averaged),
+                    List.of(), Map.of(), rejectedSignals,
                     false, totalScore, RuntimeCascadeStage.RECIPE_INHERITANCE,
                     "recipe ingredient inheritance");
 

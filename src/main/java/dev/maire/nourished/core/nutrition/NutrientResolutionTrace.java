@@ -84,7 +84,7 @@ public record NutrientResolutionTrace(
 
         sb.append("--- Runtime Resolver ---\n");
         if (cascadeStage != null) {
-            sb.append("Cascade stage: ").append(cascadeStage.name()).append("\n");
+            sb.append("Cascade stage: ").append(cascadeStage.displayName()).append("\n");
         }
         sb.append("Nutrients:\n");
         appendMapIndented(sb, resolverNutrients);

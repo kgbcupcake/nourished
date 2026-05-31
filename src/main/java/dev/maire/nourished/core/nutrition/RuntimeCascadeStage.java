@@ -8,7 +8,20 @@ public enum RuntimeCascadeStage {
     COMMUNITY_TAG,
     KEYWORD_SUFFIX,
     COMPOSITE,
+    COMPOSITE_RECIPE,
+    KEYWORD_SUFFIX_RECIPE,
     RECIPE_INHERITANCE,
     NAMESPACE_PEER,
-    HARD_FALLBACK
+    HARD_FALLBACK;
+
+    /**
+     * Human-readable label for debug output (e.g. {@code COMPOSITE+RECIPE}).
+     */
+    public String displayName() {
+        return switch (this) {
+            case COMPOSITE_RECIPE -> "COMPOSITE+RECIPE";
+            case KEYWORD_SUFFIX_RECIPE -> "KEYWORD_SUFFIX+RECIPE";
+            default -> name();
+        };
+    }
 }

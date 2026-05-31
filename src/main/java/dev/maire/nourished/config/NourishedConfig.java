@@ -116,6 +116,7 @@ public final class NourishedConfig {
     private final ModConfigSpec.BooleanValue scannerEnableRecipeInheritance;
     private final ModConfigSpec.DoubleValue scannerConfidenceSpreadThreshold;
     private final ModConfigSpec.DoubleValue compositeRatioThreshold;
+    private final ModConfigSpec.DoubleValue multiNutrientInheritanceThreshold;
 
     private final Map<String, ModConfigSpec.DoubleValue> nutrientDecayRateOverrides;
     private final Map<String, ModConfigSpec.DoubleValue> nutrientCriticalThresholdOverrides;
@@ -287,6 +288,9 @@ public final class NourishedConfig {
         compositeRatioThreshold = builder
                 .comment("Minimum ratio (second / top) to trigger composite multi-nutrient output instead of single dominant")
                 .defineInRange("compositeRatioThreshold", ConfigDefaultsLoader.getDouble(defaults, "compositeRatioThreshold", 0.40d), 0.0d, 1.0d);
+        multiNutrientInheritanceThreshold = builder
+                .comment("Minimum fractional contribution (score / total) for a nutrient to qualify in recipe inheritance output")
+                .defineInRange("multiNutrientInheritanceThreshold", ConfigDefaultsLoader.getDouble(defaults, "multiNutrientInheritanceThreshold", 0.10d), 0.0d, 1.0d);
         builder.pop();
 
         nutrientDecayRateOverrides = new LinkedHashMap<>();
@@ -700,6 +704,14 @@ public final class NourishedConfig {
 
     public void setCompositeRatioThreshold(double value) {
         compositeRatioThreshold.set(value);
+    }
+
+    public float multiNutrientInheritanceThreshold() {
+        return multiNutrientInheritanceThreshold.get().floatValue();
+    }
+
+    public void setMultiNutrientInheritanceThreshold(double value) {
+        multiNutrientInheritanceThreshold.set(value);
     }
 
     private ModConfigSpec.BooleanValue defineModuleToggle(

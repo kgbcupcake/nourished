@@ -4449,7 +4449,164 @@
     {
       "id": "prime_cuts:turtle_skewers_3",
       "required": false
+    },
+    {
+      "id": "createfood:biscuit",
+      "required": false
+    },
+    {
+      "id": "createfood:mushroom_taco",
+      "required": false
+    },
+    {
+      "id": "createfood:nacho_bowl_taco_sauce",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:ambrosia_ring",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:fluffy_floss",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:marshbellow",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:maze_smore",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:monster_mousse",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:poi",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:poi_cup",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:rotpop",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:sculk_catblueberry",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:sculk_dogapple",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:trial_freakshake",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:wardenzola",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:roasted_corn",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:vegetable_noodles",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:elote",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:roasted_marshmallow_stick",
+      "required": false
+    },
+    {
+      "id": "iceandfire:cannoli",
+      "required": false
+    },
+    {
+      "id": "iceandfire:pixie_dust_milky_tea",
+      "required": false
+    },
+    {
+      "id": "lendersdelight:void_custard",
+      "required": false
+    },
+    {
+      "id": "occultism:cursed_honey",
+      "required": false
+    },
+    {
+      "id": "occultism:sweet_honey_heart",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:batteritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:carameldonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:carrotdonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chorusdonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:noodlesoupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:plaindonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:powdereddonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:pumpkindonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sprinklesdonutitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:beancornmealitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:biscuititem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:broccolimacitem",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:aurora_pie_slice",
+      "required": false
+    },
+    {
+      "id": "twilightdelight:chocolate_113",
+      "required": false
+    },
+    {
+      "id": "undergardendelight:glitterwrap",
+      "required": false
     }
+
 
   ]
 }
