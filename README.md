@@ -1,5 +1,3 @@
-# 🌿 Nourished — Food variety finally matters
-
 ![Main Menu](Assets/nourished_banner.png)
 
 
