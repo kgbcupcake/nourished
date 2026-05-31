@@ -73,7 +73,7 @@ public final class NourishedClientConfig {
         );
         hudShowAboveThreshold = builder.defineInRange(
                 "hudShowAboveThreshold",
-                ConfigDefaultsLoader.getDouble(defaults, "hudShowAboveThreshold", 0.0d),
+                ConfigDefaultsLoader.getDouble(defaults, "hudShowAboveThreshold", 1.0d),
                 0.0d,
                 1.0d
         );
@@ -123,6 +123,7 @@ public final class NourishedClientConfig {
     public static void onModConfigLoading(ModConfigEvent.Loading event) {
         bindIfOurs(event.getConfig());
         migrateLegacyClientToml();
+        migrateHudShowAboveThresholdOffValue();
     }
 
     public static void onModConfigReloading(ModConfigEvent.Reloading event) {
@@ -148,6 +149,14 @@ public final class NourishedClientConfig {
                     changed = true;
                     continue;
                 }
+                if (trimmed.startsWith("hudShowAboveThreshold")) {
+                    String value = trimmed.substring(trimmed.indexOf('=') + 1).trim();
+                    if (value.equals("0.0") || value.equals("0.0d") || value.equals("0.0D")) {
+                        kept.add(line.replaceFirst("=\\s*0\\.0+[dD]?", "= 1.0"));
+                        changed = true;
+                        continue;
+                    }
+                }
                 kept.add(line);
             }
             if (changed) {
@@ -156,6 +165,18 @@ public final class NourishedClientConfig {
             }
         } catch (IOException ex) {
             Nourished.LOGGER.warn("[Nourished] Failed to migrate legacy client config at {}", path, ex);
+        }
+    }
+
+    /** Old Show-off used 0.0; new off uses 1.0 (aligned with Hide). */
+    private static void migrateHudShowAboveThresholdOffValue() {
+        if (INSTANCE == null) {
+            return;
+        }
+        if (INSTANCE.hudShowAboveThreshold.get() == 0.0d) {
+            INSTANCE.setHudShowAboveThreshold(1.0d);
+            saveNow();
+            Nourished.LOGGER.info("[Nourished] Migrated hudShowAboveThreshold 0.0 -> 1.0");
         }
     }
 
