@@ -12,15 +12,19 @@ Regeneration I — passively while balanced
 
 When all five food groups are above 75%, you get:
 
-| Group         | Neglect Penalty  |
-| ------------- | ---------------- |
-| 🌾 Grains     | Weakness I       |
-| 🥦 Vegetables | Slowness I       |
-| 🥩 Proteins   | Mining Fatigue I |
-| 🍎 Fruits     | Unluck I         |
-| 🥛 Dairy      | —                |
+| Group | Neglect Penalty | Balance Buff |
+|---|---|---|
+| 🌾 Grains | Weakness I | ✓ |
+| 🥦 Vegetables | Slowness I | ✓ |
+| 🥩 Proteins | Mining Fatigue I | ✓ |
+| 🍎 Fruits | Unluck I | ✓ |
+| 🍬 Sugars | — | — |
+| 🥛 Dairy | — | ✓ |
 
 ---
+
+Sugars and Dairy have no penalty effect by default — these groups are tracked and affect your balance score but do not apply a debuff when depleted. Dairy still counts toward the balance buff. This is configurable.
+
 
 ## 🍽️ Eating at full hunger
 
