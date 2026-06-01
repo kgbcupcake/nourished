@@ -36,8 +36,6 @@ All effects are fully configurable and can be disabled per-module.
 
 Diminishing returns apply - eating the same food repeatedly gives less credit each time, encouraging real variety.
 
-Dairy has no penalty effect by default — this group is tracked and affects your balance score but does not apply a debuff when depleted. This is configurable.
-
 ---
 
 ## The HUD
