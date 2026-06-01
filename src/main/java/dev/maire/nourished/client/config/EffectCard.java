@@ -216,6 +216,7 @@ class EffectCard {
     void render(GuiGraphics g, int x, int y, int w, int mouseX, int mouseY, float delta, boolean editable) {
         Minecraft mc = Minecraft.getInstance();
         if (!expanded) {
+            hideInnerControls();
             expandToggle.setX(x);
             expandToggle.setY(y);
             String summary = "▶ " + summaryLine();
@@ -291,6 +292,8 @@ class EffectCard {
             thresholdMaxSlider.setWidth(w);
             thresholdMaxSlider.active = editable;
             thresholdMaxSlider.render(g, mouseX, mouseY, delta);
+        } else {
+            thresholdMaxSlider.setY(-2000);
         }
 
         lineY += EffectBuilderWidget.BTN_H + 16;
@@ -415,6 +418,11 @@ class EffectCard {
 
     void hideButtons() {
         expandToggle.setY(-2000);
+        hideInnerControls();
+    }
+
+    /** Removes stale hitboxes when collapsed or when the parent row scrolls off-screen. */
+    private void hideInnerControls() {
         thresholdMaxSlider.setY(-2000);
         ruleIdEdit.setY(-2000);
         effectEdit.setY(-2000);
