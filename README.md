@@ -1,8 +1,6 @@
 ![Main Menu](Assets/nourished_banner.png)
 
-
 I got sick of Minecraft's food system. There are other nutrition mods out there, but none of them did what I wanted or were updated for modern Minecraft, so I decided to build my own.
-
 
 ---
 
@@ -26,7 +24,6 @@ When all five food groups are above 75%, you get:
 ---
 
 Sugars and Dairy have no penalty effect by default — these groups are tracked and affect your balance score but do not apply a debuff when depleted. Dairy still counts toward the balance buff. This is configurable.
-
 
 
 ## 🍽️ Eating at full hunger
