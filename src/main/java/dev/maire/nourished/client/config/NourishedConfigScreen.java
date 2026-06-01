@@ -756,6 +756,15 @@ public final class NourishedConfigScreen {
                         .setSaveConsumer(client::setHudShowZeroBars)
                         .build()
         );
+        category.addEntry(
+                eb.startBooleanToggle(
+                                Component.translatable("nourished.config.hud.reveal_on_gain"),
+                                client.hudRevealOnNutrientGain())
+                        .setDefaultValue(true)
+                        .setSaveConsumer(client::setHudRevealOnNutrientGain)
+                        .setTooltip(Component.translatable("nourished.config.hud.reveal_on_gain.desc"))
+                        .build()
+        );
         IntegerSliderEntry hideAboveEntry = (IntegerSliderEntry) buildDoubleSlider(
                 eb,
                 Component.translatable("config.nourished.hudHideAboveThreshold"),

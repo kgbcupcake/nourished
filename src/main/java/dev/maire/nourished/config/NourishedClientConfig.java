@@ -41,6 +41,7 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.DoubleValue hudHideAboveThreshold;
     private final ModConfigSpec.DoubleValue hudShowAboveThreshold;
     private final ModConfigSpec.BooleanValue hudShowZeroBars;
+    private final ModConfigSpec.BooleanValue hudRevealOnNutrientGain;
     private final ModConfigSpec.DoubleValue hudBackgroundOpacity;
     private final ModConfigSpec.BooleanValue hudVerticalLayout;
     private final ModConfigSpec.ConfigValue<List<? extends String>> dietBarOrder;
@@ -80,6 +81,10 @@ public final class NourishedClientConfig {
         hudShowZeroBars = builder.define(
                 "hudShowZeroBars",
                 ConfigDefaultsLoader.getBoolean(defaults, "hudShowZeroBars", false)
+        );
+        hudRevealOnNutrientGain = builder.define(
+                "hudRevealOnNutrientGain",
+                ConfigDefaultsLoader.getBoolean(defaults, "hudRevealOnNutrientGain", true)
         );
         hudBackgroundOpacity = builder.defineInRange(
                 "hudBackgroundOpacity",
@@ -328,6 +333,14 @@ public final class NourishedClientConfig {
 
     public void setHudShowZeroBars(boolean value) {
         hudShowZeroBars.set(value);
+    }
+
+    public boolean hudRevealOnNutrientGain() {
+        return hudRevealOnNutrientGain.get();
+    }
+
+    public void setHudRevealOnNutrientGain(boolean value) {
+        hudRevealOnNutrientGain.set(value);
     }
 
     public double hudBackgroundOpacity() {

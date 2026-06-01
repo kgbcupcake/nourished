@@ -3,6 +3,7 @@ package dev.maire.nourished.client.hud;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Pure visibility rules for HUD nutrient bars. Extracted for unit testing without config wiring.
@@ -23,7 +24,8 @@ public final class HudVisibilityRules {
             List<String> keys,
             boolean showZero,
             float hideAbove,
-            float showAbove
+            float showAbove,
+            Set<String> flashingKeys
     ) {
         hideAbove = Math.max(0f, Math.min(1f, hideAbove));
         showAbove = Math.max(0f, Math.min(1f, showAbove));
@@ -36,6 +38,11 @@ public final class HudVisibilityRules {
 
         List<String> result = new ArrayList<>(keys.size());
         for (String key : keys) {
+            if (flashingKeys.contains(key)) {
+                result.add(key);
+                continue;
+            }
+
             float value = nutrients.getOrDefault(key, 0f);
 
             if (value <= ZERO_EPSILON) {
