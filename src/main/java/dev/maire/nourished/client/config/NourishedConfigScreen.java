@@ -757,17 +757,25 @@ public final class NourishedConfigScreen {
                         .build()
         );
         category.addEntry(
-                buildDoubleSlider(
-                        eb,
-                        Component.translatable("config.nourished.hudHideAboveThreshold"),
-                        client.hudHideAboveThreshold(),
-                        0.0d,
-                        1.0d,
-                        1.0d,
-                        client::setHudHideAboveThreshold,
-                        Component.translatable("config.nourished.hudHideAboveThreshold.desc")
-                )
+                eb.startBooleanToggle(
+                                Component.translatable("nourished.config.hud.reveal_on_gain"),
+                                client.hudRevealOnNutrientGain())
+                        .setDefaultValue(true)
+                        .setSaveConsumer(client::setHudRevealOnNutrientGain)
+                        .setTooltip(Component.translatable("nourished.config.hud.reveal_on_gain.desc"))
+                        .build()
         );
+        IntegerSliderEntry hideAboveEntry = (IntegerSliderEntry) buildDoubleSlider(
+                eb,
+                Component.translatable("config.nourished.hudHideAboveThreshold"),
+                client.hudHideAboveThreshold(),
+                0.0d,
+                1.0d,
+                1.0d,
+                client::setHudHideAboveThreshold,
+                Component.translatable("config.nourished.hudHideAboveThreshold.desc")
+        );
+        category.addEntry(hideAboveEntry);
         category.addEntry(
                 buildDoubleSlider(
                         eb,
@@ -775,8 +783,9 @@ public final class NourishedConfigScreen {
                         client.hudShowAboveThreshold(),
                         0.0d,
                         1.0d,
-                        0.0d,
+                        1.0d,
                         client::setHudShowAboveThreshold,
+                        () -> hideAboveEntry.getValue() < 1000,
                         Component.translatable("config.nourished.hudShowAboveThreshold.desc")
                 )
         );
@@ -1088,11 +1097,40 @@ public final class NourishedConfigScreen {
             DoubleConsumer saveConsumer,
             Component... tooltip
     ) {
+        return buildDoubleSlider(eb, label, value, min, max, defaultValue, saveConsumer, null, tooltip);
+    }
+
+    private static AbstractConfigListEntry buildDoubleSlider(
+            ConfigEntryBuilder eb,
+            Component label,
+            double value,
+            double min,
+            double max,
+            double defaultValue,
+            DoubleConsumer saveConsumer,
+            Supplier<Boolean> enabledSupplier,
+            Component... tooltip
+    ) {
         int scale = 1000;
         int minScaled = (int) Math.round(min * scale);
         int maxScaled = (int) Math.round(max * scale);
         int valueScaled = (int) Math.round(Math.max(min, Math.min(max, value)) * scale);
         int defaultScaled = (int) Math.round(Math.max(min, Math.min(max, defaultValue)) * scale);
+        if (enabledSupplier != null) {
+            return new DependentIntegerSliderEntry(
+                    label,
+                    valueScaled,
+                    minScaled,
+                    maxScaled,
+                    Component.empty(),
+                    () -> defaultScaled,
+                    v -> saveConsumer.accept(v / (double) scale),
+                    () -> tooltip.length > 0 ? Optional.of(tooltip) : Optional.empty(),
+                    false,
+                    v -> Component.literal(String.format(Locale.ROOT, "%.3f", v / (double) scale)),
+                    enabledSupplier
+            );
+        }
         var slider = eb.startIntSlider(label, valueScaled, minScaled, maxScaled)
                 .setDefaultValue(defaultScaled)
                 .setTextGetter(v -> Component.literal(String.format(Locale.ROOT, "%.3f", v / (double) scale)))

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,7 +23,7 @@ class HudVisibilityRulesTest {
                 "fruits", 0.9f
         );
 
-        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 1.0f, 0.0f);
+        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 1.0f, 1.0f, Set.of());
 
         assertEquals(List.of("proteins", "fruits"), visible);
     }
@@ -36,7 +37,7 @@ class HudVisibilityRulesTest {
                 "fruits", 0.90f
         );
 
-        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.8f, 0.0f);
+        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.8f, 1.0f, Set.of());
 
         assertEquals(List.of("proteins"), visible);
     }
@@ -50,7 +51,7 @@ class HudVisibilityRulesTest {
                 "fruits", 0.50f
         );
 
-        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 1.0f, 0.674f);
+        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 1.0f, 0.674f, Set.of());
 
         assertEquals(KEYS, visible);
     }
@@ -64,7 +65,7 @@ class HudVisibilityRulesTest {
                 "fruits", 0.90f
         );
 
-        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.8f, 0.674f);
+        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.8f, 0.674f, Set.of());
 
         assertEquals(KEYS, visible);
     }
@@ -78,7 +79,7 @@ class HudVisibilityRulesTest {
                 "fruits", 0.90f
         );
 
-        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.8f, 0.9f);
+        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.8f, 0.9f, Set.of());
 
         assertEquals(List.of("proteins", "fruits"), visible);
     }
@@ -92,10 +93,10 @@ class HudVisibilityRulesTest {
                 "fruits", 0.0f
         );
 
-        List<String> hiddenZeros = HudVisibilityRules.filter(nutrients, KEYS, false, 1.0f, 0.674f);
+        List<String> hiddenZeros = HudVisibilityRules.filter(nutrients, KEYS, false, 1.0f, 0.674f, Set.of());
         assertEquals(List.of("grains"), hiddenZeros);
 
-        List<String> shownZeros = HudVisibilityRules.filter(nutrients, KEYS, true, 1.0f, 0.674f);
+        List<String> shownZeros = HudVisibilityRules.filter(nutrients, KEYS, true, 1.0f, 0.674f, Set.of());
         assertEquals(KEYS, shownZeros);
     }
 
@@ -108,7 +109,7 @@ class HudVisibilityRulesTest {
                 "fruits", 0.90f
         );
 
-        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, true, 1.0f, 0.0f);
+        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, true, 1.0f, 1.0f, Set.of());
 
         assertEquals(KEYS, visible);
     }
@@ -122,8 +123,78 @@ class HudVisibilityRulesTest {
                 "fruits", 0.50f
         );
 
-        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.344f, 0.0f);
+        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.344f, 1.0f, Set.of());
 
         assertTrue(visible.isEmpty());
+    }
+
+    @Test
+    @DisplayName("showAbove=0.0 re-enables all hidden non-zero bars")
+    void showAboveAtZeroReenablesAllHidden() {
+        Map<String, Float> nutrients = Map.of(
+                "proteins", 0.50f,
+                "grains", 0.85f,
+                "fruits", 0.90f
+        );
+
+        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.8f, 0.0f, Set.of());
+
+        assertEquals(KEYS, visible);
+    }
+
+    @Test
+    @DisplayName("flashing key bypasses hideAbove threshold")
+    void flashingKeyBypassesHideAbove() {
+        Map<String, Float> nutrients = Map.of(
+                "proteins", 0.50f,
+                "grains", 0.85f,
+                "fruits", 0.90f
+        );
+
+        List<String> visible = HudVisibilityRules.filter(
+                nutrients,
+                KEYS,
+                false,
+                0.8f,
+                1.0f,
+                Set.of("grains", "fruits")
+        );
+
+        assertEquals(KEYS, visible);
+    }
+
+    @Test
+    @DisplayName("flashing zero bar appears even when showZero is false")
+    void flashingZeroBarAppearsWithoutShowZero() {
+        Map<String, Float> nutrients = Map.of(
+                "proteins", 0.0f,
+                "grains", 0.50f,
+                "fruits", 0.0f
+        );
+
+        List<String> visible = HudVisibilityRules.filter(
+                nutrients,
+                KEYS,
+                false,
+                1.0f,
+                1.0f,
+                Set.of("fruits")
+        );
+
+        assertEquals(List.of("grains", "fruits"), visible);
+    }
+
+    @Test
+    @DisplayName("empty flashingKeys preserves existing hideAbove behavior")
+    void emptyFlashingKeysPreservesHideAbove() {
+        Map<String, Float> nutrients = Map.of(
+                "proteins", 0.50f,
+                "grains", 0.85f,
+                "fruits", 0.90f
+        );
+
+        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.8f, 1.0f, Set.of());
+
+        assertEquals(List.of("proteins"), visible);
     }
 }

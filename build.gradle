@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'net.neoforged.moddev' version '2.0.141'
 }
-version = '0.2.3-beta-'
+version = '0.2.4-beta-'
 group = 'dev.maire.nourished'
 base {
     archivesName = 'nourished'
