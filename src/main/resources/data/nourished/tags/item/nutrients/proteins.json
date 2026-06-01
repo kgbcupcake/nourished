@@ -4653,6 +4653,38 @@
     {
       "id": "pamhc2foodextended:rawtofishitem",
       "required": false
+    },
+    {
+      "id": "createfood:pork_meatball",
+      "required": false
+    },
+    {
+      "id": "createfood:small_pork_meatballs",
+      "required": false
+    },
+    {
+      "id": "createfood:sausage_patty",
+      "required": false
+    },
+    {
+      "id": "createfood:egg_yolk",
+      "required": false
+    },
+    {
+      "id": "twilightforest:raw_venison",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:eggs",
+      "required": false
+    },
+    {
+      "id": "minersdelight:squid",
+      "required": false
+    },
+    {
+      "id": "arsdelight:wilden_meat",
+      "required": false
     }
 
   ]

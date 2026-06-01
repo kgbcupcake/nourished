@@ -4059,6 +4059,70 @@
     {
       "id": "createfood:chocolate_sweet_roll_base",
       "required": false
+    },
+    {
+      "id": "createfood:scone",
+      "required": false
+    },
+    {
+      "id": "create:dough",
+      "required": false
+    },
+    {
+      "id": "moredelight:bread_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:bread_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_tomato_sauce",
+      "required": false
+    },
+    {
+      "id": "createfood:sugar_dough",
+      "required": false
+    },
+    {
+      "id": "createfood:chicken_bun",
+      "required": false
+    },
+    {
+      "id": "createfood:mini_waffle",
+      "required": false
+    },
+    {
+      "id": "createfood:graham_cracker",
+      "required": false
+    },
+    {
+      "id": "createfood:waffle_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:ice_cream_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:muffin_batter_bucket",
+      "required": false
+    },
+    {
+      "id": "createfood:sliced_potato",
+      "required": false
+    },
+    {
+      "id": "createfood:baked_potato_butter",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_beetroot",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_bacon",
+      "required": false
     }
 
   ]

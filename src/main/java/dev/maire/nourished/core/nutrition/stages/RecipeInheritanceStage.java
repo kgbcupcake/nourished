@@ -67,7 +67,27 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             "pamhc2foodextended:vanillaitem",
             "pamhc2foodcore:stockitem",
             "pamhc2foodcore:vinegaritem",
-            "croptopia:soy_sauce"
+            "croptopia:soy_sauce",
+            "createfood:taco_sauce_bottle",
+            "createfood:chocolate_chips",
+            "createfood:white_chocolate_chips",
+            "createfood:dark_chocolate_chips",
+            "createfood:butterscotch",
+            "createfood:caramel_chips",
+            "createfood:toffee_chips",
+            "createfood:cocoa_powder",
+            "createfood:powdered_sugar",
+            "createfood:shredded_potato",
+            "createfood:chocolate_donut_base",
+            "rusticdelight:cooking_oil",
+            "herbsandharvest:spice_jar_item",
+            "herbsandharvest:salt",
+            "alltheores:salt",
+            "pamhc2trees:maplesyrupitem",
+            "expandeddelight:peanut_butter",
+            "croptopia:strawberry_seed",
+            "croptopia:paprika",
+            "brewery:hops"
     );
 
     private final BoundedLRU<ResourceLocation, List<ResourceLocation>> recipeCache;
@@ -137,7 +157,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                         itemId, confirmed, totalContribs);
             }
 
-            if (confirmed < 2) {
+            if (confirmed < 2 && !(confirmed == 1 && ingredients.size() == 1)) {
                 if (Nourished.LOGGER.isDebugEnabled()) {
                     Nourished.LOGGER.info("[RecipeInheritance] {} — FAILED: only {} confirmed ingredient(s), need 2",
                             itemId, confirmed);
