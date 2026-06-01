@@ -2,6 +2,7 @@ package dev.maire.nourished.api;
 
 import dev.maire.nourished.core.Nourished;
 
+@ApiStatus.Internal
 public final class NourishedAPIState {
 
     public enum Phase {
@@ -26,6 +27,7 @@ public final class NourishedAPIState {
      * Ends the mod-init registration window. Safe to call when already {@link Phase#CLOSED}
      * (for example after a nested {@link DatapackReloadScope}).
      */
+    @ApiStatus.Internal
     public static void close() {
         if (currentPhase == Phase.CLOSED) {
             return;
@@ -34,6 +36,7 @@ public final class NourishedAPIState {
         Nourished.LOGGER.info("[Nourished] Registration phase: CLOSED");
     }
 
+    @ApiStatus.Internal
     public static DatapackReloadScope openForDatapackReload() {
         currentPhase = Phase.DATAPACK_RELOAD;
         Nourished.LOGGER.info("[Nourished] Registration phase: DATAPACK_RELOAD");
