@@ -2111,9 +2111,107 @@
     {
       "id": "tombstone:lollipop",
       "required": false
+    },
+    {
+      "id": "pamhc2crops:onionitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:cabbageitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:tomatoitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:garlicitem",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:tomato_sauce",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:bellpepperitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:gingeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:chilipepperitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:lettuceitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:cucumberitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:broccoliitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:zucchiniitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:celeryitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:artichokeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:eggplantitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:parsnipitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:spinachitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:radishitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:leekitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:turnipitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:kaleitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:caulifloweritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:asparagusitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:sweetpotatoitem",
+      "required": false
+    },
+    {
+      "id": "minecraft:dried_kelp",
+      "required": false
     }
-
-
 
   ]
 }

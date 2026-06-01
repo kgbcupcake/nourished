@@ -5086,6 +5086,14 @@
     {
       "id": "crabbersdelight:coconut_milk",
       "required": false
+    },
+    {
+      "id": "fruitsdelight:hamimelon_slice",
+      "required": false
+    },
+    {
+      "id": "pamhc2trees:dragonfruititem",
+      "required": false
     }
 
   ]

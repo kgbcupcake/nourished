@@ -17,11 +17,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.item.crafting.SmeltingRecipe;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -46,6 +44,52 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             ResourceLocation.withDefaultNamespace("barrier")
     );
 
+    private static final String[] PAMHC2_RECIPE_TOOL_PATH_SUFFIXES = {
+            "bakewareitem", "cuttingboarditem", "potitem", "saucepanitem", "mixingbowlitem",
+            "skilletitem", "juiceritem", "grinderitem", "rolleritem"
+    };
+
+    private static final Set<String> CROPTOPIA_RECIPE_TOOL_PATHS = Set.of(
+            "frying_pan", "cooking_pot", "food_press", "knife"
+    );
+
+    private static final Set<String> NON_FOOD_RECIPE_INGREDIENT_IDS = Set.of(
+            "butchery:salt",
+            "farm_and_charm:yeast",
+            "croptopia:water_bottle",
+            "croptopia:tomato_seed",
+            "croptopia:onion_seed",
+            "croptopia:olive_oil",
+            "pamhc2foodcore:cookingoilitem",
+            "pamhc2foodextended:saltandpepperitem",
+            "pamhc2foodextended:sesameoilitem",
+            "pamhc2foodextended:blackpepperitem",
+            "pamhc2foodextended:vanillaitem",
+            "pamhc2foodcore:stockitem",
+            "pamhc2foodcore:vinegaritem",
+            "croptopia:soy_sauce",
+            "createfood:taco_sauce_bottle",
+            "createfood:chocolate_chips",
+            "createfood:white_chocolate_chips",
+            "createfood:dark_chocolate_chips",
+            "createfood:butterscotch",
+            "createfood:caramel_chips",
+            "createfood:toffee_chips",
+            "createfood:cocoa_powder",
+            "createfood:powdered_sugar",
+            "createfood:shredded_potato",
+            "createfood:chocolate_donut_base",
+            "rusticdelight:cooking_oil",
+            "herbsandharvest:spice_jar_item",
+            "herbsandharvest:salt",
+            "alltheores:salt",
+            "pamhc2trees:maplesyrupitem",
+            "expandeddelight:peanut_butter",
+            "croptopia:strawberry_seed",
+            "croptopia:paprika",
+            "brewery:hops"
+    );
+
     private final BoundedLRU<ResourceLocation, List<ResourceLocation>> recipeCache;
 
     public RecipeInheritanceStage(BoundedLRU<ResourceLocation, List<ResourceLocation>> recipeCache) {
@@ -59,6 +103,10 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
         if (recipeManager == null) return null;
 
         long start = System.nanoTime();
+
+        if (Nourished.LOGGER.isDebugEnabled()) {
+            Nourished.LOGGER.info("[RecipeInheritance] Resolving: {}", itemId);
+        }
 
         try {
             List<ResourceLocation> ingredients = recipeCache.get(itemId);
@@ -81,12 +129,21 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                     return null;
                 }
 
-                if (shouldSkipRecipeIngredient(ingredientId)) continue;
+                if (shouldSkipRecipeIngredient(ingredientId)) {
+                    if (Nourished.LOGGER.isDebugEnabled()) {
+                        Nourished.LOGGER.info("[RecipeInheritance]   ingredient {} → SKIPPED", ingredientId);
+                    }
+                    continue;
+                }
 
                 Item ingredientItem = BuiltInRegistries.ITEM.get(ingredientId);
                 if (ingredientItem == null) continue;
 
                 Map<String, Float> tagMatches = collectConfirmedNutrientTags(ingredientItem, ingredientId);
+                if (Nourished.LOGGER.isDebugEnabled()) {
+                    Nourished.LOGGER.info("[RecipeInheritance]   ingredient {} → tags: {} (confirmed: {})",
+                            ingredientId, tagMatches, confirmed);
+                }
                 if (!tagMatches.isEmpty()) {
                     for (Map.Entry<String, Float> e : tagMatches.entrySet()) {
                         totalContribs.merge(e.getKey(), e.getValue(), Float::sum);
@@ -95,7 +152,18 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                 }
             }
 
-            if (confirmed < 2) return null;
+            if (Nourished.LOGGER.isDebugEnabled()) {
+                Nourished.LOGGER.info("[RecipeInheritance] {} — confirmed={}, contributions={}",
+                        itemId, confirmed, totalContribs);
+            }
+
+            if (confirmed < 2 && !(confirmed == 1 && ingredients.size() == 1)) {
+                if (Nourished.LOGGER.isDebugEnabled()) {
+                    Nourished.LOGGER.info("[RecipeInheritance] {} — FAILED: only {} confirmed ingredient(s), need 2",
+                            itemId, confirmed);
+                }
+                return null;
+            }
 
             Map<String, Float> averaged = new HashMap<>();
             for (Map.Entry<String, Float> e : totalContribs.entrySet()) {
@@ -112,7 +180,17 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
 
             Map<String, Float> qualifying = MultiNutrientInheritance.filterQualifyingNutrients(
                     filtered, MultiNutrientInheritance.threshold());
-            if (qualifying.isEmpty()) return null;
+            if (qualifying.isEmpty()) {
+                if (Nourished.LOGGER.isDebugEnabled()) {
+                    Nourished.LOGGER.info("[RecipeInheritance] {} — FAILED: all nutrients filtered below threshold",
+                            itemId);
+                }
+                return null;
+            }
+
+            if (Nourished.LOGGER.isDebugEnabled()) {
+                Nourished.LOGGER.info("[RecipeInheritance] {} — SUCCESS: {}", itemId, qualifying);
+            }
 
             Map<String, String> rejectedSignals = new LinkedHashMap<>();
             for (String key : ctx.validKeys()) {
@@ -156,11 +234,15 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             }
 
             var recipe = holder.value();
-            if (!(recipe instanceof CraftingRecipe) && !(recipe instanceof SmeltingRecipe)) continue;
 
             try {
                 ItemStack recipeResult = recipe.getResultItem(null);
                 if (recipeResult == null || !ItemStack.isSameItem(recipeResult, targetStack)) continue;
+
+                if (itemId.toString().contains("garlicmashedpotatoes")) {
+                    Nourished.LOGGER.info("[RecipeInheritance] RECIPE FOUND for {} — type: {}, class: {}",
+                            itemId, holder.id(), recipe.getClass().getName());
+                }
 
                 List<Ingredient> recipeIngredients = recipe.getIngredients();
                 Set<ResourceLocation> uniqueIds = new HashSet<>();
@@ -175,8 +257,28 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                     }
                 }
 
-                if (uniqueIds.size() > 6) continue;
-                if (!uniqueIds.isEmpty()) {
+                if (itemId.toString().contains("garlicmashedpotatoes")) {
+                    Nourished.LOGGER.info("[RecipeInheritance] {} ingredients collected: {}",
+                            itemId, uniqueIds);
+                }
+
+                if (uniqueIds.size() > 6) {
+                    if (Nourished.LOGGER.isDebugEnabled()) {
+                        Nourished.LOGGER.info("[RecipeInheritance] {} — skipped, too many unique ingredients ({})",
+                                itemId, uniqueIds.size());
+                    }
+                    continue;
+                }
+                if (uniqueIds.isEmpty()) {
+                    if (Nourished.LOGGER.isDebugEnabled()) {
+                        Nourished.LOGGER.info("[RecipeInheritance] {} — recipe found but no usable ingredients",
+                                itemId);
+                    }
+                } else {
+                    if (Nourished.LOGGER.isDebugEnabled()) {
+                        Nourished.LOGGER.info("[RecipeInheritance] {} — found recipe with ingredients: {}",
+                                itemId, uniqueIds);
+                    }
                     return new ArrayList<>(uniqueIds);
                 }
             } catch (Exception ignored) {
@@ -184,6 +286,9 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             }
         }
 
+        if (Nourished.LOGGER.isDebugEnabled()) {
+            Nourished.LOGGER.info("[RecipeInheritance] {} — no matching recipe found", itemId);
+        }
         return List.of();
     }
 
@@ -191,6 +296,18 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
         if (RECIPE_SKIP.contains(id)) return true;
         String path = id.getPath();
         if (path.contains("debug") || path.contains("test") || path.contains("internal")) return true;
+        for (String suffix : PAMHC2_RECIPE_TOOL_PATH_SUFFIXES) {
+            if (path.endsWith(suffix)) return true;
+        }
+        if ("croptopia".equals(id.getNamespace()) && CROPTOPIA_RECIPE_TOOL_PATHS.contains(path)) {
+            return true;
+        }
+        if (NON_FOOD_RECIPE_INGREDIENT_IDS.contains(id.toString())) {
+            return true;
+        }
+        if ("theurgy".equals(id.getNamespace())) {
+            return true;
+        }
         if ("minecraft".equals(id.getNamespace())) {
             Item item = BuiltInRegistries.ITEM.get(id);
             if (item != null) {

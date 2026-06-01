@@ -37,3 +37,4 @@ run/
 
 
 *.launch
+log4j2.xml

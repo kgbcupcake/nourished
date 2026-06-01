@@ -273,6 +273,9 @@ public class FoodNutritionRegistry {
         if (level != null && !level.isClientSide() && level.getServer() != null) {
             rm = level.getServer().getRecipeManager();
         }
+        if (rm == null) {
+            rm = serverRecipeManager;
+        }
         return resolveNutrientBars(stack, warnIfUnmatched, rm);
     }
 

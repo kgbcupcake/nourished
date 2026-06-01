@@ -3967,6 +3967,162 @@
     {
       "id": "refurbished_furniture:cheese_sandwich",
       "required": false
+    },
+    {
+      "id": "prime_cuts:dough",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:toastitem",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cooked_rice",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:pastaitem",
+      "required": false
+    },
+    {
+      "id": "createfood:pita_bread",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:burger_bun",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:doughitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:flouritem",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:rice",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:cornitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:oatsitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:barleyitem",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:raw_pasta",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:wheat_dough",
+      "required": false
+    },
+    {
+      "id": "bountifulfares:flour",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:riceitem",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_graham_cracker",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_pastry_base",
+      "required": false
+    },
+    {
+      "id": "createfood:sweet_roll_base",
+      "required": false
+    },
+    {
+      "id": "createfood:taco_shell",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_sweet_roll_base",
+      "required": false
+    },
+    {
+      "id": "createfood:scone",
+      "required": false
+    },
+    {
+      "id": "create:dough",
+      "required": false
+    },
+    {
+      "id": "moredelight:bread_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:bread_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_tomato_sauce",
+      "required": false
+    },
+    {
+      "id": "createfood:sugar_dough",
+      "required": false
+    },
+    {
+      "id": "createfood:chicken_bun",
+      "required": false
+    },
+    {
+      "id": "createfood:mini_waffle",
+      "required": false
+    },
+    {
+      "id": "createfood:graham_cracker",
+      "required": false
+    },
+    {
+      "id": "createfood:waffle_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:ice_cream_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:muffin_batter_bucket",
+      "required": false
+    },
+    {
+      "id": "createfood:sliced_potato",
+      "required": false
+    },
+    {
+      "id": "createfood:baked_potato_butter",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_beetroot",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_bacon",
+      "required": false
     }
 
   ]

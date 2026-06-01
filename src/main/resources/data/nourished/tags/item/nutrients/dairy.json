@@ -1270,6 +1270,46 @@
     {
       "id": "pamhc2foodextended:pepperonipizzaitem",
       "required": false
+    },
+    {
+      "id": "pamhc2foodcore:butteritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:yogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:creamitem",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:cheese",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:grilledcheeseitem",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_frosting_bottle",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:aged_cheddar",
+      "required": false
+    },
+    {
+      "id": "createfood:condensed_milk_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_milkshake_bottle",
+      "required": false
     }
 
   ]

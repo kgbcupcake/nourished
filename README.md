@@ -36,6 +36,7 @@ All effects are fully configurable and can be disabled per-module.
 
 Diminishing returns apply - eating the same food repeatedly gives less credit each time, encouraging real variety.
 
+
 ---
 
 ## The HUD
