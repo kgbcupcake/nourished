@@ -1,80 +1,76 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.141'
 }
-version = '0.2.4-beta-'
-group = 'dev.maire.nourished'
+
+version = mod_version
+group = mod_group_id
+
 base {
-    archivesName = 'nourished'
+    archivesName = mod_id
 }
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
-}
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/main/java']
-        }
-        resources {
-            srcDirs = ['src/main/resources', 'src/generated/resources']
-        }
-    }
-}
-jar {
-    from(sourceSets.main.output)
-    manifest {
-        attributes([
-            'Specification-Title'     : 'nourished',
-            'Specification-Vendor'    : 'maire',
-            'Specification-Version'   : '1',
-            'Implementation-Title'    : project.name,
-            'Implementation-Version'  : project.jar.archiveVersion,
-            'Implementation-Vendor'   : 'maire',
-            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-            'Jar-Version'             : project.version
-        ])
-    }
-}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
 neoForge {
-    version = '21.1.228'
+    version = project.neo_version
+
     parchment {
-        mappingsVersion = '2024.11.17'
-        minecraftVersion = '1.21.1'
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
     }
+
     runs {
         client {
             client()
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'nourished'
+            systemProperty 'neoforge.logging.markers', 'REGISTRIES'
+            systemProperty 'neoforge.logging.console.level', 'debug'
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
         }
+
         server {
             server()
             programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'nourished'
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
         }
+
         gameTestServer {
             type = 'gameTestServer'
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'nourished'
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
         }
+
         data {
             data()
-            programArguments.addAll '--mod', 'nourished',
-                    '--all',
-                    '--output', file('src/generated/resources/').getAbsolutePath(),
-                    '--existing', file('src/main/resources/').getAbsolutePath()
+            programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
+
     mods {
-        nourished {
-            sourceSet(sourceSets.main)
+        "${mod_id}" {
+            sourceSet sourceSets.main
         }
     }
 }
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
 repositories {
+    mavenCentral()
+    maven {
+        name = 'NeoForged'
+        url = 'https://maven.neoforged.net/releases/'
+    }
     maven { url = 'https://maven.architectury.dev/' }
     maven { url = 'https://maven.blamejared.com' }
     maven { url = 'https://maven.latvian.dev/releases' }
     maven { url = 'https://maven.terraformersmc.com/releases/' }
-    maven { url = 'https://www.cursemaven.com' }
+    maven {
+        name = 'CurseMaven'
+        url = 'https://cursemaven.com'
+    }
     maven {
         name = 'Modrinth'
         url = 'https://api.modrinth.com/maven'
@@ -83,24 +79,56 @@ repositories {
         }
     }
 }
+
 dependencies {
-    implementation "me.shedaniel.cloth:cloth-config-neoforge:15.0.140"
-    compileOnly "dev.latvian.mods:kubejs-neoforge:2101.7.2-build.295"
+    implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
+    compileOnly "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"
     compileOnly "mezz.jei:jei-1.21.1-common-api:+"
     compileOnly "mezz.jei:jei-1.21.1-neoforge-api:+"
     compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:+"
     compileOnly "dev.emi:emi-neoforge:+"
-    compileOnly "vazkii.patchouli:Patchouli:1.21.1-93-NEOFORGE:api"
-    runtimeOnly "vazkii.patchouli:Patchouli:1.21.1-93-NEOFORGE"
-    compileOnly "maven.modrinth:spice-of-life-onion:1.5.6"
+    compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}:api"
+    runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
+    compileOnly "maven.modrinth:spice-of-life-onion:${spice_of_life_onion_version}"
 
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
 test {
     useJUnitPlatform()
 }
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description,
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties
+    }
+
+    doLast {
+        try {
+            file("${sourceSets.main.output.resourcesDir}/.gitversion-${mod_id}").text = 'git log "-1" "--format=%h"'.execute().in.text.trim()
+        } catch (Exception ignored) {
+            file("${sourceSets.main.output.resourcesDir}/.gitversion-${mod_id}").text = 'unknown'
+        }
+    }
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }

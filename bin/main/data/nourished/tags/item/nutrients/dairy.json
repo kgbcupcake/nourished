@@ -1270,6 +1270,30 @@
     {
       "id": "pamhc2foodextended:pepperonipizzaitem",
       "required": false
+    },
+    {
+      "id": "pamhc2foodcore:butteritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:yogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:creamitem",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:cheese",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:grilledcheeseitem",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_frosting_bottle",
+      "required": false
     }
 
   ]

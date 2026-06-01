@@ -4605,8 +4605,55 @@
     {
       "id": "undergardendelight:glitterwrap",
       "required": false
+    },
+    {
+      "id": "naturalist:cooked_egg",
+      "required": false
+    },
+    {
+      "id": "prime_cuts:cooked_beef_burger",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:beanitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:sausageitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:soybeanitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:chickpeaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2crops:amaranthitem",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:minced_beef",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:ham",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:salmon_slice",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pepperoniitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rawtofishitem",
+      "required": false
     }
-
 
   ]
 }
