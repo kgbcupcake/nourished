@@ -1,0 +1,58 @@
+name: Dev Audit
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    name: Audit (BETA)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate repomix
+        run: npx --yes repomix --output repomix-output.xml
+
+      - name: Run audit
+        id: audit
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          PROMPT=$(cat docs/audit-prompt.md)
+          REPOMIX=$(cat repomix-output.xml | head -c 80000)
+
+          RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d "$(jq -n \
+              --arg prompt "$PROMPT" \
+              --arg repomix "$REPOMIX" \
+              '{
+                model: "claude-opus-4-6",
+                max_tokens: 2048,
+                messages: [{
+                  role: "user",
+                  content: ($prompt + "\n\n<repomix>\n" + $repomix + "\n</repomix>")
+                }]
+              }')")
+
+          AUDIT_OUTPUT=$(echo "$RESPONSE" | jq -r '.content[0].text')
+          echo "$AUDIT_OUTPUT"
+          echo "result<<EOF" >> $GITHUB_OUTPUT
+          echo "$AUDIT_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Fail on critical issues
+        run: |
+          RESULT="${{ steps.audit.outputs.result }}"
+          if echo "$RESULT" | grep -q "🔴"; then
+            echo "❌ Critical issues found."
+            exit 1
+          else
+            echo "✅ Audit passed."
+          fi
