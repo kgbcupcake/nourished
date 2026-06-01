@@ -229,6 +229,8 @@
   "config.nourished.dietBarDragEnabled.desc": "Let you drag nutrient rows in the Diet screen.",
   "config.nourished.hudShowZeroBars": "Show zero nutrients on HUD",
   "config.nourished.hudShowZeroBars.desc": "Show HUD rows for nutrients currently at 0%. When off, zero bars are hidden.",
+  "nourished.config.hud.reveal_on_gain": "Reveal HUD on nutrient gain",
+  "nourished.config.hud.reveal_on_gain.desc": "Temporarily show hidden nutrient bars when they increase from eating. The bar returns to normal threshold behavior after the flash window (2 seconds).",
   "config.nourished.hudHideAboveThreshold": "Hide above threshold",
   "config.nourished.hudHideAboveThreshold.desc": "Hide HUD bars at or above this level. 1.0 hides nothing; 0.8 hides bars at 80% or higher.",
   "config.nourished.hudShowAboveThreshold": "Also show above threshold",

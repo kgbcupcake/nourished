@@ -11,6 +11,7 @@
   "hudHideAboveThreshold": 1.0,
   "hudShowAboveThreshold": 1.0,
   "hudShowZeroBars": false,
+  "hudRevealOnNutrientGain": true,
   "hudBackgroundOpacity": 0.796078431372549,
   "hudVerticalLayout": false
 }
