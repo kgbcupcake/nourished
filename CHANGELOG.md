@@ -62,7 +62,7 @@ Nutrition state updates now correctly:
 - While also clarifying the current state of upcoming progression systems.
 
 
-### [0.2.5-beta] - 2026-06-1
+## [0.2.5-beta] - 2026-06-1
 
 ### Important Upgrade Notes
 
