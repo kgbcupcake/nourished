@@ -61,12 +61,8 @@ Nutrition state updates now correctly:
 - internal stability and logging cleanliness
 - While also clarifying the current state of upcoming progression systems.
 
-## Nourished 0.2.5-beta.1
 
-A stability-focused patch improving consistency, safety, and integration reliability across the nutrition system.
-
-
-## 0.2.5-beta
+#### [0.2.5-beta] - 2026-06-1
 
 ### Important Upgrade Notes
 
