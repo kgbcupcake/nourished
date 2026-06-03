@@ -2,6 +2,139 @@
 
 <!-- markdownlint-disable MD013 -->
 
+## [ Nourished 0.2.5-beta.1 ]  Stability & API Patch - 2026-6-1
+
+## This update focuses on runtime stability, API safety, and synchronization reliability across the nutrition system. It also includes internal cleanup and clarifications to the current state of experimental systems.
+
+## Stability Fixes
+
+- Diet synchronization corrected
+
+- Fixed an issue where changes made through modifyNutrition() were not consistently synchronized to clients or followed by effect re-evaluation.
+
+This could previously result in:
+
+- temporary desync between server and client diet values
+- missing or delayed application of nutrition-based effects
+
+Nutrition state updates now correctly:
+
+- sync to client when running on the server
+- re-apply threshold-based effects when diet changes
+- Nutrition effect consistency
+
+- Ensured that nutrition threshold effects are properly re-evaluated after external or API-driven diet modifications, aligning behavior with internal gameplay pipelines.
+
+## API Safety Improvements
+- Null-safe API entry points
+- Public API methods have been hardened against null player references to prevent crashes when called from external mods or scripts.
+- This improves compatibility and prevents unexpected failures in integration scenarios.
+- API lifecycle protection
+- NourishedAPIState lifecycle control methods are now marked internal to prevent unintended external modification of:
+- registry state
+- datapack reload phases
+- Public query methods remain unchanged.
+
+##  Internal Cleanup
+- Debug logging cleanup
+- Temporary debugging logic in RecipeInheritanceStage has been removed, including targeted diagnostic logs used during development.
+- Logging behavior has been restored to standard debug-level output only.
+
+##  System Status Notes
+- The following systems are currently registered but not fully wired into gameplay logic:
+- Nutrient Synergies
+- Food Synergy Bonuses
+- Milestone Rewards
+- These systems are exposed through the API and available for integration, but are not yet active in the core eating/progression pipeline. They are planned for future updates.
+
+##  Compatibility
+- No changes to:
+- food classification behavior
+- datapack structure
+- existing configuration formats
+- This update is fully backward compatible with existing saves.
+
+## Summary
+- This release improves:
+- synchronization reliability
+- API safety for external mods
+- internal stability and logging cleanliness
+- While also clarifying the current state of upcoming progression systems.
+
+
+## [0.2.5-beta] - 2026-06-1
+
+### Important Upgrade Notes
+
+If updating from an earlier 0.2.x beta:
+
+1. Delete `config/nourished/scanner_spec.json` before launching the game.
+2. Load your world and run:
+
+   ```
+   /nourished invalidate_cache
+   ```
+3. Rejoin the world to rebuild cached nutrition data.
+
+Existing worlds may continue using outdated scanner data until these steps are completed.
+
+These steps ensure recipe inheritance, nutrient tags, and scanner data are regenerated using the latest compatibility improvements.
+
+### Added
+
+* Recipe inheritance now works client-side, allowing composite foods to display accurate multi-nutrient tooltips without requiring server-side lookups.
+* Single-ingredient transformation recipes now inherit nutritional categories correctly (e.g. bread → bread slice, raw meat → cooked meat, apple → apple mash).
+
+### Fixed
+
+* Pam's HarvestCraft mixing bowl recipes and other custom recipe types are now discovered by the inheritance pipeline. Previously, only crafting and smelting recipes were supported.
+* Pam's cooking containers (bakeware, cutting board, pot, saucepan, mixing bowl, skillet, juicer, grinder) and Croptopia cooking tools (frying pan, cooking pot, food press, knife) are no longer treated as nutritional ingredients during recipe inheritance.
+* Non-food items such as salt, oils, spices, flavorings, yeast, water bottles, and alchemical ingredients are now ignored during inheritance instead of lowering confidence counts.
+* Fruits such as berries and raspberries no longer incorrectly classify as raw foods.
+
+### Compatibility
+
+* Greatly expanded nutrient tag coverage across Pam's HarvestCraft 2 (Crops, Trees, Food Core, Food Extended), Croptopia, Create: Food, Farmer's Delight, Wilder Nature, Undergarden Delight, and additional food mods.
+* Hundreds of composite foods now inherit and display more accurate multi-nutrient profiles.
+
+## [0.2.4-beta] - 2026-05-31
+
+### Added
+- HUD bars temporarily reveal when a nutrient increases from eating — no need to open the
+  nutrition screen to see what changed. Configurable via "Reveal HUD on nutrient gain" in
+  HUD & Display settings.
+
+### Fixed
+- "Also show above threshold" and "Hide above threshold" now share consistent off-state
+  semantics: `1.0` = disabled on both. Previously Show used `0.0` as off, opposite of Hide.
+- Show threshold slider is now disabled until Hide is active, preventing the two sliders
+  from conflicting silently.
+- Existing configs with `hudShowAboveThreshold = 0.0` are automatically migrated to `1.0`
+  on load — no manual action required.
+
+[0.2.3-beta] - 2026-05-31
+
+### Added
+- Multi-nutrient recipe inheritance — complex dishes now contribute to multiple food groups based on their ingredients. Eating a steak sandwich gives Proteins, Grains, and Vegetables credit automatically.
+- HUD hide-above threshold — bars above a configurable percentage are hidden from the HUD. Set to 0.4 to only see bars that need attention. as requested. in #3 
+- HUD show-below threshold — bars below a configurable percentage are always shown regardless of other visibility settings.
+- Show zero nutrients on HUD — toggle to show bars at 0% so you always know what you're missing.
+- HUD background opacity — configurable from fully transparent to fully opaque.
+- Vertical HUD layout — bars render as side-by-side columns filling upward instead of horizontal rows.
+- HUD flash on nutrient increase — bars briefly highlight for 2 seconds when a nutrient increases from eating.
+- Multi-nutrient full registry analysis — /nourished scan_analysis command analyzes all 4700+ classified foods and writes multi-nutrient recommendations, overlap matrix, ambiguity report, and scanner metrics to config/nourished/scanner_analysis/.
+- Run Analysis button in the Scanner config tab triggers full registry analysis in game.
+- Data Scan button renamed from Scan for clarity.
+
+## Changed
+
+- HUD settings now apply live without requiring Save & Quit.
+- Pre-scan hint text removed from Scanner config tab.
+
+### Fixed 
+- HUD vertical layout and zero-bar visibility were reading stale config values due to Cloth Config write-on-save behavior — fixed with live config application.
+
+
 ## [0.2.2-beta] - 2026-05-30
 
 ### Added

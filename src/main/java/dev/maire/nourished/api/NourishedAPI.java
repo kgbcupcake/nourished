@@ -6,12 +6,17 @@ import dev.maire.nourished.api.registry.MilestoneRegistry;
 import dev.maire.nourished.api.registry.ReportProviderRegistry;
 import dev.maire.nourished.api.registry.SeasonHookRegistry;
 import dev.maire.nourished.api.registry.SynergyRegistry;
+import dev.maire.nourished.config.ModuleCache;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.effect.NutritionEffectApplier;
+import dev.maire.nourished.core.impl.EmptyFoodMemoryView;
+import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -49,6 +54,9 @@ public final class NourishedAPI {
      * @throws IllegalStateException if the nutrition system is not initialized
      */
     public static float getCalories(Player player) {
+        if (player == null) {
+            return 0f;
+        }
         return DietAttachment.getCalories(player);
     }
 
@@ -61,6 +69,9 @@ public final class NourishedAPI {
      *         or {@code -1.0f} if the nutrient key is not recognized
      */
     public static float getNutrientLevel(Player player, String nutrientKey) {
+        if (player == null) {
+            return -1.0f;
+        }
         return DietAttachment.getNutrientLevel(player, nutrientKey);
     }
 
@@ -73,6 +84,9 @@ public final class NourishedAPI {
      * @throws IllegalStateException if the nutrition system is not initialized
      */
     public static FoodMemoryView getFoodMemory(Player player) {
+        if (player == null) {
+            return EmptyFoodMemoryView.INSTANCE;
+        }
         return DietAttachment.getFoodMemoryView(player);
     }
 
@@ -137,6 +151,13 @@ public final class NourishedAPI {
         DietData diet = player.getData(DietAttachment.DIET.get());
         diet.addNutrient(nutrientKey, modifierEvent.getAmount());
         player.setData(DietAttachment.DIET.get(), diet);
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        ModNetworking.syncDietDelta(serverPlayer, diet);
+        if (ModuleCache.enableEffects) {
+            NutritionEffectApplier.apply(serverPlayer, diet);
+        }
     }
 
     @ApiStatus.Stable

@@ -105,7 +105,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
         long start = System.nanoTime();
 
         if (Nourished.LOGGER.isDebugEnabled()) {
-            Nourished.LOGGER.info("[RecipeInheritance] Resolving: {}", itemId);
+            Nourished.LOGGER.debug("[RecipeInheritance] Resolving: {}", itemId);
         }
 
         try {
@@ -131,7 +131,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
 
                 if (shouldSkipRecipeIngredient(ingredientId)) {
                     if (Nourished.LOGGER.isDebugEnabled()) {
-                        Nourished.LOGGER.info("[RecipeInheritance]   ingredient {} → SKIPPED", ingredientId);
+                        Nourished.LOGGER.debug("[RecipeInheritance]   ingredient {} → SKIPPED", ingredientId);
                     }
                     continue;
                 }
@@ -141,7 +141,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
 
                 Map<String, Float> tagMatches = collectConfirmedNutrientTags(ingredientItem, ingredientId);
                 if (Nourished.LOGGER.isDebugEnabled()) {
-                    Nourished.LOGGER.info("[RecipeInheritance]   ingredient {} → tags: {} (confirmed: {})",
+                    Nourished.LOGGER.debug("[RecipeInheritance]   ingredient {} → tags: {} (confirmed: {})",
                             ingredientId, tagMatches, confirmed);
                 }
                 if (!tagMatches.isEmpty()) {
@@ -153,13 +153,13 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             }
 
             if (Nourished.LOGGER.isDebugEnabled()) {
-                Nourished.LOGGER.info("[RecipeInheritance] {} — confirmed={}, contributions={}",
+                Nourished.LOGGER.debug("[RecipeInheritance] {} — confirmed={}, contributions={}",
                         itemId, confirmed, totalContribs);
             }
 
             if (confirmed < 2 && !(confirmed == 1 && ingredients.size() == 1)) {
                 if (Nourished.LOGGER.isDebugEnabled()) {
-                    Nourished.LOGGER.info("[RecipeInheritance] {} — FAILED: only {} confirmed ingredient(s), need 2",
+                    Nourished.LOGGER.debug("[RecipeInheritance] {} — FAILED: only {} confirmed ingredient(s), need 2",
                             itemId, confirmed);
                 }
                 return null;
@@ -182,14 +182,14 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                     filtered, MultiNutrientInheritance.threshold());
             if (qualifying.isEmpty()) {
                 if (Nourished.LOGGER.isDebugEnabled()) {
-                    Nourished.LOGGER.info("[RecipeInheritance] {} — FAILED: all nutrients filtered below threshold",
+                    Nourished.LOGGER.debug("[RecipeInheritance] {} — FAILED: all nutrients filtered below threshold",
                             itemId);
                 }
                 return null;
             }
 
             if (Nourished.LOGGER.isDebugEnabled()) {
-                Nourished.LOGGER.info("[RecipeInheritance] {} — SUCCESS: {}", itemId, qualifying);
+                Nourished.LOGGER.debug("[RecipeInheritance] {} — SUCCESS: {}", itemId, qualifying);
             }
 
             Map<String, String> rejectedSignals = new LinkedHashMap<>();
@@ -239,11 +239,6 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                 ItemStack recipeResult = recipe.getResultItem(null);
                 if (recipeResult == null || !ItemStack.isSameItem(recipeResult, targetStack)) continue;
 
-                if (itemId.toString().contains("garlicmashedpotatoes")) {
-                    Nourished.LOGGER.info("[RecipeInheritance] RECIPE FOUND for {} — type: {}, class: {}",
-                            itemId, holder.id(), recipe.getClass().getName());
-                }
-
                 List<Ingredient> recipeIngredients = recipe.getIngredients();
                 Set<ResourceLocation> uniqueIds = new HashSet<>();
 
@@ -257,26 +252,21 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                     }
                 }
 
-                if (itemId.toString().contains("garlicmashedpotatoes")) {
-                    Nourished.LOGGER.info("[RecipeInheritance] {} ingredients collected: {}",
-                            itemId, uniqueIds);
-                }
-
                 if (uniqueIds.size() > 6) {
                     if (Nourished.LOGGER.isDebugEnabled()) {
-                        Nourished.LOGGER.info("[RecipeInheritance] {} — skipped, too many unique ingredients ({})",
+                        Nourished.LOGGER.debug("[RecipeInheritance] {} — skipped, too many unique ingredients ({})",
                                 itemId, uniqueIds.size());
                     }
                     continue;
                 }
                 if (uniqueIds.isEmpty()) {
                     if (Nourished.LOGGER.isDebugEnabled()) {
-                        Nourished.LOGGER.info("[RecipeInheritance] {} — recipe found but no usable ingredients",
+                        Nourished.LOGGER.debug("[RecipeInheritance] {} — recipe found but no usable ingredients",
                                 itemId);
                     }
                 } else {
                     if (Nourished.LOGGER.isDebugEnabled()) {
-                        Nourished.LOGGER.info("[RecipeInheritance] {} — found recipe with ingredients: {}",
+                        Nourished.LOGGER.debug("[RecipeInheritance] {} — found recipe with ingredients: {}",
                                 itemId, uniqueIds);
                     }
                     return new ArrayList<>(uniqueIds);
@@ -287,7 +277,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
         }
 
         if (Nourished.LOGGER.isDebugEnabled()) {
-            Nourished.LOGGER.info("[RecipeInheritance] {} — no matching recipe found", itemId);
+            Nourished.LOGGER.debug("[RecipeInheritance] {} — no matching recipe found", itemId);
         }
         return List.of();
     }

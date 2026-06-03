@@ -1294,6 +1294,22 @@
     {
       "id": "createfood:cream_frosting_bottle",
       "required": false
+    },
+    {
+      "id": "herbsandharvest:aged_cheddar",
+      "required": false
+    },
+    {
+      "id": "createfood:condensed_milk_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_milkshake_bottle",
+      "required": false
     }
 
   ]
