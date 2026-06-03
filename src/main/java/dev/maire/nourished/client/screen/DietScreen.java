@@ -163,6 +163,11 @@ public class DietScreen extends Screen {
     // ── Render ───────────────────────────────────────────────────────────────
 
     @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        // intentionally empty — suppress vanilla menu blur; panel draws its own backdrop
+    }
+
+    @Override
     public void render(GuiGraphics g, int mx, int my, float pt) {
         long now = System.nanoTime();
         if (!fadeClockStarted) {
