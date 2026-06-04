@@ -1,6 +1,44 @@
 # Changelog
 
 <!-- markdownlint-disable MD013 -->
+## [ Nourished 0.2.5-beta.3 ]  2026-6-3
+
+
+### Diagnostics & Classification Tracing
+
+* Added `ClassificationTrace` infrastructure for recording food classification decisions.
+* Added `ClassificationPipeline` support to identify trace origin.
+* Added `ClassificationTraceStep` for step-by-step classification tracking.
+* Added `ClassificationTraceFormatter` for human-readable diagnostic reports.
+
+### Runtime Trace Improvements
+
+* Added runtime `SIGNAL_AGGREGATION` tracing.
+* Added runtime `WINNER_SELECTION` tracing.
+* Added runtime `CONFIDENCE` tracing.
+* Added confidence and uncertainty propagation to runtime traces.
+
+### Classification Explainability
+
+* Added archetype match evidence capture.
+* Added token demotion evidence capture.
+* Added negative keyword contribution tracing.
+* Improved held-item diagnostics and classification reasoning output.
+
+### Recipe Diagnostics
+
+Added detailed recipe failure reporting:
+
+* `NO_RECIPE_FOUND`
+* `NULL_RECIPE_MANAGER`
+* `INGREDIENT_CAP_EXCEEDED`
+* `CONFIRMED_THRESHOLD_FAILED`
+* `NUTRIENTS_BELOW_THRESHOLD`
+* `RECIPE_EXCEPTION`
+
+### Notes
+
+This update significantly expands Nourished's diagnostic capabilities and lays the foundation for future self-diagnosing classification and validation tooling.
 
 ## [ Nourished 0.2.5-beta.2 ]  Ui Fixes- 2026-6-2
 
