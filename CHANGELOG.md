@@ -36,6 +36,12 @@ Added detailed recipe failure reporting:
 * `NUTRIENTS_BELOW_THRESHOLD`
 * `RECIPE_EXCEPTION`
 
+### Fixes & Lifecycle Improvements
+
+* Consolidated config reload handling to ServerStartingEvent, replacing LevelEvent.Load to prevent          duplicate reload cycles during world initialization.
+* Removed legacy HUD threshold migration from NourishedClientConfig.
+* Improved datapack error logging for duplicate nutrients and malformed entries with clearer messages.
+
 ### Notes
 
 This update significantly expands Nourished's diagnostic capabilities and lays the foundation for future self-diagnosing classification and validation tooling.
