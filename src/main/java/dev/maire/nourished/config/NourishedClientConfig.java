@@ -128,7 +128,6 @@ public final class NourishedClientConfig {
     public static void onModConfigLoading(ModConfigEvent.Loading event) {
         bindIfOurs(event.getConfig());
         migrateLegacyClientToml();
-        migrateHudShowAboveThresholdOffValue();
     }
 
     public static void onModConfigReloading(ModConfigEvent.Reloading event) {
@@ -170,18 +169,6 @@ public final class NourishedClientConfig {
             }
         } catch (IOException ex) {
             Nourished.LOGGER.warn("[Nourished] Failed to migrate legacy client config at {}", path, ex);
-        }
-    }
-
-    /** Old Show-off used 0.0; new off uses 1.0 (aligned with Hide). */
-    private static void migrateHudShowAboveThresholdOffValue() {
-        if (INSTANCE == null) {
-            return;
-        }
-        if (INSTANCE.hudShowAboveThreshold.get() == 0.0d) {
-            INSTANCE.setHudShowAboveThreshold(1.0d);
-            saveNow();
-            Nourished.LOGGER.info("[Nourished] Migrated hudShowAboveThreshold 0.0 -> 1.0");
         }
     }
 

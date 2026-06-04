@@ -534,6 +534,13 @@ public final class NourishedDataLoader extends SimpleJsonResourceReloadListener 
     }
 
     private static void warnMalformed(ResourceLocation fileId, Exception ex) {
-        Nourished.LOGGER.warn("[Nourished] Skipping malformed datapack entry at data/{}/{}/{}.json: {}", fileId.getNamespace(), DatapackSchema.ROOT, fileId.getPath(), ex.getMessage());
+        String path = "data/" + fileId.getNamespace() + "/" + DatapackSchema.ROOT + "/" + fileId.getPath() + ".json";
+        String message = ex.getMessage();
+        if (message != null && message.startsWith("Nutrient already registered: ")) {
+            String key = message.substring("Nutrient already registered: ".length());
+            Nourished.LOGGER.debug("[Nourished] Nutrient '{}' already registered (loaded from config); ignoring datapack duplicate at {}", key, path);
+            return;
+        }
+        Nourished.LOGGER.warn("[Nourished] Skipping malformed datapack entry at {}: {}", path, message);
     }
 }
