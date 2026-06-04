@@ -11,6 +11,9 @@ import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.nutrition.StageContext;
 import dev.maire.nourished.core.nutrition.cache.BoundedLRU;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.tooling.classification.ClassificationTraceStep;
+import dev.maire.nourished.tooling.classification.TraceStepId;
+import dev.maire.nourished.tooling.classification.TraceStepStatus;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -100,7 +103,10 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
     @Nullable
     public ResolutionResult resolve(ResourceLocation itemId, StageContext ctx) {
         RecipeManager recipeManager = ctx.recipeManager();
-        if (recipeManager == null) return null;
+        if (recipeManager == null) {
+            ctx.setRecipeFailureReason("NULL_RECIPE_MANAGER");
+            return null;
+        }
 
         long start = System.nanoTime();
 
@@ -110,13 +116,20 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
 
         try {
             List<ResourceLocation> ingredients = recipeCache.get(itemId);
+            boolean[] capSkipped = {false};
             if (ingredients == null) {
-                ingredients = discoverRecipeIngredients(itemId, recipeManager, start);
-                if (ingredients == null) return null;
+                ingredients = discoverRecipeIngredients(itemId, recipeManager, start, capSkipped);
+                if (ingredients == null) {
+                    ctx.setRecipeFailureReason("RECIPE_TIMEOUT");
+                    return null;
+                }
                 recipeCache.put(itemId, ingredients);
             }
 
-            if (ingredients.isEmpty()) return null;
+            if (ingredients.isEmpty()) {
+                ctx.setRecipeFailureReason(capSkipped[0] ? "INGREDIENT_CAP_EXCEEDED" : "NO_RECIPE_FOUND");
+                return null;
+            }
 
             Map<String, Float> totalContribs = new HashMap<>();
             int confirmed = 0;
@@ -133,11 +146,17 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                     if (Nourished.LOGGER.isDebugEnabled()) {
                         Nourished.LOGGER.debug("[RecipeInheritance]   ingredient {} → SKIPPED", ingredientId);
                     }
+                    emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.SKIPPED,
+                            "INGREDIENT_SKIPPED", null, false, "tool/non-food ingredient");
                     continue;
                 }
 
                 Item ingredientItem = BuiltInRegistries.ITEM.get(ingredientId);
-                if (ingredientItem == null) continue;
+                if (ingredientItem == null) {
+                    emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.FAILURE,
+                            "NONE", null, false, "item not found");
+                    continue;
+                }
 
                 Map<String, Float> tagMatches = collectConfirmedNutrientTags(ingredientItem, ingredientId);
                 if (Nourished.LOGGER.isDebugEnabled()) {
@@ -149,6 +168,11 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                         totalContribs.merge(e.getKey(), e.getValue(), Float::sum);
                     }
                     confirmed++;
+                    emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.SUCCESS,
+                            "TAG", tagMatches, false, null);
+                } else {
+                    emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.FAILURE,
+                            "NONE", null, false, "INGREDIENT_UNCLASSIFIED");
                 }
             }
 
@@ -162,6 +186,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                     Nourished.LOGGER.debug("[RecipeInheritance] {} — FAILED: only {} confirmed ingredient(s), need 2",
                             itemId, confirmed);
                 }
+                ctx.setRecipeFailureReason("CONFIRMED_THRESHOLD_FAILED:confirmed=" + confirmed + "/total=" + ingredients.size());
                 return null;
             }
 
@@ -185,6 +210,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                     Nourished.LOGGER.debug("[RecipeInheritance] {} — FAILED: all nutrients filtered below threshold",
                             itemId);
                 }
+                ctx.setRecipeFailureReason("NUTRIENTS_BELOW_THRESHOLD");
                 return null;
             }
 
@@ -213,13 +239,14 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
 
         } catch (Exception e) {
             Nourished.LOGGER.warn("[RuntimeFoodResolver] Recipe exception for {}: {}", itemId, e.getMessage());
+            ctx.setRecipeFailureReason("RECIPE_EXCEPTION");
             return null;
         }
     }
 
     @Nullable
     private List<ResourceLocation> discoverRecipeIngredients(
-            ResourceLocation itemId, RecipeManager recipeManager, long startNanos
+            ResourceLocation itemId, RecipeManager recipeManager, long startNanos, boolean[] capSkipped
     ) {
         Item targetItem = BuiltInRegistries.ITEM.get(itemId);
         if (targetItem == null) return List.of();
@@ -257,6 +284,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                         Nourished.LOGGER.debug("[RecipeInheritance] {} — skipped, too many unique ingredients ({})",
                                 itemId, uniqueIds.size());
                     }
+                    capSkipped[0] = true;
                     continue;
                 }
                 if (uniqueIds.isEmpty()) {
@@ -334,5 +362,50 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
         });
 
         return matches;
+    }
+
+    private static void emitIngredientResolutionStep(
+            StageContext ctx,
+            ResourceLocation ingredientId,
+            TraceStepStatus status,
+            String source,
+            @Nullable Map<String, Float> nutrients,
+            boolean uncertain,
+            @Nullable String reason
+    ) {
+        if (ctx.traceOut() == null) {
+            return;
+        }
+        Map<String, Object> detail = new LinkedHashMap<>();
+        detail.put("ingredientId", ingredientId.toString());
+        detail.put("source", source);
+        if (nutrients != null && !nutrients.isEmpty()) {
+            detail.put("nutrients", new LinkedHashMap<>(nutrients));
+        }
+        if (uncertain) {
+            detail.put("uncertain", true);
+        }
+        if (status == TraceStepStatus.SKIPPED) {
+            detail.put("skipped", true);
+            if (reason != null) {
+                detail.put("skipReason", reason);
+            }
+        }
+        if (reason != null && status == TraceStepStatus.FAILURE) {
+            detail.put("warningCode", "INGREDIENT_UNCLASSIFIED");
+        }
+
+        String message = switch (status) {
+            case SUCCESS -> "Ingredient classified via " + source;
+            case SKIPPED -> "Ingredient skipped: " + (reason != null ? reason : "unknown");
+            case FAILURE -> "Ingredient unclassified: " + (reason != null ? reason : "unknown");
+            default -> "Ingredient resolution";
+        };
+
+        ctx.addTraceStep(new ClassificationTraceStep(
+                TraceStepId.INGREDIENT_RESOLUTION,
+                status,
+                message,
+                detail));
     }
 }

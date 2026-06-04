@@ -17,6 +17,11 @@ import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.compat.ModCompat;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.tooling.classification.ClassificationPipeline;
+import dev.maire.nourished.tooling.classification.ClassificationTrace;
+import dev.maire.nourished.tooling.classification.ClassificationTraceStep;
+import dev.maire.nourished.tooling.classification.TraceStepId;
+import dev.maire.nourished.tooling.classification.TraceStepStatus;
 import dev.maire.nourished.tooling.scanner.ClassificationResult;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import dev.maire.nourished.tooling.scanner.RecipeInheritanceResolver;
@@ -363,6 +368,173 @@ public class FoodNutritionRegistry {
                 List.of(),
                 false
         );
+    }
+
+    /**
+     * Full classification trace for held-item debugging via {@code /nourished debug held}.
+     * Builds the trace with all intermediate steps, precedence decisions, and the final merged result.
+     * Returns a {@link ClassificationTrace} with pipeline = HELD_DEBUG.
+     *
+     * @param stack         the item to resolve
+     * @param recipeManager server recipe manager, or null for client/no-recipe-inheritance
+     * @return ClassificationTrace with all steps and final outcome
+     */
+    public static ClassificationTrace resolveHeldItemClassificationTrace(ItemStack stack, @Nullable RecipeManager recipeManager) {
+        Item item = stack.getItem();
+        ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
+        String itemIdStr = itemId != null ? itemId.toString() : "unknown";
+
+        List<ClassificationTraceStep> traceSteps = new ArrayList<>();
+
+        if (itemId != null && ScannerSpecRegistry.get().excludedItems().contains(itemIdStr)) {
+            Map<String, Object> discoveryDetail = new LinkedHashMap<>();
+            discoveryDetail.put("itemId", itemIdStr);
+            discoveryDetail.put("errorCode", "EXCLUDED_ITEM");
+            traceSteps.add(new ClassificationTraceStep(
+                    TraceStepId.ITEM_DISCOVERY,
+                    TraceStepStatus.FAILURE,
+                    "Item excluded from classification",
+                    discoveryDetail));
+            return ClassificationTrace.builder(itemIdStr, ClassificationPipeline.HELD_DEBUG)
+                    .addSteps(traceSteps)
+                    .summaryReason("excluded_items")
+                    .build();
+        }
+
+        Map<String, Float> tagRaw = collectNutrientTagMatchesRaw(item);
+        Map<String, Float> tagFiltered = collectNutrientTagMatches(item);
+
+        List<String> strippedByCompat = new ArrayList<>();
+        for (String key : tagRaw.keySet()) {
+            if (!tagFiltered.containsKey(key)) {
+                strippedByCompat.add(key);
+            }
+        }
+
+        Map<String, Object> tagDetail = new LinkedHashMap<>();
+        tagDetail.put("tagsMatched", tagFiltered.size());
+        tagDetail.put("rawTags", new LinkedHashMap<>(tagRaw));
+        tagDetail.put("afterCompat", new LinkedHashMap<>(tagFiltered));
+        if (!strippedByCompat.isEmpty()) {
+            tagDetail.put("strippedByCompat", strippedByCompat);
+            tagDetail.put("warningCode", "TAG_COMPAT_STRIPPED");
+        }
+        traceSteps.add(new ClassificationTraceStep(
+                TraceStepId.NUTRIENT_TAG_LOOKUP,
+                tagFiltered.isEmpty() ? TraceStepStatus.SKIPPED : TraceStepStatus.SUCCESS,
+                tagFiltered.isEmpty() ? "No nutrient tags matched" : "Matched " + tagFiltered.size() + " nutrient tag(s)",
+                tagDetail));
+
+        Map<String, Float> external = itemId != null ? getExternalClassification(itemId) : null;
+        NutrientResolutionTrace.ExternalSource externalSource = NutrientResolutionTrace.ExternalSource.NONE;
+        if (itemId != null && hasApiClassification(itemId)) {
+            externalSource = NutrientResolutionTrace.ExternalSource.API;
+        } else if (itemId != null && hasScannerClassification(itemId)) {
+            externalSource = NutrientResolutionTrace.ExternalSource.SCANNER;
+        }
+        if (external == null) {
+            external = Map.of();
+        }
+
+        if (!external.isEmpty()) {
+            Map<String, Object> externalDetail = new LinkedHashMap<>();
+            externalDetail.put("source", externalSource.name());
+            externalDetail.put("nutrients", new LinkedHashMap<>(external));
+            traceSteps.add(new ClassificationTraceStep(
+                    TraceStepId.EXTERNAL_CLASSIFICATION,
+                    TraceStepStatus.SUCCESS,
+                    "External classification from " + externalSource.name(),
+                    externalDetail));
+        }
+
+        ClassificationTrace runtimeTrace = RuntimeFoodResolver.getInstance().resolveWithTrace(stack, recipeManager);
+        Map<String, Float> resolved = Map.of();
+        RuntimeCascadeStage cascadeStage = null;
+        if (runtimeTrace != null) {
+            resolved = runtimeTrace.finalBars();
+            cascadeStage = runtimeTrace.cascadeStage();
+            traceSteps.addAll(runtimeTrace.steps());
+        }
+
+        Map<String, Float> blendTagInput = Map.of();
+        Map<String, Float> blendResolverInput = Map.of();
+        Map<String, TagRuntimeBlend.Precedence> blendPrecedence = Map.of();
+        Map<String, Float> blendDiscarded = Map.of();
+        Map<String, Float> coreResult;
+
+        boolean didBlend = false;
+        if (tagFiltered.isEmpty()) {
+            coreResult = resolved.isEmpty() ? Map.of() : new LinkedHashMap<>(resolved);
+        } else if (resolved.isEmpty()) {
+            coreResult = new LinkedHashMap<>(tagFiltered);
+        } else {
+            TagRuntimeBlend.BlendOutcome blend = TagRuntimeBlend.blend(tagFiltered, resolved);
+            coreResult = new LinkedHashMap<>(blend.result());
+            blendTagInput = tagFiltered;
+            blendResolverInput = resolved;
+            blendPrecedence = blend.perKeyPrecedence();
+            blendDiscarded = blend.discardedResolver();
+            didBlend = true;
+
+            Map<String, Object> blendDetail = new LinkedHashMap<>();
+            blendDetail.put("tagPrecedence", true);
+            blendDetail.put("tagKeys", new ArrayList<>(blendTagInput.keySet()));
+            blendDetail.put("runtimeKeys", new ArrayList<>(blendResolverInput.keySet()));
+            blendDetail.put("discardedRuntimeKeys", new ArrayList<>(blendDiscarded.keySet()));
+            blendDetail.put("blendedResult", new LinkedHashMap<>(coreResult));
+            traceSteps.add(new ClassificationTraceStep(
+                    TraceStepId.TAG_RUNTIME_BLEND,
+                    TraceStepStatus.SUCCESS,
+                    "Tag and runtime results blended",
+                    blendDetail));
+        }
+
+        Map<String, Float> finalMerged = new LinkedHashMap<>(coreResult);
+        if (!external.isEmpty()) {
+            for (Map.Entry<String, Float> e : external.entrySet()) {
+                finalMerged.merge(e.getKey(), e.getValue(), Float::sum);
+            }
+        }
+
+        String dominant = null;
+        float maxValue = 0f;
+        for (Map.Entry<String, Float> entry : finalMerged.entrySet()) {
+            if (entry.getValue() > maxValue) {
+                maxValue = entry.getValue();
+                dominant = entry.getKey();
+            }
+        }
+
+        ResolutionStage stage;
+        if (finalMerged.isEmpty()) {
+            stage = ResolutionStage.UNCLASSIFIED;
+        } else if (didBlend) {
+            stage = ResolutionStage.BLENDED;
+        } else if (!tagFiltered.isEmpty()) {
+            stage = ResolutionStage.TAG_MATCH;
+        } else if (!resolved.isEmpty()) {
+            stage = ResolutionStage.RUNTIME_RESOLVER;
+        } else if (!external.isEmpty()) {
+            stage = ResolutionStage.SCANNER_CLASSIFIED;
+        } else {
+            stage = ResolutionStage.UNCLASSIFIED;
+        }
+
+        String summaryReason = stage == ResolutionStage.UNCLASSIFIED ? "unclassified"
+                : didBlend ? "tag_and_runtime_blend"
+                : !tagFiltered.isEmpty() ? "tag_match"
+                : !resolved.isEmpty() ? "runtime_resolver"
+                : !external.isEmpty() ? "scanner_classified"
+                : "unknown";
+
+        return ClassificationTrace.builder(itemIdStr, ClassificationPipeline.HELD_DEBUG)
+                .finalBars(finalMerged)
+                .dominant(dominant)
+                .cascadeStage(cascadeStage)
+                .tagClassified(!tagFiltered.isEmpty())
+                .summaryReason(summaryReason)
+                .addSteps(traceSteps)
+                .build();
     }
 
     /**

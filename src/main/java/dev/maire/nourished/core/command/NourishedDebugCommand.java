@@ -14,6 +14,8 @@ import dev.maire.nourished.core.nutrition.RuntimeCascadeStage;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.nutrition.TagRuntimeBlend;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.tooling.classification.ClassificationTrace;
+import dev.maire.nourished.tooling.classification.ClassificationTraceFormatter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -42,6 +45,7 @@ import java.util.Map;
 public final class NourishedDebugCommand {
 
     private static final int CACHE_MAX = 2048;
+    private static final String DEBUG_SUBDIR = "debug";
 
     private NourishedDebugCommand() {}
 
@@ -146,73 +150,34 @@ public final class NourishedDebugCommand {
         ItemStack stack = player.getMainHandItem();
 
         if (stack.isEmpty()) {
-            source.sendFailure(Component.literal("No item in main hand."));
+            source.sendSuccess(() -> Component.literal("No item in main hand."), false);
             return 0;
         }
 
         RecipeManager recipeManager = source.getServer().getRecipeManager();
-        ResolutionResult result = RuntimeFoodResolver.getInstance().resolveWithResult(stack, recipeManager);
         NutrientResolutionTrace trace = FoodNutritionRegistry.resolveHeldItemTrace(stack, recipeManager);
+        ClassificationTrace classTrace = FoodNutritionRegistry.resolveHeldItemClassificationTrace(stack, recipeManager);
+        String inspectorOutput = ClassificationTraceFormatter.format(classTrace, stack);
 
         ResourceLocation itemId = NourishedRegistryUtils.itemKey(stack.getItem());
         String itemName = itemId != null ? itemId.toString() : "unknown";
 
-        sendHeader(source);
-        sendKeyValue(source, "Item:       ", itemName);
-        sendPipelineStageLine(source, trace.stage());
-        if (result != null) {
-            sendCascadeStageLine(source, result.stage());
-            sendKeyValue(source, "Confidence: ", fmt(result.confidence()));
-            sendKeyValue(source, "Reason:     ", result.debugReason());
-            sendCacheLine(source, result.cacheHit());
-        }
-        sendBlank(source);
+        Instant dumpedAt = Instant.now();
+        String fullTrace = "Item ID: " + itemName
+                + "\nDisplay Name: " + singleLineForDump(stack.getHoverName().getString())
+                + "\nTimestamp: " + DateTimeFormatter.ISO_INSTANT.format(dumpedAt)
+                + "\n\n" + trace.format()
+                + "\n\n---\n\n" + inspectorOutput;
 
-        if (result != null) {
-            sendSection(source, "Tokens:");
-            if (result.tokens().isEmpty()) {
-                sendDarkGray(source, "  none");
-            } else {
-                for (String token : result.tokens()) {
-                    Float weight = result.tokenWeights().get(token);
-                    sendTokenLine(source, token, weight != null ? weight : 0f);
-                }
-            }
-            sendBlank(source);
-
-            sendSection(source, "Raw Scores:");
-            sendSortedMapDescending(source, result.rawScores());
-            sendBlank(source);
-
-            sendSection(source, "Normalized:");
-            sendSortedMapDescending(source, result.nutrients());
-            sendBlank(source);
-
-            sendSection(source, "Rejected Signals:");
-            if (result.rejectedSignals().isEmpty()) {
-                sendDarkGray(source, "  none");
-            } else {
-                for (Map.Entry<String, String> entry : result.rejectedSignals().entrySet()) {
-                    sendRejectedLine(source, entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
-        sendBlank(source);
-        sendSection(source, "Final Bars:");
-        sendSortedMapDescending(source, trace.finalMergedBars());
-
-        if (ModuleCache.enableDebugLogging) {
-            sendBlank(source);
-            sendTraceDetails(source, trace);
-        }
-
-        Path dumpPath = writeTraceDump(trace, itemName, stack.getHoverName().getString());
-        if (dumpPath != null) {
-            sendBlank(source);
-            source.sendSuccess(() -> Component.literal("Trace written to: ")
-                    .withStyle(ChatFormatting.GRAY)
-                    .append(Component.literal(dumpPath.toString()).withStyle(ChatFormatting.WHITE)), false);
+        try {
+            Path dir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve(DEBUG_SUBDIR);
+            Files.createDirectories(dir);
+            Path file = dir.resolve("trace_dump.txt");
+            Files.writeString(file, fullTrace);
+            source.sendSuccess(() -> Component.literal("Trace written to: " + file.toString()), false);
+        } catch (IOException e) {
+            Nourished.LOGGER.warn("[NourishedDebugCommand] Failed to write trace dump: {}", e.getMessage());
+            source.sendSuccess(() -> Component.literal("Trace write failed: " + e.getMessage()), false);
         }
 
         return 1;
@@ -251,7 +216,8 @@ public final class NourishedDebugCommand {
         return String.join(", ", map.keySet());
     }
 
-    private static Path writeTraceDump(NutrientResolutionTrace trace, String itemIdStr, String displayName) {
+    private static Path writeTraceDump(NutrientResolutionTrace trace, ClassificationTrace classTrace,
+                                       String inspectorOutput, String itemIdStr, String displayName) {
         try {
             Path debugDir = FMLPaths.GAMEDIR.get().resolve("config").resolve(Nourished.MODID).resolve("debug");
             Files.createDirectories(debugDir);
@@ -273,6 +239,8 @@ public final class NourishedDebugCommand {
                 writer.write(DateTimeFormatter.ISO_INSTANT.format(dumpedAt));
                 writer.write("\n\n");
                 writer.write(trace.format());
+                writer.write("\n\n---\n\n");
+                writer.write(inspectorOutput);
             }
 
             return path;

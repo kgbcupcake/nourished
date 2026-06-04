@@ -2,6 +2,9 @@ package dev.maire.nourished.tooling.scanner;
 
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.tooling.classification.ClassificationTraceStep;
+import dev.maire.nourished.tooling.classification.TraceStepId;
+import dev.maire.nourished.tooling.classification.TraceStepStatus;
 import dev.maire.nourished.tooling.scanner.stages.RecipeInheritanceStage;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -16,9 +19,11 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -57,6 +62,18 @@ public final class FoodClassifier {
             Function<ResourceLocation, ClassificationResult> classifiedLookup,
             Map<String, Map<String, Float>> namespaceAverages
     ) {
+        return classify(item, classifiedLookup, namespaceAverages, Optional.empty());
+    }
+
+    /**
+     * Classify a single item with optional trace output, returning the full classification result.
+     */
+    public ClassificationResult classify(
+            Item item,
+            Function<ResourceLocation, ClassificationResult> classifiedLookup,
+            Map<String, Map<String, Float>> namespaceAverages,
+            Optional<List<ClassificationTraceStep>> traceOut
+    ) {
         ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
         if (itemId == null) {
             return ClassificationResult.empty(ResourceLocation.withDefaultNamespace("unknown"), nutrientKeys.get(0));
@@ -70,6 +87,22 @@ public final class FoodClassifier {
         String namespace = itemId.getNamespace();
         String path = itemId.getPath();
         FoodProperties food = item.components().get(DataComponents.FOOD);
+
+        boolean isFood = food != null && food.nutrition() > 0;
+        if (traceOut.isPresent()) {
+            Map<String, Object> discoveryDetail = new LinkedHashMap<>();
+            discoveryDetail.put("itemId", itemId.toString());
+            discoveryDetail.put("nutrition", food != null ? food.nutrition() : 0);
+            discoveryDetail.put("hasTag", false);
+            if (!isFood) {
+                discoveryDetail.put("errorCode", "NOT_FOOD");
+            }
+            traceOut.get().add(new ClassificationTraceStep(
+                    TraceStepId.ITEM_DISCOVERY,
+                    isFood ? TraceStepStatus.SUCCESS : TraceStepStatus.FAILURE,
+                    isFood ? "Food item discovered" : "Not a food item or nutrition <= 0",
+                    discoveryDetail));
+        }
 
         Map<String, Float> scores = new HashMap<>();
         for (String key : nutrientKeys) {
@@ -87,6 +120,8 @@ public final class FoodClassifier {
                     scaleContributions(communityTagContribs, mult.communityTag())
             ));
         }
+        emitSignalStep(traceOut, TraceStepId.COMMUNITY_TAG_SIGNAL, "community_tag",
+                communityTagContribs, scaleContributions(communityTagContribs, mult.communityTag()));
 
         Map<String, Float> namespaceContribs = analyzeSignal2Namespace(namespace, spec.namespaceWeights());
         applySignal(scores, namespaceContribs, mult.namespace());
@@ -117,6 +152,8 @@ public final class FoodClassifier {
                     scaleContributions(keywordContribs, mult.keyword())
             ));
         }
+        emitSignalStep(traceOut, TraceStepId.KEYWORD_SUFFIX_SCORING, "keyword_suffix",
+                keywordContribs, scaleContributions(keywordContribs, mult.keyword()));
 
         Map<String, Float> negativeContribs = analyzeSignal5NegativeKeywords(path, spec.negativeKeywords());
         applySignal(scores, negativeContribs, 1.0f);
@@ -172,9 +209,42 @@ public final class FoodClassifier {
                         scaleContributions(peerContribs, mult.namespacePeer())
                 ));
             }
+            emitSignalStep(traceOut, TraceStepId.NAMESPACE_PEER, "namespace_peer",
+                    peerContribs, scaleContributions(peerContribs, mult.namespacePeer()));
         }
 
-        return buildResult(itemId, scores, signals);
+        if (traceOut.isPresent()) {
+            Map<String, Object> aggregationDetail = new LinkedHashMap<>();
+            aggregationDetail.put("mergedScores", new LinkedHashMap<>(scores));
+            aggregationDetail.put("signalCount", signals.size());
+            traceOut.get().add(new ClassificationTraceStep(
+                    TraceStepId.SIGNAL_AGGREGATION,
+                    TraceStepStatus.SUCCESS,
+                    "Aggregated " + signals.size() + " signal(s)",
+                    aggregationDetail));
+        }
+
+        return buildResult(itemId, scores, signals, traceOut);
+    }
+
+    private void emitSignalStep(
+            Optional<List<ClassificationTraceStep>> traceOut,
+            TraceStepId stepId,
+            String signalType,
+            Map<String, Float> rawContribs,
+            Map<String, Float> scaledContribs
+    ) {
+        if (traceOut.isEmpty()) return;
+
+        Map<String, Object> detail = new LinkedHashMap<>();
+        detail.put("signalType", signalType);
+        detail.put("contributions", new LinkedHashMap<>(scaledContribs));
+        boolean hasSignal = !rawContribs.isEmpty();
+        traceOut.get().add(new ClassificationTraceStep(
+                stepId,
+                hasSignal ? TraceStepStatus.SUCCESS : TraceStepStatus.SKIPPED,
+                hasSignal ? signalType + " signal contributed scores" : "No " + signalType + " signal match",
+                detail));
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -385,6 +455,15 @@ public final class FoodClassifier {
             Map<String, Float> scores,
             List<ClassificationSignal> signals
     ) {
+        return buildResult(itemId, scores, signals, Optional.empty());
+    }
+
+    private ClassificationResult buildResult(
+            ResourceLocation itemId,
+            Map<String, Float> scores,
+            List<ClassificationSignal> signals,
+            Optional<List<ClassificationTraceStep>> traceOut
+    ) {
         List<Map.Entry<String, Float>> sorted = scores.entrySet().stream()
                 .sorted((a, b) -> Float.compare(b.getValue(), a.getValue()))
                 .toList();
@@ -399,6 +478,35 @@ public final class FoodClassifier {
         float secondScore = sorted.size() > 1 ? sorted.get(1).getValue() : 0f;
         float spread = topScore - secondScore;
         boolean uncertain = spread < confidenceSpreadThreshold;
+
+        if (traceOut.isPresent()) {
+            Map<String, Object> winnerDetail = new LinkedHashMap<>();
+            winnerDetail.put("dominant", dominant);
+            if (secondary != null) {
+                winnerDetail.put("secondary", secondary);
+            }
+            winnerDetail.put("spread", (double) spread);
+            traceOut.get().add(new ClassificationTraceStep(
+                    TraceStepId.WINNER_SELECTION,
+                    TraceStepStatus.SUCCESS,
+                    "Selected " + dominant + " as dominant (spread=" + String.format("%.2f", spread) + ")",
+                    winnerDetail));
+
+            Map<String, Object> confidenceDetail = new LinkedHashMap<>();
+            confidenceDetail.put("spread", (double) spread);
+            confidenceDetail.put("threshold", (double) confidenceSpreadThreshold);
+            confidenceDetail.put("uncertain", uncertain);
+            float confidenceScore = topScore > 0 ? spread / topScore : 0f;
+            confidenceDetail.put("confidenceScore", (double) Math.max(0f, Math.min(1f, confidenceScore)));
+            if (uncertain) {
+                confidenceDetail.put("warningCode", "UNCERTAIN_SPREAD");
+            }
+            traceOut.get().add(new ClassificationTraceStep(
+                    TraceStepId.CONFIDENCE,
+                    uncertain ? TraceStepStatus.WARNING : TraceStepStatus.SUCCESS,
+                    uncertain ? "Low confidence (spread below threshold)" : "Confident classification",
+                    confidenceDetail));
+        }
 
         return new ClassificationResult(itemId, scores, dominant, secondary, spread, signals, uncertain, false);
     }
