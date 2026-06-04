@@ -2,6 +2,20 @@
 
 <!-- markdownlint-disable MD013 -->
 
+## [ Nourished 0.2.5-beta.2 ]  Ui Fixes- 2026-6-2
+
+### 0.2.5-beta.2
+
+- Fixed the Diet Screen being affected by Minecraft's Menu Background Blur setting. The UI Should now render sharply regardless of your blur setting, with the world still visible behind the panel.
+Thanks To https://github.com/kgbcupcake/nourished/pull/2
+![Main-Gui](https://cdn.modrinth.com/data/cached_images/583dd8a2f4d4e8bf5c7501c0565ef12aa1986fee_0.webp)
+![Blur Setting](https://cdn.modrinth.com/data/cached_images/39c00c193c7890a769af63b294672640586e6892.png)
+
+
+
+
+
+
 ## [ Nourished 0.2.5-beta.1 ]  Stability & API Patch - 2026-6-1
 
 ## This update focuses on runtime stability, API safety, and synchronization reliability across the nutrition system. It also includes internal cleanup and clarifications to the current state of experimental systems.
