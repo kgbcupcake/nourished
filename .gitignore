@@ -36,3 +36,4 @@ run/
 .clinerules
 .cursorrules
 log4j2.xml
+bin/
