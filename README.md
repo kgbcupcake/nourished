@@ -45,8 +45,6 @@ The HUD is the heart of the mod. Five color-coded bars sit on screen while you p
 
 ![HUD Edit Mode](Assets/nourished-MiniHud.gif)
 
-Note: The HUD and Diet Screen screenshots were taken using the PureBDCraft resource pack. The UI is fully functional on vanilla textures but will appear in the default Minecraft style without a resource pack installed.
-
 **Drag it anywhere.** Press the keybind to enter edit mode and reposition the HUD exactly where you want it. Scale it, anchor it to any corner, or hide bars that are at zero.
 
 ---

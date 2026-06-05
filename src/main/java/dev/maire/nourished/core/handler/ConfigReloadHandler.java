@@ -9,7 +9,7 @@ import dev.maire.nourished.tooling.data.NourishedDataManager;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 @ApiStatus.Internal
@@ -24,15 +24,18 @@ public class ConfigReloadHandler {
         return reloadInProgress || RegistryLifecycleManager.isReloadInProgress();
     }
 
+    /**
+     * Reloads config-backed registries once when the dedicated server starts.
+     * Previously hooked {@code LevelEvent.Load}, which fires per dimension and caused
+     * duplicate full reload cycles (overworld, nether, end) on every startup.
+     */
     @SubscribeEvent
-    public void onLevelLoad(LevelEvent.Load event) {
-        if (!event.getLevel().isClientSide()) {
-            reloadInProgress = true;
-            try {
-                NourishedReloadPipeline.reloadAll();
-            } finally {
-                reloadInProgress = false;
-            }
+    public void onServerStarting(ServerStartingEvent event) {
+        reloadInProgress = true;
+        try {
+            NourishedReloadPipeline.reloadAll();
+        } finally {
+            reloadInProgress = false;
         }
     }
 

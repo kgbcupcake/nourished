@@ -395,7 +395,7 @@ Addon-facing registries documented under “Extension Points” follow the same 
 
 - **`load()`** — **cold startup** path: called from the mod constructor (`Nourished`) once per game launch to **create default files if missing** and **populate registries from config / bundled JSON** before other systems wire up. It is not tied to `/reload` or the config screen.
 
-- **`reload()`** — **runtime refresh** of the same config-backed files while the game is running (after edits, import, level load on dedicated server, or `/nourished reload`). Implementations typically **`reset()`**, re-parse, **`freeze()`**, and sometimes call follow-up hooks (e.g. `NutrientRegistry.reload()` re-runs `FoodNutritionRegistry.init()`).
+- **`reload()`** — **runtime refresh** of the same config-backed files while the game is running (after edits, import, server startup, or `/nourished reload`). Implementations typically **`reset()`**, re-parse, **`freeze()`**, and sometimes call follow-up hooks (e.g. `NutrientRegistry.reload()` re-runs `FoodNutritionRegistry.init()`).
 
 **Datapack JSON** for Nourished definitions uses a separate path: `NourishedDataLoader` / `loadFromDatapack(...)` on individual registries where applicable — that is **data reload**, not the same as the static `*.reload()` pipeline in §8.
 
@@ -404,7 +404,7 @@ Addon-facing registries documented under “Extension Points” follow the same 
 | | **`RegistryLifecycleManager`** | **`NourishedApiDefinitionRegistries`** |
 |---|-------------------------------------------|----------------------------------------|
 | **Purpose** | One ordered pass to **re-read server/client config files** (and datapack slices) for the nine static registries (nutrients, colors, effects, food values, overrides, scanner spec, locks, mod compat, presets). | **Coordinates reset/freeze** of **public API list registries** around **`NourishedDataLoader`** datapack apply and common setup. |
-| **Trigger** | Bootstrap `loadAll()`, level load (server), `/nourished reload`, config UI “reload”, import apply — see §8. Datapack reload uses `loadAll(ResourceManager)`. | Start of each datapack `apply` (`onDatapackApplyBegin` — **reset** selected registries after the first pass), end of apply (`onDatapackApplyEnd` — **freeze**), and after common setup (`freezeModOnlyRegistriesAfterCommonSetup` for registries that only accept mod-time registration). |
+| **Trigger** | Bootstrap `loadAll()`, server startup (`ServerStartingEvent`), `/nourished reload`, config UI “reload”, import apply — see §8. Datapack reload uses `loadAll(ResourceManager)`. | Start of each datapack `apply` (`onDatapackApplyBegin` — **reset** selected registries after the first pass), end of apply (`onDatapackApplyEnd` — **freeze**), and after common setup (`freezeModOnlyRegistriesAfterCommonSetup` for registries that only accept mod-time registration). |
 | **Data source** | Config directory JSON / TOML-adjacent files written by the mod and edited by users; optional `loadFromDatapack` hook for datapack JSON. | Datapack JSON under `data/<namespace>/nourished/...` plus mod constructor registrations. |
 
 They **do not call each other**. Think: **RegistryLifecycleManager** = “refresh local config files”; **ApiDefinitionRegistries** = “wrap datapack-driven API registry passes in reset/freeze discipline.”
@@ -435,12 +435,27 @@ The manager is also the **bootstrap entry point** (`loadAll()`, called once duri
 
 ### Call sites
 
-| Location | What triggers it |
-|----------|------------------|
-| `ConfigReloadHandler.onLevelLoad` | Server **`LevelEvent.Load`** (not client) — ensures dedicated servers pick up disk config when a level loads. |
-| `NourishedCommand.reloadAll` | **`/nourished reload`** — after `MinecraftServer.reloadResources(...)`, runs on the server executor so datapack and config views stay aligned. |
-| `NourishedConfigScreen.ReloadConfigsListEntry` (button lambda) | Mod **config screen** “reload configs” control — immediate client-side refresh for local files. |
-| `ImportExportManager.applyImport` | **Config import** completes (`apply*` sections + `NourishedConfig.saveNow()`), then `reloadAll()`, then `NutrientUiColors.clearOverrides()`. |
+| Handler | Event | Calls |
+|---------|-------|-------|
+| `ConfigReloadHandler.onServerStarting()` | **`ServerStartingEvent`** | `NourishedReloadPipeline.reloadAll()` |
+| `ConfigReloadHandler.onAddReloadListeners()` | **`AddReloadListenerEvent`** | `RegistryLifecycleManager.loadAll(ResourceManager)` |
+| `NourishedCommand.reloadAll` | **`/nourished reload`** | `NourishedReloadPipeline.reloadAll()` (after `MinecraftServer.reloadResources(...)`, on the server executor so datapack and config views stay aligned) |
+| `NourishedConfigScreen.ReloadConfigsListEntry` (button lambda) | Config screen “reload configs” | `NourishedReloadPipeline.reloadAll()` — immediate client-side refresh for local files |
+| `ImportExportManager.applyImport` | Config import completes | `NourishedReloadPipeline.reloadAll()`, then `NutrientUiColors.clearOverrides()` |
+
+### Server startup reload
+
+Config-backed registries reload **once** when the server starts via **`ServerStartingEvent`**. This consolidates the reload into a single pass, avoiding per-dimension duplicate cycles.
+
+| | |
+|---|---|
+| **Event** | `ServerStartingEvent` (not `LevelEvent.Load`) |
+| **When** | Server startup (once per server lifecycle) |
+| **What** | Full config reload via `NourishedReloadPipeline.reloadAll()` → `RegistryLifecycleManager.reloadAll()` |
+| **Where** | `ConfigReloadHandler.onServerStarting()` in `ConfigReloadHandler.java` |
+| **Why** | The previous `LevelEvent.Load` hook fired once per dimension (overworld, nether, end), triggering multiple full reload cycles on every startup |
+
+See `ConfigReloadHandler.onServerStarting()` for implementation.
 
 Do not reorder the nine entries registered in `Nourished.registerLifecycleEntries()` without auditing dependents; the Javadoc on that method and the order list above should stay in sync.
 

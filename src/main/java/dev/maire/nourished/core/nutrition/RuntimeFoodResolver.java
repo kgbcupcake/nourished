@@ -11,6 +11,11 @@ import dev.maire.nourished.core.nutrition.stages.KeywordSuffixStage;
 import dev.maire.nourished.core.nutrition.stages.NamespacePeerStage;
 import dev.maire.nourished.core.nutrition.stages.RecipeInheritanceStage;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.tooling.classification.ClassificationPipeline;
+import dev.maire.nourished.tooling.classification.ClassificationTrace;
+import dev.maire.nourished.tooling.classification.ClassificationTraceStep;
+import dev.maire.nourished.tooling.classification.TraceStepId;
+import dev.maire.nourished.tooling.classification.TraceStepStatus;
 import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -21,7 +26,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -108,7 +116,153 @@ public final class RuntimeFoodResolver {
         return resolveUncached(stack, itemId, recipeManager);
     }
 
+    public @Nullable ClassificationTrace resolveWithTrace(ItemStack stack, @Nullable RecipeManager recipeManager) {
+        if (stack.isEmpty() || stack.getItem() == null) return null;
+
+        List<String> nutrientKeys = NutrientRegistry.getKeys();
+        if (nutrientKeys.isEmpty()) return null;
+
+        Item item = stack.getItem();
+        ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
+        if (itemId == null) return null;
+
+        FoodProperties food = item.components().get(DataComponents.FOOD);
+        boolean isEdible = food != null && food.nutrition() > 0;
+
+        List<ClassificationTraceStep> traceOut = new ArrayList<>();
+
+        Map<String, Object> discoveryDetail = new LinkedHashMap<>();
+        discoveryDetail.put("itemId", itemId.toString());
+        discoveryDetail.put("nutrition", food != null ? food.nutrition() : 0);
+        discoveryDetail.put("hasTag", false);
+        if (!isEdible) {
+            discoveryDetail.put("errorCode", "NOT_FOOD");
+        }
+        traceOut.add(new ClassificationTraceStep(
+                TraceStepId.ITEM_DISCOVERY,
+                isEdible ? TraceStepStatus.SUCCESS : TraceStepStatus.FAILURE,
+                isEdible ? "Item is edible" : "No FoodProperties or nutrition <= 0",
+                discoveryDetail));
+
+        if (!isEdible) {
+            return ClassificationTrace.builder(itemId.toString(), ClassificationPipeline.RUNTIME)
+                    .addStep(traceOut.get(0))
+                    .summaryReason("Not a food item")
+                    .build();
+        }
+
+        ResolutionResult cached = resolvedCache.get(itemId);
+        if (cached != null) {
+            cacheHits.incrementAndGet();
+            Map<String, Object> cacheDetail = new LinkedHashMap<>();
+            cacheDetail.put("cacheKey", itemId.toString());
+            cacheDetail.put("hit", true);
+            traceOut.add(new ClassificationTraceStep(
+                    TraceStepId.RESOLVER_CACHE,
+                    TraceStepStatus.SUCCESS,
+                    "Cache hit",
+                    cacheDetail));
+
+            return buildTraceFromResult(itemId.toString(), cached.withCacheHit(true), traceOut);
+        }
+
+        cacheMisses.incrementAndGet();
+        ResolutionResult result = resolveUncached(stack, itemId, recipeManager, traceOut);
+        return buildTraceFromResult(itemId.toString(), result, traceOut);
+    }
+
+    private ClassificationTrace buildTraceFromResult(String itemId, ResolutionResult result,
+                                                     List<ClassificationTraceStep> steps) {
+        String dominant = null;
+        float maxValue = 0f;
+        float secondValue = 0f;
+        for (Map.Entry<String, Float> entry : result.nutrients().entrySet()) {
+            float v = entry.getValue();
+            if (v > maxValue) {
+                secondValue = maxValue;
+                maxValue = v;
+                dominant = entry.getKey();
+            } else if (v > secondValue) {
+                secondValue = v;
+            }
+        }
+
+        // SIGNAL_AGGREGATION — "mergedScores" key is what the formatter reads for Aggregation/Why Won sections
+        Map<String, Float> signalScores = result.rawScores().isEmpty() ? result.nutrients() : result.rawScores();
+        if (!signalScores.isEmpty()) {
+            Map<String, Object> aggDetail = new LinkedHashMap<>();
+            aggDetail.put("mergedScores", new LinkedHashMap<>(signalScores));
+            aggDetail.put("stage", result.stage().name());
+            if (!result.rejectedSignals().isEmpty()) {
+                aggDetail.put("rejectedSignals", new LinkedHashMap<>(result.rejectedSignals()));
+            }
+            steps.add(new ClassificationTraceStep(
+                    TraceStepId.SIGNAL_AGGREGATION,
+                    TraceStepStatus.SUCCESS,
+                    "Signals aggregated via " + result.stage().displayName(),
+                    aggDetail));
+        }
+
+        // WINNER_SELECTION — explains why dominant won over alternatives
+        if (dominant != null) {
+            Map<String, Object> winnerDetail = new LinkedHashMap<>();
+            winnerDetail.put("winner", dominant);
+            winnerDetail.put("winnerScore", (double) maxValue);
+            if (secondValue > 0f) {
+                winnerDetail.put("runnerUpScore", (double) secondValue);
+                winnerDetail.put("margin", (double) (maxValue - secondValue));
+            }
+            if (!result.rejectedSignals().isEmpty()) {
+                winnerDetail.put("rejectedSignals", new LinkedHashMap<>(result.rejectedSignals()));
+            }
+            steps.add(new ClassificationTraceStep(
+                    TraceStepId.WINNER_SELECTION,
+                    TraceStepStatus.SUCCESS,
+                    String.format(Locale.ROOT, "%s selected (score=%.2f)", dominant, maxValue),
+                    winnerDetail));
+        }
+
+        // CONFIDENCE — "spread"/"threshold" keys match deriveConfidence() in ClassificationTraceFormatter
+        float confidence = result.confidence();
+        float spreadThreshold = getScannerConfidenceSpreadThreshold();
+        // uncertain when spread is below the configured threshold and item actually classified
+        boolean uncertain = dominant != null
+                && result.stage() != RuntimeCascadeStage.HARD_FALLBACK
+                && spreadThreshold > 0f
+                && confidence < spreadThreshold;
+        if (dominant != null) {
+            Map<String, Object> confDetail = new LinkedHashMap<>();
+            confDetail.put("spread", (double) confidence);
+            confDetail.put("threshold", (double) spreadThreshold);
+            confDetail.put("stage", result.stage().name());
+            if (uncertain) confDetail.put("uncertain", true);
+            steps.add(new ClassificationTraceStep(
+                    TraceStepId.CONFIDENCE,
+                    uncertain ? TraceStepStatus.WARNING : TraceStepStatus.SUCCESS,
+                    uncertain
+                            ? String.format(Locale.ROOT, "Confidence below threshold (spread=%.2f)", confidence)
+                            : String.format(Locale.ROOT, "Confidence above threshold (spread=%.2f)", confidence),
+                    confDetail));
+        }
+
+        return ClassificationTrace.builder(itemId, ClassificationPipeline.RUNTIME)
+                .finalBars(result.nutrients())
+                .dominant(dominant)
+                .cascadeStage(result.stage())
+                .tagClassified(false)
+                .uncertain(uncertain)
+                .summaryReason(result.debugReason())
+                .addSteps(steps)
+                .build();
+    }
+
     private ResolutionResult resolveUncached(ItemStack stack, ResourceLocation itemId, @Nullable RecipeManager recipeManager) {
+        return resolveUncached(stack, itemId, recipeManager, null);
+    }
+
+    ResolutionResult resolveUncached(ItemStack stack, ResourceLocation itemId,
+                                     @Nullable RecipeManager recipeManager,
+                                     @Nullable List<ClassificationTraceStep> traceOut) {
         if (ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())) {
             return new ResolutionResult(
                     Map.of(), Map.of(), List.of(), Map.of(), Map.of(),
@@ -118,22 +272,197 @@ public final class RuntimeFoodResolver {
 
         Nourished.LOGGER.debug("[RuntimeFoodResolver] cache miss entering inference pipeline: {}", itemId);
 
+        if (traceOut != null) {
+            Map<String, Object> cacheDetail = new LinkedHashMap<>();
+            cacheDetail.put("cacheKey", itemId.toString());
+            cacheDetail.put("hit", false);
+            traceOut.add(new ClassificationTraceStep(
+                    TraceStepId.RESOLVER_CACHE,
+                    TraceStepStatus.SKIPPED,
+                    "Cache miss — entering inference",
+                    cacheDetail));
+        }
+
         List<String> nutrientKeys = NutrientRegistry.getKeys();
         Holder<Item> holder = stack.getItemHolder();
         Set<String> validKeys = Set.copyOf(nutrientKeys);
-        StageContext ctx = new StageContext(holder, itemId, recipeManager, namespacePeers, validKeys);
+        StageContext ctx = new StageContext(holder, itemId, recipeManager, namespacePeers, validKeys, traceOut);
 
         communityTagStage.resolve(itemId, ctx);
 
+        if (traceOut != null) {
+            boolean communityContributed = !ctx.communityTagSignal().isEmpty();
+            Map<String, Object> communityDetail = new LinkedHashMap<>();
+            communityDetail.put("matched", new ArrayList<>(ctx.communityTagSignal().keySet()));
+            communityDetail.put("contributions", new LinkedHashMap<>(ctx.communityTagSignal()));
+            traceOut.add(new ClassificationTraceStep(
+                    TraceStepId.COMMUNITY_TAG_SIGNAL,
+                    communityContributed ? TraceStepStatus.SUCCESS : TraceStepStatus.SKIPPED,
+                    communityContributed
+                            ? "Community tags contributed " + ctx.communityTagSignal().size() + " signal(s)"
+                            : "No community tag signals",
+                    communityDetail));
+        }
+
         ResolutionResult primary = keywordSuffixStage.resolve(itemId, ctx);
+
+        if (traceOut != null) {
+            if (primary != null) {
+                Map<String, Object> keywordDetail = new LinkedHashMap<>();
+                keywordDetail.put("tokens", new ArrayList<>(primary.tokens()));
+                keywordDetail.put("scores", new LinkedHashMap<>(primary.rawScores()));
+                keywordDetail.put("spread", primary.confidence());
+                keywordDetail.put("spreadThreshold", (double) getScannerConfidenceSpreadThreshold());
+                keywordDetail.put("cascadeStage", primary.stage().name());
+                boolean isComposite = primary.stage() == RuntimeCascadeStage.COMPOSITE;
+                if (isComposite) {
+                    keywordDetail.put("composite", true);
+                }
+                if (ctx.hasArchetypeMatches()) {
+                    keywordDetail.put("archetypeMatches", new ArrayList<>(ctx.archetypeMatches()));
+                }
+                if (ctx.hasNegativeContributions()) {
+                    keywordDetail.put("negativeContributions", new LinkedHashMap<>(ctx.negativeContributions()));
+                }
+                if (ctx.hasTokenDemotions()) {
+                    keywordDetail.put("tokenDemotions", new LinkedHashMap<>(ctx.tokenDemotions()));
+                }
+                traceOut.add(new ClassificationTraceStep(
+                        TraceStepId.KEYWORD_SUFFIX_SCORING,
+                        TraceStepStatus.SUCCESS,
+                        primary.debugReason(),
+                        keywordDetail));
+            } else {
+                Map<String, Object> keywordDetail = new LinkedHashMap<>();
+                keywordDetail.put("tokens", List.of());
+                keywordDetail.put("scores", Map.of());
+                keywordDetail.put("spread", 0.0);
+                keywordDetail.put("spreadThreshold", (double) getScannerConfidenceSpreadThreshold());
+                keywordDetail.put("rejectionReason", "NO_SIGNAL_MATCH");
+                if (ctx.hasArchetypeMatches()) {
+                    keywordDetail.put("archetypeMatches", new ArrayList<>(ctx.archetypeMatches()));
+                }
+                if (ctx.hasNegativeContributions()) {
+                    keywordDetail.put("negativeContributions", new LinkedHashMap<>(ctx.negativeContributions()));
+                }
+                if (ctx.hasTokenDemotions()) {
+                    keywordDetail.put("tokenDemotions", new LinkedHashMap<>(ctx.tokenDemotions()));
+                }
+                traceOut.add(new ClassificationTraceStep(
+                        TraceStepId.KEYWORD_SUFFIX_SCORING,
+                        TraceStepStatus.FAILURE,
+                        "No keyword match",
+                        keywordDetail));
+            }
+        }
+
         ResolutionResult recipeSupplement = recipeInheritanceStage.resolve(itemId, ctx);
+
+        if (traceOut != null) {
+            if (recipeSupplement != null) {
+                Map<String, Object> recipeDetail = new LinkedHashMap<>();
+                recipeDetail.put("recipeFound", true);
+                recipeDetail.put("ingredientCount", recipeSupplement.nutrients().size());
+                recipeDetail.put("timeout", false);
+                traceOut.add(new ClassificationTraceStep(
+                        TraceStepId.RECIPE_LOOKUP,
+                        TraceStepStatus.SUCCESS,
+                        "Recipe supplement found",
+                        recipeDetail));
+            } else {
+                Map<String, Object> recipeDetail = new LinkedHashMap<>();
+                recipeDetail.put("recipeFound", false);
+                recipeDetail.put("ingredientCount", 0);
+                String failureReason = ctx.recipeFailureReason();
+                recipeDetail.put("errorCode", failureReason != null ? failureReason : "UNKNOWN");
+                recipeDetail.put("timeout", "RECIPE_TIMEOUT".equals(failureReason));
+                traceOut.add(new ClassificationTraceStep(
+                        TraceStepId.RECIPE_LOOKUP,
+                        TraceStepStatus.SKIPPED,
+                        "No recipe supplement: " + (failureReason != null ? failureReason : "UNKNOWN"),
+                        recipeDetail));
+            }
+        }
+
         ResolutionResult result = RuntimeResolutionMerge.mergePrimaryWithRecipeSupplement(primary, recipeSupplement);
+
+        if (traceOut != null) {
+            if (result != null) {
+                Map<String, Object> mergeDetail = new LinkedHashMap<>();
+                List<String> keysAdded = new ArrayList<>();
+                if (recipeSupplement != null && primary != null) {
+                    for (String key : result.nutrients().keySet()) {
+                        if (!primary.nutrients().containsKey(key)) {
+                            keysAdded.add(key);
+                        }
+                    }
+                }
+                mergeDetail.put("keysAdded", keysAdded);
+                if (recipeSupplement != null) {
+                    mergeDetail.put("recipeContribution", new LinkedHashMap<>(recipeSupplement.nutrients()));
+                }
+                traceOut.add(new ClassificationTraceStep(
+                        TraceStepId.PRIMARY_RECIPE_MERGE,
+                        TraceStepStatus.SUCCESS,
+                        result.stage().displayName(),
+                        mergeDetail));
+            } else {
+                Map<String, Object> mergeDetail = new LinkedHashMap<>();
+                mergeDetail.put("keysAdded", List.of());
+                traceOut.add(new ClassificationTraceStep(
+                        TraceStepId.PRIMARY_RECIPE_MERGE,
+                        TraceStepStatus.SKIPPED,
+                        "No primary or recipe result to merge",
+                        mergeDetail));
+            }
+        }
 
         if (result == null) {
             result = namespacePeerStage.resolve(itemId, ctx);
+            if (traceOut != null) {
+                String ns = itemId.getNamespace();
+                RunningAverage peerAvg = namespacePeers.get(ns);
+                int peerCount = peerAvg != null ? peerAvg.count() : 0;
+                Map<String, Float> avg = peerAvg != null ? peerAvg.average() : Map.of();
+                float peerSpread = computeSpread(avg);
+                Map<String, Object> peerDetail = new LinkedHashMap<>();
+                peerDetail.put("peerCount", peerCount);
+                peerDetail.put("peerSpread", (double) peerSpread);
+                peerDetail.put("minPeerCount", 5);
+                peerDetail.put("minSpread", 2.0);
+                if (result != null) {
+                    peerDetail.put("applied", true);
+                    traceOut.add(new ClassificationTraceStep(
+                            TraceStepId.NAMESPACE_PEER,
+                            TraceStepStatus.SUCCESS,
+                            "Namespace peer used",
+                            peerDetail));
+                } else {
+                    peerDetail.put("applied", false);
+                    String rejectionReason = peerCount < 5 ? "NAMESPACE_PEER_UNAVAILABLE: count < 5"
+                            : peerSpread < 2.0f ? "NAMESPACE_PEER_UNAVAILABLE: spread < 2.0" : "NAMESPACE_PEER_UNAVAILABLE";
+                    peerDetail.put("rejectionReason", rejectionReason);
+                    traceOut.add(new ClassificationTraceStep(
+                            TraceStepId.NAMESPACE_PEER,
+                            TraceStepStatus.SKIPPED,
+                            "Namespace peer unavailable",
+                            peerDetail));
+                }
+            }
         }
         if (result == null) {
             result = hardFallbackStage.resolve(itemId, ctx);
+            if (traceOut != null) {
+                Map<String, Object> fallbackDetail = new LinkedHashMap<>();
+                fallbackDetail.put("terminated", true);
+                fallbackDetail.put("reason", "unclassified");
+                fallbackDetail.put("errorCode", "UNCLASSIFIED");
+                traceOut.add(new ClassificationTraceStep(
+                        TraceStepId.HARD_FALLBACK,
+                        TraceStepStatus.FAILURE,
+                        "No classification path — unclassified",
+                        fallbackDetail));
+            }
         }
 
         resolvedCache.put(itemId, result);
@@ -204,5 +533,29 @@ public final class RuntimeFoodResolver {
                 slowestItem.get(),
                 recipeTimeouts.get()
         );
+    }
+
+    private static float getScannerConfidenceSpreadThreshold() {
+        try {
+            return (float) dev.maire.nourished.config.NourishedConfig.get().scannerConfidenceSpreadThreshold();
+        } catch (IllegalStateException ignored) {
+            return 0f;
+        }
+    }
+
+    private static float computeSpread(Map<String, Float> scores) {
+        float first = Float.NEGATIVE_INFINITY;
+        float second = Float.NEGATIVE_INFINITY;
+        for (float v : scores.values()) {
+            if (v > first) {
+                second = first;
+                first = v;
+            } else if (v > second) {
+                second = v;
+            }
+        }
+        if (first == Float.NEGATIVE_INFINITY) return 0f;
+        if (second == Float.NEGATIVE_INFINITY) return first;
+        return first - second;
     }
 }

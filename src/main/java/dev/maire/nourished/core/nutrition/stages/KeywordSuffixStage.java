@@ -232,6 +232,13 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
                 float ambiguousMult = AMBIGUOUS_TOKENS.contains(stemmed) ? AMBIGUOUS_TOKEN_MULTIPLIER : 1.0f;
                 float finalWeight = positionalWeight * semanticMult * ambiguousMult;
                 tokenWeightMap.merge(stemmed, finalWeight, Float::max);
+                // Record demotion flags for any token whose multipliers reduce weight below 1.0
+                if (ctx.traceOut() != null && (semanticMult < 1.0f || ambiguousMult < 1.0f)) {
+                    List<String> flags = new ArrayList<>();
+                    if (semanticMult < 1.0f) flags.add("PREPARATION_HALVED");
+                    if (ambiguousMult < 1.0f) flags.add("AMBIGUOUS_SUPPRESSED");
+                    ctx.tokenDemotions().put(stemmed, flags);
+                }
             }
         }
 
@@ -278,7 +285,12 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
             if (neg != null) {
                 for (Map.Entry<String, Float> e : neg.entrySet()) {
                     if (scores.containsKey(e.getKey())) {
-                        scores.merge(e.getKey(), e.getValue() * finalWeight, Float::sum);
+                        float negAmount = e.getValue() * finalWeight;
+                        scores.merge(e.getKey(), negAmount, Float::sum);
+                        // Accumulate negative contributions separately so the trace can show suppression
+                        if (ctx.traceOut() != null) {
+                            ctx.negativeContributions().merge(e.getKey(), negAmount, Float::sum);
+                        }
                     }
                 }
             }
@@ -288,10 +300,19 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
         List<ArchetypePattern> archetypes = spec.archetypes();
         for (ArchetypePattern archetype : archetypes) {
             if (archetype.matches(path)) {
+                Map<String, Float> weighted = new LinkedHashMap<>();
                 for (Map.Entry<String, Float> e : archetype.contributions().entrySet()) {
                     if (scores.containsKey(e.getKey())) {
-                        scores.merge(e.getKey(), e.getValue() * mult.archetype(), Float::sum);
+                        float contribution = e.getValue() * mult.archetype();
+                        scores.merge(e.getKey(), contribution, Float::sum);
+                        weighted.put(e.getKey(), contribution);
                     }
+                }
+                if (ctx.traceOut() != null && !weighted.isEmpty()) {
+                    Map<String, Object> archetypeEntry = new LinkedHashMap<>();
+                    archetypeEntry.put("pattern", archetype.pattern());
+                    archetypeEntry.put("contributions", weighted);
+                    ctx.archetypeMatches().add(archetypeEntry);
                 }
             }
         }

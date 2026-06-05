@@ -3,6 +3,9 @@ package dev.maire.nourished.tooling.scanner;
 import dev.maire.nourished.api.ApiStatus;
 import dev.maire.nourished.core.nutrition.MultiNutrientInheritance;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.tooling.classification.ClassificationTraceStep;
+import dev.maire.nourished.tooling.classification.TraceStepId;
+import dev.maire.nourished.tooling.classification.TraceStepStatus;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -19,6 +22,7 @@ import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,6 +98,18 @@ public final class RecipeInheritanceResolver {
             Function<ResourceLocation, ClassificationResult> classifiedLookup,
             @Nullable List<RecipeInheritanceStep> traceOut
     ) {
+        return resolve(item, classifiedLookup, traceOut, null);
+    }
+
+    /**
+     * Same as above but also emits ClassificationTraceStep for trace diagnostics.
+     */
+    public Map<String, Float> resolve(
+            Item item,
+            Function<ResourceLocation, ClassificationResult> classifiedLookup,
+            @Nullable List<RecipeInheritanceStep> traceOut,
+            @Nullable List<ClassificationTraceStep> classificationTraceOut
+    ) {
         if (recipeManager == null) {
             return Map.of();
         }
@@ -103,7 +119,21 @@ public final class RecipeInheritanceResolver {
             return Map.of();
         }
 
-        Map<String, Float> aggregated = resolveRecursive(itemId, classifiedLookup, 0, new HashMap<>(), traceOut);
+        List<ResourceLocation> ingredients = getIngredients(itemId);
+
+        if (classificationTraceOut != null) {
+            Map<String, Object> recipeDetail = new LinkedHashMap<>();
+            recipeDetail.put("recipeFound", !ingredients.isEmpty());
+            recipeDetail.put("ingredientCount", ingredients.size());
+            recipeDetail.put("timeout", false);
+            classificationTraceOut.add(new ClassificationTraceStep(
+                    TraceStepId.RECIPE_LOOKUP,
+                    ingredients.isEmpty() ? TraceStepStatus.FAILURE : TraceStepStatus.SUCCESS,
+                    ingredients.isEmpty() ? "No recipe found" : "Found recipe with " + ingredients.size() + " ingredient(s)",
+                    recipeDetail));
+        }
+
+        Map<String, Float> aggregated = resolveRecursive(itemId, classifiedLookup, 0, new HashMap<>(), traceOut, classificationTraceOut);
         return MultiNutrientInheritance.filterQualifyingNutrients(aggregated, MultiNutrientInheritance.threshold());
     }
 
@@ -114,11 +144,34 @@ public final class RecipeInheritanceResolver {
             Map<ResourceLocation, Boolean> visited,
             @Nullable List<RecipeInheritanceStep> traceOut
     ) {
+        return resolveRecursive(itemId, classifiedLookup, depth, visited, traceOut, null);
+    }
+
+    private Map<String, Float> resolveRecursive(
+            ResourceLocation itemId,
+            Function<ResourceLocation, ClassificationResult> classifiedLookup,
+            int depth,
+            Map<ResourceLocation, Boolean> visited,
+            @Nullable List<RecipeInheritanceStep> traceOut,
+            @Nullable List<ClassificationTraceStep> classificationTraceOut
+    ) {
         if (depth >= MAX_DEPTH) {
             return Map.of();
         }
 
         if (visited.containsKey(itemId)) {
+            if (classificationTraceOut != null) {
+                Map<String, Object> detail = new LinkedHashMap<>();
+                detail.put("ingredientId", itemId.toString());
+                detail.put("source", "NONE");
+                detail.put("skipped", true);
+                detail.put("skipReason", "CYCLE_DETECTED");
+                classificationTraceOut.add(new ClassificationTraceStep(
+                        TraceStepId.INGREDIENT_RESOLUTION,
+                        TraceStepStatus.SKIPPED,
+                        "Ingredient skipped: cycle detected",
+                        detail));
+            }
             return Map.of();
         }
         visited.put(itemId, true);
@@ -144,8 +197,44 @@ public final class RecipeInheritanceResolver {
                 if (traceOut != null) {
                     traceOut.add(new RecipeInheritanceStep(ingredientId, depth, decayFactor, stepContribs));
                 }
+                if (classificationTraceOut != null) {
+                    Map<String, Object> detail = new LinkedHashMap<>();
+                    detail.put("ingredientId", ingredientId.toString());
+                    detail.put("source", result.tagClassified() ? "TAG" : "SCANNER");
+                    detail.put("nutrients", new LinkedHashMap<>(stepContribs));
+                    if (result.uncertain()) {
+                        detail.put("uncertain", true);
+                    }
+                    classificationTraceOut.add(new ClassificationTraceStep(
+                            TraceStepId.INGREDIENT_RESOLUTION,
+                            TraceStepStatus.SUCCESS,
+                            "Ingredient classified via " + (result.tagClassified() ? "TAG" : "SCANNER"),
+                            detail));
+                }
             } else {
-                Map<String, Float> inherited = resolveRecursive(ingredientId, classifiedLookup, depth + 1, visited, traceOut);
+                if (classificationTraceOut != null && result == null) {
+                    Map<String, Object> detail = new LinkedHashMap<>();
+                    detail.put("ingredientId", ingredientId.toString());
+                    detail.put("source", "NONE");
+                    detail.put("warningCode", "INGREDIENT_UNCLASSIFIED");
+                    classificationTraceOut.add(new ClassificationTraceStep(
+                            TraceStepId.INGREDIENT_RESOLUTION,
+                            TraceStepStatus.FAILURE,
+                            "Ingredient unclassified",
+                            detail));
+                } else if (classificationTraceOut != null && result != null && result.uncertain()) {
+                    Map<String, Object> detail = new LinkedHashMap<>();
+                    detail.put("ingredientId", ingredientId.toString());
+                    detail.put("source", "SCANNER");
+                    detail.put("uncertain", true);
+                    detail.put("warningCode", "INGREDIENT_UNCLASSIFIED");
+                    classificationTraceOut.add(new ClassificationTraceStep(
+                            TraceStepId.INGREDIENT_RESOLUTION,
+                            TraceStepStatus.WARNING,
+                            "Ingredient classification uncertain",
+                            detail));
+                }
+                Map<String, Float> inherited = resolveRecursive(ingredientId, classifiedLookup, depth + 1, visited, traceOut, classificationTraceOut);
                 for (Map.Entry<String, Float> e : inherited.entrySet()) {
                     contributions.merge(e.getKey(), e.getValue() / n, Float::sum);
                 }

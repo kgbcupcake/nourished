@@ -1,6 +1,64 @@
 # Changelog
 
 <!-- markdownlint-disable MD013 -->
+## [ Nourished 0.2.5-beta.3 ]  2026-6-3
+
+
+### Diagnostics & Classification Tracing
+
+* Added `ClassificationTrace` infrastructure for recording food classification decisions.
+* Added `ClassificationPipeline` support to identify trace origin.
+* Added `ClassificationTraceStep` for step-by-step classification tracking.
+* Added `ClassificationTraceFormatter` for human-readable diagnostic reports.
+
+### Runtime Trace Improvements
+
+* Added runtime `SIGNAL_AGGREGATION` tracing.
+* Added runtime `WINNER_SELECTION` tracing.
+* Added runtime `CONFIDENCE` tracing.
+* Added confidence and uncertainty propagation to runtime traces.
+
+### Classification Explainability
+
+* Added archetype match evidence capture.
+* Added token demotion evidence capture.
+* Added negative keyword contribution tracing.
+* Improved held-item diagnostics and classification reasoning output.
+
+### Recipe Diagnostics
+
+Added detailed recipe failure reporting:
+
+* `NO_RECIPE_FOUND`
+* `NULL_RECIPE_MANAGER`
+* `INGREDIENT_CAP_EXCEEDED`
+* `CONFIRMED_THRESHOLD_FAILED`
+* `NUTRIENTS_BELOW_THRESHOLD`
+* `RECIPE_EXCEPTION`
+
+### Fixes & Lifecycle Improvements
+
+* Consolidated config reload handling to ServerStartingEvent, replacing LevelEvent.Load to prevent          duplicate reload cycles during world initialization.
+* Removed legacy HUD threshold migration from NourishedClientConfig.
+* Improved datapack error logging for duplicate nutrients and malformed entries with clearer messages.
+
+### Notes
+
+This update significantly expands Nourished's diagnostic capabilities and lays the foundation for future self-diagnosing classification and validation tooling.
+
+## [ Nourished 0.2.5-beta.2 ]  Ui Fixes- 2026-6-2
+
+### 0.2.5-beta.2
+
+- Fixed the Diet Screen being affected by Minecraft's Menu Background Blur setting. The UI Should now render sharply regardless of your blur setting, with the world still visible behind the panel.
+Thanks To https://github.com/kgbcupcake/nourished/pull/2
+![Main-Gui](https://cdn.modrinth.com/data/cached_images/583dd8a2f4d4e8bf5c7501c0565ef12aa1986fee_0.webp)
+![Blur Setting](https://cdn.modrinth.com/data/cached_images/39c00c193c7890a769af63b294672640586e6892.png)
+
+
+
+
+
 
 ## [ Nourished 0.2.5-beta.1 ]  Stability & API Patch - 2026-6-1
 

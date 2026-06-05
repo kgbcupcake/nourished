@@ -6,6 +6,7 @@ import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.tooling.classification.ClassificationTraceStep;
 import dev.maire.nourished.tooling.scanner.analysis.MultiNutrientAnalysisPipeline;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -55,14 +57,20 @@ public final class UnassignedFoodScanner {
      * @param itemId The item's registry ID
      * @param fallbackNutrient The fallback nutrient category assigned
      * @param result The full classification result (nullable for backward compat)
+     * @param trace The classification trace steps (nullable)
      */
     public record ScanHit(
             ResourceLocation itemId,
             String fallbackNutrient,
-            @Nullable ClassificationResult result
+            @Nullable ClassificationResult result,
+            @Nullable List<ClassificationTraceStep> trace
     ) {
         public ScanHit(ResourceLocation itemId, String fallbackNutrient) {
-            this(itemId, fallbackNutrient, null);
+            this(itemId, fallbackNutrient, null, null);
+        }
+
+        public ScanHit(ResourceLocation itemId, String fallbackNutrient, @Nullable ClassificationResult result) {
+            this(itemId, fallbackNutrient, result, null);
         }
     }
 
@@ -74,6 +82,7 @@ public final class UnassignedFoodScanner {
             float confidenceSpreadThreshold,
             boolean writeReports,
             boolean writeRecommendations,
+            boolean collectTraces,
             @Nullable RecipeManager recipeManager,
             @Nullable Consumer<String> progressCallback
     ) {
@@ -91,6 +100,7 @@ public final class UnassignedFoodScanner {
                     spreadThreshold,
                     true,
                     true,
+                    false,
                     null,
                     null
             );
@@ -98,32 +108,37 @@ public final class UnassignedFoodScanner {
 
         public ScanOptions withRecipeManager(RecipeManager rm) {
             return new ScanOptions(enableRecipeInheritance, confidenceSpreadThreshold,
-                    writeReports, writeRecommendations, rm, progressCallback);
+                    writeReports, writeRecommendations, collectTraces, rm, progressCallback);
         }
 
         public ScanOptions withProgressCallback(Consumer<String> callback) {
             return new ScanOptions(enableRecipeInheritance, confidenceSpreadThreshold,
-                    writeReports, writeRecommendations, recipeManager, callback);
+                    writeReports, writeRecommendations, collectTraces, recipeManager, callback);
         }
 
         public ScanOptions withThreshold(float threshold) {
             return new ScanOptions(enableRecipeInheritance, threshold,
-                    writeReports, writeRecommendations, recipeManager, progressCallback);
+                    writeReports, writeRecommendations, collectTraces, recipeManager, progressCallback);
         }
 
         public ScanOptions withRecipeInheritance(boolean enabled) {
             return new ScanOptions(enabled, confidenceSpreadThreshold,
-                    writeReports, writeRecommendations, recipeManager, progressCallback);
+                    writeReports, writeRecommendations, collectTraces, recipeManager, progressCallback);
         }
 
         public ScanOptions withReports(boolean enabled) {
             return new ScanOptions(enableRecipeInheritance, confidenceSpreadThreshold,
-                    enabled, writeRecommendations, recipeManager, progressCallback);
+                    enabled, writeRecommendations, collectTraces, recipeManager, progressCallback);
         }
 
         public ScanOptions withRecommendations(boolean enabled) {
             return new ScanOptions(enableRecipeInheritance, confidenceSpreadThreshold,
-                    writeReports, enabled, recipeManager, progressCallback);
+                    writeReports, enabled, collectTraces, recipeManager, progressCallback);
+        }
+
+        public ScanOptions withTraces(boolean enabled) {
+            return new ScanOptions(enableRecipeInheritance, confidenceSpreadThreshold,
+                    writeReports, writeRecommendations, enabled, recipeManager, progressCallback);
         }
     }
 
@@ -134,8 +149,18 @@ public final class UnassignedFoodScanner {
             List<ScanHit> hits,
             List<ClassificationResult> allResults,
             ScanCache.ScanSummary summary,
-            @Nullable ScanCache.ScanDiff diff
-    ) {}
+            @Nullable ScanCache.ScanDiff diff,
+            Map<ResourceLocation, List<ClassificationTraceStep>> traces
+    ) {
+        public ScanResult(
+                List<ScanHit> hits,
+                List<ClassificationResult> allResults,
+                ScanCache.ScanSummary summary,
+                @Nullable ScanCache.ScanDiff diff
+        ) {
+            this(hits, allResults, summary, diff, Map.of());
+        }
+    }
 
     private UnassignedFoodScanner() {}
 
@@ -322,6 +347,7 @@ public final class UnassignedFoodScanner {
         progress.accept("Found " + foodItems.size() + " untagged food items...");
 
         Map<ResourceLocation, ClassificationResult> classifiedResults = new ConcurrentHashMap<>();
+        Map<ResourceLocation, List<ClassificationTraceStep>> traceMap = options.collectTraces() ? new ConcurrentHashMap<>() : Map.of();
         Map<String, Map<String, Float>> namespaceAverages = new HashMap<>();
 
         progress.accept("Running classification pass 1 (without namespace peers)...");
@@ -352,13 +378,21 @@ public final class UnassignedFoodScanner {
             ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
             if (itemId == null) continue;
 
+            List<ClassificationTraceStep> traceOut = options.collectTraces() ? new ArrayList<>() : null;
+            Optional<List<ClassificationTraceStep>> traceOpt = traceOut != null ? Optional.of(traceOut) : Optional.empty();
+
             ClassificationResult result = classifier.classify(
                     item,
                     classifiedResults::get,
-                    namespaceAverages
+                    namespaceAverages,
+                    traceOpt
             );
             classifiedResults.put(itemId, result);
             cache.put(itemId, result);
+
+            if (traceOut != null && !traceOut.isEmpty()) {
+                traceMap.put(itemId, traceOut);
+            }
         }
 
         List<ClassificationResult> allResults = new ArrayList<>(classifiedResults.values());
@@ -418,7 +452,7 @@ public final class UnassignedFoodScanner {
 
         progress.accept("Done.");
 
-        return new ScanResult(hits, allResults, summary, diff);
+        return new ScanResult(hits, allResults, summary, diff, traceMap);
     }
 
     /**
