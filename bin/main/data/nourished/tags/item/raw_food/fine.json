@@ -1,9 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    { "id": "#minecraft:is_fruit", "required": false },
-    { "id": "#forge:fruits", "required": false },
-    { "id": "#neoforge:fruits", "required": false },
-    { "id": "#nourished:nutrients/fruits", "required": false }
-  ]
-}

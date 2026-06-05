@@ -1,9 +1,0 @@
-{
-  "nourished_schema_version": 1,
-  "nutrient_key": "proteins",
-  "threshold": 0.25,
-  "threshold_type": "LOW",
-  "effect_id": "minecraft:mining_fatigue",
-  "amplifier": 0,
-  "duration": 140
-}
