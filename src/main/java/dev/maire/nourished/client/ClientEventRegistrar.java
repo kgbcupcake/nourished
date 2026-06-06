@@ -6,6 +6,7 @@ import dev.maire.nourished.core.Nourished;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 
 public final class ClientEventRegistrar {
 
@@ -19,7 +20,12 @@ public final class ClientEventRegistrar {
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onRenderGuiPost);
         // NeoForge.EVENT_BUS.addListener(StaminaHUD::onRenderGuiPost); // STAMINA_SHELVED
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onKeyInput);
+        NeoForge.EVENT_BUS.addListener(ClientEventRegistrar::onLogout);
         bootstrapCompatPlugins();
+    }
+
+    private static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
+        ClientNourishedState.reset();
     }
 
     private static void bootstrapCompatPlugins() {

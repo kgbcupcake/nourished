@@ -22,6 +22,8 @@ import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.ModNetworking;
+import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
+import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry.NutrientResolutionDiagnostic;
@@ -50,6 +52,9 @@ import java.util.Optional;
  */
 @ApiStatus.Internal
 final class FoodNutrientPipeline {
+
+    private static final java.util.concurrent.atomic.AtomicBoolean THRESHOLD_WARN_ONCE =
+            new java.util.concurrent.atomic.AtomicBoolean(false);
 
     private FoodNutrientPipeline() {}
 
@@ -335,14 +340,26 @@ final class FoodNutrientPipeline {
     }
 
     private static void checkThresholdCrossings(ServerPlayer player, DietData diet) {
-        NourishedConfig config = NourishedConfig.get();
-        float excessThreshold = (float) config.excessThreshold();
+        SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
+        final float excessThreshold;
+
+        if (snapshot != null) {
+            excessThreshold = (float) snapshot.excessThreshold();
+        } else {
+            if (THRESHOLD_WARN_ONCE.compareAndSet(false, true)) {
+                dev.maire.nourished.core.Nourished.LOGGER.warn(
+                    "[Nourished] FoodNutrientPipeline: snapshot null in checkThresholdCrossings, falling back to raw config.");
+            }
+            excessThreshold = (float) NourishedConfig.get().excessThreshold();
+        }
         for (String key : NutrientRegistry.getKeys()) {
             float current = diet.nutrients.getOrDefault(key, 0f);
             float previous = diet.lastNutrients.getOrDefault(key, 0f);
             boolean beneficial = NutrientRegistry.isBeneficial(key);
 
-            float criticalThreshold = (float) config.criticalThresholdFor(key);
+            float criticalThreshold = snapshot != null
+                    ? (float) snapshot.criticalThreshold()
+                    : (float) NourishedConfig.get().criticalThresholdFor(key);
 
             if (beneficial) {
                 if (current <= criticalThreshold && previous > criticalThreshold) {

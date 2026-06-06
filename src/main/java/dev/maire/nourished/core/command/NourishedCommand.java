@@ -24,9 +24,12 @@ import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.network.ModNetworking;
+import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
+import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
+import dev.maire.nourished.core.handler.ConfigReloadHandler;
 import dev.maire.nourished.core.reload.NourishedReloadPipeline;
 import dev.maire.nourished.core.util.NourishedRegistryUtils;
 import dev.maire.nourished.core.util.NourishedValidation;
@@ -395,7 +398,10 @@ public class NourishedCommand {
     private int resetPlayer(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
         DietData data = player.getData(DietAttachment.DIET.get());
-        float start = (float) NourishedConfig.get().startingNutrientValue();
+        SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
+        float start = snapshot != null
+                ? (float) snapshot.startingNutrientValue()
+                : (float) NourishedConfig.get().startingNutrientValue();
         for (String key : NutrientRegistry.getKeys()) {
             float old = data.nutrients.getOrDefault(key, 0f);
             data.nutrients.put(key, start);
@@ -439,6 +445,7 @@ public class NourishedCommand {
         server.reloadResources(server.getPackRepository().getSelectedIds()).thenRun(() -> {
             server.execute(() -> {
                 NourishedReloadPipeline.reloadAll();
+                ConfigReloadHandler.reloadAndBroadcast(server);
                 source.sendSuccess(() -> Component.literal("Nourished data reload complete."), true);
             });
         });

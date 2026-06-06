@@ -1,7 +1,9 @@
 package dev.maire.nourished.core.network;
 
 import dev.maire.nourished.client.ClientDietCache;
+import dev.maire.nourished.client.ClientNourishedState;
 import dev.maire.nourished.client.NourishedToastManager;
+import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.core.diet.FoodMemoryEntry;
@@ -52,6 +54,13 @@ public class ModNetworking {
                 ModNetworking::handleSyncDietDelta
         );
 
+        // Config snapshot — server-authoritative gameplay parameters
+        registrar.playToClient(
+                SyncNourishedConfigSnapshot.TYPE,
+                SyncNourishedConfigSnapshot.STREAM_CODEC,
+                ModNetworking::handleSyncConfigSnapshot
+        );
+
         // Gut health sync — raw food module
         registrar.playToClient(
                 GutHealthSyncPayload.TYPE,
@@ -75,6 +84,17 @@ public class ModNetworking {
     /** Send full DietData. Call on login, respawn, dimension change, command only. */
     public static void syncDiet(ServerPlayer player, DietData diet) {
         PacketDistributor.sendToPlayer(player, new SyncDietPayload(diet));
+    }
+
+    private static void handleSyncConfigSnapshot(SyncNourishedConfigSnapshot payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (payload.protocolVersion() != SyncNourishedConfigSnapshot.PROTOCOL_VERSION) {
+                Nourished.LOGGER.warn("[Nourished] Ignoring config snapshot: protocol version mismatch (got {}, expected {})",
+                        payload.protocolVersion(), SyncNourishedConfigSnapshot.PROTOCOL_VERSION);
+                return;
+            }
+            ClientNourishedState.setConfig(payload);
+        });
     }
 
     private static void handleSyncDiet(SyncDietPayload payload, IPayloadContext context) {

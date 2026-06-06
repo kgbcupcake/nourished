@@ -7,6 +7,7 @@ import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.ModNetworking;
+import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,7 +23,7 @@ public class DietPlayerEvents {
         DietData diet = player.getData(DietAttachment.DIET.get());
         diet.tick();
         player.setData(DietAttachment.DIET.get(), diet);
-        ModNetworking.syncDiet(player, diet);
+        NourishedSyncHandler.syncOnJoin(player);
         if (ModuleCache.enableEffects) {
             NutritionEffectApplier.apply(player, diet);
         }
@@ -53,7 +54,7 @@ public class DietPlayerEvents {
         DietData diet = player.getData(DietAttachment.DIET.get());
         diet.tick();
         player.setData(DietAttachment.DIET.get(), diet);
-        ModNetworking.syncDiet(player, diet);
+        NourishedSyncHandler.syncOnJoin(player);
         if (ModuleCache.enableEffects) {
             NutritionEffectApplier.apply(player, diet);
         }
