@@ -26,10 +26,14 @@ public record SyncNourishedConfigSnapshot(
         boolean enableToasts,
         double confidenceSpreadThreshold,
         float compositeRatioThreshold,
+        long memoryWindowMinutes,
+        double noveltyBonus,
+        double noveltyDecayCap,
+        double diminishingFloor,
         Map<String, Double> nutrientDecayOverrides
 ) implements CustomPacketPayload {
 
-    public static final int PROTOCOL_VERSION = 1;
+    public static final int PROTOCOL_VERSION = 2;
 
     public static final CustomPacketPayload.Type<SyncNourishedConfigSnapshot> TYPE =
             new CustomPacketPayload.Type<>(
@@ -72,6 +76,10 @@ public record SyncNourishedConfigSnapshot(
                         buf.writeBoolean(s.enableToasts());
                         buf.writeDouble(s.confidenceSpreadThreshold());
                         buf.writeFloat(s.compositeRatioThreshold());
+                        buf.writeLong(s.memoryWindowMinutes());
+                        buf.writeDouble(s.noveltyBonus());
+                        buf.writeDouble(s.noveltyDecayCap());
+                        buf.writeDouble(s.diminishingFloor());
                         DECAY_OVERRIDES_CODEC.encode(buf, s.nutrientDecayOverrides());
                     },
                     buf -> {
@@ -90,13 +98,19 @@ public record SyncNourishedConfigSnapshot(
                         boolean enableToasts = buf.readBoolean();
                         double confidenceSpreadThreshold = buf.readDouble();
                         float compositeRatioThreshold = buf.readFloat();
+                        long memoryWindowMinutes = buf.readLong();
+                        double noveltyBonus = buf.readDouble();
+                        double noveltyDecayCap = buf.readDouble();
+                        double diminishingFloor = buf.readDouble();
                         Map<String, Double> overrides = DECAY_OVERRIDES_CODEC.decode(buf);
                         return new SyncNourishedConfigSnapshot(
                                 version, decayRate, decayIntervalTicks, criticalThreshold,
                                 lowThreshold, excessThreshold, bonusEffectThreshold,
                                 penaltyEffectThreshold, startingNutrientValue, enableRawFoodPenalty,
                                 enableEffects, enableHUD, enableToasts, confidenceSpreadThreshold,
-                                compositeRatioThreshold, overrides
+                                compositeRatioThreshold,
+                                memoryWindowMinutes, noveltyBonus, noveltyDecayCap, diminishingFloor,
+                                overrides
                         );
                     }
             );
@@ -125,6 +139,10 @@ public record SyncNourishedConfigSnapshot(
                 config.enableToasts(),
                 config.scannerConfidenceSpreadThreshold(),
                 config.compositeRatioThreshold(),
+                config.memoryWindowMinutes(),
+                config.noveltyBonus(),
+                config.noveltyDecayCap(),
+                config.diminishingFloor(),
                 overrides
         );
     }
