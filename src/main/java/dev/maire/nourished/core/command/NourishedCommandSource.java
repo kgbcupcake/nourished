@@ -4,6 +4,7 @@ import dev.maire.nourished.api.DietReportProvider;
 import dev.maire.nourished.api.registry.ReportProviderRegistry;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -41,6 +42,17 @@ public final class NourishedCommandSource {
         float critical = (float) config.criticalThresholdFor(key);
         float low = (float) config.lowThreshold();
         float excess = (float) config.excessThreshold();
+        return statusFor(value, critical, low, excess);
+    }
+
+    public static NutrientStatus statusFor(float value, String key, SyncNourishedConfigSnapshot snapshot) {
+        float critical = (float) snapshot.criticalThreshold();
+        float low = (float) snapshot.lowThreshold();
+        float excess = (float) snapshot.excessThreshold();
+        return statusFor(value, critical, low, excess);
+    }
+
+    private static NutrientStatus statusFor(float value, float critical, float low, float excess) {
         if (value < critical) return NutrientStatus.CRITICAL;
         if (value < low) return NutrientStatus.LOW;
         if (value > excess) return NutrientStatus.EXCESS;
@@ -57,6 +69,21 @@ public final class NourishedCommandSource {
     }
 
     public static List<Component> buildReportLines(ServerPlayer target, DietData diet, String activeProfile, NourishedConfig config) {
+        return buildReportLines(target, diet, activeProfile, key -> (float) config.decayRateFor(key),
+                (value, key) -> statusFor(value, key, config));
+    }
+
+    public static List<Component> buildReportLines(ServerPlayer target, DietData diet, String activeProfile, SyncNourishedConfigSnapshot snapshot) {
+        return buildReportLines(target, diet, activeProfile, key -> (float) snapshot.decayRateFor(key),
+                (value, key) -> statusFor(value, key, snapshot));
+    }
+
+    private static List<Component> buildReportLines(
+            ServerPlayer target,
+            DietData diet,
+            String activeProfile,
+            java.util.function.Function<String, Float> decayRateFor,
+            java.util.function.BiFunction<Float, String, NutrientStatus> statusFor) {
         List<Component> lines = new ArrayList<>();
         lines.add(Component.literal("=== Nourished Report ===").withStyle(ChatFormatting.GOLD));
         lines.add(Component.literal("Player: ").withStyle(ChatFormatting.GRAY)
@@ -69,8 +96,8 @@ public final class NourishedCommandSource {
 
         for (String key : diet.nutrients.keySet()) {
             float value = diet.nutrients.getOrDefault(key, 0f);
-            float decayRate = (float) config.decayRateFor(key);
-            NutrientStatus status = statusFor(value, key, config);
+            float decayRate = decayRateFor.apply(key);
+            NutrientStatus status = statusFor.apply(value, key);
 
             MutableComponent line = Component.literal(key + ": ").withStyle(ChatFormatting.WHITE)
                     .append(Component.literal(bar(value) + " "))

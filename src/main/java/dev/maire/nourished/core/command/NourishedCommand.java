@@ -68,6 +68,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -109,9 +110,12 @@ public class NourishedCommand {
         }
     }
 
+    private static final AtomicBoolean RESET_SNAPSHOT_WARN_ONCE = new AtomicBoolean(false);
+
     @SubscribeEvent
     public void onServerStopped(ServerStoppedEvent event) {
         ACTIVE_PROFILES.clear();
+        RESET_SNAPSHOT_WARN_ONCE.set(false);
     }
 
     @SubscribeEvent
@@ -399,9 +403,16 @@ public class NourishedCommand {
         ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
         DietData data = player.getData(DietAttachment.DIET.get());
         SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
-        float start = snapshot != null
-                ? (float) snapshot.startingNutrientValue()
-                : (float) NourishedConfig.get().startingNutrientValue();
+        float start;
+        if (snapshot != null) {
+            start = (float) snapshot.startingNutrientValue();
+        } else {
+            if (RESET_SNAPSHOT_WARN_ONCE.compareAndSet(false, true)) {
+                Nourished.LOGGER.warn(
+                        "[Nourished] NourishedCommand.resetPlayer: snapshot null, falling back to raw config. Will not warn again until server restart.");
+            }
+            start = (float) NourishedConfig.get().startingNutrientValue();
+        }
         for (String key : NutrientRegistry.getKeys()) {
             float old = data.nutrients.getOrDefault(key, 0f);
             data.nutrients.put(key, start);
@@ -551,7 +562,13 @@ public class NourishedCommand {
             return 0;
         }
         DietData data = target.getData(DietAttachment.DIET.get());
-        List<Component> lines = NourishedCommandSource.buildReportLines(target, data, activeProfile(target), NourishedConfig.get());
+        SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
+        if (snapshot == null) {
+            source.sendSystemMessage(Component.literal("[Nourished] Server config not yet synchronized; showing defaults."));
+        }
+        List<Component> lines = snapshot != null
+                ? NourishedCommandSource.buildReportLines(target, data, activeProfile(target), snapshot)
+                : NourishedCommandSource.buildReportLines(target, data, activeProfile(target), NourishedConfig.get());
         for (Component line : lines) {
             source.sendSuccess(() -> line, false);
         }
@@ -571,13 +588,26 @@ public class NourishedCommand {
         }
 
         DietData data = target.getData(DietAttachment.DIET.get());
-        NourishedConfig config = NourishedConfig.get();
+        SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
+        if (snapshot == null) {
+            source.sendSystemMessage(Component.literal("[Nourished] Server config not yet synchronized; showing defaults."));
+        }
         float value = data.nutrients.getOrDefault(key, 0f);
-        float decay = (float) config.decayRateFor(key);
-        float critical = (float) config.criticalThresholdFor(key);
-        float low = (float) config.lowThreshold();
-        float excess = (float) config.excessThreshold();
-        Component chip = NourishedCommandSource.statusChip(NourishedCommandSource.statusFor(value, key, config));
+        float decay = snapshot != null
+                ? (float) snapshot.decayRateFor(key)
+                : (float) NourishedConfig.get().decayRateFor(key);
+        float critical = snapshot != null
+                ? (float) snapshot.criticalThreshold()
+                : (float) NourishedConfig.get().criticalThresholdFor(key);
+        float low = snapshot != null
+                ? (float) snapshot.lowThreshold()
+                : (float) NourishedConfig.get().lowThreshold();
+        float excess = snapshot != null
+                ? (float) snapshot.excessThreshold()
+                : (float) NourishedConfig.get().excessThreshold();
+        Component chip = snapshot != null
+                ? NourishedCommandSource.statusChip(NourishedCommandSource.statusFor(value, key, snapshot))
+                : NourishedCommandSource.statusChip(NourishedCommandSource.statusFor(value, key, NourishedConfig.get()));
 
         source.sendSuccess(() -> Component.literal("Nutrient: " + key + " (" + target.getName().getString() + ")").withStyle(ChatFormatting.GOLD), false);
         source.sendSuccess(() -> Component.literal(String.format(Locale.ROOT, "Current: %.2f (%d%%)", value, Math.round(value * 100f))).withStyle(ChatFormatting.WHITE), false);

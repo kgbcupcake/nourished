@@ -5,8 +5,10 @@ import dev.maire.nourished.api.NourishedSeasonHook;
 import dev.maire.nourished.api.NourishedEvents;
 import dev.maire.nourished.api.registry.SeasonHookRegistry;
 import dev.maire.nourished.config.ModuleCache;
+import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.diet.DietMemoryConfig;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
@@ -28,16 +30,18 @@ public class NutritionDecayHandler {
         if (ConfigReloadHandler.isReloadInProgress()) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
-        if (snapshot == null) {
+        DietData data = player.getData(DietAttachment.DIET.get());
+        if (snapshot != null) {
+            data.setMemoryConfig(DietMemoryConfig.fromSnapshot(snapshot));
+        } else {
             if (SNAPSHOT_WARN_ONCE.compareAndSet(false, true)) {
                 dev.maire.nourished.core.Nourished.LOGGER.warn("[Nourished] NutritionDecayHandler: config snapshot is null, decay skipped. Will not warn again until server restart.");
             }
+            data.setMemoryConfig(DietMemoryConfig.fromRawConfig(NourishedConfig.get()));
             return;
         }
         int interval = Math.max(1, snapshot.decayIntervalTicks());
         if (player.level().getGameTime() % interval != 0) return;
-
-        DietData data = player.getData(DietAttachment.DIET.get());
         boolean changed = false;
         for (String key : NutrientRegistry.getKeys()) {
             float rate = (float) snapshot.decayRateFor(key);
@@ -72,6 +76,7 @@ public class NutritionDecayHandler {
     @SubscribeEvent
     public void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
         SNAPSHOT_WARN_ONCE.set(false);
+        FoodNutrientPipeline.resetSnapshotWarnings();
     }
 
     private float applySeasonalDecayModifier(String nutrientKey, float baseRate) {

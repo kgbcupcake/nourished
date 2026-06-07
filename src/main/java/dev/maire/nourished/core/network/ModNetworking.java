@@ -1,31 +1,23 @@
 package dev.maire.nourished.core.network;
 
-import dev.maire.nourished.client.ClientDietCache;
-import dev.maire.nourished.client.ClientNourishedState;
-import dev.maire.nourished.client.NourishedToastManager;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
-import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.core.diet.FoodMemoryEntry;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthSyncPayload;
-import dev.maire.nourished.modules.Stamina.Core.StaminaAttachment;
 import dev.maire.nourished.modules.Stamina.Core.StaminaData;
 import dev.maire.nourished.modules.Stamina.Core.StaminaSyncPayload;
-import dev.maire.nourished.modules.Stamina.HUD.StaminaHUD;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import io.netty.buffer.ByteBuf;
 
@@ -38,41 +30,43 @@ import java.util.Map;
 public class ModNetworking {
 
     public static void register(RegisterPayloadHandlersEvent event) {
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            return;
+        }
+
         PayloadRegistrar registrar = event.registrar("1");
 
-        // Full sync — login, respawn, dimension change, commands only
+        // Dedicated server: register outbound playToClient payloads with no-op handlers.
+        // Client-side receive handlers are registered in ClientNetworkCallbacks.
+
         registrar.playToClient(
                 SyncDietPayload.TYPE,
                 SyncDietPayload.STREAM_CODEC,
-                ModNetworking::handleSyncDiet
+                (payload, context) -> {}
         );
 
-        // Lightweight delta — every food eat and decay tick
         registrar.playToClient(
                 SyncDietDeltaPayload.TYPE,
                 SyncDietDeltaPayload.STREAM_CODEC,
-                ModNetworking::handleSyncDietDelta
+                (payload, context) -> {}
         );
 
-        // Config snapshot — server-authoritative gameplay parameters
         registrar.playToClient(
                 SyncNourishedConfigSnapshot.TYPE,
                 SyncNourishedConfigSnapshot.STREAM_CODEC,
-                ModNetworking::handleSyncConfigSnapshot
+                (payload, context) -> {}
         );
 
-        // Gut health sync — raw food module
         registrar.playToClient(
                 GutHealthSyncPayload.TYPE,
                 GutHealthSyncPayload.STREAM_CODEC,
-                ModNetworking::handleSyncGutHealth
+                (payload, context) -> {}
         );
 
-        // Stamina sync — stamina module
         // registrar.playToClient( // STAMINA_SHELVED
         //         StaminaSyncPayload.TYPE, // STAMINA_SHELVED
         //         StaminaSyncPayload.STREAM_CODEC, // STAMINA_SHELVED
-        //         ModNetworking::handleSyncStamina // STAMINA_SHELVED
+        //         (payload, context) -> {} // STAMINA_SHELVED
         // ); // STAMINA_SHELVED
     }
 
@@ -84,36 +78,6 @@ public class ModNetworking {
     /** Send full DietData. Call on login, respawn, dimension change, command only. */
     public static void syncDiet(ServerPlayer player, DietData diet) {
         PacketDistributor.sendToPlayer(player, new SyncDietPayload(diet));
-    }
-
-    private static void handleSyncConfigSnapshot(SyncNourishedConfigSnapshot payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            if (payload.protocolVersion() != SyncNourishedConfigSnapshot.PROTOCOL_VERSION) {
-                Nourished.LOGGER.warn("[Nourished] Ignoring config snapshot: protocol version mismatch (got {}, expected {})",
-                        payload.protocolVersion(), SyncNourishedConfigSnapshot.PROTOCOL_VERSION);
-                return;
-            }
-            ClientNourishedState.setConfig(payload);
-        });
-    }
-
-    private static void handleSyncDiet(SyncDietPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            DietData next = payload.diet();
-            NourishedToastManager.onClientDietUpdated(next);
-            ClientDietCache.set(next);
-            LocalPlayer player = Minecraft.getInstance().player;
-            if (player != null) {
-                player.setData(DietAttachment.DIET.get(), next);
-            }
-        });
-    }
-
-    private static void handleSyncDietDelta(SyncDietDeltaPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            ClientDietCache.applyDelta(payload);
-            NourishedToastManager.onClientDietUpdated(payload);
-        });
     }
 
     /** Send gut health sync to client. Call on raw food eat, cooked food recovery, and gut tick. */
@@ -135,39 +99,6 @@ public class ModNetworking {
                 data.getMentalBonusStamina(),
                 data.getMentalDebt()
         ));
-    }
-
-    private static void handleSyncGutHealth(GutHealthSyncPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            LocalPlayer player = Minecraft.getInstance().player;
-            if (player != null) {
-                GutHealthData gut = GutHealthData.fromSync(payload.gutHealth(), payload.sensitivity());
-                player.setData(GutHealthAttachment.GUT.get(), gut);
-            }
-        });
-    }
-
-    @SuppressWarnings("unused")
-    private static void handleSyncStamina(StaminaSyncPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            StaminaHUD.updateFromPayload(payload);
-            LocalPlayer player = Minecraft.getInstance().player;
-            if (player != null) {
-                StaminaData stamina = StaminaData.fromSync(
-                        payload.physicalStamina(),
-                        payload.physicalMax(),
-                        payload.physicalFatiguePenalty(),
-                        payload.physicalBonusStamina(),
-                        payload.physicalDebt(),
-                        payload.mentalStamina(),
-                        payload.mentalMax(),
-                        payload.mentalFatiguePenalty(),
-                        payload.mentalBonusStamina(),
-                        payload.mentalDebt()
-                );
-                player.setData(StaminaAttachment.STAMINA.get(), stamina);
-            }
-        });
     }
 
     private static void encodeFoodMemoryMap(FriendlyByteBuf buf, Map<String, FoodMemoryEntry> map) {

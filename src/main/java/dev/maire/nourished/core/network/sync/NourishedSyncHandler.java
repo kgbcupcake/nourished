@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.network.sync;
 
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
 import dev.maire.nourished.core.network.ModNetworking;
@@ -38,10 +39,21 @@ public final class NourishedSyncHandler {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             PacketDistributor.sendToPlayer(player, snapshot);
         }
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            DietData diet = player.getData(DietAttachment.DIET.get());
+            ModNetworking.syncDiet(player, diet);
+        }
     }
 
     /** Delegates diet delta sync to existing payload path. */
     public static void syncDietDelta(ServerPlayer player, DietData diet) {
         ModNetworking.syncDietDelta(player, diet);
+    }
+
+    public static void logServerStartupInfo() {
+        Nourished.LOGGER.info(
+                "[Nourished] Server startup: protocol version {}, features: {}",
+                SyncNourishedConfigSnapshot.PROTOCOL_VERSION,
+                "config_sync, diet_tracking, memory_system");
     }
 }

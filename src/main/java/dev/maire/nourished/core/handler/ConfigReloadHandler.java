@@ -42,6 +42,7 @@ public class ConfigReloadHandler {
         }
         NourishedSyncHandler.setConfigSnapshot(
                 SyncNourishedConfigSnapshot.fromConfig(NourishedConfig.get()));
+        NourishedSyncHandler.logServerStartupInfo();
     }
 
     /**

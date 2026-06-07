@@ -29,9 +29,14 @@ public final class ClientNourishedState {
         return snapshot;
     }
 
-    /** Called by ModNetworking when a config snapshot packet arrives. Transitions state to ACTIVE. */
+    /** Called when a config snapshot packet arrives. Transitions state to PENDING (awaiting full diet sync). */
     public static void setConfig(SyncNourishedConfigSnapshot received) {
         snapshot = received;
+        state = SyncState.PENDING;
+    }
+
+    /** Called when a full diet sync packet arrives. Transitions state to ACTIVE. */
+    public static void onFullDietSynced() {
         state = SyncState.ACTIVE;
     }
 

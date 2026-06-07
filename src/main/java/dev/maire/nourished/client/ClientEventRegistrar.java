@@ -24,8 +24,10 @@ public final class ClientEventRegistrar {
         bootstrapCompatPlugins();
     }
 
+    /** Reset sync state to UNINITIALIZED on disconnect. */
     private static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientNourishedState.reset();
+        ClientDietCache.resetDiagnostics();
     }
 
     private static void bootstrapCompatPlugins() {
