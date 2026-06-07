@@ -1,6 +1,43 @@
 # Changelog
 
 <!-- markdownlint-disable MD013 -->
+
+## [ Nourished 0.2.5-beta.4 ]  2026-6-6
+
+### Multiplayer / Server Sync
+- Fixed a fundamental multiplayer bug where client config was overriding server-authoritative
+  gameplay parameters (decay rate, thresholds, memory window) on dedicated servers
+- Config snapshot is now sent to clients on join before diet data, ensuring correct values
+  are in place before any simulation runs
+- Added `SyncState.PENDING` lifecycle — client transitions UNINITIALIZED → PENDING on
+  snapshot receipt, PENDING → ACTIVE on full diet sync
+- Client state now resets correctly on disconnect, preventing stale server config from
+  leaking into the next connection
+- `/nourished reload` now re-syncs full diet data to all connected players in addition to
+  the config snapshot
+- Bumped network protocol to version 2 — servers and clients on mismatched versions will
+  log a warning and discard the packet rather than silently corrupting state
+
+### Architecture
+- Introduced `DietMemoryConfig` — diet simulation parameters are now injected at system
+  boundaries rather than pulled directly from raw config at runtime
+- `DietData` no longer reads `NourishedConfig` directly; all memory/multiplier values come
+  from the server snapshot in multiplayer or raw config in singleplayer
+- Client network handling extracted out of common code into client-only classes, fixing
+  a dedicated server classloading issue
+
+### Config Snapshot
+- Snapshot now carries `memoryWindowMinutes`, `noveltyBonus`, `noveltyDecayCap`, and
+  `diminishingFloor` in addition to existing fields
+- Commands (`/nourished report`, `/nourished nutrient`) now prefer snapshot values over
+  raw config, with a fallback notice when out of sync
+
+### Diagnostics
+- Protocol version logged at server startup
+- Warn-once logging added at all injection points when config snapshot is null
+- Null snapshot no longer silently falls back — missed injection sites now produce a
+  visible error rather than wrong gameplay values
+
 ## [ Nourished 0.2.5-beta.3 ]  2026-6-3
 
 

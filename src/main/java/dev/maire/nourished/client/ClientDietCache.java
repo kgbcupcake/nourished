@@ -1,12 +1,17 @@
 package dev.maire.nourished.client;
 
+import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.diet.DietMemoryConfig;
 import dev.maire.nourished.core.network.ModNetworking.SyncDietDeltaPayload;
+import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import net.minecraft.util.Mth;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClientDietCache {
 
@@ -18,7 +23,7 @@ public class ClientDietCache {
      * (full sync derives lists from {@link DietData}; delta sync carries lists on the wire separately).
      * volatile: replaced whole on the network thread; read concurrently on the render thread.
      */
-    private static volatile Snapshot current = Snapshot.initial();
+    private static volatile Snapshot current;
 
     private record Snapshot(
             DietData diet,
@@ -28,11 +33,13 @@ public class ClientDietCache {
     ) {
         static Snapshot initial() {
             DietData d = new DietData();
+            d.setMemoryConfig(injectClientMemoryConfig());
             return new Snapshot(d, List.of(), List.of(), List.of());
         }
 
         static Snapshot fromFullDiet(DietData data) {
             DietData snapshot = DietData.copySnapshot(data);
+            snapshot.setMemoryConfig(injectClientMemoryConfig());
             List<String> recent = snapshot.foodMemory.entrySet().stream()
                     .sorted((a, b) -> Long.compare(b.getValue().lastEatenTick(), a.getValue().lastEatenTick()))
                     .limit(3)
@@ -59,13 +66,46 @@ public class ClientDietCache {
     private static final Map<String, Long> lastNutrientIncreaseMs = new ConcurrentHashMap<>();
     /** Skip recording flashes on the first sync (login) so zeros-to-values does not flash every bar. */
     private static boolean firstClientSync = true;
+    private static final AtomicBoolean SNAPSHOT_WARN_ONCE = new AtomicBoolean(false);
+
+    private static DietMemoryConfig injectClientMemoryConfig() {
+        SyncNourishedConfigSnapshot snap = ClientNourishedState.getConfig();
+        if (snap == null) {
+            if (SNAPSHOT_WARN_ONCE.compareAndSet(false, true)) {
+                Nourished.LOGGER.warn(
+                        "[Nourished] ClientDietCache: config snapshot null, falling back to raw config. Will not warn again until disconnect.");
+            }
+            return DietMemoryConfig.fromRawConfig(NourishedConfig.get());
+        }
+        return DietMemoryConfig.fromSnapshot(snap);
+    }
+
+    /** Resets client-side snapshot diagnostics, e.g. on disconnect. */
+    public static void resetDiagnostics() {
+        SNAPSHOT_WARN_ONCE.set(false);
+        firstClientSync = true;
+    }
+
+    private static Snapshot currentSnapshot() {
+        Snapshot snap = current;
+        if (snap != null) {
+            return snap;
+        }
+        synchronized (ClientDietCache.class) {
+            snap = current;
+            if (snap == null) {
+                current = snap = Snapshot.initial();
+            }
+            return snap;
+        }
+    }
 
     /**
      * Applies incoming full diet from the server: updates cache, records nutrient increases for bar flash
      * (except on the very first client sync this session). Used on login, respawn, dimension change.
      */
     public static void set(DietData data) {
-        Snapshot prev = current;
+        Snapshot prev = currentSnapshot();
         Snapshot next = Snapshot.fromFullDiet(data);
         if (!firstClientSync) {
             recordNutrientIncreases(prev.diet.nutrients, next.diet.nutrients);
@@ -80,7 +120,7 @@ public class ClientDietCache {
      * {@link DietData#peekMultiplier} matches the server after each eat or decay sync.
      */
     public static void applyDelta(SyncDietDeltaPayload payload) {
-        Snapshot prev = current;
+        Snapshot prev = currentSnapshot();
         if (!firstClientSync) {
             recordNutrientIncreases(prev.diet.nutrients, payload.nutrients());
         }
@@ -100,6 +140,7 @@ public class ClientDietCache {
         nextDiet.familyMemory.clear();
         nextDiet.familyMemory.putAll(payload.familyMemory());
         nextDiet.lastTickTime = payload.lastTickTime();
+        nextDiet.setMemoryConfig(injectClientMemoryConfig());
         current = Snapshot.fromDelta(nextDiet, payload);
     }
 
@@ -131,27 +172,22 @@ public class ClientDietCache {
     }
 
     public static DietData get() {
-        Snapshot snap = current;
-        return snap.diet;
+        return currentSnapshot().diet;
     }
 
     public static float getBalanceScore() {
-        Snapshot snap = current;
-        return snap.diet.getBalanceScore();
+        return currentSnapshot().diet.getBalanceScore();
     }
 
     public static List<String> getRecentFoodIds() {
-        Snapshot snap = current;
-        return snap.recentFoodIds;
+        return currentSnapshot().recentFoodIds;
     }
 
     public static List<String> getNeglectedCategories() {
-        Snapshot snap = current;
-        return snap.neglectedCategories;
+        return currentSnapshot().neglectedCategories;
     }
 
     public static List<String> getFatiguedFamilies() {
-        Snapshot snap = current;
-        return snap.fatiguedFamilies;
+        return currentSnapshot().fatiguedFamilies;
     }
 }

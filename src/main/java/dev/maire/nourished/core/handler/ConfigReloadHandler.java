@@ -1,7 +1,10 @@
 package dev.maire.nourished.core.handler;
 
 import dev.maire.nourished.api.ApiStatus;
+import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
+import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.registry.RegistryLifecycleManager;
 import dev.maire.nourished.core.reload.NourishedReloadPipeline;
@@ -37,6 +40,19 @@ public class ConfigReloadHandler {
         } finally {
             reloadInProgress = false;
         }
+        NourishedSyncHandler.setConfigSnapshot(
+                SyncNourishedConfigSnapshot.fromConfig(NourishedConfig.get()));
+        NourishedSyncHandler.logServerStartupInfo();
+    }
+
+    /**
+     * Rebuilds the config snapshot from current config and broadcasts it to all connected players.
+     * Call this after a {@code /nourished reload} completes.
+     */
+    public static void reloadAndBroadcast(MinecraftServer server) {
+        NourishedSyncHandler.setConfigSnapshot(
+                SyncNourishedConfigSnapshot.fromConfig(NourishedConfig.get()));
+        NourishedSyncHandler.broadcastConfigReload(server);
     }
 
     @SubscribeEvent

@@ -1,8 +1,16 @@
 ![Main Menu](Assets/nourished_banner.png)
 
-I got sick of Minecraft's food system. There are other nutrition mods out there, but none of them did what I wanted or were updated for modern Minecraft, so I decided to build my own.
+I got sick of Minecraft's food system. There are other nutrition mods out there,
+but none of them did what I wanted or were updated for modern Minecraft,
+so I decided to build my own.
 
 ---
+
+## Community
+
+Discord: [https://discord.gg/EZnFJsfQup]
+
+Questions, suggestions, and development discussion are welcome.
 
 ❤️ What you gain
 When you have all five food groups are above 75%, you get:
@@ -12,19 +20,18 @@ Regeneration I — passively while balanced
 
 When all five food groups are above 75%, you get:
 
-| Group | Neglect Penalty | Balance Buff |
-|---|---|---|
-| 🌾 Grains | Weakness I | ✓ |
-| 🥦 Vegetables | Slowness I | ✓ |
-| 🥩 Proteins | Mining Fatigue I | ✓ |
-| 🍎 Fruits | Unluck I | ✓ |
-| 🍬 Sugars | — | — |
-| 🥛 Dairy | — | ✓ |
+| Group         | Neglect Penalty  | Balance Buff |
+| ------------- | ---------------- | ------------ |
+| 🌾 Grains     | Weakness I       | ✓            |
+| 🥦 Vegetables | Slowness I       | ✓            |
+| 🥩 Proteins   | Mining Fatigue I | ✓            |
+| 🍎 Fruits     | Unluck I         | ✓            |
+| 🍬 Sugars     | —                | —            |
+| 🥛 Dairy      | —                | ✓            |
 
 ---
 
-Sugars and Dairy have no penalty effect by default — these groups are tracked and affect your balance score but do not apply a debuff when depleted. Dairy still counts toward the balance buff. This is configurable.
-
+Sugars and Dairy have no penalty effect by default these groups are tracked and affect your balance score but do not apply a debuff when depleted. Dairy still counts toward the balance buff. This is configurable.
 
 ## 🍽️ Eating at full hunger
 
@@ -35,7 +42,6 @@ Both behaviors are configurable: `blockHeavyMeals` and `blockLightFood` toggles 
 All effects are fully configurable and can be disabled per-module.
 
 Diminishing returns apply - eating the same food repeatedly gives less credit each time, encouraging real variety.
-
 
 ---
 

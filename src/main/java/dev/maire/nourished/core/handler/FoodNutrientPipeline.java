@@ -20,8 +20,11 @@ import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.debug.NutritionDebugLogger;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.DietData;
+import dev.maire.nourished.core.diet.DietMemoryConfig;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.ModNetworking;
+import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
+import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry.NutrientResolutionDiagnostic;
@@ -51,11 +54,26 @@ import java.util.Optional;
 @ApiStatus.Internal
 final class FoodNutrientPipeline {
 
+    private static final java.util.concurrent.atomic.AtomicBoolean THRESHOLD_WARN_ONCE =
+            new java.util.concurrent.atomic.AtomicBoolean(false);
+    private static final java.util.concurrent.atomic.AtomicBoolean WARN_ONCE_FOOD_EATEN =
+            new java.util.concurrent.atomic.AtomicBoolean(false);
+
     private FoodNutrientPipeline() {}
 
     static void process(ServerPlayer player, ItemStack stack, DietData diet, long gameTimeMs) {
         if (ConfigReloadHandler.isReloadInProgress()) {
             return;
+        }
+        SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
+        if (snapshot != null) {
+            diet.setMemoryConfig(DietMemoryConfig.fromSnapshot(snapshot));
+        } else {
+            if (WARN_ONCE_FOOD_EATEN.compareAndSet(false, true)) {
+                Nourished.LOGGER.warn(
+                        "[Nourished] FoodNutrientPipeline: snapshot null, falling back to raw config. Will not warn again until server restart.");
+            }
+            diet.setMemoryConfig(DietMemoryConfig.fromRawConfig(NourishedConfig.get()));
         }
         boolean debugEatLog = ModuleCache.enableDebugLogging;
         Map<String, Float> nutrientsBefore = debugEatLog ? snapshotNutrients(diet) : Map.of();
@@ -335,14 +353,26 @@ final class FoodNutrientPipeline {
     }
 
     private static void checkThresholdCrossings(ServerPlayer player, DietData diet) {
-        NourishedConfig config = NourishedConfig.get();
-        float excessThreshold = (float) config.excessThreshold();
+        SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
+        final float excessThreshold;
+
+        if (snapshot != null) {
+            excessThreshold = (float) snapshot.excessThreshold();
+        } else {
+            if (THRESHOLD_WARN_ONCE.compareAndSet(false, true)) {
+                dev.maire.nourished.core.Nourished.LOGGER.warn(
+                        "[Nourished] FoodNutrientPipeline: snapshot null in checkThresholdCrossings, falling back to raw config. Will not warn again until server restart.");
+            }
+            excessThreshold = (float) NourishedConfig.get().excessThreshold();
+        }
         for (String key : NutrientRegistry.getKeys()) {
             float current = diet.nutrients.getOrDefault(key, 0f);
             float previous = diet.lastNutrients.getOrDefault(key, 0f);
             boolean beneficial = NutrientRegistry.isBeneficial(key);
 
-            float criticalThreshold = (float) config.criticalThresholdFor(key);
+            float criticalThreshold = snapshot != null
+                    ? (float) snapshot.criticalThreshold()
+                    : (float) NourishedConfig.get().criticalThresholdFor(key);
 
             if (beneficial) {
                 if (current <= criticalThreshold && previous > criticalThreshold) {
@@ -399,5 +429,10 @@ final class FoodNutrientPipeline {
             return 0f;
         }
         return amount;
+    }
+
+    static void resetSnapshotWarnings() {
+        WARN_ONCE_FOOD_EATEN.set(false);
+        THRESHOLD_WARN_ONCE.set(false);
     }
 }

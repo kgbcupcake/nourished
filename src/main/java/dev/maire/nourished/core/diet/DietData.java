@@ -186,6 +186,10 @@ public class DietData {
 
     // Food memory maps
     public final LinkedHashMap<String, FoodMemoryEntry> foodMemory = new LinkedHashMap<>();
+
+    /** Server/client-injected config at runtime. Never serialized. */
+    private DietMemoryConfig memoryConfig = null;
+
     public final HashMap<String, FoodMemoryEntry> categoryMemory = new HashMap<>();
     public final HashMap<String, FoodMemoryEntry> familyMemory = new HashMap<>();
 
@@ -219,6 +223,9 @@ public class DietData {
         d.familyMemory.clear();
         d.familyMemory.putAll(src.familyMemory);
         d.lastTickTime = src.lastTickTime;
+        if (src.memoryConfig != null) {
+            d.memoryConfig = src.memoryConfig;
+        }
         return d;
     }
 
@@ -227,9 +234,9 @@ public class DietData {
      * Uses {@link NourishedConfig#startingNutrientValue()} (default {@code 0.5} = 50%) so typical
      * {@code below}-threshold debuffs do not apply until decay or poor diet pulls bars down.
      */
-    private static float startNutrientFill() {
+    private float startNutrientFill() {
         try {
-            return Mth.clamp((float) NourishedConfig.get().startingNutrientValue(), 0f, 1f);
+            return Mth.clamp((float) config().startingNutrientValue(), 0f, 1f);
         } catch (IllegalStateException ignored) {
             return 0.5f;
         }
@@ -416,11 +423,11 @@ public class DietData {
      * Used for tooltip display.
      */
     public float peekMultiplier(String itemId) {
-        long halfLifeMs = NourishedConfig.get().memoryWindowMinutes() * 60_000L;
+        long halfLifeMs = config().memoryWindowMinutes() * 60_000L;
         long gameTimeMs = resolveCurrentTime(0L);
         FoodMemoryEntry entry = foodMemory.get(itemId);
         if (entry == null || entry.isEffectivelyExpired(halfLifeMs, gameTimeMs, 0.1f)) {
-            return (float) NourishedConfig.get().noveltyBonus();
+            return (float) config().noveltyBonus();
         }
         // Simulate one more eat for preview
         float nextDecayed = entry.decayedEatCount(halfLifeMs, gameTimeMs) + 1f;
@@ -438,10 +445,11 @@ public class DietData {
      * @param gameTimeMs       current game time in milliseconds
      */
     private void applyNutritionalDebt(String dominantCategory, long gameTimeMs) {
-        NourishedConfig config = NourishedConfig.get();
-        long halfLifeMs = config.memoryWindowMinutes() * 60_000L;
-        float debtThreshold = (float) config.debtThreshold();
-        float debtRate = (float) config.debtDecayRate();
+        DietMemoryConfig memCfg = config();
+        long halfLifeMs = memCfg.memoryWindowMinutes() * 60_000L;
+        NourishedConfig raw = NourishedConfig.get();
+        float debtThreshold = (float) raw.debtThreshold();
+        float debtRate = (float) raw.debtDecayRate();
 
         // Check if category memory exceeds debt threshold
         FoodMemoryEntry catEntry = categoryMemory.get(dominantCategory);
@@ -488,11 +496,11 @@ public class DietData {
      * @return multiplier in [floor, noveltyBonus]
      */
     private float resolveMultiplier(float decayedCount) {
-        NourishedConfig config = NourishedConfig.get();
-        double floor = config.diminishingFloor();
-        double steepness = config.diminishingSteepness();
-        double midpoint = config.diminishingMidpoint();
-        double noveltyBonus = config.noveltyBonus();
+        DietMemoryConfig memCfg = config();
+        double floor = memCfg.diminishingFloor();
+        double steepness = NourishedConfig.get().diminishingSteepness();
+        double midpoint = NourishedConfig.get().diminishingMidpoint();
+        double noveltyBonus = memCfg.noveltyBonus();
 
         if (decayedCount <= 0f) {
             return (float) noveltyBonus;
@@ -535,7 +543,7 @@ public class DietData {
             return 1.0f; // Effectively forgotten = novel
         }
 
-        double noveltyDecayCap = NourishedConfig.get().noveltyDecayCap();
+        double noveltyDecayCap = config().noveltyDecayCap();
         return Math.max(0f, 1.0f - (decayed / (float) noveltyDecayCap));
     }
 
@@ -559,10 +567,10 @@ public class DietData {
      * @return blended multiplier in [floor, noveltyBonus]
      */
     public float computeBlendedMultiplier(String itemId, String dominantCategory, String familyKey, long gameTimeMs) {
-        NourishedConfig config = NourishedConfig.get();
-        long halfLifeMs = config.memoryWindowMinutes() * 60_000L;
-        double floor = config.diminishingFloor();
-        double noveltyBonus = config.noveltyBonus();
+        DietMemoryConfig memCfg = config();
+        long halfLifeMs = memCfg.memoryWindowMinutes() * 60_000L;
+        double floor = memCfg.diminishingFloor();
+        double noveltyBonus = memCfg.noveltyBonus();
 
         // Get decayed counts for all three signals
         float itemDecayed = 0f;
@@ -643,12 +651,13 @@ public class DietData {
     public float getCategoryFatigue(String categoryKey, long gameTimeMs) {
         FoodMemoryEntry entry = categoryMemory.get(categoryKey);
         if (entry == null) return 1.0f;
-        long halfLifeMs = NourishedConfig.get().memoryWindowMinutes() * 60_000L;
+        DietMemoryConfig memCfg = config();
+        long halfLifeMs = memCfg.memoryWindowMinutes() * 60_000L;
         float decayed = entry.decayedEatCount(halfLifeMs, gameTimeMs);
         // Use same logistic curve as resolveMultiplier — invert so 1.0 = fresh, 0.0 = saturated
         float multiplier = resolveMultiplier(decayed);
-        double floor = NourishedConfig.get().diminishingFloor();
-        double noveltyBonus = NourishedConfig.get().noveltyBonus();
+        double floor = memCfg.diminishingFloor();
+        double noveltyBonus = memCfg.noveltyBonus();
         // Normalize multiplier from [floor, noveltyBonus] to [0, 1]
         return (float) ((multiplier - floor) / (noveltyBonus - floor));
     }
@@ -661,7 +670,7 @@ public class DietData {
      * @return novelty score in [0, 1]
      */
     public float getNoveltyScore(String itemId, long gameTimeMs) {
-        long halfLifeMs = NourishedConfig.get().memoryWindowMinutes() * 60_000L;
+        long halfLifeMs = config().memoryWindowMinutes() * 60_000L;
         return resolveNoveltyScore(itemId, halfLifeMs, gameTimeMs);
     }
 
@@ -673,7 +682,7 @@ public class DietData {
      * @return list of family keys sorted by fatigue (most fatigued first)
      */
     public List<String> getMostFatiguedFamilies(int n, long gameTimeMs) {
-        long halfLifeMs = NourishedConfig.get().memoryWindowMinutes() * 60_000L;
+        long halfLifeMs = config().memoryWindowMinutes() * 60_000L;
 
         return familyMemory.entrySet().stream()
                 .filter(e -> !e.getValue().isEffectivelyExpired(halfLifeMs, gameTimeMs, 0.1f))
@@ -709,9 +718,9 @@ public class DietData {
      * @return detailed breakdown record
      */
     public MultiplierBreakdown getMultiplierBreakdown(String itemId, String dominantCategory, String familyKey, long gameTimeMs) {
-        NourishedConfig config = NourishedConfig.get();
-        long halfLifeMs = config.memoryWindowMinutes() * 60_000L;
-        double noveltyBonus = config.noveltyBonus();
+        DietMemoryConfig memCfg = config();
+        long halfLifeMs = memCfg.memoryWindowMinutes() * 60_000L;
+        double noveltyBonus = memCfg.noveltyBonus();
 
         // Get decayed counts
         float itemDecayed = 0f;
@@ -757,13 +766,30 @@ public class DietData {
 
         itemContribution *= noveltyContribution;
         float finalMultiplier = itemContribution + categoryContribution + familyContribution;
-        finalMultiplier = (float) Math.max(config.diminishingFloor(), Math.min(noveltyBonus, finalMultiplier));
+        finalMultiplier = (float) Math.max(memCfg.diminishingFloor(), Math.min(noveltyBonus, finalMultiplier));
 
         return new MultiplierBreakdown(
                 itemContribution, categoryContribution, familyContribution,
                 noveltyContribution, finalMultiplier,
                 itemWeight, categoryWeight, familyWeight
         );
+    }
+
+    /**
+     * Set the memory config at a sync boundary (server-side) or on delta apply (client-side).
+     * Called once per eat/tick/sync — not on every method.
+     */
+    public void setMemoryConfig(DietMemoryConfig cfg) {
+        this.memoryConfig = cfg;
+    }
+
+    /** Returns injected memory config. Must be set at a sync boundary before use. */
+    private DietMemoryConfig config() {
+        if (memoryConfig == null) {
+            throw new IllegalStateException(
+                    "[Nourished] DietMemoryConfig not injected. This indicates a missed injection site.");
+        }
+        return memoryConfig;
     }
 
     /**
@@ -792,7 +818,7 @@ public class DietData {
     }
 
     private void cleanupAllMemories(long currentTime) {
-        long halfLifeMs = NourishedConfig.get().memoryWindowMinutes() * 60_000L;
+        long halfLifeMs = config().memoryWindowMinutes() * 60_000L;
         float threshold = 0.1f;
         removeExpiredEntries(foodMemory, halfLifeMs, currentTime, threshold);
         removeExpiredEntries(categoryMemory, halfLifeMs, currentTime, threshold);
