@@ -5,6 +5,7 @@
 ## [ Nourished 0.2.5-beta.4 ]  2026-6-6
 
 ### Multiplayer / Server Sync
+
 - Fixed a fundamental multiplayer bug where client config was overriding server-authoritative
   gameplay parameters (decay rate, thresholds, memory window) on dedicated servers
 - Config snapshot is now sent to clients on join before diet data, ensuring correct values
@@ -15,10 +16,19 @@
   leaking into the next connection
 - `/nourished reload` now re-syncs full diet data to all connected players in addition to
   the config snapshot
-- Bumped network protocol to version 2 — servers and clients on mismatched versions will
+- Bumped network protocol to version 3 — servers and clients on mismatched versions will
   log a warning and discard the packet rather than silently corrupting state
 
+### Raw Food / Gut Health
+
+- Added `enableGutHealth` module toggle — gut health tracking, recovery, and sensitivity
+  can now be disabled independently of raw food penalties
+- `GutHealthTickHandler` and `GutHealthRecoveryHandler` now gate on `enableGutHealth`
+  instead of `enableRawFoodPenalty`
+- Raw food penalty effects remain controlled by `enableRawFoodPenalty` only
+
 ### Architecture
+
 - Introduced `DietMemoryConfig` — diet simulation parameters are now injected at system
   boundaries rather than pulled directly from raw config at runtime
 - `DietData` no longer reads `NourishedConfig` directly; all memory/multiplier values come
@@ -27,12 +37,14 @@
   a dedicated server classloading issue
 
 ### Config Snapshot
-- Snapshot now carries `memoryWindowMinutes`, `noveltyBonus`, `noveltyDecayCap`, and
-  `diminishingFloor` in addition to existing fields
+
+- Snapshot now carries `memoryWindowMinutes`, `noveltyBonus`, `noveltyDecayCap`,
+  `diminishingFloor`, and `enableGutHealth` in addition to existing fields
 - Commands (`/nourished report`, `/nourished nutrient`) now prefer snapshot values over
   raw config, with a fallback notice when out of sync
 
 ### Diagnostics
+
 - Protocol version logged at server startup
 - Warn-once logging added at all injection points when config snapshot is null
 - Null snapshot no longer silently falls back — missed injection sites now produce a
@@ -121,6 +133,7 @@ Nutrition state updates now correctly:
 - Ensured that nutrition threshold effects are properly re-evaluated after external or API-driven diet modifications, aligning behavior with internal gameplay pipelines.
 
 ## API Safety Improvements
+
 - Null-safe API entry points
 - Public API methods have been hardened against null player references to prevent crashes when called from external mods or scripts.
 - This improves compatibility and prevents unexpected failures in integration scenarios.
@@ -131,11 +144,13 @@ Nutrition state updates now correctly:
 - Public query methods remain unchanged.
 
 ##  Internal Cleanup
+
 - Debug logging cleanup
 - Temporary debugging logic in RecipeInheritanceStage has been removed, including targeted diagnostic logs used during development.
 - Logging behavior has been restored to standard debug-level output only.
 
 ##  System Status Notes
+
 - The following systems are currently registered but not fully wired into gameplay logic:
 - Nutrient Synergies
 - Food Synergy Bonuses
@@ -143,6 +158,7 @@ Nutrition state updates now correctly:
 - These systems are exposed through the API and available for integration, but are not yet active in the core eating/progression pipeline. They are planned for future updates.
 
 ##  Compatibility
+
 - No changes to:
 - food classification behavior
 - datapack structure
@@ -150,6 +166,7 @@ Nutrition state updates now correctly:
 - This update is fully backward compatible with existing saves.
 
 ## Summary
+
 - This release improves:
 - synchronization reliability
 - API safety for external mods
@@ -166,7 +183,7 @@ If updating from an earlier 0.2.x beta:
 1. Delete `config/nourished/scanner_spec.json` before launching the game.
 2. Load your world and run:
 
-   ```
+  ```bash
    /nourished invalidate_cache
    ```
 3. Rejoin the world to rebuild cached nutrition data.
@@ -195,11 +212,13 @@ These steps ensure recipe inheritance, nutrient tags, and scanner data are regen
 ## [0.2.4-beta] - 2026-05-31
 
 ### Added
+
 - HUD bars temporarily reveal when a nutrient increases from eating — no need to open the
   nutrition screen to see what changed. Configurable via "Reveal HUD on nutrient gain" in
   HUD & Display settings.
 
 ### Fixed
+
 - "Also show above threshold" and "Hide above threshold" now share consistent off-state
   semantics: `1.0` = disabled on both. Previously Show used `0.0` as off, opposite of Hide.
 - Show threshold slider is now disabled until Hide is active, preventing the two sliders
@@ -210,6 +229,7 @@ These steps ensure recipe inheritance, nutrient tags, and scanner data are regen
 [0.2.3-beta] - 2026-05-31
 
 ### Added
+
 - Multi-nutrient recipe inheritance — complex dishes now contribute to multiple food groups based on their ingredients. Eating a steak sandwich gives Proteins, Grains, and Vegetables credit automatically.
 - HUD hide-above threshold — bars above a configurable percentage are hidden from the HUD. Set to 0.4 to only see bars that need attention. as requested. in #3 
 - HUD show-below threshold — bars below a configurable percentage are always shown regardless of other visibility settings.
@@ -226,7 +246,8 @@ These steps ensure recipe inheritance, nutrient tags, and scanner data are regen
 - HUD settings now apply live without requiring Save & Quit.
 - Pre-scan hint text removed from Scanner config tab.
 
-### Fixed 
+### Fixed
+
 - HUD vertical layout and zero-bar visibility were reading stale config values due to Cloth Config write-on-save behavior — fixed with live config application.
 
 

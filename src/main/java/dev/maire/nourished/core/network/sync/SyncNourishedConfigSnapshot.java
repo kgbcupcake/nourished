@@ -21,6 +21,7 @@ public record SyncNourishedConfigSnapshot(
         double penaltyEffectThreshold,
         double startingNutrientValue,
         boolean enableRawFoodPenalty,
+        boolean enableGutHealth,
         boolean enableEffects,
         boolean enableHUD,
         boolean enableToasts,
@@ -33,7 +34,7 @@ public record SyncNourishedConfigSnapshot(
         Map<String, Double> nutrientDecayOverrides
 ) implements CustomPacketPayload {
 
-    public static final int PROTOCOL_VERSION = 2;
+    public static final int PROTOCOL_VERSION = 3;
 
     public static final CustomPacketPayload.Type<SyncNourishedConfigSnapshot> TYPE =
             new CustomPacketPayload.Type<>(
@@ -71,6 +72,7 @@ public record SyncNourishedConfigSnapshot(
                         buf.writeDouble(s.penaltyEffectThreshold());
                         buf.writeDouble(s.startingNutrientValue());
                         buf.writeBoolean(s.enableRawFoodPenalty());
+                        buf.writeBoolean(s.enableGutHealth());
                         buf.writeBoolean(s.enableEffects());
                         buf.writeBoolean(s.enableHUD());
                         buf.writeBoolean(s.enableToasts());
@@ -93,6 +95,7 @@ public record SyncNourishedConfigSnapshot(
                         double penaltyEffectThreshold = buf.readDouble();
                         double startingNutrientValue = buf.readDouble();
                         boolean enableRawFoodPenalty = buf.readBoolean();
+                        boolean enableGutHealth = buf.readBoolean();
                         boolean enableEffects = buf.readBoolean();
                         boolean enableHUD = buf.readBoolean();
                         boolean enableToasts = buf.readBoolean();
@@ -107,7 +110,7 @@ public record SyncNourishedConfigSnapshot(
                                 version, decayRate, decayIntervalTicks, criticalThreshold,
                                 lowThreshold, excessThreshold, bonusEffectThreshold,
                                 penaltyEffectThreshold, startingNutrientValue, enableRawFoodPenalty,
-                                enableEffects, enableHUD, enableToasts, confidenceSpreadThreshold,
+                                enableGutHealth, enableEffects, enableHUD, enableToasts, confidenceSpreadThreshold,
                                 compositeRatioThreshold,
                                 memoryWindowMinutes, noveltyBonus, noveltyDecayCap, diminishingFloor,
                                 overrides
@@ -134,6 +137,7 @@ public record SyncNourishedConfigSnapshot(
                 config.penaltyEffectThreshold(),
                 config.startingNutrientValue(),
                 config.isModuleEnabled("enableRawFoodPenalty"),
+                config.isModuleEnabled("enableGutHealth"),
                 config.enableEffects(),
                 config.enableHUD(),
                 config.enableToasts(),

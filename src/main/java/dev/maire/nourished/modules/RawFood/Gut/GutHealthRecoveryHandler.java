@@ -25,7 +25,7 @@ public class GutHealthRecoveryHandler {
 
     @SubscribeEvent
     public void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
-        if (!ModuleCache.enableRawFoodPenalty) return;
+        if (!ModuleCache.enableGutHealth) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
         ItemStack stack = event.getItem();

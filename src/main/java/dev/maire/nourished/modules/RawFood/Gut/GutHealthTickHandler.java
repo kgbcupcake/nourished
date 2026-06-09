@@ -22,7 +22,7 @@ public class GutHealthTickHandler {
 
     @SubscribeEvent
     public void onPlayerTick(PlayerTickEvent.Post event) {
-        if (!ModuleCache.enableRawFoodPenalty) return;
+        if (!ModuleCache.enableGutHealth) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
         int tickInterval = RawFoodConfig.gutTickInterval();
