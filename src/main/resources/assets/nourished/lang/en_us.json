@@ -129,6 +129,8 @@
   "config.nourished.enableSleepBonus.desc": "Sleeping with all nutrient bars above 50% grants Regeneration I for 30 seconds.",
   "config.nourished.enableRawFoodPenalty": "Raw Food Penalties",
   "config.nourished.enableRawFoodPenalty.desc": "When true, eating raw food applies potion effects and nutrient penalties based on severity",
+  "config.nourished.enableGutHealth": "Gut Health",
+  "config.nourished.enableGutHealth.desc": "When enabled, gut health is tracked per player. Eating raw food degrades gut health; cooked food and dietary diversity aid recovery.",
   "config.nourished.enableStamina": "Stamina Module",
   "config.nourished.enableStamina.desc": "When true, the dual physical/mental stamina bar system is active",
   "config.nourished.enableSynergies": "Synergies",

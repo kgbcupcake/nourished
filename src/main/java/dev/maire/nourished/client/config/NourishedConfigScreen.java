@@ -428,6 +428,7 @@ public final class NourishedConfigScreen {
             case "blockHeavyMeals" -> "nourished.config.blockHeavyMeals";
             case "blockLightFood" -> "nourished.config.blockLightFood";
             case "enableRawFoodPenalty" -> "config.nourished.enableRawFoodPenalty";
+            case "enableGutHealth" -> "config.nourished.enableGutHealth";
             case "enableStamina" -> "config.nourished.enableStamina";
             case "enablePSStaminaUsage" -> "config.nourished.enablePSStaminaUsage";
             case "enablePSPenaltyDecay" -> "config.nourished.enablePSPenaltyDecay";
@@ -450,6 +451,7 @@ public final class NourishedConfigScreen {
             case "blockHeavyMeals" -> "nourished.config.blockHeavyMeals.desc";
             case "blockLightFood" -> "nourished.config.blockLightFood.desc";
             case "enableRawFoodPenalty" -> "config.nourished.enableRawFoodPenalty.desc";
+            case "enableGutHealth" -> "config.nourished.enableGutHealth.desc";
             case "enableStamina" -> "config.nourished.enableStamina.desc";
             case "enablePSStaminaUsage" -> "config.nourished.enablePSStaminaUsage.desc";
             case "enablePSPenaltyDecay" -> "config.nourished.enablePSPenaltyDecay.desc";
@@ -479,7 +481,7 @@ public final class NourishedConfigScreen {
                 case "enableDecay", "enableNutritionEating", "blockHeavyMeals", "blockLightFood",
                      "enableEffects", "enableCalorieTracking", "enableSleepBonus",
                      "enableSynergies", "enableMilestones", "enableSeasonHooks", "enableAbsorptionModifiers" -> group = "core";
-                case "enableRawFoodPenalty" -> group = "rawfood";
+                case "enableRawFoodPenalty", "enableGutHealth" -> group = "rawfood";
                 // case "enableStamina" -> group = "stamina"; // STAMINA_SHELVED
                 case "enablePSStaminaUsage", "enablePSPenaltyDecay", "enablePSExhaustionDuration" -> {
                     if (!ModList.get().isLoaded("peakstamina")) {
