@@ -1,11 +1,11 @@
 package dev.maire.nourished.core.handler;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
-import dev.maire.nourished.config.ModCompatRegistry;
-import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.core.util.NourishedItemTags;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.MariesLib.config.ModCompatRegistry;
+import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.util.MarieItemTags;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -29,7 +29,7 @@ public class NutritionEatingHandler {
 
     @SubscribeEvent
     public void onRightClick(PlayerInteractEvent.RightClickItem event) {
-        if (!ModuleCache.enableDecay || !ModuleCache.enableNutritionEating) return;
+        if (!ModuleCache.enableDecay || !ModuleCache.enableSourceApplication) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         long now = player.level().getGameTime();
         Long lastEat = LAST_NUTRITION_ONLY_EAT_GAME_TIME.get(player.getUUID());
@@ -74,7 +74,7 @@ public class NutritionEatingHandler {
             return;
         }
         PENDING_NUTRITION_ONLY_FINISH.remove(player.getUUID());
-        DietData diet = player.getData(DietAttachment.DIET.get());
+        TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
         long gameTimeMs = player.level().getGameTime() * 50L;
         diet.tickTime(gameTimeMs);
         diet.tick();
@@ -103,22 +103,22 @@ public class NutritionEatingHandler {
      * When vanilla hunger is full, optionally block nutrition-only eating for heavy meals and light food.
      */
     private static boolean shouldBlockNutritionOnlyAtFullHunger(ItemStack stack, FoodProperties food) {
-        if (ModuleCache.enableBlockHeavyMeals) {
+        if (ModuleCache.enableBlockHeavySources) {
             if (ModCompatRegistry.isLoaded("solonion")) {
-                int threshold = ModCompatRegistry.getHeavyMealThreshold();
+                int threshold = ModCompatRegistry.getHeavySourceThreshold();
                 if (food != null && food.nutrition() >= threshold) {
                     return true;
                 }
-            } else if (stack.is(NourishedItemTags.MEAL)) {
+            } else if (stack.is(MarieItemTags.heavySource())) {
                 return true;
             }
         }
-        return ModuleCache.enableBlockLightFood && stack.is(NourishedItemTags.LIGHT_FOOD);
+        return ModuleCache.enableBlockLightSource && stack.is(MarieItemTags.lightSource());
     }
 
     private static boolean performNutritionOnlyConsume(ServerPlayer player, ItemStack stack, InteractionHand hand) {
         PENDING_NUTRITION_ONLY_FINISH.remove(player.getUUID());
-        if (!ModuleCache.enableDecay || !ModuleCache.enableNutritionEating) {
+        if (!ModuleCache.enableDecay || !ModuleCache.enableSourceApplication) {
             return false;
         }
         if (!player.isAlive()) {

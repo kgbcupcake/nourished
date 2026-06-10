@@ -1,5 +1,8 @@
 package dev.maire.nourished.core.nutrition;
 
+import dev.marie.MariesLib.scan.ResolutionStage;
+import dev.marie.MariesLib.scan.RuntimeCascadeStage;
+
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Locale;

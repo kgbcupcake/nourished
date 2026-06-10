@@ -1,6 +1,6 @@
 package dev.maire.nourished.modules.Stamina.Nutrition;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 
 @ApiStatus.Internal
 public record StaminaNutritionProfile(

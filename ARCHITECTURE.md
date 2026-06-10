@@ -422,7 +422,7 @@ The manager is also the **bootstrap entry point** (`loadAll()`, called once duri
 ### Registration order (and why order matters)
 
 1. **`NutrientRegistry`** — Re-establishes nutrient keys, thresholds, icons, and tags; every later registry and `DietData` logic assumes this set is current. *No datapack hook.*
-2. **`ColorRegistry`** — Re-binds display colors to the current nutrient key list. *Has datapack hook.*
+2. **`ColorRegistry`** (MarieLib: `dev.marie.MariesLib.color.ColorRegistry`) — Re-binds display colors to the current nutrient key list. *Has datapack hook.*
 3. **`EffectRegistry`** — Re-loads threshold-triggered effects; definitions reference nutrient ids from the live key set. *Has datapack hook.*
 4. **`FoodValueRegistry`** — Re-loads per-food nutrition contributions; classification and HUD use nutrient keys from (1). *Has datapack hook.*
 5. **`FoodOverrideRegistry`** — Re-applies item-level overrides on top of base food values. *Has datapack hook.*
@@ -463,7 +463,7 @@ Do not reorder the nine entries registered in `Nourished.registerLifecycleEntrie
 
 To wire a new config-backed registry into the lifecycle:
 
-1. **Implement the registry hooks on your class.** At minimum provide a `public static void load()` (called at bootstrap) and a `public static void reload()` (called on `/nourished reload` and friends). If the registry should also re-read from datapacks, add a `public static void loadFromDatapack(ResourceManager rm)` that uses `NourishedResourceLoader.loadFromModConfig(...)`.
+1. **Implement the registry hooks on your class.** At minimum provide a `public static void load()` (called at bootstrap) and a `public static void reload()` (called on `/nourished reload` and friends). If the registry should also re-read from datapacks, add a `public static void loadFromDatapack(ResourceManager rm)` that uses `MarieResourceLoader.loadFromModConfig(...)`.
 
 2. **Register it in `Nourished.registerLifecycleEntries()`.** Insert the call in dependency order — entries earlier in the list run first, so anything that depends on nutrient keys must come after `NutrientRegistry`. Pick the right overload:
 

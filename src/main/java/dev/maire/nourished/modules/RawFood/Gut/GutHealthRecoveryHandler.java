@@ -1,10 +1,10 @@
 package dev.maire.nourished.modules.RawFood.Gut;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.config.ModuleCache;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.rawInfo.CookednessResolver;
 import net.minecraft.resources.ResourceLocation;
@@ -33,7 +33,7 @@ public class GutHealthRecoveryHandler {
             return;
         }
 
-        ResourceLocation itemId = NourishedRegistryUtils.itemKey(stack);
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(stack);
         float cookedness = CookednessResolver.resolve(itemId);
 
         if (cookedness < 0.5f) {

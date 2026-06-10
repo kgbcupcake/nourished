@@ -3,19 +3,19 @@ package dev.maire.nourished.core.command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.config.ModuleCache;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.nutrition.CacheStats;
+import dev.marie.MariesLib.scan.CacheStats;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientResolutionTrace;
-import dev.maire.nourished.core.nutrition.ResolutionResult;
-import dev.maire.nourished.core.nutrition.ResolutionStage;
-import dev.maire.nourished.core.nutrition.RuntimeCascadeStage;
+import dev.marie.MariesLib.scan.ResolutionResult;
+import dev.marie.MariesLib.scan.ResolutionStage;
+import dev.marie.MariesLib.scan.RuntimeCascadeStage;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.nutrition.TagRuntimeBlend;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
-import dev.maire.nourished.tooling.classification.ClassificationTrace;
-import dev.maire.nourished.tooling.classification.ClassificationTraceFormatter;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.MariesLib.classification.ClassificationTrace;
+import dev.marie.MariesLib.classification.ClassificationTraceFormatter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -159,7 +159,7 @@ public final class NourishedDebugCommand {
         ClassificationTrace classTrace = FoodNutritionRegistry.resolveHeldItemClassificationTrace(stack, recipeManager);
         String inspectorOutput = ClassificationTraceFormatter.format(classTrace, stack);
 
-        ResourceLocation itemId = NourishedRegistryUtils.itemKey(stack.getItem());
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
         String itemName = itemId != null ? itemId.toString() : "unknown";
 
         Instant dumpedAt = Instant.now();

@@ -1,8 +1,8 @@
 package dev.maire.nourished.modules.Stamina.HUD;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.config.ModuleCache;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.modules.Stamina.Core.StaminaSyncPayload;
 import net.minecraft.client.Minecraft;

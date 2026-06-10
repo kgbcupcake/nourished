@@ -1,14 +1,14 @@
 package dev.maire.nourished.core.handler;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
-import dev.maire.nourished.core.registry.RegistryLifecycleManager;
+import dev.marie.MariesLib.registry.RegistryLifecycleManager;
 import dev.maire.nourished.core.reload.NourishedReloadPipeline;
-import dev.maire.nourished.tooling.data.NourishedDataManager;
+import dev.marie.MariesLib.data.MarieDataManager;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
@@ -57,7 +57,7 @@ public class ConfigReloadHandler {
 
     @SubscribeEvent
     public void onAddReloadListeners(AddReloadListenerEvent event) {
-        NourishedDataManager.registerReloadListener(event);
+        MarieDataManager.registerReloadListener(event);
         event.addListener((preparationBarrier, resourceManager, profilerFiller, profilerFiller2, executor, executor2) ->
                 preparationBarrier.wait(net.minecraft.util.Unit.INSTANCE).thenRunAsync(() -> {
                     reloadInProgress = true;

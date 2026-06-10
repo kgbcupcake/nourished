@@ -1,9 +1,9 @@
 package dev.maire.nourished.core.handler;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -16,8 +16,8 @@ public class SleepBonusHandler {
     public void onWakeUp(PlayerWakeUpEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!ModuleCache.enableSleepBonus) return;
-        DietData diet = player.getData(DietAttachment.DIET.get());
-        if (diet.nutrients.values().stream().allMatch(v -> v >= 0.5f)) {
+        TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
+        if (diet.values.values().stream().allMatch(v -> v >= 0.5f)) {
             player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 600, 0, false, true));
         }
     }

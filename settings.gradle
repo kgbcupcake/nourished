@@ -10,3 +10,9 @@ plugins {
 }
 
 rootProject.name = 'NutritionalBalance'
+
+includeBuild('../MarieLib') {
+    dependencySubstitution {
+        substitute module('dev.marie.MariesLib:marieslib') using project(':')
+    }
+}

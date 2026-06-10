@@ -1,9 +1,11 @@
 package dev.maire.nourished.core.nutrition.stages;
 
-import dev.maire.nourished.core.nutrition.ResolutionResult;
-import dev.maire.nourished.core.nutrition.RuntimeCascadeStage;
-import dev.maire.nourished.core.nutrition.StageContext;
-import dev.maire.nourished.core.nutrition.cache.RunningAverage;
+import dev.marie.MariesLib.scan.ResolutionResult;
+import dev.marie.MariesLib.scan.RuntimeCascadeStage;
+import dev.marie.MariesLib.scan.ResolutionStageHandler;
+import dev.marie.MariesLib.scan.StageContext;
+import dev.marie.MariesLib.scan.StageMath;
+import dev.marie.MariesLib.cache.RunningAverage;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;

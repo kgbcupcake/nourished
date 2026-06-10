@@ -1,19 +1,19 @@
 package dev.maire.nourished.core.handler;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.api.NourishedSeasonHook;
-import dev.maire.nourished.api.NourishedEvents;
-import dev.maire.nourished.api.registry.SeasonHookRegistry;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.api.MarieSeasonHook;
+import dev.marie.MariesLib.api.MarieEvents;
+import dev.marie.MariesLib.api.registry.SeasonHookRegistry;
+import dev.marie.MariesLib.config.ModuleCache;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
-import dev.maire.nourished.core.diet.DietMemoryConfig;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.MariesLib.tracking.TrackingMemoryConfig;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.registry.NourishedAttributes;
+import dev.marie.MariesLib.registry.MarieAttributes;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -30,14 +30,19 @@ public class NutritionDecayHandler {
         if (ConfigReloadHandler.isReloadInProgress()) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
-        DietData data = player.getData(DietAttachment.DIET.get());
+        TrackingData data = player.getData(TrackingAttachment.TRACKING.get());
         if (snapshot != null) {
-            data.setMemoryConfig(DietMemoryConfig.fromSnapshot(snapshot));
+            data.setMemoryConfig(new TrackingMemoryConfig(
+                    snapshot.memoryWindowMinutes(), snapshot.noveltyBonus(), snapshot.noveltyDecayCap(),
+                    snapshot.diminishingFloor(), snapshot.startingNutrientValue()));
         } else {
             if (SNAPSHOT_WARN_ONCE.compareAndSet(false, true)) {
                 dev.maire.nourished.core.Nourished.LOGGER.warn("[Nourished] NutritionDecayHandler: config snapshot is null, decay skipped. Will not warn again until server restart.");
             }
-            data.setMemoryConfig(DietMemoryConfig.fromRawConfig(NourishedConfig.get()));
+            NourishedConfig cfg = NourishedConfig.get();
+            data.setMemoryConfig(new TrackingMemoryConfig(
+                    cfg.memoryWindowMinutes(), cfg.noveltyBonus(), cfg.noveltyDecayCap(),
+                    cfg.diminishingFloor(), cfg.startingNutrientValue()));
             return;
         }
         int interval = Math.max(1, snapshot.decayIntervalTicks());
@@ -46,21 +51,21 @@ public class NutritionDecayHandler {
         for (String key : NutrientRegistry.getKeys()) {
             float rate = (float) snapshot.decayRateFor(key);
             rate = applySeasonalDecayModifier(key, rate);
-            rate *= NourishedAttributes.nutrientDecayMultiplier(player);
-            float current = data.nutrients.getOrDefault(key, 0f);
+            rate *= MarieAttributes.valueDecayMultiplier(player);
+            float current = data.values.getOrDefault(key, 0f);
             if (current > 0f) {
                 float newValue = Math.max(0f, current - rate);
-                data.nutrients.put(key, newValue);
+                data.values.put(key, newValue);
                 changed = true;
 
                 if (current != newValue) {
-                    NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientChangedEvent(
+                    NeoForge.EVENT_BUS.post(new MarieEvents.ValueChangedEvent(
                             player, key, current, newValue));
 
                     if (NutrientRegistry.isBeneficial(key)) {
                         float criticalThreshold = (float) snapshot.criticalThreshold();
                         if (newValue <= criticalThreshold && current > criticalThreshold) {
-                            NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientCriticalEvent(player, key));
+                            NeoForge.EVENT_BUS.post(new MarieEvents.ValueCriticalEvent(player, key));
                         }
                     }
                 }
@@ -68,7 +73,7 @@ public class NutritionDecayHandler {
         }
 
         if (changed) {
-            player.setData(DietAttachment.DIET.get(), data);
+            player.setData(TrackingAttachment.TRACKING.get(), data);
             ModNetworking.syncDietDelta(player, data);
         }
     }
@@ -79,14 +84,14 @@ public class NutritionDecayHandler {
         FoodNutrientPipeline.resetSnapshotWarnings();
     }
 
-    private float applySeasonalDecayModifier(String nutrientKey, float baseRate) {
+    private float applySeasonalDecayModifier(String valueKey, float baseRate) {
         var hooks = SeasonHookRegistry.getAll();
         if (!ModuleCache.enableSeasonHooks || hooks.isEmpty()) {
             return baseRate;
         }
         float rate = baseRate;
-        for (NourishedSeasonHook hook : hooks) {
-            float seasonal = Math.max(0f, hook.getSeasonalDecayModifier(nutrientKey, NourishedSeasonHook.Season.SPRING));
+        for (MarieSeasonHook hook : hooks) {
+            float seasonal = Math.max(0f, hook.getSeasonalDecayModifier(valueKey, MarieSeasonHook.Season.SPRING));
             rate *= seasonal;
         }
         return rate;

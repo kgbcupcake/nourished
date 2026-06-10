@@ -2,14 +2,16 @@ package dev.maire.nourished.core.nutrition.stages;
 
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.nutrition.ResolutionResult;
-import dev.maire.nourished.core.nutrition.RuntimeCascadeStage;
-import dev.maire.nourished.core.nutrition.StageContext;
-import dev.maire.nourished.tooling.scanner.ArchetypePattern;
-import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
-import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry.Multipliers;
-import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry.ScannerSpec;
-import dev.maire.nourished.tooling.scanner.FoodTokenStemmer;
+import dev.marie.MariesLib.scan.ResolutionResult;
+import dev.marie.MariesLib.scan.RuntimeCascadeStage;
+import dev.marie.MariesLib.scan.ResolutionStageHandler;
+import dev.marie.MariesLib.scan.StageContext;
+import dev.marie.MariesLib.scan.StageMath;
+import dev.marie.MariesLib.scanner.ArchetypePattern;
+import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
+import dev.marie.MariesLib.scanner.ScannerSpecRegistry.Multipliers;
+import dev.marie.MariesLib.scanner.ScannerSpecRegistry.ScannerSpec;
+import dev.marie.MariesLib.scanner.TokenStemmer;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -215,14 +217,14 @@ public final class KeywordSuffixStage implements ResolutionStageHandler {
         }
 
         String path = itemId.getPath();
-        List<String> rawSegments = FoodTokenStemmer.rawSegmentsForPath(path);
+        List<String> rawSegments = TokenStemmer.rawSegmentsForPath(path);
         List<String> tokens = new ArrayList<>(rawSegments.size());
         List<String> stemmedTokens = new ArrayList<>();
         Map<String, Float> tokenWeightMap = new LinkedHashMap<>();
         for (String raw : rawSegments) {
             String t = raw.toLowerCase(Locale.ROOT);
             if (STOP_WORDS.contains(t) || t.isEmpty()) continue;
-            List<String> chunkStems = FoodTokenStemmer.stemAll(raw);
+            List<String> chunkStems = TokenStemmer.stemAll(raw);
             if (chunkStems.isEmpty()) continue;
             float positionalWeight = weightForPosition(stemmedTokens.size());
             for (String stemmed : chunkStems) {

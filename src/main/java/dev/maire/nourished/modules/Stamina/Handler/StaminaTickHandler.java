@@ -1,9 +1,9 @@
 package dev.maire.nourished.modules.Stamina.Handler;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
@@ -30,12 +30,12 @@ public class StaminaTickHandler {
         if (player.level().getGameTime() % interval != 0) return;
 
         StaminaData stamina = player.getData(StaminaAttachment.STAMINA.get());
-        DietData diet = player.getData(DietAttachment.DIET.get());
+        TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
         GutHealthData gut = player.getData(GutHealthAttachment.GUT.get());
 
         StaminaNutritionProfile profile = StaminaNutritionResolver.resolve(diet, gut);
 
-        stamina.applyNutritionModifiers(diet.nutrients, gut.getGutHealth());
+        stamina.applyNutritionModifiers(diet.values, gut.getGutHealth());
 
         float physicalRegen = StaminaConfig.basePhysicalRegen() * profile.regenModifier();
         float mentalRegen = StaminaConfig.baseMentalRegen() * profile.regenModifier();

@@ -1,11 +1,11 @@
 package dev.maire.nourished.core.reload;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.core.diagnostics.NourishedUnknownFoodLogger;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.diagnostics.MarieUnknownItemLogger;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
-import dev.maire.nourished.core.registry.RegistryLifecycleManager;
+import dev.marie.MariesLib.registry.RegistryLifecycleManager;
 
 /**
  * Thin shim that delegates to {@link RegistryLifecycleManager#reloadAll()}.
@@ -23,6 +23,6 @@ public final class NourishedReloadPipeline {
         FoodFamilyResolver.clearCache();
         RuntimeFoodResolver.getInstance().invalidateCache();
         FoodNutritionRegistry.clearPerReloadWarnings();
-        NourishedUnknownFoodLogger.onReload();
+        MarieUnknownItemLogger.onReload();
     }
 }

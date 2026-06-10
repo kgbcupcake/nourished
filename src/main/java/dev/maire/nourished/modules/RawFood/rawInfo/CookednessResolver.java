@@ -1,12 +1,12 @@
 package dev.maire.nourished.modules.RawFood.rawInfo;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
-import dev.maire.nourished.tooling.scanner.ClassificationResult;
-import dev.maire.nourished.tooling.scanner.FoodTokenStemmer;
-import dev.maire.nourished.tooling.scanner.ScanCache;
-import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
+import dev.marie.MariesLib.scanner.ClassificationResult;
+import dev.marie.MariesLib.scanner.TokenStemmer;
+import dev.marie.MariesLib.scanner.ScanCache;
+import dev.marie.MariesLib.scanner.ItemScanner;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public final class CookednessResolver {
             return cached;
         }
 
-        ScanCache scanCache = UnassignedFoodScanner.getCache();
+        ScanCache scanCache = ItemScanner.getCache();
         if (scanCache == null) {
             CACHE.put(itemId, 1.0f);
             return 1.0f;
@@ -58,7 +58,7 @@ public final class CookednessResolver {
 
     /**
      * Clears the cookedness cache.
-     * Called from /nourished invalidatecache alongside UnassignedFoodScanner.invalidateCache().
+     * Called from /nourished invalidatecache alongside ItemScanner.invalidateCache().
      */
     public static void invalidate() {
         CACHE.clear();
@@ -76,7 +76,7 @@ public final class CookednessResolver {
     }
 
     private static float computeCookedness(ResourceLocation itemId, ClassificationResult result) {
-        List<String> tokens = FoodTokenStemmer.tokenizeForScoring(itemId.getPath());
+        List<String> tokens = TokenStemmer.tokenizeForScoring(itemId.getPath());
 
         Float baseCookedness = null;
         if (RawFoodConfig.hasAnyToken(RawSeverity.SEVERE, tokens)) {

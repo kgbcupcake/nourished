@@ -1,8 +1,8 @@
 package dev.maire.nourished.core.nutrition;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.tooling.scanner.ClassificationResult;
-import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.scanner.ClassificationResult;
+import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -18,14 +18,14 @@ import java.util.Map;
  * datapack tags (authoritative), then API or scanner cache entries.
  */
 @ApiStatus.Internal
-public final class ClassifiedFoodCollector {
+public final class ClassifiedSourceCollector {
 
-    private ClassifiedFoodCollector() {}
+    private ClassifiedSourceCollector() {}
 
     /**
      * @return full classification results for every classified food; empty when nothing is classified
      */
-    public static List<ClassificationResult> collectAllClassifiedFoods() {
+    public static List<ClassificationResult> collectAllClassifiedSources() {
         List<ClassificationResult> out = new ArrayList<>();
         var excluded = ScannerSpecRegistry.get().excludedItems();
 

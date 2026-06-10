@@ -13,24 +13,27 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.compat.ModCompat;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.compat.ModCompat;
+import dev.marie.MariesLib.scan.ResolutionResult;
+import dev.marie.MariesLib.scan.ResolutionStage;
+import dev.marie.MariesLib.scan.RuntimeCascadeStage;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.tooling.classification.ClassificationPipeline;
-import dev.maire.nourished.tooling.classification.ClassificationTrace;
-import dev.maire.nourished.tooling.classification.ClassificationTraceStep;
-import dev.maire.nourished.tooling.classification.TraceStepId;
-import dev.maire.nourished.tooling.classification.TraceStepStatus;
-import dev.maire.nourished.tooling.scanner.ClassificationResult;
-import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
-import dev.maire.nourished.tooling.scanner.RecipeInheritanceResolver;
-import dev.maire.nourished.tooling.scanner.RecipeInheritanceResolver.RecipeInheritanceStep;
-import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
+import dev.marie.MariesLib.classification.ClassificationPipeline;
+import dev.marie.MariesLib.classification.ClassificationTrace;
+import dev.marie.MariesLib.classification.ClassificationTraceStep;
+import dev.marie.MariesLib.classification.TraceStepId;
+import dev.marie.MariesLib.classification.TraceStepStatus;
+import dev.marie.MariesLib.scanner.ClassificationResult;
+import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
+import dev.marie.MariesLib.scanner.RecipeInheritanceResolver;
+import dev.marie.MariesLib.scanner.RecipeInheritanceResolver.RecipeInheritanceStep;
+import dev.marie.MariesLib.scanner.ItemScanner;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -54,10 +57,10 @@ import javax.annotation.Nullable;
  *       (bound to diet bars via {@link NutrientRegistry}). These are authoritative: any match from
  *       this family wins over heuristic and scanner-supplied guesses for that item.</li>
  *   <li><b>External compat registrations</b> — Classifications registered at runtime through the API
- *       ({@link dev.maire.nourished.api.NourishedAPI#registerFoodClassification} /
+ *       ({@link dev.maire.nourished.api.NourishedAPI#registerSourceClassification} /
  *       {@link #registerClassification}). These take precedence over scanner-derived maps in
  *       {@link #getExternalClassification}.</li>
- *   <li><b>Scanner classifications</b> — Results from {@link UnassignedFoodScanner} (async scan on
+ *   <li><b>Scanner classifications</b> — Results from {@link ItemScanner} (async scan on
  *       world load), applied via {@link #applyFromScanner}. Scanner entries are skipped for
  *       items that already have nutrient tags or an API registration so tags always override scanner
  *       guesses.</li>
@@ -70,7 +73,7 @@ import javax.annotation.Nullable;
  *       {@link #resolveNutrientBars}, this path supplies the full map only when there are no exact
  *       nutrient tag matches; otherwise it participates only through the blend step above.</li>
  *   <li><b>Unclassified fallback</b> — Empty map: no diet bars, and tooltips show no nutrient bar
- *       lines (see unclassified messaging in {@link dev.maire.nourished.compat.NourishedFoodTooltipHelper}).</li>
+ *       lines (see unclassified messaging in {@link dev.marie.MariesLib.compat.MarieTooltipHelper}).</li>
  * </ol>
  *
  * <p><b>Datapack note:</b> Cross-mod tag entries (anything outside the {@code minecraft:} namespace,
@@ -149,16 +152,16 @@ public class FoodNutritionRegistry {
 
     /**
      * Registers an API-driven food classification mapping a food item to a nutrient key with an amount.
-     * Called by {@link dev.maire.nourished.api.NourishedAPI#registerFoodClassification}.
+     * Called by {@link dev.maire.nourished.api.NourishedAPI#registerSourceClassification}.
      */
-    public static void registerClassification(ResourceLocation foodId, String nutrientKey, float amount) {
-        if (EXTERNAL_CLASSIFICATIONS.size() >= EXTERNAL_CLASSIFICATION_CAP && !EXTERNAL_CLASSIFICATIONS.containsKey(foodId)) {
+    public static void registerClassification(ResourceLocation sourceId, String valueKey, float amount) {
+        if (EXTERNAL_CLASSIFICATIONS.size() >= EXTERNAL_CLASSIFICATION_CAP && !EXTERNAL_CLASSIFICATIONS.containsKey(sourceId)) {
             LOGGER.warn("[FoodNutritionRegistry] External classification cap ({}) reached — ignoring: {} -> {}",
-                    EXTERNAL_CLASSIFICATION_CAP, foodId, nutrientKey);
+                    EXTERNAL_CLASSIFICATION_CAP, sourceId, valueKey);
             return;
         }
-        EXTERNAL_CLASSIFICATIONS.computeIfAbsent(foodId, k -> new ConcurrentHashMap<>()).put(nutrientKey, amount);
-        LOGGER.info("[FoodNutritionRegistry] Registered external classification: {} -> {} ({})", foodId, nutrientKey, amount);
+        EXTERNAL_CLASSIFICATIONS.computeIfAbsent(sourceId, k -> new ConcurrentHashMap<>()).put(valueKey, amount);
+        LOGGER.info("[FoodNutritionRegistry] Registered external classification: {} -> {} ({})", sourceId, valueKey, amount);
     }
 
     /** Clears API-registered external classifications. Called during reload pipeline. */
@@ -178,7 +181,7 @@ public class FoodNutritionRegistry {
                 continue;
             }
             ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
-            if (UnassignedFoodScanner.hasNutrientTag(stack)) {
+            if (ItemScanner.hasValueTag(stack)) {
                 continue;
             }
             Map<String, Float> inner = entry.getValue();
@@ -206,26 +209,26 @@ public class FoodNutritionRegistry {
      * Returns classifications for a food item: API {@link #registerClassification} first, then scanner-derived
      * {@link #applyFromScanner} as fallback; {@code null} if neither applies.
      */
-    public static Map<String, Float> getExternalClassification(ResourceLocation foodId) {
-        Map<String, Float> api = EXTERNAL_CLASSIFICATIONS.get(foodId);
+    public static Map<String, Float> getExternalClassification(ResourceLocation sourceId) {
+        Map<String, Float> api = EXTERNAL_CLASSIFICATIONS.get(sourceId);
         if (api != null) {
             return api;
         }
-        return SCANNER_CLASSIFICATIONS.get(foodId);
+        return SCANNER_CLASSIFICATIONS.get(sourceId);
     }
 
     /**
      * Package-private: returns true if the given item has an API-registered external classification.
      */
-    static boolean hasApiClassification(ResourceLocation foodId) {
-        return EXTERNAL_CLASSIFICATIONS.containsKey(foodId);
+    static boolean hasApiClassification(ResourceLocation sourceId) {
+        return EXTERNAL_CLASSIFICATIONS.containsKey(sourceId);
     }
 
     /**
      * Package-private: returns true if the given item has a scanner-derived classification.
      */
-    static boolean hasScannerClassification(ResourceLocation foodId) {
-        return SCANNER_CLASSIFICATIONS.containsKey(foodId);
+    static boolean hasScannerClassification(ResourceLocation sourceId) {
+        return SCANNER_CLASSIFICATIONS.containsKey(sourceId);
     }
 
     public record NutrientValues(float protein, float carbs, float fats, float vitamins, float hydration) {}
@@ -295,7 +298,7 @@ public class FoodNutritionRegistry {
      */
     public static Map<String, Float> resolveNutrientBars(ItemStack stack, boolean warnIfUnmatched, @Nullable RecipeManager recipeManager) {
         Item item = stack.getItem();
-        ResourceLocation itemId = NourishedRegistryUtils.itemKey(stack.getItem());
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
         if (itemId != null && ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())) {
             return Map.of();
         }
@@ -381,7 +384,7 @@ public class FoodNutritionRegistry {
      */
     public static ClassificationTrace resolveHeldItemClassificationTrace(ItemStack stack, @Nullable RecipeManager recipeManager) {
         Item item = stack.getItem();
-        ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(item);
         String itemIdStr = itemId != null ? itemId.toString() : "unknown";
 
         List<ClassificationTraceStep> traceSteps = new ArrayList<>();
@@ -420,7 +423,7 @@ public class FoodNutritionRegistry {
             tagDetail.put("warningCode", "TAG_COMPAT_STRIPPED");
         }
         traceSteps.add(new ClassificationTraceStep(
-                TraceStepId.NUTRIENT_TAG_LOOKUP,
+                TraceStepId.VALUE_TAG_LOOKUP,
                 tagFiltered.isEmpty() ? TraceStepStatus.SKIPPED : TraceStepStatus.SUCCESS,
                 tagFiltered.isEmpty() ? "No nutrient tags matched" : "Matched " + tagFiltered.size() + " nutrient tag(s)",
                 tagDetail));
@@ -552,7 +555,7 @@ public class FoodNutritionRegistry {
      */
     public static NutrientResolutionTrace resolveHeldItemTrace(ItemStack stack, @Nullable RecipeManager recipeManager) {
         Item item = stack.getItem();
-        ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(item);
         String itemIdStr = itemId != null ? itemId.toString() : "unknown";
 
         if (itemId != null && ScannerSpecRegistry.get().excludedItems().contains(itemIdStr)) {
@@ -589,7 +592,7 @@ public class FoodNutritionRegistry {
         }
 
         ResolutionResult resolverResult = RuntimeFoodResolver.getInstance().resolveWithResult(stack, recipeManager);
-        Map<String, Float> resolved = resolverResult != null ? resolverResult.nutrients() : Map.of();
+        Map<String, Float> resolved = resolverResult != null ? resolverResult.values() : Map.of();
         RuntimeCascadeStage cascadeStage = resolverResult != null ? resolverResult.stage() : null;
         Map<String, String> rejectedSignals = resolverResult != null ? resolverResult.rejectedSignals() : Map.of();
 
@@ -697,7 +700,7 @@ public class FoodNutritionRegistry {
 
         for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
             for (String tagStr : def.tags()) {
-                var tagKey = NourishedRegistryUtils.itemTagKey(tagStr);
+                var tagKey = MarieRegistryUtils.itemTagKey(tagStr);
                 if (holder.is(tagKey)) {
                     matches.put(def.key(), 1.0f);
                     break;
@@ -722,7 +725,7 @@ public class FoodNutritionRegistry {
                     continue;
                 }
                 for (String tagStr : def.tags()) {
-                    var tagKey = NourishedRegistryUtils.itemTagKey(tagStr);
+                    var tagKey = MarieRegistryUtils.itemTagKey(tagStr);
                     if (holder.is(tagKey)) {
                         out.add(tagKey.location().toString());
                         break;
@@ -758,7 +761,7 @@ public class FoodNutritionRegistry {
 
         for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
             for (String tagStr : def.tags()) {
-                var tagKey = NourishedRegistryUtils.itemTagKey(tagStr);
+                var tagKey = MarieRegistryUtils.itemTagKey(tagStr);
                 if (holder.is(tagKey)) {
                     matches.put(def.key(), 1.0f);
                     break;

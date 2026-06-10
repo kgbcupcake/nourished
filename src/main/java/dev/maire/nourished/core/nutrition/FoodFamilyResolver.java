@@ -1,8 +1,8 @@
 package dev.maire.nourished.core.nutrition;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.core.registry.AbstractRegistry;
-import dev.maire.nourished.tooling.scanner.FoodTokenStemmer;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.registry.AbstractRegistry;
+import dev.marie.MariesLib.scanner.TokenStemmer;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashSet;
@@ -14,11 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Resolves food item IDs to logical food families based on token matching against the path.
- * The path is tokenized the same way as scanner scoring ({@link FoodTokenStemmer#rawSegmentsForPath}:
+ * The path is tokenized the same way as scanner scoring ({@link TokenStemmer#rawSegmentsForPath}:
  * underscores split into segments; single CamelCase segments expand with a food dictionary).
  * Each keyword must match a whole token (not a substring) to avoid false positives like
  * {@code seabass_soup} matching {@code bass} or {@code scroll_of_food} matching {@code roll}.
- * Used by both {@link FoodNutritionRegistry} and {@link UnassignedFoodScanner}.
+ * Used by both {@link FoodNutritionRegistry} and {@link ItemScanner}.
  * All resolutions are cached for O(1) repeated lookups.
  */
 @ApiStatus.Internal
@@ -81,7 +81,7 @@ public final class FoodFamilyResolver {
     }
 
     private static Set<String> tokenize(String path) {
-        List<String> segs = FoodTokenStemmer.rawSegmentsForPath(path);
+        List<String> segs = TokenStemmer.rawSegmentsForPath(path);
         if (segs.size() > 64) return Set.of();
         Set<String> tokens = new HashSet<>(segs.size() * 2);
         for (String part : segs) {

@@ -12,15 +12,15 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import dev.maire.nourished.api.NourishedEvents;
-import dev.maire.nourished.api.registry.DietProfileRegistry;
+import dev.marie.MariesLib.api.MarieEvents;
+import dev.marie.MariesLib.api.registry.ProfileRegistry;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.tooling.data.DatapackDiagnostic;
-import dev.maire.nourished.tooling.data.DatapackDiagnostics;
-import dev.maire.nourished.tooling.data.SchemaDefinition;
-import dev.maire.nourished.tooling.datapack.SchemaTemplateGenerator;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.data.DatapackDiagnostic;
+import dev.marie.MariesLib.data.DatapackDiagnostics;
+import dev.marie.MariesLib.data.SchemaDefinition;
+import dev.marie.MariesLib.datapack.SchemaTemplateGenerator;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.network.ModNetworking;
@@ -31,12 +31,13 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.handler.ConfigReloadHandler;
 import dev.maire.nourished.core.reload.NourishedReloadPipeline;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
-import dev.maire.nourished.core.util.NourishedValidation;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.MariesLib.util.MarieValidation;
 import dev.maire.nourished.modules.RawFood.rawInfo.CookedVersionResolver;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
-import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
-import dev.maire.nourished.tooling.scanner.analysis.MultiNutrientAnalysisPipeline;
+import dev.marie.MariesLib.scanner.ItemScanner;
+import dev.maire.nourished.core.nutrition.ClassifiedSourceCollector;
+import dev.marie.MariesLib.scanner.analysis.MultiValueAnalysisPipeline;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.commands.CommandSourceStack;
@@ -87,7 +88,7 @@ public class NourishedCommand {
 
     private static final SuggestionProvider<CommandSourceStack> PROFILE_SUGGESTIONS =
             (ctx, builder) -> SharedSuggestionProvider.suggest(
-                    DietProfileRegistry.getAll().stream().map(p -> p.getId()),
+                    ProfileRegistry.getAll().stream().map(p -> p.getId()),
                     builder
             );
 
@@ -197,7 +198,7 @@ public class NourishedCommand {
         FoodNutritionRegistry.clearScannerClassifications();
         RawFoodClassifier.invalidate();
         CookedVersionResolver.invalidate();
-        UnassignedFoodScanner.scanAndApply(source.getServer().getRecipeManager());
+        ItemScanner.scanAndApply(source.getServer().getRecipeManager());
         source.sendSuccess(() -> Component.literal("Nourished cache invalidated. Scanner will reapply on next tick."), false);
         return 1;
     }
@@ -210,7 +211,7 @@ public class NourishedCommand {
         Path tagsDir = packRoot.resolve("data").resolve(Nourished.MODID).resolve("tags").resolve("item").resolve("nutrients");
 
         try {
-            NourishedValidation.assertPathUnder(packRoot, worldRoot, "repairGeneratedDatapack");
+            MarieValidation.assertPathUnder(packRoot, worldRoot, "repairGeneratedDatapack");
             if (!Files.isDirectory(tagsDir)) {
                 source.sendSuccess(() -> Component.literal("No nourished-generated datapack nutrient tags found."), false);
                 return 1;
@@ -307,17 +308,17 @@ public class NourishedCommand {
         player.sendSystemMessage(copyableGreenLine(header));
 
         for (String key : NutrientRegistry.getKeys()) {
-            String path = DietAttachment.getNutrientNbtPath(key);
+            String path = TrackingAttachment.getValueNbtPath(key);
             player.sendSystemMessage(copyableGreenLine(path));
         }
 
-        player.sendSystemMessage(copyableGreenLine(DietAttachment.getCaloriesNbtPath()));
+        player.sendSystemMessage(copyableGreenLine(TrackingAttachment.getTotalNbtPath()));
         return 1;
     }
 
     private int showUnassignedFoods(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        UnassignedFoodScanner.scanAndApplyNow(ctx.getSource().getServer().getRecipeManager());
+        ItemScanner.scanAndApplyNow(ctx.getSource().getServer().getRecipeManager());
         Map<String, List<ResourceLocation>> byNamespace = new TreeMap<>();
 
         for (Item item : BuiltInRegistries.ITEM) {
@@ -381,27 +382,27 @@ public class NourishedCommand {
     private int setNutrient(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         String key = StringArgumentType.getString(ctx, "key");
         try {
-            NourishedRegistryUtils.requireNutrientKey(key, "nourished set nutrient command");
+            MarieRegistryUtils.requireValueKey(key, "nourished set nutrient command");
         } catch (IllegalArgumentException e) {
             ctx.getSource().sendFailure(Component.literal("Unknown nutrient key: " + key));
             return 0;
         }
         float value = FloatArgumentType.getFloat(ctx, "value");
         ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
-        DietData data = player.getData(DietAttachment.DIET.get());
-        float old = data.nutrients.getOrDefault(key, 0f);
-        data.nutrients.put(key, value);
-        player.setData(DietAttachment.DIET.get(), data);
+        TrackingData data = player.getData(TrackingAttachment.TRACKING.get());
+        float old = data.values.getOrDefault(key, 0f);
+        data.values.put(key, value);
+        player.setData(TrackingAttachment.TRACKING.get(), data);
         ModNetworking.syncDiet(player, data);
         NutritionEffectApplier.apply(player, data);
-        NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientChangedEvent(player, key, old, value));
+        NeoForge.EVENT_BUS.post(new MarieEvents.ValueChangedEvent(player, key, old, value));
         ctx.getSource().sendSuccess(() -> Component.literal(String.format(Locale.ROOT, "Set %s for %s: %.2f -> %.2f", key, player.getName().getString(), old, value)), true);
         return 1;
     }
 
     private int resetPlayer(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
-        DietData data = player.getData(DietAttachment.DIET.get());
+        TrackingData data = player.getData(TrackingAttachment.TRACKING.get());
         SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
         float start;
         if (snapshot != null) {
@@ -414,17 +415,17 @@ public class NourishedCommand {
             start = (float) NourishedConfig.get().startingNutrientValue();
         }
         for (String key : NutrientRegistry.getKeys()) {
-            float old = data.nutrients.getOrDefault(key, 0f);
-            data.nutrients.put(key, start);
-            NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientChangedEvent(player, key, old, start));
+            float old = data.values.getOrDefault(key, 0f);
+            data.values.put(key, start);
+            NeoForge.EVENT_BUS.post(new MarieEvents.ValueChangedEvent(player, key, old, start));
         }
-        player.setData(DietAttachment.DIET.get(), data);
+        player.setData(TrackingAttachment.TRACKING.get(), data);
         ctx.getSource().sendSuccess(() -> Component.literal("Reset nutrients for " + player.getName().getString()), true);
         return 1;
     }
 
     private int profileList(CommandContext<CommandSourceStack> ctx) {
-        List<String> names = DietProfileRegistry.getAll().stream().map(p -> p.getId() + " (" + p.getDisplayName() + ")").toList();
+        List<String> names = ProfileRegistry.getAll().stream().map(p -> p.getId() + " (" + p.getDisplayName() + ")").toList();
         if (names.isEmpty()) {
             ctx.getSource().sendSuccess(() -> Component.literal("No diet profiles registered."), false);
             return 1;
@@ -465,22 +466,22 @@ public class NourishedCommand {
 
     private int debugTarget(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
-        DietData data = target.getData(DietAttachment.DIET.get());
+        TrackingData data = target.getData(TrackingAttachment.TRACKING.get());
 
         JsonObject root = new JsonObject();
         root.addProperty("player", target.getGameProfile().getName());
-        root.addProperty("calories", data.calories);
-        root.addProperty("maxCalories", data.maxCalories);
+        root.addProperty("calories", data.total);
+        root.addProperty("maxCalories", data.maxTotal);
         root.addProperty("activeProfile", activeProfile(target));
 
         JsonObject nutrients = new JsonObject();
-        for (Map.Entry<String, Float> entry : new LinkedHashMap<>(data.nutrients).entrySet()) {
+        for (Map.Entry<String, Float> entry : new LinkedHashMap<>(data.values).entrySet()) {
             nutrients.addProperty(entry.getKey(), entry.getValue());
         }
         root.add("nutrients", nutrients);
 
         String[] lines = GSON.toJson(root).split("\n");
-        ctx.getSource().sendSuccess(() -> Component.literal("Raw DietData for " + target.getName().getString() + ":").withStyle(ChatFormatting.GOLD), false);
+        ctx.getSource().sendSuccess(() -> Component.literal("Raw TrackingData for " + target.getName().getString() + ":").withStyle(ChatFormatting.GOLD), false);
         for (String line : lines) {
             ctx.getSource().sendSuccess(() -> Component.literal(line).withStyle(ChatFormatting.GRAY), false);
         }
@@ -488,7 +489,8 @@ public class NourishedCommand {
     }
 
     private int runScanAnalysis(CommandContext<CommandSourceStack> ctx) {
-        MultiNutrientAnalysisPipeline.runFullRegistry(0.15f, 0.35f, 0.10f);
+        MultiValueAnalysisPipeline.runFullRegistry(
+                ClassifiedSourceCollector.collectAllClassifiedSources(), 0.15f, 0.35f, 0.10f);
         String outputPath = "config/" + Nourished.MODID + "/scanner_analysis/";
         ctx.getSource().sendSuccess(
                 () -> Component.literal("Multi-nutrient analysis written to " + outputPath)
@@ -544,13 +546,13 @@ public class NourishedCommand {
 
     private static Supplier<SchemaDefinition> schemaSupplier(String type) {
         return switch (type) {
-            case "nutrients" -> SchemaDefinition::forNutrient;
-            case "food_classifications" -> SchemaDefinition::forFoodClassification;
+            case "values" -> SchemaDefinition::forValue;
+            case "source_classifications" -> SchemaDefinition::forSourceClassification;
             case "effects" -> SchemaDefinition::forEffect;
             case "synergies" -> SchemaDefinition::forSynergy;
-            case "food_synergies" -> SchemaDefinition::forFoodSynergy;
+            case "source_synergies" -> SchemaDefinition::forSourcePairSynergy;
             case "milestones" -> SchemaDefinition::forMilestone;
-            case "diet_profiles" -> SchemaDefinition::forDietProfile;
+            case "tracking_profiles" -> SchemaDefinition::forTrackingProfile;
             case "compat" -> SchemaDefinition::forCompat;
             default -> null;
         };
@@ -561,7 +563,7 @@ public class NourishedCommand {
             source.sendFailure(Component.literal("You do not have permission to target another player."));
             return 0;
         }
-        DietData data = target.getData(DietAttachment.DIET.get());
+        TrackingData data = target.getData(TrackingAttachment.TRACKING.get());
         SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
         if (snapshot == null) {
             source.sendSystemMessage(Component.literal("[Nourished] Server config not yet synchronized; showing defaults."));
@@ -577,7 +579,7 @@ public class NourishedCommand {
 
     private int sendNutrientDetail(CommandSourceStack source, String key, ServerPlayer target) {
         try {
-            NourishedRegistryUtils.requireNutrientKey(key, "nourished nutrient command");
+            MarieRegistryUtils.requireValueKey(key, "nourished nutrient command");
         } catch (IllegalArgumentException e) {
             source.sendFailure(Component.literal("Unknown nutrient key: " + key));
             return 0;
@@ -587,12 +589,12 @@ public class NourishedCommand {
             return 0;
         }
 
-        DietData data = target.getData(DietAttachment.DIET.get());
+        TrackingData data = target.getData(TrackingAttachment.TRACKING.get());
         SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
         if (snapshot == null) {
             source.sendSystemMessage(Component.literal("[Nourished] Server config not yet synchronized; showing defaults."));
         }
-        float value = data.nutrients.getOrDefault(key, 0f);
+        float value = data.values.getOrDefault(key, 0f);
         float decay = snapshot != null
                 ? (float) snapshot.decayRateFor(key)
                 : (float) NourishedConfig.get().decayRateFor(key);
@@ -618,7 +620,7 @@ public class NourishedCommand {
     }
 
     private int setProfile(CommandSourceStack source, String profile, ServerPlayer target) {
-        if (DietProfileRegistry.get(profile) == null) {
+        if (ProfileRegistry.get(profile) == null) {
             source.sendFailure(Component.literal("Unknown profile: " + profile));
             return 0;
         }
@@ -643,7 +645,7 @@ public class NourishedCommand {
         }
         for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
             for (String tagStr : def.tags()) {
-                TagKey<Item> tagKey = NourishedRegistryUtils.itemTagKey(tagStr);
+                TagKey<Item> tagKey = MarieRegistryUtils.itemTagKey(tagStr);
                 if (holder.is(tagKey)) {
                     return true;
                 }

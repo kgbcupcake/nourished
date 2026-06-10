@@ -7,11 +7,12 @@ import com.google.gson.JsonObject;
 
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.util.NourishedValidation;
-import dev.maire.nourished.tooling.scanner.UnassignedFoodScanner;
-import dev.maire.nourished.tooling.scanner.ClassificationResult;
-import dev.maire.nourished.tooling.scanner.ClassificationSignal;
-import dev.maire.nourished.tooling.scanner.analysis.MultiNutrientAnalysisPipeline;
+import dev.marie.MariesLib.util.MarieValidation;
+import dev.marie.MariesLib.scanner.ItemScanner;
+import dev.marie.MariesLib.scanner.ClassificationResult;
+import dev.marie.MariesLib.scanner.ClassificationSignal;
+import dev.maire.nourished.core.nutrition.ClassifiedSourceCollector;
+import dev.marie.MariesLib.scanner.analysis.MultiValueAnalysisPipeline;
 import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
@@ -100,14 +101,14 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         hasRunScan = true;
         List<String> keys = NutrientRegistry.getKeys();
 
-        for (UnassignedFoodScanner.ScanHit hit : UnassignedFoodScanner.scan()) {
+        for (ItemScanner.ScanHit hit : ItemScanner.scan()) {
             ClassificationResult result = hit.result();
-            String dominant = result != null ? result.dominant() : hit.fallbackNutrient();
+            String dominant = result != null ? result.dominant() : hit.fallbackValue();
             boolean uncertain = result != null && result.uncertain();
             float spread = result != null ? result.confidenceSpread() : 0f;
             List<ClassificationSignal> signals = result != null ? result.topSignals(3) : List.of();
 
-            rows.add(new Row(hit.itemId(), hit.fallbackNutrient(), dominant, uncertain, spread, signals, keys));
+            rows.add(new Row(hit.itemId(), hit.fallbackValue(), dominant, uncertain, spread, signals, keys));
         }
         requestReferenceRebuilding();
     }
@@ -129,7 +130,8 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
 
         server.execute(() -> {
             try {
-                MultiNutrientAnalysisPipeline.runFullRegistry(0.15f, 0.35f, 0.10f);
+                MultiValueAnalysisPipeline.runFullRegistry(
+                        ClassifiedSourceCollector.collectAllClassifiedSources(), 0.15f, 0.35f, 0.10f);
                 mc.execute(() -> finishAnalysis(mc, null));
             } catch (RuntimeException ex) {
                 mc.execute(() -> finishAnalysis(mc, ex));
@@ -180,7 +182,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         String outputPath = packRoot.toAbsolutePath().toString();
 
         try {
-            NourishedValidation.assertPathUnder(
+            MarieValidation.assertPathUnder(
                     packRoot.normalize(),
                     server.getWorldPath(LevelResource.ROOT).normalize(),
                     "writeDatapack");
@@ -505,7 +507,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
 
     private static final class Row {
         private final ResourceLocation itemId;
-        private final String fallbackNutrient;
+        private final String fallbackValue;
         private final boolean uncertain;
         private final float confidenceSpread;
         private final List<ClassificationSignal> topSignals;
@@ -514,14 +516,14 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         private final Button nutrientButton;
 
         Row(ResourceLocation itemId,
-            String fallbackNutrient,
+            String fallbackValue,
             String dominant,
             boolean uncertain,
             float confidenceSpread,
             List<ClassificationSignal> topSignals,
             List<String> keys) {
             this.itemId = itemId;
-            this.fallbackNutrient = fallbackNutrient;
+            this.fallbackValue = fallbackValue;
             this.uncertain = uncertain;
             this.confidenceSpread = confidenceSpread;
             this.topSignals = topSignals;

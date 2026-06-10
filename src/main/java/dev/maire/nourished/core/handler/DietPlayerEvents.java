@@ -1,12 +1,12 @@
 package dev.maire.nourished.core.handler;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.config.ModuleCache;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
-import dev.maire.nourished.core.diet.DietMemoryConfig;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.MariesLib.tracking.TrackingMemoryConfig;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
@@ -28,15 +28,20 @@ public class DietPlayerEvents {
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        DietData diet = player.getData(DietAttachment.DIET.get());
+        TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
         diet.tick();
-        player.setData(DietAttachment.DIET.get(), diet);
+        player.setData(TrackingAttachment.TRACKING.get(), diet);
         SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
         if (snapshot != null) {
-            diet.setMemoryConfig(DietMemoryConfig.fromSnapshot(snapshot));
+            diet.setMemoryConfig(new TrackingMemoryConfig(
+                    snapshot.memoryWindowMinutes(), snapshot.noveltyBonus(), snapshot.noveltyDecayCap(),
+                    snapshot.diminishingFloor(), snapshot.startingNutrientValue()));
         } else {
             warnSnapshotNull("join");
-            diet.setMemoryConfig(DietMemoryConfig.fromRawConfig(NourishedConfig.get()));
+            NourishedConfig cfg = NourishedConfig.get();
+            diet.setMemoryConfig(new TrackingMemoryConfig(
+                    cfg.memoryWindowMinutes(), cfg.noveltyBonus(), cfg.noveltyDecayCap(),
+                    cfg.diminishingFloor(), cfg.startingNutrientValue()));
         }
         NourishedSyncHandler.syncOnJoin(player);
         if (ModuleCache.enableEffects) {
@@ -66,15 +71,20 @@ public class DietPlayerEvents {
     @SubscribeEvent
     public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        DietData diet = player.getData(DietAttachment.DIET.get());
+        TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
         diet.tick();
-        player.setData(DietAttachment.DIET.get(), diet);
+        player.setData(TrackingAttachment.TRACKING.get(), diet);
         SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
         if (snapshot != null) {
-            diet.setMemoryConfig(DietMemoryConfig.fromSnapshot(snapshot));
+            diet.setMemoryConfig(new TrackingMemoryConfig(
+                    snapshot.memoryWindowMinutes(), snapshot.noveltyBonus(), snapshot.noveltyDecayCap(),
+                    snapshot.diminishingFloor(), snapshot.startingNutrientValue()));
         } else {
             warnSnapshotNull("respawn");
-            diet.setMemoryConfig(DietMemoryConfig.fromRawConfig(NourishedConfig.get()));
+            NourishedConfig cfg = NourishedConfig.get();
+            diet.setMemoryConfig(new TrackingMemoryConfig(
+                    cfg.memoryWindowMinutes(), cfg.noveltyBonus(), cfg.noveltyDecayCap(),
+                    cfg.diminishingFloor(), cfg.startingNutrientValue()));
         }
         NourishedSyncHandler.syncOnJoin(player);
         if (ModuleCache.enableEffects) {
@@ -90,7 +100,7 @@ public class DietPlayerEvents {
     @SubscribeEvent
     public void onPlayerChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        DietData diet = player.getData(DietAttachment.DIET.get());
+        TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
         ModNetworking.syncDietDelta(player, diet);
         if (ModuleCache.enableEffects) {
             NutritionEffectApplier.apply(player, diet);

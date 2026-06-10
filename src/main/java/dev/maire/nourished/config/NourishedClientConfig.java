@@ -1,9 +1,11 @@
 package dev.maire.nourished.config;
 
 import com.google.gson.JsonObject;
+import dev.marie.MariesLib.config.ConfigDefaultsLoader;
+import dev.marie.MariesLib.config.HudAnchor;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -105,7 +107,7 @@ public final class NourishedClientConfig {
                         return false;
                     }
                     try {
-                        NourishedRegistryUtils.requireNutrientKey(s, "NourishedClientConfig.dietBarOrder");
+                        MarieRegistryUtils.requireValueKey(s, "NourishedClientConfig.dietBarOrder");
                         return true;
                     } catch (IllegalArgumentException e) {
                         return false;

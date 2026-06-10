@@ -1,10 +1,11 @@
 package dev.maire.nourished.core.nutrition.stages;
 
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.nutrition.ResolutionResult;
-import dev.maire.nourished.core.nutrition.StageContext;
-import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
-import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry.ScannerSpec;
+import dev.marie.MariesLib.scan.ResolutionResult;
+import dev.marie.MariesLib.scan.ResolutionStageHandler;
+import dev.marie.MariesLib.scan.StageContext;
+import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
+import dev.marie.MariesLib.scanner.ScannerSpecRegistry.ScannerSpec;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;

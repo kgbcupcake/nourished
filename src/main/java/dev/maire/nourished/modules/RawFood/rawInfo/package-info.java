@@ -20,4 +20,4 @@
 @ApiStatus.Internal
 package dev.maire.nourished.modules.RawFood.rawInfo;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;

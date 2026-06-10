@@ -6,11 +6,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.registry.AbstractRegistry;
-import dev.maire.nourished.core.util.NourishedJsonUtils;
-import dev.maire.nourished.core.util.NourishedResourceLoader;
+import dev.marie.MariesLib.registry.AbstractRegistry;
+import dev.marie.MariesLib.util.MarieJsonUtils;
+import dev.marie.MariesLib.util.MarieResourceLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -125,7 +125,7 @@ public class FoodValueRegistry {
      * Call this from a reload listener when datapacks are available.
      */
     public static void loadFromDatapack(ResourceManager resourceManager) {
-        NourishedResourceLoader.loadFromModConfig(
+        MarieResourceLoader.loadFromModConfig(
                 resourceManager,
                 "config/food_values.json",
                 FoodValueRegistry::parseFromReader,
@@ -143,11 +143,11 @@ public class FoodValueRegistry {
             return false;
         }
         String category = categoryEl.getAsString();
-        float protein = NourishedJsonUtils.getOptionalFloat(obj, "protein", 0.2f);
-        float carbs = NourishedJsonUtils.getOptionalFloat(obj, "carbs", 0.2f);
-        float fats = NourishedJsonUtils.getOptionalFloat(obj, "fats", 0.2f);
-        float vitamins = NourishedJsonUtils.getOptionalFloat(obj, "vitamins", 0.2f);
-        float hydration = NourishedJsonUtils.getOptionalFloat(obj, "hydration", 0.2f);
+        float protein = MarieJsonUtils.getOptionalFloat(obj, "protein", 0.2f);
+        float carbs = MarieJsonUtils.getOptionalFloat(obj, "carbs", 0.2f);
+        float fats = MarieJsonUtils.getOptionalFloat(obj, "fats", 0.2f);
+        float vitamins = MarieJsonUtils.getOptionalFloat(obj, "vitamins", 0.2f);
+        float hydration = MarieJsonUtils.getOptionalFloat(obj, "hydration", 0.2f);
         INSTANCE.registerUnlocked(category, new FoodValueDef(category, protein, carbs, fats, vitamins, hydration));
         return true;
     }

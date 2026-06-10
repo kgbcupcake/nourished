@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.util.NourishedJsonUtils;
-import dev.maire.nourished.core.util.NourishedResourceLoader;
+import dev.marie.MariesLib.util.MarieJsonUtils;
+import dev.marie.MariesLib.util.MarieResourceLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -422,7 +422,7 @@ public final class StaminaConfig {
     }
 
     public static void loadFromDatapack(ResourceManager resourceManager) {
-        NourishedResourceLoader.loadFromModConfig(
+        MarieResourceLoader.loadFromModConfig(
                 resourceManager,
                 "config/stamina.json",
                 reader -> {
@@ -480,53 +480,53 @@ public final class StaminaConfig {
             return;
         }
 
-        initialPhysicalMax = NourishedJsonUtils.getOptionalFloat(root, "initialPhysicalMax", initialPhysicalMax);
-        initialMentalMax = NourishedJsonUtils.getOptionalFloat(root, "initialMentalMax", initialMentalMax);
-        minStamina = NourishedJsonUtils.getOptionalFloat(root, "minStamina", minStamina);
-        maxStamina = NourishedJsonUtils.getOptionalFloat(root, "maxStamina", maxStamina);
-        maxFatiguePenalty = NourishedJsonUtils.getOptionalFloat(root, "maxFatiguePenalty", maxFatiguePenalty);
-        fatigueThreshold = NourishedJsonUtils.getOptionalFloat(root, "fatigueThreshold", fatigueThreshold);
-        fatigueBuildRate = NourishedJsonUtils.getOptionalFloat(root, "fatigueBuildRate", fatigueBuildRate);
-        fatigueDecayRate = NourishedJsonUtils.getOptionalFloat(root, "fatigueDecayRate", fatigueDecayRate);
-        fatigueDurationTicks = NourishedJsonUtils.getOptionalInt(root, "fatigueDurationTicks", fatigueDurationTicks);
-        maxDebt = NourishedJsonUtils.getOptionalFloat(root, "maxDebt", maxDebt);
-        debtRepayRate = NourishedJsonUtils.getOptionalFloat(root, "debtRepayRate", debtRepayRate);
-        bonusDecayRate = NourishedJsonUtils.getOptionalFloat(root, "bonusDecayRate", bonusDecayRate);
-        minNutritionModifier = NourishedJsonUtils.getOptionalFloat(root, "minNutritionModifier", minNutritionModifier);
-        maxNutritionModifier = NourishedJsonUtils.getOptionalFloat(root, "maxNutritionModifier", maxNutritionModifier);
-        minGutModifier = NourishedJsonUtils.getOptionalFloat(root, "minGutModifier", minGutModifier);
-        basePhysicalRegen = NourishedJsonUtils.getOptionalFloat(root, "basePhysicalRegen", basePhysicalRegen);
-        baseMentalRegen = NourishedJsonUtils.getOptionalFloat(root, "baseMentalRegen", baseMentalRegen);
-        regenDelay = NourishedJsonUtils.getOptionalInt(root, "regenDelay", regenDelay);
-        regenRestMultiplier = NourishedJsonUtils.getOptionalFloat(root, "regenRestMultiplier", regenRestMultiplier);
-        enableSprint = NourishedJsonUtils.getOptionalBoolean(root, "enableSprint", enableSprint);
-        sprintCost = NourishedJsonUtils.getOptionalFloat(root, "sprintCost", sprintCost);
-        enableJump = NourishedJsonUtils.getOptionalBoolean(root, "enableJump", enableJump);
-        jumpCost = NourishedJsonUtils.getOptionalFloat(root, "jumpCost", jumpCost);
-        enableAttack = NourishedJsonUtils.getOptionalBoolean(root, "enableAttack", enableAttack);
-        attackCost = NourishedJsonUtils.getOptionalFloat(root, "attackCost", attackCost);
-        enableMissedAttack = NourishedJsonUtils.getOptionalBoolean(root, "enableMissedAttack", enableMissedAttack);
-        missedAttackCost = NourishedJsonUtils.getOptionalFloat(root, "missedAttackCost", missedAttackCost);
-        enableElytra = NourishedJsonUtils.getOptionalBoolean(root, "enableElytra", enableElytra);
-        elytraCost = NourishedJsonUtils.getOptionalFloat(root, "elytraCost", elytraCost);
-        enableSwim = NourishedJsonUtils.getOptionalBoolean(root, "enableSwim", enableSwim);
-        swimCost = NourishedJsonUtils.getOptionalFloat(root, "swimCost", swimCost);
-        enableClimb = NourishedJsonUtils.getOptionalBoolean(root, "enableClimb", enableClimb);
-        climbCost = NourishedJsonUtils.getOptionalFloat(root, "climbCost", climbCost);
-        enableTakeDamage = NourishedJsonUtils.getOptionalBoolean(root, "enableTakeDamage", enableTakeDamage);
-        takeDamageCost = NourishedJsonUtils.getOptionalFloat(root, "takeDamageCost", takeDamageCost);
-        enableMine = NourishedJsonUtils.getOptionalBoolean(root, "enableMine", enableMine);
-        mineCost = NourishedJsonUtils.getOptionalFloat(root, "mineCost", mineCost);
-        enablePlace = NourishedJsonUtils.getOptionalBoolean(root, "enablePlace", enablePlace);
-        placeCost = NourishedJsonUtils.getOptionalFloat(root, "placeCost", placeCost);
-        enableFish = NourishedJsonUtils.getOptionalBoolean(root, "enableFish", enableFish);
-        fishCost = NourishedJsonUtils.getOptionalFloat(root, "fishCost", fishCost);
-        enableEat = NourishedJsonUtils.getOptionalBoolean(root, "enableEat", enableEat);
-        eatCost = NourishedJsonUtils.getOptionalFloat(root, "eatCost", eatCost);
-        enableRawEatPenalty = NourishedJsonUtils.getOptionalBoolean(root, "enableRawEatPenalty", enableRawEatPenalty);
-        rawEatCostMultiplier = NourishedJsonUtils.getOptionalFloat(root, "rawEatCostMultiplier", rawEatCostMultiplier);
-        enableUseItem = NourishedJsonUtils.getOptionalBoolean(root, "enableUseItem", enableUseItem);
-        useItemCost = NourishedJsonUtils.getOptionalFloat(root, "useItemCost", useItemCost);
+        initialPhysicalMax = MarieJsonUtils.getOptionalFloat(root, "initialPhysicalMax", initialPhysicalMax);
+        initialMentalMax = MarieJsonUtils.getOptionalFloat(root, "initialMentalMax", initialMentalMax);
+        minStamina = MarieJsonUtils.getOptionalFloat(root, "minStamina", minStamina);
+        maxStamina = MarieJsonUtils.getOptionalFloat(root, "maxStamina", maxStamina);
+        maxFatiguePenalty = MarieJsonUtils.getOptionalFloat(root, "maxFatiguePenalty", maxFatiguePenalty);
+        fatigueThreshold = MarieJsonUtils.getOptionalFloat(root, "fatigueThreshold", fatigueThreshold);
+        fatigueBuildRate = MarieJsonUtils.getOptionalFloat(root, "fatigueBuildRate", fatigueBuildRate);
+        fatigueDecayRate = MarieJsonUtils.getOptionalFloat(root, "fatigueDecayRate", fatigueDecayRate);
+        fatigueDurationTicks = MarieJsonUtils.getOptionalInt(root, "fatigueDurationTicks", fatigueDurationTicks);
+        maxDebt = MarieJsonUtils.getOptionalFloat(root, "maxDebt", maxDebt);
+        debtRepayRate = MarieJsonUtils.getOptionalFloat(root, "debtRepayRate", debtRepayRate);
+        bonusDecayRate = MarieJsonUtils.getOptionalFloat(root, "bonusDecayRate", bonusDecayRate);
+        minNutritionModifier = MarieJsonUtils.getOptionalFloat(root, "minNutritionModifier", minNutritionModifier);
+        maxNutritionModifier = MarieJsonUtils.getOptionalFloat(root, "maxNutritionModifier", maxNutritionModifier);
+        minGutModifier = MarieJsonUtils.getOptionalFloat(root, "minGutModifier", minGutModifier);
+        basePhysicalRegen = MarieJsonUtils.getOptionalFloat(root, "basePhysicalRegen", basePhysicalRegen);
+        baseMentalRegen = MarieJsonUtils.getOptionalFloat(root, "baseMentalRegen", baseMentalRegen);
+        regenDelay = MarieJsonUtils.getOptionalInt(root, "regenDelay", regenDelay);
+        regenRestMultiplier = MarieJsonUtils.getOptionalFloat(root, "regenRestMultiplier", regenRestMultiplier);
+        enableSprint = MarieJsonUtils.getOptionalBoolean(root, "enableSprint", enableSprint);
+        sprintCost = MarieJsonUtils.getOptionalFloat(root, "sprintCost", sprintCost);
+        enableJump = MarieJsonUtils.getOptionalBoolean(root, "enableJump", enableJump);
+        jumpCost = MarieJsonUtils.getOptionalFloat(root, "jumpCost", jumpCost);
+        enableAttack = MarieJsonUtils.getOptionalBoolean(root, "enableAttack", enableAttack);
+        attackCost = MarieJsonUtils.getOptionalFloat(root, "attackCost", attackCost);
+        enableMissedAttack = MarieJsonUtils.getOptionalBoolean(root, "enableMissedAttack", enableMissedAttack);
+        missedAttackCost = MarieJsonUtils.getOptionalFloat(root, "missedAttackCost", missedAttackCost);
+        enableElytra = MarieJsonUtils.getOptionalBoolean(root, "enableElytra", enableElytra);
+        elytraCost = MarieJsonUtils.getOptionalFloat(root, "elytraCost", elytraCost);
+        enableSwim = MarieJsonUtils.getOptionalBoolean(root, "enableSwim", enableSwim);
+        swimCost = MarieJsonUtils.getOptionalFloat(root, "swimCost", swimCost);
+        enableClimb = MarieJsonUtils.getOptionalBoolean(root, "enableClimb", enableClimb);
+        climbCost = MarieJsonUtils.getOptionalFloat(root, "climbCost", climbCost);
+        enableTakeDamage = MarieJsonUtils.getOptionalBoolean(root, "enableTakeDamage", enableTakeDamage);
+        takeDamageCost = MarieJsonUtils.getOptionalFloat(root, "takeDamageCost", takeDamageCost);
+        enableMine = MarieJsonUtils.getOptionalBoolean(root, "enableMine", enableMine);
+        mineCost = MarieJsonUtils.getOptionalFloat(root, "mineCost", mineCost);
+        enablePlace = MarieJsonUtils.getOptionalBoolean(root, "enablePlace", enablePlace);
+        placeCost = MarieJsonUtils.getOptionalFloat(root, "placeCost", placeCost);
+        enableFish = MarieJsonUtils.getOptionalBoolean(root, "enableFish", enableFish);
+        fishCost = MarieJsonUtils.getOptionalFloat(root, "fishCost", fishCost);
+        enableEat = MarieJsonUtils.getOptionalBoolean(root, "enableEat", enableEat);
+        eatCost = MarieJsonUtils.getOptionalFloat(root, "eatCost", eatCost);
+        enableRawEatPenalty = MarieJsonUtils.getOptionalBoolean(root, "enableRawEatPenalty", enableRawEatPenalty);
+        rawEatCostMultiplier = MarieJsonUtils.getOptionalFloat(root, "rawEatCostMultiplier", rawEatCostMultiplier);
+        enableUseItem = MarieJsonUtils.getOptionalBoolean(root, "enableUseItem", enableUseItem);
+        useItemCost = MarieJsonUtils.getOptionalFloat(root, "useItemCost", useItemCost);
     }
 
     private static void loadDefaults() {

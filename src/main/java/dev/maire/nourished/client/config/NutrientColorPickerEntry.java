@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.config;
 
-import dev.maire.nourished.client.NutrientUiColors;
-import dev.maire.nourished.core.color.ColorRegistry;
+import dev.marie.MariesLib.client.MarieValueColors;
+import dev.marie.MariesLib.color.ColorRegistry;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 /**
  * Cloth Config row: R/G/B sliders, hex field (bidirectional), and a small HSV color wheel; live-updates
- * {@link NutrientUiColors#setOverride} for the HUD preview; {@link #save()} writes through {@link ColorRegistry}.
+ * {@link MarieValueColors#setOverride} for the HUD preview; {@link #save()} writes through {@link ColorRegistry}.
  */
 public final class NutrientColorPickerEntry extends TooltipListEntry<Integer> {
 
@@ -42,15 +42,15 @@ public final class NutrientColorPickerEntry extends TooltipListEntry<Integer> {
     private int wheelCx;
     private int wheelCy;
 
-    public NutrientColorPickerEntry(String nutrientKey) {
+    public NutrientColorPickerEntry(String valueKey) {
         super(
-                Component.translatable("nourished.screen.diet.bar." + nutrientKey),
+                Component.translatable("nourished.screen.diet.bar." + valueKey),
                 () -> Optional.of(new Component[]{Component.translatable("config.nourished.colors.picker.desc")}),
                 false);
-        this.key = nutrientKey;
-        int initial = ColorRegistry.getArgb(nutrientKey)
-                .orElseGet(() -> NutrientUiColors.paletteOnlyArgb(nutrientKey));
-        this.hadRegistryEntry = ColorRegistry.getArgb(nutrientKey).isPresent();
+        this.key = valueKey;
+        int initial = ColorRegistry.getArgb(valueKey)
+                .orElseGet(() -> MarieValueColors.paletteOnlyArgb(valueKey));
+        this.hadRegistryEntry = ColorRegistry.getArgb(valueKey).isPresent();
         this.r = (initial >> 16) & 0xFF;
         this.g = (initial >> 8) & 0xFF;
         this.b = initial & 0xFF;
@@ -113,7 +113,7 @@ public final class NutrientColorPickerEntry extends TooltipListEntry<Integer> {
     }
 
     private void pushLivePreview() {
-        NutrientUiColors.setOverride(key, packArgb());
+        MarieValueColors.setOverride(key, packArgb());
     }
 
     private int packArgb() {
@@ -174,7 +174,7 @@ public final class NutrientColorPickerEntry extends TooltipListEntry<Integer> {
     @Override
     public void save() {
         int now = packArgb();
-        int pal = NutrientUiColors.paletteOnlyArgb(key);
+        int pal = MarieValueColors.paletteOnlyArgb(key);
         if (now == pal && !hadRegistryEntry) {
             return;
         }

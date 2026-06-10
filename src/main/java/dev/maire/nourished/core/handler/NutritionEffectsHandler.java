@@ -1,9 +1,9 @@
 package dev.maire.nourished.core.handler;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,7 +28,7 @@ public class NutritionEffectsHandler {
         if (ConfigReloadHandler.isReloadInProgress()) return;
 
         if (ModuleCache.enableEffects) {
-            DietData data = player.getData(DietAttachment.DIET.get());
+            TrackingData data = player.getData(TrackingAttachment.TRACKING.get());
             NutritionEffectApplier.apply(player, data);
             for (String oldId : EffectRegistry.getPreviousEffectIds()) {
                 boolean stillRegistered = EffectRegistry.getAll().stream()

@@ -1,7 +1,7 @@
 package dev.maire.nourished.modules.Stamina.Nutrition;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
 import dev.maire.nourished.modules.Stamina.Core.StaminaConfig;
 
@@ -10,11 +10,11 @@ public final class StaminaNutritionResolver {
 
     private StaminaNutritionResolver() {}
 
-    public static StaminaNutritionProfile resolve(DietData diet, GutHealthData gut) {
-        float proteins = diet.nutrients.getOrDefault("proteins", 0f);
-        float grains = diet.nutrients.getOrDefault("grains", 0f);
-        float vegetables = diet.nutrients.getOrDefault("vegetables", 0f);
-        float dairy = diet.nutrients.getOrDefault("dairy", 0f);
+    public static StaminaNutritionProfile resolve(TrackingData diet, GutHealthData gut) {
+        float proteins = diet.values.getOrDefault("proteins", 0f);
+        float grains = diet.values.getOrDefault("grains", 0f);
+        float vegetables = diet.values.getOrDefault("vegetables", 0f);
+        float dairy = diet.values.getOrDefault("dairy", 0f);
         float gutHealth = gut.getGutHealth();
         float balance = diet.getBalanceScore();
 

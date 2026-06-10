@@ -1,10 +1,10 @@
 package dev.maire.nourished.modules.RawFood.rawInfo;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
-import dev.maire.nourished.core.util.NourishedItemTags;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.marie.MariesLib.util.MarieItemTags;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
 import net.minecraft.resources.ResourceLocation;
@@ -38,26 +38,26 @@ public final class RawFoodClassifier {
      * @return the raw food severity
      */
     public static RawSeverity classify(ItemStack stack, Level level) {
-        ResourceLocation itemId = NourishedRegistryUtils.itemKey(stack);
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(stack);
 
         RawSeverity cached = SEVERITY_CACHE.get(itemId);
         if (cached != null) {
             return cached;
         }
 
-        if (stack.is(NourishedItemTags.RAW_FOOD_FINE)) {
+        if (stack.is(MarieItemTags.rawSourceFine())) {
             SEVERITY_CACHE.put(itemId, RawSeverity.FINE);
             return RawSeverity.FINE;
         }
-        if (stack.is(NourishedItemTags.RAW_FOOD_MILD)) {
+        if (stack.is(MarieItemTags.rawSourceMild())) {
             SEVERITY_CACHE.put(itemId, RawSeverity.MILD);
             return RawSeverity.MILD;
         }
-        if (stack.is(NourishedItemTags.RAW_FOOD_MEDIUM)) {
+        if (stack.is(MarieItemTags.rawSourceMedium())) {
             SEVERITY_CACHE.put(itemId, RawSeverity.MEDIUM);
             return RawSeverity.MEDIUM;
         }
-        if (stack.is(NourishedItemTags.RAW_FOOD_SEVERE)) {
+        if (stack.is(MarieItemTags.rawSourceSevere())) {
             SEVERITY_CACHE.put(itemId, RawSeverity.SEVERE);
             return RawSeverity.SEVERE;
         }

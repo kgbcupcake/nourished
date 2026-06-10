@@ -1,8 +1,11 @@
 package dev.maire.nourished.client;
 
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.client.MarieClientCache;
+import dev.marie.MariesLib.client.MarieClientState;
+import dev.marie.MariesLib.client.MarieToastManager;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
@@ -67,27 +70,47 @@ public final class ClientNetworkCallbacks {
                 );
                 return;
             }
-            ClientNourishedState.setConfig(payload);
+            MarieClientState.setConfig(payload);
         });
     }
 
     public static void onFullDiet(ModNetworking.SyncDietPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            DietData next = payload.diet();
-            NourishedToastManager.onClientDietUpdated(next);
-            ClientDietCache.set(next);
-            ClientNourishedState.onFullDietSynced();
+            TrackingData next = payload.diet();
+            MarieToastManager.onTrackingUpdated(next);
+            MarieClientCache.onFullTrackingSync(next);
+            MarieClientState.onFullTrackingSynced();
             LocalPlayer player = Minecraft.getInstance().player;
             if (player != null) {
-                player.setData(DietAttachment.DIET.get(), next);
+                player.setData(TrackingAttachment.TRACKING.get(), next);
             }
         });
     }
 
     public static void onDietDelta(ModNetworking.SyncDietDeltaPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            ClientDietCache.applyDelta(payload);
-            NourishedToastManager.onClientDietUpdated(payload);
+            TrackingData prev = MarieClientCache.get();
+            TrackingData nextDiet = TrackingData.copySnapshot(prev);
+            nextDiet.values.clear();
+            nextDiet.values.putAll(payload.nutrients());
+            nextDiet.lastValues.clear();
+            nextDiet.lastValues.putAll(payload.lastNutrients());
+            nextDiet.total = payload.calories();
+            nextDiet.maxTotal = payload.maxCalories();
+            nextDiet.sourceMemory.clear();
+            nextDiet.sourceMemory.putAll(payload.foodMemory());
+            nextDiet.categoryMemory.clear();
+            nextDiet.categoryMemory.putAll(payload.categoryMemory());
+            nextDiet.familyMemory.clear();
+            nextDiet.familyMemory.putAll(payload.familyMemory());
+            nextDiet.lastTickTime = payload.lastTickTime();
+
+            MarieClientCache.onTrackingDelta(
+                    nextDiet,
+                    payload.recentFoodIds(),
+                    payload.neglectedCategories(),
+                    payload.fatiguedFamilies());
+            MarieToastManager.onTrackingDelta(payload.nutrients());
         });
     }
 

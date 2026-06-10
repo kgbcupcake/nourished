@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.hud;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.maire.nourished.client.NutrientUiColors;
+import dev.marie.MariesLib.client.MarieValueColors;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -179,7 +179,7 @@ final class HudDrawHelpers {
             if (v < cfg.lowThreshold()) {
                 return COL_GOLD;
             }
-            return NutrientUiColors.baseColorArgb(key);
+            return MarieValueColors.baseColorArgb(key);
         }
         if (v > cfg.excessThreshold()) {
             return COL_RED;
@@ -187,7 +187,7 @@ final class HudDrawHelpers {
         if (v > cfg.lowThreshold()) {
             return COL_GOLD;
         }
-        return NutrientUiColors.baseColorArgb(key);
+        return MarieValueColors.baseColorArgb(key);
     }
 
     static int pctColor(String key, float v) {

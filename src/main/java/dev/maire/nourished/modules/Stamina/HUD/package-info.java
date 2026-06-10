@@ -7,4 +7,4 @@
 @ApiStatus.Internal
 package dev.maire.nourished.modules.Stamina.HUD;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;

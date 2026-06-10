@@ -1,211 +1,98 @@
 package dev.maire.nourished.client.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.client.NutrientUiColors;
-import dev.maire.nourished.core.color.ColorRegistry;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.client.MarieValueColors;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
-import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.util.NourishedJsonUtils;
-import dev.maire.nourished.core.util.NourishedValidation;
 import dev.maire.nourished.core.reload.NourishedReloadPipeline;
+import dev.marie.MariesLib.client.ImportExportManager;
+import dev.marie.MariesLib.color.ColorRegistry;
+import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.PresetRegistry;
+import dev.marie.MariesLib.util.MarieJsonUtils;
+import dev.marie.MariesLib.util.MarieValidation;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
- * Serializes and restores bundled Nourished settings for file export and {@code NCF1:} share codes.
+ * Nourished-specific config import/export serialization wired into {@link dev.marie.MariesLib.core.MarieLibContext}.
  */
-public final class ImportExportManager {
+public final class NourishedImportExport {
 
-    public static final String SHARE_PREFIX = "NCF1:";
-    public static final int SCHEMA_VERSION = 1;
+    private NourishedImportExport() {}
 
-    private static final Gson GSON_COMPACT = new GsonBuilder().create();
-    private static final Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().create();
-    private static final DateTimeFormatter FILE_TS = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
-
-    public enum Section {
-        GENERAL("general"),
-        THRESHOLDS("thresholds"),
-        EFFECTS("effects"),
-        NUTRIENT_COLORS("nutrientColors"),
-        FOOD_VALUES("foodValues"),
-        MODULES("modules");
-
-        private final String jsonKey;
-
-        Section(String jsonKey) {
-            this.jsonKey = jsonKey;
-        }
-
-        public String jsonKey() {
-            return jsonKey;
-        }
-
-        public static Section fromJsonKey(String key) {
-            for (Section s : values()) {
-                if (s.jsonKey.equals(key)) {
-                    return s;
-                }
-            }
-            return null;
-        }
-    }
-
-    private ImportExportManager() {}
-
-    public static Path exportsDirectory() {
-        return FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("exports");
-    }
-
-    public static Path writeExportFile(JsonObject root) throws IOException {
-        Files.createDirectories(exportsDirectory());
-        String stem = "nourished-config-" + LocalDateTime.now().format(FILE_TS);
-        Path file = exportsDirectory().resolve(stem + ".json");
-        try (Writer w = Files.newBufferedWriter(file)) {
-            GSON_PRETTY.toJson(root, w);
-        }
-        return file;
-    }
-
-    public static JsonObject buildExportRoot(Set<Section> sections) {
-        JsonObject root = new JsonObject();
-        root.addProperty("schemaVersion", SCHEMA_VERSION);
+    public static JsonObject exportCurrentConfig() {
         NourishedConfig c = NourishedConfig.get();
-        if (sections.contains(Section.MODULES)) {
-            root.add(Section.MODULES.jsonKey(), exportModules(c));
-        }
-        if (sections.contains(Section.GENERAL)) {
-            root.add(Section.GENERAL.jsonKey(), exportGeneral(c));
-        }
-        if (sections.contains(Section.THRESHOLDS)) {
-            root.add(Section.THRESHOLDS.jsonKey(), exportThresholds(c));
-        }
-        if (sections.contains(Section.EFFECTS)) {
-            root.add(Section.EFFECTS.jsonKey(), exportEffects(c));
-        }
-        if (sections.contains(Section.NUTRIENT_COLORS)) {
-            root.add(Section.NUTRIENT_COLORS.jsonKey(), exportNutrientColors());
-        }
-        if (sections.contains(Section.FOOD_VALUES)) {
-            root.add(Section.FOOD_VALUES.jsonKey(), exportFoodValues());
-        }
+        JsonObject root = new JsonObject();
+        root.addProperty("schemaVersion", ImportExportManager.SCHEMA_VERSION);
+        root.add(ImportExportManager.Section.MODULES.jsonKey(), exportModules(c));
+        root.add(ImportExportManager.Section.GENERAL.jsonKey(), exportGeneral(c));
+        root.add(ImportExportManager.Section.THRESHOLDS.jsonKey(), exportThresholds(c));
+        root.add(ImportExportManager.Section.EFFECTS.jsonKey(), exportEffects(c));
+        root.add(ImportExportManager.Section.VALUE_COLORS.jsonKey(), exportNutrientColors());
+        root.add(ImportExportManager.Section.SOURCE_VALUES.jsonKey(), exportFoodValues());
         return root;
     }
 
-    public static String buildShareCode(JsonObject root) throws IOException {
-        String json = GSON_COMPACT.toJson(root);
-        byte[] gzipped = gzipUtf8(json);
-        return SHARE_PREFIX + Base64.getEncoder().encodeToString(gzipped);
+    public static void applyImport(JsonObject root) throws IOException {
+        applyImport(root, sectionsPresent(root));
     }
 
-    public static JsonObject parseShareCode(String raw) throws IOException {
-        if (raw == null) {
-            throw new IOException("empty");
-        }
-        String flat = raw.replaceAll("\\s+", "");
-        if (!flat.regionMatches(true, 0, SHARE_PREFIX, 0, SHARE_PREFIX.length())) {
-            throw new IOException("missing prefix");
-        }
-        String b64 = flat.substring(SHARE_PREFIX.length());
-        byte[] decoded = Base64.getDecoder().decode(b64);
-        if (decoded.length > 65536) {
-            throw new IOException("share code payload too large: " + decoded.length + " bytes");
-        }
-        String json = gunzipUtf8(decoded);
-        JsonObject obj = GSON_COMPACT.fromJson(json, JsonObject.class);
-        if (obj == null) {
-            throw new IOException("not json object");
-        }
-        return obj;
-    }
-
-    public static JsonObject parseJsonFile(Path file) throws IOException {
-        try (Reader r = Files.newBufferedReader(file)) {
-            JsonObject obj = GSON_COMPACT.fromJson(r, JsonObject.class);
-            if (obj == null) {
-                throw new IOException("empty file");
-            }
-            return obj;
-        }
-    }
-
-    public static EnumSet<Section> sectionsPresent(JsonObject root) {
-        EnumSet<Section> out = EnumSet.noneOf(Section.class);
-        for (Section s : Section.values()) {
-            if (root.has(s.jsonKey()) && !root.get(s.jsonKey()).isJsonNull()) {
-                out.add(s);
-            }
-        }
-        return out;
-    }
-
-    public static void applyImport(JsonObject root, Set<Section> selected) throws IOException {
+    public static void applyImport(JsonObject root, Set<ImportExportManager.Section> selected) throws IOException {
         NourishedConfig c = NourishedConfig.get();
-        if (selected.contains(Section.MODULES) && root.has(Section.MODULES.jsonKey())) {
-            applyModules(c, root.getAsJsonObject(Section.MODULES.jsonKey()));
+        if (selected.contains(ImportExportManager.Section.MODULES) && root.has(ImportExportManager.Section.MODULES.jsonKey())) {
+            applyModules(c, root.getAsJsonObject(ImportExportManager.Section.MODULES.jsonKey()));
         }
-        if (selected.contains(Section.GENERAL) && root.has(Section.GENERAL.jsonKey())) {
-            applyGeneral(c, root.getAsJsonObject(Section.GENERAL.jsonKey()));
+        if (selected.contains(ImportExportManager.Section.GENERAL) && root.has(ImportExportManager.Section.GENERAL.jsonKey())) {
+            applyGeneral(c, root.getAsJsonObject(ImportExportManager.Section.GENERAL.jsonKey()));
         }
-        if (selected.contains(Section.THRESHOLDS) && root.has(Section.THRESHOLDS.jsonKey())) {
-            applyThresholds(c, root.getAsJsonObject(Section.THRESHOLDS.jsonKey()));
+        if (selected.contains(ImportExportManager.Section.THRESHOLDS) && root.has(ImportExportManager.Section.THRESHOLDS.jsonKey())) {
+            applyThresholds(c, root.getAsJsonObject(ImportExportManager.Section.THRESHOLDS.jsonKey()));
         }
-        if (selected.contains(Section.EFFECTS) && root.has(Section.EFFECTS.jsonKey())) {
-            applyEffects(c, root.getAsJsonObject(Section.EFFECTS.jsonKey()));
+        if (selected.contains(ImportExportManager.Section.EFFECTS) && root.has(ImportExportManager.Section.EFFECTS.jsonKey())) {
+            applyEffects(c, root.getAsJsonObject(ImportExportManager.Section.EFFECTS.jsonKey()));
         }
-        if (selected.contains(Section.NUTRIENT_COLORS) && root.has(Section.NUTRIENT_COLORS.jsonKey())) {
-            applyNutrientColors(root.get(Section.NUTRIENT_COLORS.jsonKey()));
+        if (selected.contains(ImportExportManager.Section.VALUE_COLORS) && root.has(ImportExportManager.Section.VALUE_COLORS.jsonKey())) {
+            applyNutrientColors(root.get(ImportExportManager.Section.VALUE_COLORS.jsonKey()));
         }
-        if (selected.contains(Section.FOOD_VALUES) && root.has(Section.FOOD_VALUES.jsonKey())) {
-            applyFoodValues(root.get(Section.FOOD_VALUES.jsonKey()));
+        if (selected.contains(ImportExportManager.Section.SOURCE_VALUES) && root.has(ImportExportManager.Section.SOURCE_VALUES.jsonKey())) {
+            applyFoodValues(root.get(ImportExportManager.Section.SOURCE_VALUES.jsonKey()));
         }
         NourishedConfig.saveNow();
         NourishedReloadPipeline.reloadAll();
-        NutrientUiColors.clearOverrides();
+        MarieValueColors.clearOverrides();
     }
 
-    public static List<Path> listExportJsonFiles() throws IOException {
-        Path dir = exportsDirectory();
-        if (!Files.isDirectory(dir)) {
-            return List.of();
-        }
-        List<Path> out = new ArrayList<>();
-        try (var stream = Files.list(dir)) {
-            stream.filter(p -> p.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".json"))
-                    .sorted()
-                    .forEach(out::add);
-        }
-        return out;
+    public static EnumSet<ImportExportManager.Section> sectionsPresent(JsonObject root) {
+        return ImportExportManager.sectionsPresent(root);
+    }
+
+    public static PresetRegistry.PresetValues presetValuesFromCurrentConfig() {
+        NourishedConfig c = NourishedConfig.get();
+        return new PresetRegistry.PresetValues(
+                c.decayRate(),
+                c.criticalThreshold(),
+                c.lowThreshold(),
+                c.excessThreshold(),
+                c.defaultEffectDurationTicks(),
+                c.enableDecay(),
+                c.enableEffects());
     }
 
     private static JsonObject exportModules(NourishedConfig c) {
@@ -375,7 +262,7 @@ public final class ImportExportManager {
         }
         if (o.has("nutrientDecayOverrides") && o.get("nutrientDecayOverrides").isJsonObject()) {
             JsonObject map = o.getAsJsonObject("nutrientDecayOverrides");
-            NourishedValidation.requireBoundedMap(map.asMap(), 64, "applyGeneral.nutrientDecayOverrides");
+            MarieValidation.requireBoundedMap(map.asMap(), 64, "applyGeneral.nutrientDecayOverrides");
             for (String key : NutrientRegistry.getKeys()) {
                 if (!map.has(key)) {
                     continue;
@@ -389,7 +276,7 @@ public final class ImportExportManager {
         }
         if (o.has("nutrientCriticalOverrides") && o.get("nutrientCriticalOverrides").isJsonObject()) {
             JsonObject map = o.getAsJsonObject("nutrientCriticalOverrides");
-            NourishedValidation.requireBoundedMap(map.asMap(), 64, "applyGeneral.nutrientCriticalOverrides");
+            MarieValidation.requireBoundedMap(map.asMap(), 64, "applyGeneral.nutrientCriticalOverrides");
             for (String key : NutrientRegistry.getKeys()) {
                 if (!map.has(key)) {
                     continue;
@@ -427,7 +314,7 @@ public final class ImportExportManager {
         }
         if (o.has("definitions") && o.get("definitions").isJsonArray()) {
             JsonArray arr = o.getAsJsonArray("definitions");
-            NourishedValidation.requireBoundedArray(arr, 256, "applyEffects.definitions");
+            MarieValidation.requireBoundedArray(arr, 256, "applyEffects.definitions");
             List<EffectRegistry.EffectDef> defs = parseEffectDefs(arr);
             EffectRegistry.saveAll(defs);
         }
@@ -447,20 +334,20 @@ public final class ImportExportManager {
             String id = obj.get("id").getAsString();
             String effect = obj.get("effect").getAsString();
             String nutrient = obj.get("nutrient").getAsString();
-            NourishedValidation.requireBoundedString(id, 256, "parseEffectDefs.id");
-            NourishedValidation.requireBoundedString(effect, 256, "parseEffectDefs.effect");
-            NourishedValidation.requireBoundedString(nutrient, 256, "parseEffectDefs.nutrient");
+            MarieValidation.requireBoundedString(id, 256, "parseEffectDefs.id");
+            MarieValidation.requireBoundedString(effect, 256, "parseEffectDefs.effect");
+            MarieValidation.requireBoundedString(nutrient, 256, "parseEffectDefs.nutrient");
             String trigger = obj.has("trigger") ? obj.get("trigger").getAsString() : "below";
-            NourishedValidation.requireBoundedString(trigger, 256, "parseEffectDefs.trigger");
-            double threshold = NourishedJsonUtils.getOptionalDouble(obj, "threshold", 0.25d);
+            MarieValidation.requireBoundedString(trigger, 256, "parseEffectDefs.trigger");
+            double threshold = MarieJsonUtils.getOptionalDouble(obj, "threshold", 0.25d);
             threshold = clamp(threshold, 0d, 1d);
-            int amplifier = NourishedJsonUtils.getOptionalInt(obj, "amplifier", 0);
-            int durationTicks = NourishedJsonUtils.getOptionalInt(obj, "duration_ticks", 140);
-            boolean enabled = NourishedJsonUtils.getOptionalBoolean(obj, "enabled", true);
-            double thresholdMax = NourishedJsonUtils.getOptionalDouble(obj, "threshold_max", 1.0d);
+            int amplifier = MarieJsonUtils.getOptionalInt(obj, "amplifier", 0);
+            int durationTicks = MarieJsonUtils.getOptionalInt(obj, "duration_ticks", 140);
+            boolean enabled = MarieJsonUtils.getOptionalBoolean(obj, "enabled", true);
+            double thresholdMax = MarieJsonUtils.getOptionalDouble(obj, "threshold_max", 1.0d);
             thresholdMax = clamp(thresholdMax, 0d, 1d);
-            boolean ambient = NourishedJsonUtils.getOptionalBoolean(obj, "ambient", true);
-            boolean showParticles = NourishedJsonUtils.getOptionalBoolean(obj, "show_particles", false);
+            boolean ambient = MarieJsonUtils.getOptionalBoolean(obj, "ambient", true);
+            boolean showParticles = MarieJsonUtils.getOptionalBoolean(obj, "show_particles", false);
             out.add(new EffectRegistry.EffectDef(
                     id,
                     effect,
@@ -485,7 +372,7 @@ public final class ImportExportManager {
         Files.createDirectories(configDir);
         Path file = configDir.resolve("colors.json");
         try (Writer w = Files.newBufferedWriter(file)) {
-            GSON_PRETTY.toJson(el.getAsJsonArray(), w);
+            new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(el.getAsJsonArray(), w);
         }
     }
 
@@ -494,7 +381,7 @@ public final class ImportExportManager {
             return;
         }
         JsonArray arr = el.getAsJsonArray();
-        NourishedValidation.requireBoundedArray(arr, 256, "applyFoodValues");
+        MarieValidation.requireBoundedArray(arr, 256, "applyFoodValues");
         if (arr.isEmpty()) {
             return;
         }
@@ -504,12 +391,12 @@ public final class ImportExportManager {
             }
             JsonObject obj = row.getAsJsonObject();
             String category = obj.get("category").getAsString();
-            NourishedValidation.requireBoundedString(category, 256, "applyFoodValues.category");
-            float protein = clampF(NourishedJsonUtils.getOptionalFloat(obj, "protein", 0.2f), 0f, 10f);
-            float carbs = clampF(NourishedJsonUtils.getOptionalFloat(obj, "carbs", 0.2f), 0f, 10f);
-            float fats = clampF(NourishedJsonUtils.getOptionalFloat(obj, "fats", 0.2f), 0f, 10f);
-            float vitamins = clampF(NourishedJsonUtils.getOptionalFloat(obj, "vitamins", 0.2f), 0f, 10f);
-            float hydration = clampF(NourishedJsonUtils.getOptionalFloat(obj, "hydration", 0.2f), 0f, 10f);
+            MarieValidation.requireBoundedString(category, 256, "applyFoodValues.category");
+            float protein = clampF(MarieJsonUtils.getOptionalFloat(obj, "protein", 0.2f), 0f, 10f);
+            float carbs = clampF(MarieJsonUtils.getOptionalFloat(obj, "carbs", 0.2f), 0f, 10f);
+            float fats = clampF(MarieJsonUtils.getOptionalFloat(obj, "fats", 0.2f), 0f, 10f);
+            float vitamins = clampF(MarieJsonUtils.getOptionalFloat(obj, "vitamins", 0.2f), 0f, 10f);
+            float hydration = clampF(MarieJsonUtils.getOptionalFloat(obj, "hydration", 0.2f), 0f, 10f);
             FoodValueRegistry.setCategory(category, protein, carbs, fats, vitamins, hydration);
         }
         FoodValueRegistry.save();
@@ -525,33 +412,5 @@ public final class ImportExportManager {
 
     private static int clampInt(int v, int min, int max) {
         return Math.min(max, Math.max(min, v));
-    }
-
-    private static byte[] gzipUtf8(String s) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (GZIPOutputStream gzip = new GZIPOutputStream(baos)) {
-            gzip.write(s.getBytes(StandardCharsets.UTF_8));
-        }
-        return baos.toByteArray();
-    }
-
-    @com.google.common.annotations.VisibleForTesting
-    static String gunzipUtf8(byte[] data) throws IOException {
-        final int maxBytes = 1_048_576;
-        try (GZIPInputStream in = new GZIPInputStream(new ByteArrayInputStream(data));
-             Reader r = new InputStreamReader(in, StandardCharsets.UTF_8);
-             StringWriter sw = new StringWriter()) {
-            char[] buf = new char[8192];
-            int total = 0;
-            int n;
-            while ((n = r.read(buf)) != -1) {
-                total += n;
-                if (total > maxBytes) {
-                    throw new IOException("decompressed payload exceeds 1 MiB");
-                }
-                sw.write(buf, 0, n);
-            }
-            return sw.toString();
-        }
     }
 }

@@ -7,20 +7,20 @@ import java.util.Map;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.api.NourishedEvents;
-import dev.maire.nourished.api.NourishedSeasonHook;
-import dev.maire.nourished.api.NutrientAbsorptionModifier;
-import dev.maire.nourished.api.NutrientModifierEvent;
-import dev.maire.nourished.api.registry.AbsorptionModifierRegistry;
-import dev.maire.nourished.api.registry.SeasonHookRegistry;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.api.MarieEvents;
+import dev.marie.MariesLib.api.MarieSeasonHook;
+import dev.marie.MariesLib.api.AbsorptionModifier;
+import dev.marie.MariesLib.api.ValueModifierEvent;
+import dev.marie.MariesLib.api.registry.AbsorptionModifierRegistry;
+import dev.marie.MariesLib.api.registry.SeasonHookRegistry;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.config.ModuleCache;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.debug.NutritionDebugLogger;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
-import dev.maire.nourished.core.diet.DietMemoryConfig;
+import dev.marie.MariesLib.debug.MarieDebugLogger;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.MariesLib.tracking.TrackingMemoryConfig;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
@@ -30,13 +30,13 @@ import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry.NutrientResolutionDiagnostic;
 import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.registry.NourishedAttributes;
-import dev.maire.nourished.core.util.NourishedItemTags;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
-import dev.maire.nourished.core.util.NourishedValidation;
-import dev.maire.nourished.tooling.scanner.ClassificationResult;
-import dev.maire.nourished.tooling.scanner.ClassificationSignal;
-import dev.maire.nourished.tooling.scanner.RecipeInheritanceResolver.RecipeInheritanceStep;
+import dev.marie.MariesLib.registry.MarieAttributes;
+import dev.marie.MariesLib.util.MarieItemTags;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.MariesLib.util.MarieValidation;
+import dev.marie.MariesLib.scanner.ClassificationResult;
+import dev.marie.MariesLib.scanner.ClassificationSignal;
+import dev.marie.MariesLib.scanner.RecipeInheritanceResolver.RecipeInheritanceStep;
 
 import javax.annotation.Nullable;
 
@@ -61,30 +61,35 @@ final class FoodNutrientPipeline {
 
     private FoodNutrientPipeline() {}
 
-    static void process(ServerPlayer player, ItemStack stack, DietData diet, long gameTimeMs) {
+    static void process(ServerPlayer player, ItemStack stack, TrackingData diet, long gameTimeMs) {
         if (ConfigReloadHandler.isReloadInProgress()) {
             return;
         }
         SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
         if (snapshot != null) {
-            diet.setMemoryConfig(DietMemoryConfig.fromSnapshot(snapshot));
+            diet.setMemoryConfig(new TrackingMemoryConfig(
+                    snapshot.memoryWindowMinutes(), snapshot.noveltyBonus(), snapshot.noveltyDecayCap(),
+                    snapshot.diminishingFloor(), snapshot.startingNutrientValue()));
         } else {
             if (WARN_ONCE_FOOD_EATEN.compareAndSet(false, true)) {
                 Nourished.LOGGER.warn(
                         "[Nourished] FoodNutrientPipeline: snapshot null, falling back to raw config. Will not warn again until server restart.");
             }
-            diet.setMemoryConfig(DietMemoryConfig.fromRawConfig(NourishedConfig.get()));
+            NourishedConfig cfg = NourishedConfig.get();
+            diet.setMemoryConfig(new TrackingMemoryConfig(
+                    cfg.memoryWindowMinutes(), cfg.noveltyBonus(), cfg.noveltyDecayCap(),
+                    cfg.diminishingFloor(), cfg.startingNutrientValue()));
         }
         boolean debugEatLog = ModuleCache.enableDebugLogging;
         Map<String, Float> nutrientsBefore = debugEatLog ? snapshotNutrients(diet) : Map.of();
 
-        String itemId = NourishedRegistryUtils.itemKey(stack).toString();
+        String itemId = MarieRegistryUtils.itemKey(stack).toString();
         Optional<FoodOverrideRegistry.FoodOverride> override = FoodOverrideRegistry.getOverride(itemId);
 
         float caloriesAdded;
         Map<String, Float> nutrientDeltas;
         Map<String, Float> matchedBars;
-        ResourceLocation foodResourceId = NourishedRegistryUtils.itemKey(stack);
+        ResourceLocation foodResourceId = MarieRegistryUtils.itemKey(stack);
         NutrientResolutionDiagnostic diagnostic = null;
         FoodProperties foodProps = FoodNutritionRegistry.foodPropertiesForNutrition(stack, player);
 
@@ -125,17 +130,17 @@ final class FoodNutrientPipeline {
                         .map(Map.Entry::getKey)
                         .orElse(null);
         String familyKey = FoodFamilyResolver.resolve(
-                NourishedRegistryUtils.itemKey(stack));
+                MarieRegistryUtils.itemKey(stack));
 
-        float multiplier = diet.recordEat(itemId, dominantCategory, familyKey, gameTimeMs);
-        DietData.MultiplierBreakdown multiplierBreakdown = debugEatLog
+        float multiplier = diet.recordSource(itemId, dominantCategory, familyKey, gameTimeMs);
+        TrackingData.MultiplierBreakdown multiplierBreakdown = debugEatLog
                 ? diet.getMultiplierBreakdown(itemId, dominantCategory, familyKey, gameTimeMs)
                 : null;
 
-        if (ModuleCache.enableCalorieTracking) {
+        if (ModuleCache.enableTotalTracking) {
             Nourished.LOGGER.debug("Nourished calories: adding {} * {} for {}", caloriesAdded, multiplier,
                     stack.getItem().getDescriptionId());
-            diet.addCalories(caloriesAdded * multiplier);
+            diet.addTotal(caloriesAdded * multiplier);
         }
 
         Map<String, Float> afterMultiplierOnly = new HashMap<>();
@@ -148,9 +153,9 @@ final class FoodNutrientPipeline {
                 afterMultiplierOnly.put(key, adjustedDelta);
                 adjustedDelta = applySeasonalAbsorption(player, key, adjustedDelta);
                 adjustedDelta = applyAbsorptionModifiers(player, key, adjustedDelta);
-                adjustedDelta *= NourishedAttributes.nutrientRegenMultiplier(player);
+                adjustedDelta *= MarieAttributes.valueRegenMultiplier(player);
 
-                NutrientModifierEvent modifierEvent = new NutrientModifierEvent(
+                ValueModifierEvent modifierEvent = new ValueModifierEvent(
                         player, foodResourceId, key, adjustedDelta);
                 NeoForge.EVENT_BUS.post(modifierEvent);
 
@@ -165,16 +170,16 @@ final class FoodNutrientPipeline {
                     continue;
                 }
                 finalApplied.put(key, finalDelta);
-                float oldValue = diet.nutrients.getOrDefault(key, 0f);
-                diet.addNutrient(key, finalDelta);
-                float newValue = diet.nutrients.getOrDefault(key, 0f);
+                float oldValue = diet.values.getOrDefault(key, 0f);
+                diet.addValue(key, finalDelta);
+                float newValue = diet.values.getOrDefault(key, 0f);
 
                 if (oldValue != newValue) {
-                    NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientChangedEvent(
+                    NeoForge.EVENT_BUS.post(new MarieEvents.ValueChangedEvent(
                             player, key, oldValue, newValue));
                 }
 
-                NeoForge.EVENT_BUS.post(new NourishedEvents.FoodEatenEvent(
+                NeoForge.EVENT_BUS.post(new MarieEvents.SourceAppliedEvent(
                         player, foodResourceId, key, finalDelta));
             }
         }
@@ -203,7 +208,7 @@ final class FoodNutrientPipeline {
 
         checkThresholdCrossings(player, diet);
 
-        player.setData(DietAttachment.DIET.get(), diet);
+        player.setData(TrackingAttachment.TRACKING.get(), diet);
         ModNetworking.syncDietDelta(player, diet);
 
         if (ModuleCache.enableEffects) {
@@ -216,10 +221,10 @@ final class FoodNutrientPipeline {
                 diet);
     }
 
-    private static Map<String, Float> snapshotNutrients(DietData diet) {
+    private static Map<String, Float> snapshotNutrients(TrackingData diet) {
         Map<String, Float> m = new HashMap<>();
         for (String key : NutrientRegistry.getKeys()) {
-            m.put(key, diet.nutrients.getOrDefault(key, 0f));
+            m.put(key, diet.values.getOrDefault(key, 0f));
         }
         return m;
     }
@@ -239,16 +244,16 @@ final class FoodNutrientPipeline {
             Map<String, Float> nutrientsBefore,
             Map<String, Float> nutrientsAfter,
             float multiplier,
-            DietData.MultiplierBreakdown breakdown,
+            TrackingData.MultiplierBreakdown breakdown,
             FoodProperties food
     ) {
         JsonObject root = new JsonObject();
-        root.addProperty("timestamp", NutritionDebugLogger.isoTimestamp());
+        root.addProperty("timestamp", MarieDebugLogger.isoTimestamp());
         root.addProperty("classifier_path", foodOverride
-                ? "FOOD_OVERRIDE"
+                ? "SOURCE_OVERRIDE"
                 : (diagnostic != null ? diagnostic.classifierPath() : "UNCLASSIFIED"));
         root.addProperty("pipeline_stage", foodOverride
-                ? "FOOD_OVERRIDE"
+                ? "SOURCE_OVERRIDE"
                 : (diagnostic != null ? diagnostic.pipelineStage().name() : "UNCLASSIFIED"));
 
         JsonObject playerJo = new JsonObject();
@@ -274,26 +279,26 @@ final class FoodNutrientPipeline {
         root.add("tag_match", tagMatch);
 
         root.add("classifier_signals", buildSignalsJson(foodOverride, diagnostic));
-        root.add("matched_bars", NutritionDebugLogger.floatMapToJson(matchedBarWeights));
+        root.add("matched_bars", MarieDebugLogger.floatMapToJson(matchedBarWeights));
         root.add("recipe_inheritance", buildRecipeInheritanceJson(foodOverride, diagnostic));
-        root.add("raw_nutrient_delta", NutritionDebugLogger.floatMapToJson(rawNutrientDelta));
-        root.addProperty("multiplier", NutritionDebugLogger.round4(multiplier));
+        root.add("raw_nutrient_delta", MarieDebugLogger.floatMapToJson(rawNutrientDelta));
+        root.addProperty("multiplier", MarieDebugLogger.round4(multiplier));
         root.add("multiplier_breakdown", buildMultiplierBreakdownJson(breakdown));
-        root.add("after_multiplier_nutrient_delta", NutritionDebugLogger.floatMapToJson(afterMultiplierOnly));
-        root.add("final_nutrient_delta", NutritionDebugLogger.floatMapToJson(finalApplied));
-        root.add("nutrients_before", NutritionDebugLogger.floatMapToJson(nutrientsBefore));
-        root.add("nutrients_after", NutritionDebugLogger.floatMapToJson(nutrientsAfter));
+        root.add("after_multiplier_nutrient_delta", MarieDebugLogger.floatMapToJson(afterMultiplierOnly));
+        root.add("final_nutrient_delta", MarieDebugLogger.floatMapToJson(finalApplied));
+        root.add("nutrients_before", MarieDebugLogger.floatMapToJson(nutrientsBefore));
+        root.add("nutrients_after", MarieDebugLogger.floatMapToJson(nutrientsAfter));
 
         boolean lightBypass = food != null
-                && (food.nutrition() <= 2 || stack.is(NourishedItemTags.LIGHT_FOOD))
-                && !stack.is(NourishedItemTags.MEAL);
+                && (food.nutrition() <= 2 || stack.is(MarieItemTags.lightSource()))
+                && !stack.is(MarieItemTags.heavySource());
         root.addProperty("light_snack_bypass_eligible", lightBypass);
 
         root.addProperty("game_time_ms", gameTimeMs);
         root.addProperty("game_time_ticks", player.level().getGameTime());
         root.addProperty("dimension", player.level().dimension().location().toString());
 
-        NutritionDebugLogger.submitEatLog(root);
+        MarieDebugLogger.submitSourceLog(root);
     }
 
     private static JsonArray buildSignalsJson(boolean foodOverride, @Nullable NutrientResolutionDiagnostic diagnostic) {
@@ -309,8 +314,8 @@ final class FoodNutrientPipeline {
             JsonObject o = new JsonObject();
             o.addProperty("type", s.signalType());
             o.addProperty("source", s.source());
-            o.add("contributions", NutritionDebugLogger.floatMapToJson(s.contributions()));
-            o.addProperty("total_magnitude", NutritionDebugLogger.round4(s.totalMagnitude()));
+            o.add("contributions", MarieDebugLogger.floatMapToJson(s.contributions()));
+            o.addProperty("total_magnitude", MarieDebugLogger.round4(s.totalMagnitude()));
             arr.add(o);
         }
         return arr;
@@ -325,34 +330,34 @@ final class FoodNutrientPipeline {
             JsonObject o = new JsonObject();
             o.addProperty("ingredient_id", step.ingredientId().toString());
             o.addProperty("depth", step.depth());
-            o.addProperty("decay_factor", NutritionDebugLogger.round4(step.decayFactor()));
-            o.add("nutrient_contributions", NutritionDebugLogger.floatMapToJson(step.nutrientContributions()));
+            o.addProperty("decay_factor", MarieDebugLogger.round4(step.decayFactor()));
+            o.add("value_contributions", MarieDebugLogger.floatMapToJson(step.valueContributions()));
             arr.add(o);
         }
         return arr;
     }
 
-    private static JsonObject buildMultiplierBreakdownJson(DietData.MultiplierBreakdown b) {
+    private static JsonObject buildMultiplierBreakdownJson(TrackingData.MultiplierBreakdown b) {
         JsonObject o = new JsonObject();
         if (b == null) {
             return o;
         }
         float fin = b.finalMultiplier();
-        o.addProperty("item_contribution", NutritionDebugLogger.round4(b.itemContribution()));
-        o.addProperty("category_contribution", NutritionDebugLogger.round4(b.categoryContribution()));
-        o.addProperty("family_contribution", NutritionDebugLogger.round4(b.familyContribution()));
-        o.addProperty("novelty_contribution", NutritionDebugLogger.round4(b.noveltyContribution()));
-        o.addProperty("final_multiplier", NutritionDebugLogger.round4(fin));
-        o.addProperty("item_weight", NutritionDebugLogger.round4(b.itemWeight()));
-        o.addProperty("category_weight", NutritionDebugLogger.round4(b.categoryWeight()));
-        o.addProperty("family_weight", NutritionDebugLogger.round4(b.familyWeight()));
-        o.addProperty("item_percent_of_final", NutritionDebugLogger.pctOfFinal(b.itemContribution(), fin));
-        o.addProperty("category_percent_of_final", NutritionDebugLogger.pctOfFinal(b.categoryContribution(), fin));
-        o.addProperty("family_percent_of_final", NutritionDebugLogger.pctOfFinal(b.familyContribution(), fin));
+        o.addProperty("item_contribution", MarieDebugLogger.round4(b.itemContribution()));
+        o.addProperty("category_contribution", MarieDebugLogger.round4(b.categoryContribution()));
+        o.addProperty("family_contribution", MarieDebugLogger.round4(b.familyContribution()));
+        o.addProperty("novelty_contribution", MarieDebugLogger.round4(b.noveltyContribution()));
+        o.addProperty("final_multiplier", MarieDebugLogger.round4(fin));
+        o.addProperty("item_weight", MarieDebugLogger.round4(b.itemWeight()));
+        o.addProperty("category_weight", MarieDebugLogger.round4(b.categoryWeight()));
+        o.addProperty("family_weight", MarieDebugLogger.round4(b.familyWeight()));
+        o.addProperty("item_percent_of_final", MarieDebugLogger.pctOfFinal(b.itemContribution(), fin));
+        o.addProperty("category_percent_of_final", MarieDebugLogger.pctOfFinal(b.categoryContribution(), fin));
+        o.addProperty("family_percent_of_final", MarieDebugLogger.pctOfFinal(b.familyContribution(), fin));
         return o;
     }
 
-    private static void checkThresholdCrossings(ServerPlayer player, DietData diet) {
+    private static void checkThresholdCrossings(ServerPlayer player, TrackingData diet) {
         SyncNourishedConfigSnapshot snapshot = NourishedSyncHandler.getConfigSnapshot();
         final float excessThreshold;
 
@@ -366,8 +371,8 @@ final class FoodNutrientPipeline {
             excessThreshold = (float) NourishedConfig.get().excessThreshold();
         }
         for (String key : NutrientRegistry.getKeys()) {
-            float current = diet.nutrients.getOrDefault(key, 0f);
-            float previous = diet.lastNutrients.getOrDefault(key, 0f);
+            float current = diet.values.getOrDefault(key, 0f);
+            float previous = diet.lastValues.getOrDefault(key, 0f);
             boolean beneficial = NutrientRegistry.isBeneficial(key);
 
             float criticalThreshold = snapshot != null
@@ -376,56 +381,56 @@ final class FoodNutrientPipeline {
 
             if (beneficial) {
                 if (current <= criticalThreshold && previous > criticalThreshold) {
-                    NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientCriticalEvent(player, key));
+                    NeoForge.EVENT_BUS.post(new MarieEvents.ValueCriticalEvent(player, key));
                 }
                 if (current >= excessThreshold && previous < excessThreshold) {
-                    NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientExcessEvent(player, key));
+                    NeoForge.EVENT_BUS.post(new MarieEvents.ValueExcessEvent(player, key));
                 }
             } else {
                 if (current >= excessThreshold && previous < excessThreshold) {
-                    NeoForge.EVENT_BUS.post(new NourishedEvents.NutrientCriticalEvent(player, key));
+                    NeoForge.EVENT_BUS.post(new MarieEvents.ValueCriticalEvent(player, key));
                 }
             }
         }
     }
 
-    private static float applySeasonalAbsorption(ServerPlayer player, String nutrientKey, float baseAmount) {
+    private static float applySeasonalAbsorption(ServerPlayer player, String valueKey, float baseAmount) {
         var hooks = SeasonHookRegistry.getAll();
         if (!ModuleCache.enableSeasonHooks || hooks.isEmpty()) {
             return baseAmount;
         }
         float amount = baseAmount;
-        for (NourishedSeasonHook hook : hooks) {
-            float mult = hook.getSeasonalAbsorptionModifier(nutrientKey, NourishedSeasonHook.Season.SPRING);
+        for (MarieSeasonHook hook : hooks) {
+            float mult = hook.getSeasonalAbsorptionModifier(valueKey, MarieSeasonHook.Season.SPRING);
             if (!Float.isFinite(mult)) {
-                Nourished.LOGGER.warn("[Nourished] Seasonal modifier returned non-finite value {} for nutrient={} — using 0", mult, nutrientKey);
+                Nourished.LOGGER.warn("[Nourished] Seasonal modifier returned non-finite value {} for nutrient={} — using 0", mult, valueKey);
                 mult = 0f;
             }
             amount *= Math.max(0f, mult);
         }
         if (!Float.isFinite(amount)) {
-            Nourished.LOGGER.warn("[Nourished] Seasonal absorption result non-finite for nutrient={} — using 0", nutrientKey);
+            Nourished.LOGGER.warn("[Nourished] Seasonal absorption result non-finite for nutrient={} — using 0", valueKey);
             return 0f;
         }
         return amount;
     }
 
-    private static float applyAbsorptionModifiers(ServerPlayer player, String nutrientKey, float baseAmount) {
+    private static float applyAbsorptionModifiers(ServerPlayer player, String valueKey, float baseAmount) {
         var modifiers = AbsorptionModifierRegistry.getAll();
         if (!ModuleCache.enableAbsorptionModifiers || modifiers.isEmpty()) {
             return baseAmount;
         }
         float amount = baseAmount;
-        for (NutrientAbsorptionModifier modifier : modifiers) {
-            float factor = modifier.getAbsorptionMultiplier(player, nutrientKey, amount);
+        for (AbsorptionModifier modifier : modifiers) {
+            float factor = modifier.getAbsorptionMultiplier(player, valueKey, amount);
             if (!Float.isFinite(factor)) {
-                Nourished.LOGGER.warn("[Nourished] Absorption modifier returned non-finite value {} for nutrient={} — using 0", factor, nutrientKey);
+                Nourished.LOGGER.warn("[Nourished] Absorption modifier returned non-finite value {} for nutrient={} — using 0", factor, valueKey);
                 factor = 0f;
             }
             amount *= Math.max(0f, factor);
         }
         if (!Float.isFinite(amount)) {
-            Nourished.LOGGER.warn("[Nourished] Absorption modifier result non-finite for nutrient={} — using 0", nutrientKey);
+            Nourished.LOGGER.warn("[Nourished] Absorption modifier result non-finite for nutrient={} — using 0", valueKey);
             return 0f;
         }
         return amount;

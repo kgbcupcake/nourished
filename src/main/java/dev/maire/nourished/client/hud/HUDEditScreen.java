@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.hud;
 
 import dev.maire.nourished.client.NourishedKeys;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.config.ModuleCache;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;

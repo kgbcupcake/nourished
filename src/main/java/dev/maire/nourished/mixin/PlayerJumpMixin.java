@@ -1,7 +1,7 @@
 package dev.maire.nourished.mixin;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.config.ModuleCache;
 import dev.maire.nourished.modules.Stamina.Action.StaminaActionType;
 import dev.maire.nourished.modules.Stamina.Action.StaminaDrainPipeline;
 import net.minecraft.server.level.ServerPlayer;

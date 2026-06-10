@@ -4,29 +4,51 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.api.NourishedAPIVersion;
-import dev.maire.nourished.api.NourishedAPIState;
-import dev.maire.nourished.core.registry.NourishedApiDefinitionRegistries;
-import dev.maire.nourished.core.registry.NourishedAttributes;
-import dev.maire.nourished.core.registry.RegistryLifecycleManager;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.api.MarieAPIVersion;
+import dev.marie.MariesLib.api.MarieAPIState;
+import dev.marie.MariesLib.registry.MarieApiRegistries;
+import dev.marie.MariesLib.registry.MarieAttributes;
+import dev.marie.MariesLib.registry.RegistryLifecycleManager;
 import dev.maire.nourished.core.command.NourishedCommand;
-import dev.maire.nourished.compat.kubejs.NourishedKubeJSPlugin;
-import dev.maire.nourished.compat.AutoCompatDiscovery;
-import dev.maire.nourished.compat.ModCompat;
+import dev.marie.MariesLib.compat.kubejs.MarieKubeJSPlugin;
+import dev.marie.MariesLib.compat.AutoCompatDiscovery;
+import dev.marie.MariesLib.compat.ModCompat;
 import dev.maire.nourished.compat.lso.LSOCompat;
 import dev.maire.nourished.compat.peakstamina.PeakStaminaCompat;
 import dev.maire.nourished.compat.spiceoflifeonion.SpiceOfLifeOnionCompat;
-import dev.maire.nourished.config.LockRegistry;
-import dev.maire.nourished.config.ModCompatRegistry;
+import dev.marie.MariesLib.config.LockRegistry;
+import dev.marie.MariesLib.config.ModCompatRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.config.NourishedPresetRegistry;
+import dev.maire.nourished.client.config.ExportConfigScreen;
+import dev.maire.nourished.client.config.ImportConfigScreen;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
-import dev.maire.nourished.config.PresetRegistry;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.color.ColorRegistry;
+import dev.maire.nourished.client.config.NourishedImportExport;
+import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
+import dev.marie.MariesLib.client.MarieClientCache;
+import dev.marie.MariesLib.client.MarieClientState;
+import dev.marie.MariesLib.client.MarieValueColors;
+import dev.marie.MariesLib.color.ColorRegistry;
+import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.PresetRegistry;
+import dev.marie.MariesLib.api.ThresholdEffect;
+import dev.marie.MariesLib.api.ValueDefinition;
+import dev.marie.MariesLib.api.ValueModifierEvent;
+import dev.marie.MariesLib.api.MemoryView;
+import dev.marie.MariesLib.core.MarieLibContext;
+import dev.marie.MariesLib.core.MarieLibPlayerDataProvider;
+import dev.marie.MariesLib.core.MarieLibRegistrationDelegate;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.MariesLib.tracking.TrackingMemoryConfig;
 import dev.maire.nourished.client.ClientEventRegistrar;
+import dev.maire.nourished.core.diet.DietAttachment;
+import dev.maire.nourished.core.diet.NourishedTrackingData;
 import dev.maire.nourished.core.effect.EffectRegistry;
+import dev.maire.nourished.core.effect.NutritionEffectApplier;
+import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
@@ -53,7 +75,11 @@ import dev.maire.nourished.modules.Stamina.Core.StaminaConfig;
 // import dev.maire.nourished.modules.Stamina.Handler.StaminaTickHandler; // STAMINA_SHELVED
 // import dev.maire.nourished.modules.Stamina.Handler.StaminaWorldHandler; // STAMINA_SHELVED
 import dev.maire.nourished.core.network.ModNetworking;
-import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
+import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
+import java.util.List;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -71,13 +97,67 @@ public class Nourished {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Nourished(IEventBus modEventBus, ModContainer modContainer) {
+        NourishedConfig.register(modContainer);
+        NourishedClientConfig.register(modContainer);
+        modEventBus.addListener(NourishedConfig::onModConfigLoading);
+        modEventBus.addListener(NourishedConfig::onModConfigReloading);
+        modEventBus.addListener(NourishedClientConfig::onModConfigLoading);
+        modEventBus.addListener(NourishedClientConfig::onModConfigReloading);
+
+        MarieLibContext.register(MarieLibContext.builder(MODID)
+                .valueKeys(NutrientRegistry::getKeys)
+                .scannerConfidenceSpreadThreshold(() -> (float) NourishedConfig.get().scannerConfidenceSpreadThreshold())
+                .compositeRatioThreshold(NourishedConfig.get()::compositeRatioThreshold)
+                .scannerEnableRecipeInheritance(NourishedConfig.get()::scannerEnableRecipeInheritance)
+                .enableDebugLogging(() -> ModuleCache.enableDebugLogging)
+                .scannerApplyCallback(FoodNutritionRegistry::applyFromScanner)
+                .valueTagChecker(() -> stack -> !FoodNutritionRegistry.getNutrientTagScores(stack.getItem()).isEmpty())
+                .memoryWindowMinutes(() -> (long) NourishedConfig.get().memoryWindowMinutes())
+                .memoryWindowCount(NourishedConfig.get()::memoryWindowCount)
+                .streakWindowMs(() -> (long) NourishedConfig.get().streakWindowMs())
+                .streakWeight(() -> (float) NourishedConfig.get().streakWeight())
+                .debtThreshold(() -> (float) NourishedConfig.get().debtThreshold())
+                .debtDecayRate(() -> (float) NourishedConfig.get().debtDecayRate())
+                .diminishingSteepness(() -> (float) NourishedConfig.get().diminishingSteepness())
+                .diminishingMidpoint(() -> (float) NourishedConfig.get().diminishingMidpoint())
+                .debugMemoryLogging(NourishedConfig.get()::debugMemoryLogging)
+                .isValueBeneficial(() -> NutrientRegistry::isBeneficial)
+                .excessThreshold(() -> (float) NourishedConfig.get().excessThreshold())
+                .lowThreshold(() -> (float) NourishedConfig.get().lowThreshold())
+                .criticalThreshold(() -> (float) NourishedConfig.get().criticalThreshold())
+                .tooltipValueResolver((stack, player) -> player != null && player.level() != null
+                        ? FoodNutritionRegistry.resolveNutrientBars(stack, false, player.level())
+                        : FoodNutritionRegistry.resolveNutrientBars(stack, false))
+                .clientTrackingDataProvider(MarieClientCache::get)
+                .valueColorProvider(MarieValueColors::baseColorArgb)
+                .valueIconProvider(NutrientRegistry::getIcon)
+                .sourceFamilyResolver(FoodFamilyResolver::resolve)
+                .configScreenFactory(() -> NourishedConfigScreen.create(null))
+                .exportScreenFactory(parent -> new ExportConfigScreen(parent, null))
+                .importScreenFactory(parent -> new ImportConfigScreen(parent, null))
+                .configExporter(NourishedImportExport::exportCurrentConfig)
+                .configImporter(json -> {
+                    try {
+                        NourishedImportExport.applyImport(json);
+                    } catch (java.io.IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .currentConfigPresetValues(NourishedImportExport::presetValuesFromCurrentConfig)
+                .ensureBuiltInPresetsOnDisk(NourishedPresetRegistry::ensureBuiltInFilesOnDisk)
+                .applyPresetValues(NourishedPresetRegistry::applyPresetValues)
+                .enableAllEffectsForPresets(NourishedPresetRegistry::enableAllEffects)
+                .clientMemoryConfigProvider(Nourished::clientMemoryConfig)
+                .playerDataProvider(new PlayerDataProvider())
+                .registrationDelegate(new RegistrationDelegate())
+                .build());
         if (ModList.get().isLoaded("kubejs")) {
             modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLConstructModEvent.class, event ->
-                    NourishedKubeJSPlugin.bootstrap());
+                    MarieKubeJSPlugin.bootstrap());
         }
         registerLifecycleEntries();
         RegistryLifecycleManager.loadAll();
-        NourishedAttributes.register(modEventBus);
+        MarieAttributes.register(modEventBus);
         ModCompat.initialize();
         if (ModList.get().isLoaded("peakstamina")) {
             PeakStaminaCompat.register();
@@ -88,12 +168,9 @@ public class Nourished {
         if (ModList.get().isLoaded("legendarysurvivaloverhaul")) {
             LSOCompat.register();
         }
-        NourishedConfig.register(modContainer);
-        NourishedClientConfig.register(modContainer);
-        modEventBus.addListener(NourishedConfig::onModConfigLoading);
-        modEventBus.addListener(NourishedClientConfig::onModConfigLoading);
-        modEventBus.addListener(NourishedClientConfig::onModConfigReloading);
         FoodNutritionRegistry.init();
+        TrackingData.setInstanceFactory(NourishedTrackingData::new);
+        TrackingAttachment.register(modEventBus);
         DietAttachment.register(modEventBus);
         GutHealthAttachment.register(modEventBus);
         // StaminaAttachment.register(modEventBus); // STAMINA_SHELVED
@@ -121,13 +198,13 @@ public class Nourished {
                     NeoForge.EVENT_BUS.register(new NutritionDecayHandler());
                 }
                 LOGGER.info("[Nourished] Starting AutoCompatDiscovery...");
-                try (var scope = NourishedAPIState.openForDatapackReload()) {
+                try (var scope = MarieAPIState.openForDatapackReload()) {
                     AutoCompatDiscovery.discover();
                 } catch (Exception e) {
                     LOGGER.error("[Nourished] AutoCompatDiscovery failed.", e);
                 }
-                NourishedApiDefinitionRegistries.freezeModOnlyRegistriesAfterCommonSetup();
-                NourishedAPIState.close();
+                MarieApiRegistries.freezeModOnlyRegistriesAfterCommonSetup();
+                MarieAPIState.close();
             });
         });
         NeoForge.EVENT_BUS.register(new NourishedGuideJoinHandler());
@@ -137,24 +214,47 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new NourishedCommand());
         if (ModList.get().isLoaded("kubejs")) {
             try {
-                NourishedKubeJSPlugin.bootstrap();
-                if (NourishedKubeJSPlugin.isRegistered()) {
+                MarieKubeJSPlugin.bootstrap();
+                if (MarieKubeJSPlugin.isRegistered()) {
                     LOGGER.info("[Nourished] Enabled KubeJS integration bridge.");
                 } else {
-                    LOGGER.warn("[Nourished] KubeJS is loaded but NourishedKubeJSPlugin was not registered.");
+                    LOGGER.warn("[Nourished] KubeJS is loaded but MarieKubeJSPlugin was not registered.");
                 }
             } catch (Throwable t) {
                 LOGGER.warn("[Nourished] Failed to initialize KubeJS integration bridge.", t);
             }
         }
-        DietAttachment.logAllNutrientNbtPaths();
-        LOGGER.info("[Nourished] Calories NBT path: {}", DietAttachment.getCaloriesNbtPath());
+        TrackingAttachment.logAllValueNbtPaths();
+        LOGGER.info("[Nourished] Calories NBT path: {}", TrackingAttachment.getTotalNbtPath());
         LOGGER.info("[Nourished] API v{} ready — {} nutrients, {} effects, {} compat entries registered.",
-                NourishedAPIVersion.VERSION,
+                MarieAPIVersion.VERSION,
                 NutrientRegistry.getAll().size(),
                 EffectRegistry.getAll().size(),
                 ModCompat.getAllEntries().size());
         LOGGER.info("Nourished loaded.");
+    }
+
+    private static final java.util.concurrent.atomic.AtomicBoolean CLIENT_MEMORY_WARN_ONCE = new java.util.concurrent.atomic.AtomicBoolean(false);
+
+    public static void resetClientMemoryDiagnostics() {
+        CLIENT_MEMORY_WARN_ONCE.set(false);
+    }
+
+    static TrackingMemoryConfig clientMemoryConfig() {
+        Object raw = MarieClientState.getConfig();
+        if (raw instanceof SyncNourishedConfigSnapshot snap) {
+            return new TrackingMemoryConfig(
+                    snap.memoryWindowMinutes(), snap.noveltyBonus(), snap.noveltyDecayCap(),
+                    snap.diminishingFloor(), snap.startingNutrientValue());
+        }
+        if (CLIENT_MEMORY_WARN_ONCE.compareAndSet(false, true)) {
+            LOGGER.warn(
+                    "[Nourished] MarieClientCache: config snapshot null, falling back to raw config. Will not warn again until disconnect.");
+        }
+        NourishedConfig cfg = NourishedConfig.get();
+        return new TrackingMemoryConfig(
+                cfg.memoryWindowMinutes(), cfg.noveltyBonus(), cfg.noveltyDecayCap(),
+                cfg.diminishingFloor(), cfg.startingNutrientValue());
     }
 
     /**
@@ -189,5 +289,68 @@ public class Nourished {
                 "ModCompatRegistry", ModCompatRegistry::load, () -> {});
         RegistryLifecycleManager.registerRegistry(
                 "PresetRegistry", PresetRegistry::ensureBuiltInFilesOnDisk, PresetRegistry::reload);
+    }
+
+    private static final class PlayerDataProvider implements MarieLibPlayerDataProvider {
+
+        private static final ResourceLocation API_MODIFIER_SOURCE =
+                ResourceLocation.fromNamespaceAndPath(MODID, "api");
+
+        @Override
+        public float getTotal(Player player) {
+            return TrackingAttachment.getTotal(player);
+        }
+
+        @Override
+        public float getValueLevel(Player player, String valueKey) {
+            return TrackingAttachment.getValueLevel(player, valueKey);
+        }
+
+        @Override
+        public MemoryView getSourceMemoryView(Player player) {
+            return TrackingAttachment.getSourceMemoryView(player);
+        }
+
+        @Override
+        public void modifyValue(Player player, String valueKey, float delta) {
+            ValueModifierEvent modifierEvent = new ValueModifierEvent(player, API_MODIFIER_SOURCE, valueKey, delta);
+            NeoForge.EVENT_BUS.post(modifierEvent);
+            if (modifierEvent.isCanceled()) {
+                return;
+            }
+            TrackingData data = player.getData(TrackingAttachment.TRACKING.get());
+            data.addValue(valueKey, modifierEvent.getAmount());
+            player.setData(TrackingAttachment.TRACKING.get(), data);
+            if (!(player instanceof ServerPlayer serverPlayer)) {
+                return;
+            }
+            ModNetworking.syncDietDelta(serverPlayer, data);
+            if (ModuleCache.enableEffects) {
+                NutritionEffectApplier.apply(serverPlayer, data);
+            }
+        }
+    }
+
+    private static final class RegistrationDelegate implements MarieLibRegistrationDelegate {
+
+        @Override
+        public List<String> getValueKeys() {
+            return NutrientRegistry.getKeys();
+        }
+
+        @Override
+        public void registerValue(ValueDefinition definition) {
+            NutrientRegistry.registerExternal(definition);
+        }
+
+        @Override
+        public void registerEffect(ThresholdEffect definition) {
+            EffectRegistry.registerExternal(definition);
+        }
+
+        @Override
+        public void registerSourceClassification(ResourceLocation sourceId, String valueKey, float amount) {
+            FoodNutritionRegistry.registerClassification(sourceId, valueKey, amount);
+        }
     }
 }

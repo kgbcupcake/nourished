@@ -3,28 +3,27 @@ package dev.maire.nourished.client.config;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.maire.nourished.client.NourishedKeys;
-import dev.maire.nourished.client.NutrientUiColors;
+import dev.marie.MariesLib.client.MarieValueColors;
 import dev.maire.nourished.client.config.EffectBuilderWidget;
 import dev.maire.nourished.client.config.FoodScannerWidget;
-import dev.maire.nourished.client.config.ImportExportButtonsWidget;
-import dev.maire.nourished.client.config.PresetsWidget;
-import dev.maire.nourished.compat.CompatEntry;
-import dev.maire.nourished.compat.CompatReportEntry;
-import dev.maire.nourished.compat.ModCompat;
-import dev.maire.nourished.core.color.ColorRegistry;
+import dev.marie.MariesLib.client.ImportExportButtonsWidget;
+import dev.marie.MariesLib.client.PresetsWidget;
+import dev.marie.MariesLib.compat.CompatEntry;
+import dev.marie.MariesLib.compat.CompatReportEntry;
+import dev.marie.MariesLib.compat.ModCompat;
+import dev.marie.MariesLib.color.ColorRegistry;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.maire.nourished.core.reload.NourishedReloadPipeline;
-import dev.maire.nourished.config.HudAnchor;
-import dev.maire.nourished.config.LockRegistry;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.config.HudAnchor;
+import dev.marie.MariesLib.config.LockRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.config.PresetRegistry;
+import dev.marie.MariesLib.config.PresetRegistry;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawFoodTierDef;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
@@ -157,10 +156,10 @@ public final class NourishedConfigScreen {
             EffectRegistry.save();
             StaminaConfig.save();
             RawFoodConfig.save();
-            NutrientUiColors.clearOverrides();
+            MarieValueColors.clearOverrides();
             NourishedClientConfig.saveNow();
             NourishedConfig.saveNow();
-            ModuleCache.refresh();
+            NourishedConfig.syncModuleCache();
         });
         builder.setAlwaysShowTabs(true);
         builder.setAfterInitConsumer(NourishedConfigLeftCardsLayout::apply);
@@ -235,16 +234,16 @@ public final class NourishedConfigScreen {
         addModuleGroupSubcategory(category, eb, "ui", groupedEntries.get("ui"));
         addModuleGroupSubcategory(category, eb, "other", groupedEntries.get("other"));
 
-        if (!LockRegistry.isLocked("heavyMealNutritionThreshold")) {
+        if (!LockRegistry.isLocked("heavySourcePropertyThreshold")) {
             category.addEntry(
                     eb.startIntSlider(
-                                    Component.translatable("nourished.config.heavyMealNutritionThreshold"),
-                                    config.heavyMealNutritionThreshold(),
+                                    Component.translatable("nourished.config.heavySourcePropertyThreshold"),
+                                    config.heavySourcePropertyThreshold(),
                                     1,
                                     20)
                             .setDefaultValue(6)
-                            .setTooltip(Component.translatable("nourished.config.heavyMealNutritionThreshold.desc"))
-                            .setSaveConsumer(config::setHeavyMealNutritionThreshold)
+                            .setTooltip(Component.translatable("nourished.config.heavySourcePropertyThreshold.desc"))
+                            .setSaveConsumer(config::setHeavySourcePropertyThreshold)
                             .build()
             );
         }
@@ -425,8 +424,8 @@ public final class NourishedConfigScreen {
 
     private static Component moduleToggleTitle(String key) {
         return Component.translatable(switch (key) {
-            case "blockHeavyMeals" -> "nourished.config.blockHeavyMeals";
-            case "blockLightFood" -> "nourished.config.blockLightFood";
+            case "enableBlockHeavySources" -> "nourished.config.enableBlockHeavySources";
+            case "enableBlockLightSource" -> "nourished.config.enableBlockLightSource";
             case "enableRawFoodPenalty" -> "config.nourished.enableRawFoodPenalty";
             case "enableGutHealth" -> "config.nourished.enableGutHealth";
             case "enableStamina" -> "config.nourished.enableStamina";
@@ -448,8 +447,8 @@ public final class NourishedConfigScreen {
 
     private static Component moduleToggleDescription(String key) {
         return Component.translatable(switch (key) {
-            case "blockHeavyMeals" -> "nourished.config.blockHeavyMeals.desc";
-            case "blockLightFood" -> "nourished.config.blockLightFood.desc";
+            case "enableBlockHeavySources" -> "nourished.config.enableBlockHeavySources.desc";
+            case "enableBlockLightSource" -> "nourished.config.enableBlockLightSource.desc";
             case "enableRawFoodPenalty" -> "config.nourished.enableRawFoodPenalty.desc";
             case "enableGutHealth" -> "config.nourished.enableGutHealth.desc";
             case "enableStamina" -> "config.nourished.enableStamina.desc";
@@ -478,7 +477,7 @@ public final class NourishedConfigScreen {
             String group;
             String dependsOn = null;
             switch (key) {
-                case "enableDecay", "enableNutritionEating", "blockHeavyMeals", "blockLightFood",
+                case "enableDecay", "enableSourceApplication", "enableBlockHeavySources", "enableBlockLightSource",
                      "enableEffects", "enableCalorieTracking", "enableSleepBonus",
                      "enableSynergies", "enableMilestones", "enableSeasonHooks", "enableAbsorptionModifiers" -> group = "core";
                 case "enableRawFoodPenalty", "enableGutHealth" -> group = "rawfood";
@@ -825,15 +824,15 @@ public final class NourishedConfigScreen {
         category.addEntry(new HudNutrientColorsSectionHeaderEntry());
         List<NutrientHudHexColorRowEntry> hudNutrientColorRows = new ArrayList<>();
         category.addEntry(new HudNutrientColorsResetAllEntry(() -> {
-            for (String nutrientKey : NutrientRegistry.getKeys()) {
-                ColorRegistry.remove(nutrientKey);
+            for (String valueKey : NutrientRegistry.getKeys()) {
+                ColorRegistry.remove(valueKey);
             }
             for (NutrientHudHexColorRowEntry row : hudNutrientColorRows) {
                 row.syncAfterBulkReset();
             }
         }));
-        for (String nutrientKey : NutrientRegistry.getKeys()) {
-            NutrientHudHexColorRowEntry row = new NutrientHudHexColorRowEntry(nutrientKey);
+        for (String valueKey : NutrientRegistry.getKeys()) {
+            NutrientHudHexColorRowEntry row = new NutrientHudHexColorRowEntry(valueKey);
             hudNutrientColorRows.add(row);
             category.addEntry(row);
         }
@@ -848,7 +847,7 @@ public final class NourishedConfigScreen {
             Map<String, PendingOverride> decayOverrides,
             Map<String, PendingOverride> criticalOverrides
     ) {
-        ConfigCategory nutrients = builder.getOrCreateCategory(Component.translatable("config.nourished.category.nutrients"));
+        ConfigCategory nutrients = builder.getOrCreateCategory(Component.translatable("config.nourished.category.values"));
         for (String key : NutrientRegistry.getKeys()) {
             double decayRaw = config.nutrientDecayRateOverrides().get(key).get();
             double criticalRaw = config.nutrientCriticalThresholdOverrides().get(key).get();
@@ -1889,15 +1888,15 @@ public final class NourishedConfigScreen {
                     .orElse("unknown");
         }
 
-        private void drawConflictBadge(GuiGraphics graphics, int x, int y, dev.maire.nourished.compat.ConflictLevel level) {
+        private void drawConflictBadge(GuiGraphics graphics, int x, int y, dev.marie.MariesLib.compat.ConflictLevel level) {
             String text;
             int bgColor;
             int borderColor;
-            if (level == dev.maire.nourished.compat.ConflictLevel.FULL_CONFLICT) {
+            if (level == dev.marie.MariesLib.compat.ConflictLevel.FULL_CONFLICT) {
                 text = "FULL CONFLICT";
                 bgColor = 0xFF6B1A1A;
                 borderColor = 0xFF8A2F2F;
-            } else if (level == dev.maire.nourished.compat.ConflictLevel.PARTIAL_CONFLICT) {
+            } else if (level == dev.marie.MariesLib.compat.ConflictLevel.PARTIAL_CONFLICT) {
                 text = "PARTIAL";
                 bgColor = 0xFF7A5A00;
                 borderColor = 0xFF9C7A18;
@@ -1927,7 +1926,7 @@ public final class NourishedConfigScreen {
                 int totalFood = 0;
                 int classified = 0;
                 for (Item item : BuiltInRegistries.ITEM) {
-                    ResourceLocation id = NourishedRegistryUtils.itemKey(item);
+                    ResourceLocation id = MarieRegistryUtils.itemKey(item);
                     if (id == null || !row.modId().equals(id.getNamespace())) {
                         continue;
                     }
@@ -2189,8 +2188,8 @@ public final class NourishedConfigScreen {
 
         private String builtInSummary(CompatEntry entry) {
             List<String> bullets = new ArrayList<>();
-            if (entry.providesFoodTags()) bullets.add("provides tags");
-            if (entry.handlesOwnNutrition()) bullets.add("handles own nutrition");
+            if (entry.providesSourceTags()) bullets.add("provides tags");
+            if (entry.handlesOwnValues()) bullets.add("handles own values");
             if (entry.conflictBehavior() != null) bullets.add("conflict rules");
             if (bullets.isEmpty()) bullets.add("baseline compat mapping");
             return String.join(", ", bullets);
@@ -2461,17 +2460,17 @@ public final class NourishedConfigScreen {
                 if (pending != null) pending.set(false);
             }
             switch (profile) {
-                case "minimalist" -> setModules(true, "enableDecay", "enableNutritionEating", "enableEffects", "enableCalorieTracking");
+                case "minimalist" -> setModules(true, "enableDecay", "enableSourceApplication", "enableEffects", "enableCalorieTracking");
                 case "immersive" -> setModules(true, editableModuleKeys.toArray(new String[0]));
                 case "gameplay" -> setModules(true,
                         "enableDecay",
-                        "enableNutritionEating",
+                        "enableSourceApplication",
                         "enableEffects",
                         "enableCalorieTracking",
                         "enableSleepBonus");
                 default -> setModules(true,
                         "enableDecay",
-                        "enableNutritionEating",
+                        "enableSourceApplication",
                         "enableEffects",
                         "enableHUD",
                         "enableToasts",

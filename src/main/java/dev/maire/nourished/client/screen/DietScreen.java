@@ -6,11 +6,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import dev.maire.nourished.client.ClientDietCache;
+import dev.marie.MariesLib.client.MarieClientCache;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.client.NutrientUiColors;
-import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.client.MarieValueColors;
+import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -183,13 +183,13 @@ public class DietScreen extends Screen {
         RenderSystem.setShaderColor(1f, 1f, 1f, fadeAlpha);
         renderBackground(g, mx, my, pt);
 
-        DietData data = getClientData();
+        TrackingData data = getClientData();
 
         // Animate display values toward target using dt-based lerp (~300ms convergence)
         if (data != null) {
             float animStep = dt <= 0f ? 0f : Math.min(1f, dt / ANIM_DURATION_SEC);
             for (String k : visibleBars) {
-                float target = data.nutrients.getOrDefault(k, 0f);
+                float target = data.values.getOrDefault(k, 0f);
                 float cur    = display.getOrDefault(k, 0f);
                 display.put(k, cur + (target - cur) * animStep);
             }
@@ -224,7 +224,7 @@ public class DietScreen extends Screen {
 
     // ── Left panel ───────────────────────────────────────────────────────────
 
-    private void drawLeftPanel(GuiGraphics g, DietData data) {
+    private void drawLeftPanel(GuiGraphics g, TrackingData data) {
         int x  = leftPos + PAD;
         int y  = topPos + 20;
         int bw = SPLIT - PAD * 2;   // box inner width
@@ -241,7 +241,7 @@ public class DietScreen extends Screen {
                 todayStartX + 20, y - 4, COL_GOLD, false);
         y += 10;
 
-        if (ModuleCache.enableCalorieTracking) {
+        if (ModuleCache.enableTotalTracking) {
             // ── Calories box ──────────────────────────────────────────────
             drawRoundedBox(g, x - 2, y - 2, bw + 4, 40);
 
@@ -253,10 +253,10 @@ public class DietScreen extends Screen {
             g.drawString(font, Component.translatable("nourished.screen.diet.calories_label"),
                     x + 22, y + 4, COL_WHITE, false);
 
-            String calStr = (int) data.calories + " / " + (int) data.maxCalories;
+            String calStr = (int) data.total + " / " + (int) data.maxTotal;
             g.drawString(font, calStr, x + 22, y + 15, COL_GREEN, false);
 
-            float calPct = data.maxCalories > 0 ? Mth.clamp(data.calories / data.maxCalories, 0f, 1f) : 0f;
+            float calPct = data.maxTotal > 0 ? Mth.clamp(data.total / data.maxTotal, 0f, 1f) : 0f;
             drawSolidBar(g, x, y + 31, bw, 4, calPct, COL_GREEN);
             y += 45;
         }
@@ -289,7 +289,7 @@ public class DietScreen extends Screen {
         g.drawString(font, balText, 0, 0, balColor, false);
         pose.popPose();
 
-        float balScore = ClientDietCache.getBalanceScore();
+        float balScore = MarieClientCache.getBalanceScore();
         // 5 pips: 10px wide, 6px tall, 3px gap -> total 62px, centered in bw
         int filledPips = Math.round(balScore * 5);
         int pipTotalW = 5 * 10 + 4 * 3; // 62
@@ -300,7 +300,7 @@ public class DietScreen extends Screen {
         }
         y += 55;
 
-        List<String> recentIds = ClientDietCache.getRecentFoodIds();
+        List<String> recentIds = MarieClientCache.getRecentSourceIds();
         if (!recentIds.isEmpty()) {
             int recentHeight = 10 + (recentIds.size() * 14);
             if (y + recentHeight <= maxY) {
@@ -325,7 +325,7 @@ public class DietScreen extends Screen {
             }
         }
 
-        List<String> neglected = ClientDietCache.getNeglectedCategories();
+        List<String> neglected = MarieClientCache.getNeglectedCategories();
         if (!neglected.isEmpty()) {
             int suggestionHeight = 50;
             if (y + suggestionHeight <= maxY) {
@@ -357,7 +357,7 @@ public class DietScreen extends Screen {
                             font.plainSubstrByWidth(label, labelMaxWidth),
                             colX + 18,
                             y + 4,
-                            NutrientUiColors.baseColorArgb(categoryKey),
+                            MarieValueColors.baseColorArgb(categoryKey),
                             false);
                 }
                 y += 36 + 4;
@@ -407,7 +407,7 @@ public class DietScreen extends Screen {
 
     // ── Right panel ──────────────────────────────────────────────────────────
 
-    private void drawRightPanel(GuiGraphics g, DietData data, float panelFadeAlpha, int mx, int my) {
+    private void drawRightPanel(GuiGraphics g, TrackingData data, float panelFadeAlpha, int mx, int my) {
         int rx = leftPos + SPLIT + PAD;   // right panel left edge
         int y  = topPos + 30;
 
@@ -433,8 +433,8 @@ public class DietScreen extends Screen {
 
         for (String key : visibleBars) {
             float disp  = display.getOrDefault(key, 0f);
-            float real  = data.nutrients.getOrDefault(key, 0f);
-            float prev  = data.lastNutrients.getOrDefault(key, real);
+            float real  = data.values.getOrDefault(key, 0f);
+            float prev  = data.lastValues.getOrDefault(key, real);
             int   color = barColor(key, disp);
             int   pctColor = nutrientBaseColor(key);
 
@@ -464,7 +464,7 @@ public class DietScreen extends Screen {
             // ── Segmented bar (BAR_H = 7) ─────────────────────────────────
             drawSegmentedBar(g, rx + 24, y + 12, barW, BAR_H, disp, color);
 
-            float flashA = ClientDietCache.flashAlpha(key);
+            float flashA = MarieClientCache.flashAlpha(key);
             if (flashA > 0f) {
                 int aByte = Mth.clamp(Mth.floor(flashA * panelFadeAlpha * 255f), 1, 255);
                 g.fill(rx + 24, y + 12, rx + 24 + barW, y + 12 + BAR_H, (aByte << 24) | COL_FLASH_RGB);
@@ -604,18 +604,18 @@ public class DietScreen extends Screen {
 
     // ── Logic helpers ────────────────────────────────────────────────────────
 
-    private static DietData getClientData() {
+    private static TrackingData getClientData() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return null;
-        return ClientDietCache.get();
+        return MarieClientCache.get();
     }
 
-    private static String getBalanceKey(DietData data) {
+    private static String getBalanceKey(TrackingData data) {
         NourishedConfig config = NourishedConfig.get();
         float critical = (float) config.criticalThreshold();
         float excessThreshold = (float) config.excessThreshold();
-        boolean low = data.nutrients.values().stream().anyMatch(v -> v < critical);
-        boolean excess = data.nutrients.values().stream().anyMatch(v -> v > excessThreshold);
+        boolean low = data.values.values().stream().anyMatch(v -> v < critical);
+        boolean excess = data.values.values().stream().anyMatch(v -> v > excessThreshold);
         if (low)    return "low";
         if (excess) return "excess";
         return "balanced";
@@ -631,7 +631,7 @@ public class DietScreen extends Screen {
     }
 
     private static int nutrientBaseColor(String key) {
-        return NutrientUiColors.baseColorArgb(key);
+        return MarieValueColors.baseColorArgb(key);
     }
 
     private static int balanceColor(String key) {

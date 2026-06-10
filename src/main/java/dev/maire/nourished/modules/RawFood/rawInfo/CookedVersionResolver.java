@@ -1,9 +1,9 @@
 package dev.maire.nourished.modules.RawFood.rawInfo;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
-import dev.maire.nourished.tooling.scanner.RecipeInheritanceResolver;
+import dev.marie.MariesLib.scanner.RecipeInheritanceResolver;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;

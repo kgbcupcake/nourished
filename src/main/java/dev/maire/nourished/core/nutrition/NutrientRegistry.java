@@ -6,12 +6,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.api.NutrientDefinition;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.api.ValueDefinition;
+import dev.marie.MariesLib.config.ModuleCache;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.registry.AbstractRegistry;
-import dev.maire.nourished.tooling.data.DatapackSchema;
+import dev.marie.MariesLib.registry.AbstractRegistry;
+import dev.marie.MariesLib.data.DatapackSchema;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLPaths;
@@ -52,7 +52,7 @@ public class NutrientRegistry {
             List<String> tags,
             boolean beneficial
     ) {
-        public static NutrientDef fromDefinition(NutrientDefinition definition) {
+        public static NutrientDef fromDefinition(ValueDefinition definition) {
             String key = Objects.requireNonNull(definition.getId(), "definition id");
             String icon = resolveIcon(key);
             List<String> tags = List.of(Nourished.MODID + ":nutrients/" + key);
@@ -173,7 +173,7 @@ public class NutrientRegistry {
         return def == null || def.beneficial();
     }
 
-    public static void registerExternal(NutrientDefinition definition) {
+    public static void registerExternal(ValueDefinition definition) {
         Objects.requireNonNull(definition, "definition");
         String key = Objects.requireNonNull(definition.getId(), "definition id");
         if (INSTANCE.contains(key)) {
@@ -381,7 +381,7 @@ public class NutrientRegistry {
     private static List<NutrientDef> loadBundledDefaults() {
         List<NutrientDef> defaults = new ArrayList<>();
         for (String path : DEFAULT_NUTRIENT_RESOURCES) {
-            String resource = "/data/" + Nourished.MODID + "/" + DatapackSchema.ROOT + "/nutrients/" + path + ".json";
+            String resource = "/data/" + Nourished.MODID + "/" + DatapackSchema.root() + "/nutrients/" + path + ".json";
             try (InputStream in = NutrientRegistry.class.getResourceAsStream(resource)) {
                 if (in == null) {
                     continue;

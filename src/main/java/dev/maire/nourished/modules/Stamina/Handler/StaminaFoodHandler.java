@@ -1,7 +1,7 @@
 package dev.maire.nourished.modules.Stamina.Handler;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.config.ModuleCache;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;

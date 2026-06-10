@@ -2,8 +2,8 @@
   "integrations": [
     {
       "modId": "solonion",
-      "heavyMealNutritionThreshold": 6,
-      "notes": "SOL:O uses nutrition-based Full-Course Meal categorization instead of item tags"
+      "heavySourcePropertyThreshold": 6,
+      "notes": "SOL:O uses property-based Full-Course Meal categorization instead of item tags"
     },
     {
       "modId": "legendarysurvivaloverhaul",

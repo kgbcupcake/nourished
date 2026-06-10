@@ -6,12 +6,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.registry.ListRegistry;
-import dev.maire.nourished.tooling.data.DatapackSchema;
-import dev.maire.nourished.core.util.NourishedJsonUtils;
-import dev.maire.nourished.core.util.NourishedResourceLoader;
+import dev.marie.MariesLib.registry.ListRegistry;
+import dev.marie.MariesLib.data.DatapackSchema;
+import dev.marie.MariesLib.util.MarieJsonUtils;
+import dev.marie.MariesLib.util.MarieResourceLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -74,7 +74,7 @@ public class EffectRegistry {
      * Registers an externally-defined effect via the public API.
      * Called by {@link dev.maire.nourished.api.NourishedAPI#registerCustomEffect}.
      */
-    public static void registerExternal(dev.maire.nourished.api.EffectDefinition definition) {
+    public static void registerExternal(dev.marie.MariesLib.api.ThresholdEffect definition) {
         String trigger = switch (definition.getThresholdType()) {
             case CRITICAL -> "below";
             case LOW -> "below";
@@ -82,9 +82,9 @@ public class EffectRegistry {
             case BONUS -> "all_above";
         };
         EffectDef def = new EffectDef(
-                "api_" + definition.getNutrientKey() + "_" + definition.getEffectId().getPath(),
+                "api_" + definition.getValueKey() + "_" + definition.getEffectId().getPath(),
                 definition.getEffectId().toString(),
-                definition.getNutrientKey(),
+                definition.getValueKey(),
                 trigger,
                 definition.getThreshold(),
                 definition.getAmplifier(),
@@ -174,7 +174,7 @@ public class EffectRegistry {
      * Call this from a reload listener when datapacks are available.
      */
     public static void loadFromDatapack(ResourceManager resourceManager) {
-        NourishedResourceLoader.loadFromModConfig(
+        MarieResourceLoader.loadFromModConfig(
                 resourceManager,
                 "config/effects.json",
                 EffectRegistry::parseFromReader,
@@ -210,10 +210,10 @@ public class EffectRegistry {
             double threshold = obj.get("threshold").getAsDouble();
             int amplifier = obj.get("amplifier").getAsInt();
             int durationTicks = obj.get("duration_ticks").getAsInt();
-            boolean enabled = NourishedJsonUtils.getOptionalBoolean(obj, "enabled", true);
-            double thresholdMax = NourishedJsonUtils.getOptionalDouble(obj, "threshold_max", 1.0);
-            boolean ambient = NourishedJsonUtils.getOptionalBoolean(obj, "ambient", true);
-            boolean showParticles = NourishedJsonUtils.getOptionalBoolean(obj, "show_particles", false);
+            boolean enabled = MarieJsonUtils.getOptionalBoolean(obj, "enabled", true);
+            double thresholdMax = MarieJsonUtils.getOptionalDouble(obj, "threshold_max", 1.0);
+            boolean ambient = MarieJsonUtils.getOptionalBoolean(obj, "ambient", true);
+            boolean showParticles = MarieJsonUtils.getOptionalBoolean(obj, "show_particles", false);
             INSTANCE.registerUnlocked(new EffectDef(id, effect, nutrient, trigger, threshold, amplifier, durationTicks, enabled, thresholdMax, ambient, showParticles));
         }
     }
@@ -322,7 +322,7 @@ public class EffectRegistry {
     private static List<EffectDef> loadBundledDefaults() {
         List<EffectDef> defaults = new ArrayList<>();
         for (String stem : DEFAULT_EFFECT_RESOURCES) {
-            String resourcePath = "/data/" + Nourished.MODID + "/" + DatapackSchema.ROOT + "/effects/" + stem + ".json";
+            String resourcePath = "/data/" + Nourished.MODID + "/" + DatapackSchema.root() + "/effects/" + stem + ".json";
             try (InputStream in = EffectRegistry.class.getResourceAsStream(resourcePath)) {
                 if (in == null) {
                     continue;

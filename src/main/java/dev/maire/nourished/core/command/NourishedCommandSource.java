@@ -1,9 +1,9 @@
 package dev.maire.nourished.core.command;
 
-import dev.maire.nourished.api.DietReportProvider;
-import dev.maire.nourished.api.registry.ReportProviderRegistry;
+import dev.marie.MariesLib.api.ReportProvider;
+import dev.marie.MariesLib.api.registry.ReportProviderRegistry;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -68,19 +68,19 @@ public final class NourishedCommandSource {
         };
     }
 
-    public static List<Component> buildReportLines(ServerPlayer target, DietData diet, String activeProfile, NourishedConfig config) {
+    public static List<Component> buildReportLines(ServerPlayer target, TrackingData diet, String activeProfile, NourishedConfig config) {
         return buildReportLines(target, diet, activeProfile, key -> (float) config.decayRateFor(key),
                 (value, key) -> statusFor(value, key, config));
     }
 
-    public static List<Component> buildReportLines(ServerPlayer target, DietData diet, String activeProfile, SyncNourishedConfigSnapshot snapshot) {
+    public static List<Component> buildReportLines(ServerPlayer target, TrackingData diet, String activeProfile, SyncNourishedConfigSnapshot snapshot) {
         return buildReportLines(target, diet, activeProfile, key -> (float) snapshot.decayRateFor(key),
                 (value, key) -> statusFor(value, key, snapshot));
     }
 
     private static List<Component> buildReportLines(
             ServerPlayer target,
-            DietData diet,
+            TrackingData diet,
             String activeProfile,
             java.util.function.Function<String, Float> decayRateFor,
             java.util.function.BiFunction<Float, String, NutrientStatus> statusFor) {
@@ -91,11 +91,11 @@ public final class NourishedCommandSource {
         lines.add(Component.literal("Active Profile: ").withStyle(ChatFormatting.GRAY)
                 .append(Component.literal(activeProfile).withStyle(ChatFormatting.LIGHT_PURPLE)));
         lines.add(Component.literal("Total Calories: ").withStyle(ChatFormatting.GRAY)
-                .append(Component.literal(String.format(java.util.Locale.ROOT, "%.0f", diet.calories)).withStyle(ChatFormatting.WHITE)));
+                .append(Component.literal(String.format(java.util.Locale.ROOT, "%.0f", diet.total)).withStyle(ChatFormatting.WHITE)));
         lines.add(Component.literal(" "));
 
-        for (String key : diet.nutrients.keySet()) {
-            float value = diet.nutrients.getOrDefault(key, 0f);
+        for (String key : diet.values.keySet()) {
+            float value = diet.values.getOrDefault(key, 0f);
             float decayRate = decayRateFor.apply(key);
             NutrientStatus status = statusFor.apply(value, key);
 
@@ -107,7 +107,7 @@ public final class NourishedCommandSource {
             lines.add(line);
         }
 
-        for (DietReportProvider provider : ReportProviderRegistry.getAll()) {
+        for (ReportProvider provider : ReportProviderRegistry.getAll()) {
             lines.add(Component.literal(" "));
             lines.add(provider.getSectionTitle().copy().withStyle(ChatFormatting.GOLD));
             List<Component> sectionLines = provider.generateReport(target);

@@ -1,8 +1,8 @@
 package dev.maire.nourished.modules.RawFood.rawInfo;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,14 +35,14 @@ public final class RawFoodResistanceResolver {
             return 1.0f;
         }
 
-        DietData diet = player.getData(DietAttachment.DIET.get());
+        TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
         RawFoodResistanceConfig config = RawFoodConfig.getResistanceConfig(severity);
 
         float totalResistance = 0.0f;
         for (Map.Entry<String, Float> entry : config.nutrientWeights().entrySet()) {
-            String nutrientKey = entry.getKey();
+            String valueKey = entry.getKey();
             float weight = entry.getValue();
-            float currentValue = diet.nutrients.getOrDefault(nutrientKey, 0f);
+            float currentValue = diet.values.getOrDefault(valueKey, 0f);
             if (currentValue >= config.resistanceThreshold()) {
                 totalResistance += weight;
             }

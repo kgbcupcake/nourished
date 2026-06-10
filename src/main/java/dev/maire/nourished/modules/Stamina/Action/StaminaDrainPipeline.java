@@ -1,6 +1,6 @@
 package dev.maire.nourished.modules.Stamina.Action;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.modules.Stamina.Core.StaminaAttachment;

@@ -1,22 +1,27 @@
 package dev.maire.nourished.core.nutrition;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.scan.CacheStats;
+import dev.marie.MariesLib.scan.ResolutionResult;
+import dev.marie.MariesLib.scan.RuntimeCascadeStage;
+import dev.marie.MariesLib.scan.RuntimeResolutionMerge;
+import dev.marie.MariesLib.scan.StageContext;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.diagnostics.NourishedUnknownFoodLogger;
-import dev.maire.nourished.core.nutrition.cache.BoundedLRU;
-import dev.maire.nourished.core.nutrition.cache.RunningAverage;
+import dev.marie.MariesLib.diagnostics.MarieUnknownItemLogger;
+import dev.marie.MariesLib.cache.BoundedLRU;
+import dev.marie.MariesLib.cache.RunningAverage;
 import dev.maire.nourished.core.nutrition.stages.CommunityTagStage;
 import dev.maire.nourished.core.nutrition.stages.HardFallbackStage;
 import dev.maire.nourished.core.nutrition.stages.KeywordSuffixStage;
 import dev.maire.nourished.core.nutrition.stages.NamespacePeerStage;
 import dev.maire.nourished.core.nutrition.stages.RecipeInheritanceStage;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
-import dev.maire.nourished.tooling.classification.ClassificationPipeline;
-import dev.maire.nourished.tooling.classification.ClassificationTrace;
-import dev.maire.nourished.tooling.classification.ClassificationTraceStep;
-import dev.maire.nourished.tooling.classification.TraceStepId;
-import dev.maire.nourished.tooling.classification.TraceStepStatus;
-import dev.maire.nourished.tooling.scanner.ScannerSpecRegistry;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.MariesLib.classification.ClassificationPipeline;
+import dev.marie.MariesLib.classification.ClassificationTrace;
+import dev.marie.MariesLib.classification.ClassificationTraceStep;
+import dev.marie.MariesLib.classification.TraceStepId;
+import dev.marie.MariesLib.classification.TraceStepStatus;
+import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
@@ -73,11 +78,11 @@ public final class RuntimeFoodResolver {
     public Map<String, Float> resolve(ItemStack stack, @Nullable RecipeManager recipeManager) {
         if (stack.isEmpty() || stack.getItem() == null) return Map.of();
 
-        List<String> nutrientKeys = NutrientRegistry.getKeys();
-        if (nutrientKeys.isEmpty()) return Map.of();
+        List<String> valueKeys = NutrientRegistry.getKeys();
+        if (valueKeys.isEmpty()) return Map.of();
 
         Item item = stack.getItem();
-        ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(item);
         if (itemId == null) return Map.of();
 
         FoodProperties food = item.components().get(DataComponents.FOOD);
@@ -86,21 +91,21 @@ public final class RuntimeFoodResolver {
         ResolutionResult cached = resolvedCache.get(itemId);
         if (cached != null) {
             cacheHits.incrementAndGet();
-            return cached.toNutrientMap();
+            return cached.toValueMap();
         }
 
         cacheMisses.incrementAndGet();
-        return resolveUncached(stack, itemId, recipeManager).toNutrientMap();
+        return resolveUncached(stack, itemId, recipeManager).toValueMap();
     }
 
     public @Nullable ResolutionResult resolveWithResult(ItemStack stack, @Nullable RecipeManager recipeManager) {
         if (stack.isEmpty() || stack.getItem() == null) return null;
 
-        List<String> nutrientKeys = NutrientRegistry.getKeys();
-        if (nutrientKeys.isEmpty()) return null;
+        List<String> valueKeys = NutrientRegistry.getKeys();
+        if (valueKeys.isEmpty()) return null;
 
         Item item = stack.getItem();
-        ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(item);
         if (itemId == null) return null;
 
         FoodProperties food = item.components().get(DataComponents.FOOD);
@@ -119,11 +124,11 @@ public final class RuntimeFoodResolver {
     public @Nullable ClassificationTrace resolveWithTrace(ItemStack stack, @Nullable RecipeManager recipeManager) {
         if (stack.isEmpty() || stack.getItem() == null) return null;
 
-        List<String> nutrientKeys = NutrientRegistry.getKeys();
-        if (nutrientKeys.isEmpty()) return null;
+        List<String> valueKeys = NutrientRegistry.getKeys();
+        if (valueKeys.isEmpty()) return null;
 
         Item item = stack.getItem();
-        ResourceLocation itemId = NourishedRegistryUtils.itemKey(item);
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(item);
         if (itemId == null) return null;
 
         FoodProperties food = item.components().get(DataComponents.FOOD);
@@ -176,7 +181,7 @@ public final class RuntimeFoodResolver {
         String dominant = null;
         float maxValue = 0f;
         float secondValue = 0f;
-        for (Map.Entry<String, Float> entry : result.nutrients().entrySet()) {
+        for (Map.Entry<String, Float> entry : result.values().entrySet()) {
             float v = entry.getValue();
             if (v > maxValue) {
                 secondValue = maxValue;
@@ -188,7 +193,7 @@ public final class RuntimeFoodResolver {
         }
 
         // SIGNAL_AGGREGATION — "mergedScores" key is what the formatter reads for Aggregation/Why Won sections
-        Map<String, Float> signalScores = result.rawScores().isEmpty() ? result.nutrients() : result.rawScores();
+        Map<String, Float> signalScores = result.rawScores().isEmpty() ? result.values() : result.rawScores();
         if (!signalScores.isEmpty()) {
             Map<String, Object> aggDetail = new LinkedHashMap<>();
             aggDetail.put("mergedScores", new LinkedHashMap<>(signalScores));
@@ -246,7 +251,7 @@ public final class RuntimeFoodResolver {
         }
 
         return ClassificationTrace.builder(itemId, ClassificationPipeline.RUNTIME)
-                .finalBars(result.nutrients())
+                .finalBars(result.values())
                 .dominant(dominant)
                 .cascadeStage(result.stage())
                 .tagClassified(false)
@@ -283,9 +288,9 @@ public final class RuntimeFoodResolver {
                     cacheDetail));
         }
 
-        List<String> nutrientKeys = NutrientRegistry.getKeys();
+        List<String> valueKeys = NutrientRegistry.getKeys();
         Holder<Item> holder = stack.getItemHolder();
-        Set<String> validKeys = Set.copyOf(nutrientKeys);
+        Set<String> validKeys = Set.copyOf(valueKeys);
         StageContext ctx = new StageContext(holder, itemId, recipeManager, namespacePeers, validKeys, traceOut);
 
         communityTagStage.resolve(itemId, ctx);
@@ -362,7 +367,7 @@ public final class RuntimeFoodResolver {
             if (recipeSupplement != null) {
                 Map<String, Object> recipeDetail = new LinkedHashMap<>();
                 recipeDetail.put("recipeFound", true);
-                recipeDetail.put("ingredientCount", recipeSupplement.nutrients().size());
+                recipeDetail.put("ingredientCount", recipeSupplement.values().size());
                 recipeDetail.put("timeout", false);
                 traceOut.add(new ClassificationTraceStep(
                         TraceStepId.RECIPE_LOOKUP,
@@ -391,15 +396,15 @@ public final class RuntimeFoodResolver {
                 Map<String, Object> mergeDetail = new LinkedHashMap<>();
                 List<String> keysAdded = new ArrayList<>();
                 if (recipeSupplement != null && primary != null) {
-                    for (String key : result.nutrients().keySet()) {
-                        if (!primary.nutrients().containsKey(key)) {
+                    for (String key : result.values().keySet()) {
+                        if (!primary.values().containsKey(key)) {
                             keysAdded.add(key);
                         }
                     }
                 }
                 mergeDetail.put("keysAdded", keysAdded);
                 if (recipeSupplement != null) {
-                    mergeDetail.put("recipeContribution", new LinkedHashMap<>(recipeSupplement.nutrients()));
+                    mergeDetail.put("recipeContribution", new LinkedHashMap<>(recipeSupplement.values()));
                 }
                 traceOut.add(new ClassificationTraceStep(
                         TraceStepId.PRIMARY_RECIPE_MERGE,
@@ -466,7 +471,7 @@ public final class RuntimeFoodResolver {
         }
 
         resolvedCache.put(itemId, result);
-        NourishedUnknownFoodLogger.log(result, itemId);
+        MarieUnknownItemLogger.log(result, itemId);
 
         if (result.stage() == RuntimeCascadeStage.COMMUNITY_TAG
                 || result.stage() == RuntimeCascadeStage.KEYWORD_SUFFIX
@@ -475,7 +480,7 @@ public final class RuntimeFoodResolver {
                 || result.stage() == RuntimeCascadeStage.KEYWORD_SUFFIX_RECIPE
                 || result.stage() == RuntimeCascadeStage.RECIPE_INHERITANCE) {
             namespacePeers.computeIfAbsent(itemId.getNamespace(), k -> new RunningAverage())
-                    .add(result.nutrients());
+                    .add(result.values());
         }
 
         Nourished.LOGGER.debug("[RuntimeFoodResolver] {} resolved via {} (confidence={}): {}",
