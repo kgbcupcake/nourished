@@ -79,15 +79,8 @@ repositories {
         }
     }
 }
-
 dependencies {
     compileOnly "dev.marie.MariesLib:marieslib:${marie_lib_version}"
-    jarJar(implementation("dev.marie.MariesLib:marieslib:${marie_lib_version}")) {
-        version {
-            strictly "[${marie_lib_version},)"
-            prefer marie_lib_version
-        }
-    }
     additionalRuntimeClasspath "dev.marie.MariesLib:marieslib:${marie_lib_version}"
 
     implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
