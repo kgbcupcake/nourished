@@ -35,7 +35,7 @@ Sugars and Dairy have no penalty effect by default these groups are tracked and 
 
 ## 🍽️ Eating at full hunger
 
-Vanilla hunger normally blocks eating at full hunger; Nourished still counts nutrition when your bar is full. Light foods — berries, fruits, and snacks — can be eaten for nutrients without restoring hunger. Heavy meals follow vanilla rules by default.
+Vanilla hunger normally blocks eating at full hunger; Nourished still counts nutrition when your bar is full. Light foods berries, fruits, and snacks can be eaten for nutrients without restoring hunger. Heavy meals follow vanilla rules by default.
 
 Both behaviors are configurable: `blockHeavyMeals` and `blockLightFood` toggles give server admins full control.
 
@@ -47,7 +47,7 @@ Diminishing returns apply - eating the same food repeatedly gives less credit ea
 
 ## The HUD
 
-The HUD is the heart of the mod. Five color-coded bars sit on screen while you play - you always know where you stand without opening a menu.
+The HUD is the heart of the mod. Five color-coded bars sit on screen while you play;you always know where you stand without opening a menu.
 
 ![HUD Edit Mode](Assets/nourished-MiniHud.gif)
 
@@ -130,7 +130,7 @@ Everything in Nourished can be driven by datapacks with zero Java code:
 
 Nutrients — define custom food groups
 Food classification — assign items to nutrient bars via item tags under data/nourished/tags/item/nutrients/
-Effects — add or replace buff/debuff rules via effects.json
+Effects add or replace buff/debuff rules via effects.json
 Food overrides — override specific item nutrition values via food_overrides.json
 Food values — adjust category multipliers via food_values.json
 Colors — customize HUD bar colors via colors.json
@@ -164,9 +164,12 @@ NourishedEvents.onNutrientChanged(event => {
 
 ## Requirements
 
-- Minecraft **1.21.1**
-- NeoForge **21.1.x**
-- Java **21**
+| | |
+| --- | --- |
+| **MarieLib** | **1.0.0+** on the classpath. From here on out, Nourished will be built against the latest version from [Modrinth](https://modrinth.com/mod/marieslib). |
+| **Minecraft** | **1.21.1** |
+| **NeoForge** | **21.1.x** |
+| **Java** | **21** |
 
 ---
 

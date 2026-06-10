@@ -6,12 +6,15 @@
 
 ### MarieLib Integration
 
+- Nourished now **requires MarieLib 1.0.0+** on the classpath. From here on out, Nourished will
+  be built against the latest version of MarieLib from Modrinth.
 - Nourished now builds against **MarieLib** (`marie_lib_version=1.0.0`) as an included Gradle
   composite project. Shared infrastructure - scanner pipeline, tracking/memory, datapack
   loaders, compat framework, registries, client widgets, and most public API types - lives
   in MarieLib; Nourished owns nutrition-specific gameplay, config, and datapacks.
 - Removed duplicate Nourished copies of API/registry/scanner/tooling classes that now come
-  from MarieLib. `NourishedAPI` and related entry points delegate to MarieLib types.- KubeJS bridge now registers through MarieLib's plugin surface.
+  from MarieLib. `NourishedAPI` and related entry points delegate to MarieLib types.
+- KubeJS bridge now registers through MarieLib's plugin surface.
 
 ### Config & Module Toggles
 
@@ -64,9 +67,10 @@
 
 ### Important Upgrade Notes
 
-If updating from 0.2.5-beta.5 or earlier or newer:
+If updating from 0.2.5-beta.4 or earlier:
 
-1. **Requires MarieLib 1.0.0+** on the classpath (bundled in official Nourished builds).
+1. **Requires MarieLib 1.0.0+** on the classpath. From here on out, Nourished will be built
+   against the latest version of MarieLib from Modrinth.
 2. Delete `config/nourished/scanner_spec.json` before first launch on this version so it
    regenerates with the new schema keys (same advice as prior scanner upgrades).
 3. Review `config/nourished-common.toml` - rename the four module keys above if you had

@@ -18,7 +18,7 @@ import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
-import dev.maire.nourished.core.reload.NourishedReloadPipeline;
+import dev.marie.MariesLib.handler.ReloadPipeline;
 import dev.marie.MariesLib.config.HudAnchor;
 import dev.marie.MariesLib.config.LockRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -2928,7 +2928,7 @@ public final class NourishedConfigScreen {
                 this.openDatapackFolderButton = null;
             }
             this.button = Button.builder(Component.translatable("config.nourished.reloadConfigs"), b -> {
-                        NourishedReloadPipeline.reloadAll();
+                        ReloadPipeline.reloadAll();
                         Minecraft mc = Minecraft.getInstance();
                         if (mc.player != null) {
                             mc.player.displayClientMessage(

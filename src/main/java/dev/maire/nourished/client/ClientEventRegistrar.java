@@ -4,6 +4,7 @@ import dev.marie.MariesLib.client.MarieClientCache;
 import dev.marie.MariesLib.client.MarieClientState;
 import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.client.NourishedClientMemoryConfig;
 // import dev.maire.nourished.modules.Stamina.HUD.StaminaHUD; // STAMINA_SHELVED
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
@@ -30,7 +31,7 @@ public final class ClientEventRegistrar {
     private static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         MarieClientState.reset();
         MarieClientCache.resetDiagnostics();
-        Nourished.resetClientMemoryDiagnostics();
+        NourishedClientMemoryConfig.resetClientMemoryDiagnostics();
     }
 
     private static void bootstrapCompatPlugins() {

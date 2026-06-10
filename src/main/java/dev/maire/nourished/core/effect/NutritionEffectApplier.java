@@ -2,7 +2,7 @@ package dev.maire.nourished.core.effect;
 
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.config.ModuleCache;
-import dev.maire.nourished.core.handler.ConfigReloadHandler;
+import dev.marie.MariesLib.handler.ReloadHandler;
 import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -31,7 +31,7 @@ public final class NutritionEffectApplier {
         if (!ModuleCache.enableEffects) {
             return;
         }
-        if (ConfigReloadHandler.isReloadInProgress()) {
+        if (ReloadHandler.isReloadInProgress()) {
             return;
         }
         Map<ResourceLocation, String> seenActiveEffects = new HashMap<>();

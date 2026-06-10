@@ -546,7 +546,7 @@ public class FoodNutritionRegistry {
      *
      * <p>The final bar map includes external classification merged in the same way as tooltip display,
      * so the trace reflects player-visible bar weights. Note: the server eat pipeline applies external
-     * to <em>deltas</em> only, so trace may differ from {@link dev.maire.nourished.core.handler.FoodNutrientPipeline}
+     * to <em>deltas</em> only, so trace may differ from {@link dev.marie.MariesLib.handler.SourceApplicationPipeline}
      * matched bars.</p>
      *
      * @param stack         the item to resolve

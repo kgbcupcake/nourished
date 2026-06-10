@@ -5,7 +5,7 @@ import dev.marie.MariesLib.config.ModuleCache;
 import dev.marie.MariesLib.tracking.TrackingAttachment;
 import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
-import dev.maire.nourished.core.handler.NutritionEatingHandler;
+import dev.marie.MariesLib.handler.SourceEatingHandler;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.marie.MariesLib.util.MarieEffectUtils;
@@ -58,7 +58,7 @@ public class RawFoodPenaltyHandler {
                 "[RawFoodPenaltyHandler] item={}, severity={}, resistance={}, penaltyScale={}",
                 itemId, severity, resistance, penaltyScale);
 
-        if (NutritionEatingHandler.isNutritionOnlyPipelinePending(player, stack)) {
+        if (SourceEatingHandler.isSourceOnlyPipelinePending(player, stack)) {
             Nourished.LOGGER.debug("[RawFoodPenaltyHandler] skipped {} because nutrition-only pipeline is pending", itemId);
             return;
         }

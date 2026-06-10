@@ -10,7 +10,7 @@ import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.reload.NourishedReloadPipeline;
+import dev.marie.MariesLib.handler.ReloadPipeline;
 import dev.marie.MariesLib.client.ImportExportManager;
 import dev.marie.MariesLib.color.ColorRegistry;
 import dev.marie.MariesLib.config.ModuleCache;
@@ -75,7 +75,7 @@ public final class NourishedImportExport {
             applyFoodValues(root.get(ImportExportManager.Section.SOURCE_VALUES.jsonKey()));
         }
         NourishedConfig.saveNow();
-        NourishedReloadPipeline.reloadAll();
+        ReloadPipeline.reloadAll();
         MarieValueColors.clearOverrides();
     }
 
