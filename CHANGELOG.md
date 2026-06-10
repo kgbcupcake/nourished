@@ -2,7 +2,79 @@
 
 <!-- markdownlint-disable MD013 -->
 
-## [ Nourished 0.2.5-beta.4 ]  2026-6-6
+## [ Nourished 0.2.5-beta.5 ] 2026-6-9
+
+### MarieLib Integration
+
+- Nourished now builds against **MarieLib** (`marie_lib_version=1.0.0`) as an included Gradle
+  composite project. Shared infrastructure - scanner pipeline, tracking/memory, datapack
+  loaders, compat framework, registries, client widgets, and most public API types - lives
+  in MarieLib; Nourished owns nutrition-specific gameplay, config, and datapacks.
+- Removed duplicate Nourished copies of API/registry/scanner/tooling classes that now come
+  from MarieLib. `NourishedAPI` and related entry points delegate to MarieLib types.- KubeJS bridge now registers through MarieLib's plugin surface.
+
+### Config & Module Toggles
+
+- Renamed module toggles in `nourished-common.toml` / defaults to match MarieLib
+  `ModuleCache` field names:
+- `enableNutritionEating` -> `enableSourceApplication`
+- `blockHeavyMeals` -> `enableBlockHeavySources`
+- `blockLightFood` -> `enableBlockLightSource`
+- `heavyMealNutritionThreshold` -> `heavySourcePropertyThreshold`
+- Added `NourishedConfig.syncModuleCache()` so module toggles are copied into MarieLib's
+  hot-path cache on config load, reload, save, and config-screen apply (fixes toggles
+  that previously had no runtime effect).
+- Bundled `common_defaults.json` and lang entries updated for the new key names. Defaults
+  loader still accepts legacy JSON keys for datapack overrides.
+
+### Scanner & Datapacks
+
+- Bundled `scanner_spec.json` now uses MarieLib schema keys (`source_property_heuristics`,
+  `source_properties`, `saturating_source`, `light_application`, `min_property_points`,
+  `max_property_points`). MarieLib still accepts legacy `food_*` / `*_meal` / `*_snack`
+  keys when reading older copies from `config/nourished/scanner_spec.json`.
+- `mod_compat.json` uses `heavySourcePropertyThreshold` (legacy key still accepted).
+
+### Compat Ownership
+
+- `compat_registry.json` now ships under `data/nourished/compat/` (Nourished-owned mod
+  compat catalog).
+- Mod-specific integration hooks moved from MarieLib into Nourished:
+- `dev.maire.nourished.compat.lso.LSOCompat`
+- `dev.maire.nourished.compat.peakstamina.PeakStaminaCompat`
+- `dev.maire.nourished.compat.spiceoflifeonion.SpiceOfLifeOnionCompat`
+
+### Bootstrap & Presets
+
+- Nourished registers `NourishedConfig` / `NourishedClientConfig` and their mod-bus
+  listeners before `MarieLibContext.register()`, so config is available when MarieLib
+  hooks are wired
+- Added `NourishedPresetRegistry` for Nourished-specific preset behavior: seeding built-in
+  Casual / Survival / Hardcore JSON from the jar, applying preset values to config, and
+  force-enabling all effects for the Hardcore preset
+- MarieLib `PresetRegistry` stub methods (`ensureBuiltInFilesOnDisk`, `applyPresetValues`,
+  `enableAllEffects`) now delegate through `MarieLibContext` instead of throwing at runtime
+
+### Fixed
+
+- Fixed mod-load crash (`UnsupportedOperationException: Implement via consuming mod`) when
+  `PresetRegistry.ensureBuiltInFilesOnDisk()` ran during registry lifecycle init
+- Updated client code for MarieLib API renames: `VALUE_COLORS` / `SOURCE_VALUES`
+  import-export sections, `getRecentSourceIds()`, and `onFullTrackingSynced()`
+
+### Important Upgrade Notes
+
+If updating from 0.2.5-beta.5 or earlier or newer:
+
+1. **Requires MarieLib 1.0.0+** on the classpath (bundled in official Nourished builds).
+2. Delete `config/nourished/scanner_spec.json` before first launch on this version so it
+   regenerates with the new schema keys (same advice as prior scanner upgrades).
+3. Review `config/nourished-common.toml` - rename the four module keys above if you had
+   custom values; unset keys fall back to defaults.
+4. After upgrading, run `/nourished reload` on servers or rejoin worlds to refresh cached
+   classification and config-driven module state.
+
+## [ Nourished 0.2.5-beta.4 ] 2026-6-6
 
 ### Multiplayer / Server Sync
 
@@ -50,66 +122,60 @@
 - Null snapshot no longer silently falls back — missed injection sites now produce a
   visible error rather than wrong gameplay values
 
-## [ Nourished 0.2.5-beta.3 ]  2026-6-3
-
+## [ Nourished 0.2.5-beta.3 ] 2026-6-3
 
 ### Diagnostics & Classification Tracing
 
-* Added `ClassificationTrace` infrastructure for recording food classification decisions.
-* Added `ClassificationPipeline` support to identify trace origin.
-* Added `ClassificationTraceStep` for step-by-step classification tracking.
-* Added `ClassificationTraceFormatter` for human-readable diagnostic reports.
+- Added `ClassificationTrace` infrastructure for recording food classification decisions.
+- Added `ClassificationPipeline` support to identify trace origin.
+- Added `ClassificationTraceStep` for step-by-step classification tracking.
+- Added `ClassificationTraceFormatter` for human-readable diagnostic reports.
 
 ### Runtime Trace Improvements
 
-* Added runtime `SIGNAL_AGGREGATION` tracing.
-* Added runtime `WINNER_SELECTION` tracing.
-* Added runtime `CONFIDENCE` tracing.
-* Added confidence and uncertainty propagation to runtime traces.
+- Added runtime `SIGNAL_AGGREGATION` tracing.
+- Added runtime `WINNER_SELECTION` tracing.
+- Added runtime `CONFIDENCE` tracing.
+- Added confidence and uncertainty propagation to runtime traces.
 
 ### Classification Explainability
 
-* Added archetype match evidence capture.
-* Added token demotion evidence capture.
-* Added negative keyword contribution tracing.
-* Improved held-item diagnostics and classification reasoning output.
+- Added archetype match evidence capture.
+- Added token demotion evidence capture.
+- Added negative keyword contribution tracing.
+- Improved held-item diagnostics and classification reasoning output.
 
 ### Recipe Diagnostics
 
 Added detailed recipe failure reporting:
 
-* `NO_RECIPE_FOUND`
-* `NULL_RECIPE_MANAGER`
-* `INGREDIENT_CAP_EXCEEDED`
-* `CONFIRMED_THRESHOLD_FAILED`
-* `NUTRIENTS_BELOW_THRESHOLD`
-* `RECIPE_EXCEPTION`
+- `NO_RECIPE_FOUND`
+- `NULL_RECIPE_MANAGER`
+- `INGREDIENT_CAP_EXCEEDED`
+- `CONFIRMED_THRESHOLD_FAILED`
+- `NUTRIENTS_BELOW_THRESHOLD`
+- `RECIPE_EXCEPTION`
 
 ### Fixes & Lifecycle Improvements
 
-* Consolidated config reload handling to ServerStartingEvent, replacing LevelEvent.Load to prevent          duplicate reload cycles during world initialization.
-* Removed legacy HUD threshold migration from NourishedClientConfig.
-* Improved datapack error logging for duplicate nutrients and malformed entries with clearer messages.
+- Consolidated config reload handling to ServerStartingEvent, replacing LevelEvent.Load to prevent duplicate reload cycles during world initialization.
+- Removed legacy HUD threshold migration from NourishedClientConfig.
+- Improved datapack error logging for duplicate nutrients and malformed entries with clearer messages.
 
 ### Notes
 
 This update significantly expands Nourished's diagnostic capabilities and lays the foundation for future self-diagnosing classification and validation tooling.
 
-## [ Nourished 0.2.5-beta.2 ]  Ui Fixes- 2026-6-2
+## [ Nourished 0.2.5-beta.2 ] Ui Fixes- 2026-6-2
 
 ### 0.2.5-beta.2
 
 - Fixed the Diet Screen being affected by Minecraft's Menu Background Blur setting. The UI Should now render sharply regardless of your blur setting, with the world still visible behind the panel.
-Thanks To https://github.com/kgbcupcake/nourished/pull/2
-![Main-Gui](https://cdn.modrinth.com/data/cached_images/583dd8a2f4d4e8bf5c7501c0565ef12aa1986fee_0.webp)
-![Blur Setting](https://cdn.modrinth.com/data/cached_images/39c00c193c7890a769af63b294672640586e6892.png)
+  ![Thanks-To](https://github.com/kgbcupcake/nourished/pull/2)
+  ![Main-Gui](https://cdn.modrinth.com/data/cached_images/583dd8a2f4d4e8bf5c7501c0565ef12aa1986fee_0.webp)
+  ![Blur Setting](https://cdn.modrinth.com/data/cached_images/39c00c193c7890a769af63b294672640586e6892.png)
 
-
-
-
-
-
-## [ Nourished 0.2.5-beta.1 ]  Stability & API Patch - 2026-6-1
+## [ Nourished 0.2.5-beta.1 ] Stability & API Patch - 2026-6-1
 
 ## This update focuses on runtime stability, API safety, and synchronization reliability across the nutrition system. It also includes internal cleanup and clarifications to the current state of experimental systems.
 
@@ -143,13 +209,13 @@ Nutrition state updates now correctly:
 - datapack reload phases
 - Public query methods remain unchanged.
 
-##  Internal Cleanup
+## Internal Cleanup
 
 - Debug logging cleanup
 - Temporary debugging logic in RecipeInheritanceStage has been removed, including targeted diagnostic logs used during development.
 - Logging behavior has been restored to standard debug-level output only.
 
-##  System Status Notes
+## System Status Notes
 
 - The following systems are currently registered but not fully wired into gameplay logic:
 - Nutrient Synergies
@@ -157,7 +223,7 @@ Nutrition state updates now correctly:
 - Milestone Rewards
 - These systems are exposed through the API and available for integration, but are not yet active in the core eating/progression pipeline. They are planned for future updates.
 
-##  Compatibility
+## Compatibility
 
 - No changes to:
 - food classification behavior
@@ -173,7 +239,6 @@ Nutrition state updates now correctly:
 - internal stability and logging cleanliness
 - While also clarifying the current state of upcoming progression systems.
 
-
 ## [0.2.5-beta] - 2026-06-1
 
 ### Important Upgrade Notes
@@ -183,9 +248,10 @@ If updating from an earlier 0.2.x beta:
 1. Delete `config/nourished/scanner_spec.json` before launching the game.
 2. Load your world and run:
 
-  ```bash
-   /nourished invalidate_cache
-   ```
+```bash
+ /nourished invalidate_cache
+```
+
 3. Rejoin the world to rebuild cached nutrition data.
 
 Existing worlds may continue using outdated scanner data until these steps are completed.
@@ -194,20 +260,20 @@ These steps ensure recipe inheritance, nutrient tags, and scanner data are regen
 
 ### Added
 
-* Recipe inheritance now works client-side, allowing composite foods to display accurate multi-nutrient tooltips without requiring server-side lookups.
-* Single-ingredient transformation recipes now inherit nutritional categories correctly (e.g. bread → bread slice, raw meat → cooked meat, apple → apple mash).
+- Recipe inheritance now works client-side, allowing composite foods to display accurate multi-nutrient tooltips without requiring server-side lookups.
+- Single-ingredient transformation recipes now inherit nutritional categories correctly (e.g. bread → bread slice, raw meat → cooked meat, apple → apple mash).
 
 ### Fixed
 
-* Pam's HarvestCraft mixing bowl recipes and other custom recipe types are now discovered by the inheritance pipeline. Previously, only crafting and smelting recipes were supported.
-* Pam's cooking containers (bakeware, cutting board, pot, saucepan, mixing bowl, skillet, juicer, grinder) and Croptopia cooking tools (frying pan, cooking pot, food press, knife) are no longer treated as nutritional ingredients during recipe inheritance.
-* Non-food items such as salt, oils, spices, flavorings, yeast, water bottles, and alchemical ingredients are now ignored during inheritance instead of lowering confidence counts.
-* Fruits such as berries and raspberries no longer incorrectly classify as raw foods.
+- Pam's HarvestCraft mixing bowl recipes and other custom recipe types are now discovered by the inheritance pipeline. Previously, only crafting and smelting recipes were supported.
+- Pam's cooking containers (bakeware, cutting board, pot, saucepan, mixing bowl, skillet, juicer, grinder) and Croptopia cooking tools (frying pan, cooking pot, food press, knife) are no longer treated as nutritional ingredients during recipe inheritance.
+- Non-food items such as salt, oils, spices, flavorings, yeast, water bottles, and alchemical ingredients are now ignored during inheritance instead of lowering confidence counts.
+- Fruits such as berries and raspberries no longer incorrectly classify as raw foods.
 
 ### Compatibility
 
-* Greatly expanded nutrient tag coverage across Pam's HarvestCraft 2 (Crops, Trees, Food Core, Food Extended), Croptopia, Create: Food, Farmer's Delight, Wilder Nature, Undergarden Delight, and additional food mods.
-* Hundreds of composite foods now inherit and display more accurate multi-nutrient profiles.
+- Greatly expanded nutrient tag coverage across Pam's HarvestCraft 2 (Crops, Trees, Food Core, Food Extended), Croptopia, Create: Food, Farmer's Delight, Wilder Nature, Undergarden Delight, and additional food mods.
+- Hundreds of composite foods now inherit and display more accurate multi-nutrient profiles.
 
 ## [0.2.4-beta] - 2026-05-31
 
@@ -231,7 +297,7 @@ These steps ensure recipe inheritance, nutrient tags, and scanner data are regen
 ### Added
 
 - Multi-nutrient recipe inheritance — complex dishes now contribute to multiple food groups based on their ingredients. Eating a steak sandwich gives Proteins, Grains, and Vegetables credit automatically.
-- HUD hide-above threshold — bars above a configurable percentage are hidden from the HUD. Set to 0.4 to only see bars that need attention. as requested. in #3 
+- HUD hide-above threshold — bars above a configurable percentage are hidden from the HUD. Set to 0.4 to only see bars that need attention. as requested. in #3
 - HUD show-below threshold — bars below a configurable percentage are always shown regardless of other visibility settings.
 - Show zero nutrients on HUD — toggle to show bars at 0% so you always know what you're missing.
 - HUD background opacity — configurable from fully transparent to fully opaque.
@@ -250,15 +316,14 @@ These steps ensure recipe inheritance, nutrient tags, and scanner data are regen
 
 - HUD vertical layout and zero-bar visibility were reading stale config values due to Cloth Config write-on-save behavior — fixed with live config application.
 
-
 ## [0.2.2-beta] - 2026-05-30
 
 ### Added
 
 - Configurable player join messages under `[general]` in `nourished-common.toml`:
-  - `showJoinMessage` — toggle welcome and notice chat lines on login (default: `true`)
-  - `joinMessageLine1` — welcome text after the NOURISHED header (default: `Welcome to the nutrition engine.`)
-  - `joinMessageLine2` — secondary notice line (default: `Beta NOTICE - features and balance may change.`)
+    - `showJoinMessage` — toggle welcome and notice chat lines on login (default: `true`)
+    - `joinMessageLine1` — welcome text after the NOURISHED header (default: `Welcome to the nutrition engine.`)
+    - `joinMessageLine2` — secondary notice line (default: `Beta NOTICE - features and balance may change.`)
 - Matching defaults in `data/nourished/config/common_defaults.json` for modpack and datapack overrides.
 - KubeJS 2101 plugin discovery via `kubejs.plugins.txt` plus a `META-INF/services` service entry as a backup path.
 - Manual KubeJS plugin bootstrap fallback when automatic discovery fails (for example under Architectury), invoked from mod initialization.
@@ -269,10 +334,10 @@ These steps ensure recipe inheritance, nutrient tags, and scanner data are regen
 ### Changed
 
 - **KubeJS (2101 migration):**
-  - Migrated runtime events to the KubeJS 2101 `EventGroup` / `EventHandler` interface pattern.
-  - Moved NeoForge subscription and event wrapping out of `NourishedKubeJSEvents` into `NourishedKubeJSEventBridge`.
-  - Event payload `player` fields are now typed as `ServerPlayer` instead of `Object`.
-- Join welcome and beta notice messages now read from config while keeping the existing styled chat formatting (◆ NOURISHED ◆ header, ⚠ notice line, and bold/light split when `joinMessageLine2` contains ` - `).
+    - Migrated runtime events to the KubeJS 2101 `EventGroup` / `EventHandler` interface pattern.
+    - Moved NeoForge subscription and event wrapping out of `NourishedKubeJSEvents` into `NourishedKubeJSEventBridge`.
+    - Event payload `player` fields are now typed as `ServerPlayer` instead of `Object`.
+- Join welcome and beta notice messages now read from config while keeping the existing styled chat formatting (◆ NOURISHED ◆ header, ⚠ notice line, and bold/light split when `joinMessageLine2` contains `-`).
 - Replaced hardcoded `"nourished"` mod id strings with `Nourished.MODID` across configs, registries, compat hooks, and tooling.
 - Registry reload pipeline hardened with read/write locks on `AbstractRegistry` and `ListRegistry` so reset → repopulate → freeze is atomic during `/reload`.
 - Datapack and config loaders now log warnings on swallowed `IOException`s instead of failing silently.
