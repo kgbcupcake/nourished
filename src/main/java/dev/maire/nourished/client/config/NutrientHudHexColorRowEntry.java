@@ -36,7 +36,7 @@ public final class NutrientHudHexColorRowEntry extends TooltipListEntry<Integer>
                 Component.translatable("config.nourished.hudColors.row.tooltip")
         }), false);
         this.key = valueKey;
-        this.nutrientLabel = Component.translatable("nourished.screen.diet.bar." + valueKey);
+        this.nutrientLabel = NutrientRegistry.getLabelComponent(valueKey);
         this.startArgb = ColorRegistry.getArgb(valueKey)
                 .orElseGet(() -> MarieValueColors.baseColorArgb(valueKey));
         this.initialHex = formatRgbHex(startArgb);

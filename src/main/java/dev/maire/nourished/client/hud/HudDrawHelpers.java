@@ -54,7 +54,7 @@ final class HudDrawHelpers {
     }
 
     static String nutrientLabel(String key) {
-        return Component.translatable(Nourished.MODID + ".screen.diet.bar." + key).getString();
+        return NutrientRegistry.getLabel(key);
     }
 
     static void drawRoundedBar(GuiGraphics g, int x, int y, int w, int h, float pct, int bgColor, int fillColor) {

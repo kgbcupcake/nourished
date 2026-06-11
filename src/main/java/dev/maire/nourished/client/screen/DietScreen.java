@@ -351,7 +351,7 @@ public class DietScreen extends Screen {
                     int suggestionColW = (bw - 4) / 2;
                     int colX = x + col * suggestionColW;
                     g.renderItem(new ItemStack(exampleItem), colX, y);
-                    String label = Component.translatable("nourished.screen.diet.bar." + categoryKey).getString();
+                    String label = NutrientRegistry.getLabel(categoryKey);
                     int labelMaxWidth = Math.max(0, suggestionColW - 20);
                     g.drawString(font,
                             font.plainSubstrByWidth(label, labelMaxWidth),
@@ -458,7 +458,7 @@ public class DietScreen extends Screen {
 
             // ── Nutrient name ─────────────────────────────────────────────
             g.drawString(font,
-                    Component.translatable("nourished.screen.diet.bar." + key),
+                    NutrientRegistry.getLabelComponent(key),
                     rx + 24, y + 2, COL_WHITE, false);
 
             // ── Segmented bar (BAR_H = 7) ─────────────────────────────────

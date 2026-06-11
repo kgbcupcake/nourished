@@ -7,8 +7,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.MarieAPI;
-import dev.marie.MariesLib.api.MarieAPIState;
 import dev.marie.MariesLib.api.ValueDefinition;
 import dev.marie.MariesLib.api.registry.ValueRegistry;
 import dev.marie.MariesLib.config.ModuleCache;
@@ -17,6 +15,7 @@ import dev.marie.MariesLib.registry.AbstractRegistry;
 import dev.marie.MariesLib.data.DatapackSchema;
 import dev.marie.MariesLib.runtime.SourceRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.neoforged.fml.loading.FMLPaths;
@@ -168,6 +167,37 @@ public class NutrientRegistry {
         return def != null ? def.tags() : List.of();
     }
 
+    /** Display name from nutrients.json, or the key if unknown. */
+    public static String getDisplayName(String key) {
+        NutrientDef def = INSTANCE.get(key);
+        if (def != null && def.displayName() != null && !def.displayName().isBlank()) {
+            return def.displayName();
+        }
+        return key;
+    }
+
+    /**
+     * Localized HUD label when a lang entry exists; otherwise {@link #getDisplayName(String)}.
+     */
+    public static String getLabel(String key) {
+        String translationKey = Nourished.MODID + ".screen.diet.bar." + key;
+        String translated = Component.translatable(translationKey).getString();
+        if (!translated.equals(translationKey)) {
+            return translated;
+        }
+        return getDisplayName(key);
+    }
+
+    /** Same resolution as {@link #getLabel(String)}, as a chat component. */
+    public static Component getLabelComponent(String key) {
+        String translationKey = Nourished.MODID + ".screen.diet.bar." + key;
+        String translated = Component.translatable(translationKey).getString();
+        if (!translated.equals(translationKey)) {
+            return Component.translatable(translationKey);
+        }
+        return Component.literal(getDisplayName(key));
+    }
+
     /** All registered nutrient definitions in order. */
     public static List<NutrientDef> getAll() {
         return INSTANCE.values();
@@ -231,24 +261,38 @@ public class NutrientRegistry {
             }
             parse(file);
             syncToValueRegistry();
-            registerClassificationsFromTags();
             Nourished.LOGGER.info("[NutrientRegistry] Loaded {} nutrients from {}", INSTANCE.size(), file);
         } catch (IOException e) {
             Nourished.LOGGER.error("[NutrientRegistry] Failed to load nutrients.json, using built-in defaults", e);
             loadDefaults();
             syncToValueRegistry();
-            registerClassificationsFromTags();
         }
     }
 
     /**
-     * Re-reads nutrients.json from disk and re-runs {@link FoodNutritionRegistry#init()}.
-     * Safe to call at runtime; dependent systems are updated immediately after.
+     * Re-reads nutrients.json from disk. Tag-based classifications are synced separately on
+     * {@link net.neoforged.neoforge.event.TagsUpdatedEvent} once item tags are bound.
      */
     public static void reload() {
         Nourished.LOGGER.info("[NutrientRegistry] Reloading nutrients.json");
-        SourceRegistry.clearExternalClassifications();
         load();
+    }
+
+    /**
+     * Registers nutrient tag matches into {@link dev.marie.MariesLib.runtime.SourceRegistry}.
+     * Must be called after item tags are bound (see {@code NourishedTagsHandler}).
+     */
+    public static void registerClassificationsFromTags() {
+        for (Item item : BuiltInRegistries.ITEM) {
+            Map<String, Float> scores = FoodNutritionRegistry.getNutrientTagScores(item);
+            if (scores.isEmpty()) {
+                continue;
+            }
+            ResourceLocation itemId = item.builtInRegistryHolder().key().location();
+            for (Map.Entry<String, Float> entry : scores.entrySet()) {
+                SourceRegistry.registerClassification(itemId, entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     private static void syncToValueRegistry() {
@@ -257,28 +301,6 @@ public class NutrientRegistry {
             ValueRegistry.register(def.toValueDefinition());
         }
         ValueRegistry.freezeInternal();
-    }
-
-    private static void registerClassificationsFromTags() {
-        Runnable register = () -> {
-            for (Item item : BuiltInRegistries.ITEM) {
-                Map<String, Float> scores = FoodNutritionRegistry.getNutrientTagScores(item);
-                if (scores.isEmpty()) {
-                    continue;
-                }
-                ResourceLocation itemId = item.builtInRegistryHolder().key().location();
-                for (Map.Entry<String, Float> entry : scores.entrySet()) {
-                    MarieAPI.registerSourceClassification(itemId, entry.getKey(), entry.getValue());
-                }
-            }
-        };
-        if (MarieAPIState.isRegistrationAllowed()) {
-            register.run();
-        } else {
-            try (MarieAPIState.DatapackReloadScope ignored = MarieAPIState.openForDatapackReload()) {
-                register.run();
-            }
-        }
     }
 
     // ── Internals ─────────────────────────────────────────────────────────────

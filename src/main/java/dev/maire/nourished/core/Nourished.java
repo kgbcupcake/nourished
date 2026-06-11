@@ -32,8 +32,9 @@ import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.handler.NourishedFoodTriggerHandler;
-import dev.maire.nourished.core.handler.NourishedServerHandler;
 import dev.maire.nourished.core.handler.NourishedGuideJoinHandler;
+import dev.maire.nourished.core.handler.NourishedServerHandler;
+import dev.maire.nourished.core.handler.NourishedTagsHandler;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthRecoveryHandler;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthTickHandler;
@@ -96,6 +97,7 @@ public class Nourished {
         }
         modEventBus.addListener(ModNetworking::register);
         NourishedFoodTriggerHandler.register(NeoForge.EVENT_BUS);
+        NeoForge.EVENT_BUS.addListener(NourishedTagsHandler::onTagsUpdated);
         NeoForge.EVENT_BUS.register(new NourishedServerHandler());
         NeoForge.EVENT_BUS.register(new RawFoodPenaltyHandler());
         NeoForge.EVENT_BUS.register(new GutHealthTickHandler());

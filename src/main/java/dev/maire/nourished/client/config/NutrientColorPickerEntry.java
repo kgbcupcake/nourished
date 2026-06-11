@@ -2,6 +2,7 @@ package dev.maire.nourished.client.config;
 
 import dev.marie.MariesLib.client.MarieValueColors;
 import dev.marie.MariesLib.color.ColorRegistry;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -44,7 +45,7 @@ public final class NutrientColorPickerEntry extends TooltipListEntry<Integer> {
 
     public NutrientColorPickerEntry(String valueKey) {
         super(
-                Component.translatable("nourished.screen.diet.bar." + valueKey),
+                NutrientRegistry.getLabelComponent(valueKey),
                 () -> Optional.of(new Component[]{Component.translatable("config.nourished.colors.picker.desc")}),
                 false);
         this.key = valueKey;

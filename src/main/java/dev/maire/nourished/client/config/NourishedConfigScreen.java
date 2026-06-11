@@ -1084,7 +1084,7 @@ public final class NourishedConfigScreen {
     }
 
     private static String prettyKey(String key) {
-        return Component.translatable("nourished.screen.diet.bar." + key).getString();
+        return NutrientRegistry.getLabel(key);
     }
 
     /** Returns -1 when no per-nutrient TOML override exists (use global default). */
