@@ -15,7 +15,9 @@ import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import net.minecraft.client.gui.screens.Screen;
 
 @ApiStatus.Internal
 public final class NourishedContextBuilder {
@@ -34,8 +36,8 @@ public final class NourishedContextBuilder {
                 .trackingDeltaSyncer(NourishedSyncHandler::syncDietDelta)
                 .syncOnJoin(NourishedSyncHandler::syncOnJoin)
                 .configScreenFactory(() -> NourishedConfigScreen.create(null))
-                .exportScreenFactory(parent -> new ExportConfigScreen(parent, null))
-                .importScreenFactory(parent -> new ImportConfigScreen(parent, null))
+                .exportScreenFactory(parent -> new ExportConfigScreen((Screen) parent, null))
+                .importScreenFactory(parent -> new ImportConfigScreen((Screen) parent, null))
                 .configExporter(NourishedImportExport::exportCurrentConfig)
                 .configImporter(json -> {
                     try {
@@ -54,6 +56,8 @@ public final class NourishedContextBuilder {
                 .sourceItemFilter(() -> NourishedItems::isNutritiousFood)
                 .valueIconProvider(NutrientRegistry::getIcon)
                 .sourceFamilyResolver(FoodFamilyResolver::resolve)
+                .valueTagScoresProvider(FoodNutritionRegistry::getNutrientTagScores)
+                .registrationDelegate(new NourishedRegistrationDelegate())
                 .runtimeResolverStages(NourishedResolverStages.STAGES)
                 .clientTrackingDataProvider(MarieClientCache::get)
                 .clientMemoryConfigProvider(NourishedClientMemoryConfig::get)
@@ -217,8 +221,8 @@ public final class NourishedContextBuilder {
                 .trackingDeltaSyncer((player, data) -> ModNetworking.syncDietDelta(player, data))
                 .syncOnJoin(NourishedSyncHandler::syncOnJoin)
                 .configScreenFactory(() -> NourishedConfigScreen.create(null))
-                .exportScreenFactory(parent -> new ExportConfigScreen(parent, null))
-                .importScreenFactory(parent -> new ImportConfigScreen(parent, null))
+                .exportScreenFactory(parent -> new ExportConfigScreen((Screen) parent, null))
+                .importScreenFactory(parent -> new ImportConfigScreen((Screen) parent, null))
                 .configExporter(NourishedImportExport::exportCurrentConfig)
                 .configImporter(json -> {
                     try {

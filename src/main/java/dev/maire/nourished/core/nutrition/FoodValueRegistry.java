@@ -42,6 +42,8 @@ import java.util.Objects;
 @ApiStatus.Internal
 public class FoodValueRegistry {
 
+    public record NutrientValues(float protein, float carbs, float fats, float vitamins, float hydration) {}
+
     public record FoodValueDef(String category, float protein, float carbs, float fats, float vitamins, float hydration) {}
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -62,10 +64,10 @@ public class FoodValueRegistry {
      * Returns NutrientValues scaled by the category's multipliers.
      * Falls back to an even split if the category is unknown.
      */
-    public static FoodNutritionRegistry.NutrientValues getValuesForCategory(String categoryKey, float totalPoints) {
+    public static NutrientValues getValuesForCategory(String categoryKey, float totalPoints) {
         FoodValueDef def = INSTANCE.get(categoryKey);
         if (def == null) {
-            return new FoodNutritionRegistry.NutrientValues(
+            return new NutrientValues(
                     totalPoints * DEFAULT_WEIGHTS[0],
                     totalPoints * DEFAULT_WEIGHTS[1],
                     totalPoints * DEFAULT_WEIGHTS[2],
@@ -73,7 +75,7 @@ public class FoodValueRegistry {
                     totalPoints * DEFAULT_WEIGHTS[4]
             );
         }
-        return new FoodNutritionRegistry.NutrientValues(
+        return new NutrientValues(
                 totalPoints * def.protein(),
                 totalPoints * def.carbs(),
                 totalPoints * def.fats(),

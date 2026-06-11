@@ -1,6 +1,7 @@
 package dev.maire.nourished.client.config;
 
 import dev.maire.nourished.core.effect.EffectRegistry;
+import dev.marie.MariesLib.client.ClientScreenFactories;
 import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
@@ -109,7 +110,7 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
 
     void openDeleteConfirm(int index, String ruleId) {
         Minecraft mc = Minecraft.getInstance();
-        var returnTo = getConfigScreen();
+        var returnTo = ClientScreenFactories.getConfigScreen();
         BooleanConsumer callback = yes -> {
             if (yes && index >= 0 && index < cards.size()) {
                 cards.remove(index);

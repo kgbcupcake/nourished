@@ -3,6 +3,7 @@ package dev.maire.nourished.modules.RawFood.rawInfo;
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.marie.MariesLib.scanner.RecipeInheritanceResolver;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -64,7 +65,7 @@ public final class CookedVersionResolver {
         }
 
         ItemStack cookedStack = new ItemStack(cookedItem);
-        Map<String, Float> cookedNutrients = FoodNutritionRegistry.resolveNutrientBars(cookedStack, false, (RecipeManager) null);
+        Map<String, Float> cookedNutrients = NutrientClassificationLookup.resolveBars(cookedItem);
 
         if (cookedNutrients.isEmpty()) {
             Nourished.LOGGER.debug("[CookedVersionResolver] {} → no cooked version found", rawItemId);

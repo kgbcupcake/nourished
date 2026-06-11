@@ -2,7 +2,7 @@ package dev.maire.nourished.modules.RawFood.rawInfo;
 
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.tags.NourishedItemTags;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
@@ -71,7 +71,7 @@ public final class RawFoodClassifier {
 
             RawSeverity fallbackSeverity = RawFoodConfig.classifyByTokens(itemPath, displayName);
             if (fallbackSeverity != RawSeverity.FINE) {
-                Map<String, Float> bars = FoodNutritionRegistry.resolveNutrientBars(stack, false, level);
+                Map<String, Float> bars = NutrientClassificationLookup.resolveBars(stack, level);
                 if (!bars.isEmpty()) {
                     Nourished.LOGGER.debug(
                             "[RawFoodClassifier] {} → {} (token+bar fallback, path='{}', displayName='{}')",

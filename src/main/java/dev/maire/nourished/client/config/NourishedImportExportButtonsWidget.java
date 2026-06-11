@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.config;
 
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.core.MarieLibContext;
+import dev.marie.MariesLib.client.ClientScreenFactories;
 import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
@@ -32,7 +32,7 @@ public final class NourishedImportExportButtonsWidget extends TooltipListEntry<O
                 false);
         Minecraft mc = Minecraft.getInstance();
         this.exportButton = Button.builder(Component.translatable(configKey("importExport.export")), b -> {
-                    Screen exportScreen = MarieLibContext.get().exportScreenFactory(getConfigScreen());
+                    Screen exportScreen = ClientScreenFactories.exportScreen(ClientScreenFactories.getConfigScreen());
                     if (exportScreen != null) {
                         mc.setScreen(exportScreen);
                     }
@@ -40,7 +40,7 @@ public final class NourishedImportExportButtonsWidget extends TooltipListEntry<O
                 .bounds(0, 0, BTN_W, BTN_H)
                 .build();
         this.importButton = Button.builder(Component.translatable(configKey("importExport.import")), b -> {
-                    Screen importScreen = MarieLibContext.get().importScreenFactory(getConfigScreen());
+                    Screen importScreen = ClientScreenFactories.importScreen(ClientScreenFactories.getConfigScreen());
                     if (importScreen != null) {
                         mc.setScreen(importScreen);
                     }

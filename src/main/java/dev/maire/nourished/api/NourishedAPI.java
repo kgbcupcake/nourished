@@ -217,7 +217,7 @@ public final class NourishedAPI {
             org.slf4j.LoggerFactory.getLogger(NourishedAPI.class).warn("[NourishedAPI] registerSourceClassification: item '{}' not found in BuiltInRegistries.ITEM", sourceId);
         }
         MarieRegistryUtils.requireValueKey(valueKey, "NourishedAPI.registerSourceClassification");
-        dev.maire.nourished.core.nutrition.FoodNutritionRegistry.registerClassification(sourceId, valueKey, amount);
+        dev.marie.MariesLib.api.MarieAPI.registerSourceClassification(sourceId, valueKey, amount);
     }
 
     /**

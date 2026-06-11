@@ -7,6 +7,8 @@ import com.mojang.logging.LogUtils;
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.api.MarieAPIVersion;
 import dev.marie.MariesLib.api.MarieAPIState;
+import dev.marie.MariesLib.data.MarieDataManager;
+import dev.maire.nourished.core.datapack.NourishedDatapackCallbacks;
 import dev.marie.MariesLib.registry.MarieApiRegistries;
 import dev.marie.MariesLib.registry.RegistryLifecycleManager;
 import dev.maire.nourished.core.context.NourishedContextBuilder;
@@ -30,6 +32,7 @@ import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.handler.NourishedFoodTriggerHandler;
+import dev.maire.nourished.core.handler.NourishedServerHandler;
 import dev.maire.nourished.core.handler.NourishedGuideJoinHandler;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthRecoveryHandler;
@@ -65,6 +68,7 @@ public class Nourished {
         NourishedLifecycle.register();
         MariesLibBootstrap.attach(Nourished.MODID, modEventBus);
         NourishedContextBuilder.registerSlim();
+        MarieDataManager.setCallbacks(new NourishedDatapackCallbacks());
         // NourishedContextBuilder.register(); // Phase 6: restore if slim bootstrap fails verification
 
         if (ModList.get().isLoaded("kubejs")) {
@@ -92,6 +96,7 @@ public class Nourished {
         }
         modEventBus.addListener(ModNetworking::register);
         NourishedFoodTriggerHandler.register(NeoForge.EVENT_BUS);
+        NeoForge.EVENT_BUS.register(new NourishedServerHandler());
         NeoForge.EVENT_BUS.register(new RawFoodPenaltyHandler());
         NeoForge.EVENT_BUS.register(new GutHealthTickHandler());
         NeoForge.EVENT_BUS.register(new GutHealthRecoveryHandler());

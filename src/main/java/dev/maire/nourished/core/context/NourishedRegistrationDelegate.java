@@ -5,7 +5,7 @@ import dev.marie.MariesLib.api.ThresholdEffect;
 import dev.marie.MariesLib.api.ValueDefinition;
 import dev.marie.MariesLib.core.MarieLibRegistrationDelegate;
 import dev.maire.nourished.core.effect.EffectRegistry;
-import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.marie.MariesLib.runtime.SourceRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +30,6 @@ final class NourishedRegistrationDelegate implements MarieLibRegistrationDelegat
 
     @Override
     public void registerSourceClassification(ResourceLocation sourceId, String valueKey, float amount) {
-        FoodNutritionRegistry.registerClassification(sourceId, valueKey, amount);
+        SourceRegistry.registerClassification(sourceId, valueKey, amount);
     }
 }

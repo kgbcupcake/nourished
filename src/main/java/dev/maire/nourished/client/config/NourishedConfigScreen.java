@@ -12,6 +12,7 @@ import dev.marie.MariesLib.compat.ModCompat;
 import dev.marie.MariesLib.color.ColorRegistry;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -1939,7 +1940,7 @@ public final class NourishedConfigScreen {
                         continue;
                     }
                     totalFood++;
-                    Map<String, Float> bars = FoodNutritionRegistry.resolveNutrientBars(stack, false, Minecraft.getInstance().level);
+                    Map<String, Float> bars = NutrientClassificationLookup.resolveBars(stack, Minecraft.getInstance().level);
                     if (bars != null && !bars.isEmpty()) {
                         classified++;
                     }

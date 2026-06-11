@@ -7,13 +7,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.api.MarieAPI;
+import dev.marie.MariesLib.api.MarieAPIState;
 import dev.marie.MariesLib.api.ValueDefinition;
+import dev.marie.MariesLib.api.registry.ValueRegistry;
 import dev.marie.MariesLib.config.ModuleCache;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.MariesLib.registry.AbstractRegistry;
 import dev.marie.MariesLib.data.DatapackSchema;
+import dev.marie.MariesLib.runtime.SourceRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
@@ -83,6 +88,18 @@ public class NutrientRegistry {
                     tags,
                     true
             );
+        }
+
+        public ValueDefinition toValueDefinition() {
+            return ValueDefinition.builder(key)
+                    .displayName(displayName)
+                    .color(color)
+                    .defaultDecayRate(defaultDecayRate)
+                    .criticalThreshold(criticalThreshold)
+                    .lowThreshold(lowThreshold)
+                    .excessThreshold(excessThreshold)
+                    .beneficial(beneficial)
+                    .build();
         }
     }
 
@@ -213,10 +230,14 @@ public class NutrientRegistry {
                 validateSchema(file, arr);
             }
             parse(file);
+            syncToValueRegistry();
+            registerClassificationsFromTags();
             Nourished.LOGGER.info("[NutrientRegistry] Loaded {} nutrients from {}", INSTANCE.size(), file);
         } catch (IOException e) {
             Nourished.LOGGER.error("[NutrientRegistry] Failed to load nutrients.json, using built-in defaults", e);
             loadDefaults();
+            syncToValueRegistry();
+            registerClassificationsFromTags();
         }
     }
 
@@ -226,8 +247,38 @@ public class NutrientRegistry {
      */
     public static void reload() {
         Nourished.LOGGER.info("[NutrientRegistry] Reloading nutrients.json");
+        SourceRegistry.clearExternalClassifications();
         load();
-        FoodNutritionRegistry.init();
+    }
+
+    private static void syncToValueRegistry() {
+        ValueRegistry.resetInternal();
+        for (NutrientDef def : getAll()) {
+            ValueRegistry.register(def.toValueDefinition());
+        }
+        ValueRegistry.freezeInternal();
+    }
+
+    private static void registerClassificationsFromTags() {
+        Runnable register = () -> {
+            for (Item item : BuiltInRegistries.ITEM) {
+                Map<String, Float> scores = FoodNutritionRegistry.getNutrientTagScores(item);
+                if (scores.isEmpty()) {
+                    continue;
+                }
+                ResourceLocation itemId = item.builtInRegistryHolder().key().location();
+                for (Map.Entry<String, Float> entry : scores.entrySet()) {
+                    MarieAPI.registerSourceClassification(itemId, entry.getKey(), entry.getValue());
+                }
+            }
+        };
+        if (MarieAPIState.isRegistrationAllowed()) {
+            register.run();
+        } else {
+            try (MarieAPIState.DatapackReloadScope ignored = MarieAPIState.openForDatapackReload()) {
+                register.run();
+            }
+        }
     }
 
     // ── Internals ─────────────────────────────────────────────────────────────

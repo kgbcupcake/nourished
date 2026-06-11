@@ -1,6 +1,7 @@
 package dev.maire.nourished.core.nutrition;
 
 import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.runtime.SourceRegistry;
 import dev.marie.MariesLib.scanner.ClassificationResult;
 import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
 import net.minecraft.core.component.DataComponents;
@@ -44,7 +45,7 @@ public final class ClassifiedSourceCollector {
                 continue;
             }
 
-            Map<String, Float> external = FoodNutritionRegistry.getExternalClassification(itemId);
+            Map<String, Float> external = SourceRegistry.getExternalClassification(itemId);
             if (external != null && !external.isEmpty()) {
                 out.add(toClassificationResult(itemId, Map.copyOf(external), false));
             }

@@ -7,6 +7,7 @@ import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.marie.MariesLib.util.MarieEffectUtils;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
@@ -138,7 +139,7 @@ public class RawFoodPenaltyHandler {
     }
 
     private static void applyNutrientPenalty(ServerPlayer player, ItemStack stack, RawFoodTierDef tierDef, float penaltyScale) {
-        Map<String, Float> matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, false, player.level());
+        Map<String, Float> matchedBars = NutrientClassificationLookup.resolveBars(stack, player.level());
         String dominantKey = matchedBars.entrySet().stream()
                 .max(Comparator.comparingDouble(entry -> entry.getValue()))
                 .map(Map.Entry::getKey)

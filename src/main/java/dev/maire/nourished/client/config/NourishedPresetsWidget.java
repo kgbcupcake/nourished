@@ -2,6 +2,7 @@ package dev.maire.nourished.client.config;
 
 import dev.maire.nourished.config.NourishedPresetRegistry;
 import dev.maire.nourished.core.Nourished;
+import dev.marie.MariesLib.client.ClientScreenFactories;
 import dev.marie.MariesLib.config.PresetRegistry.ParsedPreset;
 import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
@@ -59,7 +60,7 @@ public final class NourishedPresetsWidget extends TooltipListEntry<Object> {
 
     void openDeleteConfirm(ParsedPreset preset) {
         Minecraft mc = Minecraft.getInstance();
-        Screen returnTo = getConfigScreen();
+        Screen returnTo = ClientScreenFactories.getConfigScreen();
         var callback = (it.unimi.dsi.fastutil.booleans.BooleanConsumer) yes -> {
             if (yes) {
                 try {
