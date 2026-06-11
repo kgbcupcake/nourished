@@ -1,29 +1,45 @@
 package dev.maire.nourished.config;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.marie.MariesLib.config.PresetRegistry;
 import dev.marie.MariesLib.data.DatapackSchema;
+import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Stream;
 
 /**
- * Nourished-specific preset hooks wired into {@link dev.marie.MariesLib.core.MarieLibContext}.
+ * Nourished-specific preset storage under {@code config/nourished/presets/}.
  */
 public final class NourishedPresetRegistry {
 
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final List<String> BUILTIN_STEMS = List.of("casual", "survival", "hardcore");
+
     private NourishedPresetRegistry() {}
 
+    public static Path presetsDirectory() {
+        return FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("presets");
+    }
+
     public static void ensureBuiltInFilesOnDisk() {
-        Path dir = PresetRegistry.presetsDirectory();
+        Path dir = presetsDirectory();
         try {
             Files.createDirectories(dir);
-            for (String stem : PresetRegistry.BUILTIN_STEMS) {
+            for (String stem : BUILTIN_STEMS) {
                 Path target = dir.resolve(stem + ".json");
                 if (Files.exists(target)) {
                     continue;
@@ -31,15 +47,54 @@ public final class NourishedPresetRegistry {
                 String resource = "/data/" + Nourished.MODID + "/" + DatapackSchema.root() + "/presets/" + stem + ".json";
                 try (InputStream in = Nourished.class.getResourceAsStream(resource)) {
                     if (in == null) {
-                        Nourished.LOGGER.error("[PresetRegistry] Missing built-in resource {}", resource);
+                        Nourished.LOGGER.error("[NourishedPresetRegistry] Missing built-in resource {}", resource);
                         continue;
                     }
                     Files.copy(in, target);
-                    Nourished.LOGGER.info("[PresetRegistry] Wrote built-in preset {}", target.getFileName());
+                    Nourished.LOGGER.info("[NourishedPresetRegistry] Wrote built-in preset {}", target.getFileName());
                 }
             }
         } catch (IOException e) {
-            Nourished.LOGGER.error("[PresetRegistry] Failed to ensure built-in presets", e);
+            Nourished.LOGGER.error("[NourishedPresetRegistry] Failed to ensure built-in presets", e);
+        }
+    }
+
+    public static void reload() {
+        ensureBuiltInFilesOnDisk();
+    }
+
+    public static List<PresetRegistry.ParsedPreset> listPresets() {
+        Path dir = presetsDirectory();
+        List<PresetRegistry.ParsedPreset> out = new ArrayList<>();
+        if (!Files.isDirectory(dir)) {
+            return out;
+        }
+        try (Stream<Path> stream = Files.list(dir)) {
+            stream.filter(p -> p.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".json"))
+                    .forEach(p -> {
+                        try {
+                            PresetRegistry.ParsedPreset parsed = PresetRegistry.parseFile(p);
+                            if (parsed != null) {
+                                out.add(parsed);
+                            }
+                        } catch (Exception e) {
+                            Nourished.LOGGER.warn("[NourishedPresetRegistry] Skipping invalid preset {}", p, e);
+                        }
+                    });
+        } catch (IOException e) {
+            Nourished.LOGGER.error("[NourishedPresetRegistry] Failed to list presets", e);
+        }
+        out.sort(Comparator
+                .comparing((PresetRegistry.ParsedPreset p) -> p.locked())
+                .reversed()
+                .thenComparing(p -> p.name().toLowerCase(Locale.ROOT)));
+        return out;
+    }
+
+    public static void applyPreset(PresetRegistry.ParsedPreset preset) {
+        applyPresetValues(preset.values());
+        if ("hardcore".equals(preset.fileStem())) {
+            enableAllEffects();
         }
     }
 
@@ -53,6 +108,38 @@ public final class NourishedPresetRegistry {
         config.setEnableDecay(values.enableDecay());
         config.setEnableEffects(values.enableEffects());
         NourishedConfig.saveNow();
+        NourishedConfig.syncModuleCache();
+    }
+
+    public static void deletePreset(PresetRegistry.ParsedPreset preset) throws IOException {
+        PresetRegistry.deletePreset(preset);
+    }
+
+    public static Path saveUserPreset(
+            String displayName,
+            String description,
+            String author,
+            PresetRegistry.PresetValues values
+    ) throws IOException {
+        Path dir = presetsDirectory();
+        Files.createDirectories(dir);
+        String baseStem = PresetRegistry.sanitizeFileStem(displayName);
+        if (baseStem.isEmpty()) {
+            baseStem = "preset";
+        }
+        String stem = uniquifyStem(dir, baseStem);
+        Path file = dir.resolve(stem + ".json");
+        JsonObject root = new JsonObject();
+        root.addProperty("name", displayName.trim());
+        root.addProperty("description", description == null ? "" : description.trim());
+        root.addProperty("author", author == null ? "" : author.trim());
+        root.addProperty("locked", false);
+        root.add("values", values.toJsonObject());
+        try (Writer w = Files.newBufferedWriter(file)) {
+            GSON.toJson(root, w);
+        }
+        Nourished.LOGGER.info("[NourishedPresetRegistry] Saved preset to {}", file);
+        return file;
     }
 
     public static void enableAllEffects() {
@@ -76,8 +163,18 @@ public final class NourishedPresetRegistry {
         try {
             EffectRegistry.saveAll(updated);
         } catch (IOException e) {
-            Nourished.LOGGER.warn("[PresetRegistry] Failed to force-enable all effects for Hardcore preset", e);
+            Nourished.LOGGER.warn("[NourishedPresetRegistry] Failed to force-enable all effects for Hardcore preset", e);
         }
+    }
+
+    private static String uniquifyStem(Path dir, String base) throws IOException {
+        String candidate = base;
+        int n = 2;
+        while (Files.exists(dir.resolve(candidate + ".json"))) {
+            candidate = base + "_" + n;
+            n++;
+        }
+        return candidate;
     }
 
     private static double clamp(double value, double min, double max) {

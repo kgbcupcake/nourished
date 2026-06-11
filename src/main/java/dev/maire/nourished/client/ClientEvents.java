@@ -1,6 +1,7 @@
 package dev.maire.nourished.client;
 
 import dev.maire.nourished.client.screen.DietScreen;
+import dev.maire.nourished.core.Nourished;
 import dev.marie.MariesLib.compat.MarieTooltipHelper;
 import dev.marie.MariesLib.config.ModuleCache;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
@@ -11,7 +12,7 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
@@ -63,11 +64,17 @@ public final class ClientEvents {
         lines.addAll(nourishedLines);
     }
 
-    public static void onKeyInput(InputEvent.Key event) {
+    public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen != null) return;
-        if (NourishedKeys.OPEN_CONFIG.consumeClick()) {
-            mc.setScreen(NourishedConfigScreen.create(null));
+        if (mc.player == null || mc.screen != null) {
+            return;
+        }
+        while (NourishedKeys.OPEN_CONFIG.consumeClick()) {
+            try {
+                mc.setScreen(NourishedConfigScreen.create(null));
+            } catch (Exception e) {
+                Nourished.LOGGER.error("[Nourished] Failed to open config screen", e);
+            }
         }
     }
 }

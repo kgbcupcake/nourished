@@ -1,7 +1,7 @@
 package dev.maire.nourished.modules.Stamina.Handler;
 
 import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.maire.nourished.config.NourishedModuleCache;
 import dev.maire.nourished.modules.Stamina.Action.StaminaActionType;
 import dev.maire.nourished.modules.Stamina.Action.StaminaDrainPipeline;
 import dev.maire.nourished.modules.Stamina.Core.StaminaConfig;
@@ -16,7 +16,7 @@ public class StaminaCombatHandler {
     @SubscribeEvent
     public void onAttack(AttackEntityEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!ModuleCache.enableStamina) return;
+        if (!NourishedModuleCache.enableStamina) return;
         StaminaDrainPipeline.apply(player, StaminaActionType.ATTACK);
     }
 
@@ -24,7 +24,7 @@ public class StaminaCombatHandler {
     @SubscribeEvent
     public void onTakeDamage(LivingDamageEvent.Pre event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!ModuleCache.enableStamina) return;
+        if (!NourishedModuleCache.enableStamina) return;
         if (!StaminaConfig.enableTakeDamage()) return;
 
         float cost = StaminaConfig.takeDamageCost() * Math.min(event.getNewDamage(), 10f);

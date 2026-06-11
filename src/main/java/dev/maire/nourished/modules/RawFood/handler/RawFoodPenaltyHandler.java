@@ -1,11 +1,10 @@
 package dev.maire.nourished.modules.RawFood.handler;
 
 import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.maire.nourished.config.NourishedModuleCache;
 import dev.marie.MariesLib.tracking.TrackingAttachment;
 import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
-import dev.marie.MariesLib.handler.SourceEatingHandler;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.marie.MariesLib.util.MarieEffectUtils;
@@ -47,7 +46,7 @@ public class RawFoodPenaltyHandler {
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
-        if (!ModuleCache.enableRawSourcePenalty) return;
+        if (!NourishedModuleCache.enableRawSourcePenalty) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         ItemStack stack = event.getItem();
         ResourceLocation itemId = MarieRegistryUtils.itemKey(stack);
@@ -58,10 +57,6 @@ public class RawFoodPenaltyHandler {
                 "[RawFoodPenaltyHandler] item={}, severity={}, resistance={}, penaltyScale={}",
                 itemId, severity, resistance, penaltyScale);
 
-        if (SourceEatingHandler.isSourceOnlyPipelinePending(player, stack)) {
-            Nourished.LOGGER.debug("[RawFoodPenaltyHandler] skipped {} because nutrition-only pipeline is pending", itemId);
-            return;
-        }
         if (FoodNutritionRegistry.foodPropertiesForNutrition(stack, player) == null) {
             return;
         }

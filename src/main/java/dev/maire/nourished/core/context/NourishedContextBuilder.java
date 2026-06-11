@@ -2,13 +2,8 @@ package dev.maire.nourished.core.context;
 
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.client.MarieClientCache;
-import dev.marie.MariesLib.client.MarieValueColors;
 import dev.marie.MariesLib.config.ModuleCache;
 import dev.marie.MariesLib.core.MarieLibContext;
-import dev.marie.MariesLib.runtime.RuntimeResolver;
-import dev.marie.MariesLib.runtime.SourceOverrideRegistry;
-import dev.marie.MariesLib.scan.ResolutionStageHandler;
-import dev.marie.MariesLib.tracking.TrackingMemoryConfig;
 import dev.maire.nourished.client.NourishedClientMemoryConfig;
 import dev.maire.nourished.client.config.ExportConfigScreen;
 import dev.maire.nourished.client.config.ImportConfigScreen;
@@ -17,36 +12,79 @@ import dev.maire.nourished.client.config.NourishedImportExport;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.NourishedPresetRegistry;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
-import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
-import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
-import dev.maire.nourished.core.nutrition.ClassifiedSourceCollector;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
-import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
-import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
-import dev.maire.nourished.core.nutrition.NourishedStemmerData;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.nutrition.NutrientResolutionTrace;
-import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
-import dev.marie.MariesLib.data.SchemaDefinition;
-import dev.maire.nourished.core.nutrition.stages.CommunityTagStage;
-import dev.maire.nourished.core.nutrition.stages.HardFallbackStage;
-import dev.maire.nourished.core.nutrition.stages.KeywordSuffixStage;
-import dev.maire.nourished.core.nutrition.stages.NamespacePeerStage;
-import dev.maire.nourished.core.nutrition.stages.RecipeInheritanceStage;
-import dev.maire.nourished.core.reload.NourishedReloadHelper;
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.food.FoodProperties;
 
 @ApiStatus.Internal
 public final class NourishedContextBuilder {
 
     private NourishedContextBuilder() {}
 
+    public static void registerSlim() {
+        MarieLibContext.register(MarieLibContext.builder(Nourished.MODID)
+                .dataProvider(NourishedPlayerDataProvider.INSTANCE)
+                .effectApplier((player, data) -> {
+                    if (ModuleCache.enableEffects) {
+                        NutritionEffectApplier.apply(player, data);
+                    }
+                })
+                .effectClearer(NutritionEffectApplier::clearAll)
+                .trackingDeltaSyncer(NourishedSyncHandler::syncDietDelta)
+                .syncOnJoin(NourishedSyncHandler::syncOnJoin)
+                .configScreenFactory(() -> NourishedConfigScreen.create(null))
+                .exportScreenFactory(parent -> new ExportConfigScreen(parent, null))
+                .importScreenFactory(parent -> new ImportConfigScreen(parent, null))
+                .configExporter(NourishedImportExport::exportCurrentConfig)
+                .configImporter(json -> {
+                    try {
+                        NourishedImportExport.applyImport(json);
+                    } catch (java.io.IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .currentConfigPresetValues(NourishedImportExport::presetValuesFromCurrentConfig)
+                .ensureBuiltInPresetsOnDisk(NourishedPresetRegistry::ensureBuiltInFilesOnDisk)
+                .applyPresetValues(NourishedPresetRegistry::applyPresetValues)
+                .showJoinMessage(() -> NourishedConfig.get().showJoinMessage())
+                .joinMessageLine1(NourishedJoinMessage::line1)
+                .joinMessageLine2(NourishedJoinMessage::line2)
+                .heavySourceBlocker(NourishedSourceRules::isHeavyBlocked)
+                .sourceItemFilter(() -> NourishedItems::isNutritiousFood)
+                .valueIconProvider(NutrientRegistry::getIcon)
+                .sourceFamilyResolver(FoodFamilyResolver::resolve)
+                .runtimeResolverStages(NourishedResolverStages.STAGES)
+                .clientTrackingDataProvider(MarieClientCache::get)
+                .clientMemoryConfigProvider(NourishedClientMemoryConfig::get)
+                .trackingMemoryConfigProvider(NourishedMemoryConfig::serverTrackingMemoryConfig)
+                .scannerConfidenceSpreadThreshold(
+                        () -> (float) NourishedConfig.get().scannerConfidenceSpreadThreshold())
+                .compositeRatioThreshold(NourishedConfig.get()::compositeRatioThreshold)
+                .scannerEnableRecipeInheritance(NourishedConfig.get()::scannerEnableRecipeInheritance)
+                .memoryWindowMinutes(() -> (long) NourishedConfig.get().memoryWindowMinutes())
+                .memoryWindowCount(NourishedConfig.get()::memoryWindowCount)
+                .streakWindowMs(() -> (long) NourishedConfig.get().streakWindowMs())
+                .streakWeight(() -> (float) NourishedConfig.get().streakWeight())
+                .debtThreshold(() -> (float) NourishedConfig.get().debtThreshold())
+                .debtDecayRate(() -> (float) NourishedConfig.get().debtDecayRate())
+                .diminishingSteepness(() -> (float) NourishedConfig.get().diminishingSteepness())
+                .diminishingMidpoint(() -> (float) NourishedConfig.get().diminishingMidpoint())
+                .debugMemoryLogging(NourishedConfig.get()::debugMemoryLogging)
+                .excessThreshold(() -> (float) NourishedConfig.get().excessThreshold())
+                .lowThreshold(() -> (float) NourishedConfig.get().lowThreshold())
+                .criticalThreshold(() -> (float) NourishedConfig.get().criticalThreshold())
+                .decayIntervalTicks(NourishedConfig.get()::decayIntervalTicks)
+                .multiValueInheritanceThreshold(
+                        () -> NourishedConfig.get().multiNutrientInheritanceThreshold())
+                .build());
+    }
+
+    /**
+     * Legacy bootstrap — block-commented until Phase 6 gameplay verification passes.
+     * Restore by uncommenting and switching {@link Nourished} back to {@code register()}.
+     */
+    /*
     public static void register() {
         CommunityTagStage communityTagStage = new CommunityTagStage();
         KeywordSuffixStage keywordSuffixStage = new KeywordSuffixStage();
@@ -83,10 +121,8 @@ public final class NourishedContextBuilder {
                 .valueColorProvider(MarieValueColors::baseColorArgb)
                 .valueIconProvider(NutrientRegistry::getIcon)
                 .sourceFamilyResolver(FoodFamilyResolver::resolve)
-                .isSourceResolvable(stack -> {
-                    FoodProperties food = stack.getItem().components().get(DataComponents.FOOD);
-                    return food != null && food.nutrition() > 0;
-                })
+                .isSourceResolvable(NourishedContextBuilder::isNutritiousFood)
+                .sourceItemFilter(() -> NourishedContextBuilder::isNutritiousFood)
                 .valueTagScoresProvider(item -> FoodNutritionRegistry.getNutrientTagScores(item))
                 .multiValueInheritanceThreshold(() -> NourishedConfig.get().multiNutrientInheritanceThreshold())
                 .runtimeResolverStages(new ResolutionStageHandler[]{
@@ -120,11 +156,19 @@ public final class NourishedContextBuilder {
                 })
                 .sourceValueResolver((stack, level) ->
                         FoodNutritionRegistry.resolveNutrientBars(stack, false, level))
-                .sourceDeltaResolver((stack, level, nutrition, saturation, bars) -> {
+                .sourceDeltaResolver((stack, level, payload, bars) -> {
                     FoodNutritionRegistry.DietDelta d =
-                            FoodNutritionRegistry.computeDietDelta(stack, level, nutrition, saturation, bars);
+                            FoodNutritionRegistry.computeDietDelta(
+                                    stack, level, (int) payload, 0f, bars);
                     return new MarieLibContext.SourceDelta(d.calories(), d.nutrients());
                 })
+                .heavySourceBlocker((player, trigger) -> {
+                    if (trigger.type() != ValueSourceTrigger.TriggerType.ITEM_CONSUMED)
+                        return false;
+                    return (int) trigger.payload() >=
+                            NourishedModuleCache.heavySourcePropertyThreshold;
+                })
+                .lightSourceBlocker((player, trigger) -> false)
                 .sourceOverrideLookup(itemId -> {
                     var ov = FoodOverrideRegistry.getOverride(itemId);
                     return ov.map(o -> new SourceOverrideRegistry.SourceOverride(
@@ -209,4 +253,5 @@ public final class NourishedContextBuilder {
                 ))
                 .build());
     }
+    */
 }

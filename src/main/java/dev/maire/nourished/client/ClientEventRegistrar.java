@@ -19,10 +19,10 @@ public final class ClientEventRegistrar {
         modEventBus.addListener(NourishedKeys::onRegisterKeyMappings);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onScreenInit);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onItemTooltip);
-        NeoForge.EVENT_BUS.addListener(ClientEvents::onKeyInput);
+        NeoForge.EVENT_BUS.addListener(ClientEvents::onClientTick);
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onRenderGuiPost);
         // NeoForge.EVENT_BUS.addListener(StaminaHUD::onRenderGuiPost); // STAMINA_SHELVED
-        NeoForge.EVENT_BUS.addListener(NourishedHUD::onKeyInput);
+        NeoForge.EVENT_BUS.addListener(NourishedHUD::onClientTick);
         NeoForge.EVENT_BUS.addListener(ClientEventRegistrar::onLogout);
         bootstrapCompatPlugins();
     }

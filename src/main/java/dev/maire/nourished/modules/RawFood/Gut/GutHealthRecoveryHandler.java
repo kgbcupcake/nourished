@@ -1,7 +1,7 @@
 package dev.maire.nourished.modules.RawFood.Gut;
 
 import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.maire.nourished.config.NourishedModuleCache;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
@@ -25,7 +25,7 @@ public class GutHealthRecoveryHandler {
 
     @SubscribeEvent
     public void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
-        if (!ModuleCache.enableGutHealth) return;
+        if (!NourishedModuleCache.enableGutHealth) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
         ItemStack stack = event.getItem();

@@ -1,7 +1,7 @@
 package dev.maire.nourished.modules.RawFood.Gut;
 
 import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.maire.nourished.config.NourishedModuleCache;
 import dev.marie.MariesLib.tracking.TrackingAttachment;
 import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.network.ModNetworking;
@@ -22,7 +22,7 @@ public class GutHealthTickHandler {
 
     @SubscribeEvent
     public void onPlayerTick(PlayerTickEvent.Post event) {
-        if (!ModuleCache.enableGutHealth) return;
+        if (!NourishedModuleCache.enableGutHealth) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
         int tickInterval = RawFoodConfig.gutTickInterval();

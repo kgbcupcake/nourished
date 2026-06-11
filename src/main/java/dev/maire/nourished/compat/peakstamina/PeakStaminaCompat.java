@@ -2,8 +2,10 @@ package dev.maire.nourished.compat.peakstamina;
 
 import dev.marie.MariesLib.api.MarieAPI;
 import dev.marie.MariesLib.api.MarieEvents;
-import dev.marie.MariesLib.config.ModuleCache;
-import dev.marie.MariesLib.core.MarieLibContext;
+import dev.maire.nourished.config.NourishedModuleCache;
+import dev.marie.MariesLib.api.ValueDefinition;
+import dev.marie.MariesLib.api.registry.ValueRegistry;
+import dev.marie.MariesLib.core.IMarieLibConfig;
 import dev.marie.MariesLib.core.MariesLib;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -21,7 +23,8 @@ import java.util.Objects;
 public final class PeakStaminaCompat {
 
     private static final String PEAK_STAMINA_MOD_ID = "peakstamina";
-    private static final ResourceLocation MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(MarieLibContext.get().modId(), "peak_stamina_value_modifier");
+    private static final ResourceLocation MODIFIER_ID =
+            ResourceLocation.fromNamespaceAndPath(IMarieLibConfig.get().modId(), "peak_stamina_value_modifier");
     private static final ResourceLocation STAMINA_REGEN_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peak_stamina", "stamina_regen");
     private static final ResourceLocation MAX_STAMINA_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peak_stamina", "max_stamina");
     private static final ResourceLocation STAMINA_USAGE_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath("peak_stamina", "stamina_usage");
@@ -53,13 +56,13 @@ public final class PeakStaminaCompat {
 
         double regenMultiplier = calculateRegenMultiplier(averageValueLevel);
         double maxStaminaMultiplier = calculateMaxStaminaMultiplier(averageValueLevel);
-        double staminaUsageMultiplier = ModuleCache.enablePSStaminaUsage
+        double staminaUsageMultiplier = NourishedModuleCache.enablePSStaminaUsage
                 ? calculateStaminaUsageMultiplier(averageValueLevel)
                 : 0.0d;
-        double penaltyDecayMultiplier = ModuleCache.enablePSPenaltyDecay
+        double penaltyDecayMultiplier = NourishedModuleCache.enablePSPenaltyDecay
                 ? calculatePenaltyDecayMultiplier(averageValueLevel)
                 : 0.0d;
-        double exhaustionDurationMultiplier = ModuleCache.enablePSExhaustionDuration
+        double exhaustionDurationMultiplier = NourishedModuleCache.enablePSExhaustionDuration
                 ? calculateExhaustionDurationMultiplier(averageValueLevel)
                 : 0.0d;
 
@@ -71,7 +74,7 @@ public final class PeakStaminaCompat {
     }
 
     private static float getAverageValueLevel(ServerPlayer player) {
-        List<String> valueKeys = MarieLibContext.get().valueKeys();
+        List<String> valueKeys = ValueRegistry.getAll().stream().map(ValueDefinition::getId).toList();
         if (valueKeys.isEmpty()) {
             return -1.0f;
         }

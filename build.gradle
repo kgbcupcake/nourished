@@ -52,6 +52,11 @@ neoForge {
         "${mod_id}" {
             sourceSet sourceSets.main
         }
+        if (findProject(':MarieLib') != null) {
+            marieslib {
+                sourceSet project(':MarieLib').sourceSets.main
+            }
+        }
     }
 }
 
@@ -80,8 +85,12 @@ repositories {
     }
 }
 dependencies {
-    compileOnly "dev.marie.MariesLib:marieslib:${marie_lib_version}"
-    additionalRuntimeClasspath "dev.marie.MariesLib:marieslib:${marie_lib_version}"
+    if (findProject(':MarieLib') != null) {
+        implementation project(':MarieLib')
+    } else {
+        compileOnly "dev.marie.MariesLib:marieslib:${marie_lib_version}"
+        additionalRuntimeClasspath "dev.marie.MariesLib:marieslib:${marie_lib_version}"
+    }
 
     implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
     compileOnly "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"

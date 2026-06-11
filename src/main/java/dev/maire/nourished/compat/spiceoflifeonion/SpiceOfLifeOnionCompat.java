@@ -1,6 +1,6 @@
 package dev.maire.nourished.compat.spiceoflifeonion;
 
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.maire.nourished.config.NourishedModuleCache;
 import dev.marie.MariesLib.core.MarieLibContext;
 import dev.marie.MariesLib.core.MariesLib;
 import net.minecraft.core.Holder;
@@ -57,10 +57,10 @@ public final class SpiceOfLifeOnionCompat {
         }
 
         double combined = 0.0d;
-        if (ModuleCache.enableSOLDiversityHealth) {
+        if (NourishedModuleCache.enableSOLDiversityHealth) {
             combined += diversityHealthMaxHealthModifier(normalized);
         }
-        if (ModuleCache.enableSOLDiversityPenalty) {
+        if (NourishedModuleCache.enableSOLDiversityPenalty) {
             combined += diversityPenaltyMaxHealthModifier(normalized);
         }
 

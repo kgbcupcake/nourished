@@ -2,9 +2,9 @@ package dev.maire.nourished.core.lifecycle;
 
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.color.ColorRegistry;
-import dev.marie.MariesLib.config.LockRegistry;
+import dev.maire.nourished.config.NourishedLockRegistry;
+import dev.maire.nourished.config.NourishedPresetRegistry;
 import dev.marie.MariesLib.config.ModCompatRegistry;
-import dev.marie.MariesLib.config.PresetRegistry;
 import dev.marie.MariesLib.registry.RegistryLifecycleManager;
 import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
 import dev.maire.nourished.core.effect.EffectRegistry;
@@ -46,10 +46,12 @@ public final class NourishedLifecycle {
         RegistryLifecycleManager.registerRegistry(
                 "ScannerSpecRegistry", ScannerSpecRegistry::load, ScannerSpecRegistry::reload, ScannerSpecRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
-                "LockRegistry", LockRegistry::load, LockRegistry::reload, LockRegistry::loadFromDatapack);
+                "NourishedLockRegistry", NourishedLockRegistry::load, NourishedLockRegistry::reload,
+                NourishedLockRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
                 "ModCompatRegistry", ModCompatRegistry::load, () -> {});
         RegistryLifecycleManager.registerRegistry(
-                "PresetRegistry", PresetRegistry::ensureBuiltInFilesOnDisk, PresetRegistry::reload);
+                "NourishedPresetRegistry", NourishedPresetRegistry::ensureBuiltInFilesOnDisk,
+                NourishedPresetRegistry::reload);
     }
 }

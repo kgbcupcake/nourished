@@ -387,7 +387,7 @@ public final class NourishedConfig {
         ModuleCache.enableSourceApplication = c.isModuleEnabled("enableSourceApplication");
         ModuleCache.enableBlockHeavySources = c.isModuleEnabled("enableBlockHeavySources");
         ModuleCache.enableBlockLightSource = c.isModuleEnabled("enableBlockLightSource");
-        ModuleCache.heavySourcePropertyThreshold = c.heavySourcePropertyThreshold();
+        NourishedModuleCache.refresh(c);
         ModuleCache.enableEffects = c.enableEffects();
         ModuleCache.enableHUD = c.enableHUD();
         ModuleCache.enableToasts = c.enableToasts();
@@ -396,17 +396,6 @@ public final class NourishedConfig {
         ModuleCache.enableTrackingScreen = c.enableDietScreen();
         ModuleCache.enableCriticalToasts = c.enableCriticalToasts();
         ModuleCache.enableSleepBonus = c.enableSleepBonus();
-        ModuleCache.enableRawSourcePenalty = c.isModuleEnabled("enableRawFoodPenalty");
-        ModuleCache.enableGutHealth = c.isModuleEnabled("enableGutHealth");
-        ModuleCache.enableStamina = c.isModuleEnabled("enableStamina");
-        ModuleCache.enablePSStaminaUsage = c.isModuleEnabled("enablePSStaminaUsage");
-        ModuleCache.enablePSPenaltyDecay = c.isModuleEnabled("enablePSPenaltyDecay");
-        ModuleCache.enablePSExhaustionDuration = c.isModuleEnabled("enablePSExhaustionDuration");
-        ModuleCache.enableSOLDiversityHealth = c.isModuleEnabled("enableSOLDiversityHealth");
-        ModuleCache.enableSOLDiversityPenalty = c.isModuleEnabled("enableSOLDiversityPenalty");
-        ModuleCache.enableLSOThermalResistance = c.isModuleEnabled("enableLSOThermalResistance");
-        ModuleCache.enableLSOBrokenHeartResilience = c.isModuleEnabled("enableLSOBrokenHeartResilience");
-        ModuleCache.enableLSOThirstSaturation = c.isModuleEnabled("enableLSOThirstSaturation");
         ModuleCache.enableSynergies = c.isModuleEnabled("enableSynergies");
         ModuleCache.enableMilestones = c.isModuleEnabled("enableMilestones");
         ModuleCache.enableSeasonHooks = c.isModuleEnabled("enableSeasonHooks");

@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.marie.MariesLib.util.MarieItemTags;
+import dev.maire.nourished.core.tags.NourishedItemTags;
 import dev.marie.MariesLib.util.MarieJsonUtils;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.marie.MariesLib.util.MarieResourceLoader;
@@ -58,16 +58,16 @@ public class RawFoodConfig {
     private RawFoodConfig() {}
 
     public static RawSeverity classify(ItemStack stack) {
-        if (stack.is(MarieItemTags.rawSourceFine())) {
+        if (stack.is(NourishedItemTags.rawSourceFine())) {
             return RawSeverity.FINE;
         }
-        if (stack.is(MarieItemTags.rawSourceMild())) {
+        if (stack.is(NourishedItemTags.rawSourceMild())) {
             return RawSeverity.MILD;
         }
-        if (stack.is(MarieItemTags.rawSourceMedium())) {
+        if (stack.is(NourishedItemTags.rawSourceMedium())) {
             return RawSeverity.MEDIUM;
         }
-        if (stack.is(MarieItemTags.rawSourceSevere())) {
+        if (stack.is(NourishedItemTags.rawSourceSevere())) {
             return RawSeverity.SEVERE;
         }
 

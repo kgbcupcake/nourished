@@ -2,8 +2,10 @@ package dev.maire.nourished.compat.lso;
 
 import dev.marie.MariesLib.api.MarieAPI;
 import dev.marie.MariesLib.api.MarieEvents;
-import dev.marie.MariesLib.config.ModuleCache;
-import dev.marie.MariesLib.core.MarieLibContext;
+import dev.maire.nourished.config.NourishedModuleCache;
+import dev.marie.MariesLib.api.ValueDefinition;
+import dev.marie.MariesLib.api.registry.ValueRegistry;
+import dev.marie.MariesLib.core.IMarieLibConfig;
 import dev.marie.MariesLib.core.MariesLib;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -23,7 +25,8 @@ import java.util.Objects;
 public final class LSOCompat {
 
     private static final String LSO_MOD_ID = "legendarysurvivaloverhaul";
-    private static final ResourceLocation MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(MarieLibContext.get().modId(), "lso_value_modifier");
+    private static final ResourceLocation MODIFIER_ID =
+            ResourceLocation.fromNamespaceAndPath(IMarieLibConfig.get().modId(), "lso_value_modifier");
     private static final ResourceLocation THERMAL_RESISTANCE_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath(
             "legendarysurvivaloverhaul",
             "thermal_resistance"
@@ -66,10 +69,10 @@ public final class LSOCompat {
             return;
         }
 
-        double thermal = ModuleCache.enableLSOThermalResistance
+        double thermal = NourishedModuleCache.enableLSOThermalResistance
                 ? calculateThermalResistanceBonus(averageValueLevel)
                 : 0.0d;
-        double brokenHeart = ModuleCache.enableLSOBrokenHeartResilience
+        double brokenHeart = NourishedModuleCache.enableLSOBrokenHeartResilience
                 ? calculateBrokenHeartResilienceMultiplier(averageValueLevel)
                 : 0.0d;
 
@@ -86,7 +89,7 @@ public final class LSOCompat {
         if (!ModList.get().isLoaded(LSO_MOD_ID)) {
             return;
         }
-        if (!ModuleCache.enableLSOThirstSaturation) {
+        if (!NourishedModuleCache.enableLSOThirstSaturation) {
             return;
         }
         if (!(event.getPlayer() instanceof ServerPlayer serverPlayer)) {
@@ -99,7 +102,7 @@ public final class LSOCompat {
     }
 
     private static float getAverageValueLevel(ServerPlayer player) {
-        List<String> valueKeys = MarieLibContext.get().valueKeys();
+        List<String> valueKeys = ValueRegistry.getAll().stream().map(ValueDefinition::getId).toList();
         if (valueKeys.isEmpty()) {
             return -1.0f;
         }

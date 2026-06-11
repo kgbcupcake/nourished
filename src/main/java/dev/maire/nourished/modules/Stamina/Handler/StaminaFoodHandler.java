@@ -1,7 +1,7 @@
 package dev.maire.nourished.modules.Stamina.Handler;
 
 import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.maire.nourished.config.NourishedModuleCache;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
@@ -20,7 +20,7 @@ public class StaminaFoodHandler {
     @SubscribeEvent
     public void onEat(LivingEntityUseItemEvent.Finish event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!ModuleCache.enableStamina) return;
+        if (!NourishedModuleCache.enableStamina) return;
 
         FoodProperties food = FoodNutritionRegistry.foodPropertiesForNutrition(event.getItem(), player);
         if (food == null) {
@@ -41,7 +41,7 @@ public class StaminaFoodHandler {
     @SubscribeEvent
     public void onFish(ItemFishedEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!ModuleCache.enableStamina) return;
+        if (!NourishedModuleCache.enableStamina) return;
         StaminaDrainPipeline.apply(player, StaminaActionType.FISH);
     }
 }

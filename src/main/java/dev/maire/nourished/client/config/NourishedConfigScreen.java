@@ -6,8 +6,6 @@ import dev.maire.nourished.client.NourishedKeys;
 import dev.marie.MariesLib.client.MarieValueColors;
 import dev.maire.nourished.client.config.EffectBuilderWidget;
 import dev.maire.nourished.client.config.FoodScannerWidget;
-import dev.marie.MariesLib.client.ImportExportButtonsWidget;
-import dev.marie.MariesLib.client.PresetsWidget;
 import dev.marie.MariesLib.compat.CompatEntry;
 import dev.marie.MariesLib.compat.CompatReportEntry;
 import dev.marie.MariesLib.compat.ModCompat;
@@ -20,10 +18,10 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.marie.MariesLib.handler.ReloadPipeline;
 import dev.marie.MariesLib.config.HudAnchor;
-import dev.marie.MariesLib.config.LockRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.marie.MariesLib.config.PresetRegistry;
+import dev.maire.nourished.config.NourishedLockRegistry;
+import dev.maire.nourished.config.NourishedPresetRegistry;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawFoodTierDef;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
@@ -167,11 +165,11 @@ public final class NourishedConfigScreen {
     }
 
     private static void addPresetsCategory(ConfigBuilder builder, ConfigEntryBuilder eb, Screen reopenParent) {
-        PresetRegistry.ensureBuiltInFilesOnDisk();
+        NourishedPresetRegistry.ensureBuiltInFilesOnDisk();
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.presets"));
-        category.addEntry(new PresetsWidget(reopenParent));
+        category.addEntry(new NourishedPresetsWidget(reopenParent));
         addReloadButton(category, eb, false);
-        category.addEntry(new ImportExportButtonsWidget(reopenParent));
+        category.addEntry(new NourishedImportExportButtonsWidget(reopenParent));
     }
 
     private static boolean isMultiplayer() {
@@ -194,7 +192,7 @@ public final class NourishedConfigScreen {
         }
         for (ModuleMeta meta : metas) {
             String key = meta.key;
-            if (LockRegistry.isLocked(key)) {
+            if (NourishedLockRegistry.isLocked(key)) {
                 continue;
             }
             AtomicBoolean pending = new AtomicBoolean(config.isModuleEnabled(key));
@@ -206,7 +204,7 @@ public final class NourishedConfigScreen {
                     meta.group,
                     meta.dependsOn,
                     modulePending);
-            boolean editable = !(LockRegistry.isServerOnly(key) && isMultiplayer());
+            boolean editable = !(NourishedLockRegistry.isServerOnly(key) && isMultiplayer());
             if (!editable) {
                 entry.setEditable(false);
             } else {
@@ -234,7 +232,7 @@ public final class NourishedConfigScreen {
         addModuleGroupSubcategory(category, eb, "ui", groupedEntries.get("ui"));
         addModuleGroupSubcategory(category, eb, "other", groupedEntries.get("other"));
 
-        if (!LockRegistry.isLocked("heavySourcePropertyThreshold")) {
+        if (!NourishedLockRegistry.isLocked("heavySourcePropertyThreshold")) {
             category.addEntry(
                     eb.startIntSlider(
                                     Component.translatable("nourished.config.heavySourcePropertyThreshold"),
@@ -519,7 +517,7 @@ public final class NourishedConfigScreen {
     private static void addGeneralCategory(NourishedConfig config, ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.general"));
 
-        if (!LockRegistry.isLocked("decayRate")) {
+        if (!NourishedLockRegistry.isLocked("decayRate")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -534,7 +532,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("decayIntervalTicks")) {
+        if (!NourishedLockRegistry.isLocked("decayIntervalTicks")) {
             category.addEntry(
                     eb.startIntSlider(Component.translatable("config.nourished.decayIntervalTicks"), config.decayIntervalTicks(), 20, 72000)
                             .setDefaultValue(1200)
@@ -545,7 +543,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("startingNutrientValue")) {
+        if (!NourishedLockRegistry.isLocked("startingNutrientValue")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -560,7 +558,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("nutrientGainScale")) {
+        if (!NourishedLockRegistry.isLocked("nutrientGainScale")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -575,7 +573,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("nutrientGainPerBiteMax")) {
+        if (!NourishedLockRegistry.isLocked("nutrientGainPerBiteMax")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -600,7 +598,7 @@ public final class NourishedConfigScreen {
     ) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.thresholds"));
 
-        if (!LockRegistry.isLocked("criticalThreshold")) {
+        if (!NourishedLockRegistry.isLocked("criticalThreshold")) {
             AbstractConfigListEntry<?> entry = buildDoubleSlider(
                     eb,
                     Component.translatable("config.nourished.criticalThreshold"),
@@ -614,7 +612,7 @@ public final class NourishedConfigScreen {
             category.addEntry(entry);
         }
 
-        if (!LockRegistry.isLocked("lowThreshold")) {
+        if (!NourishedLockRegistry.isLocked("lowThreshold")) {
             AbstractConfigListEntry<?> entry = buildDoubleSlider(
                     eb,
                     Component.translatable("config.nourished.lowThreshold"),
@@ -628,7 +626,7 @@ public final class NourishedConfigScreen {
             category.addEntry(entry);
         }
 
-        if (!LockRegistry.isLocked("excessThreshold")) {
+        if (!NourishedLockRegistry.isLocked("excessThreshold")) {
             AbstractConfigListEntry<?> entry = buildDoubleSlider(
                     eb,
                     Component.translatable("config.nourished.excessThreshold"),
@@ -642,7 +640,7 @@ public final class NourishedConfigScreen {
             category.addEntry(entry);
         }
 
-        if (!LockRegistry.isLocked("bonusEffectThreshold")) {
+        if (!NourishedLockRegistry.isLocked("bonusEffectThreshold")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -657,7 +655,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("penaltyEffectThreshold")) {
+        if (!NourishedLockRegistry.isLocked("penaltyEffectThreshold")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -678,7 +676,7 @@ public final class NourishedConfigScreen {
     private static void addEffectsCategory(NourishedConfig config, ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.effects"));
 
-        if (!LockRegistry.isLocked("defaultEffectDurationTicks")) {
+        if (!NourishedLockRegistry.isLocked("defaultEffectDurationTicks")) {
             category.addEntry(
                     eb.startIntSlider(Component.translatable("config.nourished.defaultEffectDurationTicks"), config.defaultEffectDurationTicks(), 20, 72000)
                             .setDefaultValue(140)
@@ -847,10 +845,10 @@ public final class NourishedConfigScreen {
             Map<String, PendingOverride> decayOverrides,
             Map<String, PendingOverride> criticalOverrides
     ) {
-        ConfigCategory nutrients = builder.getOrCreateCategory(Component.translatable("config.nourished.category.values"));
+        ConfigCategory nutrients = builder.getOrCreateCategory(Component.translatable("config.nourished.category.nutrients"));
         for (String key : NutrientRegistry.getKeys()) {
-            double decayRaw = config.nutrientDecayRateOverrides().get(key).get();
-            double criticalRaw = config.nutrientCriticalThresholdOverrides().get(key).get();
+            double decayRaw = overrideRaw(config.nutrientDecayRateOverrides().get(key));
+            double criticalRaw = overrideRaw(config.nutrientCriticalThresholdOverrides().get(key));
 
             PendingOverride decay = new PendingOverride(decayRaw >= 0d, decayRaw >= 0d ? decayRaw : config.decayRate());
             PendingOverride critical = new PendingOverride(criticalRaw >= 0d, criticalRaw >= 0d ? criticalRaw : config.criticalThreshold());
@@ -939,7 +937,7 @@ public final class NourishedConfigScreen {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.advanced"));
 
         AtomicBoolean debugLogPending = modulePending.get("enableDebugLogging");
-        if (debugLogPending != null && !LockRegistry.isLocked("enableDebugLogging")) {
+        if (debugLogPending != null && !NourishedLockRegistry.isLocked("enableDebugLogging")) {
             var debugEntry = new ModuleToggleListEntry(
                     moduleToggleTitle("enableDebugLogging"),
                     moduleToggleDescription("enableDebugLogging"),
@@ -947,14 +945,14 @@ public final class NourishedConfigScreen {
                     "other",
                     null,
                     modulePending);
-            boolean editable = !(LockRegistry.isServerOnly("enableDebugLogging") && isMultiplayer());
+            boolean editable = !(NourishedLockRegistry.isServerOnly("enableDebugLogging") && isMultiplayer());
             if (!editable) {
                 debugEntry.setEditable(false);
             }
             category.addEntry(debugEntry);
         }
 
-        if (!LockRegistry.isLocked("calorieDisplayMax")) {
+        if (!NourishedLockRegistry.isLocked("calorieDisplayMax")) {
             category.addEntry(
                     eb.startIntSlider(Component.translatable("config.nourished.calorieDisplayMax"), config.calorieDisplayMax(), 100, 100000)
                             .setDefaultValue(2000)
@@ -971,7 +969,7 @@ public final class NourishedConfigScreen {
     private static void addScannerCategory(NourishedConfig config, ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.scanner"));
 
-        if (!LockRegistry.isLocked("scanner.enableRecipeInheritance")) {
+        if (!NourishedLockRegistry.isLocked("scanner.enableRecipeInheritance")) {
             category.addEntry(
                     eb.startBooleanToggle(
                                     Component.translatable("config.nourished.scanner.enableRecipeInheritance"),
@@ -984,7 +982,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("scanner.confidenceSpreadThreshold")) {
+        if (!NourishedLockRegistry.isLocked("scanner.confidenceSpreadThreshold")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -999,7 +997,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("scanner.multiNutrientInheritanceThreshold")) {
+        if (!NourishedLockRegistry.isLocked("scanner.multiNutrientInheritanceThreshold")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -1086,6 +1084,11 @@ public final class NourishedConfigScreen {
 
     private static String prettyKey(String key) {
         return Component.translatable("nourished.screen.diet.bar." + key).getString();
+    }
+
+    /** Returns -1 when no per-nutrient TOML override exists (use global default). */
+    private static double overrideRaw(ModConfigSpec.DoubleValue value) {
+        return value != null ? value.get() : -1.0d;
     }
 
     private static AbstractConfigListEntry buildDoubleSlider(
@@ -2082,10 +2085,10 @@ public final class NourishedConfigScreen {
 
         private boolean isToggleEditable(String modid, boolean code) {
             String key = "compat." + modid + "." + (code ? "enableCodeCompat" : "enableTagCompat");
-            if (LockRegistry.isLocked(key)) {
+            if (NourishedLockRegistry.isLocked(key)) {
                 return false;
             }
-            return !(LockRegistry.isServerOnly(key) && isMultiplayer()) && isEditable();
+            return !(NourishedLockRegistry.isServerOnly(key) && isMultiplayer()) && isEditable();
         }
 
         @Override

@@ -2,7 +2,7 @@ package dev.maire.nourished.modules.Stamina.HUD;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.maire.nourished.config.NourishedModuleCache;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.modules.Stamina.Core.StaminaSyncPayload;
 import net.minecraft.client.Minecraft;
@@ -63,7 +63,7 @@ public final class StaminaHUD {
     }
 
     public static void onRenderGuiPost(RenderGuiEvent.Post event) {
-        if (!ModuleCache.enableStamina) return;
+        if (!NourishedModuleCache.enableStamina) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen != null) return;
         LocalPlayer player = mc.player;

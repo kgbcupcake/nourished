@@ -260,6 +260,7 @@
   "config.nourished.confirm.resetHud": "Click again: Reset HUD",
   "config.nourished.confirm.resetOrder": "Click again: Reset order",
   "key.nourished.editHUD": "Edit HUD",
+  "key.nourished.openConfig": "Open Nourished Config",
   "key.categories.nourished": "Nourished",
   "config.nourished.nutrient.category": "%s Overrides",
   "config.nourished.nutrient.overrideDecay": "Override %s Decay Rate",

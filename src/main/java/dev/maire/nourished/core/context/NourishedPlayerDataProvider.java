@@ -4,7 +4,7 @@ import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.api.MemoryView;
 import dev.marie.MariesLib.api.ValueModifierEvent;
 import dev.marie.MariesLib.config.ModuleCache;
-import dev.marie.MariesLib.core.MarieLibPlayerDataProvider;
+import dev.marie.MariesLib.core.MarieLibDataProvider;
 import dev.marie.MariesLib.tracking.TrackingAttachment;
 import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.Nourished;
@@ -16,7 +16,9 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.NeoForge;
 
 @ApiStatus.Internal
-final class NourishedPlayerDataProvider implements MarieLibPlayerDataProvider {
+final class NourishedPlayerDataProvider implements MarieLibDataProvider {
+
+    static final NourishedPlayerDataProvider INSTANCE = new NourishedPlayerDataProvider();
 
     private static final ResourceLocation API_MODIFIER_SOURCE =
             ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "api");

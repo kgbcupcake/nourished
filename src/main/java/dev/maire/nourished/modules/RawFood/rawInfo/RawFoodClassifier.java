@@ -3,7 +3,7 @@ package dev.maire.nourished.modules.RawFood.rawInfo;
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
-import dev.marie.MariesLib.util.MarieItemTags;
+import dev.maire.nourished.core.tags.NourishedItemTags;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
@@ -45,19 +45,19 @@ public final class RawFoodClassifier {
             return cached;
         }
 
-        if (stack.is(MarieItemTags.rawSourceFine())) {
+        if (stack.is(NourishedItemTags.rawSourceFine())) {
             SEVERITY_CACHE.put(itemId, RawSeverity.FINE);
             return RawSeverity.FINE;
         }
-        if (stack.is(MarieItemTags.rawSourceMild())) {
+        if (stack.is(NourishedItemTags.rawSourceMild())) {
             SEVERITY_CACHE.put(itemId, RawSeverity.MILD);
             return RawSeverity.MILD;
         }
-        if (stack.is(MarieItemTags.rawSourceMedium())) {
+        if (stack.is(NourishedItemTags.rawSourceMedium())) {
             SEVERITY_CACHE.put(itemId, RawSeverity.MEDIUM);
             return RawSeverity.MEDIUM;
         }
-        if (stack.is(MarieItemTags.rawSourceSevere())) {
+        if (stack.is(NourishedItemTags.rawSourceSevere())) {
             SEVERITY_CACHE.put(itemId, RawSeverity.SEVERE);
             return RawSeverity.SEVERE;
         }

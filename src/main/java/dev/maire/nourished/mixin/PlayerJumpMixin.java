@@ -1,7 +1,7 @@
 package dev.maire.nourished.mixin;
 
 import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.maire.nourished.config.NourishedModuleCache;
 import dev.maire.nourished.modules.Stamina.Action.StaminaActionType;
 import dev.maire.nourished.modules.Stamina.Action.StaminaDrainPipeline;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,7 +20,7 @@ public abstract class PlayerJumpMixin {
     private void nourished$onJump(CallbackInfo ci) {
         Player player = (Player) (Object) this;
         if (!(player instanceof ServerPlayer serverPlayer)) return;
-        if (!ModuleCache.enableStamina) return;
+        if (!NourishedModuleCache.enableStamina) return;
         StaminaDrainPipeline.apply(serverPlayer, StaminaActionType.JUMP);
     }
 }

@@ -1,7 +1,7 @@
 package dev.maire.nourished.modules.Stamina.Handler;
 
 import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.maire.nourished.config.NourishedModuleCache;
 import dev.marie.MariesLib.tracking.TrackingAttachment;
 import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.network.ModNetworking;
@@ -22,7 +22,7 @@ public class StaminaTickHandler {
 
     @SubscribeEvent
     public void onPlayerTick(PlayerTickEvent.Post event) {
-        if (!ModuleCache.enableStamina) return;
+        if (!NourishedModuleCache.enableStamina) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
         int interval = StaminaConfig.regenDelay();

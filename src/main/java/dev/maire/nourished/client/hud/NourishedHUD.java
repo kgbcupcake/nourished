@@ -10,7 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -218,9 +218,9 @@ public final class NourishedHUD {
         }
     }
 
-    public static void onKeyInput(InputEvent.Key event) {
+    public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen != null) {
+        if (mc.player == null || mc.screen != null) {
             return;
         }
         if (!ModuleCache.enableHUD) {

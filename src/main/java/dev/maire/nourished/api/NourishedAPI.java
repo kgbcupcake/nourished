@@ -210,7 +210,9 @@ public final class NourishedAPI {
     public static void registerSourceClassification(ResourceLocation sourceId, String valueKey, float amount) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         dev.marie.MariesLib.util.MarieValidation.requireNonNullId(sourceId, "NourishedAPI.registerSourceClassification");
-        dev.marie.MariesLib.util.MarieValidation.requireFinite(amount, -10f, 10f, "NourishedAPI.registerSourceClassification.amount");
+        if (!Float.isFinite(amount))
+            throw new IllegalArgumentException(
+                    "NourishedAPI.registerSourceClassification.amount must be finite");
         if (!net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(sourceId)) {
             org.slf4j.LoggerFactory.getLogger(NourishedAPI.class).warn("[NourishedAPI] registerSourceClassification: item '{}' not found in BuiltInRegistries.ITEM", sourceId);
         }
