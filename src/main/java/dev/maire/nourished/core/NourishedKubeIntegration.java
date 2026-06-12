@@ -1,6 +1,7 @@
 package dev.maire.nourished.core;
 
 import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.api.ValueModifierContext;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.fml.ModList;
 
@@ -73,6 +74,20 @@ public final class NourishedKubeIntegration {
                 tier
         );
         return result instanceof Boolean cancelled && cancelled;
+    }
+
+    public static float fireNutrientModifier(ValueModifierContext ctx, float amount) {
+        if (!PRESENT) {
+            return amount;
+        }
+        Object result = invokeStatic(
+                EVENT_BRIDGE,
+                "fireNutrientModifier",
+                new Class<?>[] {ValueModifierContext.class, float.class},
+                ctx,
+                amount
+        );
+        return result instanceof Float value ? value : amount;
     }
 
     private static void invokeStatic(String className, String method) {

@@ -58,12 +58,32 @@
 - MarieLib `PresetRegistry` stub methods (`ensureBuiltInFilesOnDisk`, `applyPresetValues`,
   `enableAllEffects`) now delegate through `MarieLibContext` instead of throwing at runtime
 
+### KubeJS
+
+- Added dedicated `NourishedKubePlugin` with `kubejs.plugins.txt` and service-loader registration
+  for KubeJS 2101 discovery.
+- Added `NourishedEvents` server event group: `nutrientChanged`, `nutrientCritical`,
+  `nutrientExcess`, `sourceConsumed`, `gutHealthChanged`, `rawFoodPenalty`, `nutrientModifier`,
+  and `foodEaten`.
+- Added `NourishedKubeBindings` (`NourishedAPI` in scripts) with `registerNutrient`,
+  `getNutrientLevel`, `isNutrientCritical`, `getGutHealth`, and `getNutrientKeys`.
+- Added `NourishedKubeIntegration` reflection bridge so Nourished loads without KubeJS on the
+  classpath; gameplay hooks fire KubeJS events only when the mod is present.
+- Added `NourishedKubeEventBridge` to forward MarieLib value events and Nourished gameplay
+  (food eaten, gut health ticks/recovery, raw food penalties) into KubeJS.
+- `rawFoodPenalty` scripts can cancel penalties via `event.cancel()`.
+- `nutrientModifier` scripts can adjust `event.amount` or cancel gains before they apply.
+- Updated bundled `nourished_example_events.js` with current event field names and usage.
+
 ### Fixed
 
 - Fixed mod-load crash (`UnsupportedOperationException: Implement via consuming mod`) when
   `PresetRegistry.ensureBuiltInFilesOnDisk()` ran during registry lifecycle init
 - Updated client code for MarieLib API renames: `VALUE_COLORS` / `SOURCE_VALUES`
   import-export sections, `getRecentSourceIds()`, and `onFullTrackingSynced()`
+- KubeJS event payloads now expose `event.player` on `nutrientChanged`, `nutrientCritical`,
+  `nutrientExcess`, `gutHealthChanged`, and `rawFoodPenalty` (previously only `playerId` was
+  available on those events; `foodEaten` already had `player`).
 
 ### Important Upgrade Notes
 

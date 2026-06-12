@@ -144,13 +144,21 @@ public final class NourishedAPI {
      */
     @ApiStatus.Stable
     public static void modifyValue(Player player, String valueKey, float delta) {
-        dev.marie.MariesLib.api.ValueModifierEvent modifierEvent = new dev.marie.MariesLib.api.ValueModifierEvent(player, API_MODIFIER_SOURCE, valueKey, delta);
+        dev.marie.MariesLib.api.ValueModifierContext ctx =
+                dev.marie.MariesLib.api.ValueModifierContext.of(player, API_MODIFIER_SOURCE, valueKey);
+        dev.marie.MariesLib.api.ValueModifierEvent modifierEvent =
+                new dev.marie.MariesLib.api.ValueModifierEvent(ctx, delta);
         NeoForge.EVENT_BUS.post(modifierEvent);
         if (modifierEvent.isCanceled()) {
             return;
         }
+        float finalDelta = dev.maire.nourished.core.NourishedKubeIntegration.fireNutrientModifier(
+                ctx, modifierEvent.getAmount());
+        if (finalDelta == 0f) {
+            return;
+        }
         TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
-        diet.addValue(valueKey, modifierEvent.getAmount());
+        diet.addValue(valueKey, finalDelta);
         player.setData(TrackingAttachment.TRACKING.get(), diet);
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return;

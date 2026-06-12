@@ -3,7 +3,7 @@ package dev.maire.nourished.kubejs.internal;
 import dev.latvian.mods.kubejs.script.ScriptsLoadedEvent;
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.api.MarieEvents;
-import dev.marie.MariesLib.api.ValueModifierEvent;
+import dev.marie.MariesLib.api.ValueModifierContext;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.kubejs.NourishedKubeEvents;
 import dev.maire.nourished.kubejs.events.NourishedFoodEatenEvent;
@@ -17,7 +17,6 @@ import dev.maire.nourished.kubejs.events.NourishedSourceConsumedEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.EventPriority;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
@@ -42,8 +41,23 @@ public final class NourishedKubeEventBridge {
         NeoForge.EVENT_BUS.addListener(NourishedKubeEventBridge::onValueCritical);
         NeoForge.EVENT_BUS.addListener(NourishedKubeEventBridge::onValueExcess);
         NeoForge.EVENT_BUS.addListener(NourishedKubeEventBridge::onSourceConsumed);
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, NourishedKubeEventBridge::onValueModifier);
         NeoForge.EVENT_BUS.addListener(NourishedKubeEventBridge::onScriptReload);
+    }
+
+    public static float fireNutrientModifier(ValueModifierContext ctx, float amount) {
+        if (!isNutrientKey(ctx.valueKey())) {
+            return amount;
+        }
+        if (!NourishedKubeGuard.hasListeners(NourishedKubeEvents.NUTRIENT_MODIFIER_ID)) {
+            return amount;
+        }
+        NourishedNutrientModifierEvent kube = new NourishedNutrientModifierEvent(
+                ctx.player(),
+                ctx.sourceId().toString(),
+                ctx.valueKey(),
+                amount);
+        NourishedKubeEvents.NUTRIENT_MODIFIER.post(kube);
+        return kube.amount;
     }
 
     public static void fireGutHealthChanged(
@@ -118,25 +132,6 @@ public final class NourishedKubeEventBridge {
             return;
         }
         NourishedKubeEvents.SOURCE_CONSUMED.post(new NourishedSourceConsumedEvent(event));
-    }
-
-    private static void onValueModifier(ValueModifierEvent event) {
-        if (!isNutrientKey(event.getValueKey())) {
-            return;
-        }
-        if (!NourishedKubeGuard.hasListeners(NourishedKubeEvents.NUTRIENT_MODIFIER_ID)) {
-            return;
-        }
-        NourishedNutrientModifierEvent kube = new NourishedNutrientModifierEvent(
-                event.getPlayer().getUUID().toString(),
-                event.getSourceId().toString(),
-                event.getValueKey(),
-                event.getAmount());
-        NourishedKubeEvents.NUTRIENT_MODIFIER.post(kube);
-        event.setAmount(kube.amount);
-        if (kube.amount == 0f) {
-            event.setCanceled(true);
-        }
     }
 
     private static void onScriptReload(ScriptsLoadedEvent event) {

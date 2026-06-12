@@ -131,17 +131,15 @@ If a mod adds food with `FoodProperties`, Nourished handles it automatically. No
 
 ## 🌐 For mod developers
 
-Nourished ships a stable public API if you want to integrate with it:
+Nourished runs on [MariesLib](https://github.com/kgbcupcake/MarieLib) — install both mods. The nutrition API is a thin facade over the library:
 
 ```java
-float level = NourishedAPI.getNutrientLevel(player, "proteins");
-NourishedAPI.registerNutrient(definition);
-NourishedAPI.registerFoodClassification(foodId, "proteins", 0.15f);
+float level = NourishedAPI.getValueLevel(player, "proteins");
+NourishedAPI.registerValue(definition);
+NourishedAPI.registerSourceClassification(foodId, "proteins", 0.15f);
 ```
 
-API elements are marked `@Stable`, `@Experimental`, or `@Internal` so you know exactly what you can rely on.
-
-Read [`API.md`](API.md) for the full public API and [`PHILOSOPHY.md`](PHILOSOPHY.md) for compatibility and stability guarantees. Addons can register custom nutrients, food classifications, and diet events through Java or KubeJS, and can also ship datapack-only integrations without writing Java code. See the example addon project for a minimal end-to-end integration pattern.
+Read [`API.md`](API.md) for Nourished integration, [`PHILOSOPHY.md`](PHILOSOPHY.md) for stability rules, and [MariesLib API](https://github.com/kgbcupcake/MarieLib/blob/main/API.md) for shared types like `ValueDefinition`. Datapack-only integrations need no Java.
 
 ---
 
@@ -155,7 +153,7 @@ Effects add or replace buff/debuff rules via effects.json
 Food overrides — override specific item nutrition values via food_overrides.json
 Food values — adjust category multipliers via food_values.json
 Colors — customize HUD bar colors via colors.json
-The built-in Food Scanner tool auto-classifies unknown foods and can write a ready-to-use datapack directly into your save with one click.see [`API.md`](API.md).
+The built-in food scanner (MariesLib tooling, `/nourished scan`) auto-classifies unknown foods and can write datapack output into your save. See [`API.md`](API.md).
 
 ---
 
@@ -164,8 +162,8 @@ The built-in Food Scanner tool auto-classifies unknown foods and can write a rea
 Full KubeJS scripting support for custom nutrient events, food classifications, and diet hooks — no Java required.
 
 ```js
-NourishedEvents.onNutrientChanged(event => {
-    if (event.nutrient === 'proteins' && event.level < 0.25) {
+NourishedEvents.nutrientChanged(event => {
+    if (event.valueKey === 'proteins' && event.newValue < 0.25) {
         event.player.tell('Eat some protein!')
     }
 })
@@ -205,7 +203,9 @@ MIT
 ## Links
 
 - [Modrinth](https://modrinth.com/mod/nourished)
+- [MariesLib](https://github.com/kgbcupcake/MarieLib) (required dependency)
 - [Contributing](docs/CONTRIBUTING.md)
 - [API.md](API.md)
 - [PHILOSOPHY.md](PHILOSOPHY.md)
 - [ARCHITECTURE.md](ARCHITECTURE.md)
+- [RoadMap.md](RoadMap.md)

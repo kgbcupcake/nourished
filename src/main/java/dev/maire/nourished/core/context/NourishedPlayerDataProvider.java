@@ -2,12 +2,14 @@ package dev.maire.nourished.core.context;
 
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.api.ApplicationHistoryView;
+import dev.marie.MariesLib.api.ValueModifierContext;
 import dev.marie.MariesLib.api.ValueModifierEvent;
 import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.marie.MariesLib.core.MarieLibDataProvider;
 import dev.marie.MariesLib.tracking.TrackingAttachment;
 import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.NourishedKubeIntegration;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.ModNetworking;
 import net.minecraft.resources.ResourceLocation;
@@ -40,13 +42,18 @@ final class NourishedPlayerDataProvider implements MarieLibDataProvider {
 
     @Override
     public void modifyValue(Player player, String valueKey, float delta) {
-        ValueModifierEvent modifierEvent = new ValueModifierEvent(player, API_MODIFIER_SOURCE, valueKey, delta);
+        ValueModifierContext ctx = ValueModifierContext.of(player, API_MODIFIER_SOURCE, valueKey);
+        ValueModifierEvent modifierEvent = new ValueModifierEvent(ctx, delta);
         NeoForge.EVENT_BUS.post(modifierEvent);
         if (modifierEvent.isCanceled()) {
             return;
         }
+        float finalDelta = NourishedKubeIntegration.fireNutrientModifier(ctx, modifierEvent.getAmount());
+        if (finalDelta == 0f) {
+            return;
+        }
         TrackingData data = player.getData(TrackingAttachment.TRACKING.get());
-        data.addValue(valueKey, modifierEvent.getAmount());
+        data.addValue(valueKey, finalDelta);
         player.setData(TrackingAttachment.TRACKING.get(), data);
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return;

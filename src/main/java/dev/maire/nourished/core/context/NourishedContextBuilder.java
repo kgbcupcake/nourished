@@ -12,6 +12,7 @@ import dev.maire.nourished.client.config.NourishedImportExport;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.NourishedPresetRegistry;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.NourishedKubeIntegration;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
@@ -96,6 +97,7 @@ public final class NourishedContextBuilder {
                     return new MarieLibContext.SourceDelta(d.calories(), d.nutrients());
                 })
                 .onReloadBroadcast(NourishedReloadHelper::reloadAndBroadcast)
+                .postValueModifierHook(NourishedKubeIntegration::fireNutrientModifier)
                 .onCacheInvalidated(() -> {
                     FoodFamilyResolver.clearCache();
                     RuntimeFoodResolver.getInstance().invalidateCache();

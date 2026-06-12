@@ -11,8 +11,10 @@ plugins {
 
 rootProject.name = 'NutritionalBalance'
 
-// Sibling checkout: load MarieLib as a composite subproject so NeoForge dev runs register it as a mod.
 if (file('../MarieLib/build.gradle').exists()) {
-    include 'MarieLib'
-    project(':MarieLib').projectDir = file('../MarieLib')
+    includeBuild('../MarieLib') {
+        dependencySubstitution {
+            substitute module('dev.marie.MariesLib:marieslib') using project(':')
+        }
+    }
 }
