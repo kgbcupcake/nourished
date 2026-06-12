@@ -1,7 +1,9 @@
 package dev.maire.nourished.core.nutrition;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -13,12 +15,14 @@ import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.Level;
 
 /**
  * Food-specific helpers retained after classification migration to
@@ -118,5 +122,76 @@ public final class FoodNutritionRegistry {
         });
 
         return matches;
+    }
+
+    public record DietDelta(int calories, Map<String, Float> nutrients) {}
+
+    public static DietDelta computeDietDelta(
+            ItemStack stack,
+            @Nullable Level level,
+            int foodNutrition,
+            float foodSaturation,
+            Map<String, Float> matchedBars) {
+        int calories = Math.max(0, Math.round(foodNutrition * 25f));
+        Objects.requireNonNull(matchedBars, "matchedBars");
+
+        float matchedWeightTotal = 0f;
+        for (float weight : matchedBars.values()) {
+            matchedWeightTotal += Math.max(0f, weight);
+        }
+        if (matchedWeightTotal <= 0f) {
+            Map<String, Float> zeros = new HashMap<>();
+            for (String key : NutrientRegistry.getKeys()) {
+                zeros.put(key, 0f);
+            }
+            return new DietDelta(calories, zeros);
+        }
+
+        float burst = foodNutrition * 0.008f + foodSaturation * 0.010f + 0.004f;
+        float totalBurst = burst * matchedWeightTotal;
+
+        Map<String, Float> nutrients = new HashMap<>();
+        for (String key : NutrientRegistry.getKeys()) {
+            nutrients.put(key, 0f);
+        }
+
+        for (Map.Entry<String, Float> entry : matchedBars.entrySet()) {
+            float weight = Math.max(0f, entry.getValue());
+            if (weight <= 0f) {
+                continue;
+            }
+            float contribution = totalBurst * (weight / matchedWeightTotal);
+            String key = entry.getKey();
+            nutrients.merge(key, contribution, Float::sum);
+        }
+
+        float scale = configuredNutrientGainScale();
+        Map<String, Float> scaledNutrients = new HashMap<>();
+        for (Map.Entry<String, Float> e : nutrients.entrySet()) {
+            scaledNutrients.put(e.getKey(), e.getValue() * scale);
+        }
+
+        float perBiteMax = configuredNutrientGainPerBiteMax();
+        for (String k : scaledNutrients.keySet()) {
+            scaledNutrients.put(k, Math.min(scaledNutrients.get(k), perBiteMax));
+        }
+
+        return new DietDelta(calories, scaledNutrients);
+    }
+
+    private static float configuredNutrientGainScale() {
+        try {
+            return Mth.clamp((float) NourishedConfig.get().nutrientGainScale(), 0.5f, 20f);
+        } catch (IllegalStateException ignored) {
+            return 5f;
+        }
+    }
+
+    private static float configuredNutrientGainPerBiteMax() {
+        try {
+            return Mth.clamp((float) NourishedConfig.get().nutrientGainPerBiteMax(), 0.05f, 1f);
+        } catch (IllegalStateException ignored) {
+            return 0.2f;
+        }
     }
 }

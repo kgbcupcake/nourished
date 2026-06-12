@@ -3,6 +3,7 @@ package dev.maire.nourished.core.handler;
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.api.MarieAPIState;
 import dev.marie.MariesLib.runtime.SourceRegistry;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 
@@ -12,9 +13,11 @@ public final class NourishedTagsHandler {
     private NourishedTagsHandler() {}
 
     public static void onTagsUpdated(TagsUpdatedEvent event) {
+        Nourished.LOGGER.info("[DEBUG] TagsUpdatedEvent fired");
         SourceRegistry.clearExternalClassifications();
         try (MarieAPIState.DatapackReloadScope scope = MarieAPIState.openForDatapackReload()) {
             NutrientRegistry.registerClassificationsFromTags();
         }
+        Nourished.LOGGER.info("[DEBUG] Classifications registered");
     }
 }

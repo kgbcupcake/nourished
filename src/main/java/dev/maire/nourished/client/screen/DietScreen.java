@@ -9,7 +9,7 @@ import java.util.Map;
 import dev.marie.MariesLib.client.MarieClientCache;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.MariesLib.client.MarieValueColors;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
@@ -241,7 +241,7 @@ public class DietScreen extends Screen {
                 todayStartX + 20, y - 4, COL_GOLD, false);
         y += 10;
 
-        if (ModuleCache.enableTotalTracking) {
+        if (FeatureFlagCache.enableTotalTracking()) {
             // ── Calories box ──────────────────────────────────────────────
             drawRoundedBox(g, x - 2, y - 2, bw + 4, 40);
 

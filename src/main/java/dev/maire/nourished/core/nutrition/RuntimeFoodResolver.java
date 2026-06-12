@@ -233,6 +233,7 @@ public final class RuntimeFoodResolver {
         // uncertain when spread is below the configured threshold and item actually classified
         boolean uncertain = dominant != null
                 && result.stage() != RuntimeCascadeStage.HARD_FALLBACK
+                && result.stage() != RuntimeCascadeStage.RECIPE_INHERITANCE
                 && spreadThreshold > 0f
                 && confidence < spreadThreshold;
         if (dominant != null) {

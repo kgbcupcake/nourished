@@ -45,6 +45,27 @@ Diminishing returns apply - eating the same food repeatedly gives less credit ea
 
 ---
 
+---
+
+## 🥩 Raw Food & Gut Health
+
+Eating raw or undercooked food has consequences. Nourished tracks a **gut health** value for every player that degrades when you eat raw food and recovers over time from cooked food and dietary variety.
+
+Raw foods are classified into four tiers:
+
+| Tier   | Effect                           |
+| ------ | -------------------------------- |
+| Fine   | No penalty                       |
+| Mild   | Minor debuff, short duration     |
+| Medium | Moderate debuff, longer duration |
+| Severe | Strong debuff, extended duration |
+
+Eating the same raw food repeatedly within a memory window increases sensitivity, the more you do it, the worse the penalty gets. Gut health recovers passively and faster when you eat cooked food and maintain dietary diversity.
+
+Resistance can be built up over time, reducing penalty scale. Everything, tiers, durations, nutrient penalties, recovery rates, is configurable via `config/nourished/raw_food.json` and server module toggles.
+
+---
+
 ## The HUD
 
 The HUD is the heart of the mod. Five color-coded bars sit on screen while you play;you always know where you stand without opening a menu.
@@ -162,14 +183,18 @@ NourishedEvents.onNutrientChanged(event => {
 
 ---
 
-## Requirements
+---
 
-| | |
-| --- | --- |
-| **MarieLib** | **1.0.0+** on the classpath. From here on out, Nourished will be built against the latest version from [Modrinth](https://modrinth.com/mod/marieslib). |
-| **Minecraft** | **1.21.1** |
-| **NeoForge** | **21.1.x** |
-| **Java** | **21** |
+## ⚙️ Requirements
+
+|                  |                                                                |
+| ---------------- | -------------------------------------------------------------- |
+| **Minecraft**    | 1.21.1                                                         |
+| **NeoForge**     | 21.1.x                                                         |
+| **MarieLib**     | **v0.1.0-beta.1** ( ⚠️ Going forward from **v0.2.5-beta.5**. ) |
+| **Cloth Config** | required at runtime                                            |
+| **Patchouli**    | optional (in-game guide)                                       |
+| **Java**         | 21                                                             |
 
 ---
 

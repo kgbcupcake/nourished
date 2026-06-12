@@ -2,7 +2,7 @@ package dev.maire.nourished.core.handler;
 
 import dev.marie.MariesLib.api.ValueSourceTrigger;
 import dev.marie.MariesLib.api.MarieAPI;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.marie.MariesLib.tracking.TrackingAttachment;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
 import net.minecraft.core.component.DataComponents;
@@ -46,7 +46,7 @@ public final class NourishedFoodTriggerHandler {
         @SubscribeEvent(priority = EventPriority.HIGH)
         public void onItemUseFinishHigh(LivingEntityUseItemEvent.Finish event) {
             if (!(event.getEntity() instanceof ServerPlayer player)) return;
-            if (!ModuleCache.enableSourceApplication) return;
+            if (!FeatureFlagCache.enableSourceApplication()) return;
             if (!TrackingAttachment.isRegistered()) return;
             ItemStack stack = event.getItem();
             if (stack == null || stack.isEmpty()) {
@@ -57,12 +57,13 @@ public final class NourishedFoodTriggerHandler {
             if (food == null) return;
             MarieAPI.fireSourceTrigger(player,
                 ValueSourceTrigger.itemConsumed(
-                    MarieRegistryUtils.itemKey(stack), food.nutrition()));
+                    MarieRegistryUtils.itemKey(stack), food.nutrition()),
+                stack);
         }
 
         @SubscribeEvent
         public void onRightClick(PlayerInteractEvent.RightClickItem event) {
-            if (!ModuleCache.enableDecay || !ModuleCache.enableSourceApplication) return;
+            if (!FeatureFlagCache.enableDecay() || !FeatureFlagCache.enableSourceApplication()) return;
             if (!(event.getEntity() instanceof ServerPlayer player)) return;
             long now = player.level().getGameTime();
             Long last = LAST_SOURCE_ONLY_EAT.get(player.getUUID());
@@ -105,7 +106,8 @@ public final class NourishedFoodTriggerHandler {
             if (food == null) return;
             MarieAPI.fireSourceTrigger(player,
                 ValueSourceTrigger.itemConsumed(
-                    MarieRegistryUtils.itemKey(stack), food.nutrition()));
+                    MarieRegistryUtils.itemKey(stack), food.nutrition()),
+                stack);
             LAST_SOURCE_ONLY_EAT.put(player.getUUID(), player.level().getGameTime());
         }
 

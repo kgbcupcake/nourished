@@ -13,7 +13,7 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.MariesLib.handler.ReloadPipeline;
 import dev.marie.MariesLib.client.ImportExportManager;
 import dev.marie.MariesLib.color.ColorRegistry;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.marie.MariesLib.config.PresetRegistry;
 import dev.marie.MariesLib.util.MarieJsonUtils;
 import dev.marie.MariesLib.util.MarieValidation;
@@ -105,11 +105,11 @@ public final class NourishedImportExport {
         o.addProperty("enableCalorieTracking", c.enableCalorieTracking());
         o.addProperty("enableDietScreen", c.enableDietScreen());
         o.addProperty("enableCriticalToasts", c.enableCriticalToasts());
-        o.addProperty("enableSleepBonus", ModuleCache.enableSleepBonus);
-        o.addProperty("enableSynergies", ModuleCache.enableSynergies);
-        o.addProperty("enableMilestones", ModuleCache.enableMilestones);
-        o.addProperty("enableSeasonHooks", ModuleCache.enableSeasonHooks);
-        o.addProperty("enableAbsorptionModifiers", ModuleCache.enableAbsorptionModifiers);
+        o.addProperty("enableSleepBonus", FeatureFlagCache.enableSleepBonus());
+        o.addProperty("enableSynergies", FeatureFlagCache.enableSynergies());
+        o.addProperty("enableMilestones", FeatureFlagCache.enableMilestones());
+        o.addProperty("enableSeasonHooks", FeatureFlagCache.enableSeasonHooks());
+        o.addProperty("enableAbsorptionModifiers", FeatureFlagCache.enableAbsorptionModifiers());
         return o;
     }
 

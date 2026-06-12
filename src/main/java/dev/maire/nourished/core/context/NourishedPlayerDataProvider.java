@@ -1,9 +1,9 @@
 package dev.maire.nourished.core.context;
 
 import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.MemoryView;
+import dev.marie.MariesLib.api.ApplicationHistoryView;
 import dev.marie.MariesLib.api.ValueModifierEvent;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.marie.MariesLib.core.MarieLibDataProvider;
 import dev.marie.MariesLib.tracking.TrackingAttachment;
 import dev.marie.MariesLib.tracking.TrackingData;
@@ -24,7 +24,7 @@ final class NourishedPlayerDataProvider implements MarieLibDataProvider {
             ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "api");
 
     @Override
-    public float getTotal(Player player) {
+    public float getAggregateLevel(Player player) {
         return TrackingAttachment.getTotal(player);
     }
 
@@ -34,8 +34,8 @@ final class NourishedPlayerDataProvider implements MarieLibDataProvider {
     }
 
     @Override
-    public MemoryView getSourceMemoryView(Player player) {
-        return TrackingAttachment.getSourceMemoryView(player);
+    public ApplicationHistoryView getApplicationHistoryView(Player player) {
+        return TrackingAttachment.getApplicationHistoryView(player);
     }
 
     @Override
@@ -52,7 +52,7 @@ final class NourishedPlayerDataProvider implements MarieLibDataProvider {
             return;
         }
         ModNetworking.syncDietDelta(serverPlayer, data);
-        if (ModuleCache.enableEffects) {
+        if (FeatureFlagCache.enableEffects()) {
             NutritionEffectApplier.apply(serverPlayer, data);
         }
     }

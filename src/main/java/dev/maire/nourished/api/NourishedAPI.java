@@ -6,7 +6,7 @@ import dev.marie.MariesLib.api.SourcePairSynergy;
 import dev.marie.MariesLib.api.MarieAPIState;
 import dev.marie.MariesLib.api.MarieAPIVersion;
 import dev.marie.MariesLib.api.MarieSeasonHook;
-import dev.marie.MariesLib.api.MemoryView;
+import dev.marie.MariesLib.api.ApplicationHistoryView;
 import dev.marie.MariesLib.api.MilestoneDefinition;
 import dev.marie.MariesLib.api.ProfileDefinition;
 import dev.marie.MariesLib.api.ReportProvider;
@@ -20,12 +20,12 @@ import dev.marie.MariesLib.api.registry.ReportProviderRegistry;
 import dev.marie.MariesLib.api.registry.SeasonHookRegistry;
 import dev.marie.MariesLib.api.registry.SynergyRegistry;
 import dev.marie.MariesLib.compat.CompatDefinition;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.MariesLib.tracking.TrackingAttachment;
 import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
-import dev.marie.MariesLib.api.impl.EmptyMemoryView;
+import dev.marie.MariesLib.api.impl.EmptyApplicationHistoryView;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
@@ -94,14 +94,14 @@ public final class NourishedAPI {
      * exposing recent eating history and variety information.
      *
      * @param player the player to query
-     * @return a {@link MemoryView} for the given player
+     * @return an {@link ApplicationHistoryView} for the given player
      * @throws IllegalStateException if the nutrition system is not initialized
      */
-    public static MemoryView getSourceMemory(Player player) {
+    public static ApplicationHistoryView getSourceMemory(Player player) {
         if (player == null) {
-            return EmptyMemoryView.INSTANCE;
+            return EmptyApplicationHistoryView.INSTANCE;
         }
-        return TrackingAttachment.getSourceMemoryView(player);
+        return TrackingAttachment.getApplicationHistoryView(player);
     }
     /**
      * Alias for {@link #getTotal(Player)}.
@@ -156,7 +156,7 @@ public final class NourishedAPI {
             return;
         }
         ModNetworking.syncDietDelta(serverPlayer, diet);
-        if (ModuleCache.enableEffects) {
+        if (FeatureFlagCache.enableEffects()) {
             NutritionEffectApplier.apply(serverPlayer, diet);
         }
     }

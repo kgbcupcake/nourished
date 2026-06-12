@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.api.ValueDefinition;
 import dev.marie.MariesLib.api.registry.ValueRegistry;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.MariesLib.registry.AbstractRegistry;
 import dev.marie.MariesLib.data.DatapackSchema;
@@ -283,6 +283,8 @@ public class NutrientRegistry {
      * Must be called after item tags are bound (see {@code NourishedTagsHandler}).
      */
     public static void registerClassificationsFromTags() {
+        Nourished.LOGGER.info("[DEBUG] registerClassificationsFromTags starting");
+        int count = 0;
         for (Item item : BuiltInRegistries.ITEM) {
             Map<String, Float> scores = FoodNutritionRegistry.getNutrientTagScores(item);
             if (scores.isEmpty()) {
@@ -291,8 +293,10 @@ public class NutrientRegistry {
             ResourceLocation itemId = item.builtInRegistryHolder().key().location();
             for (Map.Entry<String, Float> entry : scores.entrySet()) {
                 SourceRegistry.registerClassification(itemId, entry.getKey(), entry.getValue());
+                count++;
             }
         }
+        Nourished.LOGGER.info("[DEBUG] registerClassificationsFromTags complete — {} classifications registered", count);
     }
 
     private static void syncToValueRegistry() {
@@ -334,7 +338,7 @@ public class NutrientRegistry {
             mismatches.add("entry '" + key + "': missing " + missing);
         }
 
-        if (ModuleCache.enableDebugLogging) {
+        if (FeatureFlagCache.enableDebugLogging()) {
             for (String mismatch : mismatches) {
                 Nourished.LOGGER.debug("[NutrientRegistry] nutrients.json schema mismatch: {}", mismatch);
             }

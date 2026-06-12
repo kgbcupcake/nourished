@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.hud;
 
 import dev.maire.nourished.client.NourishedKeys;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -33,7 +33,7 @@ public final class HUDEditScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        if (!ModuleCache.enableHUD) {
+        if (!FeatureFlagCache.enableHUD()) {
             return;
         }
         super.render(graphics, mouseX, mouseY, partialTick);

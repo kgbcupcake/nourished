@@ -2,7 +2,7 @@ package dev.maire.nourished.client.hud;
 
 import dev.marie.MariesLib.client.MarieClientCache;
 import dev.maire.nourished.client.NourishedKeys;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -37,7 +37,7 @@ public final class NourishedHUD {
     private NourishedHUD() {}
 
     public static void onRenderGuiPost(RenderGuiEvent.Post event) {
-        if (!ModuleCache.enableHUD) {
+        if (!FeatureFlagCache.enableHUD()) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
@@ -75,7 +75,7 @@ public final class NourishedHUD {
     }
 
     public static void renderForEditScreen(GuiGraphics g, Minecraft mc) {
-        if (!ModuleCache.enableHUD) {
+        if (!FeatureFlagCache.enableHUD()) {
             return;
         }
         LocalPlayer player = mc.player;
@@ -223,7 +223,7 @@ public final class NourishedHUD {
         if (mc.player == null || mc.screen != null) {
             return;
         }
-        if (!ModuleCache.enableHUD) {
+        if (!FeatureFlagCache.enableHUD()) {
             return;
         }
         while (NourishedKeys.EDIT_HUD.consumeClick()) {

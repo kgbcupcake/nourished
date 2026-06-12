@@ -3,7 +3,7 @@ package dev.maire.nourished.client;
 import dev.maire.nourished.client.screen.DietScreen;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.MariesLib.compat.MarieTooltipHelper;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -42,7 +42,7 @@ public final class ClientEvents {
 
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!(event.getScreen() instanceof InventoryScreen screen)) return;
-        if (!ModuleCache.enableTrackingScreen) return;
+        if (!FeatureFlagCache.enableTrackingScreen()) return;
 
         int x = screen.getGuiLeft() - 26;
         int y = screen.getGuiTop() + 60;

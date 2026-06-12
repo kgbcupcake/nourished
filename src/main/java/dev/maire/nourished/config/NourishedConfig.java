@@ -3,7 +3,8 @@ package dev.maire.nourished.config;
 import com.google.gson.JsonObject;
 import dev.marie.MariesLib.compat.ModCompat;
 import dev.marie.MariesLib.config.ConfigDefaultsLoader;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.FeatureFlagCache;
+import dev.marie.MariesLib.config.MarieModFeatureFlags;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -377,30 +378,32 @@ public final class NourishedConfig {
         syncModuleCache();
     }
 
-    /** Copies module toggles from common config into {@link ModuleCache} for hot paths. */
+    /** Copies module toggles from common config into {@link FeatureFlagCache} for hot paths. */
     public static void syncModuleCache() {
         if (INSTANCE == null) {
             return;
         }
         NourishedConfig c = INSTANCE;
-        ModuleCache.enableDecay = c.enableDecay();
-        ModuleCache.enableSourceApplication = c.isModuleEnabled("enableSourceApplication");
-        ModuleCache.enableBlockHeavySources = c.isModuleEnabled("enableBlockHeavySources");
-        ModuleCache.enableBlockLightSource = c.isModuleEnabled("enableBlockLightSource");
         NourishedModuleCache.refresh(c);
-        ModuleCache.enableEffects = c.enableEffects();
-        ModuleCache.enableHUD = c.enableHUD();
-        ModuleCache.enableToasts = c.enableToasts();
-        ModuleCache.enableSourceTooltips = c.enableFoodTooltips();
-        ModuleCache.enableTotalTracking = c.enableCalorieTracking();
-        ModuleCache.enableTrackingScreen = c.enableDietScreen();
-        ModuleCache.enableCriticalToasts = c.enableCriticalToasts();
-        ModuleCache.enableSleepBonus = c.enableSleepBonus();
-        ModuleCache.enableSynergies = c.isModuleEnabled("enableSynergies");
-        ModuleCache.enableMilestones = c.isModuleEnabled("enableMilestones");
-        ModuleCache.enableSeasonHooks = c.isModuleEnabled("enableSeasonHooks");
-        ModuleCache.enableAbsorptionModifiers = c.isModuleEnabled("enableAbsorptionModifiers");
-        ModuleCache.enableDebugLogging = c.isModuleEnabled("enableDebugLogging");
+        FeatureFlagCache.sync(new MarieModFeatureFlags(
+                c.enableDecay(),
+                c.isModuleEnabled("enableSourceApplication"),
+                c.isModuleEnabled("enableBlockHeavySources"),
+                c.isModuleEnabled("enableBlockLightSource"),
+                c.enableEffects(),
+                c.enableHUD(),
+                c.enableToasts(),
+                c.enableFoodTooltips(),
+                c.enableCalorieTracking(),
+                c.enableDietScreen(),
+                c.enableCriticalToasts(),
+                c.enableSleepBonus(),
+                c.isModuleEnabled("enableSynergies"),
+                c.isModuleEnabled("enableMilestones"),
+                c.isModuleEnabled("enableSeasonHooks"),
+                c.isModuleEnabled("enableAbsorptionModifiers"),
+                c.isModuleEnabled("enableDebugLogging")
+        ));
     }
 
     public static NourishedConfig get() {

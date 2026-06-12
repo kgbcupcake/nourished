@@ -2,7 +2,7 @@ package dev.maire.nourished.core.context;
 
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.client.MarieClientCache;
-import dev.marie.MariesLib.config.ModuleCache;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.marie.MariesLib.core.MarieLibContext;
 import dev.maire.nourished.client.NourishedClientMemoryConfig;
 import dev.maire.nourished.client.config.ExportConfigScreen;
@@ -16,6 +16,7 @@ import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.gui.screens.Screen;
 
@@ -28,7 +29,7 @@ public final class NourishedContextBuilder {
         MarieLibContext.register(MarieLibContext.builder(Nourished.MODID)
                 .dataProvider(NourishedPlayerDataProvider.INSTANCE)
                 .effectApplier((player, data) -> {
-                    if (ModuleCache.enableEffects) {
+                    if (FeatureFlagCache.enableEffects()) {
                         NutritionEffectApplier.apply(player, data);
                     }
                 })
@@ -81,6 +82,16 @@ public final class NourishedContextBuilder {
                 .decayIntervalTicks(NourishedConfig.get()::decayIntervalTicks)
                 .multiValueInheritanceThreshold(
                         () -> NourishedConfig.get().multiNutrientInheritanceThreshold())
+                .tooltipValueResolver((stack, player) -> player != null && player.level() != null
+                        ? NutrientClassificationLookup.resolveNutrientBars(stack, false, player.level())
+                        : NutrientClassificationLookup.resolveNutrientBars(stack, false))
+                .sourceValueResolver((stack, level) ->
+                        NutrientClassificationLookup.resolveNutrientBars(stack, false, level))
+                .sourceDeltaResolver((stack, level, payload, bars) -> {
+                    FoodNutritionRegistry.DietDelta d = FoodNutritionRegistry.computeDietDelta(
+                            stack, level, (int) payload, 0f, bars);
+                    return new MarieLibContext.SourceDelta(d.calories(), d.nutrients());
+                })
                 .build());
     }
 
