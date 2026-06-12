@@ -1,4 +1,5 @@
 {
+  "marie_schema_version": 1,
   "tag": "nourished:nutrients/vegetables",
   "value_key": "vegetables",
   "amount": 1.0

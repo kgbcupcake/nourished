@@ -1,4 +1,5 @@
 {
+  "marie_schema_version": 1,
   "tag": "nourished:nutrients/fruits",
   "value_key": "fruits",
   "amount": 1.0

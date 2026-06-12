@@ -1,4 +1,5 @@
 {
+  "marie_schema_version": 1,
   "tag": "nourished:nutrients/proteins",
   "value_key": "proteins",
   "amount": 1.0

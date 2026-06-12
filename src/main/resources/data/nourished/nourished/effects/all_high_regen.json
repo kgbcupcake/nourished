@@ -1,6 +1,6 @@
 {
-  "nourished_schema_version": 1,
-  "nutrient_key": "all",
+  "marie_schema_version": 1,
+  "value_key": "all",
   "threshold": 0.75,
   "threshold_type": "BONUS",
   "effect_id": "minecraft:regeneration",

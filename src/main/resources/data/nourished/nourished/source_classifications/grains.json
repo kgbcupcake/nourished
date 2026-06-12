@@ -1,4 +1,5 @@
 {
+  "marie_schema_version": 1,
   "tag": "nourished:nutrients/grains",
   "value_key": "grains",
   "amount": 1.0

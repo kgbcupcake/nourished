@@ -1,6 +1,6 @@
 {
-  "nourished_schema_version": 1,
-  "nutrient_key": "grains",
+  "marie_schema_version": 1,
+  "value_key": "grains",
   "threshold": 0.25,
   "threshold_type": "LOW",
   "effect_id": "minecraft:weakness",

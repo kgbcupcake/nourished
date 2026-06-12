@@ -332,7 +332,9 @@ public class EffectRegistry {
                     if (obj == null) {
                         continue;
                     }
-                    String nutrient = obj.has("nutrient_key") ? obj.get("nutrient_key").getAsString() : "all";
+                    String nutrient = obj.has(DatapackSchema.KEY_VALUE_KEY)
+                            ? obj.get(DatapackSchema.KEY_VALUE_KEY).getAsString()
+                            : "all";
                     String thresholdType = obj.has("threshold_type") ? obj.get("threshold_type").getAsString() : "LOW";
                     String trigger = switch (thresholdType.toUpperCase(java.util.Locale.ROOT)) {
                         case "EXCESS" -> "above";

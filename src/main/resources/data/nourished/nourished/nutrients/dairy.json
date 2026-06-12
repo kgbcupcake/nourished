@@ -1,5 +1,5 @@
 {
-  "nourished_schema_version": 1,
+  "marie_schema_version": 1,
   "display_name": "Dairy",
   "color": -1,
   "default_decay_rate": 0.001,
