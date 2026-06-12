@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 
 import dev.maire.nourished.client.config.NourishedConfigScreen;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.client.ImportExportManager;
 import dev.marie.MariesLib.client.ImportExportToast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,7 +16,6 @@ import net.minecraft.network.chat.MutableComponent;
 import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Import from an export file or {@code NCF1:} share code, preview sections, then apply.
@@ -35,8 +33,8 @@ public final class ImportConfigScreen extends Screen {
     private int sourceTab;
     private String codeDraft = "";
     private JsonObject pending;
-    private EnumSet<ImportExportManager.Section> available = EnumSet.noneOf(ImportExportManager.Section.class);
-    private EnumSet<ImportExportManager.Section> selectedSections = EnumSet.noneOf(ImportExportManager.Section.class);
+    private EnumSet<NourishedImportExport.Section> available = EnumSet.noneOf(NourishedImportExport.Section.class);
+    private EnumSet<NourishedImportExport.Section> selectedSections = EnumSet.noneOf(NourishedImportExport.Section.class);
     private List<Path> exportFiles = List.of();
     private int selectedFileIndex = -1;
     private EditBox codeBox;
@@ -84,7 +82,7 @@ public final class ImportConfigScreen extends Screen {
 
         if (sourceTab == 0) {
             try {
-                exportFiles = ImportExportManager.listExportJsonFiles();
+                exportFiles = NourishedImportExport.listExportJsonFiles();
             } catch (Exception e) {
                 Nourished.LOGGER.warn("[ImportConfigScreen] Failed to list exports", e);
                 exportFiles = List.of();
@@ -143,11 +141,11 @@ public final class ImportConfigScreen extends Screen {
                     ImportExportToast.show(Component.translatable("config.nourished.importExport.pickFileFirst"));
                     return;
                 }
-                root = ImportExportManager.parseJsonFile(exportFiles.get(selectedFileIndex));
+                root = NourishedImportExport.parseJsonFile(exportFiles.get(selectedFileIndex));
             } else {
-                root = ImportExportManager.parseShareCode(codeDraft);
+                root = NourishedImportExport.parseShareCode(codeDraft);
             }
-            EnumSet<ImportExportManager.Section> found = ImportExportManager.sectionsPresent(root);
+            EnumSet<NourishedImportExport.Section> found = NourishedImportExport.sectionsPresent(root);
             if (found.isEmpty()) {
                 ImportExportToast.show(Component.translatable("config.nourished.importExport.invalidBundle"));
                 return;
@@ -165,7 +163,7 @@ public final class ImportConfigScreen extends Screen {
 
     private void initPreview(int cx) {
         int y = this.height / 2 - 100;
-        for (ImportExportManager.Section s : ImportExportManager.Section.values()) {
+        for (NourishedImportExport.Section s : NourishedImportExport.Section.values()) {
             if (!available.contains(s)) {
                 continue;
             }
@@ -205,10 +203,10 @@ public final class ImportConfigScreen extends Screen {
                         .build());
     }
 
-    private static Component previewLine(ImportExportManager.Section s, boolean on) {
+    private static Component previewLine(NourishedImportExport.Section s, boolean on) {
         String mark = on ? "\u2713 " : "";
         return Component.literal(mark)
-                .append(Component.translatable("config.nourished.importExport.section." + s.name().toLowerCase(Locale.ROOT)));
+                .append(Component.translatable("config.nourished.importExport.section." + s.labelKey()));
     }
 
     private void applySelected() {
@@ -218,7 +216,7 @@ public final class ImportConfigScreen extends Screen {
         }
         Minecraft mc = Minecraft.getInstance();
         try {
-            ImportExportManager.applyImport(pending, selectedSections);
+            NourishedImportExport.applyImport(pending, selectedSections);
             ImportExportToast.show(Component.translatable("config.nourished.importExport.importSuccess"));
             mc.setScreen(NourishedConfigScreen.create(reopenParent));
         } catch (Exception e) {
