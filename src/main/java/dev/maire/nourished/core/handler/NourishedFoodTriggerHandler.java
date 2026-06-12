@@ -5,7 +5,10 @@ import dev.marie.MariesLib.api.MarieAPI;
 import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.marie.MariesLib.tracking.TrackingAttachment;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.maire.nourished.core.NourishedKubeIntegration;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -18,6 +21,8 @@ import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -55,10 +60,7 @@ public final class NourishedFoodTriggerHandler {
             if (PENDING_FINISH.containsKey(player.getUUID())) return;
             FoodProperties food = stack.getItem().components().get(DataComponents.FOOD);
             if (food == null) return;
-            MarieAPI.fireSourceTrigger(player,
-                ValueSourceTrigger.itemConsumed(
-                    MarieRegistryUtils.itemKey(stack), food.nutrition()),
-                stack);
+            fireSourceTriggerAndNotifyFoodEaten(player, stack, food);
         }
 
         @SubscribeEvent
@@ -104,10 +106,7 @@ public final class NourishedFoodTriggerHandler {
             if (!TrackingAttachment.isRegistered()) return;
             FoodProperties food = stack.getItem().getFoodProperties(stack, player);
             if (food == null) return;
-            MarieAPI.fireSourceTrigger(player,
-                ValueSourceTrigger.itemConsumed(
-                    MarieRegistryUtils.itemKey(stack), food.nutrition()),
-                stack);
+            fireSourceTriggerAndNotifyFoodEaten(player, stack, food);
             LAST_SOURCE_ONLY_EAT.put(player.getUUID(), player.level().getGameTime());
         }
 
@@ -116,6 +115,49 @@ public final class NourishedFoodTriggerHandler {
             if (!(event.getEntity() instanceof ServerPlayer player)) return;
             PENDING_FINISH.remove(player.getUUID());
         }
+    }
+
+    private static void fireSourceTriggerAndNotifyFoodEaten(
+            ServerPlayer player,
+            ItemStack stack,
+            FoodProperties food
+    ) {
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(stack);
+        Map<String, Float> before = snapshotNutrientLevels(player);
+        MarieAPI.fireSourceTrigger(
+                player,
+                ValueSourceTrigger.itemConsumed(itemId, food.nutrition()),
+                stack);
+        Map<String, Float> deltas = computeNutrientDeltas(before, snapshotNutrientLevels(player));
+        NourishedKubeIntegration.fireFoodEaten(player, itemId.toString(), deltas);
+    }
+
+    private static Map<String, Float> snapshotNutrientLevels(ServerPlayer player) {
+        Map<String, Float> levels = new LinkedHashMap<>();
+        for (NutrientRegistry.NutrientDef nutrient : NutrientRegistry.getAll()) {
+            levels.put(nutrient.key(), nutrientLevel(player, nutrient.key()));
+        }
+        return levels;
+    }
+
+    private static Map<String, Float> computeNutrientDeltas(
+            Map<String, Float> before,
+            Map<String, Float> after
+    ) {
+        Map<String, Float> deltas = new LinkedHashMap<>();
+        for (NutrientRegistry.NutrientDef nutrient : NutrientRegistry.getAll()) {
+            String key = nutrient.key();
+            float delta = after.getOrDefault(key, 0f) - before.getOrDefault(key, 0f);
+            if (delta != 0f) {
+                deltas.put(key, delta);
+            }
+        }
+        return deltas;
+    }
+
+    private static float nutrientLevel(ServerPlayer player, String nutrientKey) {
+        float level = MarieAPI.getValueLevel(player, nutrientKey);
+        return level < 0f ? 0f : level;
     }
 
     private record PendingFinish(net.minecraft.world.item.Item item, int count) {

@@ -20,6 +20,7 @@ import dev.maire.nourished.modules.RawFood.rawInfo.CookednessResolver;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodResistanceResolver;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.NourishedKubeIntegration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.Holder;
@@ -73,6 +74,11 @@ public class RawFoodPenaltyHandler {
 
         RawFoodTierDef tierDef = RawFoodConfig.getTier(severity);
         boolean repeatedRawEat = updateRawEatTimestamp(player, itemId.toString());
+
+        if (NourishedKubeIntegration.isRawFoodPenaltyCancelled(
+                player.getUUID().toString(), itemId.toString(), severity.name().toLowerCase())) {
+            return;
+        }
 
         applyRawFoodEffect(player, severity, tierDef, repeatedRawEat);
         applyNutrientPenalty(player, stack, tierDef, penaltyScale);
@@ -152,10 +158,13 @@ public class RawFoodPenaltyHandler {
         float cookedness = CookednessResolver.resolve(itemId);
 
         GutHealthData gut = player.getData(GutHealthAttachment.GUT.get());
+        float oldGutHealth = gut.getGutHealth();
         gut.applyRawEat(cookedness, Math.abs(tierDef.nutrientPenalty()) * penaltyScale);
         float sensitivityMultiplier = gut.effectivePenaltyMultiplier();
         player.setData(GutHealthAttachment.GUT.get(), gut);
         ModNetworking.syncGutHealth(player, gut);
+        NourishedKubeIntegration.fireGutHealthChanged(
+                player.getUUID().toString(), oldGutHealth, gut.getGutHealth(), "raw_food");
 
         TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
 

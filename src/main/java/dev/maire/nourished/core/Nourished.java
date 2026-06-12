@@ -14,7 +14,6 @@ import dev.marie.MariesLib.registry.RegistryLifecycleManager;
 import dev.maire.nourished.core.context.NourishedContextBuilder;
 import dev.maire.nourished.core.lifecycle.NourishedLifecycle;
 import dev.marie.MariesLib.core.MariesLibBootstrap;
-import dev.marie.MariesLib.compat.kubejs.MarieKubeJSPlugin;
 import dev.marie.MariesLib.compat.AutoCompatDiscovery;
 import dev.marie.MariesLib.compat.ModCompat;
 import dev.maire.nourished.compat.lso.LSOCompat;
@@ -72,10 +71,7 @@ public class Nourished {
         MarieDataManager.setCallbacks(new NourishedDatapackCallbacks());
         // NourishedContextBuilder.register(); // Phase 6: restore if slim bootstrap fails verification
 
-        if (ModList.get().isLoaded("kubejs")) {
-            modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLConstructModEvent.class, event ->
-                    MarieKubeJSPlugin.bootstrap());
-        }
+        NourishedKubeIntegration.register();
         ModCompat.initialize();
         if (ModList.get().isLoaded("peakstamina")) {
             PeakStaminaCompat.register();
@@ -116,18 +112,6 @@ public class Nourished {
             });
         });
         NeoForge.EVENT_BUS.register(new NourishedGuideJoinHandler());
-        if (ModList.get().isLoaded("kubejs")) {
-            try {
-                MarieKubeJSPlugin.bootstrap();
-                if (MarieKubeJSPlugin.isRegistered()) {
-                    LOGGER.info("[Nourished] Enabled KubeJS integration bridge.");
-                } else {
-                    LOGGER.warn("[Nourished] KubeJS is loaded but MarieKubeJSPlugin was not registered.");
-                }
-            } catch (Throwable t) {
-                LOGGER.warn("[Nourished] Failed to initialize KubeJS integration bridge.", t);
-            }
-        }
         TrackingAttachment.logAllValueNbtPaths();
         LOGGER.info("[Nourished] Calories NBT path: {}", TrackingAttachment.getTotalNbtPath());
         LOGGER.info("[Nourished] API v{} ready — {} nutrients, {} effects, {} compat entries registered.",

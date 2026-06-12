@@ -2,6 +2,7 @@ package dev.maire.nourished.modules.RawFood.Gut;
 
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.config.NourishedModuleCache;
+import dev.maire.nourished.core.NourishedKubeIntegration;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
@@ -43,10 +44,13 @@ public class GutHealthRecoveryHandler {
         float recoveryAmount = RawFoodConfig.cookedFoodRecoveryRate() * cookedness;
 
         GutHealthData gut = player.getData(GutHealthAttachment.GUT.get());
+        float oldGutHealth = gut.getGutHealth();
         gut.applyRecovery(recoveryAmount);
         gut.setLastUpdateMs(player.level().getGameTime() * 50L);
 
         player.setData(GutHealthAttachment.GUT.get(), gut);
         ModNetworking.syncGutHealth(player, gut);
+        NourishedKubeIntegration.fireGutHealthChanged(
+                player.getUUID().toString(), oldGutHealth, gut.getGutHealth(), "recovery");
     }
 }
