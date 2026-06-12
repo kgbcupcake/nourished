@@ -24,8 +24,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class CookednessResolver {
 
     private static final ConcurrentHashMap<ResourceLocation, Float> CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<ResourceLocation, Float> OVERRIDES = new ConcurrentHashMap<>();
 
     private CookednessResolver() {}
+
+    public static void registerOverride(ResourceLocation itemId, float cookedness) {
+        OVERRIDES.put(itemId, Math.max(0.0f, Math.min(1.0f, cookedness)));
+    }
 
     /**
      * Resolves cookedness for the given item ID.
@@ -37,6 +42,12 @@ public final class CookednessResolver {
         Float cached = CACHE.get(itemId);
         if (cached != null) {
             return cached;
+        }
+
+        Float override = OVERRIDES.get(itemId);
+        if (override != null) {
+            CACHE.put(itemId, override);
+            return override;
         }
 
         ScanCache scanCache = ItemScanner.getCache();
@@ -62,6 +73,7 @@ public final class CookednessResolver {
      */
     public static void invalidate() {
         CACHE.clear();
+        OVERRIDES.clear();
     }
 
     /**

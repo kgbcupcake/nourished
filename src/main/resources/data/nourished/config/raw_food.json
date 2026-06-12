@@ -5,6 +5,15 @@
     "medium": ["raw", "uncooked"],
     "severe": ["rotten", "spoiled", "crude"]
   },
+  "overrides": {
+    "minecraft:beef": 0.1,
+    "minecraft:porkchop": 0.1,
+    "minecraft:mutton": 0.1,
+    "minecraft:chicken": 0.1,
+    "minecraft:rabbit": 0.1,
+    "minecraft:cod": 0.1,
+    "minecraft:salmon": 0.1
+  },
   "tiers": {
     "fine": {
       "effect_pool": [],

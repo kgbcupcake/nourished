@@ -13,7 +13,9 @@ import dev.maire.nourished.core.tags.NourishedItemTags;
 import dev.marie.MariesLib.util.MarieJsonUtils;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.marie.MariesLib.util.MarieResourceLoader;
+import dev.maire.nourished.modules.RawFood.rawInfo.CookednessResolver;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodResistanceConfig;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.loading.FMLPaths;
@@ -201,6 +203,7 @@ public class RawFoodConfig {
         Path file = configDir.resolve("raw_food.json");
 
         resetToEmpty();
+        CookednessResolver.invalidate();
         try {
             parseBundledDefaults();
             Files.createDirectories(configDir);
@@ -283,6 +286,9 @@ public class RawFoodConfig {
         if (root.has("tokens") && root.get("tokens").isJsonObject()) {
             parseTokens(root.getAsJsonObject("tokens"));
         }
+        if (root.has("overrides") && root.get("overrides").isJsonObject()) {
+            parseOverrides(root.getAsJsonObject("overrides"));
+        }
         if (root.has("tiers") && root.get("tiers").isJsonObject()) {
             parseTiers(root.getAsJsonObject("tiers"));
         }
@@ -300,6 +306,18 @@ public class RawFoodConfig {
         sensitivityDecayRate = MarieJsonUtils.getOptionalFloat(gut, "sensitivity_decay_rate", sensitivityDecayRate);
         maxSensitivityMultiplier = MarieJsonUtils.getOptionalFloat(gut, "max_sensitivity_multiplier", maxSensitivityMultiplier);
         sensitivityIncrementPerRawEat = MarieJsonUtils.getOptionalFloat(gut, "sensitivity_increment_per_raw_eat", sensitivityIncrementPerRawEat);
+    }
+
+    private static void parseOverrides(JsonObject overrides) {
+        for (Map.Entry<String, JsonElement> entry : overrides.entrySet()) {
+            try {
+                ResourceLocation itemId = ResourceLocation.parse(entry.getKey());
+                float cookedness = entry.getValue().getAsFloat();
+                CookednessResolver.registerOverride(itemId, cookedness);
+            } catch (RuntimeException e) {
+                Nourished.LOGGER.warn("[RawFoodConfig] Ignoring invalid cookedness override '{}'", entry.getKey());
+            }
+        }
     }
 
     private static void parseTokens(JsonObject tokens) {
