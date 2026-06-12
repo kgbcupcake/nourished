@@ -18,6 +18,9 @@ import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
+import dev.maire.nourished.core.reload.NourishedReloadHelper;
+import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
 import net.minecraft.client.gui.screens.Screen;
 
 @ApiStatus.Internal
@@ -92,6 +95,12 @@ public final class NourishedContextBuilder {
                             stack, level, (int) payload, 0f, bars);
                     return new MarieLibContext.SourceDelta(d.calories(), d.nutrients());
                 })
+                .onReloadBroadcast(NourishedReloadHelper::reloadAndBroadcast)
+                .onCacheInvalidated(() -> {
+                    FoodFamilyResolver.clearCache();
+                    RuntimeFoodResolver.getInstance().invalidateCache();
+                    RawFoodClassifier.invalidate();
+                })
                 .build());
     }
 
@@ -136,7 +145,6 @@ public final class NourishedContextBuilder {
                 .valueColorProvider(MarieValueColors::baseColorArgb)
                 .valueIconProvider(NutrientRegistry::getIcon)
                 .sourceFamilyResolver(FoodFamilyResolver::resolve)
-                .isSourceResolvable(NourishedContextBuilder::isNutritiousFood)
                 .sourceItemFilter(() -> NourishedContextBuilder::isNutritiousFood)
                 .valueTagScoresProvider(item -> FoodNutritionRegistry.getNutrientTagScores(item))
                 .multiValueInheritanceThreshold(() -> NourishedConfig.get().multiNutrientInheritanceThreshold())
