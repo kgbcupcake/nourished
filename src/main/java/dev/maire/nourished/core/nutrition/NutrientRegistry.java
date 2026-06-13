@@ -138,6 +138,8 @@ public class NutrientRegistry {
 
     private static final Core INSTANCE = new Core();
 
+    private static volatile boolean bootstrapped = false;
+
     private static final String[] DEFAULT_NUTRIENT_RESOURCES = {
             "fruits",
             "vegetables",
@@ -247,6 +249,14 @@ public class NutrientRegistry {
     // ── Loading ───────────────────────────────────────────────────────────────
 
     public static void load() {
+        if (bootstrapped) {
+            return;
+        }
+        bootstrapped = true;
+        doLoad();
+    }
+
+    private static void doLoad() {
         Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
         Path file = configDir.resolve("nutrients.json");
 
@@ -261,6 +271,7 @@ public class NutrientRegistry {
                 validateSchema(file, arr);
             }
             parse(file);
+            FoodNutritionRegistry.clearTagKeyCache();
             syncToValueRegistry();
             Nourished.LOGGER.info("[NutrientRegistry] Loaded {} nutrients from {}", INSTANCE.size(), file);
         } catch (IOException e) {
@@ -276,7 +287,7 @@ public class NutrientRegistry {
      */
     public static void reload() {
         Nourished.LOGGER.info("[NutrientRegistry] Reloading nutrients.json");
-        load();
+        doLoad();
     }
 
     /**

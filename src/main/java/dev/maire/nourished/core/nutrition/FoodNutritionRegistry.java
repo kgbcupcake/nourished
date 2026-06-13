@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
 
@@ -15,6 +16,7 @@ import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.food.FoodProperties;
@@ -30,6 +32,8 @@ import net.minecraft.world.level.Level;
  */
 @ApiStatus.Internal
 public final class FoodNutritionRegistry {
+
+    private static final Map<String, TagKey<Item>> TAG_KEY_CACHE = new ConcurrentHashMap<>();
 
     /**
      * Milk buckets consume like food for effects but omit {@link DataComponents#FOOD}. Used for nutrient math everywhere
@@ -91,6 +95,10 @@ public final class FoodNutritionRegistry {
         // Classifications now live in SourceRegistry via datapack and MarieAPI.
     }
 
+    public static void clearTagKeyCache() {
+        TAG_KEY_CACHE.clear();
+    }
+
     /**
      * Nutrient bar weights from datapack {@code nourished:nutrients/*} tags (compat-filtered).
      * Used by tooling that snapshots tag-classified foods.
@@ -103,11 +111,11 @@ public final class FoodNutritionRegistry {
     private static Map<String, Float> collectNutrientTagMatches(Item item) {
         ResourceLocation itemId = item.builtInRegistryHolder().key().location();
         Map<String, Float> matches = new LinkedHashMap<>();
-        var holder = new ItemStack(item).getItemHolder();
+        var holder = item.builtInRegistryHolder();
 
         for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
             for (String tagStr : def.tags()) {
-                var tagKey = MarieRegistryUtils.itemTagKey(tagStr);
+                var tagKey = TAG_KEY_CACHE.computeIfAbsent(tagStr, MarieRegistryUtils::itemTagKey);
                 if (holder.is(tagKey)) {
                     matches.put(def.key(), 1.0f);
                     break;
