@@ -14,6 +14,7 @@ import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.marie.MariesLib.api.ApiStatus;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -32,6 +33,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+@ApiStatus.Internal
 public class DietScreen extends Screen {
 
     // ── Panel dimensions ─────────────────────────────────────────────────────
@@ -309,7 +311,11 @@ public class DietScreen extends Screen {
                 y += 10;
 
                 for (String id : recentIds) {
-                    ItemStack recent = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id)));
+                    ResourceLocation itemId = ResourceLocation.tryParse(id);
+                    if (itemId == null) {
+                        continue;
+                    }
+                    ItemStack recent = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
                     PoseStack poseRecent = g.pose();
                     poseRecent.pushPose();
                     poseRecent.translate(x, y, 0);

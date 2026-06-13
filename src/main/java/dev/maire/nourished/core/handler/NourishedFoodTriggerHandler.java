@@ -1,6 +1,7 @@
 package dev.maire.nourished.core.handler;
 
 import dev.marie.MariesLib.api.ValueSourceTrigger;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.api.MarieAPI;
 import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.marie.MariesLib.tracking.TrackingAttachment;
@@ -16,7 +17,6 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
@@ -30,6 +30,7 @@ import java.util.UUID;
  * Fires MarieLib's value pipeline when a player eats food.
  * This logic lives in Nourished, not in MarieLib.
  */
+@ApiStatus.Internal
 public final class NourishedFoodTriggerHandler {
 
     private static final int SOURCE_ONLY_EAT_COOLDOWN_TICKS = 20;
@@ -48,7 +49,6 @@ public final class NourishedFoodTriggerHandler {
 
     private static class Listener {
 
-        @SubscribeEvent(priority = EventPriority.HIGH)
         public void onItemUseFinishHigh(LivingEntityUseItemEvent.Finish event) {
             if (!(event.getEntity() instanceof ServerPlayer player)) return;
             if (!FeatureFlagCache.enableSourceApplication()) return;
@@ -63,7 +63,6 @@ public final class NourishedFoodTriggerHandler {
             fireSourceTriggerAndNotifyFoodEaten(player, stack, food);
         }
 
-        @SubscribeEvent
         public void onRightClick(PlayerInteractEvent.RightClickItem event) {
             if (!FeatureFlagCache.enableDecay() || !FeatureFlagCache.enableSourceApplication()) return;
             if (!(event.getEntity() instanceof ServerPlayer player)) return;
@@ -88,7 +87,6 @@ public final class NourishedFoodTriggerHandler {
             }
         }
 
-        @SubscribeEvent
         public void onItemUseFinish(LivingEntityUseItemEvent.Finish event) {
             if (!(event.getEntity() instanceof ServerPlayer player)) return;
             PendingFinish pending = PENDING_FINISH.get(player.getUUID());
@@ -110,7 +108,6 @@ public final class NourishedFoodTriggerHandler {
             LAST_SOURCE_ONLY_EAT.put(player.getUUID(), player.level().getGameTime());
         }
 
-        @SubscribeEvent(priority = EventPriority.LOWEST)
         public void onItemUseStop(LivingEntityUseItemEvent.Stop event) {
             if (!(event.getEntity() instanceof ServerPlayer player)) return;
             PENDING_FINISH.remove(player.getUUID());

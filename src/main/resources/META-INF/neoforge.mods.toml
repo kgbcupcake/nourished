@@ -29,8 +29,8 @@ ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${mod_id}]]
-modId = "marieslib"
-type = "required"
-versionRange = "[0.0.1-beta.1,)"
-ordering = "AFTER"
-side = "BOTH"
+    modId = "marieslib"
+    type = "required"
+    versionRange = "${marie_lib_version_range}"
+    ordering = "AFTER"
+    side = "BOTH"

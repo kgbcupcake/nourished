@@ -14,6 +14,7 @@ import dev.maire.nourished.core.Nourished;
 import dev.marie.MariesLib.registry.AbstractRegistry;
 import dev.marie.MariesLib.data.DatapackSchema;
 import dev.marie.MariesLib.runtime.SourceRegistry;
+import dev.marie.MariesLib.util.MarieValidation;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -283,7 +284,9 @@ public class NutrientRegistry {
      * Must be called after item tags are bound (see {@code NourishedTagsHandler}).
      */
     public static void registerClassificationsFromTags() {
-        Nourished.LOGGER.info("[DEBUG] registerClassificationsFromTags starting");
+        if (FeatureFlagCache.enableDebugLogging()) {
+            Nourished.LOGGER.debug("registerClassificationsFromTags starting");
+        }
         int count = 0;
         for (Item item : BuiltInRegistries.ITEM) {
             Map<String, Float> scores = FoodNutritionRegistry.getNutrientTagScores(item);
@@ -296,7 +299,9 @@ public class NutrientRegistry {
                 count++;
             }
         }
-        Nourished.LOGGER.info("[DEBUG] registerClassificationsFromTags complete — {} classifications registered", count);
+        if (FeatureFlagCache.enableDebugLogging()) {
+            Nourished.LOGGER.debug("registerClassificationsFromTags complete — {} classifications registered", count);
+        }
     }
 
     private static void syncToValueRegistry() {
@@ -358,7 +363,11 @@ public class NutrientRegistry {
                 loadDefaultsUnlocked();
                 return;
             }
-            for (int i = 0; i < arr.size(); i++) {
+            int limit = 2000;
+            if (arr.size() > limit) {
+                Nourished.LOGGER.warn("[NutrientRegistry] nutrients.json has {} entries, exceeding {} — truncating", arr.size(), limit);
+            }
+            for (int i = 0; i < Math.min(arr.size(), limit); i++) {
                 JsonElement el = arr.get(i);
                 JsonObject obj = el.getAsJsonObject();
                 com.google.gson.JsonElement keyEl = obj.get("key");
@@ -433,6 +442,7 @@ public class NutrientRegistry {
             obj.add("tags", tags);
             arr.add(obj);
         }
+        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "NutrientRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }

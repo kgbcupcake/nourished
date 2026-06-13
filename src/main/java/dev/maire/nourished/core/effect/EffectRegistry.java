@@ -12,6 +12,7 @@ import dev.marie.MariesLib.registry.ListRegistry;
 import dev.marie.MariesLib.data.DatapackSchema;
 import dev.marie.MariesLib.util.MarieJsonUtils;
 import dev.marie.MariesLib.util.MarieResourceLoader;
+import dev.marie.MariesLib.util.MarieValidation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -160,6 +161,7 @@ public class EffectRegistry {
                 obj.addProperty("show_particles", def.showParticles());
                 arr.add(obj);
             }
+            MarieValidation.assertPathUnder(file, configDir, "EffectRegistry");
             try (Writer w = Files.newBufferedWriter(file)) {
                 GSON.toJson(arr, w);
             }
@@ -186,7 +188,11 @@ public class EffectRegistry {
     }
 
     private static void parseJson(JsonArray arr) {
-        for (int i = 0; i < arr.size(); i++) {
+        int limit = 2000;
+        if (arr.size() > limit) {
+            Nourished.LOGGER.warn("[EffectRegistry] effects.json has {} entries, exceeding {} — truncating", arr.size(), limit);
+        }
+        for (int i = 0; i < Math.min(arr.size(), limit); i++) {
             JsonElement el = arr.get(i);
             JsonObject obj = el.getAsJsonObject();
             com.google.gson.JsonElement idEl = obj.get("id");
@@ -314,6 +320,7 @@ public class EffectRegistry {
             obj.addProperty("show_particles", def.showParticles());
             arr.add(obj);
         }
+        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "EffectRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }

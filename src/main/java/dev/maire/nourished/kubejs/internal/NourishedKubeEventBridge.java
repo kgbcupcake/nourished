@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.script.ScriptsLoadedEvent;
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.api.MarieEvents;
 import dev.marie.MariesLib.api.ValueModifierContext;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.kubejs.NourishedKubeEvents;
 import dev.maire.nourished.kubejs.events.NourishedFoodEatenEvent;
@@ -80,8 +81,13 @@ public final class NourishedKubeEventBridge {
         if (!NourishedKubeGuard.hasListeners(NourishedKubeEvents.FOOD_EATEN_ID)) {
             return;
         }
+        ResourceLocation parsedItemId = ResourceLocation.tryParse(itemId);
+        if (parsedItemId == null) {
+            Nourished.LOGGER.warn("[NourishedKubeEventBridge] Invalid item id '{}' — skipping FOOD_EATEN event", itemId);
+            return;
+        }
         NourishedKubeEvents.FOOD_EATEN.post(
-                new NourishedFoodEatenEvent(player, ResourceLocation.parse(itemId), deltas));
+                new NourishedFoodEatenEvent(player, parsedItemId, deltas));
     }
 
     public static boolean fireRawFoodPenalty(String playerId, String itemId, String tier) {

@@ -120,15 +120,23 @@ public final class NourishedLockRegistry {
         if (obj != null) {
             if (obj.has("locked") && obj.get("locked").isJsonArray()) {
                 JsonArray arr = obj.getAsJsonArray("locked");
-                for (JsonElement el : arr) {
-                    LOCKED.register(el.getAsString(), Boolean.TRUE);
+                int limit = 2000;
+                if (arr.size() > limit) {
+                    Nourished.LOGGER.warn("[NourishedLockRegistry] locked has {} entries, exceeding {} — truncating", arr.size(), limit);
+                }
+                for (int i = 0; i < Math.min(arr.size(), limit); i++) {
+                    LOCKED.register(arr.get(i).getAsString(), Boolean.TRUE);
                 }
             }
 
             if (obj.has("server_only") && obj.get("server_only").isJsonArray()) {
                 JsonArray arr = obj.getAsJsonArray("server_only");
-                for (JsonElement el : arr) {
-                    SERVER_ONLY.register(el.getAsString(), Boolean.TRUE);
+                int limit = 2000;
+                if (arr.size() > limit) {
+                    Nourished.LOGGER.warn("[NourishedLockRegistry] server_only has {} entries, exceeding {} — truncating", arr.size(), limit);
+                }
+                for (int i = 0; i < Math.min(arr.size(), limit); i++) {
+                    SERVER_ONLY.register(arr.get(i).getAsString(), Boolean.TRUE);
                 }
             }
         }

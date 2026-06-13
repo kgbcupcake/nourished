@@ -149,7 +149,10 @@ final class HudDrawHelpers {
 
     static void renderIcon(GuiGraphics g, String key, int x, int y, int iconSize) {
         String iconId = NutrientRegistry.getIcon(key);
-        var item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(iconId)).orElse(Items.APPLE);
+        ResourceLocation iconLoc = ResourceLocation.tryParse(iconId);
+        var item = iconLoc == null
+                ? Items.APPLE
+                : BuiltInRegistries.ITEM.getOptional(iconLoc).orElse(Items.APPLE);
         ItemStack stack = new ItemStack(item);
         PoseStack pose = g.pose();
         pose.pushPose();

@@ -103,6 +103,7 @@ public final class NourishedImportExport {
         Files.createDirectories(exportsDirectory());
         String stem = Nourished.MODID + "-config-" + LocalDateTime.now().format(FILE_TS);
         Path file = exportsDirectory().resolve(stem + ".json");
+        MarieValidation.assertPathUnder(file, exportsDirectory(), "NourishedImportExport.writeExportFile");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON_PRETTY.toJson(root, w);
         }

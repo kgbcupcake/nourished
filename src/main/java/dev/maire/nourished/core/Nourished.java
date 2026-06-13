@@ -69,7 +69,6 @@ public class Nourished {
         MariesLibBootstrap.attach(Nourished.MODID, modEventBus);
         NourishedContextBuilder.registerSlim();
         MarieDataManager.setCallbacks(new NourishedDatapackCallbacks());
-        // NourishedContextBuilder.register(); // Phase 6: restore if slim bootstrap fails verification
 
         NourishedKubeIntegration.register();
         ModCompat.initialize();

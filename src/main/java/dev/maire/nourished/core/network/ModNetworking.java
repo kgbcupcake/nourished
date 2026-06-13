@@ -6,6 +6,7 @@ import dev.marie.MariesLib.tracking.SourceMemoryEntry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthSyncPayload;
+import dev.marie.MariesLib.api.ApiStatus;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -25,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@ApiStatus.Internal
 public class ModNetworking {
 
     public static void register(RegisterPayloadHandlersEvent event) {

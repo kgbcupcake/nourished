@@ -8,6 +8,7 @@ import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.marie.MariesLib.config.PresetRegistry;
 import dev.marie.MariesLib.data.DatapackSchema;
+import dev.marie.MariesLib.util.MarieValidation;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
@@ -135,6 +136,7 @@ public final class NourishedPresetRegistry {
         root.addProperty("author", author == null ? "" : author.trim());
         root.addProperty("locked", false);
         root.add("values", values.toJsonObject());
+        MarieValidation.assertPathUnder(file, dir, "NourishedPresetRegistry.saveUserPreset");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(root, w);
         }

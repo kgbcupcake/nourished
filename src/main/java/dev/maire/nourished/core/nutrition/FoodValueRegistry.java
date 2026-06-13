@@ -11,6 +11,7 @@ import dev.maire.nourished.core.Nourished;
 import dev.marie.MariesLib.registry.AbstractRegistry;
 import dev.marie.MariesLib.util.MarieJsonUtils;
 import dev.marie.MariesLib.util.MarieResourceLoader;
+import dev.marie.MariesLib.util.MarieValidation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -219,7 +220,11 @@ public class FoodValueRegistry {
                 registerBundledDefaultsUnlocked();
                 return;
             }
-            for (int i = 0; i < arr.size(); i++) {
+            int limit = 2000;
+            if (arr.size() > limit) {
+                Nourished.LOGGER.warn("[FoodValueRegistry] food_values.json has {} entries, exceeding {} — truncating", arr.size(), limit);
+            }
+            for (int i = 0; i < Math.min(arr.size(), limit); i++) {
                 registerFoodValueRow(arr.get(i).getAsJsonObject(), i);
             }
             if (INSTANCE.valuesUnlocked().isEmpty()) {
@@ -251,6 +256,7 @@ public class FoodValueRegistry {
         for (FoodValueDef def : loadBundledDefaults()) {
             arr.add(defToJson(def));
         }
+        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "FoodValueRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }
@@ -261,6 +267,7 @@ public class FoodValueRegistry {
         for (FoodValueDef def : INSTANCE.values()) {
             arr.add(defToJson(def));
         }
+        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "FoodValueRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }

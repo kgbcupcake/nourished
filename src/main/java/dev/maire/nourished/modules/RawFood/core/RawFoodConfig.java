@@ -13,6 +13,7 @@ import dev.maire.nourished.core.tags.NourishedItemTags;
 import dev.marie.MariesLib.util.MarieJsonUtils;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.marie.MariesLib.util.MarieResourceLoader;
+import dev.marie.MariesLib.util.MarieValidation;
 import dev.maire.nourished.modules.RawFood.rawInfo.CookednessResolver;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodResistanceConfig;
 import net.minecraft.resources.ResourceLocation;
@@ -470,6 +471,7 @@ public class RawFoodConfig {
         root.add("tokens", tokensToJson());
         root.add("tiers", tiersToJson());
         root.add("gut", gutToJson());
+        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "RawFoodConfig");
         try (Writer writer = Files.newBufferedWriter(file)) {
             GSON.toJson(root, writer);
         }

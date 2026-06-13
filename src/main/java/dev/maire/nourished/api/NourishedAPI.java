@@ -67,6 +67,7 @@ public final class NourishedAPI {
      * @return the player's current calorie value
      * @throws IllegalStateException if the nutrition system is not initialized
      */
+    @ApiStatus.Stable
     public static float getTotal(Player player) {
         if (player == null) {
             return 0f;
@@ -82,6 +83,7 @@ public final class NourishedAPI {
      * @return the nutrient level as a normalized float (0.0 to 1.0),
      *         or {@code -1.0f} if the nutrient key is not recognized
      */
+    @ApiStatus.Stable
     public static float getValueLevel(Player player, String valueKey) {
         if (player == null) {
             return -1.0f;
@@ -97,6 +99,7 @@ public final class NourishedAPI {
      * @return an {@link ApplicationHistoryView} for the given player
      * @throws IllegalStateException if the nutrition system is not initialized
      */
+    @ApiStatus.Stable
     public static ApplicationHistoryView getSourceMemory(Player player) {
         if (player == null) {
             return EmptyApplicationHistoryView.INSTANCE;
@@ -144,6 +147,7 @@ public final class NourishedAPI {
      */
     @ApiStatus.Stable
     public static void modifyValue(Player player, String valueKey, float delta) {
+        MarieRegistryUtils.requireValueKey(valueKey, "NourishedAPI.modifyValue");
         dev.marie.MariesLib.api.ValueModifierContext ctx =
                 dev.marie.MariesLib.api.ValueModifierContext.of(player, API_MODIFIER_SOURCE, valueKey);
         dev.marie.MariesLib.api.ValueModifierEvent modifierEvent =
@@ -188,6 +192,7 @@ public final class NourishedAPI {
      * @throws IllegalStateException    if called after initialization is complete
      * @throws IllegalArgumentException if a nutrient with the same id already exists
      */
+    @ApiStatus.Stable
     public static void registerValue(ValueDefinition definition) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         if (NutrientRegistry.getKeys().contains(definition.getId())) {
@@ -215,6 +220,7 @@ public final class NourishedAPI {
      * @param amount      the nutrient contribution amount per consumption
      * @throws IllegalArgumentException if the nutrient key is not registered
      */
+    @ApiStatus.Stable
     public static void registerSourceClassification(ResourceLocation sourceId, String valueKey, float amount) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         dev.marie.MariesLib.util.MarieValidation.requireNonNullId(sourceId, "NourishedAPI.registerSourceClassification");
@@ -250,6 +256,7 @@ public final class NourishedAPI {
      * @param definition the effect definition describing the trigger and effect
      * @throws IllegalArgumentException if the referenced nutrient or effect doesn't exist
      */
+    @ApiStatus.Stable
     public static void registerCustomEffect(ThresholdEffect definition) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         dev.maire.nourished.core.effect.EffectRegistry.registerExternal(definition);
@@ -275,6 +282,7 @@ public final class NourishedAPI {
      *
      * @param definition the compat definition with food-to-nutrient mappings
      */
+    @ApiStatus.Stable
     public static void registerCompatEntry(CompatDefinition definition) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         dev.marie.MariesLib.compat.ModCompat.registerExternal(definition);
@@ -302,6 +310,7 @@ public final class NourishedAPI {
      * @param definition the nutrient synergy definition
      * @throws IllegalArgumentException if referenced nutrients don't exist
      */
+    @ApiStatus.Stable
     public static void registerValueSynergy(SynergyDefinition definition) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         SynergyRegistry.registerValueSynergy(definition);
@@ -323,6 +332,7 @@ public final class NourishedAPI {
      *
      * @param definition the food synergy definition
      */
+    @ApiStatus.Stable
     public static void registerSourcePairSynergy(SourcePairSynergy definition) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         SynergyRegistry.registerSourcePairSynergy(definition);
@@ -348,6 +358,7 @@ public final class NourishedAPI {
      * @param definition the diet profile definition with custom thresholds and bonuses
      * @throws IllegalArgumentException if a profile with the same id already exists
      */
+    @ApiStatus.Stable
     public static void registerTrackingProfile(ProfileDefinition definition) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         ProfileRegistry.register(definition);
@@ -370,6 +381,7 @@ public final class NourishedAPI {
      * @param definition the milestone definition
      * @throws IllegalArgumentException if a milestone with the same id already exists
      */
+    @ApiStatus.Stable
     public static void registerMilestone(MilestoneDefinition definition) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         MilestoneRegistry.register(definition);
@@ -395,6 +407,7 @@ public final class NourishedAPI {
      *
      * @param hook the season hook implementation
      */
+    @ApiStatus.Stable
     public static void registerSeasonHook(MarieSeasonHook hook) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         SeasonHookRegistry.register(hook);
@@ -416,6 +429,7 @@ public final class NourishedAPI {
      *
      * @param modifier the absorption modifier implementation
      */
+    @ApiStatus.Stable
     public static void registerAbsorptionModifier(AbsorptionModifier modifier) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         AbsorptionModifierRegistry.register(modifier);
@@ -437,6 +451,7 @@ public final class NourishedAPI {
      *
      * @param provider the report provider implementation
      */
+    @ApiStatus.Stable
     public static void registerReportProvider(ReportProvider provider) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         ReportProviderRegistry.register(provider);
