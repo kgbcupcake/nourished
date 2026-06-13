@@ -33,8 +33,6 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.EnumValue<HudAnchor> hudAnchor;
     private final ModConfigSpec.IntValue hudOffsetX;
     private final ModConfigSpec.IntValue hudOffsetY;
-    // private final ModConfigSpec.IntValue staminaHudOffsetX; // STAMINA_SHELVED
-    // private final ModConfigSpec.IntValue staminaHudOffsetY; // STAMINA_SHELVED
     private final ModConfigSpec.IntValue hudBarWidth;
     private final ModConfigSpec.DoubleValue hudScale;
     private final ModConfigSpec.IntValue hudReservedBottom;
@@ -61,8 +59,6 @@ public final class NourishedClientConfig {
         );
         hudOffsetX = builder.defineInRange("hudOffsetX", ConfigDefaultsLoader.getInt(defaults, "hudOffsetX", 0), -2000, 2000);
         hudOffsetY = builder.defineInRange("hudOffsetY", ConfigDefaultsLoader.getInt(defaults, "hudOffsetY", 0), -2000, 2000);
-        // staminaHudOffsetX = builder.defineInRange("staminaHudOffsetX", ConfigDefaultsLoader.getInt(defaults, "staminaHudOffsetX", -10), -2000, 2000); // STAMINA_SHELVED
-        // staminaHudOffsetY = builder.defineInRange("staminaHudOffsetY", ConfigDefaultsLoader.getInt(defaults, "staminaHudOffsetY", -60), -2000, 2000); // STAMINA_SHELVED
         hudBarWidth = builder.defineInRange("hudBarWidth", ConfigDefaultsLoader.getInt(defaults, "hudBarWidth", 60), 40, 120);
         hudScale = builder.defineInRange("hudScale", ConfigDefaultsLoader.getDouble(defaults, "hudScale", 1.0d), 0.5d, 1.5d);
         hudReservedBottom = builder.defineInRange("hudReservedBottom", ConfigDefaultsLoader.getInt(defaults, "hudReservedBottom", 52), 30, 100);
@@ -228,36 +224,6 @@ public final class NourishedClientConfig {
 
     public void setHudOffsetY(int value) {
         hudOffsetY.set(value);
-    }
-
-    // public int staminaHudOffsetX() { // STAMINA_SHELVED
-    //     return staminaHudOffsetX.get(); // STAMINA_SHELVED
-    // } // STAMINA_SHELVED
-
-    public int staminaHudOffsetX() {
-        return -10;
-    }
-
-    // public void setStaminaHudOffsetX(int value) { // STAMINA_SHELVED
-    //     staminaHudOffsetX.set(value); // STAMINA_SHELVED
-    // } // STAMINA_SHELVED
-
-    public void setStaminaHudOffsetX(int value) {
-    }
-
-    // public int staminaHudOffsetY() { // STAMINA_SHELVED
-    //     return staminaHudOffsetY.get(); // STAMINA_SHELVED
-    // } // STAMINA_SHELVED
-
-    public int staminaHudOffsetY() {
-        return -60;
-    }
-
-    // public void setStaminaHudOffsetY(int value) { // STAMINA_SHELVED
-    //     staminaHudOffsetY.set(value); // STAMINA_SHELVED
-    // } // STAMINA_SHELVED
-
-    public void setStaminaHudOffsetY(int value) {
     }
 
     public int hudBarWidth() {

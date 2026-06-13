@@ -6,8 +6,6 @@ import dev.marie.MariesLib.tracking.SourceMemoryEntry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthSyncPayload;
-import dev.maire.nourished.modules.Stamina.Core.StaminaData;
-import dev.maire.nourished.modules.Stamina.Core.StaminaSyncPayload;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -63,11 +61,6 @@ public class ModNetworking {
                 (payload, context) -> {}
         );
 
-        // registrar.playToClient( // STAMINA_SHELVED
-        //         StaminaSyncPayload.TYPE, // STAMINA_SHELVED
-        //         StaminaSyncPayload.STREAM_CODEC, // STAMINA_SHELVED
-        //         (payload, context) -> {} // STAMINA_SHELVED
-        // ); // STAMINA_SHELVED
     }
 
     /** Send lightweight client sync. Call on every food eat and decay tick. */
@@ -83,22 +76,6 @@ public class ModNetworking {
     /** Send gut health sync to client. Call on raw food eat, cooked food recovery, and gut tick. */
     public static void syncGutHealth(ServerPlayer player, GutHealthData gut) {
         PacketDistributor.sendToPlayer(player, new GutHealthSyncPayload(gut.getGutHealth(), gut.getSensitivity()));
-    }
-
-    /** Send stamina sync to client. Call when stamina state changes. */
-    public static void syncStamina(ServerPlayer player, StaminaData data) {
-        PacketDistributor.sendToPlayer(player, new StaminaSyncPayload(
-                data.getPhysicalStamina(),
-                data.getPhysicalMax(),
-                data.getPhysicalFatiguePenalty(),
-                data.getPhysicalBonusStamina(),
-                data.getPhysicalDebt(),
-                data.getMentalStamina(),
-                data.getMentalMax(),
-                data.getMentalFatiguePenalty(),
-                data.getMentalBonusStamina(),
-                data.getMentalDebt()
-        ));
     }
 
     private static void encodeFoodMemoryMap(FriendlyByteBuf buf, Map<String, SourceMemoryEntry> map) {

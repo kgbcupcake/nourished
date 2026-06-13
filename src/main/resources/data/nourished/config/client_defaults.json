@@ -1,8 +1,6 @@
 {
   "hudOffsetX": 0,
   "hudOffsetY": 0,
-  "staminaHudOffsetX": -10,
-  "staminaHudOffsetY": -60,
   "hudBarWidth": 60,
   "hudScale": 1.0,
   "hudReservedBottom": 52,

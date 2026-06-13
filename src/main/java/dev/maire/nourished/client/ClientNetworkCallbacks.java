@@ -52,12 +52,6 @@ public final class ClientNetworkCallbacks {
                 GutHealthSyncPayload.STREAM_CODEC,
                 ClientNetworkCallbacks::onGutHealth
         );
-
-        // registrar.playToClient( // STAMINA_SHELVED
-        //         StaminaSyncPayload.TYPE, // STAMINA_SHELVED
-        //         StaminaSyncPayload.STREAM_CODEC, // STAMINA_SHELVED
-        //         ClientNetworkCallbacks::onStamina // STAMINA_SHELVED
-        // ); // STAMINA_SHELVED
     }
 
     public static void onConfigSnapshot(SyncNourishedConfigSnapshot payload, IPayloadContext context) {
@@ -123,27 +117,4 @@ public final class ClientNetworkCallbacks {
             }
         });
     }
-
-    // @SuppressWarnings("unused") // STAMINA_SHELVED
-    // public static void onStamina(StaminaSyncPayload payload, IPayloadContext context) { // STAMINA_SHELVED
-    //     context.enqueueWork(() -> { // STAMINA_SHELVED
-    //         StaminaHUD.updateFromPayload(payload); // STAMINA_SHELVED
-    //         LocalPlayer player = Minecraft.getInstance().player; // STAMINA_SHELVED
-    //         if (player != null) { // STAMINA_SHELVED
-    //             StaminaData stamina = StaminaData.fromSync( // STAMINA_SHELVED
-    //                     payload.physicalStamina(), // STAMINA_SHELVED
-    //                     payload.physicalMax(), // STAMINA_SHELVED
-    //                     payload.physicalFatiguePenalty(), // STAMINA_SHELVED
-    //                     payload.physicalBonusStamina(), // STAMINA_SHELVED
-    //                     payload.physicalDebt(), // STAMINA_SHELVED
-    //                     payload.mentalStamina(), // STAMINA_SHELVED
-    //                     payload.mentalMax(), // STAMINA_SHELVED
-    //                     payload.mentalFatiguePenalty(), // STAMINA_SHELVED
-    //                     payload.mentalBonusStamina(), // STAMINA_SHELVED
-    //                     payload.mentalDebt() // STAMINA_SHELVED
-    //             ); // STAMINA_SHELVED
-    //             player.setData(StaminaAttachment.STAMINA.get(), stamina); // STAMINA_SHELVED
-    //         } // STAMINA_SHELVED
-    //     }); // STAMINA_SHELVED
-    // } // STAMINA_SHELVED
 }

@@ -10,7 +10,6 @@ public final class NourishedModuleCache {
     public static int heavySourcePropertyThreshold = 6;
     public static boolean enableRawSourcePenalty = true;
     public static boolean enableGutHealth = true;
-    public static boolean enableStamina = false;
     public static boolean enablePSStaminaUsage = true;
     public static boolean enablePSPenaltyDecay = true;
     public static boolean enablePSExhaustionDuration = true;
@@ -26,7 +25,6 @@ public final class NourishedModuleCache {
         heavySourcePropertyThreshold = c.heavySourcePropertyThreshold();
         enableRawSourcePenalty = c.isModuleEnabled("enableRawFoodPenalty");
         enableGutHealth = c.isModuleEnabled("enableGutHealth");
-        enableStamina = c.isModuleEnabled("enableStamina");
         enablePSStaminaUsage = c.isModuleEnabled("enablePSStaminaUsage");
         enablePSPenaltyDecay = c.isModuleEnabled("enablePSPenaltyDecay");
         enablePSExhaustionDuration = c.isModuleEnabled("enablePSExhaustionDuration");

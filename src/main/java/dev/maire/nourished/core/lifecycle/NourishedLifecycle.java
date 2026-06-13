@@ -12,7 +12,6 @@ import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
-import dev.maire.nourished.modules.Stamina.Core.StaminaConfig;
 
 /**
  * Registers all config-backed registries with {@link RegistryLifecycleManager} in dependency
@@ -37,8 +36,6 @@ public final class NourishedLifecycle {
                 "EffectRegistry", EffectRegistry::load, EffectRegistry::reload, EffectRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
                 "RawFoodConfig", RawFoodConfig::load, RawFoodConfig::reload, RawFoodConfig::loadFromDatapack);
-        RegistryLifecycleManager.registerRegistry(
-                "StaminaConfig", StaminaConfig::load, StaminaConfig::reload, StaminaConfig::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
                 "FoodValueRegistry", FoodValueRegistry::load, FoodValueRegistry::reload, FoodValueRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(

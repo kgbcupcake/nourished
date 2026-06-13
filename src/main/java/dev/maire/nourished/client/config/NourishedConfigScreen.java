@@ -26,7 +26,6 @@ import dev.maire.nourished.config.NourishedPresetRegistry;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawFoodTierDef;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
-import dev.maire.nourished.modules.Stamina.Core.StaminaConfig;
 
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -144,16 +143,9 @@ public final class NourishedConfigScreen {
             if (toastsPending != null && !toastsPending.get()) {
                 config.setModuleEnabled("enableCriticalToasts", false);
             }
-            AtomicBoolean staminaPending = modulePending.get("enableStamina");
-            if (staminaPending != null && !staminaPending.get()) {
-                config.setModuleEnabled("enablePSStaminaUsage", false);
-                config.setModuleEnabled("enablePSPenaltyDecay", false);
-                config.setModuleEnabled("enablePSExhaustionDuration", false);
-            }
             FoodValueRegistry.save();
             ColorRegistry.save();
             EffectRegistry.save();
-            StaminaConfig.save();
             RawFoodConfig.save();
             MarieValueColors.clearOverrides();
             NourishedClientConfig.saveNow();
@@ -188,7 +180,7 @@ public final class NourishedConfigScreen {
         List<ModuleMeta> metas = moduleMetas(config.moduleToggles());
         List<String> editableModuleKeys = new ArrayList<>();
         Map<String, List<AbstractConfigListEntry>> groupedEntries = new LinkedHashMap<>();
-        for (String group : List.of("core", "rawfood", "stamina", "peakstamina", "spiceoflife", "lso", "ui", "other")) {
+        for (String group : List.of("core", "rawfood", "peakstamina", "spiceoflife", "lso", "ui", "other")) {
             groupedEntries.put(group, new ArrayList<>());
         }
         for (ModuleMeta meta : metas) {
@@ -222,11 +214,9 @@ public final class NourishedConfigScreen {
         }
 
         addRawFoodConfigEntries(groupedEntries.get("rawfood"), eb);
-        // addStaminaConfigEntries(groupedEntries.get("stamina"), eb); // STAMINA_SHELVED
 
         addModuleGroupSubcategory(category, eb, "core", groupedEntries.get("core"));
         addModuleGroupSubcategory(category, eb, "rawfood", groupedEntries.get("rawfood"));
-        // addModuleGroupSubcategory(category, eb, "stamina", groupedEntries.get("stamina")); // STAMINA_SHELVED
         addModuleGroupSubcategory(category, eb, "peakstamina", groupedEntries.get("peakstamina"));
         addModuleGroupSubcategory(category, eb, "spiceoflife", groupedEntries.get("spiceoflife"));
         addModuleGroupSubcategory(category, eb, "lso", groupedEntries.get("lso"));
@@ -252,84 +242,6 @@ public final class NourishedConfigScreen {
         }
 
         addReloadButton(category, eb, false);
-    }
-
-    @SuppressWarnings("unused")
-    private static void addStaminaConfigEntries(List<AbstractConfigListEntry> entries, ConfigEntryBuilder eb) {
-        if (entries == null) {
-            return;
-        }
-
-        List<AbstractConfigListEntry> physicalActions = new ArrayList<>();
-        addStaminaAction(physicalActions, eb, "enableSprint", StaminaConfig.enableSprint(), true, StaminaConfig::setEnableSprint,
-                "sprintCost", StaminaConfig.sprintCost(), 0.0f, 10.0f, 0.05f, 0.15f, StaminaConfig::setSprintCost);
-        addStaminaAction(physicalActions, eb, "enableJump", StaminaConfig.enableJump(), true, StaminaConfig::setEnableJump,
-                "jumpCost", StaminaConfig.jumpCost(), 0.0f, 10.0f, 0.05f, 0.85f, StaminaConfig::setJumpCost);
-        addStaminaAction(physicalActions, eb, "enableAttack", StaminaConfig.enableAttack(), true, StaminaConfig::setEnableAttack,
-                "attackCost", StaminaConfig.attackCost(), 0.0f, 20.0f, 0.05f, 3.45f, StaminaConfig::setAttackCost);
-        addStaminaAction(physicalActions, eb, "enableMissedAttack", StaminaConfig.enableMissedAttack(), true, StaminaConfig::setEnableMissedAttack,
-                "missedAttackCost", StaminaConfig.missedAttackCost(), 0.0f, 10.0f, 0.05f, 1.0f, StaminaConfig::setMissedAttackCost);
-        addStaminaAction(physicalActions, eb, "enableElytra", StaminaConfig.enableElytra(), true, StaminaConfig::setEnableElytra,
-                "elytraCost", StaminaConfig.elytraCost(), 0.0f, 10.0f, 0.05f, 0.25f, StaminaConfig::setElytraCost);
-        addStaminaAction(physicalActions, eb, "enableSwim", StaminaConfig.enableSwim(), true, StaminaConfig::setEnableSwim,
-                "swimCost", StaminaConfig.swimCost(), 0.0f, 10.0f, 0.05f, 0.05f, StaminaConfig::setSwimCost);
-        addStaminaAction(physicalActions, eb, "enableClimb", StaminaConfig.enableClimb(), true, StaminaConfig::setEnableClimb,
-                "climbCost", StaminaConfig.climbCost(), 0.0f, 10.0f, 0.05f, 0.7f, StaminaConfig::setClimbCost);
-        addStaminaAction(physicalActions, eb, "enableTakeDamage", StaminaConfig.enableTakeDamage(), true, StaminaConfig::setEnableTakeDamage,
-                "takeDamageCost", StaminaConfig.takeDamageCost(), 0.0f, 10.0f, 0.05f, 0.5f, StaminaConfig::setTakeDamageCost);
-
-        List<AbstractConfigListEntry> mentalActions = new ArrayList<>();
-        addStaminaAction(mentalActions, eb, "enableMine", StaminaConfig.enableMine(), true, StaminaConfig::setEnableMine,
-                "mineCost", StaminaConfig.mineCost(), 0.0f, 10.0f, 0.05f, 0.3f, StaminaConfig::setMineCost);
-        addStaminaAction(mentalActions, eb, "enablePlace", StaminaConfig.enablePlace(), true, StaminaConfig::setEnablePlace,
-                "placeCost", StaminaConfig.placeCost(), 0.0f, 10.0f, 0.05f, 0.2f, StaminaConfig::setPlaceCost);
-        addStaminaAction(mentalActions, eb, "enableFish", StaminaConfig.enableFish(), true, StaminaConfig::setEnableFish,
-                "fishCost", StaminaConfig.fishCost(), 0.0f, 10.0f, 0.05f, 0.5f, StaminaConfig::setFishCost);
-        addStaminaAction(mentalActions, eb, "enableEat", StaminaConfig.enableEat(), true, StaminaConfig::setEnableEat,
-                "eatCost", StaminaConfig.eatCost(), 0.0f, 10.0f, 0.05f, 0.3f, StaminaConfig::setEatCost);
-        addStaminaAction(mentalActions, eb, "enableRawEatPenalty", StaminaConfig.enableRawEatPenalty(), true, StaminaConfig::setEnableRawEatPenalty,
-                "rawEatCostMultiplier", StaminaConfig.rawEatCostMultiplier(), 1.0f, 5.0f, 0.1f, 2.0f, StaminaConfig::setRawEatCostMultiplier);
-        addStaminaAction(mentalActions, eb, "enableUseItem", StaminaConfig.enableUseItem(), true, StaminaConfig::setEnableUseItem,
-                "useItemCost", StaminaConfig.useItemCost(), 0.0f, 10.0f, 0.05f, 0.2f, StaminaConfig::setUseItemCost);
-
-        entries.add(eb.startSubCategory(Component.literal("Physical Actions"), physicalActions).setExpanded(false).build());
-        entries.add(eb.startSubCategory(Component.literal("Mental Actions"), mentalActions).setExpanded(false).build());
-    }
-
-    private static void addStaminaAction(
-            List<AbstractConfigListEntry> entries,
-            ConfigEntryBuilder eb,
-            String toggleKey,
-            boolean toggleValue,
-            boolean defaultToggleValue,
-            Consumer<Boolean> toggleSaveConsumer,
-            String sliderKey,
-            float sliderValue,
-            float min,
-            float max,
-            float step,
-            float defaultValue,
-            Consumer<Float> sliderSaveConsumer
-    ) {
-        BooleanListEntry toggleEntry = eb.startBooleanToggle(
-                        Component.translatable("config.nourished.stamina." + toggleKey),
-                        toggleValue)
-                .setDefaultValue(defaultToggleValue)
-                .setTooltip(Component.translatable("config.nourished.stamina." + toggleKey + ".desc"))
-                .setSaveConsumer(toggleSaveConsumer)
-                .build();
-        entries.add(toggleEntry);
-        entries.add(buildSteppedFloatSlider(
-                Component.translatable("config.nourished.stamina." + sliderKey),
-                sliderValue,
-                min,
-                max,
-                step,
-                defaultValue,
-                sliderSaveConsumer,
-                toggleEntry::getValue,
-                Component.translatable("config.nourished.stamina." + sliderKey + ".desc")
-        ));
     }
 
     private static void addRawFoodConfigEntries(List<AbstractConfigListEntry> entries, ConfigEntryBuilder eb) {
@@ -413,7 +325,6 @@ public final class NourishedConfigScreen {
     private static Component groupTitle(String group) {
         return Component.translatable(switch (group) {
             case "rawfood" -> "config.nourished.modules.group.rawfood";
-            case "stamina" -> "config.nourished.modules.group.stamina";
             case "peakstamina" -> "config.nourished.modules.group.peakstamina";
             case "spiceoflife" -> "config.nourished.modules.group.spiceoflife";
             case "lso" -> "config.nourished.modules.group.lso";
@@ -427,7 +338,6 @@ public final class NourishedConfigScreen {
             case "enableBlockLightSource" -> "nourished.config.enableBlockLightSource";
             case "enableRawFoodPenalty" -> "config.nourished.enableRawFoodPenalty";
             case "enableGutHealth" -> "config.nourished.enableGutHealth";
-            case "enableStamina" -> "config.nourished.enableStamina";
             case "enablePSStaminaUsage" -> "config.nourished.enablePSStaminaUsage";
             case "enablePSPenaltyDecay" -> "config.nourished.enablePSPenaltyDecay";
             case "enablePSExhaustionDuration" -> "config.nourished.enablePSExhaustionDuration";
@@ -450,7 +360,6 @@ public final class NourishedConfigScreen {
             case "enableBlockLightSource" -> "nourished.config.enableBlockLightSource.desc";
             case "enableRawFoodPenalty" -> "config.nourished.enableRawFoodPenalty.desc";
             case "enableGutHealth" -> "config.nourished.enableGutHealth.desc";
-            case "enableStamina" -> "config.nourished.enableStamina.desc";
             case "enablePSStaminaUsage" -> "config.nourished.enablePSStaminaUsage.desc";
             case "enablePSPenaltyDecay" -> "config.nourished.enablePSPenaltyDecay.desc";
             case "enablePSExhaustionDuration" -> "config.nourished.enablePSExhaustionDuration.desc";
@@ -470,9 +379,6 @@ public final class NourishedConfigScreen {
     private static List<ModuleMeta> moduleMetas(Map<String, ModConfigSpec.BooleanValue> moduleMap) {
         List<ModuleMeta> out = new ArrayList<>();
         for (String key : moduleMap.keySet()) {
-            if ("enableStamina".equals(key)) {
-                continue;
-            }
             String group;
             String dependsOn = null;
             switch (key) {
@@ -480,7 +386,6 @@ public final class NourishedConfigScreen {
                      "enableEffects", "enableCalorieTracking", "enableSleepBonus",
                      "enableSynergies", "enableMilestones", "enableSeasonHooks", "enableAbsorptionModifiers" -> group = "core";
                 case "enableRawFoodPenalty", "enableGutHealth" -> group = "rawfood";
-                // case "enableStamina" -> group = "stamina"; // STAMINA_SHELVED
                 case "enablePSStaminaUsage", "enablePSPenaltyDecay", "enablePSExhaustionDuration" -> {
                     if (!ModList.get().isLoaded("peakstamina")) {
                         continue;
@@ -504,10 +409,6 @@ public final class NourishedConfigScreen {
             }
             if ("enableCriticalToasts".equals(key)) {
                 dependsOn = "enableToasts";
-            } else if ("enablePSStaminaUsage".equals(key)
-                    || "enablePSPenaltyDecay".equals(key)
-                    || "enablePSExhaustionDuration".equals(key)) {
-                // dependsOn = "enableStamina"; // STAMINA_SHELVED
             }
             out.add(new ModuleMeta(key, group, dependsOn));
         }
@@ -2493,10 +2394,6 @@ public final class NourishedConfigScreen {
             AtomicBoolean crit = modulePending.get("enableCriticalToasts");
             if (toasts != null && crit != null && !toasts.get()) {
                 crit.set(false);
-            }
-            AtomicBoolean stamina = modulePending.get("enableStamina");
-            if (stamina != null && !stamina.get()) {
-                setModules(false, "enablePSStaminaUsage", "enablePSPenaltyDecay", "enablePSExhaustionDuration");
             }
         }
 
