@@ -1,5 +1,5 @@
 {
-  "nourished_schema_version": 1,
+  "marie_schema_version": 1,
   "display_name": "Fruits",
   "color": -39373,
   "default_decay_rate": 0.001,

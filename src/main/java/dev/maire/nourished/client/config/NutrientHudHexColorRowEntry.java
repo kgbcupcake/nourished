@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.config;
 
-import dev.maire.nourished.client.NutrientUiColors;
-import dev.maire.nourished.core.color.ColorRegistry;
+import dev.marie.MariesLib.client.MarieValueColors;
+import dev.marie.MariesLib.color.ColorRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
@@ -31,14 +31,14 @@ public final class NutrientHudHexColorRowEntry extends TooltipListEntry<Integer>
     private final Button resetButton;
     private boolean suppressHexResponder;
 
-    public NutrientHudHexColorRowEntry(String nutrientKey) {
+    public NutrientHudHexColorRowEntry(String valueKey) {
         super(Component.empty(), () -> Optional.of(new Component[]{
                 Component.translatable("config.nourished.hudColors.row.tooltip")
         }), false);
-        this.key = nutrientKey;
-        this.nutrientLabel = Component.translatable("nourished.screen.diet.bar." + nutrientKey);
-        this.startArgb = ColorRegistry.getArgb(nutrientKey)
-                .orElseGet(() -> NutrientUiColors.baseColorArgb(nutrientKey));
+        this.key = valueKey;
+        this.nutrientLabel = NutrientRegistry.getLabelComponent(valueKey);
+        this.startArgb = ColorRegistry.getArgb(valueKey)
+                .orElseGet(() -> MarieValueColors.baseColorArgb(valueKey));
         this.initialHex = formatRgbHex(startArgb);
         this.hexBox = new EditBox(Minecraft.getInstance().font, 0, 0, 96, 18, Component.translatable("config.nourished.hudColors.hex"));
         this.hexBox.setMaxLength(7);
@@ -85,9 +85,9 @@ public final class NutrientHudHexColorRowEntry extends TooltipListEntry<Integer>
     private void pushLivePreview() {
         Optional<Integer> parsed = parseStrictRgbHex(hexBox.getValue());
         if (parsed.isPresent()) {
-            NutrientUiColors.setOverride(key, parsed.get());
+            MarieValueColors.setOverride(key, parsed.get());
         } else {
-            NutrientUiColors.setOverride(key, null);
+            MarieValueColors.setOverride(key, null);
         }
     }
 
@@ -107,7 +107,7 @@ public final class NutrientHudHexColorRowEntry extends TooltipListEntry<Integer>
     }
 
     private void syncHexFromEffectiveColor() {
-        int effective = ColorRegistry.getArgb(key).orElseGet(() -> NutrientUiColors.paletteOnlyArgb(key));
+        int effective = ColorRegistry.getArgb(key).orElseGet(() -> MarieValueColors.paletteOnlyArgb(key));
         suppressHexResponder = true;
         hexBox.setValue(formatRgbHex(effective));
         suppressHexResponder = false;
@@ -178,7 +178,7 @@ public final class NutrientHudHexColorRowEntry extends TooltipListEntry<Integer>
             return;
         }
         int now = parsed.get();
-        int pal = NutrientUiColors.paletteOnlyArgb(key);
+        int pal = MarieValueColors.paletteOnlyArgb(key);
         int nowRgb = now & 0x00_FF_FF_FF;
         int palRgb = pal & 0x00_FF_FF_FF;
         if (nowRgb == palRgb) {

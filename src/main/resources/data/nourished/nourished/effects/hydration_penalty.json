@@ -1,6 +1,6 @@
 {
-  "nourished_schema_version": 1,
-  "nutrient_key": "vegetables",
+  "marie_schema_version": 1,
+  "value_key": "vegetables",
   "threshold": 0.25,
   "threshold_type": "LOW",
   "effect_id": "minecraft:slowness",

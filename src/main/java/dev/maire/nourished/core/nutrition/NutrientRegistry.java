@@ -6,14 +6,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.api.NutrientDefinition;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.api.ValueDefinition;
+import dev.marie.MariesLib.api.registry.ValueRegistry;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.registry.AbstractRegistry;
-import dev.maire.nourished.tooling.data.DatapackSchema;
+import dev.marie.MariesLib.registry.AbstractRegistry;
+import dev.marie.MariesLib.data.DatapackSchema;
+import dev.marie.MariesLib.runtime.SourceRegistry;
+import dev.marie.MariesLib.util.MarieValidation;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
@@ -52,7 +57,7 @@ public class NutrientRegistry {
             List<String> tags,
             boolean beneficial
     ) {
-        public static NutrientDef fromDefinition(NutrientDefinition definition) {
+        public static NutrientDef fromDefinition(ValueDefinition definition) {
             String key = Objects.requireNonNull(definition.getId(), "definition id");
             String icon = resolveIcon(key);
             List<String> tags = List.of(Nourished.MODID + ":nutrients/" + key);
@@ -83,6 +88,18 @@ public class NutrientRegistry {
                     tags,
                     true
             );
+        }
+
+        public ValueDefinition toValueDefinition() {
+            return ValueDefinition.builder(key)
+                    .displayName(displayName)
+                    .color(color)
+                    .defaultDecayRate(defaultDecayRate)
+                    .criticalThreshold(criticalThreshold)
+                    .lowThreshold(lowThreshold)
+                    .excessThreshold(excessThreshold)
+                    .beneficial(beneficial)
+                    .build();
         }
     }
 
@@ -121,6 +138,8 @@ public class NutrientRegistry {
 
     private static final Core INSTANCE = new Core();
 
+    private static volatile boolean bootstrapped = false;
+
     private static final String[] DEFAULT_NUTRIENT_RESOURCES = {
             "fruits",
             "vegetables",
@@ -151,6 +170,37 @@ public class NutrientRegistry {
         return def != null ? def.tags() : List.of();
     }
 
+    /** Display name from nutrients.json, or the key if unknown. */
+    public static String getDisplayName(String key) {
+        NutrientDef def = INSTANCE.get(key);
+        if (def != null && def.displayName() != null && !def.displayName().isBlank()) {
+            return def.displayName();
+        }
+        return key;
+    }
+
+    /**
+     * Localized HUD label when a lang entry exists; otherwise {@link #getDisplayName(String)}.
+     */
+    public static String getLabel(String key) {
+        String translationKey = Nourished.MODID + ".screen.diet.bar." + key;
+        String translated = Component.translatable(translationKey).getString();
+        if (!translated.equals(translationKey)) {
+            return translated;
+        }
+        return getDisplayName(key);
+    }
+
+    /** Same resolution as {@link #getLabel(String)}, as a chat component. */
+    public static Component getLabelComponent(String key) {
+        String translationKey = Nourished.MODID + ".screen.diet.bar." + key;
+        String translated = Component.translatable(translationKey).getString();
+        if (!translated.equals(translationKey)) {
+            return Component.translatable(translationKey);
+        }
+        return Component.literal(getDisplayName(key));
+    }
+
     /** All registered nutrient definitions in order. */
     public static List<NutrientDef> getAll() {
         return INSTANCE.values();
@@ -173,7 +223,7 @@ public class NutrientRegistry {
         return def == null || def.beneficial();
     }
 
-    public static void registerExternal(NutrientDefinition definition) {
+    public static void registerExternal(ValueDefinition definition) {
         Objects.requireNonNull(definition, "definition");
         String key = Objects.requireNonNull(definition.getId(), "definition id");
         if (INSTANCE.contains(key)) {
@@ -199,6 +249,14 @@ public class NutrientRegistry {
     // ── Loading ───────────────────────────────────────────────────────────────
 
     public static void load() {
+        if (bootstrapped) {
+            return;
+        }
+        bootstrapped = true;
+        doLoad();
+    }
+
+    private static void doLoad() {
         Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
         Path file = configDir.resolve("nutrients.json");
 
@@ -213,21 +271,56 @@ public class NutrientRegistry {
                 validateSchema(file, arr);
             }
             parse(file);
+            FoodNutritionRegistry.clearTagKeyCache();
+            syncToValueRegistry();
             Nourished.LOGGER.info("[NutrientRegistry] Loaded {} nutrients from {}", INSTANCE.size(), file);
         } catch (IOException e) {
             Nourished.LOGGER.error("[NutrientRegistry] Failed to load nutrients.json, using built-in defaults", e);
             loadDefaults();
+            syncToValueRegistry();
         }
     }
 
     /**
-     * Re-reads nutrients.json from disk and re-runs {@link FoodNutritionRegistry#init()}.
-     * Safe to call at runtime; dependent systems are updated immediately after.
+     * Re-reads nutrients.json from disk. Tag-based classifications are synced separately on
+     * {@link net.neoforged.neoforge.event.TagsUpdatedEvent} once item tags are bound.
      */
     public static void reload() {
         Nourished.LOGGER.info("[NutrientRegistry] Reloading nutrients.json");
-        load();
-        FoodNutritionRegistry.init();
+        doLoad();
+    }
+
+    /**
+     * Registers nutrient tag matches into {@link dev.marie.MariesLib.runtime.SourceRegistry}.
+     * Must be called after item tags are bound (see {@code NourishedTagsHandler}).
+     */
+    public static void registerClassificationsFromTags() {
+        if (FeatureFlagCache.enableDebugLogging()) {
+            Nourished.LOGGER.debug("registerClassificationsFromTags starting");
+        }
+        int count = 0;
+        for (Item item : BuiltInRegistries.ITEM) {
+            Map<String, Float> scores = FoodNutritionRegistry.getNutrientTagScores(item);
+            if (scores.isEmpty()) {
+                continue;
+            }
+            ResourceLocation itemId = item.builtInRegistryHolder().key().location();
+            for (Map.Entry<String, Float> entry : scores.entrySet()) {
+                SourceRegistry.registerClassification(itemId, entry.getKey(), entry.getValue());
+                count++;
+            }
+        }
+        if (FeatureFlagCache.enableDebugLogging()) {
+            Nourished.LOGGER.debug("registerClassificationsFromTags complete — {} classifications registered", count);
+        }
+    }
+
+    private static void syncToValueRegistry() {
+        ValueRegistry.resetInternal();
+        for (NutrientDef def : getAll()) {
+            ValueRegistry.register(def.toValueDefinition());
+        }
+        ValueRegistry.freezeInternal();
     }
 
     // ── Internals ─────────────────────────────────────────────────────────────
@@ -261,7 +354,7 @@ public class NutrientRegistry {
             mismatches.add("entry '" + key + "': missing " + missing);
         }
 
-        if (ModuleCache.enableDebugLogging) {
+        if (FeatureFlagCache.enableDebugLogging()) {
             for (String mismatch : mismatches) {
                 Nourished.LOGGER.debug("[NutrientRegistry] nutrients.json schema mismatch: {}", mismatch);
             }
@@ -281,7 +374,11 @@ public class NutrientRegistry {
                 loadDefaultsUnlocked();
                 return;
             }
-            for (int i = 0; i < arr.size(); i++) {
+            int limit = 2000;
+            if (arr.size() > limit) {
+                Nourished.LOGGER.warn("[NutrientRegistry] nutrients.json has {} entries, exceeding {} — truncating", arr.size(), limit);
+            }
+            for (int i = 0; i < Math.min(arr.size(), limit); i++) {
                 JsonElement el = arr.get(i);
                 JsonObject obj = el.getAsJsonObject();
                 com.google.gson.JsonElement keyEl = obj.get("key");
@@ -356,6 +453,7 @@ public class NutrientRegistry {
             obj.add("tags", tags);
             arr.add(obj);
         }
+        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "NutrientRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }
@@ -381,7 +479,7 @@ public class NutrientRegistry {
     private static List<NutrientDef> loadBundledDefaults() {
         List<NutrientDef> defaults = new ArrayList<>();
         for (String path : DEFAULT_NUTRIENT_RESOURCES) {
-            String resource = "/data/" + Nourished.MODID + "/" + DatapackSchema.ROOT + "/nutrients/" + path + ".json";
+            String resource = "/data/" + Nourished.MODID + "/" + DatapackSchema.root() + "/nutrients/" + path + ".json";
             try (InputStream in = NutrientRegistry.class.getResourceAsStream(resource)) {
                 if (in == null) {
                     continue;

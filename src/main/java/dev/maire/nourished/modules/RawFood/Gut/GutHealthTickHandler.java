@@ -1,9 +1,10 @@
 package dev.maire.nourished.modules.RawFood.Gut;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.maire.nourished.config.NourishedModuleCache;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
+import dev.maire.nourished.core.NourishedKubeIntegration;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,14 +23,15 @@ public class GutHealthTickHandler {
 
     @SubscribeEvent
     public void onPlayerTick(PlayerTickEvent.Post event) {
-        if (!ModuleCache.enableGutHealth) return;
+        if (!NourishedModuleCache.enableGutHealth) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
         int tickInterval = RawFoodConfig.gutTickInterval();
         if (player.level().getGameTime() % tickInterval != 0) return;
 
         GutHealthData gut = player.getData(GutHealthAttachment.GUT.get());
-        DietData diet = player.getData(DietAttachment.DIET.get());
+        float oldGutHealth = gut.getGutHealth();
+        TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
 
         gut.applyRecovery(RawFoodConfig.baseRecoveryRate());
 
@@ -45,5 +47,7 @@ public class GutHealthTickHandler {
 
         player.setData(GutHealthAttachment.GUT.get(), gut);
         ModNetworking.syncGutHealth(player, gut);
+        NourishedKubeIntegration.fireGutHealthChanged(
+                player.getUUID().toString(), oldGutHealth, gut.getGutHealth(), "variety");
     }
 }

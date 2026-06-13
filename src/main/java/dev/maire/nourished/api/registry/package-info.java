@@ -7,4 +7,4 @@
 @ApiStatus.Internal
 package dev.maire.nourished.api.registry;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;

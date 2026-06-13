@@ -1,9 +1,9 @@
 package dev.maire.nourished.core.nutrition.stages;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.tooling.scanner.FoodTokenStemmer;
-import dev.maire.nourished.core.nutrition.CacheStats;
+import dev.marie.MariesLib.scanner.TokenStemmer;
+import dev.marie.MariesLib.scan.CacheStats;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import net.minecraft.resources.ResourceLocation;
@@ -42,9 +42,9 @@ final class RuntimeFoodResolverTest {
     }
 
     private static void testStemmerSpecExamples() {
-        assertEquals("tomato", FoodTokenStemmer.stem("tomatoes"), "tomatoes -> tomato");
-        assertEquals("berry", FoodTokenStemmer.stem("berries"), "berries -> berry");
-        assertEquals("meatball", FoodTokenStemmer.stem("meatballs"), "meatballs -> meatball");
+        assertEquals("tomato", TokenStemmer.stem("tomatoes"), "tomatoes -> tomato");
+        assertEquals("berry", TokenStemmer.stem("berries"), "berries -> berry");
+        assertEquals("meatball", TokenStemmer.stem("meatballs"), "meatballs -> meatball");
     }
 
     private static void testCacheStatsInitiallyZero() {

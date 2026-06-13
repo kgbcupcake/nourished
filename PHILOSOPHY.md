@@ -1,48 +1,62 @@
-# Nourished - API Philosophy
+# Nourished — API Philosophy
 
 ## What Nourished Is
 
-Nourished is a nutrition engine and ecosystem layer for NeoForge 1.21.1. It is not just a nutrition mod. It is infrastructure other mods build on top of. The default gameplay experience (HUD, effects, decay, balancing) is one implementation of that engine, not the engine itself.
+Nourished is a nutrition gameplay mod for NeoForge 1.21.1. It tracks food-group balance, rewards variety, and applies configurable buffs and debuffs. Under the hood it runs on MariesLib — the engine, scanner, and tracking layer live there. Nourished is the food-domain implementation players actually install.
+
+If you're building a new Marie mod with your own value bars (not nutrition), depend on [MariesLib](https://github.com/kgbcupcake/MarieLib/blob/main/PHILOSOPHY.md) directly.
 
 ## What We Guarantee
 
-Everything annotated `@ApiStatus.Stable` in `dev.maire.nourished.api` is a public contract. We will not remove or change stable method signatures without a major version bump and a deprecation cycle. Stable APIs will work across minor and patch releases.
+`dev.maire.nourished.api.NourishedAPI` is `@ApiStatus.Stable`. Method signatures on that class won't break without a major version bump and deprecation cycle.
+
+Shared types (`ValueDefinition`, `ThresholdEffect`, `CompatDefinition`, etc.) follow MariesLib's stability rules.
 
 ## What We Don't Guarantee
 
-Anything annotated `@ApiStatus.Experimental` may change between minor versions. Anything annotated `@ApiStatus.Internal` is not part of the public contract and may change or disappear at any time without notice. Do not depend on internal classes.
+KubeJS bindings (`NourishedKubeEvents`) are `@Experimental`.
 
-## What Addons Should Build Against
+Anything in `dev.maire.nourished.core`, `client`, `config`, `compat`, or `api.impl` is internal. Same for MariesLib internals — see MarieLib PHILOSOPHY.
 
-Only `dev.maire.nourished.api.*` (including registry facades under `dev.maire.nourished.api.registry` where those types are part of the supported surface). Do not import from `dev.maire.nourished.core`, `dev.maire.nourished.tooling`, `dev.maire.nourished.client`, `dev.maire.nourished.config`, `dev.maire.nourished.compat`, or `dev.maire.nourished.api.impl`. Those packages are implementation details and may change without notice.
+## What Nutrition Addons Should Build Against
+
+- `NourishedAPI` for registering nutrients, food mappings, and hooks
+- MariesLib API types for definitions (`ValueDefinition`, `ThresholdEffect`, …)
+- `MarieEvents` for NeoForge event subscriptions
+- Datapacks for static food classification
+
+Do not import Nourished or MarieLib implementation packages.
 
 ## What Addons Should Avoid
 
-Do not depend on specific nutrient keys like `"proteins"` or `"carbs"` being present. Query `NourishedAPI` at runtime. Do not depend on specific internal balancing values. Those evolve with gameplay. Do not depend on HUD layout or rendering internals. Do not reflect into internal classes.
+Don't hardcode nutrient keys like `"proteins"` — query at runtime via `getTrackingData()` or `NutrientRegistry`.
+
+Don't depend on HUD layout internals or gut health implementation details unless you're intentionally coupling to those modules.
+
+Don't reflect into internal classes.
 
 ## Configuration Layering
 
-Nourished uses a four-layer config system: Java defaults -> TOML config -> config JSON files -> datapack JSON. Datapacks have highest priority. Addons should prefer datapack JSON for food classifications and compat entries rather than calling `registerFoodClassification` in code. This gives modpack authors override authority.
+Java defaults → TOML → config JSON → datapack JSON. Datapacks win for food classification. Server owners tune mechanics in config. Modpack makers override classifications in datapacks.
 
 ## Data vs Code
 
-Prefer registering nutrients, effects, compat entries, and food classifications via datapack JSON over Java API calls where possible. Java API calls are for runtime-dynamic behavior only. Static definitions belong in data.
+Ship food classifications and balance in datapacks when you can. Java registration is for dynamic or addon-mod-time definitions.
 
 ## Versioning
 
-Nourished uses semantic versioning. Major version bumps may break `@Stable` APIs with a migration guide. Minor version bumps may evolve `@Experimental` APIs. Patch releases are stable. Check `NourishedAPIVersion.isCompatible(requiredMajor)` at startup if your addon requires a minimum API version.
+Nourished tracks MariesLib's API version (`MarieAPIVersion`). Both mods must be present at runtime. Check compatibility at startup if your addon depends on a minimum version.
 
 ## Ecosystem Intent
 
-Nourished is meant to be the nutrition layer other mods integrate with, not a competing system. If your mod adds food, register your items with Nourished. If your mod affects player state, consider firing or listening to `NourishedEvents`. The goal is a coherent food ecosystem, not a walled garden.
+Nourished is the nutrition layer other food mods integrate with. Register your items. Listen to events. The goal is one coherent diet system across a modpack, not competing nutrition mods.
 
-## What Will Physically Separate Eventually
+## Engine Separation
 
-The engine (nutrition calculations, APIs, registries) and the gameplay layer (HUD, effects, overlays) will eventually ship as separate modules. Addons depending only on the engine will not need to pull in client-side rendering code. This separation is planned but not yet complete. Design your addon accordingly.
+Done. MariesLib is the engine. Nourished is gameplay. Addons that only need generic value tracking don't need Nourished on the classpath.
 
-## Contact and Contributions
+## Contact
 
-Repository: [https://github.com/kgbcupcake/nourished](https://github.com/kgbcupcake/nourished)  
-Issue tracker: [https://github.com/kgbcupcake/nourished/issues](https://github.com/kgbcupcake/nourished/issues)
+Repository: [https://github.com/kgbcupcake/nourished](https://github.com/kgbcupcake/nourished)
 
-Compat PRs are welcome. New nutrient tag mappings for popular food mods are especially appreciated.
+Compat PRs welcome — nutrient tag mappings for popular food mods are especially useful.

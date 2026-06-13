@@ -2,13 +2,13 @@
 
 Welcome! This guide is for **modpack players** and **mod authors** who want to help Nourished classify more foods automatically. You do not need to read any game code. If you can edit JSON, you can contribute.
 
-Nourished targets **NeoForge 1.21.1** with mod id `nourished`.
+Nourished targets **NeoForge 1.21.1** with mod id `nourished`. The scanner pipeline lives in **MariesLib**; Nourished owns the nutrition categories and the `scanner_spec.json` weights for food.
 
 ---
 
 ## 1. What is `scanner_spec.json`?
 
-`scanner_spec.json` is a **data file** that tells Nourished’s automatic food classifier how to map foods to the five nutrient categories (fruits, vegetables, proteins, grains, dairy).
+`scanner_spec.json` is a **data file** that tells Nourished’s automatic food classifier how to map foods to the five nutrient categories (fruits, vegetables, proteins, grains, dairy). MariesLib runs the scan; this file is Nourished's domain config for it.
 
 - If a food item already has an explicit `nourished:nutrients/*` item tag, that tag wins and the scanner is not needed for that item.
 - If there is **no** such tag, Nourished uses **weighted signals** from this file (keywords, suffixes, namespaces, archetypes, and a few other rules) to infer the best match at **runtime**.

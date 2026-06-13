@@ -2,6 +2,7 @@ package dev.maire.nourished.core.network.sync;
 
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
+import dev.marie.MariesLib.api.ApiStatus;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -10,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.HashMap;
 import java.util.Map;
 
+@ApiStatus.Internal
 public record SyncNourishedConfigSnapshot(
         int protocolVersion,
         double decayRate,
@@ -51,9 +53,20 @@ public record SyncNourishedConfigSnapshot(
                     },
                     buf -> {
                         int size = buf.readVarInt();
-                        Map<String, Double> map = new HashMap<>(Math.max(8, size * 2));
+                        int cap = 64;
+                        int retain = Math.min(size, cap);
+                        Map<String, Double> map = new HashMap<>(Math.max(8, retain * 2));
+                        if (size > cap) {
+                            Nourished.LOGGER.warn(
+                                    "[SyncNourishedConfigSnapshot] nutrientDecayOverrides exceeded cap ({} of {} entries) — truncating to {}",
+                                    retain, size, cap);
+                        }
                         for (int i = 0; i < size; i++) {
-                            map.put(buf.readUtf(), buf.readDouble());
+                            String key = buf.readUtf();
+                            double value = buf.readDouble();
+                            if (i < retain) {
+                                map.put(key, value);
+                            }
                         }
                         return map;
                     }

@@ -1,13 +1,12 @@
 package dev.maire.nourished.core.network;
 
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
-import dev.maire.nourished.core.diet.DietData;
-import dev.maire.nourished.core.diet.FoodMemoryEntry;
+import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.MariesLib.tracking.SourceMemoryEntry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthSyncPayload;
-import dev.maire.nourished.modules.Stamina.Core.StaminaData;
-import dev.maire.nourished.modules.Stamina.Core.StaminaSyncPayload;
+import dev.marie.MariesLib.api.ApiStatus;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -27,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@ApiStatus.Internal
 public class ModNetworking {
 
     public static void register(RegisterPayloadHandlersEvent event) {
@@ -63,20 +63,15 @@ public class ModNetworking {
                 (payload, context) -> {}
         );
 
-        // registrar.playToClient( // STAMINA_SHELVED
-        //         StaminaSyncPayload.TYPE, // STAMINA_SHELVED
-        //         StaminaSyncPayload.STREAM_CODEC, // STAMINA_SHELVED
-        //         (payload, context) -> {} // STAMINA_SHELVED
-        // ); // STAMINA_SHELVED
     }
 
     /** Send lightweight client sync. Call on every food eat and decay tick. */
-    public static void syncDietDelta(ServerPlayer player, DietData diet) {
-        PacketDistributor.sendToPlayer(player, diet.toDeltaPayload());
+    public static void syncDietDelta(ServerPlayer player, TrackingData diet) {
+        PacketDistributor.sendToPlayer(player, (SyncDietDeltaPayload) diet.toDeltaPayload());
     }
 
-    /** Send full DietData. Call on login, respawn, dimension change, command only. */
-    public static void syncDiet(ServerPlayer player, DietData diet) {
+    /** Send full TrackingData. Call on login, respawn, dimension change, command only. */
+    public static void syncDiet(ServerPlayer player, TrackingData diet) {
         PacketDistributor.sendToPlayer(player, new SyncDietPayload(diet));
     }
 
@@ -85,62 +80,46 @@ public class ModNetworking {
         PacketDistributor.sendToPlayer(player, new GutHealthSyncPayload(gut.getGutHealth(), gut.getSensitivity()));
     }
 
-    /** Send stamina sync to client. Call when stamina state changes. */
-    public static void syncStamina(ServerPlayer player, StaminaData data) {
-        PacketDistributor.sendToPlayer(player, new StaminaSyncPayload(
-                data.getPhysicalStamina(),
-                data.getPhysicalMax(),
-                data.getPhysicalFatiguePenalty(),
-                data.getPhysicalBonusStamina(),
-                data.getPhysicalDebt(),
-                data.getMentalStamina(),
-                data.getMentalMax(),
-                data.getMentalFatiguePenalty(),
-                data.getMentalBonusStamina(),
-                data.getMentalDebt()
-        ));
-    }
-
-    private static void encodeFoodMemoryMap(FriendlyByteBuf buf, Map<String, FoodMemoryEntry> map) {
+    private static void encodeFoodMemoryMap(FriendlyByteBuf buf, Map<String, SourceMemoryEntry> map) {
         buf.writeVarInt(map.size());
-        for (Map.Entry<String, FoodMemoryEntry> e : map.entrySet()) {
+        for (Map.Entry<String, SourceMemoryEntry> e : map.entrySet()) {
             buf.writeUtf(e.getKey());
-            FoodMemoryEntry entry = e.getValue();
-            buf.writeFloat(entry.eatCount());
-            buf.writeLong(entry.lastEatenTick());
+            SourceMemoryEntry entry = e.getValue();
+            buf.writeFloat(entry.applicationCount());
+            buf.writeLong(entry.lastAppliedTick());
         }
     }
 
-    private static LinkedHashMap<String, FoodMemoryEntry> decodeLinkedFoodMemoryMap(FriendlyByteBuf buf) {
+    private static LinkedHashMap<String, SourceMemoryEntry> decodeLinkedFoodMemoryMap(FriendlyByteBuf buf) {
         int size = buf.readVarInt();
         if (size > 256) throw new DecoderException("food memory map exceeds 256 entries: " + size);
-        LinkedHashMap<String, FoodMemoryEntry> map = new LinkedHashMap<>(Math.max(16, size * 2));
+        LinkedHashMap<String, SourceMemoryEntry> map = new LinkedHashMap<>(Math.max(16, size * 2));
         for (int i = 0; i < size; i++) {
-            map.put(buf.readUtf(), new FoodMemoryEntry(buf.readFloat(), buf.readLong()));
+            map.put(buf.readUtf(), new SourceMemoryEntry(buf.readFloat(), buf.readLong()));
         }
         return map;
     }
 
-    private static HashMap<String, FoodMemoryEntry> decodeHashFoodMemoryMap(FriendlyByteBuf buf) {
+    private static HashMap<String, SourceMemoryEntry> decodeHashFoodMemoryMap(FriendlyByteBuf buf) {
         int size = buf.readVarInt();
         if (size > 256) throw new DecoderException("food memory map exceeds 256 entries: " + size);
-        HashMap<String, FoodMemoryEntry> map = new HashMap<>(Math.max(16, size * 2));
+        HashMap<String, SourceMemoryEntry> map = new HashMap<>(Math.max(16, size * 2));
         for (int i = 0; i < size; i++) {
-            map.put(buf.readUtf(), new FoodMemoryEntry(buf.readFloat(), buf.readLong()));
+            map.put(buf.readUtf(), new SourceMemoryEntry(buf.readFloat(), buf.readLong()));
         }
         return map;
     }
 
     // ── Full Sync Payload ────────────────────────────────────────────────────────
 
-    public record SyncDietPayload(DietData diet) implements CustomPacketPayload {
+    public record SyncDietPayload(TrackingData diet) implements CustomPacketPayload {
 
         public static final CustomPacketPayload.Type<SyncDietPayload> TYPE =
                 new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "sync_diet"));
 
         public static final StreamCodec<FriendlyByteBuf, SyncDietPayload> STREAM_CODEC =
                 StreamCodec.composite(
-                        ByteBufCodecs.fromCodec(DietData.CODEC),
+                        ByteBufCodecs.fromCodec(TrackingData.CODEC),
                         SyncDietPayload::diet,
                         SyncDietPayload::new
                 );
@@ -162,9 +141,9 @@ public class ModNetworking {
             List<String> recentFoodIds,
             List<String> neglectedCategories,
             List<String> fatiguedFamilies,
-            Map<String, FoodMemoryEntry> foodMemory,
-            Map<String, FoodMemoryEntry> categoryMemory,
-            Map<String, FoodMemoryEntry> familyMemory,
+            Map<String, SourceMemoryEntry> foodMemory,
+            Map<String, SourceMemoryEntry> categoryMemory,
+            Map<String, SourceMemoryEntry> familyMemory,
             long lastTickTime
     ) implements CustomPacketPayload {
 

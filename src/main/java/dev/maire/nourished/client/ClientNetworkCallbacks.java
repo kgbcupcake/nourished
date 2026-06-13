@@ -1,8 +1,11 @@
 package dev.maire.nourished.client;
 
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.client.MarieClientCache;
+import dev.marie.MariesLib.client.MarieClientState;
+import dev.marie.MariesLib.client.MarieToastManager;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
@@ -49,12 +52,6 @@ public final class ClientNetworkCallbacks {
                 GutHealthSyncPayload.STREAM_CODEC,
                 ClientNetworkCallbacks::onGutHealth
         );
-
-        // registrar.playToClient( // STAMINA_SHELVED
-        //         StaminaSyncPayload.TYPE, // STAMINA_SHELVED
-        //         StaminaSyncPayload.STREAM_CODEC, // STAMINA_SHELVED
-        //         ClientNetworkCallbacks::onStamina // STAMINA_SHELVED
-        // ); // STAMINA_SHELVED
     }
 
     public static void onConfigSnapshot(SyncNourishedConfigSnapshot payload, IPayloadContext context) {
@@ -67,27 +64,47 @@ public final class ClientNetworkCallbacks {
                 );
                 return;
             }
-            ClientNourishedState.setConfig(payload);
+            MarieClientState.setConfig(payload);
         });
     }
 
     public static void onFullDiet(ModNetworking.SyncDietPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            DietData next = payload.diet();
-            NourishedToastManager.onClientDietUpdated(next);
-            ClientDietCache.set(next);
-            ClientNourishedState.onFullDietSynced();
+            TrackingData next = payload.diet();
+            MarieToastManager.onTrackingUpdated(next);
+            MarieClientCache.onFullTrackingSync(next);
+            MarieClientState.onFullTrackingSynced();
             LocalPlayer player = Minecraft.getInstance().player;
             if (player != null) {
-                player.setData(DietAttachment.DIET.get(), next);
+                player.setData(TrackingAttachment.TRACKING.get(), next);
             }
         });
     }
 
     public static void onDietDelta(ModNetworking.SyncDietDeltaPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            ClientDietCache.applyDelta(payload);
-            NourishedToastManager.onClientDietUpdated(payload);
+            TrackingData prev = MarieClientCache.get();
+            TrackingData nextDiet = TrackingData.copySnapshot(prev);
+            nextDiet.values.clear();
+            nextDiet.values.putAll(payload.nutrients());
+            nextDiet.lastValues.clear();
+            nextDiet.lastValues.putAll(payload.lastNutrients());
+            nextDiet.total = payload.calories();
+            nextDiet.maxTotal = payload.maxCalories();
+            nextDiet.sourceMemory.clear();
+            nextDiet.sourceMemory.putAll(payload.foodMemory());
+            nextDiet.categoryMemory.clear();
+            nextDiet.categoryMemory.putAll(payload.categoryMemory());
+            nextDiet.familyMemory.clear();
+            nextDiet.familyMemory.putAll(payload.familyMemory());
+            nextDiet.lastTickTime = payload.lastTickTime();
+
+            MarieClientCache.onTrackingDelta(
+                    nextDiet,
+                    payload.recentFoodIds(),
+                    payload.neglectedCategories(),
+                    payload.fatiguedFamilies());
+            MarieToastManager.onTrackingDelta(payload.nutrients());
         });
     }
 
@@ -100,27 +117,4 @@ public final class ClientNetworkCallbacks {
             }
         });
     }
-
-    // @SuppressWarnings("unused") // STAMINA_SHELVED
-    // public static void onStamina(StaminaSyncPayload payload, IPayloadContext context) { // STAMINA_SHELVED
-    //     context.enqueueWork(() -> { // STAMINA_SHELVED
-    //         StaminaHUD.updateFromPayload(payload); // STAMINA_SHELVED
-    //         LocalPlayer player = Minecraft.getInstance().player; // STAMINA_SHELVED
-    //         if (player != null) { // STAMINA_SHELVED
-    //             StaminaData stamina = StaminaData.fromSync( // STAMINA_SHELVED
-    //                     payload.physicalStamina(), // STAMINA_SHELVED
-    //                     payload.physicalMax(), // STAMINA_SHELVED
-    //                     payload.physicalFatiguePenalty(), // STAMINA_SHELVED
-    //                     payload.physicalBonusStamina(), // STAMINA_SHELVED
-    //                     payload.physicalDebt(), // STAMINA_SHELVED
-    //                     payload.mentalStamina(), // STAMINA_SHELVED
-    //                     payload.mentalMax(), // STAMINA_SHELVED
-    //                     payload.mentalFatiguePenalty(), // STAMINA_SHELVED
-    //                     payload.mentalBonusStamina(), // STAMINA_SHELVED
-    //                     payload.mentalDebt() // STAMINA_SHELVED
-    //             ); // STAMINA_SHELVED
-    //             player.setData(StaminaAttachment.STAMINA.get(), stamina); // STAMINA_SHELVED
-    //         } // STAMINA_SHELVED
-    //     }); // STAMINA_SHELVED
-    // } // STAMINA_SHELVED
 }

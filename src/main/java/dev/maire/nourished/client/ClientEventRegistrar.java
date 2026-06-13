@@ -1,8 +1,10 @@
 package dev.maire.nourished.client;
 
+import dev.marie.MariesLib.client.MarieClientCache;
+import dev.marie.MariesLib.client.MarieClientState;
 import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.core.Nourished;
-// import dev.maire.nourished.modules.Stamina.HUD.StaminaHUD; // STAMINA_SHELVED
+import dev.maire.nourished.client.NourishedClientMemoryConfig;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
@@ -16,24 +18,24 @@ public final class ClientEventRegistrar {
         modEventBus.addListener(NourishedKeys::onRegisterKeyMappings);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onScreenInit);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onItemTooltip);
-        NeoForge.EVENT_BUS.addListener(ClientEvents::onKeyInput);
+        NeoForge.EVENT_BUS.addListener(ClientEvents::onClientTick);
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onRenderGuiPost);
-        // NeoForge.EVENT_BUS.addListener(StaminaHUD::onRenderGuiPost); // STAMINA_SHELVED
-        NeoForge.EVENT_BUS.addListener(NourishedHUD::onKeyInput);
+        NeoForge.EVENT_BUS.addListener(NourishedHUD::onClientTick);
         NeoForge.EVENT_BUS.addListener(ClientEventRegistrar::onLogout);
         bootstrapCompatPlugins();
     }
 
     /** Reset sync state to UNINITIALIZED on disconnect. */
     private static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
-        ClientNourishedState.reset();
-        ClientDietCache.resetDiagnostics();
+        MarieClientState.reset();
+        MarieClientCache.resetDiagnostics();
+        NourishedClientMemoryConfig.resetClientMemoryDiagnostics();
     }
 
     private static void bootstrapCompatPlugins() {
-        maybeBootstrap("jei", "dev.maire.nourished.compat.jei.NourishedJeiPlugin");
-        maybeBootstrap("roughlyenoughitems", "dev.maire.nourished.compat.rei.NourishedReiPlugin");
-        maybeBootstrap("emi", "dev.maire.nourished.compat.emi.NourishedEmiPlugin");
+        maybeBootstrap("jei", "dev.marie.MariesLib.compat.jei.MarieJeiPlugin");
+        maybeBootstrap("roughlyenoughitems", "dev.marie.MariesLib.compat.rei.MarieReiPlugin");
+        maybeBootstrap("emi", "dev.marie.MariesLib.compat.emi.MarieEmiPlugin");
     }
 
     private static void maybeBootstrap(String modId, String className) {

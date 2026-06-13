@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.hud;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.maire.nourished.client.NutrientUiColors;
+import dev.marie.MariesLib.client.MarieValueColors;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -54,7 +54,7 @@ final class HudDrawHelpers {
     }
 
     static String nutrientLabel(String key) {
-        return Component.translatable(Nourished.MODID + ".screen.diet.bar." + key).getString();
+        return NutrientRegistry.getLabel(key);
     }
 
     static void drawRoundedBar(GuiGraphics g, int x, int y, int w, int h, float pct, int bgColor, int fillColor) {
@@ -149,7 +149,10 @@ final class HudDrawHelpers {
 
     static void renderIcon(GuiGraphics g, String key, int x, int y, int iconSize) {
         String iconId = NutrientRegistry.getIcon(key);
-        var item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(iconId)).orElse(Items.APPLE);
+        ResourceLocation iconLoc = ResourceLocation.tryParse(iconId);
+        var item = iconLoc == null
+                ? Items.APPLE
+                : BuiltInRegistries.ITEM.getOptional(iconLoc).orElse(Items.APPLE);
         ItemStack stack = new ItemStack(item);
         PoseStack pose = g.pose();
         pose.pushPose();
@@ -179,7 +182,7 @@ final class HudDrawHelpers {
             if (v < cfg.lowThreshold()) {
                 return COL_GOLD;
             }
-            return NutrientUiColors.baseColorArgb(key);
+            return MarieValueColors.baseColorArgb(key);
         }
         if (v > cfg.excessThreshold()) {
             return COL_RED;
@@ -187,7 +190,7 @@ final class HudDrawHelpers {
         if (v > cfg.lowThreshold()) {
             return COL_GOLD;
         }
-        return NutrientUiColors.baseColorArgb(key);
+        return MarieValueColors.baseColorArgb(key);
     }
 
     static int pctColor(String key, float v) {

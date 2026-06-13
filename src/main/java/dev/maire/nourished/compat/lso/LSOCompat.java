@@ -1,10 +1,12 @@
 package dev.maire.nourished.compat.lso;
 
-import dev.maire.nourished.api.NourishedAPI;
-import dev.maire.nourished.api.NourishedEvents;
-import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.marie.MariesLib.api.MarieAPI;
+import dev.marie.MariesLib.api.MarieEvents;
+import dev.maire.nourished.config.NourishedModuleCache;
+import dev.marie.MariesLib.api.ValueDefinition;
+import dev.marie.MariesLib.api.registry.ValueRegistry;
+import dev.marie.MariesLib.core.IMarieLibConfig;
+import dev.marie.MariesLib.core.MariesLib;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -23,7 +25,8 @@ import java.util.Objects;
 public final class LSOCompat {
 
     private static final String LSO_MOD_ID = "legendarysurvivaloverhaul";
-    private static final ResourceLocation MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "lso_nutrition_modifier");
+    private static final ResourceLocation MODIFIER_ID =
+            ResourceLocation.fromNamespaceAndPath(IMarieLibConfig.get().modId(), "lso_value_modifier");
     private static final ResourceLocation THERMAL_RESISTANCE_ATTRIBUTE_ID = ResourceLocation.fromNamespaceAndPath(
             "legendarysurvivaloverhaul",
             "thermal_resistance"
@@ -49,11 +52,11 @@ public final class LSOCompat {
         if (!ModList.get().isLoaded(LSO_MOD_ID)) {
             return;
         }
-        NeoForge.EVENT_BUS.addListener(LSOCompat::onNutrientChanged);
-        NeoForge.EVENT_BUS.addListener(LSOCompat::onFoodEaten);
+        NeoForge.EVENT_BUS.addListener(LSOCompat::onValueChanged);
+        NeoForge.EVENT_BUS.addListener(LSOCompat::onSourceApplied);
     }
 
-    private static void onNutrientChanged(NourishedEvents.NutrientChangedEvent event) {
+    private static void onValueChanged(MarieEvents.ValueChangedEvent event) {
         if (!(event.getPlayer() instanceof ServerPlayer serverPlayer)) {
             return;
         }
@@ -61,16 +64,16 @@ public final class LSOCompat {
             return;
         }
 
-        float averageNutrition = getAverageNutrition(serverPlayer);
-        if (averageNutrition < 0.0f) {
+        float averageValueLevel = getAverageValueLevel(serverPlayer);
+        if (averageValueLevel < 0.0f) {
             return;
         }
 
-        double thermal = ModuleCache.enableLSOThermalResistance
-                ? calculateThermalResistanceBonus(averageNutrition)
+        double thermal = NourishedModuleCache.enableLSOThermalResistance
+                ? calculateThermalResistanceBonus(averageValueLevel)
                 : 0.0d;
-        double brokenHeart = ModuleCache.enableLSOBrokenHeartResilience
-                ? calculateBrokenHeartResilienceMultiplier(averageNutrition)
+        double brokenHeart = NourishedModuleCache.enableLSOBrokenHeartResilience
+                ? calculateBrokenHeartResilienceMultiplier(averageValueLevel)
                 : 0.0d;
 
         applyAttributeModifier(serverPlayer, THERMAL_RESISTANCE_ATTRIBUTE_ID, thermal, AttributeModifier.Operation.ADD_VALUE);
@@ -82,11 +85,11 @@ public final class LSOCompat {
         );
     }
 
-    private static void onFoodEaten(NourishedEvents.FoodEatenEvent event) {
+    private static void onSourceApplied(MarieEvents.SourceAppliedEvent event) {
         if (!ModList.get().isLoaded(LSO_MOD_ID)) {
             return;
         }
-        if (!ModuleCache.enableLSOThirstSaturation) {
+        if (!NourishedModuleCache.enableLSOThirstSaturation) {
             return;
         }
         if (!(event.getPlayer() instanceof ServerPlayer serverPlayer)) {
@@ -98,16 +101,16 @@ public final class LSOCompat {
         tryAddThirstSaturation(serverPlayer, 0.5f);
     }
 
-    private static float getAverageNutrition(ServerPlayer player) {
-        List<String> nutrientKeys = NutrientRegistry.getKeys();
-        if (nutrientKeys.isEmpty()) {
+    private static float getAverageValueLevel(ServerPlayer player) {
+        List<String> valueKeys = ValueRegistry.getAll().stream().map(ValueDefinition::getId).toList();
+        if (valueKeys.isEmpty()) {
             return -1.0f;
         }
 
         float total = 0.0f;
         int counted = 0;
-        for (String key : nutrientKeys) {
-            float value = NourishedAPI.getNutrientLevel(player, key);
+        for (String key : valueKeys) {
+            float value = MarieAPI.getValueLevel(player, key);
             if (value < 0.0f) {
                 continue;
             }
@@ -120,18 +123,18 @@ public final class LSOCompat {
         return total / counted;
     }
 
-    private static double calculateThermalResistanceBonus(float averageNutrition) {
-        if (averageNutrition > 0.75f) {
+    private static double calculateThermalResistanceBonus(float averageValueLevel) {
+        if (averageValueLevel > 0.75f) {
             return 5.0d;
         }
-        if (averageNutrition < 0.25f) {
+        if (averageValueLevel < 0.25f) {
             return -3.0d;
         }
         return 0.0d;
     }
 
-    private static double calculateBrokenHeartResilienceMultiplier(float averageNutrition) {
-        if (averageNutrition > 0.75f) {
+    private static double calculateBrokenHeartResilienceMultiplier(float averageValueLevel) {
+        if (averageValueLevel > 0.75f) {
             return 0.25d;
         }
         return 0.0d;
@@ -164,7 +167,7 @@ public final class LSOCompat {
             AttributeModifier modifier = new AttributeModifier(modifierId, amount, operation);
             instance.addOrUpdateTransientModifier(modifier);
         } catch (Throwable t) {
-            Nourished.LOGGER.debug("[Nourished] LSO attributes unavailable, skipping nutrition modifiers.", t);
+            MariesLib.LOGGER.debug("[MarieLib] LSO attributes unavailable, skipping value modifiers.", t);
         }
     }
 

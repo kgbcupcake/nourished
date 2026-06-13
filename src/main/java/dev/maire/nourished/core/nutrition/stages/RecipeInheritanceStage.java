@@ -1,19 +1,20 @@
 package dev.maire.nourished.core.nutrition.stages;
 
-import dev.maire.nourished.compat.ModCompat;
+import dev.marie.MariesLib.compat.ModCompat;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.MultiNutrientInheritance;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.nutrition.ResolutionResult;
-import dev.maire.nourished.core.nutrition.RuntimeCascadeStage;
+import dev.marie.MariesLib.scan.ResolutionResult;
+import dev.marie.MariesLib.scan.RuntimeCascadeStage;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
-import dev.maire.nourished.core.nutrition.StageContext;
-import dev.maire.nourished.core.nutrition.cache.BoundedLRU;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
-import dev.maire.nourished.tooling.classification.ClassificationTraceStep;
-import dev.maire.nourished.tooling.classification.TraceStepId;
-import dev.maire.nourished.tooling.classification.TraceStepStatus;
+import dev.marie.MariesLib.scan.ResolutionStageHandler;
+import dev.marie.MariesLib.scan.StageContext;
+import dev.marie.MariesLib.cache.BoundedLRU;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.MariesLib.classification.ClassificationTraceStep;
+import dev.marie.MariesLib.classification.TraceStepId;
+import dev.marie.MariesLib.classification.TraceStepStatus;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -272,7 +273,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                 for (Ingredient ingredient : recipeIngredients) {
                     ItemStack[] items = ingredient.getItems();
                     if (items.length > 0) {
-                        ResourceLocation ingId = NourishedRegistryUtils.itemKey(items[0]);
+                        ResourceLocation ingId = MarieRegistryUtils.itemKey(items[0]);
                         if (ingId != null && !ingId.equals(itemId)) {
                             uniqueIds.add(ingId);
                         }
@@ -347,7 +348,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
 
         for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
             for (String tagStr : def.tags()) {
-                var tagKey = NourishedRegistryUtils.itemTagKey(tagStr);
+                var tagKey = MarieRegistryUtils.itemTagKey(tagStr);
                 if (holder.is(tagKey)) {
                     matches.put(def.key(), 1.0f);
                     break;

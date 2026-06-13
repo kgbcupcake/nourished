@@ -10,3 +10,11 @@ plugins {
 }
 
 rootProject.name = 'NutritionalBalance'
+
+if (file('../MarieLib/build.gradle').exists()) {
+    includeBuild('../MarieLib') {
+        dependencySubstitution {
+            substitute module('dev.marie.MariesLib:marieslib') using project(':')
+        }
+    }
+}

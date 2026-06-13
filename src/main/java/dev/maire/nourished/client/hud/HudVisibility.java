@@ -1,8 +1,8 @@
 package dev.maire.nourished.client.hud;
 
-import dev.maire.nourished.client.ClientDietCache;
+import dev.marie.MariesLib.client.MarieClientCache;
 import dev.maire.nourished.config.NourishedClientConfig;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.tracking.TrackingData;
 
 import java.util.HashSet;
 import java.util.List;
@@ -12,12 +12,12 @@ final class HudVisibility {
 
     private HudVisibility() {}
 
-    static List<String> visibleKeys(DietData data, List<String> keys, NourishedClientConfig cc) {
+    static List<String> visibleKeys(TrackingData data, List<String> keys, NourishedClientConfig cc) {
         Set<String> flashingKeys;
         if (cc.hudRevealOnNutrientGain()) {
             flashingKeys = new HashSet<>();
             for (String key : keys) {
-                if (ClientDietCache.flashAlpha(key) > 0f) {
+                if (MarieClientCache.flashAlpha(key) > 0f) {
                     flashingKeys.add(key);
                 }
             }
@@ -26,7 +26,7 @@ final class HudVisibility {
         }
 
         return HudVisibilityRules.filter(
-                data.nutrients,
+                data.values,
                 keys,
                 cc.hudShowZeroBars(),
                 (float) cc.hudHideAboveThreshold(),

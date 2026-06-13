@@ -3,6 +3,7 @@ package dev.maire.nourished.client.config;
 import com.google.gson.JsonObject;
 
 import dev.maire.nourished.core.Nourished;
+import dev.marie.MariesLib.client.ImportExportToast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -11,7 +12,6 @@ import net.minecraft.network.chat.Component;
 
 import java.nio.file.Path;
 import java.util.EnumSet;
-import java.util.Locale;
 
 /**
  * Checklist of exportable sections, then writes JSON and opens the share-code dialog.
@@ -20,7 +20,7 @@ public final class ExportConfigScreen extends Screen {
 
     private final Screen returnTo;
     private final Screen reopenParent;
-    private final boolean[] sectionOn = new boolean[ImportExportManager.Section.values().length];
+    private final boolean[] sectionOn = new boolean[NourishedImportExport.Section.values().length];
 
     public ExportConfigScreen(Screen returnTo, Screen reopenParent) {
         super(Component.translatable("config.nourished.importExport.exportTitle"));
@@ -36,10 +36,10 @@ public final class ExportConfigScreen extends Screen {
         super.init();
         int cx = this.width / 2;
         int y0 = this.height / 2 - 90;
-        ImportExportManager.Section[] secs = ImportExportManager.Section.values();
+        NourishedImportExport.Section[] secs = NourishedImportExport.Section.values();
         for (int i = 0; i < secs.length; i++) {
             final int idx = i;
-            ImportExportManager.Section s = secs[i];
+            NourishedImportExport.Section s = secs[i];
             addRenderableWidget(
                     Button.builder(sectionLabel(s, sectionOn[idx]), b -> {
                                 sectionOn[idx] = !sectionOn[idx];
@@ -59,14 +59,14 @@ public final class ExportConfigScreen extends Screen {
                         .build());
     }
 
-    private static Component sectionLabel(ImportExportManager.Section s, boolean on) {
+    private static Component sectionLabel(NourishedImportExport.Section s, boolean on) {
         String mark = on ? "\u2713 " : "";
-        return Component.literal(mark).append(Component.translatable("config.nourished.importExport.section." + s.name().toLowerCase(Locale.ROOT)));
+        return Component.literal(mark).append(Component.translatable("config.nourished.importExport.section." + s.labelKey()));
     }
 
     private void doExport() {
-        EnumSet<ImportExportManager.Section> sel = EnumSet.noneOf(ImportExportManager.Section.class);
-        ImportExportManager.Section[] secs = ImportExportManager.Section.values();
+        EnumSet<NourishedImportExport.Section> sel = EnumSet.noneOf(NourishedImportExport.Section.class);
+        NourishedImportExport.Section[] secs = NourishedImportExport.Section.values();
         for (int i = 0; i < secs.length; i++) {
             if (sectionOn[i]) {
                 sel.add(secs[i]);
@@ -78,9 +78,9 @@ public final class ExportConfigScreen extends Screen {
         }
         Minecraft mc = Minecraft.getInstance();
         try {
-            JsonObject root = ImportExportManager.buildExportRoot(sel);
-            Path file = ImportExportManager.writeExportFile(root);
-            String share = ImportExportManager.buildShareCode(root);
+            JsonObject root = NourishedImportExport.buildExportRoot(sel);
+            Path file = NourishedImportExport.writeExportFile(root);
+            String share = NourishedImportExport.buildShareCode(root);
             String rel = "config/nourished/exports/" + file.getFileName();
             ImportExportToast.show(Component.translatable("config.nourished.importExport.exportedFileToast", rel));
             mc.setScreen(new ExportResultScreen(reopenParent, rel, share));

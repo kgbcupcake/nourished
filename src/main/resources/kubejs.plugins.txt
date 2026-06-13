@@ -1,1 +1,1 @@
-dev.maire.nourished.compat.kubejs.NourishedKubeJSPlugin nourished
+dev.maire.nourished.kubejs.NourishedKubePlugin nourished

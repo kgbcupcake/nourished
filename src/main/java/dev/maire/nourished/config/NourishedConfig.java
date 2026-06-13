@@ -1,7 +1,10 @@
 package dev.maire.nourished.config;
 
 import com.google.gson.JsonObject;
-import dev.maire.nourished.compat.ModCompat;
+import dev.marie.MariesLib.compat.ModCompat;
+import dev.marie.MariesLib.config.ConfigDefaultsLoader;
+import dev.marie.MariesLib.config.FeatureFlagCache;
+import dev.marie.MariesLib.config.MarieModFeatureFlags;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -54,7 +57,7 @@ public final class NourishedConfig {
     // config.nourished.enableCriticalToasts.desc
     private final ModConfigSpec.BooleanValue enableCriticalToasts;
     private final ModConfigSpec.BooleanValue enableSleepBonus;
-    private final ModConfigSpec.IntValue heavyMealNutritionThreshold;
+    private final ModConfigSpec.IntValue heavySourcePropertyThreshold;
 
     // General
     private final ModConfigSpec.BooleanValue showJoinMessage;
@@ -133,24 +136,23 @@ public final class NourishedConfig {
         JsonObject defaults = ConfigDefaultsLoader.loadOrEmpty("/data/" + Nourished.MODID + "/config/common_defaults.json");
 
         builder.push("modules");
-        enableDecay = defineModuleToggle(builder, "enableDecay", "When false, NutritionDecayHandler does nothing", ConfigDefaultsLoader.getBoolean(defaults, "enableDecay", true));
-        defineModuleToggle(builder, "enableNutritionEating", "When false, nutrition-only eating at full vanilla hunger is disabled.", ConfigDefaultsLoader.getBoolean(defaults, "enableNutritionEating", true));
-        defineModuleToggle(builder, "blockHeavyMeals", "When true, prevents eating heavy foods at full vanilla hunger. If Spice of Life: Onion is installed, uses nutrition threshold (heavyMealNutritionThreshold) to determine heavy meals. Otherwise requires items to be tagged nourished:meal via datapack.", ConfigDefaultsLoader.getBoolean(defaults, "blockHeavyMeals", false));
-        defineModuleToggle(builder, "blockLightFood", "When true, prevents eating light foods at full vanilla hunger. Requires items to be tagged nourished:light_food via datapack.", ConfigDefaultsLoader.getBoolean(defaults, "blockLightFood", false));
-        heavyMealNutritionThreshold = builder
-                .comment("Nutrition (FoodProperties) at or above this counts as a heavy meal when solonion is loaded and blockHeavyMeals is true. Also used if mod_compat omits solonion's threshold.")
-                .defineInRange("heavyMealNutritionThreshold", ConfigDefaultsLoader.getInt(defaults, "heavyMealNutritionThreshold", 6), 1, 20);
+        enableDecay = defineModuleToggle(builder, "enableDecay", "When false, NutritionDecayHandler does nothing", defaultsBoolean(defaults, "enableDecay", null, true));
+        defineModuleToggle(builder, "enableSourceApplication", "When false, value-only application at full vanilla restore is disabled.", defaultsBoolean(defaults, "enableSourceApplication", "enableNutritionEating", true));
+        defineModuleToggle(builder, "enableBlockHeavySources", "When true, prevents applying heavy sources at full vanilla restore. If Spice of Life: Onion is installed, uses property threshold (heavySourcePropertyThreshold). Otherwise requires items tagged nourished:heavy_source.", defaultsBoolean(defaults, "enableBlockHeavySources", "blockHeavyMeals", false));
+        defineModuleToggle(builder, "enableBlockLightSource", "When true, prevents applying light sources at full vanilla restore. Requires items tagged nourished:light_source.", defaultsBoolean(defaults, "enableBlockLightSource", "blockLightFood", false));
+        heavySourcePropertyThreshold = builder
+                .comment("FoodProperties nutrition at or above this counts as a heavy source when solonion is loaded and enableBlockHeavySources is true. Also used if mod_compat omits solonion's threshold.")
+                .defineInRange("heavySourcePropertyThreshold", defaultsInt(defaults, "heavySourcePropertyThreshold", "heavyMealNutritionThreshold", 6), 1, 20);
         enableEffects = defineModuleToggle(builder, "enableEffects", "When false, status effects from nutrition are not applied", ConfigDefaultsLoader.getBoolean(defaults, "enableEffects", true));
         enableHUD = defineModuleToggle(builder, "enableHUD", "When false, the nutrition HUD overlay is hidden", ConfigDefaultsLoader.getBoolean(defaults, "enableHUD", true));
         enableToasts = defineModuleToggle(builder, "enableToasts", "When false, NourishedToastManager never queues toasts", ConfigDefaultsLoader.getBoolean(defaults, "enableToasts", true));
         enableFoodTooltips = defineModuleToggle(builder, "enableFoodTooltips", "When false, food tooltips do not show nutrient info", ConfigDefaultsLoader.getBoolean(defaults, "enableFoodTooltips", true));
-        enableCalorieTracking = defineModuleToggle(builder, "enableCalorieTracking", "When false, DietData.addCalories() is never called and calorie display is hidden", ConfigDefaultsLoader.getBoolean(defaults, "enableCalorieTracking", true));
+        enableCalorieTracking = defineModuleToggle(builder, "enableCalorieTracking", "When false, TrackingData.addTotal() is never called and calorie display is hidden", ConfigDefaultsLoader.getBoolean(defaults, "enableCalorieTracking", true));
         enableDietScreen = defineModuleToggle(builder, "enableDietScreen", "When false, the keybind to open DietScreen does nothing", ConfigDefaultsLoader.getBoolean(defaults, "enableDietScreen", true));
         enableCriticalToasts = defineModuleToggle(builder, "enableCriticalToasts", "Separate from enableToasts, controls only the critical-threshold toast specifically", ConfigDefaultsLoader.getBoolean(defaults, "enableCriticalToasts", true));
         enableSleepBonus = defineModuleToggle(builder, "enableSleepBonus", "When true, sleeping with all nutrient bars above 50% grants Regeneration I for 30 seconds", ConfigDefaultsLoader.getBoolean(defaults, "enableSleepBonus", true));
         defineModuleToggle(builder, "enableRawFoodPenalty", "When true, eating raw food applies potion effects and subtracts from nutrient bars", ConfigDefaultsLoader.getBoolean(defaults, "enableRawFoodPenalty", true));
         defineModuleToggle(builder, "enableGutHealth", "When true, gut health is tracked and affects raw food sensitivity and recovery", ConfigDefaultsLoader.getBoolean(defaults, "enableGutHealth", true));
-        defineModuleToggle(builder, "enableStamina", "When true, the Stamina module is active", ConfigDefaultsLoader.getBoolean(defaults, "enableStamina", true));
         defineModuleToggle(builder, "enablePSStaminaUsage", "When false, Peak Stamina nutrition hook does not apply the stamina_usage attribute modifier", ConfigDefaultsLoader.getBoolean(defaults, "enablePSStaminaUsage", true));
         defineModuleToggle(builder, "enablePSPenaltyDecay", "When false, Peak Stamina nutrition hook does not apply the penalty_decay_multiplier attribute modifier", ConfigDefaultsLoader.getBoolean(defaults, "enablePSPenaltyDecay", true));
         defineModuleToggle(builder, "enablePSExhaustionDuration", "When false, Peak Stamina nutrition hook does not apply the exhaustion_duration_multiplier attribute modifier", ConfigDefaultsLoader.getBoolean(defaults, "enablePSExhaustionDuration", true));
@@ -346,7 +348,18 @@ public final class NourishedConfig {
             return;
         }
         boundCommonConfig = cfg;
-        ModuleCache.refresh();
+        syncModuleCache();
+    }
+
+    public static void onModConfigReloading(ModConfigEvent.Reloading event) {
+        ModConfig cfg = event.getConfig();
+        if (!Nourished.MODID.equals(cfg.getModId()) || cfg.getType() != ModConfig.Type.COMMON) {
+            return;
+        }
+        if (cfg.getSpec() != SPEC) {
+            return;
+        }
+        syncModuleCache();
     }
 
     /**
@@ -361,7 +374,35 @@ public final class NourishedConfig {
         if (loaded != null) {
             loaded.save();
         }
-        ModuleCache.refresh();
+        syncModuleCache();
+    }
+
+    /** Copies module toggles from common config into {@link FeatureFlagCache} for hot paths. */
+    public static void syncModuleCache() {
+        if (INSTANCE == null) {
+            return;
+        }
+        NourishedConfig c = INSTANCE;
+        NourishedModuleCache.refresh(c);
+        FeatureFlagCache.sync(new MarieModFeatureFlags(
+                c.enableDecay(),
+                c.isModuleEnabled("enableSourceApplication"),
+                c.isModuleEnabled("enableBlockHeavySources"),
+                c.isModuleEnabled("enableBlockLightSource"),
+                c.enableEffects(),
+                c.enableHUD(),
+                c.enableToasts(),
+                c.enableFoodTooltips(),
+                c.enableCalorieTracking(),
+                c.enableDietScreen(),
+                c.enableCriticalToasts(),
+                c.enableSleepBonus(),
+                c.isModuleEnabled("enableSynergies"),
+                c.isModuleEnabled("enableMilestones"),
+                c.isModuleEnabled("enableSeasonHooks"),
+                c.isModuleEnabled("enableAbsorptionModifiers"),
+                c.isModuleEnabled("enableDebugLogging")
+        ));
     }
 
     public static NourishedConfig get() {
@@ -487,12 +528,12 @@ public final class NourishedConfig {
         enableSleepBonus.set(value);
     }
 
-    public int heavyMealNutritionThreshold() {
-        return heavyMealNutritionThreshold.get();
+    public int heavySourcePropertyThreshold() {
+        return heavySourcePropertyThreshold.get();
     }
 
-    public void setHeavyMealNutritionThreshold(int value) {
-        heavyMealNutritionThreshold.set(value);
+    public void setHeavySourcePropertyThreshold(int value) {
+        heavySourcePropertyThreshold.set(value);
     }
 
     public double criticalThreshold() {
@@ -724,6 +765,26 @@ public final class NourishedConfig {
         ModConfigSpec.BooleanValue value = builder.comment(comment).define(key, defaultValue);
         moduleToggles.put(key, value);
         return value;
+    }
+
+    private static boolean defaultsBoolean(JsonObject defaults, String key, String legacyKey, boolean hardDefault) {
+        if (defaults.has(key)) {
+            return ConfigDefaultsLoader.getBoolean(defaults, key, hardDefault);
+        }
+        if (legacyKey != null && defaults.has(legacyKey)) {
+            return ConfigDefaultsLoader.getBoolean(defaults, legacyKey, hardDefault);
+        }
+        return hardDefault;
+    }
+
+    private static int defaultsInt(JsonObject defaults, String key, String legacyKey, int hardDefault) {
+        if (defaults.has(key)) {
+            return ConfigDefaultsLoader.getInt(defaults, key, hardDefault);
+        }
+        if (legacyKey != null && defaults.has(legacyKey)) {
+            return ConfigDefaultsLoader.getInt(defaults, legacyKey, hardDefault);
+        }
+        return hardDefault;
     }
 
     private static double defaultDecayRateFromRegistry() {

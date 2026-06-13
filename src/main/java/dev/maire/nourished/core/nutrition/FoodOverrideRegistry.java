@@ -6,10 +6,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.registry.AbstractRegistry;
-import dev.maire.nourished.core.util.NourishedResourceLoader;
+import dev.marie.MariesLib.registry.AbstractRegistry;
+import dev.marie.MariesLib.util.MarieResourceLoader;
+import dev.marie.MariesLib.util.MarieValidation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -109,7 +110,7 @@ public class FoodOverrideRegistry {
      * Call this from a reload listener when datapacks are available.
      */
     public static void loadFromDatapack(ResourceManager resourceManager) {
-        NourishedResourceLoader.loadFromModConfig(
+        MarieResourceLoader.loadFromModConfig(
                 resourceManager,
                 "config/food_overrides.json",
                 FoodOverrideRegistry::parseFromReader,
@@ -194,6 +195,7 @@ public class FoodOverrideRegistry {
 
     private static void writeDefaults(Path file) throws IOException {
         JsonArray arr = new JsonArray();
+        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "FoodOverrideRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }
@@ -215,6 +217,7 @@ public class FoodOverrideRegistry {
             obj.addProperty("enabled", override.enabled());
             arr.add(obj);
         }
+        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "FoodOverrideRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }

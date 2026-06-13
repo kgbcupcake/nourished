@@ -35,7 +35,7 @@ Sugars and Dairy have no penalty effect by default these groups are tracked and 
 
 ## 🍽️ Eating at full hunger
 
-Vanilla hunger normally blocks eating at full hunger; Nourished still counts nutrition when your bar is full. Light foods — berries, fruits, and snacks — can be eaten for nutrients without restoring hunger. Heavy meals follow vanilla rules by default.
+Vanilla hunger normally blocks eating at full hunger; Nourished still counts nutrition when your bar is full. Light foods berries, fruits, and snacks can be eaten for nutrients without restoring hunger. Heavy meals follow vanilla rules by default.
 
 Both behaviors are configurable: `blockHeavyMeals` and `blockLightFood` toggles give server admins full control.
 
@@ -45,9 +45,30 @@ Diminishing returns apply - eating the same food repeatedly gives less credit ea
 
 ---
 
+---
+
+## 🥩 Raw Food & Gut Health
+
+Eating raw or undercooked food has consequences. Nourished tracks a **gut health** value for every player that degrades when you eat raw food and recovers over time from cooked food and dietary variety.
+
+Raw foods are classified into four tiers:
+
+| Tier   | Effect                           |
+| ------ | -------------------------------- |
+| Fine   | No penalty                       |
+| Mild   | Minor debuff, short duration     |
+| Medium | Moderate debuff, longer duration |
+| Severe | Strong debuff, extended duration |
+
+Eating the same raw food repeatedly within a memory window increases sensitivity, the more you do it, the worse the penalty gets. Gut health recovers passively and faster when you eat cooked food and maintain dietary diversity.
+
+Resistance can be built up over time, reducing penalty scale. Everything, tiers, durations, nutrient penalties, recovery rates, is configurable via `config/nourished/raw_food.json` and server module toggles.
+
+---
+
 ## The HUD
 
-The HUD is the heart of the mod. Five color-coded bars sit on screen while you play - you always know where you stand without opening a menu.
+The HUD is the heart of the mod. Five color-coded bars sit on screen while you play;you always know where you stand without opening a menu.
 
 ![HUD Edit Mode](Assets/nourished-MiniHud.gif)
 
@@ -110,17 +131,15 @@ If a mod adds food with `FoodProperties`, Nourished handles it automatically. No
 
 ## 🌐 For mod developers
 
-Nourished ships a stable public API if you want to integrate with it:
+Nourished runs on [MariesLib](https://github.com/kgbcupcake/MarieLib) — install both mods. The nutrition API is a thin facade over the library:
 
 ```java
-float level = NourishedAPI.getNutrientLevel(player, "proteins");
-NourishedAPI.registerNutrient(definition);
-NourishedAPI.registerFoodClassification(foodId, "proteins", 0.15f);
+float level = NourishedAPI.getValueLevel(player, "proteins");
+NourishedAPI.registerValue(definition);
+NourishedAPI.registerSourceClassification(foodId, "proteins", 0.15f);
 ```
 
-API elements are marked `@Stable`, `@Experimental`, or `@Internal` so you know exactly what you can rely on.
-
-Read [`API.md`](API.md) for the full public API and [`PHILOSOPHY.md`](PHILOSOPHY.md) for compatibility and stability guarantees. Addons can register custom nutrients, food classifications, and diet events through Java or KubeJS, and can also ship datapack-only integrations without writing Java code. See the example addon project for a minimal end-to-end integration pattern.
+Read [`API.md`](API.md) for Nourished integration, [`PHILOSOPHY.md`](PHILOSOPHY.md) for stability rules, and [MariesLib API](https://github.com/kgbcupcake/MarieLib/blob/main/API.md) for shared types like `ValueDefinition`. Datapack-only integrations need no Java.
 
 ---
 
@@ -130,11 +149,11 @@ Everything in Nourished can be driven by datapacks with zero Java code:
 
 Nutrients — define custom food groups
 Food classification — assign items to nutrient bars via item tags under data/nourished/tags/item/nutrients/
-Effects — add or replace buff/debuff rules via effects.json
+Effects add or replace buff/debuff rules via effects.json
 Food overrides — override specific item nutrition values via food_overrides.json
 Food values — adjust category multipliers via food_values.json
 Colors — customize HUD bar colors via colors.json
-The built-in Food Scanner tool auto-classifies unknown foods and can write a ready-to-use datapack directly into your save with one click.see [`API.md`](API.md).
+The built-in food scanner (MariesLib tooling, `/nourished scan`) auto-classifies unknown foods and can write datapack output into your save. See [`API.md`](API.md).
 
 ---
 
@@ -143,8 +162,8 @@ The built-in Food Scanner tool auto-classifies unknown foods and can write a rea
 Full KubeJS scripting support for custom nutrient events, food classifications, and diet hooks — no Java required.
 
 ```js
-NourishedEvents.onNutrientChanged(event => {
-    if (event.nutrient === 'proteins' && event.level < 0.25) {
+NourishedEvents.nutrientChanged(event => {
+    if (event.valueKey === 'proteins' && event.newValue < 0.25) {
         event.player.tell('Eat some protein!')
     }
 })
@@ -162,11 +181,18 @@ NourishedEvents.onNutrientChanged(event => {
 
 ---
 
-## Requirements
+---
 
-- Minecraft **1.21.1**
-- NeoForge **21.1.x**
-- Java **21**
+## ⚙️ Requirements
+
+|                  |                                                                |
+| ---------------- | -------------------------------------------------------------- |
+| **Minecraft**    | 1.21.1                                                         |
+| **NeoForge**     | 21.1.x                                                         |
+| **MarieLib**     | **v0.1.0-beta.1** ( ⚠️ Going forward from **v0.2.5-beta.5**. ) |
+| **Cloth Config** | required at runtime                                            |
+| **Patchouli**    | optional (in-game guide)                                       |
+| **Java**         | 21                                                             |
 
 ---
 
@@ -177,7 +203,9 @@ MIT
 ## Links
 
 - [Modrinth](https://modrinth.com/mod/nourished)
+- [MariesLib](https://github.com/kgbcupcake/MarieLib) (required dependency)
 - [Contributing](docs/CONTRIBUTING.md)
 - [API.md](API.md)
 - [PHILOSOPHY.md](PHILOSOPHY.md)
 - [ARCHITECTURE.md](ARCHITECTURE.md)
+- [RoadMap.md](RoadMap.md)

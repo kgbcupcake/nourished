@@ -6,11 +6,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.registry.AbstractRegistry;
-import dev.maire.nourished.core.util.NourishedJsonUtils;
-import dev.maire.nourished.core.util.NourishedResourceLoader;
+import dev.marie.MariesLib.registry.AbstractRegistry;
+import dev.marie.MariesLib.util.MarieJsonUtils;
+import dev.marie.MariesLib.util.MarieResourceLoader;
+import dev.marie.MariesLib.util.MarieValidation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -42,6 +43,8 @@ import java.util.Objects;
 @ApiStatus.Internal
 public class FoodValueRegistry {
 
+    public record NutrientValues(float protein, float carbs, float fats, float vitamins, float hydration) {}
+
     public record FoodValueDef(String category, float protein, float carbs, float fats, float vitamins, float hydration) {}
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -62,10 +65,10 @@ public class FoodValueRegistry {
      * Returns NutrientValues scaled by the category's multipliers.
      * Falls back to an even split if the category is unknown.
      */
-    public static FoodNutritionRegistry.NutrientValues getValuesForCategory(String categoryKey, float totalPoints) {
+    public static NutrientValues getValuesForCategory(String categoryKey, float totalPoints) {
         FoodValueDef def = INSTANCE.get(categoryKey);
         if (def == null) {
-            return new FoodNutritionRegistry.NutrientValues(
+            return new NutrientValues(
                     totalPoints * DEFAULT_WEIGHTS[0],
                     totalPoints * DEFAULT_WEIGHTS[1],
                     totalPoints * DEFAULT_WEIGHTS[2],
@@ -73,7 +76,7 @@ public class FoodValueRegistry {
                     totalPoints * DEFAULT_WEIGHTS[4]
             );
         }
-        return new FoodNutritionRegistry.NutrientValues(
+        return new NutrientValues(
                 totalPoints * def.protein(),
                 totalPoints * def.carbs(),
                 totalPoints * def.fats(),
@@ -125,7 +128,7 @@ public class FoodValueRegistry {
      * Call this from a reload listener when datapacks are available.
      */
     public static void loadFromDatapack(ResourceManager resourceManager) {
-        NourishedResourceLoader.loadFromModConfig(
+        MarieResourceLoader.loadFromModConfig(
                 resourceManager,
                 "config/food_values.json",
                 FoodValueRegistry::parseFromReader,
@@ -143,11 +146,11 @@ public class FoodValueRegistry {
             return false;
         }
         String category = categoryEl.getAsString();
-        float protein = NourishedJsonUtils.getOptionalFloat(obj, "protein", 0.2f);
-        float carbs = NourishedJsonUtils.getOptionalFloat(obj, "carbs", 0.2f);
-        float fats = NourishedJsonUtils.getOptionalFloat(obj, "fats", 0.2f);
-        float vitamins = NourishedJsonUtils.getOptionalFloat(obj, "vitamins", 0.2f);
-        float hydration = NourishedJsonUtils.getOptionalFloat(obj, "hydration", 0.2f);
+        float protein = MarieJsonUtils.getOptionalFloat(obj, "protein", 0.2f);
+        float carbs = MarieJsonUtils.getOptionalFloat(obj, "carbs", 0.2f);
+        float fats = MarieJsonUtils.getOptionalFloat(obj, "fats", 0.2f);
+        float vitamins = MarieJsonUtils.getOptionalFloat(obj, "vitamins", 0.2f);
+        float hydration = MarieJsonUtils.getOptionalFloat(obj, "hydration", 0.2f);
         INSTANCE.registerUnlocked(category, new FoodValueDef(category, protein, carbs, fats, vitamins, hydration));
         return true;
     }
@@ -217,7 +220,11 @@ public class FoodValueRegistry {
                 registerBundledDefaultsUnlocked();
                 return;
             }
-            for (int i = 0; i < arr.size(); i++) {
+            int limit = 2000;
+            if (arr.size() > limit) {
+                Nourished.LOGGER.warn("[FoodValueRegistry] food_values.json has {} entries, exceeding {} — truncating", arr.size(), limit);
+            }
+            for (int i = 0; i < Math.min(arr.size(), limit); i++) {
                 registerFoodValueRow(arr.get(i).getAsJsonObject(), i);
             }
             if (INSTANCE.valuesUnlocked().isEmpty()) {
@@ -249,6 +256,7 @@ public class FoodValueRegistry {
         for (FoodValueDef def : loadBundledDefaults()) {
             arr.add(defToJson(def));
         }
+        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "FoodValueRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }
@@ -259,6 +267,7 @@ public class FoodValueRegistry {
         for (FoodValueDef def : INSTANCE.values()) {
             arr.add(defToJson(def));
         }
+        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "FoodValueRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }

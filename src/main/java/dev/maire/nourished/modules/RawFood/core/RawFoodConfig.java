@@ -6,14 +6,17 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.maire.nourished.api.ApiStatus;
+import dev.marie.MariesLib.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.util.NourishedItemTags;
-import dev.maire.nourished.core.util.NourishedJsonUtils;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
-import dev.maire.nourished.core.util.NourishedResourceLoader;
+import dev.maire.nourished.core.tags.NourishedItemTags;
+import dev.marie.MariesLib.util.MarieJsonUtils;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.MariesLib.util.MarieResourceLoader;
+import dev.marie.MariesLib.util.MarieValidation;
+import dev.maire.nourished.modules.RawFood.rawInfo.CookednessResolver;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodResistanceConfig;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.loading.FMLPaths;
@@ -58,20 +61,20 @@ public class RawFoodConfig {
     private RawFoodConfig() {}
 
     public static RawSeverity classify(ItemStack stack) {
-        if (stack.is(NourishedItemTags.RAW_FOOD_FINE)) {
+        if (stack.is(NourishedItemTags.rawSourceFine())) {
             return RawSeverity.FINE;
         }
-        if (stack.is(NourishedItemTags.RAW_FOOD_MILD)) {
+        if (stack.is(NourishedItemTags.rawSourceMild())) {
             return RawSeverity.MILD;
         }
-        if (stack.is(NourishedItemTags.RAW_FOOD_MEDIUM)) {
+        if (stack.is(NourishedItemTags.rawSourceMedium())) {
             return RawSeverity.MEDIUM;
         }
-        if (stack.is(NourishedItemTags.RAW_FOOD_SEVERE)) {
+        if (stack.is(NourishedItemTags.rawSourceSevere())) {
             return RawSeverity.SEVERE;
         }
 
-        String itemPath = NourishedRegistryUtils.itemKey(stack).getPath().toLowerCase(Locale.ROOT);
+        String itemPath = MarieRegistryUtils.itemKey(stack).getPath().toLowerCase(Locale.ROOT);
         return classifyByTokens(itemPath, "");
     }
 
@@ -201,6 +204,7 @@ public class RawFoodConfig {
         Path file = configDir.resolve("raw_food.json");
 
         resetToEmpty();
+        CookednessResolver.invalidate();
         try {
             parseBundledDefaults();
             Files.createDirectories(configDir);
@@ -219,7 +223,7 @@ public class RawFoodConfig {
     }
 
     public static void loadFromDatapack(ResourceManager resourceManager) {
-        NourishedResourceLoader.loadFromModConfig(
+        MarieResourceLoader.loadFromModConfig(
                 resourceManager,
                 "config/raw_food.json",
                 reader -> {
@@ -283,6 +287,9 @@ public class RawFoodConfig {
         if (root.has("tokens") && root.get("tokens").isJsonObject()) {
             parseTokens(root.getAsJsonObject("tokens"));
         }
+        if (root.has("overrides") && root.get("overrides").isJsonObject()) {
+            parseOverrides(root.getAsJsonObject("overrides"));
+        }
         if (root.has("tiers") && root.get("tiers").isJsonObject()) {
             parseTiers(root.getAsJsonObject("tiers"));
         }
@@ -292,14 +299,26 @@ public class RawFoodConfig {
     }
 
     private static void parseGut(JsonObject gut) {
-        gutTickInterval = NourishedJsonUtils.getOptionalInt(gut, "tick_interval", gutTickInterval);
-        baseRecoveryRate = NourishedJsonUtils.getOptionalFloat(gut, "base_recovery_rate", baseRecoveryRate);
-        cookedFoodRecoveryRate = NourishedJsonUtils.getOptionalFloat(gut, "cooked_food_recovery_rate", cookedFoodRecoveryRate);
-        diversityThreshold = NourishedJsonUtils.getOptionalFloat(gut, "diversity_threshold", diversityThreshold);
-        diversityBonusRate = NourishedJsonUtils.getOptionalFloat(gut, "diversity_bonus_rate", diversityBonusRate);
-        sensitivityDecayRate = NourishedJsonUtils.getOptionalFloat(gut, "sensitivity_decay_rate", sensitivityDecayRate);
-        maxSensitivityMultiplier = NourishedJsonUtils.getOptionalFloat(gut, "max_sensitivity_multiplier", maxSensitivityMultiplier);
-        sensitivityIncrementPerRawEat = NourishedJsonUtils.getOptionalFloat(gut, "sensitivity_increment_per_raw_eat", sensitivityIncrementPerRawEat);
+        gutTickInterval = MarieJsonUtils.getOptionalInt(gut, "tick_interval", gutTickInterval);
+        baseRecoveryRate = MarieJsonUtils.getOptionalFloat(gut, "base_recovery_rate", baseRecoveryRate);
+        cookedFoodRecoveryRate = MarieJsonUtils.getOptionalFloat(gut, "cooked_food_recovery_rate", cookedFoodRecoveryRate);
+        diversityThreshold = MarieJsonUtils.getOptionalFloat(gut, "diversity_threshold", diversityThreshold);
+        diversityBonusRate = MarieJsonUtils.getOptionalFloat(gut, "diversity_bonus_rate", diversityBonusRate);
+        sensitivityDecayRate = MarieJsonUtils.getOptionalFloat(gut, "sensitivity_decay_rate", sensitivityDecayRate);
+        maxSensitivityMultiplier = MarieJsonUtils.getOptionalFloat(gut, "max_sensitivity_multiplier", maxSensitivityMultiplier);
+        sensitivityIncrementPerRawEat = MarieJsonUtils.getOptionalFloat(gut, "sensitivity_increment_per_raw_eat", sensitivityIncrementPerRawEat);
+    }
+
+    private static void parseOverrides(JsonObject overrides) {
+        for (Map.Entry<String, JsonElement> entry : overrides.entrySet()) {
+            try {
+                ResourceLocation itemId = ResourceLocation.parse(entry.getKey());
+                float cookedness = entry.getValue().getAsFloat();
+                CookednessResolver.registerOverride(itemId, cookedness);
+            } catch (RuntimeException e) {
+                Nourished.LOGGER.warn("[RawFoodConfig] Ignoring invalid cookedness override '{}'", entry.getKey());
+            }
+        }
     }
 
     private static void parseTokens(JsonObject tokens) {
@@ -329,10 +348,10 @@ public class RawFoodConfig {
             List<String> effectPool = obj.has("effect_pool") && obj.get("effect_pool").isJsonArray()
                     ? parseEffectPool(obj.getAsJsonArray("effect_pool"))
                     : previous.effectPool();
-            int durationTicks = NourishedJsonUtils.getOptionalInt(obj, "duration_ticks", previous.durationTicks());
-            int amplifier = NourishedJsonUtils.getOptionalInt(obj, "amplifier", previous.amplifier());
-            float nutrientPenalty = NourishedJsonUtils.getOptionalFloat(obj, "nutrient_penalty", previous.nutrientPenalty());
-            float missedOpportunityMultiplier = NourishedJsonUtils.getOptionalFloat(obj, "missed_opportunity_multiplier", previous.missedOpportunityMultiplier());
+            int durationTicks = MarieJsonUtils.getOptionalInt(obj, "duration_ticks", previous.durationTicks());
+            int amplifier = MarieJsonUtils.getOptionalInt(obj, "amplifier", previous.amplifier());
+            float nutrientPenalty = MarieJsonUtils.getOptionalFloat(obj, "nutrient_penalty", previous.nutrientPenalty());
+            float missedOpportunityMultiplier = MarieJsonUtils.getOptionalFloat(obj, "missed_opportunity_multiplier", previous.missedOpportunityMultiplier());
             TIERS.put(severity, new RawFoodTierDef(effectPool, durationTicks, amplifier, nutrientPenalty, missedOpportunityMultiplier));
 
             if (obj.has("resistance") && obj.get("resistance").isJsonObject()) {
@@ -342,21 +361,21 @@ public class RawFoodConfig {
     }
 
     private static RawFoodResistanceConfig parseResistanceConfig(JsonObject resistance) {
-        float threshold = NourishedJsonUtils.getOptionalFloat(resistance, "threshold", 1.0f);
-        float maxResistance = NourishedJsonUtils.getOptionalFloat(resistance, "max_resistance", 0.0f);
+        float threshold = MarieJsonUtils.getOptionalFloat(resistance, "threshold", 1.0f);
+        float maxResistance = MarieJsonUtils.getOptionalFloat(resistance, "max_resistance", 0.0f);
 
         Map<String, Float> nutrientWeights = new LinkedHashMap<>();
         if (resistance.has("nutrient_weights") && resistance.get("nutrient_weights").isJsonObject()) {
             JsonObject weights = resistance.getAsJsonObject("nutrient_weights");
             List<String> validKeys = NutrientRegistry.getKeys();
             for (Map.Entry<String, JsonElement> entry : weights.entrySet()) {
-                String nutrientKey = entry.getKey();
-                if (!validKeys.contains(nutrientKey)) {
-                    Nourished.LOGGER.warn("[RawFoodConfig] Unknown nutrient key '{}' in resistance config, skipping", nutrientKey);
+                String valueKey = entry.getKey();
+                if (!validKeys.contains(valueKey)) {
+                    Nourished.LOGGER.warn("[RawFoodConfig] Unknown nutrient key '{}' in resistance config, skipping", valueKey);
                     continue;
                 }
                 float weight = entry.getValue().getAsFloat();
-                nutrientWeights.put(nutrientKey, weight);
+                nutrientWeights.put(valueKey, weight);
             }
         }
 
@@ -452,6 +471,7 @@ public class RawFoodConfig {
         root.add("tokens", tokensToJson());
         root.add("tiers", tiersToJson());
         root.add("gut", gutToJson());
+        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "RawFoodConfig");
         try (Writer writer = Files.newBufferedWriter(file)) {
             GSON.toJson(root, writer);
         }

@@ -1,12 +1,12 @@
 package dev.maire.nourished.core.effect;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.core.handler.ConfigReloadHandler;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.config.FeatureFlagCache;
+import dev.marie.MariesLib.handler.ReloadGuardListener;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.util.NourishedEffectUtils;
+import dev.marie.MariesLib.util.MarieEffectUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -27,18 +27,18 @@ public final class NutritionEffectApplier {
 
     private NutritionEffectApplier() {}
 
-    public static void apply(ServerPlayer player, DietData data) {
-        if (!ModuleCache.enableEffects) {
+    public static void apply(ServerPlayer player, TrackingData data) {
+        if (!FeatureFlagCache.enableEffects()) {
             return;
         }
-        if (ConfigReloadHandler.isReloadInProgress()) {
+        if (ReloadGuardListener.isReloadInProgress()) {
             return;
         }
         Map<ResourceLocation, String> seenActiveEffects = new HashMap<>();
         Map<ResourceLocation, EffectRegistry.EffectDef> lastSeenActiveByEffect = new HashMap<>();
         Map<ResourceLocation, EffectRegistry.EffectDef> firstSeenActiveByEffect = new HashMap<>();
         for (EffectRegistry.EffectDef def : EffectRegistry.getAll()) {
-            Holder<MobEffect> effect = NourishedEffectUtils.resolveEffect(def.effect()).orElse(null);
+            Holder<MobEffect> effect = MarieEffectUtils.resolveEffect(def.effect()).orElse(null);
             if (effect == null) continue;
 
             ResourceLocation effectId = BuiltInRegistries.MOB_EFFECT.getKey(effect.value());
@@ -49,20 +49,20 @@ public final class NutritionEffectApplier {
             }
 
             boolean shouldApply = switch (def.trigger()) {
-                case "below" -> data.nutrients.getOrDefault(def.nutrient(), 0f) < def.threshold();
-                case "above" -> data.nutrients.getOrDefault(def.nutrient(), 0f) > def.threshold();
+                case "below" -> data.values.getOrDefault(def.nutrient(), 0f) < def.threshold();
+                case "above" -> data.values.getOrDefault(def.nutrient(), 0f) > def.threshold();
                 case "all_above" -> {
                     if (def.nutrient().equals("all")) {
                         yield NutrientRegistry.getKeys().stream()
-                                .allMatch(k -> data.nutrients.getOrDefault(k, 0f) > def.threshold());
+                                .allMatch(k -> data.values.getOrDefault(k, 0f) > def.threshold());
                     } else {
-                        yield data.nutrients.getOrDefault(def.nutrient(), 0f) > def.threshold();
+                        yield data.values.getOrDefault(def.nutrient(), 0f) > def.threshold();
                     }
                 }
                 case "any_below" -> NutrientRegistry.getKeys().stream()
-                        .anyMatch(k -> data.nutrients.getOrDefault(k, 0f) < def.threshold());
+                        .anyMatch(k -> data.values.getOrDefault(k, 0f) < def.threshold());
                 case "between" -> {
-                    float v = data.nutrients.getOrDefault(def.nutrient(), 0f);
+                    float v = data.values.getOrDefault(def.nutrient(), 0f);
                     yield v >= def.threshold() && v <= def.thresholdMax();
                 }
                 default -> false;
@@ -99,7 +99,7 @@ public final class NutritionEffectApplier {
             return;
         }
         for (EffectRegistry.EffectDef def : EffectRegistry.getAll()) {
-            NourishedEffectUtils.resolveEffect(def.effect()).ifPresent(holder -> {
+            MarieEffectUtils.resolveEffect(def.effect()).ifPresent(holder -> {
                 ResourceLocation effectId = BuiltInRegistries.MOB_EFFECT.getKey(holder.value());
                 if (appliedByNourished.contains(effectId)) {
                     player.removeEffect(holder);

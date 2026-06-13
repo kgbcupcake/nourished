@@ -1,15 +1,15 @@
 package dev.maire.nourished.modules.RawFood.handler;
 
-import dev.maire.nourished.api.ApiStatus;
-import dev.maire.nourished.config.ModuleCache;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.maire.nourished.config.NourishedModuleCache;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
-import dev.maire.nourished.core.handler.NutritionEatingHandler;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
-import dev.maire.nourished.core.util.NourishedEffectUtils;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
+import dev.marie.MariesLib.util.MarieEffectUtils;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawFoodTierDef;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
@@ -20,6 +20,7 @@ import dev.maire.nourished.modules.RawFood.rawInfo.CookednessResolver;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodResistanceResolver;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.NourishedKubeIntegration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.Holder;
@@ -47,10 +48,10 @@ public class RawFoodPenaltyHandler {
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
-        if (!ModuleCache.enableRawFoodPenalty) return;
+        if (!NourishedModuleCache.enableRawSourcePenalty) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         ItemStack stack = event.getItem();
-        ResourceLocation itemId = NourishedRegistryUtils.itemKey(stack);
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(stack);
         RawSeverity severity = RawFoodClassifier.classify(stack, player.level());
         float resistance = RawFoodResistanceResolver.resolve(player, severity);
         float penaltyScale = 1.0f - resistance;
@@ -58,10 +59,6 @@ public class RawFoodPenaltyHandler {
                 "[RawFoodPenaltyHandler] item={}, severity={}, resistance={}, penaltyScale={}",
                 itemId, severity, resistance, penaltyScale);
 
-        if (NutritionEatingHandler.isNutritionOnlyPipelinePending(player, stack)) {
-            Nourished.LOGGER.debug("[RawFoodPenaltyHandler] skipped {} because nutrition-only pipeline is pending", itemId);
-            return;
-        }
         if (FoodNutritionRegistry.foodPropertiesForNutrition(stack, player) == null) {
             return;
         }
@@ -77,6 +74,11 @@ public class RawFoodPenaltyHandler {
 
         RawFoodTierDef tierDef = RawFoodConfig.getTier(severity);
         boolean repeatedRawEat = updateRawEatTimestamp(player, itemId.toString());
+
+        if (NourishedKubeIntegration.isRawFoodPenaltyCancelled(
+                player.getUUID().toString(), itemId.toString(), severity.name().toLowerCase())) {
+            return;
+        }
 
         applyRawFoodEffect(player, severity, tierDef, repeatedRawEat);
         applyNutrientPenalty(player, stack, tierDef, penaltyScale);
@@ -115,7 +117,7 @@ public class RawFoodPenaltyHandler {
 
     private static SelectedEffect activeEffectFromPool(ServerPlayer player, List<String> effectPool) {
         for (String effectId : effectPool) {
-            Holder<MobEffect> effect = NourishedEffectUtils.resolveEffect(effectId).orElse(null);
+            Holder<MobEffect> effect = MarieEffectUtils.resolveEffect(effectId).orElse(null);
             if (effect == null) {
                 continue;
             }
@@ -130,7 +132,7 @@ public class RawFoodPenaltyHandler {
     private static SelectedEffect randomEffectFromPool(ServerPlayer player, List<String> effectPool) {
         List<Holder<MobEffect>> resolved = new ArrayList<>();
         for (String effectId : effectPool) {
-            Holder<MobEffect> effect = NourishedEffectUtils.resolveEffect(effectId).orElse(null);
+            Holder<MobEffect> effect = MarieEffectUtils.resolveEffect(effectId).orElse(null);
             if (effect != null) {
                 resolved.add(effect);
             }
@@ -143,7 +145,7 @@ public class RawFoodPenaltyHandler {
     }
 
     private static void applyNutrientPenalty(ServerPlayer player, ItemStack stack, RawFoodTierDef tierDef, float penaltyScale) {
-        Map<String, Float> matchedBars = FoodNutritionRegistry.resolveNutrientBars(stack, false, player.level());
+        Map<String, Float> matchedBars = NutrientClassificationLookup.resolveBars(stack, player.level());
         String dominantKey = matchedBars.entrySet().stream()
                 .max(Comparator.comparingDouble(entry -> entry.getValue()))
                 .map(Map.Entry::getKey)
@@ -152,31 +154,34 @@ public class RawFoodPenaltyHandler {
             return;
         }
 
-        ResourceLocation itemId = NourishedRegistryUtils.itemKey(stack);
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(stack);
         float cookedness = CookednessResolver.resolve(itemId);
 
         GutHealthData gut = player.getData(GutHealthAttachment.GUT.get());
+        float oldGutHealth = gut.getGutHealth();
         gut.applyRawEat(cookedness, Math.abs(tierDef.nutrientPenalty()) * penaltyScale);
         float sensitivityMultiplier = gut.effectivePenaltyMultiplier();
         player.setData(GutHealthAttachment.GUT.get(), gut);
         ModNetworking.syncGutHealth(player, gut);
+        NourishedKubeIntegration.fireGutHealthChanged(
+                player.getUUID().toString(), oldGutHealth, gut.getGutHealth(), "raw_food");
 
-        DietData diet = player.getData(DietAttachment.DIET.get());
+        TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
 
         float scaledNutrientPenalty = tierDef.nutrientPenalty() * penaltyScale * sensitivityMultiplier;
-        diet.addNutrient(dominantKey, scaledNutrientPenalty);
+        diet.addValue(dominantKey, scaledNutrientPenalty);
 
         if (tierDef.missedOpportunityMultiplier() > 0f) {
             Optional<Map<String, Float>> cookedNutrients = CookedVersionResolver.resolveCooked(itemId);
             if (cookedNutrients.isPresent()) {
                 for (Map.Entry<String, Float> entry : cookedNutrients.get().entrySet()) {
                     float missedAmount = entry.getValue() * tierDef.missedOpportunityMultiplier() * penaltyScale * sensitivityMultiplier;
-                    diet.addNutrient(entry.getKey(), -missedAmount);
+                    diet.addValue(entry.getKey(), -missedAmount);
                 }
             }
         }
 
-        player.setData(DietAttachment.DIET.get(), diet);
+        player.setData(TrackingAttachment.TRACKING.get(), diet);
         ModNetworking.syncDietDelta(player, diet);
         NutritionEffectApplier.apply(player, diet);
     }

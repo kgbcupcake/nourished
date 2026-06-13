@@ -1,25 +1,25 @@
 {
-  "nourished_schema_version": 1,
+  "marie_schema_version": 1,
   "multipliers": {
     "community_tag": 5.0,
     "namespace": 4.0,
     "suffix": 3.0,
     "keyword": 2.0,
     "archetype": 2.0,
-    "food_properties": 1.0,
+    "source_properties": 1.0,
     "recipe_inheritance": 1.0,
     "namespace_peer": 0.5,
     "secondary_suffix": 0.5,
     "namespace_peer_average_weight": 0.5
   },
-  "food_property_heuristics": {
-    "saturating_meal": {
+  "source_property_heuristics": {
+    "saturating_source": {
       "min_saturation": 1.2,
-      "min_nutrition": 6,
+      "min_property_points": 6,
       "contributions": { "proteins": 2.0, "grains": 1.0 }
     },
-    "light_snack": {
-      "max_nutrition": 2,
+    "light_application": {
+      "max_property_points": 2,
       "contributions": { "vegetables": 1.0 }
     },
     "bad_effect_keywords": [ "poison", "nausea", "hunger" ],

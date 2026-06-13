@@ -1,20 +1,34 @@
 package dev.maire.nourished.api;
 
-import dev.maire.nourished.api.registry.AbsorptionModifierRegistry;
-import dev.maire.nourished.api.registry.DietProfileRegistry;
-import dev.maire.nourished.api.registry.MilestoneRegistry;
-import dev.maire.nourished.api.registry.ReportProviderRegistry;
-import dev.maire.nourished.api.registry.SeasonHookRegistry;
-import dev.maire.nourished.api.registry.SynergyRegistry;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.api.AbsorptionModifier;
+import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.api.SourcePairSynergy;
+import dev.marie.MariesLib.api.MarieAPIState;
+import dev.marie.MariesLib.api.MarieAPIVersion;
+import dev.marie.MariesLib.api.MarieSeasonHook;
+import dev.marie.MariesLib.api.ApplicationHistoryView;
+import dev.marie.MariesLib.api.MilestoneDefinition;
+import dev.marie.MariesLib.api.ProfileDefinition;
+import dev.marie.MariesLib.api.ReportProvider;
+import dev.marie.MariesLib.api.SynergyDefinition;
+import dev.marie.MariesLib.api.ThresholdEffect;
+import dev.marie.MariesLib.api.ValueDefinition;
+import dev.marie.MariesLib.api.registry.AbsorptionModifierRegistry;
+import dev.marie.MariesLib.api.registry.MilestoneRegistry;
+import dev.marie.MariesLib.api.registry.ProfileRegistry;
+import dev.marie.MariesLib.api.registry.ReportProviderRegistry;
+import dev.marie.MariesLib.api.registry.SeasonHookRegistry;
+import dev.marie.MariesLib.api.registry.SynergyRegistry;
+import dev.marie.MariesLib.compat.CompatDefinition;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
-import dev.maire.nourished.core.impl.EmptyFoodMemoryView;
+import dev.marie.MariesLib.api.impl.EmptyApplicationHistoryView;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -53,26 +67,28 @@ public final class NourishedAPI {
      * @return the player's current calorie value
      * @throws IllegalStateException if the nutrition system is not initialized
      */
-    public static float getCalories(Player player) {
+    @ApiStatus.Stable
+    public static float getTotal(Player player) {
         if (player == null) {
             return 0f;
         }
-        return DietAttachment.getCalories(player);
+        return TrackingAttachment.getTotal(player);
     }
 
     /**
      * Returns the current level of a specific nutrient for the given player.
      *
      * @param player      the player to query
-     * @param nutrientKey the internal key of the nutrient (e.g. "protein", "iron")
+     * @param valueKey the internal key of the nutrient (e.g. "protein", "iron")
      * @return the nutrient level as a normalized float (0.0 to 1.0),
      *         or {@code -1.0f} if the nutrient key is not recognized
      */
-    public static float getNutrientLevel(Player player, String nutrientKey) {
+    @ApiStatus.Stable
+    public static float getValueLevel(Player player, String valueKey) {
         if (player == null) {
             return -1.0f;
         }
-        return DietAttachment.getNutrientLevel(player, nutrientKey);
+        return TrackingAttachment.getValueLevel(player, valueKey);
     }
 
     /**
@@ -80,37 +96,25 @@ public final class NourishedAPI {
      * exposing recent eating history and variety information.
      *
      * @param player the player to query
-     * @return a {@link FoodMemoryView} for the given player
+     * @return an {@link ApplicationHistoryView} for the given player
      * @throws IllegalStateException if the nutrition system is not initialized
      */
-    public static FoodMemoryView getFoodMemory(Player player) {
-        if (player == null) {
-            return EmptyFoodMemoryView.INSTANCE;
-        }
-        return DietAttachment.getFoodMemoryView(player);
-    }
-
-    /**
-     * Alias for {@link #getNutrientLevel(Player, String)}.
-     *
-     * @param player      the player to query
-     * @param nutrientKey the nutrient key to query
-     * @return the current nutrient level, or {@code -1.0f} if unrecognized
-     */
     @ApiStatus.Stable
-    public static float getNutrition(Player player, String nutrientKey) {
-        return getNutrientLevel(player, nutrientKey);
+    public static ApplicationHistoryView getSourceMemory(Player player) {
+        if (player == null) {
+            return EmptyApplicationHistoryView.INSTANCE;
+        }
+        return TrackingAttachment.getApplicationHistoryView(player);
     }
-
     /**
-     * Alias for {@link #getCalories(Player)}.
+     * Alias for {@link #getTotal(Player)}.
      *
      * @param player the player to query
      * @return the player's current calorie value
      */
     @ApiStatus.Stable
-    public static float getCalorieCount(Player player) {
-        return getCalories(player);
+    public static float getTotalCount(Player player) {
+        return getTotal(player);
     }
 
     /**
@@ -121,48 +125,57 @@ public final class NourishedAPI {
      * @return aggregated player diet state snapshot
      */
     @ApiStatus.Stable
-    public static NourishedPlayerData getDietData(Player player) {
+    public static dev.marie.MariesLib.api.MariePlayerData getTrackingData(Player player) {
         Map<String, Float> nutrients = new LinkedHashMap<>();
-        for (String nutrientKey : NutrientRegistry.getKeys()) {
-            nutrients.put(nutrientKey, getNutrientLevel(player, nutrientKey));
+        for (String valueKey : NutrientRegistry.getKeys()) {
+            nutrients.put(valueKey, getValueLevel(player, valueKey));
         }
-        return new NourishedPlayerData(
-                getCalories(player),
+        return new dev.marie.MariesLib.api.MariePlayerData(
+                getTotal(player),
                 Collections.unmodifiableMap(nutrients),
-                getFoodMemory(player)
+                getSourceMemory(player)
         );
     }
 
     /**
-     * Applies a direct nutrient delta by posting a {@link NutrientModifierEvent}
+     * Applies a direct nutrient delta by posting a {@link dev.marie.MariesLib.api.ValueModifierEvent}
      * and then applying the final event amount if the event is not cancelled.
      *
      * @param player      the player to modify
-     * @param nutrientKey the nutrient key to modify
+     * @param valueKey the nutrient key to modify
      * @param delta       the nutrient delta to apply
      */
     @ApiStatus.Stable
-    public static void modifyNutrition(Player player, String nutrientKey, float delta) {
-        NutrientModifierEvent modifierEvent = new NutrientModifierEvent(player, API_MODIFIER_SOURCE, nutrientKey, delta);
+    public static void modifyValue(Player player, String valueKey, float delta) {
+        MarieRegistryUtils.requireValueKey(valueKey, "NourishedAPI.modifyValue");
+        dev.marie.MariesLib.api.ValueModifierContext ctx =
+                dev.marie.MariesLib.api.ValueModifierContext.of(player, API_MODIFIER_SOURCE, valueKey);
+        dev.marie.MariesLib.api.ValueModifierEvent modifierEvent =
+                new dev.marie.MariesLib.api.ValueModifierEvent(ctx, delta);
         NeoForge.EVENT_BUS.post(modifierEvent);
         if (modifierEvent.isCanceled()) {
             return;
         }
-        DietData diet = player.getData(DietAttachment.DIET.get());
-        diet.addNutrient(nutrientKey, modifierEvent.getAmount());
-        player.setData(DietAttachment.DIET.get(), diet);
+        float finalDelta = dev.maire.nourished.core.NourishedKubeIntegration.fireNutrientModifier(
+                ctx, modifierEvent.getAmount());
+        if (finalDelta == 0f) {
+            return;
+        }
+        TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
+        diet.addValue(valueKey, finalDelta);
+        player.setData(TrackingAttachment.TRACKING.get(), diet);
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return;
         }
         ModNetworking.syncDietDelta(serverPlayer, diet);
-        if (ModuleCache.enableEffects) {
+        if (FeatureFlagCache.enableEffects()) {
             NutritionEffectApplier.apply(serverPlayer, diet);
         }
     }
 
     @ApiStatus.Stable
     public static String getVersion() {
-        return NourishedAPIVersion.VERSION;
+        return MarieAPIVersion.VERSION;
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -179,8 +192,9 @@ public final class NourishedAPI {
      * @throws IllegalStateException    if called after initialization is complete
      * @throws IllegalArgumentException if a nutrient with the same id already exists
      */
-    public static void registerNutrient(NutrientDefinition definition) {
-        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+    @ApiStatus.Stable
+    public static void registerValue(ValueDefinition definition) {
+        if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         if (NutrientRegistry.getKeys().contains(definition.getId())) {
             throw new IllegalArgumentException("Nutrient already registered: " + definition.getId());
         }
@@ -188,45 +202,48 @@ public final class NourishedAPI {
     }
 
     /**
-     * Alias for {@link #registerNutrient(NutrientDefinition)}.
+     * Alias for {@link #registerValue(ValueDefinition)}.
      *
      * @param definition the nutrient definition to register
      */
     @ApiStatus.Stable
-    public static void addNutrient(NutrientDefinition definition) {
-        registerNutrient(definition);
+    public static void addNutrient(ValueDefinition definition) {
+        registerValue(definition);
     }
 
     /**
      * Registers a food item's nutrient classification, mapping a food to a
      * specific nutrient with a given contribution amount.
      *
-     * @param foodId      the registry identifier of the food item
-     * @param nutrientKey the nutrient key this food contributes to
+     * @param sourceId      the registry identifier of the food item
+     * @param valueKey the nutrient key this food contributes to
      * @param amount      the nutrient contribution amount per consumption
      * @throws IllegalArgumentException if the nutrient key is not registered
      */
-    public static void registerFoodClassification(ResourceLocation foodId, String nutrientKey, float amount) {
-        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
-        dev.maire.nourished.core.util.NourishedValidation.requireNonNullId(foodId, "NourishedAPI.registerFoodClassification");
-        dev.maire.nourished.core.util.NourishedValidation.requireFinite(amount, -10f, 10f, "NourishedAPI.registerFoodClassification.amount");
-        if (!net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(foodId)) {
-            org.slf4j.LoggerFactory.getLogger(NourishedAPI.class).warn("[NourishedAPI] registerFoodClassification: item '{}' not found in BuiltInRegistries.ITEM", foodId);
+    @ApiStatus.Stable
+    public static void registerSourceClassification(ResourceLocation sourceId, String valueKey, float amount) {
+        if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        dev.marie.MariesLib.util.MarieValidation.requireNonNullId(sourceId, "NourishedAPI.registerSourceClassification");
+        if (!Float.isFinite(amount))
+            throw new IllegalArgumentException(
+                    "NourishedAPI.registerSourceClassification.amount must be finite");
+        if (!net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(sourceId)) {
+            org.slf4j.LoggerFactory.getLogger(NourishedAPI.class).warn("[NourishedAPI] registerSourceClassification: item '{}' not found in BuiltInRegistries.ITEM", sourceId);
         }
-        NourishedRegistryUtils.requireNutrientKey(nutrientKey, "NourishedAPI.registerFoodClassification");
-        dev.maire.nourished.core.nutrition.FoodNutritionRegistry.registerClassification(foodId, nutrientKey, amount);
+        MarieRegistryUtils.requireValueKey(valueKey, "NourishedAPI.registerSourceClassification");
+        dev.marie.MariesLib.api.MarieAPI.registerSourceClassification(sourceId, valueKey, amount);
     }
 
     /**
-     * Alias for {@link #registerFoodClassification(ResourceLocation, String, float)}.
+     * Alias for {@link #registerSourceClassification(ResourceLocation, String, float)}.
      *
-     * @param foodId      the registry identifier of the food item
-     * @param nutrientKey the nutrient key this food contributes to
+     * @param sourceId      the registry identifier of the food item
+     * @param valueKey the nutrient key this food contributes to
      * @param amount      the nutrient contribution amount per consumption
      */
     @ApiStatus.Stable
-    public static void registerFood(ResourceLocation foodId, String nutrientKey, float amount) {
-        registerFoodClassification(foodId, nutrientKey, amount);
+    public static void registerSource(ResourceLocation sourceId, String valueKey, float amount) {
+        registerSourceClassification(sourceId, valueKey, amount);
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -239,18 +256,19 @@ public final class NourishedAPI {
      * @param definition the effect definition describing the trigger and effect
      * @throws IllegalArgumentException if the referenced nutrient or effect doesn't exist
      */
-    public static void registerCustomEffect(EffectDefinition definition) {
-        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+    @ApiStatus.Stable
+    public static void registerCustomEffect(ThresholdEffect definition) {
+        if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         dev.maire.nourished.core.effect.EffectRegistry.registerExternal(definition);
     }
 
     /**
-     * Alias for {@link #registerCustomEffect(EffectDefinition)}.
+     * Alias for {@link #registerCustomEffect(ThresholdEffect)}.
      *
      * @param definition the effect definition describing the trigger and effect
      */
     @ApiStatus.Stable
-    public static void addEffect(EffectDefinition definition) {
+    public static void addEffect(ThresholdEffect definition) {
         registerCustomEffect(definition);
     }
 
@@ -264,9 +282,10 @@ public final class NourishedAPI {
      *
      * @param definition the compat definition with food-to-nutrient mappings
      */
+    @ApiStatus.Stable
     public static void registerCompatEntry(CompatDefinition definition) {
-        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
-        dev.maire.nourished.compat.ModCompat.registerExternal(definition);
+        if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        dev.marie.MariesLib.compat.ModCompat.registerExternal(definition);
     }
 
     /**
@@ -291,19 +310,20 @@ public final class NourishedAPI {
      * @param definition the nutrient synergy definition
      * @throws IllegalArgumentException if referenced nutrients don't exist
      */
-    public static void registerNutrientSynergy(NutrientSynergyDefinition definition) {
-        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
-        SynergyRegistry.registerNutrientSynergy(definition);
+    @ApiStatus.Stable
+    public static void registerValueSynergy(SynergyDefinition definition) {
+        if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        SynergyRegistry.registerValueSynergy(definition);
     }
 
     /**
-     * Alias for {@link #registerNutrientSynergy(NutrientSynergyDefinition)}.
+     * Alias for {@link #registerValueSynergy(SynergyDefinition)}.
      *
      * @param definition the nutrient synergy definition
      */
     @ApiStatus.Stable
-    public static void addNutrientSynergy(NutrientSynergyDefinition definition) {
-        registerNutrientSynergy(definition);
+    public static void addNutrientSynergy(SynergyDefinition definition) {
+        registerValueSynergy(definition);
     }
 
     /**
@@ -312,19 +332,20 @@ public final class NourishedAPI {
      *
      * @param definition the food synergy definition
      */
-    public static void registerFoodSynergy(FoodSynergyDefinition definition) {
-        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
-        SynergyRegistry.registerFoodSynergy(definition);
+    @ApiStatus.Stable
+    public static void registerSourcePairSynergy(SourcePairSynergy definition) {
+        if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        SynergyRegistry.registerSourcePairSynergy(definition);
     }
 
     /**
-     * Alias for {@link #registerFoodSynergy(FoodSynergyDefinition)}.
+     * Alias for {@link #registerSourcePairSynergy(SourcePairSynergy)}.
      *
      * @param definition the food synergy definition
      */
     @ApiStatus.Stable
-    public static void addFoodSynergy(FoodSynergyDefinition definition) {
-        registerFoodSynergy(definition);
+    public static void addFoodSynergy(SourcePairSynergy definition) {
+        registerSourcePairSynergy(definition);
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -337,19 +358,20 @@ public final class NourishedAPI {
      * @param definition the diet profile definition with custom thresholds and bonuses
      * @throws IllegalArgumentException if a profile with the same id already exists
      */
-    public static void registerDietProfile(DietProfileDefinition definition) {
-        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
-        DietProfileRegistry.register(definition);
+    @ApiStatus.Stable
+    public static void registerTrackingProfile(ProfileDefinition definition) {
+        if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+        ProfileRegistry.register(definition);
     }
 
     /**
-     * Alias for {@link #registerDietProfile(DietProfileDefinition)}.
+     * Alias for {@link #registerTrackingProfile(ProfileDefinition)}.
      *
      * @param definition the diet profile definition with custom thresholds and bonuses
      */
     @ApiStatus.Stable
-    public static void addProfile(DietProfileDefinition definition) {
-        registerDietProfile(definition);
+    public static void addProfile(ProfileDefinition definition) {
+        registerTrackingProfile(definition);
     }
 
     /**
@@ -359,18 +381,19 @@ public final class NourishedAPI {
      * @param definition the milestone definition
      * @throws IllegalArgumentException if a milestone with the same id already exists
      */
-    public static void registerMilestone(NutrientMilestoneDefinition definition) {
-        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+    @ApiStatus.Stable
+    public static void registerMilestone(MilestoneDefinition definition) {
+        if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         MilestoneRegistry.register(definition);
     }
 
     /**
-     * Alias for {@link #registerMilestone(NutrientMilestoneDefinition)}.
+     * Alias for {@link #registerMilestone(MilestoneDefinition)}.
      *
      * @param definition the milestone definition
      */
     @ApiStatus.Stable
-    public static void addMilestone(NutrientMilestoneDefinition definition) {
+    public static void addMilestone(MilestoneDefinition definition) {
         registerMilestone(definition);
     }
 
@@ -384,18 +407,19 @@ public final class NourishedAPI {
      *
      * @param hook the season hook implementation
      */
-    public static void registerSeasonHook(NourishedSeasonHook hook) {
-        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+    @ApiStatus.Stable
+    public static void registerSeasonHook(MarieSeasonHook hook) {
+        if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         SeasonHookRegistry.register(hook);
     }
 
     /**
-     * Alias for {@link #registerSeasonHook(NourishedSeasonHook)}.
+     * Alias for {@link #registerSeasonHook(MarieSeasonHook)}.
      *
      * @param hook the season hook implementation
      */
     @ApiStatus.Stable
-    public static void addSeasonHook(NourishedSeasonHook hook) {
+    public static void addSeasonHook(MarieSeasonHook hook) {
         registerSeasonHook(hook);
     }
 
@@ -405,18 +429,19 @@ public final class NourishedAPI {
      *
      * @param modifier the absorption modifier implementation
      */
-    public static void registerAbsorptionModifier(NutrientAbsorptionModifier modifier) {
-        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+    @ApiStatus.Stable
+    public static void registerAbsorptionModifier(AbsorptionModifier modifier) {
+        if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         AbsorptionModifierRegistry.register(modifier);
     }
 
     /**
-     * Alias for {@link #registerAbsorptionModifier(NutrientAbsorptionModifier)}.
+     * Alias for {@link #registerAbsorptionModifier(AbsorptionModifier)}.
      *
      * @param modifier the absorption modifier implementation
      */
     @ApiStatus.Stable
-    public static void addAbsorptionModifier(NutrientAbsorptionModifier modifier) {
+    public static void addAbsorptionModifier(AbsorptionModifier modifier) {
         registerAbsorptionModifier(modifier);
     }
 
@@ -426,18 +451,19 @@ public final class NourishedAPI {
      *
      * @param provider the report provider implementation
      */
-    public static void registerReportProvider(DietReportProvider provider) {
-        if (!NourishedAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
+    @ApiStatus.Stable
+    public static void registerReportProvider(ReportProvider provider) {
+        if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
         ReportProviderRegistry.register(provider);
     }
 
     /**
-     * Alias for {@link #registerReportProvider(DietReportProvider)}.
+     * Alias for {@link #registerReportProvider(ReportProvider)}.
      *
      * @param provider the report provider implementation
      */
     @ApiStatus.Stable
-    public static void addReportSection(DietReportProvider provider) {
+    public static void addReportSection(ReportProvider provider) {
         registerReportProvider(provider);
     }
 }

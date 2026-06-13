@@ -31,12 +31,8 @@ NourishedEvents.nutrientCritical(event => {
 // foodEaten — fires after a player eats and gains nutrition
 // ----------------------------------------------------------------
 NourishedEvents.foodEaten(event => {
-    // event.player      — the ServerPlayer
-    // event.foodId      — item ID string (e.g. 'minecraft:apple')
-    // event.nutrientKey — nutrient gained
-    // event.amount      — how much was gained
-
-    console.log(`${event.player.username} ate ${event.foodId} (+${event.amount} ${event.nutrientKey})`)
+    console.log(event.player.name + ' ate ' + event.itemId)
+    console.log('nutrient deltas: ' + JSON.stringify(event.nutrientDeltas))
 })
 
 // ----------------------------------------------------------------

@@ -1,9 +1,9 @@
 package dev.maire.nourished.client.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.maire.nourished.client.ClientDietCache;
+import dev.marie.MariesLib.client.MarieClientCache;
 import dev.maire.nourished.config.NourishedClientConfig;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.tracking.TrackingData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
@@ -17,7 +17,7 @@ final class HudPanelRenderer {
     static void drawPanel(
             GuiGraphics g,
             Minecraft mc,
-            DietData data,
+            TrackingData data,
             List<String> keys,
             HudLayout.Layout layout,
             int panelX,
@@ -48,7 +48,7 @@ final class HudPanelRenderer {
     private static void drawVerticalColumns(
             GuiGraphics g,
             Minecraft mc,
-            DietData data,
+            TrackingData data,
             List<String> keys,
             HudLayout.Layout layout,
             int panelX,
@@ -66,7 +66,7 @@ final class HudPanelRenderer {
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);
             float displayPct = displayValues.getOrDefault(key, 0f);
-            float truePct = data.nutrients.getOrDefault(key, 0f);
+            float truePct = data.values.getOrDefault(key, 0f);
 
             boolean dimRow = HudVisibility.dimZeroRow(truePct, cc);
             if (dimRow) {
@@ -108,7 +108,7 @@ final class HudPanelRenderer {
                     HudDrawHelpers.barFillColor(key, truePct)
             );
 
-            float flash = ClientDietCache.flashAlpha(key);
+            float flash = MarieClientCache.flashAlpha(key);
             if (flash > 0f) {
                 int a = (int) (flash * 80);
                 int flashColor = (a << 24) | 0xFFFFFF;
@@ -140,7 +140,7 @@ final class HudPanelRenderer {
     private static void drawHorizontalRows(
             GuiGraphics g,
             Minecraft mc,
-            DietData data,
+            TrackingData data,
             List<String> keys,
             HudLayout.Layout layout,
             int panelX,
@@ -154,7 +154,7 @@ final class HudPanelRenderer {
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);
             float displayPct = displayValues.getOrDefault(key, 0f);
-            float truePct = data.nutrients.getOrDefault(key, 0f);
+            float truePct = data.values.getOrDefault(key, 0f);
 
             boolean dimRow = HudVisibility.dimZeroRow(truePct, cc);
             if (dimRow) {
@@ -189,7 +189,7 @@ final class HudPanelRenderer {
                     HudDrawHelpers.barFillColor(key, truePct)
             );
 
-            float flash = ClientDietCache.flashAlpha(key);
+            float flash = MarieClientCache.flashAlpha(key);
             if (flash > 0f) {
                 int a = (int) (flash * 80);
                 int flashColor = (a << 24) | 0xFFFFFF;

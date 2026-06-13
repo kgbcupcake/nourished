@@ -3,32 +3,29 @@ package dev.maire.nourished.client.config;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.maire.nourished.client.NourishedKeys;
-import dev.maire.nourished.client.NutrientUiColors;
+import dev.marie.MariesLib.client.MarieValueColors;
 import dev.maire.nourished.client.config.EffectBuilderWidget;
 import dev.maire.nourished.client.config.FoodScannerWidget;
-import dev.maire.nourished.client.config.ImportExportButtonsWidget;
-import dev.maire.nourished.client.config.PresetsWidget;
-import dev.maire.nourished.compat.CompatEntry;
-import dev.maire.nourished.compat.CompatReportEntry;
-import dev.maire.nourished.compat.ModCompat;
-import dev.maire.nourished.core.color.ColorRegistry;
+import dev.marie.MariesLib.compat.CompatEntry;
+import dev.marie.MariesLib.compat.CompatReportEntry;
+import dev.marie.MariesLib.compat.ModCompat;
+import dev.marie.MariesLib.color.ColorRegistry;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.util.NourishedRegistryUtils;
-import dev.maire.nourished.core.reload.NourishedReloadPipeline;
-import dev.maire.nourished.config.HudAnchor;
-import dev.maire.nourished.config.LockRegistry;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.MariesLib.handler.ReloadPipeline;
+import dev.marie.MariesLib.config.HudAnchor;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
-import dev.maire.nourished.config.PresetRegistry;
+import dev.maire.nourished.config.NourishedLockRegistry;
+import dev.maire.nourished.config.NourishedPresetRegistry;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawFoodTierDef;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
-import dev.maire.nourished.modules.Stamina.Core.StaminaConfig;
 
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -146,21 +143,14 @@ public final class NourishedConfigScreen {
             if (toastsPending != null && !toastsPending.get()) {
                 config.setModuleEnabled("enableCriticalToasts", false);
             }
-            AtomicBoolean staminaPending = modulePending.get("enableStamina");
-            if (staminaPending != null && !staminaPending.get()) {
-                config.setModuleEnabled("enablePSStaminaUsage", false);
-                config.setModuleEnabled("enablePSPenaltyDecay", false);
-                config.setModuleEnabled("enablePSExhaustionDuration", false);
-            }
             FoodValueRegistry.save();
             ColorRegistry.save();
             EffectRegistry.save();
-            StaminaConfig.save();
             RawFoodConfig.save();
-            NutrientUiColors.clearOverrides();
+            MarieValueColors.clearOverrides();
             NourishedClientConfig.saveNow();
             NourishedConfig.saveNow();
-            ModuleCache.refresh();
+            NourishedConfig.syncModuleCache();
         });
         builder.setAlwaysShowTabs(true);
         builder.setAfterInitConsumer(NourishedConfigLeftCardsLayout::apply);
@@ -168,11 +158,11 @@ public final class NourishedConfigScreen {
     }
 
     private static void addPresetsCategory(ConfigBuilder builder, ConfigEntryBuilder eb, Screen reopenParent) {
-        PresetRegistry.ensureBuiltInFilesOnDisk();
+        NourishedPresetRegistry.ensureBuiltInFilesOnDisk();
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.presets"));
-        category.addEntry(new PresetsWidget(reopenParent));
+        category.addEntry(new NourishedPresetsWidget(reopenParent));
         addReloadButton(category, eb, false);
-        category.addEntry(new ImportExportButtonsWidget(reopenParent));
+        category.addEntry(new NourishedImportExportButtonsWidget(reopenParent));
     }
 
     private static boolean isMultiplayer() {
@@ -190,12 +180,12 @@ public final class NourishedConfigScreen {
         List<ModuleMeta> metas = moduleMetas(config.moduleToggles());
         List<String> editableModuleKeys = new ArrayList<>();
         Map<String, List<AbstractConfigListEntry>> groupedEntries = new LinkedHashMap<>();
-        for (String group : List.of("core", "rawfood", "stamina", "peakstamina", "spiceoflife", "lso", "ui", "other")) {
+        for (String group : List.of("core", "rawfood", "peakstamina", "spiceoflife", "lso", "ui", "other")) {
             groupedEntries.put(group, new ArrayList<>());
         }
         for (ModuleMeta meta : metas) {
             String key = meta.key;
-            if (LockRegistry.isLocked(key)) {
+            if (NourishedLockRegistry.isLocked(key)) {
                 continue;
             }
             AtomicBoolean pending = new AtomicBoolean(config.isModuleEnabled(key));
@@ -207,7 +197,7 @@ public final class NourishedConfigScreen {
                     meta.group,
                     meta.dependsOn,
                     modulePending);
-            boolean editable = !(LockRegistry.isServerOnly(key) && isMultiplayer());
+            boolean editable = !(NourishedLockRegistry.isServerOnly(key) && isMultiplayer());
             if (!editable) {
                 entry.setEditable(false);
             } else {
@@ -224,27 +214,25 @@ public final class NourishedConfigScreen {
         }
 
         addRawFoodConfigEntries(groupedEntries.get("rawfood"), eb);
-        // addStaminaConfigEntries(groupedEntries.get("stamina"), eb); // STAMINA_SHELVED
 
         addModuleGroupSubcategory(category, eb, "core", groupedEntries.get("core"));
         addModuleGroupSubcategory(category, eb, "rawfood", groupedEntries.get("rawfood"));
-        // addModuleGroupSubcategory(category, eb, "stamina", groupedEntries.get("stamina")); // STAMINA_SHELVED
         addModuleGroupSubcategory(category, eb, "peakstamina", groupedEntries.get("peakstamina"));
         addModuleGroupSubcategory(category, eb, "spiceoflife", groupedEntries.get("spiceoflife"));
         addModuleGroupSubcategory(category, eb, "lso", groupedEntries.get("lso"));
         addModuleGroupSubcategory(category, eb, "ui", groupedEntries.get("ui"));
         addModuleGroupSubcategory(category, eb, "other", groupedEntries.get("other"));
 
-        if (!LockRegistry.isLocked("heavyMealNutritionThreshold")) {
+        if (!NourishedLockRegistry.isLocked("heavySourcePropertyThreshold")) {
             category.addEntry(
                     eb.startIntSlider(
-                                    Component.translatable("nourished.config.heavyMealNutritionThreshold"),
-                                    config.heavyMealNutritionThreshold(),
+                                    Component.translatable("nourished.config.heavySourcePropertyThreshold"),
+                                    config.heavySourcePropertyThreshold(),
                                     1,
                                     20)
                             .setDefaultValue(6)
-                            .setTooltip(Component.translatable("nourished.config.heavyMealNutritionThreshold.desc"))
-                            .setSaveConsumer(config::setHeavyMealNutritionThreshold)
+                            .setTooltip(Component.translatable("nourished.config.heavySourcePropertyThreshold.desc"))
+                            .setSaveConsumer(config::setHeavySourcePropertyThreshold)
                             .build()
             );
         }
@@ -254,84 +242,6 @@ public final class NourishedConfigScreen {
         }
 
         addReloadButton(category, eb, false);
-    }
-
-    @SuppressWarnings("unused")
-    private static void addStaminaConfigEntries(List<AbstractConfigListEntry> entries, ConfigEntryBuilder eb) {
-        if (entries == null) {
-            return;
-        }
-
-        List<AbstractConfigListEntry> physicalActions = new ArrayList<>();
-        addStaminaAction(physicalActions, eb, "enableSprint", StaminaConfig.enableSprint(), true, StaminaConfig::setEnableSprint,
-                "sprintCost", StaminaConfig.sprintCost(), 0.0f, 10.0f, 0.05f, 0.15f, StaminaConfig::setSprintCost);
-        addStaminaAction(physicalActions, eb, "enableJump", StaminaConfig.enableJump(), true, StaminaConfig::setEnableJump,
-                "jumpCost", StaminaConfig.jumpCost(), 0.0f, 10.0f, 0.05f, 0.85f, StaminaConfig::setJumpCost);
-        addStaminaAction(physicalActions, eb, "enableAttack", StaminaConfig.enableAttack(), true, StaminaConfig::setEnableAttack,
-                "attackCost", StaminaConfig.attackCost(), 0.0f, 20.0f, 0.05f, 3.45f, StaminaConfig::setAttackCost);
-        addStaminaAction(physicalActions, eb, "enableMissedAttack", StaminaConfig.enableMissedAttack(), true, StaminaConfig::setEnableMissedAttack,
-                "missedAttackCost", StaminaConfig.missedAttackCost(), 0.0f, 10.0f, 0.05f, 1.0f, StaminaConfig::setMissedAttackCost);
-        addStaminaAction(physicalActions, eb, "enableElytra", StaminaConfig.enableElytra(), true, StaminaConfig::setEnableElytra,
-                "elytraCost", StaminaConfig.elytraCost(), 0.0f, 10.0f, 0.05f, 0.25f, StaminaConfig::setElytraCost);
-        addStaminaAction(physicalActions, eb, "enableSwim", StaminaConfig.enableSwim(), true, StaminaConfig::setEnableSwim,
-                "swimCost", StaminaConfig.swimCost(), 0.0f, 10.0f, 0.05f, 0.05f, StaminaConfig::setSwimCost);
-        addStaminaAction(physicalActions, eb, "enableClimb", StaminaConfig.enableClimb(), true, StaminaConfig::setEnableClimb,
-                "climbCost", StaminaConfig.climbCost(), 0.0f, 10.0f, 0.05f, 0.7f, StaminaConfig::setClimbCost);
-        addStaminaAction(physicalActions, eb, "enableTakeDamage", StaminaConfig.enableTakeDamage(), true, StaminaConfig::setEnableTakeDamage,
-                "takeDamageCost", StaminaConfig.takeDamageCost(), 0.0f, 10.0f, 0.05f, 0.5f, StaminaConfig::setTakeDamageCost);
-
-        List<AbstractConfigListEntry> mentalActions = new ArrayList<>();
-        addStaminaAction(mentalActions, eb, "enableMine", StaminaConfig.enableMine(), true, StaminaConfig::setEnableMine,
-                "mineCost", StaminaConfig.mineCost(), 0.0f, 10.0f, 0.05f, 0.3f, StaminaConfig::setMineCost);
-        addStaminaAction(mentalActions, eb, "enablePlace", StaminaConfig.enablePlace(), true, StaminaConfig::setEnablePlace,
-                "placeCost", StaminaConfig.placeCost(), 0.0f, 10.0f, 0.05f, 0.2f, StaminaConfig::setPlaceCost);
-        addStaminaAction(mentalActions, eb, "enableFish", StaminaConfig.enableFish(), true, StaminaConfig::setEnableFish,
-                "fishCost", StaminaConfig.fishCost(), 0.0f, 10.0f, 0.05f, 0.5f, StaminaConfig::setFishCost);
-        addStaminaAction(mentalActions, eb, "enableEat", StaminaConfig.enableEat(), true, StaminaConfig::setEnableEat,
-                "eatCost", StaminaConfig.eatCost(), 0.0f, 10.0f, 0.05f, 0.3f, StaminaConfig::setEatCost);
-        addStaminaAction(mentalActions, eb, "enableRawEatPenalty", StaminaConfig.enableRawEatPenalty(), true, StaminaConfig::setEnableRawEatPenalty,
-                "rawEatCostMultiplier", StaminaConfig.rawEatCostMultiplier(), 1.0f, 5.0f, 0.1f, 2.0f, StaminaConfig::setRawEatCostMultiplier);
-        addStaminaAction(mentalActions, eb, "enableUseItem", StaminaConfig.enableUseItem(), true, StaminaConfig::setEnableUseItem,
-                "useItemCost", StaminaConfig.useItemCost(), 0.0f, 10.0f, 0.05f, 0.2f, StaminaConfig::setUseItemCost);
-
-        entries.add(eb.startSubCategory(Component.literal("Physical Actions"), physicalActions).setExpanded(false).build());
-        entries.add(eb.startSubCategory(Component.literal("Mental Actions"), mentalActions).setExpanded(false).build());
-    }
-
-    private static void addStaminaAction(
-            List<AbstractConfigListEntry> entries,
-            ConfigEntryBuilder eb,
-            String toggleKey,
-            boolean toggleValue,
-            boolean defaultToggleValue,
-            Consumer<Boolean> toggleSaveConsumer,
-            String sliderKey,
-            float sliderValue,
-            float min,
-            float max,
-            float step,
-            float defaultValue,
-            Consumer<Float> sliderSaveConsumer
-    ) {
-        BooleanListEntry toggleEntry = eb.startBooleanToggle(
-                        Component.translatable("config.nourished.stamina." + toggleKey),
-                        toggleValue)
-                .setDefaultValue(defaultToggleValue)
-                .setTooltip(Component.translatable("config.nourished.stamina." + toggleKey + ".desc"))
-                .setSaveConsumer(toggleSaveConsumer)
-                .build();
-        entries.add(toggleEntry);
-        entries.add(buildSteppedFloatSlider(
-                Component.translatable("config.nourished.stamina." + sliderKey),
-                sliderValue,
-                min,
-                max,
-                step,
-                defaultValue,
-                sliderSaveConsumer,
-                toggleEntry::getValue,
-                Component.translatable("config.nourished.stamina." + sliderKey + ".desc")
-        ));
     }
 
     private static void addRawFoodConfigEntries(List<AbstractConfigListEntry> entries, ConfigEntryBuilder eb) {
@@ -415,7 +325,6 @@ public final class NourishedConfigScreen {
     private static Component groupTitle(String group) {
         return Component.translatable(switch (group) {
             case "rawfood" -> "config.nourished.modules.group.rawfood";
-            case "stamina" -> "config.nourished.modules.group.stamina";
             case "peakstamina" -> "config.nourished.modules.group.peakstamina";
             case "spiceoflife" -> "config.nourished.modules.group.spiceoflife";
             case "lso" -> "config.nourished.modules.group.lso";
@@ -425,11 +334,10 @@ public final class NourishedConfigScreen {
 
     private static Component moduleToggleTitle(String key) {
         return Component.translatable(switch (key) {
-            case "blockHeavyMeals" -> "nourished.config.blockHeavyMeals";
-            case "blockLightFood" -> "nourished.config.blockLightFood";
+            case "enableBlockHeavySources" -> "nourished.config.enableBlockHeavySources";
+            case "enableBlockLightSource" -> "nourished.config.enableBlockLightSource";
             case "enableRawFoodPenalty" -> "config.nourished.enableRawFoodPenalty";
             case "enableGutHealth" -> "config.nourished.enableGutHealth";
-            case "enableStamina" -> "config.nourished.enableStamina";
             case "enablePSStaminaUsage" -> "config.nourished.enablePSStaminaUsage";
             case "enablePSPenaltyDecay" -> "config.nourished.enablePSPenaltyDecay";
             case "enablePSExhaustionDuration" -> "config.nourished.enablePSExhaustionDuration";
@@ -448,11 +356,10 @@ public final class NourishedConfigScreen {
 
     private static Component moduleToggleDescription(String key) {
         return Component.translatable(switch (key) {
-            case "blockHeavyMeals" -> "nourished.config.blockHeavyMeals.desc";
-            case "blockLightFood" -> "nourished.config.blockLightFood.desc";
+            case "enableBlockHeavySources" -> "nourished.config.enableBlockHeavySources.desc";
+            case "enableBlockLightSource" -> "nourished.config.enableBlockLightSource.desc";
             case "enableRawFoodPenalty" -> "config.nourished.enableRawFoodPenalty.desc";
             case "enableGutHealth" -> "config.nourished.enableGutHealth.desc";
-            case "enableStamina" -> "config.nourished.enableStamina.desc";
             case "enablePSStaminaUsage" -> "config.nourished.enablePSStaminaUsage.desc";
             case "enablePSPenaltyDecay" -> "config.nourished.enablePSPenaltyDecay.desc";
             case "enablePSExhaustionDuration" -> "config.nourished.enablePSExhaustionDuration.desc";
@@ -472,17 +379,13 @@ public final class NourishedConfigScreen {
     private static List<ModuleMeta> moduleMetas(Map<String, ModConfigSpec.BooleanValue> moduleMap) {
         List<ModuleMeta> out = new ArrayList<>();
         for (String key : moduleMap.keySet()) {
-            if ("enableStamina".equals(key)) {
-                continue;
-            }
             String group;
             String dependsOn = null;
             switch (key) {
-                case "enableDecay", "enableNutritionEating", "blockHeavyMeals", "blockLightFood",
+                case "enableDecay", "enableSourceApplication", "enableBlockHeavySources", "enableBlockLightSource",
                      "enableEffects", "enableCalorieTracking", "enableSleepBonus",
                      "enableSynergies", "enableMilestones", "enableSeasonHooks", "enableAbsorptionModifiers" -> group = "core";
                 case "enableRawFoodPenalty", "enableGutHealth" -> group = "rawfood";
-                // case "enableStamina" -> group = "stamina"; // STAMINA_SHELVED
                 case "enablePSStaminaUsage", "enablePSPenaltyDecay", "enablePSExhaustionDuration" -> {
                     if (!ModList.get().isLoaded("peakstamina")) {
                         continue;
@@ -506,10 +409,6 @@ public final class NourishedConfigScreen {
             }
             if ("enableCriticalToasts".equals(key)) {
                 dependsOn = "enableToasts";
-            } else if ("enablePSStaminaUsage".equals(key)
-                    || "enablePSPenaltyDecay".equals(key)
-                    || "enablePSExhaustionDuration".equals(key)) {
-                // dependsOn = "enableStamina"; // STAMINA_SHELVED
             }
             out.add(new ModuleMeta(key, group, dependsOn));
         }
@@ -520,7 +419,7 @@ public final class NourishedConfigScreen {
     private static void addGeneralCategory(NourishedConfig config, ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.general"));
 
-        if (!LockRegistry.isLocked("decayRate")) {
+        if (!NourishedLockRegistry.isLocked("decayRate")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -535,7 +434,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("decayIntervalTicks")) {
+        if (!NourishedLockRegistry.isLocked("decayIntervalTicks")) {
             category.addEntry(
                     eb.startIntSlider(Component.translatable("config.nourished.decayIntervalTicks"), config.decayIntervalTicks(), 20, 72000)
                             .setDefaultValue(1200)
@@ -546,7 +445,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("startingNutrientValue")) {
+        if (!NourishedLockRegistry.isLocked("startingNutrientValue")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -561,7 +460,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("nutrientGainScale")) {
+        if (!NourishedLockRegistry.isLocked("nutrientGainScale")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -576,7 +475,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("nutrientGainPerBiteMax")) {
+        if (!NourishedLockRegistry.isLocked("nutrientGainPerBiteMax")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -601,7 +500,7 @@ public final class NourishedConfigScreen {
     ) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.thresholds"));
 
-        if (!LockRegistry.isLocked("criticalThreshold")) {
+        if (!NourishedLockRegistry.isLocked("criticalThreshold")) {
             AbstractConfigListEntry<?> entry = buildDoubleSlider(
                     eb,
                     Component.translatable("config.nourished.criticalThreshold"),
@@ -615,7 +514,7 @@ public final class NourishedConfigScreen {
             category.addEntry(entry);
         }
 
-        if (!LockRegistry.isLocked("lowThreshold")) {
+        if (!NourishedLockRegistry.isLocked("lowThreshold")) {
             AbstractConfigListEntry<?> entry = buildDoubleSlider(
                     eb,
                     Component.translatable("config.nourished.lowThreshold"),
@@ -629,7 +528,7 @@ public final class NourishedConfigScreen {
             category.addEntry(entry);
         }
 
-        if (!LockRegistry.isLocked("excessThreshold")) {
+        if (!NourishedLockRegistry.isLocked("excessThreshold")) {
             AbstractConfigListEntry<?> entry = buildDoubleSlider(
                     eb,
                     Component.translatable("config.nourished.excessThreshold"),
@@ -643,7 +542,7 @@ public final class NourishedConfigScreen {
             category.addEntry(entry);
         }
 
-        if (!LockRegistry.isLocked("bonusEffectThreshold")) {
+        if (!NourishedLockRegistry.isLocked("bonusEffectThreshold")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -658,7 +557,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("penaltyEffectThreshold")) {
+        if (!NourishedLockRegistry.isLocked("penaltyEffectThreshold")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -679,7 +578,7 @@ public final class NourishedConfigScreen {
     private static void addEffectsCategory(NourishedConfig config, ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.effects"));
 
-        if (!LockRegistry.isLocked("defaultEffectDurationTicks")) {
+        if (!NourishedLockRegistry.isLocked("defaultEffectDurationTicks")) {
             category.addEntry(
                     eb.startIntSlider(Component.translatable("config.nourished.defaultEffectDurationTicks"), config.defaultEffectDurationTicks(), 20, 72000)
                             .setDefaultValue(140)
@@ -825,15 +724,15 @@ public final class NourishedConfigScreen {
         category.addEntry(new HudNutrientColorsSectionHeaderEntry());
         List<NutrientHudHexColorRowEntry> hudNutrientColorRows = new ArrayList<>();
         category.addEntry(new HudNutrientColorsResetAllEntry(() -> {
-            for (String nutrientKey : NutrientRegistry.getKeys()) {
-                ColorRegistry.remove(nutrientKey);
+            for (String valueKey : NutrientRegistry.getKeys()) {
+                ColorRegistry.remove(valueKey);
             }
             for (NutrientHudHexColorRowEntry row : hudNutrientColorRows) {
                 row.syncAfterBulkReset();
             }
         }));
-        for (String nutrientKey : NutrientRegistry.getKeys()) {
-            NutrientHudHexColorRowEntry row = new NutrientHudHexColorRowEntry(nutrientKey);
+        for (String valueKey : NutrientRegistry.getKeys()) {
+            NutrientHudHexColorRowEntry row = new NutrientHudHexColorRowEntry(valueKey);
             hudNutrientColorRows.add(row);
             category.addEntry(row);
         }
@@ -850,8 +749,8 @@ public final class NourishedConfigScreen {
     ) {
         ConfigCategory nutrients = builder.getOrCreateCategory(Component.translatable("config.nourished.category.nutrients"));
         for (String key : NutrientRegistry.getKeys()) {
-            double decayRaw = config.nutrientDecayRateOverrides().get(key).get();
-            double criticalRaw = config.nutrientCriticalThresholdOverrides().get(key).get();
+            double decayRaw = overrideRaw(config.nutrientDecayRateOverrides().get(key));
+            double criticalRaw = overrideRaw(config.nutrientCriticalThresholdOverrides().get(key));
 
             PendingOverride decay = new PendingOverride(decayRaw >= 0d, decayRaw >= 0d ? decayRaw : config.decayRate());
             PendingOverride critical = new PendingOverride(criticalRaw >= 0d, criticalRaw >= 0d ? criticalRaw : config.criticalThreshold());
@@ -940,7 +839,7 @@ public final class NourishedConfigScreen {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.advanced"));
 
         AtomicBoolean debugLogPending = modulePending.get("enableDebugLogging");
-        if (debugLogPending != null && !LockRegistry.isLocked("enableDebugLogging")) {
+        if (debugLogPending != null && !NourishedLockRegistry.isLocked("enableDebugLogging")) {
             var debugEntry = new ModuleToggleListEntry(
                     moduleToggleTitle("enableDebugLogging"),
                     moduleToggleDescription("enableDebugLogging"),
@@ -948,14 +847,14 @@ public final class NourishedConfigScreen {
                     "other",
                     null,
                     modulePending);
-            boolean editable = !(LockRegistry.isServerOnly("enableDebugLogging") && isMultiplayer());
+            boolean editable = !(NourishedLockRegistry.isServerOnly("enableDebugLogging") && isMultiplayer());
             if (!editable) {
                 debugEntry.setEditable(false);
             }
             category.addEntry(debugEntry);
         }
 
-        if (!LockRegistry.isLocked("calorieDisplayMax")) {
+        if (!NourishedLockRegistry.isLocked("calorieDisplayMax")) {
             category.addEntry(
                     eb.startIntSlider(Component.translatable("config.nourished.calorieDisplayMax"), config.calorieDisplayMax(), 100, 100000)
                             .setDefaultValue(2000)
@@ -972,7 +871,7 @@ public final class NourishedConfigScreen {
     private static void addScannerCategory(NourishedConfig config, ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.scanner"));
 
-        if (!LockRegistry.isLocked("scanner.enableRecipeInheritance")) {
+        if (!NourishedLockRegistry.isLocked("scanner.enableRecipeInheritance")) {
             category.addEntry(
                     eb.startBooleanToggle(
                                     Component.translatable("config.nourished.scanner.enableRecipeInheritance"),
@@ -985,7 +884,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("scanner.confidenceSpreadThreshold")) {
+        if (!NourishedLockRegistry.isLocked("scanner.confidenceSpreadThreshold")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -1000,7 +899,7 @@ public final class NourishedConfigScreen {
             );
         }
 
-        if (!LockRegistry.isLocked("scanner.multiNutrientInheritanceThreshold")) {
+        if (!NourishedLockRegistry.isLocked("scanner.multiNutrientInheritanceThreshold")) {
             category.addEntry(
                     buildDoubleSlider(
                             eb,
@@ -1086,7 +985,12 @@ public final class NourishedConfigScreen {
     }
 
     private static String prettyKey(String key) {
-        return Component.translatable("nourished.screen.diet.bar." + key).getString();
+        return NutrientRegistry.getLabel(key);
+    }
+
+    /** Returns -1 when no per-nutrient TOML override exists (use global default). */
+    private static double overrideRaw(ModConfigSpec.DoubleValue value) {
+        return value != null ? value.get() : -1.0d;
     }
 
     private static AbstractConfigListEntry buildDoubleSlider(
@@ -1889,15 +1793,15 @@ public final class NourishedConfigScreen {
                     .orElse("unknown");
         }
 
-        private void drawConflictBadge(GuiGraphics graphics, int x, int y, dev.maire.nourished.compat.ConflictLevel level) {
+        private void drawConflictBadge(GuiGraphics graphics, int x, int y, dev.marie.MariesLib.compat.ConflictLevel level) {
             String text;
             int bgColor;
             int borderColor;
-            if (level == dev.maire.nourished.compat.ConflictLevel.FULL_CONFLICT) {
+            if (level == dev.marie.MariesLib.compat.ConflictLevel.FULL_CONFLICT) {
                 text = "FULL CONFLICT";
                 bgColor = 0xFF6B1A1A;
                 borderColor = 0xFF8A2F2F;
-            } else if (level == dev.maire.nourished.compat.ConflictLevel.PARTIAL_CONFLICT) {
+            } else if (level == dev.marie.MariesLib.compat.ConflictLevel.PARTIAL_CONFLICT) {
                 text = "PARTIAL";
                 bgColor = 0xFF7A5A00;
                 borderColor = 0xFF9C7A18;
@@ -1927,7 +1831,7 @@ public final class NourishedConfigScreen {
                 int totalFood = 0;
                 int classified = 0;
                 for (Item item : BuiltInRegistries.ITEM) {
-                    ResourceLocation id = NourishedRegistryUtils.itemKey(item);
+                    ResourceLocation id = MarieRegistryUtils.itemKey(item);
                     if (id == null || !row.modId().equals(id.getNamespace())) {
                         continue;
                     }
@@ -1937,7 +1841,7 @@ public final class NourishedConfigScreen {
                         continue;
                     }
                     totalFood++;
-                    Map<String, Float> bars = FoodNutritionRegistry.resolveNutrientBars(stack, false, Minecraft.getInstance().level);
+                    Map<String, Float> bars = NutrientClassificationLookup.resolveBars(stack, Minecraft.getInstance().level);
                     if (bars != null && !bars.isEmpty()) {
                         classified++;
                     }
@@ -2083,10 +1987,10 @@ public final class NourishedConfigScreen {
 
         private boolean isToggleEditable(String modid, boolean code) {
             String key = "compat." + modid + "." + (code ? "enableCodeCompat" : "enableTagCompat");
-            if (LockRegistry.isLocked(key)) {
+            if (NourishedLockRegistry.isLocked(key)) {
                 return false;
             }
-            return !(LockRegistry.isServerOnly(key) && isMultiplayer()) && isEditable();
+            return !(NourishedLockRegistry.isServerOnly(key) && isMultiplayer()) && isEditable();
         }
 
         @Override
@@ -2189,8 +2093,8 @@ public final class NourishedConfigScreen {
 
         private String builtInSummary(CompatEntry entry) {
             List<String> bullets = new ArrayList<>();
-            if (entry.providesFoodTags()) bullets.add("provides tags");
-            if (entry.handlesOwnNutrition()) bullets.add("handles own nutrition");
+            if (entry.providesSourceTags()) bullets.add("provides tags");
+            if (entry.handlesOwnValues()) bullets.add("handles own values");
             if (entry.conflictBehavior() != null) bullets.add("conflict rules");
             if (bullets.isEmpty()) bullets.add("baseline compat mapping");
             return String.join(", ", bullets);
@@ -2461,17 +2365,17 @@ public final class NourishedConfigScreen {
                 if (pending != null) pending.set(false);
             }
             switch (profile) {
-                case "minimalist" -> setModules(true, "enableDecay", "enableNutritionEating", "enableEffects", "enableCalorieTracking");
+                case "minimalist" -> setModules(true, "enableDecay", "enableSourceApplication", "enableEffects", "enableCalorieTracking");
                 case "immersive" -> setModules(true, editableModuleKeys.toArray(new String[0]));
                 case "gameplay" -> setModules(true,
                         "enableDecay",
-                        "enableNutritionEating",
+                        "enableSourceApplication",
                         "enableEffects",
                         "enableCalorieTracking",
                         "enableSleepBonus");
                 default -> setModules(true,
                         "enableDecay",
-                        "enableNutritionEating",
+                        "enableSourceApplication",
                         "enableEffects",
                         "enableHUD",
                         "enableToasts",
@@ -2490,10 +2394,6 @@ public final class NourishedConfigScreen {
             AtomicBoolean crit = modulePending.get("enableCriticalToasts");
             if (toasts != null && crit != null && !toasts.get()) {
                 crit.set(false);
-            }
-            AtomicBoolean stamina = modulePending.get("enableStamina");
-            if (stamina != null && !stamina.get()) {
-                setModules(false, "enablePSStaminaUsage", "enablePSPenaltyDecay", "enablePSExhaustionDuration");
             }
         }
 
@@ -2929,7 +2829,7 @@ public final class NourishedConfigScreen {
                 this.openDatapackFolderButton = null;
             }
             this.button = Button.builder(Component.translatable("config.nourished.reloadConfigs"), b -> {
-                        NourishedReloadPipeline.reloadAll();
+                        ReloadPipeline.reloadAll();
                         Minecraft mc = Minecraft.getInstance();
                         if (mc.player != null) {
                             mc.player.displayClientMessage(

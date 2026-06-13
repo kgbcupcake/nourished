@@ -27,3 +27,10 @@ type = "required"
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.${mod_id}]]
+    modId = "marieslib"
+    type = "required"
+    versionRange = "${marie_lib_version_range}"
+    ordering = "AFTER"
+    side = "BOTH"

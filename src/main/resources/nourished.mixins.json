@@ -3,7 +3,7 @@
   "minVersion": "0.8",
   "package": "dev.maire.nourished.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": ["PlayerJumpMixin"],
+  "mixins": [],
   "client": [],
   "injectors": {
     "defaultRequire": 1

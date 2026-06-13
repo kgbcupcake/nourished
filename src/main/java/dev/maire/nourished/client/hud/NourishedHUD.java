@@ -1,16 +1,16 @@
 package dev.maire.nourished.client.hud;
 
-import dev.maire.nourished.client.ClientDietCache;
+import dev.marie.MariesLib.client.MarieClientCache;
 import dev.maire.nourished.client.NourishedKeys;
-import dev.maire.nourished.config.ModuleCache;
+import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.maire.nourished.config.NourishedClientConfig;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -37,7 +37,7 @@ public final class NourishedHUD {
     private NourishedHUD() {}
 
     public static void onRenderGuiPost(RenderGuiEvent.Post event) {
-        if (!ModuleCache.enableHUD) {
+        if (!FeatureFlagCache.enableHUD()) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
@@ -49,7 +49,7 @@ public final class NourishedHUD {
             return;
         }
 
-        DietData data = ClientDietCache.get();
+        TrackingData data = MarieClientCache.get();
         List<String> keys = NutrientRegistry.getKeys();
         if (keys.isEmpty()) {
             return;
@@ -75,7 +75,7 @@ public final class NourishedHUD {
     }
 
     public static void renderForEditScreen(GuiGraphics g, Minecraft mc) {
-        if (!ModuleCache.enableHUD) {
+        if (!FeatureFlagCache.enableHUD()) {
             return;
         }
         LocalPlayer player = mc.player;
@@ -83,7 +83,7 @@ public final class NourishedHUD {
             return;
         }
 
-        DietData data = ClientDietCache.get();
+        TrackingData data = MarieClientCache.get();
         List<String> keys = NutrientRegistry.getKeys();
         if (keys.isEmpty()) {
             return;
@@ -145,7 +145,7 @@ public final class NourishedHUD {
         if (keys.isEmpty()) {
             return;
         }
-        DietData data = ClientDietCache.get();
+        TrackingData data = MarieClientCache.get();
         NourishedClientConfig cc = NourishedClientConfig.get();
         List<String> visibleKeys = HudVisibility.visibleKeys(data, cc.effectiveDietBarOrder(), cc);
         if (visibleKeys.isEmpty()) {
@@ -188,7 +188,7 @@ public final class NourishedHUD {
         if (keys.isEmpty()) {
             return;
         }
-        DietData data = ClientDietCache.get();
+        TrackingData data = MarieClientCache.get();
         NourishedClientConfig cc = NourishedClientConfig.get();
         List<String> visibleKeys = HudVisibility.visibleKeys(data, cc.effectiveDietBarOrder(), cc);
         if (visibleKeys.isEmpty()) {
@@ -218,12 +218,12 @@ public final class NourishedHUD {
         }
     }
 
-    public static void onKeyInput(InputEvent.Key event) {
+    public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen != null) {
+        if (mc.player == null || mc.screen != null) {
             return;
         }
-        if (!ModuleCache.enableHUD) {
+        if (!FeatureFlagCache.enableHUD()) {
             return;
         }
         while (NourishedKeys.EDIT_HUD.consumeClick()) {
@@ -234,7 +234,7 @@ public final class NourishedHUD {
     private static void drawHudPanel(
             GuiGraphics g,
             Minecraft mc,
-            DietData data,
+            TrackingData data,
             List<String> keys,
             HudLayout.Layout layout,
             int panelX,
@@ -243,13 +243,13 @@ public final class NourishedHUD {
         HudPanelRenderer.drawPanel(g, mc, data, keys, layout, panelX, panelY, displayValues);
     }
 
-    private static void advanceLerp(DietData data, List<String> keys) {
+    private static void advanceLerp(TrackingData data, List<String> keys) {
         long now = System.nanoTime();
         float dt = lastNano == 0 ? 0f : Math.min((now - lastNano) / 1_000_000_000f, 0.1f);
         lastNano = now;
         float step = dt <= 0 ? 1f : Math.min(1f, dt / 0.2f);
         for (String key : keys) {
-            float target = data.nutrients.getOrDefault(key, 0f);
+            float target = data.values.getOrDefault(key, 0f);
             float cur = displayValues.getOrDefault(key, target);
             displayValues.put(key, cur + (target - cur) * step);
         }

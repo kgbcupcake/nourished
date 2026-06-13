@@ -1,8 +1,8 @@
 package dev.maire.nourished.core.network.sync;
 
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.diet.DietAttachment;
-import dev.maire.nourished.core.diet.DietData;
+import dev.marie.MariesLib.tracking.TrackingAttachment;
+import dev.marie.MariesLib.tracking.TrackingData;
 import dev.maire.nourished.core.network.ModNetworking;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,7 +28,7 @@ public final class NourishedSyncHandler {
         if (snapshot != null) {
             PacketDistributor.sendToPlayer(player, snapshot);
         }
-        DietData diet = player.getData(DietAttachment.DIET.get());
+        TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
         ModNetworking.syncDiet(player, diet);
     }
 
@@ -40,13 +40,13 @@ public final class NourishedSyncHandler {
             PacketDistributor.sendToPlayer(player, snapshot);
         }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            DietData diet = player.getData(DietAttachment.DIET.get());
+            TrackingData diet = player.getData(TrackingAttachment.TRACKING.get());
             ModNetworking.syncDiet(player, diet);
         }
     }
 
     /** Delegates diet delta sync to existing payload path. */
-    public static void syncDietDelta(ServerPlayer player, DietData diet) {
+    public static void syncDietDelta(ServerPlayer player, TrackingData diet) {
         ModNetworking.syncDietDelta(player, diet);
     }
 

@@ -1,5 +1,5 @@
 {
-  "nourished_schema_version": 1,
+  "marie_schema_version": 1,
   "families": {
     "berry": ["berry", "berries", "strawberry", "blueberry", "raspberry", "blackberry", "cranberry", "goji"],
     "citrus": ["orange", "lemon", "lime", "grapefruit", "citrus", "tangerine", "mandarin"],
