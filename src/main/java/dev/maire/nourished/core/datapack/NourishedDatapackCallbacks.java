@@ -2,6 +2,7 @@ package dev.maire.nourished.core.datapack;
 
 import dev.marie.MariesLib.api.MarieAPI;
 import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.api.MilestoneDefinition;
 import dev.marie.MariesLib.api.ValueDefinition;
 import dev.marie.MariesLib.data.MarieDataLoader;
 import dev.marie.MariesLib.registry.MarieApiRegistries;
@@ -30,5 +31,10 @@ public final class NourishedDatapackCallbacks implements MarieDataLoader.Callbac
     @Override
     public void registerSourceClassification(ResourceLocation itemId, String valueKey, float amount) {
         MarieAPI.registerSourceClassification(itemId, valueKey, amount);
+    }
+
+    @Override
+    public void registerMilestone(MilestoneDefinition def) {
+        MarieAPI.registerMilestone(def);
     }
 }

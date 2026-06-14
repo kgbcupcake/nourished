@@ -5,6 +5,7 @@
   "decayRate": 0.1,
   "decayIntervalTicks": 1200,
   "startingNutrientValue": 0.5,
+  "deathNutritionBehavior": "preserve",
   "criticalThreshold": 0.25,
   "lowThreshold": 0.4,
   "excessThreshold": 0.9,

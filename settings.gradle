@@ -11,7 +11,10 @@ plugins {
 
 rootProject.name = 'NutritionalBalance'
 
-if (file('../MarieLib/build.gradle').exists()) {
+def localMarieLibDir = file('../MarieLib')
+gradle.ext.localMarieLibPresent = new File(localMarieLibDir, 'build.gradle').exists()
+
+if (gradle.ext.localMarieLibPresent) {
     includeBuild('../MarieLib') {
         dependencySubstitution {
             substitute module('dev.marie.MariesLib:marieslib') using project(':')

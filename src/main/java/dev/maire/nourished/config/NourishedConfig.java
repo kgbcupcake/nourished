@@ -5,6 +5,7 @@ import dev.marie.MariesLib.compat.ModCompat;
 import dev.marie.MariesLib.config.ConfigDefaultsLoader;
 import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.marie.MariesLib.config.MarieModFeatureFlags;
+import dev.marie.MariesLib.tracking.DeathNutritionBehavior;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -68,6 +69,7 @@ public final class NourishedConfig {
     // config.nourished.startingNutrientValue
     // config.nourished.startingNutrientValue.desc
     private final ModConfigSpec.DoubleValue startingNutrientValue;
+    private final ModConfigSpec.ConfigValue<String> deathNutritionBehavior;
 
     // Thresholds
     private final ModConfigSpec.DoubleValue criticalThreshold;
@@ -184,8 +186,11 @@ public final class NourishedConfig {
                 .comment("Ticks between nutrient decay applications")
                 .defineInRange("decayIntervalTicks", ConfigDefaultsLoader.getInt(defaults, "decayIntervalTicks", 1200), 1, Integer.MAX_VALUE);
         startingNutrientValue = builder
-                .comment("Initial fill (0-1) for every nutrient bar on new diet data. Default 0.5 avoids starting debuffs when rules use the usual below-0.25 thresholds.")
+                .comment("Initial fill (0-1) for every nutrient bar on new diet data, /nourished reset, and death when deathNutritionBehavior is reset_to_starting.")
                 .defineInRange("startingNutrientValue", ConfigDefaultsLoader.getDouble(defaults, "startingNutrientValue", 0.5d), 0.0d, 1.0d);
+        deathNutritionBehavior = builder
+                .comment("Tracking bar policy on death respawn: preserve (keep bars), reset_to_starting (use startingNutrientValue), vanilla_half (legacy 50% reset).")
+                .define("deathNutritionBehavior", ConfigDefaultsLoader.getString(defaults, "deathNutritionBehavior", "preserve"));
         builder.pop();
 
         builder.push("thresholds");
@@ -590,6 +595,18 @@ public final class NourishedConfig {
 
     public void setStartingNutrientValue(double value) {
         startingNutrientValue.set(value);
+    }
+
+    public DeathNutritionBehavior deathNutritionBehavior() {
+        return DeathNutritionBehavior.fromConfigId(deathNutritionBehavior.get());
+    }
+
+    public String deathNutritionBehaviorConfigId() {
+        return deathNutritionBehavior.get();
+    }
+
+    public void setDeathNutritionBehavior(String value) {
+        deathNutritionBehavior.set(DeathNutritionBehavior.fromConfigId(value).configId());
     }
 
     public int calorieDisplayMax() {

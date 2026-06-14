@@ -52,11 +52,6 @@ neoForge {
         "${mod_id}" {
             sourceSet sourceSets.main
         }
-        if (findProject(':MarieLib') != null) {
-            marieslib {
-                sourceSet project(':MarieLib').sourceSets.main
-            }
-        }
     }
 }
 
@@ -99,10 +94,8 @@ repositories
 
 }
 dependencies {
-    if (findProject(':MarieLib') != null) {
-        implementation project(':MarieLib')
-    } else {
-        compileOnly "dev.marie.MariesLib:marieslib:${marie_lib_version}"
+    implementation "dev.marie.MariesLib:marieslib:${marie_lib_version}"
+    if (!gradle.ext.localMarieLibPresent) {
         additionalRuntimeClasspath "dev.marie.MariesLib:marieslib:${marie_lib_version}"
     }
 
@@ -160,24 +153,15 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-// Composite MarieLib checkout: avoid intermittent clean-build races where compileJava
-// starts before NeoForge moddev artifacts are present on disk.
-if (findProject(':MarieLib') != null) {
-    gradle.projectsEvaluated {
-        def marieLib = project(':MarieLib')
-        def neoJar = marieLib.layout.buildDirectory.file("moddev/artifacts/neoforge-${marieLib.neo_version}.jar")
-        marieLib.tasks.named('createMinecraftArtifacts').configure { task ->
-            task.outputs.file(neoJar)
-            task.outputs.upToDateWhen {
-                neoJar.get().asFile.exists() && task.outputs.files.every { it.exists() }
-            }
-        }
-        marieLib.tasks.named('compileJava').configure {
-            dependsOn(marieLib.tasks.named('createMinecraftArtifacts'))
-            mustRunAfter(marieLib.tasks.named('clean'))
-        }
+// Local MarieLib composite build: compile Nourished only after MarieLib classes exist.
+if (gradle.ext.localMarieLibPresent) {
+    def marieLibIncluded = gradle.includedBuilds.find { it.name == 'MarieLib' }
+    if (marieLibIncluded != null) {
         tasks.named('compileJava').configure {
-            dependsOn(marieLib.tasks.named('classes'))
+            dependsOn marieLibIncluded.task(':classes')
+        }
+        tasks.named('compileTestJava').configure {
+            dependsOn marieLibIncluded.task(':classes')
         }
     }
 }

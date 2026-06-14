@@ -261,6 +261,7 @@ public final class NourishedImportExport {
         o.addProperty("decayRate", c.decayRate());
         o.addProperty("decayIntervalTicks", c.decayIntervalTicks());
         o.addProperty("startingNutrientValue", c.startingNutrientValue());
+        o.addProperty("deathNutritionBehavior", c.deathNutritionBehaviorConfigId());
         o.addProperty("nutrientGainScale", c.nutrientGainScale());
         o.addProperty("nutrientGainPerBiteMax", c.nutrientGainPerBiteMax());
         o.addProperty("calorieDisplayMax", c.calorieDisplayMax());
@@ -393,6 +394,9 @@ public final class NourishedImportExport {
         }
         if (o.has("startingNutrientValue")) {
             c.setStartingNutrientValue(clamp(o.get("startingNutrientValue").getAsDouble(), 0d, 1d));
+        }
+        if (o.has("deathNutritionBehavior")) {
+            c.setDeathNutritionBehavior(o.get("deathNutritionBehavior").getAsString());
         }
         if (o.has("nutrientGainScale")) {
             c.setNutrientGainScale(clamp(o.get("nutrientGainScale").getAsDouble(), 0.5d, 20d));

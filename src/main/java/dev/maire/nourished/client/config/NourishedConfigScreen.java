@@ -20,6 +20,7 @@ import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.marie.MariesLib.handler.ReloadPipeline;
 import dev.marie.MariesLib.config.HudAnchor;
 import dev.maire.nourished.config.NourishedClientConfig;
+import dev.marie.MariesLib.tracking.DeathNutritionBehavior;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.NourishedLockRegistry;
 import dev.maire.nourished.config.NourishedPresetRegistry;
@@ -457,6 +458,19 @@ public final class NourishedConfigScreen {
                             config::setStartingNutrientValue,
                             Component.translatable("config.nourished.startingNutrientValue.desc")
                     )
+            );
+        }
+
+        if (!NourishedLockRegistry.isLocked("deathNutritionBehavior")) {
+            category.addEntry(
+                    eb.startStrField(
+                                    Component.translatable("config.nourished.deathNutritionBehavior"),
+                                    config.deathNutritionBehaviorConfigId()
+                            )
+                            .setDefaultValue(DeathNutritionBehavior.PRESERVE.configId())
+                            .setTooltip(Component.translatable("config.nourished.deathNutritionBehavior.desc"))
+                            .setSaveConsumer(config::setDeathNutritionBehavior)
+                            .build()
             );
         }
 

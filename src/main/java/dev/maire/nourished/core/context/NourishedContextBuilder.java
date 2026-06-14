@@ -40,6 +40,7 @@ public final class NourishedContextBuilder {
                 .effectClearer(NutritionEffectApplier::clearAll)
                 .trackingDeltaSyncer(NourishedSyncHandler::syncDietDelta)
                 .syncOnJoin(NourishedSyncHandler::syncOnJoin)
+                .deathNutritionBehavior(() -> NourishedConfig.get().deathNutritionBehavior())
                 .configScreenFactory(() -> NourishedConfigScreen.create(null))
                 .exportScreenFactory(parent -> new ExportConfigScreen((Screen) parent, null))
                 .importScreenFactory(parent -> new ImportConfigScreen((Screen) parent, null))
