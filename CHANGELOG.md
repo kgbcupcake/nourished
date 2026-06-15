@@ -2,6 +2,87 @@
 
 <!-- markdownlint-disable MD013 -->
 
+## [ Nourished 0.2.6-beta.1 ] 2026-6-14
+
+### Death Nutrition Behavior
+
+- Added `deathNutritionBehavior` config option under `[general]` in `nourished-common.toml`
+  and `common_defaults.json`. Controls what happens to nutrient bars and food memory when a
+  player respawns after death:
+- `preserve` (default): keep current nutrient levels and eating memory
+- `reset_to_starting`: reset all bars to `startingNutrientValue` and clear food memory
+- `vanilla_half`: legacy 50% reset with cleared food memory
+- Wired through `NourishedContextBuilder` into MarieLib's tracking pipeline so death handling
+  respects server config in singleplayer and multiplayer.
+- Config screen, import/export JSON, and lang entries added for the new setting.
+- `startingNutrientValue` description updated: it now also applies to `/nourished reset` and
+  death when `deathNutritionBehavior` is `reset_to_starting`.
+
+### Milestones
+
+- Datapack milestone definitions under `data/<namespace>/nourished/milestones/` now load
+  through `NourishedDatapackCallbacks.registerMilestone()` and register into MarieLib's
+  milestone registry at datapack apply time.
+- `enableMilestones` module toggle (already present) gates milestone checks at runtime.
+- Bundled example milestone `test_fruits`: awards Regeneration I when cumulative fruit
+  nutrition reaches 0.5, with matching advancement tab entries under
+  `data/nourished/advancement/milestones/`.
+
+### MarieLib & Build
+
+- Bumped MarieLib dependency to **0.1.0-beta.3** (`marie_lib_version_range=[0.1.0-beta.2,)`):
+  Requires MarieLib **0.1.0-beta.2+** on the classpath.
+- Gradle now always resolves MarieLib from Maven for compilation; local `../MarieLib` composite
+  builds are still supported for development via `includeBuild` with a simpler compile ordering
+  fix (no more intermittent clean-build races with NeoForge moddev artifacts).
+- Removed redundant JEI / REI / EMI compatibility bootstrap from `ClientEventRegistrar`:
+  recipe viewer plugins are initialized by MarieLib directly.
+
+### Raw Food
+
+- Added per-item **cookedness overrides** in `config/nourished/raw_food.json` (`overrides`
+  section). Modpack authors can pin cookedness values (0.0–1.0) for items that the resolver
+  misclassifies; overrides are registered in `CookednessResolver` and cleared on config reload.
+
+### Removed
+
+- **Stamina module** removed entirely (~2,200 lines). Stamina tracking, HUD, combat/movement
+  drain, and `stamina.json` config are gone. Peak Stamina compat integration remains under
+  module toggles for servers using that mod.
+
+### Changed
+
+- All bundled datapack JSON files now use `marie_schema_version` instead of the legacy
+  `nourished_schema_version` key (MarieLib still accepts the old key when reading overrides).
+- Nutrient registry loading hardened: redundant init guards, tag-key cache in
+  `FoodNutritionRegistry`, and cache invalidation on nutrient reload.
+- `NourishedAPI` registration methods annotated `@ApiStatus.Stable` for clearer external-mod
+  contract signaling.
+- Import/export and preset file writes now validate paths stay within the config directory.
+- `EffectRegistry` and `NourishedLockRegistry` truncate oversized entry lists with logging
+  instead of growing unbounded.
+
+### Fixed
+
+- Local MarieLib composite builds no longer hit race conditions where `compileJava` started
+  before NeoForge artifacts existed on disk.
+
+### Important Upgrade Notes
+
+If updating from 0.2.5-beta.5 or earlier:
+
+1. **Requires MarieLib 0.1.0-beta.2+** (bundled build uses 0.1.0-beta.3). Update MarieLib on
+   Modrinth before launching.
+2. If you used the removed Stamina module, delete `config/nourished/stamina.json` — it is no
+   longer read. Stamina HUD and drain mechanics are not available in this version.
+3. Review `deathNutritionBehavior` in `config/nourished-common.toml` — default is `preserve`
+   (bars kept on death). Set to `reset_to_starting` or `vanilla_half` for stricter death
+   penalties.
+4. To customize raw-food cookedness for specific items, add an `overrides` block to
+   `config/nourished/raw_food.json`.
+5. After upgrading, run `/nourished reload` on servers or rejoin worlds to refresh cached
+   classification and config-driven module state.
+
 ## [ Nourished 0.2.5-beta.5 ] 2026-6-9
 
 ### MarieLib Integration
@@ -106,18 +187,18 @@ If updating from 0.2.5-beta.4 or earlier:
   gameplay parameters (decay rate, thresholds, memory window) on dedicated servers
 - Config snapshot is now sent to clients on join before diet data, ensuring correct values
   are in place before any simulation runs
-- Added `SyncState.PENDING` lifecycle — client transitions UNINITIALIZED → PENDING on
+- Added `SyncState.PENDING` lifecycle: client transitions UNINITIALIZED → PENDING on
   snapshot receipt, PENDING → ACTIVE on full diet sync
 - Client state now resets correctly on disconnect, preventing stale server config from
   leaking into the next connection
 - `/nourished reload` now re-syncs full diet data to all connected players in addition to
   the config snapshot
-- Bumped network protocol to version 3 — servers and clients on mismatched versions will
+- Bumped network protocol to version 3: servers and clients on mismatched versions will
   log a warning and discard the packet rather than silently corrupting state
 
 ### Raw Food / Gut Health
 
-- Added `enableGutHealth` module toggle — gut health tracking, recovery, and sensitivity
+- Added `enableGutHealth` module toggle: gut health tracking, recovery, and sensitivity
   can now be disabled independently of raw food penalties
 - `GutHealthTickHandler` and `GutHealthRecoveryHandler` now gate on `enableGutHealth`
   instead of `enableRawFoodPenalty`
@@ -125,7 +206,7 @@ If updating from 0.2.5-beta.4 or earlier:
 
 ### Architecture
 
-- Introduced `DietMemoryConfig` — diet simulation parameters are now injected at system
+- Introduced `DietMemoryConfig`: diet simulation parameters are now injected at system
   boundaries rather than pulled directly from raw config at runtime
 - `DietData` no longer reads `NourishedConfig` directly; all memory/multiplier values come
   from the server snapshot in multiplayer or raw config in singleplayer
@@ -320,14 +401,14 @@ These steps ensure recipe inheritance, nutrient tags, and scanner data are regen
 
 ### Added
 
-- Multi-nutrient recipe inheritance — complex dishes now contribute to multiple food groups based on their ingredients. Eating a steak sandwich gives Proteins, Grains, and Vegetables credit automatically.
-- HUD hide-above threshold — bars above a configurable percentage are hidden from the HUD. Set to 0.4 to only see bars that need attention. as requested. in #3
-- HUD show-below threshold — bars below a configurable percentage are always shown regardless of other visibility settings.
-- Show zero nutrients on HUD — toggle to show bars at 0% so you always know what you're missing.
-- HUD background opacity — configurable from fully transparent to fully opaque.
-- Vertical HUD layout — bars render as side-by-side columns filling upward instead of horizontal rows.
-- HUD flash on nutrient increase — bars briefly highlight for 2 seconds when a nutrient increases from eating.
-- Multi-nutrient full registry analysis — /nourished scan_analysis command analyzes all 4700+ classified foods and writes multi-nutrient recommendations, overlap matrix, ambiguity report, and scanner metrics to config/nourished/scanner_analysis/.
+- Multi-nutrient recipe inheritance: complex dishes now contribute to multiple food groups based on their ingredients. Eating a steak sandwich gives Proteins, Grains, and Vegetables credit automatically.
+- HUD hide-above threshold: bars above a configurable percentage are hidden from the HUD. Set to 0.4 to only see bars that need attention. as requested. in #3
+- HUD show-below threshold: bars below a configurable percentage are always shown regardless of other visibility settings.
+- Show zero nutrients on HUD: toggle to show bars at 0% so you always know what you're missing.
+- HUD background opacity: configurable from fully transparent to fully opaque.
+- Vertical HUD layout: bars render as side-by-side columns filling upward instead of horizontal rows.
+- HUD flash on nutrient increase: bars briefly highlight for 2 seconds when a nutrient increases from eating.
+- Multi-nutrient full registry analysis: /nourished scan_analysis command analyzes all 4700+ classified foods and writes multi-nutrient recommendations, overlap matrix, ambiguity report, and scanner metrics to config/nourished/scanner_analysis/.
 - Run Analysis button in the Scanner config tab triggers full registry analysis in game.
 - Data Scan button renamed from Scan for clarity.
 
@@ -345,22 +426,22 @@ These steps ensure recipe inheritance, nutrient tags, and scanner data are regen
 ### Added
 
 - Configurable player join messages under `[general]` in `nourished-common.toml`:
-    - `showJoinMessage` — toggle welcome and notice chat lines on login (default: `true`)
-    - `joinMessageLine1` — welcome text after the NOURISHED header (default: `Welcome to the nutrition engine.`)
-    - `joinMessageLine2` — secondary notice line (default: `Beta NOTICE - features and balance may change.`)
+- `showJoinMessage`: toggle welcome and notice chat lines on login (default: `true`)
+- `joinMessageLine1`: welcome text after the NOURISHED header (default: `Welcome to the nutrition engine.`)
+- `joinMessageLine2`: secondary notice line (default: `Beta NOTICE - features and balance may change.`)
 - Matching defaults in `data/nourished/config/common_defaults.json` for modpack and datapack overrides.
 - KubeJS 2101 plugin discovery via `kubejs.plugins.txt` plus a `META-INF/services` service entry as a backup path.
 - Manual KubeJS plugin bootstrap fallback when automatic discovery fails (for example under Architectury), invoked from mod initialization.
 - `NourishedEvents` KubeJS script binding so scripts can subscribe to the `NourishedEvents` event group.
-- `NourishedKubeJSEventBridge` — dedicated NeoForge → KubeJS bridge for runtime nutrition events.
+- `NourishedKubeJSEventBridge`: dedicated NeoForge → KubeJS bridge for runtime nutrition events.
 - `ConfigReloadHandler.isReloadInProgress()` so handlers can defer work during config and datapack reloads.
 
 ### Changed
 
 - **KubeJS (2101 migration):**
-    - Migrated runtime events to the KubeJS 2101 `EventGroup` / `EventHandler` interface pattern.
-    - Moved NeoForge subscription and event wrapping out of `NourishedKubeJSEvents` into `NourishedKubeJSEventBridge`.
-    - Event payload `player` fields are now typed as `ServerPlayer` instead of `Object`.
+- Migrated runtime events to the KubeJS 2101 `EventGroup` / `EventHandler` interface pattern.
+- Moved NeoForge subscription and event wrapping out of `NourishedKubeJSEvents` into `NourishedKubeJSEventBridge`.
+- Event payload `player` fields are now typed as `ServerPlayer` instead of `Object`.
 - Join welcome and beta notice messages now read from config while keeping the existing styled chat formatting (◆ NOURISHED ◆ header, ⚠ notice line, and bold/light split when `joinMessageLine2` contains `-`).
 - Replaced hardcoded `"nourished"` mod id strings with `Nourished.MODID` across configs, registries, compat hooks, and tooling.
 - Registry reload pipeline hardened with read/write locks on `AbstractRegistry` and `ListRegistry` so reset → repopulate → freeze is atomic during `/reload`.
@@ -368,9 +449,9 @@ These steps ensure recipe inheritance, nutrient tags, and scanner data are regen
 
 ### Fixed
 
-- **KubeJS integration not loading** on KubeJS 2101 — Nourished scripts and bindings were unavailable when plugin discovery missed the jar; fixed with `kubejs.plugins.txt`, service-loader entry, and manual bootstrap registration.
-- **KubeJS nutrition events not firing** after the 2101 API change — event registration and bridging now follow the current KubeJS event-group pattern.
-- **Nutrition effects applying during reload** — effect application and player-tick effect handlers now skip work while a config or datapack reload is in progress, avoiding inconsistent effect state mid-reload.
+- **KubeJS integration not loading** on KubeJS 2101: Nourished scripts and bindings were unavailable when plugin discovery missed the jar; fixed with `kubejs.plugins.txt`, service-loader entry, and manual bootstrap registration.
+- **KubeJS nutrition events not firing** after the 2101 API change: event registration and bridging now follow the current KubeJS event-group pattern.
+- **Nutrition effects applying during reload**: effect application and player-tick effect handlers now skip work while a config or datapack reload is in progress, avoiding inconsistent effect state mid-reload.
 
 ## [0.2.1-beta-HotFix] - 2026-05-29
 
@@ -470,9 +551,9 @@ then:
 
 ### Added
 
-- Excluded items system — non-food items with FoodProperties (potions, soap, chicken feed, magic essences, etc.) are now explicitly excluded from classification and will not show a Nourished tooltip
+- Excluded items system: non-food items with FoodProperties (potions, soap, chicken feed, magic essences, etc.) are now explicitly excluded from classification and will not show a Nourished tooltip
 
-- excluded_items array in scanner_spec.json — modpack creators and datapack authors can extend this list without code changes
+- excluded_items array in scanner_spec.json: modpack creators and datapack authors can extend this list without code changes
 
 - hamburger stem mapping and archetype entry for correct multi-nutrient resolution across all hamburger variants; sandwich archetype entry to inject grains signal for sandwich-type foods
 
@@ -488,27 +569,27 @@ then:
 
 - /nourished invalidatecache command for operators to force a fresh scan without restarting
 
-- Croptopia compatibility — full nutrient tag coverage for 200+ items including meals, produce, seafood, desserts, and drinks
+- Croptopia compatibility: full nutrient tag coverage for 200+ items including meals, produce, seafood, desserts, and drinks
 
-- Pam's HarvestCraft 2 compatibility — 700+ items tagged across all six nutrient categories
+- Pam's HarvestCraft 2 compatibility: 700+ items tagged across all six nutrient categories
 
-- camelCase token splitting for mods that use concatenated item names (e.g. pamhc2foodextended) — improves scanner classification for previously unresolvable items
+- camelCase token splitting for mods that use concatenated item names (e.g. pamhc2foodextended): improves scanner classification for previously unresolvable items
 
 ### Fixed
 
-- Tag matches are now authoritative in blend resolution — when an item has an explicit nutrient tag, the resolver can only contribute nutrients not already covered by the tag, preventing archetype heuristics from overriding curated data
+- Tag matches are now authoritative in blend resolution: when an item has an explicit nutrient tag, the resolver can only contribute nutrients not already covered by the tag, preventing archetype heuristics from overriding curated data
 
 - Resolver cache is now invalidated on level load, fixing stale classifications persisting across jar swaps and config changes
 
-- stew, soup, burger, and roast removed from PREPARATION_TOKENS — they are composite food forms, not preparation methods
+- stew, soup, burger, and roast removed from PREPARATION_TOKENS: they are composite food forms, not preparation methods
 
-- burger and hamburger archetypes now only contribute grains — proteins and vegetables are scored from ingredient keywords and recipe inheritance
+- burger and hamburger archetypes now only contribute grains: proteins and vegetables are scored from ingredient keywords and recipe inheritance
 
 - Patchouli crafting recipe for the Nourished Guide
 
 ### Changed
 
-- Nutrient tag files updated — proteins, fruits, grains, and dairy now cover a significantly broader range of modded foods including beverages, composite dishes, and items previously falling through to hard fallback
+- Nutrient tag files updated: proteins, fruits, grains, and dairy now cover a significantly broader range of modded foods including beverages, composite dishes, and items previously falling through to hard fallback
 
 - compositeRatioThreshold default lowered from 0.5 to 0.4 for better composite detection on borderline foods
 

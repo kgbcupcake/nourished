@@ -1,0 +1,8 @@
+{
+  "value_key": "fruits",
+  "cumulative_goal": 0.5,
+  "reward_effect_id": "minecraft:regeneration",
+  "amplifier": 1,
+  "reward_duration": 200,
+  "advancement_id": "nourished:milestones/test_fruits"
+}
