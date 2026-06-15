@@ -1,7 +1,7 @@
 {
   "marie_schema_version": 1,
   "display_name": "Fruits",
-  "color": -39373,
+  "color": -38091,
   "default_decay_rate": 0.001,
   "critical_threshold": 0.1,
   "low_threshold": 0.3,

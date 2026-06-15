@@ -148,6 +148,7 @@ public final class NourishedConfigScreen {
             FoodValueRegistry.save();
             ColorRegistry.save();
             EffectRegistry.save();
+            NutrientRegistry.save();
             RawFoodConfig.save();
             MarieValueColors.clearOverrides();
             NourishedClientConfig.saveNow();

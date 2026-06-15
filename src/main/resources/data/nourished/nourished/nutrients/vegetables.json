@@ -1,7 +1,7 @@
 {
   "marie_schema_version": 1,
   "display_name": "Vegetables",
-  "color": -13369549,
+  "color": -13710223,
   "default_decay_rate": 0.001,
   "critical_threshold": 0.1,
   "low_threshold": 0.3,
