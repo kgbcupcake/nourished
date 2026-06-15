@@ -2,6 +2,87 @@
 
 <!-- markdownlint-disable MD013 -->
 
+## [ Nourished 0.2.6-beta.1 ] 2026-6-14
+
+### Death Nutrition Behavior
+
+- Added `deathNutritionBehavior` config option under `[general]` in `nourished-common.toml`
+  and `common_defaults.json`. Controls what happens to nutrient bars and food memory when a
+  player respawns after death:
+- `preserve` (default) — keep current nutrient levels and eating memory
+- `reset_to_starting` — reset all bars to `startingNutrientValue` and clear food memory
+- `vanilla_half` — legacy 50% reset with cleared food memory
+- Wired through `NourishedContextBuilder` into MarieLib's tracking pipeline so death handling
+  respects server config in singleplayer and multiplayer.
+- Config screen, import/export JSON, and lang entries added for the new setting.
+- `startingNutrientValue` description updated — it now also applies to `/nourished reset` and
+  death when `deathNutritionBehavior` is `reset_to_starting`.
+
+### Milestones
+
+- Datapack milestone definitions under `data/<namespace>/nourished/milestones/` now load
+  through `NourishedDatapackCallbacks.registerMilestone()` and register into MarieLib's
+  milestone registry at datapack apply time.
+- `enableMilestones` module toggle (already present) gates milestone checks at runtime.
+- Bundled example milestone `test_fruits` — awards Regeneration I when cumulative fruit
+  nutrition reaches 0.5, with matching advancement tab entries under
+  `data/nourished/advancement/milestones/`.
+
+### MarieLib & Build
+
+- Bumped MarieLib dependency to **0.1.0-beta.3** (`marie_lib_version_range=[0.1.0-beta.2,)`).
+  Requires MarieLib **0.1.0-beta.2+** on the classpath.
+- Gradle now always resolves MarieLib from Maven for compilation; local `../MarieLib` composite
+  builds are still supported for development via `includeBuild` with a simpler compile ordering
+  fix (no more intermittent clean-build races with NeoForge moddev artifacts).
+- Removed redundant JEI / REI / EMI compatibility bootstrap from `ClientEventRegistrar` —
+  recipe viewer plugins are initialized by MarieLib directly.
+
+### Raw Food
+
+- Added per-item **cookedness overrides** in `config/nourished/raw_food.json` (`overrides`
+  section). Modpack authors can pin cookedness values (0.0–1.0) for items that the resolver
+  misclassifies; overrides are registered in `CookednessResolver` and cleared on config reload.
+
+### Removed
+
+- **Stamina module** removed entirely (~2,200 lines). Stamina tracking, HUD, combat/movement
+  drain, and `stamina.json` config are gone. Peak Stamina compat integration remains under
+  module toggles for servers using that mod.
+
+### Changed
+
+- All bundled datapack JSON files now use `marie_schema_version` instead of the legacy
+  `nourished_schema_version` key (MarieLib still accepts the old key when reading overrides).
+- Nutrient registry loading hardened — redundant init guards, tag-key cache in
+  `FoodNutritionRegistry`, and cache invalidation on nutrient reload.
+- `NourishedAPI` registration methods annotated `@ApiStatus.Stable` for clearer external-mod
+  contract signaling.
+- Import/export and preset file writes now validate paths stay within the config directory.
+- `EffectRegistry` and `NourishedLockRegistry` truncate oversized entry lists with logging
+  instead of growing unbounded.
+
+### Fixed
+
+- Local MarieLib composite builds no longer hit race conditions where `compileJava` started
+  before NeoForge artifacts existed on disk.
+
+### Important Upgrade Notes
+
+If updating from 0.2.5-beta.5 or earlier:
+
+1. **Requires MarieLib 0.1.0-beta.2+** (bundled build uses 0.1.0-beta.3). Update MarieLib on
+   Modrinth before launching.
+2. If you used the removed Stamina module, delete `config/nourished/stamina.json` — it is no
+   longer read. Stamina HUD and drain mechanics are not available in this version.
+3. Review `deathNutritionBehavior` in `config/nourished-common.toml` — default is `preserve`
+   (bars kept on death). Set to `reset_to_starting` or `vanilla_half` for stricter death
+   penalties.
+4. To customize raw-food cookedness for specific items, add an `overrides` block to
+   `config/nourished/raw_food.json`.
+5. After upgrading, run `/nourished reload` on servers or rejoin worlds to refresh cached
+   classification and config-driven module state.
+
 ## [ Nourished 0.2.5-beta.5 ] 2026-6-9
 
 ### MarieLib Integration

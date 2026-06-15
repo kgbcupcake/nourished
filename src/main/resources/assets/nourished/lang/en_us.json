@@ -344,5 +344,10 @@
   "config.nourished.rawfood.severeMissedOpportunity": "Severe Missed Opportunity",
   "config.nourished.rawfood.severeMissedOpportunity.desc": "Fraction of cooked nutrition denied when eating SEVERE raw food",
   "config.nourished.rawfood.memorySecs": "Raw Food Memory (seconds)",
-  "config.nourished.rawfood.memorySecs.desc": "Seconds before raw-eat memory expires and effects reroll"
+  "config.nourished.rawfood.memorySecs.desc": "Seconds before raw-eat memory expires and effects reroll",
+  "advancement.nourished.milestones.root.title": "Nourished Milestones",
+  "advancement.nourished.milestones.root.description": "Track your dietary journey",
+  "advancement.nourished.milestones.test_fruits.title": "First Fruits",
+  "advancement.nourished.milestones.test_fruits.description": "Accumulate 0.5 cumulative fruit nutrition"
+
 }
