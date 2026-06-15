@@ -6,6 +6,7 @@ import dev.maire.nourished.client.NourishedKeys;
 import dev.marie.MariesLib.client.MarieValueColors;
 import dev.maire.nourished.client.config.EffectBuilderWidget;
 import dev.maire.nourished.client.config.FoodScannerWidget;
+import dev.marie.MariesLib.compat.CompatCategory;
 import dev.marie.MariesLib.compat.CompatEntry;
 import dev.marie.MariesLib.compat.CompatReportEntry;
 import dev.marie.MariesLib.compat.ModCompat;
@@ -1774,10 +1775,16 @@ public final class NourishedConfigScreen {
         private String resolvedDetectedCategory(CompatReportEntry row) {
             CompatEntry builtIn = builtInByModId.get(row.modId());
             if (builtIn != null && builtIn.category() != null) {
+                if (builtIn.category() == CompatCategory.SOURCE_MOD) {
+                    return "food_mod";
+                }
                 return builtIn.category().name().toLowerCase(Locale.ROOT);
             }
             if (row.category() == null) {
                 Nourished.LOGGER.debug("[Compat Config] Null category for {}, defaulting to FOOD_MOD", row.modId());
+                return "food_mod";
+            }
+            if (row.category() == CompatCategory.SOURCE_MOD) {
                 return "food_mod";
             }
             return row.category().name().toLowerCase(Locale.ROOT);
