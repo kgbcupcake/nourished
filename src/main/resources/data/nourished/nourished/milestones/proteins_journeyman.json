@@ -1,4 +1,5 @@
 {
+  "marie_schema_version": 1,
   "value_key": "proteins",
   "cumulative_goal": 2.0,
   "reward_effect_id": "minecraft:strength",

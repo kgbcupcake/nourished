@@ -1,4 +1,5 @@
 {
+  "marie_schema_version": 1,
   "value_key": "grains",
   "cumulative_goal": 0.5,
   "reward_effect_id": "minecraft:haste",
