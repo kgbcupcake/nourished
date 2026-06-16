@@ -1,0 +1,8 @@
+{
+  "value_key": "grains",
+  "cumulative_goal": 2.0,
+  "reward_effect_id": "minecraft:haste",
+  "amplifier": 1,
+  "reward_duration": 2400,
+  "advancement_id": "nourished:milestones/grains_journeyman"
+}

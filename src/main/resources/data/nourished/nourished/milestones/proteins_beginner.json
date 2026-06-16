@@ -1,0 +1,8 @@
+{
+  "value_key": "proteins",
+  "cumulative_goal": 0.5,
+  "reward_effect_id": "minecraft:strength",
+  "amplifier": 0,
+  "reward_duration": 1200,
+  "advancement_id": "nourished:milestones/proteins_beginner"
+}

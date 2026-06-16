@@ -30,6 +30,7 @@ import dev.maire.nourished.core.diet.NourishedTrackingData;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.command.NourishedCommand;
 import dev.maire.nourished.core.handler.NourishedFoodTriggerHandler;
 import dev.maire.nourished.core.handler.NourishedGuideJoinHandler;
 import dev.maire.nourished.core.handler.NourishedServerHandler;
@@ -69,6 +70,7 @@ public class Nourished {
         MariesLibBootstrap.attach(Nourished.MODID, modEventBus);
         NourishedContextBuilder.registerSlim();
         MarieDataManager.setCallbacks(new NourishedDatapackCallbacks());
+        NeoForge.EVENT_BUS.addListener(MarieDataManager::registerReloadListener);
 
         NourishedKubeIntegration.register();
         ModCompat.initialize();
@@ -111,6 +113,7 @@ public class Nourished {
             });
         });
         NeoForge.EVENT_BUS.register(new NourishedGuideJoinHandler());
+        NeoForge.EVENT_BUS.register(new NourishedCommand());
         TrackingAttachment.logAllValueNbtPaths();
         LOGGER.info("[Nourished] Calories NBT path: {}", TrackingAttachment.getTotalNbtPath());
         LOGGER.info("[Nourished] API v{} ready — {} nutrients, {} effects, {} compat entries registered.",

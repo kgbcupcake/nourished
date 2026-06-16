@@ -12,7 +12,6 @@ import dev.marie.MariesLib.api.registry.ValueRegistry;
 import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.MariesLib.registry.AbstractRegistry;
-import dev.marie.MariesLib.data.DatapackSchema;
 import dev.marie.MariesLib.runtime.SourceRegistry;
 import dev.marie.MariesLib.util.MarieValidation;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -263,21 +262,28 @@ public class NutrientRegistry {
         try {
             Files.createDirectories(configDir);
             if (!Files.exists(file)) {
-                writeDefaults(file);
-                Nourished.LOGGER.info("[NutrientRegistry] Wrote default nutrients.json");
+                if (writeDefaultsIfPossible(file)) {
+                    Nourished.LOGGER.info("[NutrientRegistry] Wrote default nutrients.json");
+                }
             }
-            try (Reader r = Files.newBufferedReader(file)) {
-                JsonArray arr = GSON.fromJson(r, JsonArray.class);
-                validateSchema(file, arr);
+            if (Files.exists(file)) {
+                try (Reader r = Files.newBufferedReader(file)) {
+                    JsonArray arr = GSON.fromJson(r, JsonArray.class);
+                    ensureValidConfigFile(file, arr);
+                }
             }
-            parse(file);
+            boolean usedBundledFallback = parse(file);
             FoodNutritionRegistry.clearTagKeyCache();
             syncToValueRegistry();
+            if (usedBundledFallback) {
+                repairConfigFile(file);
+            }
             Nourished.LOGGER.info("[NutrientRegistry] Loaded {} nutrients from {}", INSTANCE.size(), file);
         } catch (IOException e) {
             Nourished.LOGGER.error("[NutrientRegistry] Failed to load nutrients.json, using built-in defaults", e);
             loadDefaults();
             syncToValueRegistry();
+            repairConfigFile(file);
         }
     }
 
@@ -288,6 +294,18 @@ public class NutrientRegistry {
     public static void reload() {
         Nourished.LOGGER.info("[NutrientRegistry] Reloading nutrients.json");
         doLoad();
+    }
+
+    /** Persists the in-memory registry to config/nourished/nutrients.json. */
+    public static void save() {
+        Path file = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("nutrients.json");
+        try {
+            Files.createDirectories(file.getParent());
+            writeNutrientsToPath(file, INSTANCE.values());
+            Nourished.LOGGER.info("[NutrientRegistry] Saved nutrients.json ({} entries)", INSTANCE.size());
+        } catch (IOException e) {
+            Nourished.LOGGER.error("[NutrientRegistry] Failed to save nutrients.json", e);
+        }
     }
 
     /**
@@ -325,21 +343,31 @@ public class NutrientRegistry {
 
     // ── Internals ─────────────────────────────────────────────────────────────
 
-    private static void validateSchema(Path file, JsonArray arr) throws IOException {
-        if (!isSchemaMismatch(arr)) {
+    private static void ensureValidConfigFile(Path file, JsonArray arr) throws IOException {
+        if (!isInvalidConfig(arr)) {
             return;
         }
-        Nourished.LOGGER.info("[NutrientRegistry] nutrients.json schema mismatch detected — regenerating");
-        Files.delete(file);
-        writeDefaults(file);
-        Nourished.LOGGER.info("[NutrientRegistry] Wrote updated nutrients.json");
+        if (arr == null) {
+            Nourished.LOGGER.info("[NutrientRegistry] nutrients.json is missing or unreadable — regenerating");
+        } else if (arr.isEmpty()) {
+            Nourished.LOGGER.info("[NutrientRegistry] nutrients.json is empty — regenerating");
+        } else {
+            Nourished.LOGGER.info("[NutrientRegistry] nutrients.json schema mismatch detected — regenerating");
+        }
+        Files.deleteIfExists(file);
+        if (writeDefaultsIfPossible(file)) {
+            Nourished.LOGGER.info("[NutrientRegistry] Wrote updated nutrients.json");
+        }
+    }
+
+    private static boolean isInvalidConfig(JsonArray arr) {
+        if (arr == null || arr.isEmpty()) {
+            return true;
+        }
+        return isSchemaMismatch(arr);
     }
 
     private static boolean isSchemaMismatch(JsonArray arr) {
-        if (arr == null) {
-            return false;
-        }
-
         List<String> mismatches = new ArrayList<>();
         for (JsonElement el : arr) {
             JsonObject obj = el.getAsJsonObject();
@@ -362,24 +390,29 @@ public class NutrientRegistry {
         return !mismatches.isEmpty();
     }
 
-    private static void parse(Path file) throws IOException {
-        JsonArray arr;
-        try (Reader r = Files.newBufferedReader(file)) {
-            arr = GSON.fromJson(r, JsonArray.class);
+    private static boolean parse(Path file) throws IOException {
+        JsonArray arr = null;
+        if (Files.exists(file)) {
+            try (Reader r = Files.newBufferedReader(file)) {
+                arr = GSON.fromJson(r, JsonArray.class);
+            }
         }
+        final JsonArray configArray = arr;
+        boolean[] usedBundledFallback = {false};
         INSTANCE.runWrite(() -> {
             INSTANCE.resetUnlocked();
-            if (arr == null) {
+            if (configArray == null) {
                 Nourished.LOGGER.warn("[NutrientRegistry] nutrients.json was empty, using built-in defaults");
+                usedBundledFallback[0] = true;
                 loadDefaultsUnlocked();
                 return;
             }
             int limit = 2000;
-            if (arr.size() > limit) {
-                Nourished.LOGGER.warn("[NutrientRegistry] nutrients.json has {} entries, exceeding {} — truncating", arr.size(), limit);
+            if (configArray.size() > limit) {
+                Nourished.LOGGER.warn("[NutrientRegistry] nutrients.json has {} entries, exceeding {} — truncating", configArray.size(), limit);
             }
-            for (int i = 0; i < Math.min(arr.size(), limit); i++) {
-                JsonElement el = arr.get(i);
+            for (int i = 0; i < Math.min(configArray.size(), limit); i++) {
+                JsonElement el = configArray.get(i);
                 JsonObject obj = el.getAsJsonObject();
                 com.google.gson.JsonElement keyEl = obj.get("key");
                 if (keyEl == null || !keyEl.isJsonPrimitive() || !keyEl.getAsJsonPrimitive().isString()) {
@@ -416,11 +449,13 @@ public class NutrientRegistry {
             }
             if (INSTANCE.valuesUnlocked().isEmpty()) {
                 Nourished.LOGGER.warn("[NutrientRegistry] nutrients.json was empty, using built-in defaults");
+                usedBundledFallback[0] = true;
                 loadDefaultsUnlocked();
             } else {
                 INSTANCE.freezeUnlocked();
             }
         });
+        return usedBundledFallback[0];
     }
 
     private static void loadDefaultsUnlocked() {
@@ -435,9 +470,23 @@ public class NutrientRegistry {
         INSTANCE.runWrite(NutrientRegistry::loadDefaultsUnlocked);
     }
 
-    private static void writeDefaults(Path file) throws IOException {
+    private static boolean writeDefaultsIfPossible(Path file) throws IOException {
+        List<NutrientDef> defaults = loadBundledDefaults();
+        if (defaults.isEmpty()) {
+            Nourished.LOGGER.error(
+                    "[NutrientRegistry] Bundled nutrient definitions unavailable — refusing to write empty nutrients.json");
+            return false;
+        }
+        writeNutrientsToPath(file, defaults);
+        return true;
+    }
+
+    private static void writeNutrientsToPath(Path file, List<NutrientDef> nutrients) throws IOException {
+        if (nutrients.isEmpty()) {
+            throw new IOException("refusing to write empty nutrients.json");
+        }
         JsonArray arr = new JsonArray();
-        for (NutrientDef def : loadBundledDefaults()) {
+        for (NutrientDef def : nutrients) {
             JsonObject obj = new JsonObject();
             obj.addProperty("key", def.key());
             obj.addProperty("display_name", def.displayName());
@@ -449,13 +498,36 @@ public class NutrientRegistry {
             obj.addProperty("beneficial", def.beneficial());
             obj.addProperty("icon", def.icon());
             JsonArray tags = new JsonArray();
-            for (String t : def.tags()) tags.add(t);
+            for (String t : def.tags()) {
+                tags.add(t);
+            }
             obj.add("tags", tags);
             arr.add(obj);
         }
         MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "NutrientRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
+        }
+    }
+
+    private static void repairConfigFile(Path file) {
+        if (INSTANCE.size() == 0) {
+            return;
+        }
+        try {
+            if (Files.exists(file) && !isInvalidConfig(readConfigArray(file))) {
+                return;
+            }
+            writeNutrientsToPath(file, INSTANCE.values());
+            Nourished.LOGGER.info("[NutrientRegistry] Repaired nutrients.json on disk ({} entries)", INSTANCE.size());
+        } catch (IOException e) {
+            Nourished.LOGGER.error("[NutrientRegistry] Failed to repair nutrients.json", e);
+        }
+    }
+
+    private static JsonArray readConfigArray(Path file) throws IOException {
+        try (Reader r = Files.newBufferedReader(file)) {
+            return GSON.fromJson(r, JsonArray.class);
         }
     }
 
@@ -476,12 +548,17 @@ public class NutrientRegistry {
         return ICON_FALLBACKS.getOrDefault(key, DEFAULT_ICON);
     }
 
+    private static String bundledNutrientResource(String nutrientId) {
+        return "/data/" + Nourished.MODID + "/" + Nourished.MODID + "/nutrients/" + nutrientId + ".json";
+    }
+
     private static List<NutrientDef> loadBundledDefaults() {
         List<NutrientDef> defaults = new ArrayList<>();
         for (String path : DEFAULT_NUTRIENT_RESOURCES) {
-            String resource = "/data/" + Nourished.MODID + "/" + DatapackSchema.root() + "/nutrients/" + path + ".json";
+            String resource = bundledNutrientResource(path);
             try (InputStream in = NutrientRegistry.class.getResourceAsStream(resource)) {
                 if (in == null) {
+                    Nourished.LOGGER.warn("[NutrientRegistry] Missing bundled nutrient resource: {}", resource);
                     continue;
                 }
                 try (Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {

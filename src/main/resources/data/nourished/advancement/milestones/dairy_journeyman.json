@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "minecraft:egg"
+    },
+    "title": {
+      "translate": "advancement.nourished.milestones.dairy_journeyman.title"
+    },
+    "description": {
+      "translate": "advancement.nourished.milestones.dairy_journeyman.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "nourished:milestones/dairy_beginner",
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

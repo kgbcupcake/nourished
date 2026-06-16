@@ -1,8 +1,10 @@
 package dev.maire.nourished.core.datapack;
 
+import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.marie.MariesLib.api.MarieAPI;
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.api.MilestoneDefinition;
+import dev.marie.MariesLib.api.ThresholdEffect;
 import dev.marie.MariesLib.api.ValueDefinition;
 import dev.marie.MariesLib.data.MarieDataLoader;
 import dev.marie.MariesLib.registry.MarieApiRegistries;
@@ -36,5 +38,10 @@ public final class NourishedDatapackCallbacks implements MarieDataLoader.Callbac
     @Override
     public void registerMilestone(MilestoneDefinition def) {
         MarieAPI.registerMilestone(def);
+    }
+
+    @Override
+    public void registerCustomEffect(ThresholdEffect def) {
+        EffectRegistry.upsertFromDatapack(def);
     }
 }

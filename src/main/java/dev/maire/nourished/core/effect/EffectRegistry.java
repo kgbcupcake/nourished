@@ -82,10 +82,20 @@ public class EffectRegistry {
             case EXCESS -> "above";
             case BONUS -> "all_above";
         };
+        String incomingNutrient = definition.getValueKey();
+        String incomingEffect = definition.getEffectId().toString();
+        List<EffectDef> next = new ArrayList<>();
+        for (EffectDef d : INSTANCE.values()) {
+            if (d.nutrient().equals(incomingNutrient) && d.trigger().equals(trigger)
+                    && d.effect().equals(incomingEffect)) {
+                continue;
+            }
+            next.add(d);
+        }
         EffectDef def = new EffectDef(
                 "api_" + definition.getValueKey() + "_" + definition.getEffectId().getPath(),
-                definition.getEffectId().toString(),
-                definition.getValueKey(),
+                incomingEffect,
+                incomingNutrient,
                 trigger,
                 definition.getThreshold(),
                 definition.getAmplifier(),
@@ -95,7 +105,6 @@ public class EffectRegistry {
                 true,
                 false
         );
-        List<EffectDef> next = new ArrayList<>(INSTANCE.values());
         INSTANCE.runWrite(() -> {
             INSTANCE.resetUnlocked();
             for (EffectDef d : next) {
@@ -104,7 +113,50 @@ public class EffectRegistry {
             INSTANCE.registerUnlocked(def);
             INSTANCE.freezeUnlocked();
         });
-        Nourished.LOGGER.info("[EffectRegistry] Registered external effect: {}", def.id());
+        Nourished.LOGGER.info("[EffectRegistry] Registered external effect (replaced existing if matched): {}", def.id());
+    }
+
+    public static void upsertFromDatapack(dev.marie.MariesLib.api.ThresholdEffect definition) {
+        String trigger = switch (definition.getThresholdType()) {
+            case CRITICAL, LOW -> "below";
+            case EXCESS -> "above";
+            case BONUS -> "all_above";
+        };
+        String effect = definition.getEffectId().toString();
+        String nutrient = definition.getValueKey();
+        double threshold = definition.getThreshold();
+
+        List<EffectDef> current = new ArrayList<>(INSTANCE.values());
+        int matchIndex = -1;
+        for (int i = 0; i < current.size(); i++) {
+            EffectDef d = current.get(i);
+            if (d.nutrient().equals(nutrient) && d.trigger().equals(trigger)
+                    && d.effect().equals(effect)) {
+                matchIndex = i;
+                break;
+            }
+        }
+
+        EffectDef newDef;
+        if (matchIndex >= 0) {
+            EffectDef old = current.get(matchIndex);
+            newDef = new EffectDef(old.id(), effect, nutrient, trigger, threshold,
+                    definition.getAmplifier(), definition.getDuration(),
+                    old.enabled(), old.thresholdMax(), old.ambient(), old.showParticles());
+            current.set(matchIndex, newDef);
+        } else {
+            newDef = new EffectDef("api_" + nutrient + "_" + definition.getEffectId().getPath(),
+                    effect, nutrient, trigger, threshold,
+                    definition.getAmplifier(), definition.getDuration(),
+                    true, 1.0, true, false);
+            current.add(newDef);
+        }
+
+        try {
+            saveAll(current);
+        } catch (IOException e) {
+            Nourished.LOGGER.warn("[EffectRegistry] Failed to persist datapack effect upsert: {}", e.getMessage());
+        }
     }
 
     public static Set<String> getPreviousEffectIds() {

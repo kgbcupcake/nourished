@@ -1,0 +1,8 @@
+{
+  "value_key": "vegetables",
+  "cumulative_goal": 2.0,
+  "reward_effect_id": "minecraft:health_boost",
+  "amplifier": 1,
+  "reward_duration": 2400,
+  "advancement_id": "nourished:milestones/vegetables_journeyman"
+}

@@ -93,6 +93,7 @@ repositories
    }
 
 }
+
 dependencies {
     implementation "dev.marie.MariesLib:marieslib:${marie_lib_version}"
     if (!gradle.ext.localMarieLibPresent) {
@@ -101,10 +102,6 @@ dependencies {
 
     implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
     compileOnly "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"
-    compileOnly "mezz.jei:jei-1.21.1-common-api:+"
-    compileOnly "mezz.jei:jei-1.21.1-neoforge-api:+"
-    compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:+"
-    compileOnly "dev.emi:emi-neoforge:+"
     compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}:api"
     runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
     compileOnly "maven.modrinth:spice-of-life-onion:${spice_of_life_onion_version}"
