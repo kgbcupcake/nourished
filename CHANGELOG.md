@@ -28,6 +28,20 @@
   nutrition reaches 0.5, with matching advancement tab entries under
   `data/nourished/advancement/milestones/`.
 
+### Added
+
+- 18 per-nutrient milestones (beginner/journeyman/master) + perfectly_balanced cross-group milestone with chained advancements
+- NeoForge.EVENT_BUS.addListener(MarieDataManager::registerReloadListener): milestones now actually load from datapacks
+- NourishedDatapackCallbacks.registerCustomEffect wired to EffectRegistry.upsertFromDatapack
+- EffectRegistry.upsertFromDatapack — datapack effects replace bundled effects matching (nutrient, trigger, effect) instead of duplicating
+- NourishedEffectsTemplateCommand — /nourished export_effects_template
+- NourishedValuesTemplateCommand — /nourished export_values_template
+- _comment_\* documentation fields in all template export commands
+- ValueDefinition.colorOverride wired through NutrientRegistry.toValueDefinition() so nutrient colors from nutrients.json render in HUD
+- dairy.json bundled color changed to cream (0xFFE8D5B7), grains.json to amber (0xFFD9A521)
+- Cross-nutrient all milestone support (MilestoneRegistry.getForAll())
+- "Counts toward: X beginner" tooltip line on food items
+
 ### MarieLib & Build
 
 - Bumped MarieLib dependency to **0.1.0-beta.3** (`marie_lib_version_range=[0.1.0-beta.2,)`):
@@ -49,6 +63,8 @@
 - **Stamina module** removed entirely (~2,200 lines). Stamina tracking, HUD, combat/movement
   drain, and `stamina.json` config are gone. Peak Stamina compat integration remains under
   module toggles for servers using that mod.
+- test_fruits milestone and advancement (replaced by full tier chain)
+- Sugars milestone files (no sugars nutrient registered)
 
 ### Changed
 
@@ -66,6 +82,12 @@
 
 - Local MarieLib composite builds no longer hit race conditions where `compileJava` started
   before NeoForge artifacts existed on disk.
+
+- Datapack effect overrides no longer duplicate — upsertFromDatapack dedup key is (nutrient, trigger, effect) only, threshold is the overridable field
+
+-Milestone cumulative goals corrected: 0.5 beginner / 2.0 journeyman / 5.0 master (was 5.0 across all tiers)
+
+- HUD bars showing white — colorOverride now set from nutrients.json color field
 
 ### Important Upgrade Notes
 

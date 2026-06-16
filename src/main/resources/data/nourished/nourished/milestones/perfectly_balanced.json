@@ -1,4 +1,5 @@
 {
+  "marie_schema_version": 1,
   "value_key": "all",
   "cumulative_goal": 5.0,
   "reward_effect_id": "minecraft:absorption",
