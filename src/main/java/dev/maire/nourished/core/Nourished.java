@@ -70,6 +70,7 @@ public class Nourished {
         MariesLibBootstrap.attach(Nourished.MODID, modEventBus);
         NourishedContextBuilder.registerSlim();
         MarieDataManager.setCallbacks(new NourishedDatapackCallbacks());
+        NeoForge.EVENT_BUS.addListener(MarieDataManager::registerReloadListener);
 
         NourishedKubeIntegration.register();
         ModCompat.initialize();

@@ -1,6 +1,6 @@
 {
   "value_key": "grains",
-  "cumulative_goal": 25.0,
+  "cumulative_goal": 2.0,
   "reward_effect_id": "minecraft:haste",
   "amplifier": 1,
   "reward_duration": 2400,

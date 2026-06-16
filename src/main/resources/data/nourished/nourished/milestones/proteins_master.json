@@ -1,6 +1,6 @@
 {
   "value_key": "proteins",
-  "cumulative_goal": 100.0,
+  "cumulative_goal": 5.0,
   "reward_effect_id": "minecraft:strength",
   "amplifier": 2,
   "reward_duration": 6000,

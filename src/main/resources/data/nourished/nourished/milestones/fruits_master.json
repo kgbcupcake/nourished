@@ -1,6 +1,6 @@
 {
   "value_key": "fruits",
-  "cumulative_goal": 100.0,
+  "cumulative_goal": 5.0,
   "reward_effect_id": "minecraft:luck",
   "amplifier": 2,
   "reward_duration": 6000,

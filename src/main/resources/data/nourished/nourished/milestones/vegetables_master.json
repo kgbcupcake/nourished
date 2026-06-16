@@ -1,6 +1,6 @@
 {
   "value_key": "vegetables",
-  "cumulative_goal": 100.0,
+  "cumulative_goal": 5.0,
   "reward_effect_id": "minecraft:health_boost",
   "amplifier": 2,
   "reward_duration": 6000,

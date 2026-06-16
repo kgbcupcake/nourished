@@ -131,7 +131,7 @@ public class EffectRegistry {
         for (int i = 0; i < current.size(); i++) {
             EffectDef d = current.get(i);
             if (d.nutrient().equals(nutrient) && d.trigger().equals(trigger)
-                    && d.threshold() == threshold && d.effect().equals(effect)) {
+                    && d.effect().equals(effect)) {
                 matchIndex = i;
                 break;
             }

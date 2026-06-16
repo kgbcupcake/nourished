@@ -1,6 +1,6 @@
 {
   "value_key": "dairy",
-  "cumulative_goal": 5.0,
+  "cumulative_goal": 0.5,
   "reward_effect_id": "minecraft:resistance",
   "amplifier": 0,
   "reward_duration": 1200,
