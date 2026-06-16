@@ -1,0 +1,8 @@
+{
+  "value_key": "sugars",
+  "cumulative_goal": 100.0,
+  "reward_effect_id": "minecraft:speed",
+  "amplifier": 2,
+  "reward_duration": 6000,
+  "advancement_id": "nourished:milestones/sugars_master"
+}

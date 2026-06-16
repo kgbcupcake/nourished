@@ -82,10 +82,20 @@ public class EffectRegistry {
             case EXCESS -> "above";
             case BONUS -> "all_above";
         };
+        String incomingNutrient = definition.getValueKey();
+        String incomingEffect = definition.getEffectId().toString();
+        List<EffectDef> next = new ArrayList<>();
+        for (EffectDef d : INSTANCE.values()) {
+            if (d.nutrient().equals(incomingNutrient) && d.trigger().equals(trigger)
+                    && d.effect().equals(incomingEffect)) {
+                continue;
+            }
+            next.add(d);
+        }
         EffectDef def = new EffectDef(
                 "api_" + definition.getValueKey() + "_" + definition.getEffectId().getPath(),
-                definition.getEffectId().toString(),
-                definition.getValueKey(),
+                incomingEffect,
+                incomingNutrient,
                 trigger,
                 definition.getThreshold(),
                 definition.getAmplifier(),
@@ -95,7 +105,6 @@ public class EffectRegistry {
                 true,
                 false
         );
-        List<EffectDef> next = new ArrayList<>(INSTANCE.values());
         INSTANCE.runWrite(() -> {
             INSTANCE.resetUnlocked();
             for (EffectDef d : next) {
@@ -104,7 +113,7 @@ public class EffectRegistry {
             INSTANCE.registerUnlocked(def);
             INSTANCE.freezeUnlocked();
         });
-        Nourished.LOGGER.info("[EffectRegistry] Registered external effect: {}", def.id());
+        Nourished.LOGGER.info("[EffectRegistry] Registered external effect (replaced existing if matched): {}", def.id());
     }
 
     public static void upsertFromDatapack(dev.marie.MariesLib.api.ThresholdEffect definition) {

@@ -1,0 +1,8 @@
+{
+  "value_key": "proteins",
+  "cumulative_goal": 25.0,
+  "reward_effect_id": "minecraft:strength",
+  "amplifier": 1,
+  "reward_duration": 2400,
+  "advancement_id": "nourished:milestones/proteins_journeyman"
+}

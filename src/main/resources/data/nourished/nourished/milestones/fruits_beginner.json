@@ -1,0 +1,8 @@
+{
+  "value_key": "fruits",
+  "cumulative_goal": 5.0,
+  "reward_effect_id": "minecraft:luck",
+  "amplifier": 0,
+  "reward_duration": 1200,
+  "advancement_id": "nourished:milestones/fruits_beginner"
+}
