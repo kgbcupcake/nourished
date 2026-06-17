@@ -14,10 +14,17 @@ public final class NourishedKeys {
             "key.categories.nourished"
     );
 
-    public static final KeyMapping OPEN_CONFIG = new KeyMapping(
-            "key.nourished.openConfig",
+    public static final KeyMapping OPEN_DIET_SCREEN = new KeyMapping(
+            "key.nourished.openDietScreen",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_N,
+            "key.categories.nourished"
+    );
+
+    public static final KeyMapping EDIT_DIET_SCREEN = new KeyMapping(
+            "key.nourished.editDietScreen",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_J,
             "key.categories.nourished"
     );
 
@@ -25,6 +32,7 @@ public final class NourishedKeys {
 
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(EDIT_HUD);
-        event.register(OPEN_CONFIG);
+        event.register(OPEN_DIET_SCREEN);
+        event.register(EDIT_DIET_SCREEN);
     }
 }

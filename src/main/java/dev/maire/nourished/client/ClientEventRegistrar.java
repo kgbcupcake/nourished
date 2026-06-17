@@ -4,6 +4,7 @@ import dev.marie.MariesLib.client.MarieClientCache;
 import dev.marie.MariesLib.client.MarieClientState;
 import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.client.NourishedClientMemoryConfig;
+import dev.maire.nourished.client.screen.DietScreenEditMode;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
@@ -19,6 +20,7 @@ public final class ClientEventRegistrar {
         NeoForge.EVENT_BUS.addListener(ClientEvents::onClientTick);
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onRenderGuiPost);
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onClientTick);
+        NeoForge.EVENT_BUS.addListener(DietScreenEditMode::onClientTick);
         NeoForge.EVENT_BUS.addListener(ClientEventRegistrar::onLogout);
     }
 

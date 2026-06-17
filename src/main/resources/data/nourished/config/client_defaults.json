@@ -11,5 +11,16 @@
   "hudShowZeroBars": false,
   "hudRevealOnNutrientGain": true,
   "hudBackgroundOpacity": 0.796078431372549,
-  "hudVerticalLayout": false
+  "hudVerticalLayout": false,
+  "dietScale": 1.0,
+  "dietBackgroundOpacity": 0.796078431372549,
+  "dietOffsetX": 0,
+  "dietOffsetY": 0,
+  "recentMealsBoxScale": 1.0,
+  "eatMoreBoxScale": 1.0,
+  "showRecentMeals": true,
+  "showEatMoreOf": true,
+  "showActiveEffects": true,
+  "showCaloriesBox": true,
+  "showBalanceBox": true
 }
