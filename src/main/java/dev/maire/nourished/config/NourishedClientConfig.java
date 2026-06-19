@@ -45,6 +45,17 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.DoubleValue hudBackgroundOpacity;
     private final ModConfigSpec.BooleanValue hudVerticalLayout;
     private final ModConfigSpec.ConfigValue<List<? extends String>> dietBarOrder;
+    private final ModConfigSpec.DoubleValue dietScale;
+    private final ModConfigSpec.IntValue dietOffsetX;
+    private final ModConfigSpec.IntValue dietOffsetY;
+    private final ModConfigSpec.DoubleValue recentMealsBoxScale;
+    private final ModConfigSpec.DoubleValue eatMoreBoxScale;
+    private final ModConfigSpec.DoubleValue dietBackgroundOpacity;
+    private final ModConfigSpec.BooleanValue showRecentMeals;
+    private final ModConfigSpec.BooleanValue showEatMoreOf;
+    private final ModConfigSpec.BooleanValue showActiveEffects;
+    private final ModConfigSpec.BooleanValue showCaloriesBox;
+    private final ModConfigSpec.BooleanValue showBalanceBox;
 
     /** Matches legacy {@code COL_PANEL_BG} alpha ({@code 0xCC}). */
     private static final double DEFAULT_HUD_BACKGROUND_OPACITY = 204.0d / 255.0d;
@@ -110,6 +121,32 @@ public final class NourishedClientConfig {
                     }
                 }
         );
+        dietScale = builder.defineInRange("dietScale", ConfigDefaultsLoader.getDouble(defaults, "dietScale", 1.0d), 0.5d, 1.5d);
+        dietOffsetX = builder.defineInRange("dietOffsetX", ConfigDefaultsLoader.getInt(defaults, "dietOffsetX", 0), -2000, 2000);
+        dietOffsetY = builder.defineInRange("dietOffsetY", ConfigDefaultsLoader.getInt(defaults, "dietOffsetY", 0), -2000, 2000);
+        recentMealsBoxScale = builder.defineInRange(
+                "recentMealsBoxScale",
+                ConfigDefaultsLoader.getDouble(defaults, "recentMealsBoxScale", 1.0d),
+                0.5d,
+                1.5d
+        );
+        eatMoreBoxScale = builder.defineInRange(
+                "eatMoreBoxScale",
+                ConfigDefaultsLoader.getDouble(defaults, "eatMoreBoxScale", 1.0d),
+                0.5d,
+                1.5d
+        );
+        dietBackgroundOpacity = builder.defineInRange(
+                "dietBackgroundOpacity",
+                ConfigDefaultsLoader.getDouble(defaults, "dietBackgroundOpacity", DEFAULT_HUD_BACKGROUND_OPACITY),
+                0.0d,
+                1.0d
+        );
+        showRecentMeals = builder.define("showRecentMeals", ConfigDefaultsLoader.getBoolean(defaults, "showRecentMeals", true));
+        showEatMoreOf = builder.define("showEatMoreOf", ConfigDefaultsLoader.getBoolean(defaults, "showEatMoreOf", true));
+        showActiveEffects = builder.define("showActiveEffects", ConfigDefaultsLoader.getBoolean(defaults, "showActiveEffects", true));
+        showCaloriesBox = builder.define("showCaloriesBox", ConfigDefaultsLoader.getBoolean(defaults, "showCaloriesBox", true));
+        showBalanceBox = builder.define("showBalanceBox", ConfigDefaultsLoader.getBoolean(defaults, "showBalanceBox", true));
         builder.pop();
     }
 
@@ -349,5 +386,98 @@ public final class NourishedClientConfig {
 
     public void resetDietBarOrder() {
         dietBarOrder.set(List.of());
+    }
+
+    public double dietScale() {
+        return dietScale.get();
+    }
+
+    public void setDietScale(double value) {
+        dietScale.set(value);
+    }
+
+    public int dietOffsetX() {
+        return dietOffsetX.get();
+    }
+
+    public void setDietOffsetX(int value) {
+        dietOffsetX.set(value);
+    }
+
+    public int dietOffsetY() {
+        return dietOffsetY.get();
+    }
+
+    public void setDietOffsetY(int value) {
+        dietOffsetY.set(value);
+    }
+
+    public double recentMealsBoxScale() {
+        return recentMealsBoxScale.get();
+    }
+
+    public void setRecentMealsBoxScale(double value) {
+        recentMealsBoxScale.set(value);
+    }
+
+    public double eatMoreBoxScale() {
+        return eatMoreBoxScale.get();
+    }
+
+    public void setEatMoreBoxScale(double value) {
+        eatMoreBoxScale.set(value);
+    }
+
+    public double dietBackgroundOpacity() {
+        return dietBackgroundOpacity.get();
+    }
+
+    public void setDietBackgroundOpacity(double value) {
+        dietBackgroundOpacity.set(value);
+    }
+
+    public boolean showRecentMeals() {
+        return showRecentMeals.get();
+    }
+
+    public void setShowRecentMeals(boolean value) {
+        showRecentMeals.set(value);
+    }
+
+    public boolean showEatMoreOf() {
+        return showEatMoreOf.get();
+    }
+
+    public void setShowEatMoreOf(boolean value) {
+        showEatMoreOf.set(value);
+    }
+
+    public boolean showActiveEffects() {
+        return showActiveEffects.get();
+    }
+
+    public void setShowActiveEffects(boolean value) {
+        showActiveEffects.set(value);
+    }
+
+    public boolean showCaloriesBox() {
+        return showCaloriesBox.get();
+    }
+
+    public void setShowCaloriesBox(boolean value) {
+        showCaloriesBox.set(value);
+    }
+
+    public boolean showBalanceBox() {
+        return showBalanceBox.get();
+    }
+
+    public void setShowBalanceBox(boolean value) {
+        showBalanceBox.set(value);
+    }
+
+    public void resetDietOffsets() {
+        dietOffsetX.set(0);
+        dietOffsetY.set(0);
     }
 }

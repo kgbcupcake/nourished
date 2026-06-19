@@ -107,7 +107,7 @@ public final class NutrientHudHexColorRowEntry extends TooltipListEntry<Integer>
     }
 
     private void syncHexFromEffectiveColor() {
-        int effective = ColorRegistry.getArgb(key).orElseGet(() -> MarieValueColors.paletteOnlyArgb(key));
+        int effective = ColorRegistry.getArgb(key).orElseGet(() -> MarieValueColors.resolvedDefaultArgb(key));
         suppressHexResponder = true;
         hexBox.setValue(formatRgbHex(effective));
         suppressHexResponder = false;
@@ -178,7 +178,7 @@ public final class NutrientHudHexColorRowEntry extends TooltipListEntry<Integer>
             return;
         }
         int now = parsed.get();
-        int pal = MarieValueColors.paletteOnlyArgb(key);
+        int pal = MarieValueColors.resolvedDefaultArgb(key);
         int nowRgb = now & 0x00_FF_FF_FF;
         int palRgb = pal & 0x00_FF_FF_FF;
         if (nowRgb == palRgb) {

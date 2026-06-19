@@ -85,6 +85,7 @@ public final class NourishedContextBuilder {
                 .lowThreshold(() -> (float) NourishedConfig.get().lowThreshold())
                 .criticalThreshold(() -> (float) NourishedConfig.get().criticalThreshold())
                 .decayIntervalTicks(NourishedConfig.get()::decayIntervalTicks)
+                .decayRateFor(key -> (float) NourishedConfig.get().resolvedDecayRateFor(key))
                 .multiValueInheritanceThreshold(
                         () -> NourishedConfig.get().multiNutrientInheritanceThreshold())
                 .tooltipValueResolver((stack, player) -> player != null && player.level() != null

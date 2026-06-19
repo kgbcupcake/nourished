@@ -58,7 +58,7 @@ public class Nourished {
 
     public Nourished(IEventBus modEventBus, ModContainer modContainer) {
         // Per-nutrient TOML sections are keyed off NutrientRegistry; load before building the spec.
-        NutrientRegistry.load();
+        NutrientRegistry.loadDefinitions();
         NourishedConfig.register(modContainer);
         NourishedClientConfig.register(modContainer);
         modEventBus.addListener(NourishedConfig::onModConfigLoading);
@@ -101,6 +101,7 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new GutHealthRecoveryHandler());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
             event.enqueueWork(() -> {
+                NutrientRegistry.syncAndFreeze();
                 ModCompat.discoverUnknownMods();
                 LOGGER.info("[Nourished] Starting AutoCompatDiscovery...");
                 try (var scope = MarieAPIState.openForDatapackReload()) {

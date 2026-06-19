@@ -1,10 +1,8 @@
 package dev.maire.nourished.client;
 
 import dev.maire.nourished.client.screen.DietScreen;
-import dev.maire.nourished.core.Nourished;
 import dev.marie.MariesLib.compat.MarieTooltipHelper;
 import dev.marie.MariesLib.config.FeatureFlagCache;
-import dev.maire.nourished.client.config.NourishedConfigScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -69,12 +67,11 @@ public final class ClientEvents {
         if (mc.player == null || mc.screen != null) {
             return;
         }
-        while (NourishedKeys.OPEN_CONFIG.consumeClick()) {
-            try {
-                mc.setScreen(NourishedConfigScreen.create(null));
-            } catch (Exception e) {
-                Nourished.LOGGER.error("[Nourished] Failed to open config screen", e);
+        while (NourishedKeys.OPEN_DIET_SCREEN.consumeClick()) {
+            if (!FeatureFlagCache.enableTrackingScreen()) {
+                continue;
             }
+            mc.setScreen(new DietScreen());
         }
     }
 }

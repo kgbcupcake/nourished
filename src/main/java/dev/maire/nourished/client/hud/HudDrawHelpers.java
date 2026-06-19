@@ -14,7 +14,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-final class HudDrawHelpers {
+public final class HudDrawHelpers {
 
     static final int BAR_H = 5;
     static final int VERTICAL_BAR_W = 6;
@@ -100,14 +100,14 @@ final class HudDrawHelpers {
         g.fill(x + w - r, y + r, x + w, y + h - r, color);
     }
 
-    static void drawBorder(GuiGraphics g, int x, int y, int w, int h, int t, int color) {
+    public static void drawBorder(GuiGraphics g, int x, int y, int w, int h, int t, int color) {
         g.fill(x, y, x + w, y + t, color);
         g.fill(x, y + h - t, x + w, y + h, color);
         g.fill(x, y + t, x + t, y + h - t, color);
         g.fill(x + w - t, y + t, x + w, y + h - t, color);
     }
 
-    static void drawDashedBorder(GuiGraphics g, int x, int y, int w, int h, int color) {
+    public static void drawDashedBorder(GuiGraphics g, int x, int y, int w, int h, int color) {
         int step = 4;
         int seg = 2;
         for (int i = 0; i < w; i += step) {
@@ -120,13 +120,13 @@ final class HudDrawHelpers {
         }
     }
 
-    static boolean isOverResizeHandle(int mx, int my, int panelX, int panelY, int panelW, int panelH) {
+    public static boolean isOverResizeHandle(int mx, int my, int panelX, int panelY, int panelW, int panelH) {
         int hx = panelX + panelW - RESIZE_HANDLE_SIZE;
         int hy = panelY + panelH - RESIZE_HANDLE_SIZE;
         return mx >= hx && my >= hy && mx < hx + RESIZE_HANDLE_SIZE && my < hy + RESIZE_HANDLE_SIZE;
     }
 
-    static void drawResizeHandle(GuiGraphics g, Minecraft mc, int panelX, int panelY, int panelW, int panelH,
+    public static void drawResizeHandle(GuiGraphics g, Minecraft mc, int panelX, int panelY, int panelW, int panelH,
                                  boolean hovered, boolean active, int mx, int my) {
         int hx = panelX + panelW - RESIZE_HANDLE_SIZE;
         int hy = panelY + panelH - RESIZE_HANDLE_SIZE;
@@ -214,19 +214,19 @@ final class HudDrawHelpers {
         return COL_PCT_GOOD;
     }
 
-    static int editOverlayColor() {
+    public static int editOverlayColor() {
         return COL_EDIT_OVERLAY;
     }
 
-    static int hoverBorderColor() {
+    public static int hoverBorderColor() {
         return COL_HOVER_BORDER;
     }
 
-    static int dashedPreviewColor() {
+    public static int dashedPreviewColor() {
         return COL_DASHED_PREVIEW;
     }
 
-    static int handleActiveColor() {
+    public static int handleActiveColor() {
         return COL_HANDLE_ACTIVE;
     }
 
