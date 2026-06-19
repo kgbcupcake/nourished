@@ -2,6 +2,113 @@
 
 <!-- markdownlint-disable MD013 -->
 
+## [ Nourished 0.2.6-beta.2 ] 2026-6-16
+
+### Milestones
+
+- Full per-nutrient tier chain: 18 milestones (beginner / journeyman / master for fruits, vegetables,
+  proteins, grains, dairy) plus `perfectly_balanced` cross-group milestone, each with chained
+  advancement entries and lang descriptions under `data/nourished/advancement/milestones/`.
+- Milestones now actually load from datapacks: `NeoForge.EVENT_BUS.addListener(MarieDataManager::registerReloadListener)`
+  registers MarieLib's reload listener at mod init.
+- All bundled milestone JSON files include `marie_schema_version`.
+- Cross-nutrient `all` milestone support via `MilestoneRegistry.getForAll()`.
+- Cumulative goals corrected to **0.5** beginner / **2.0** journeyman / **5.0** master (was 5.0
+  across all tiers).
+- Removed `test_fruits` example milestone and all **Sugars** milestone/advancement files (no
+  sugars nutrient registered).
+
+### Diet Screen Edit Mode
+
+- In-game layout editor: press the **Edit Diet Screen** keybind (`J` by default) while the Diet
+  screen is open to drag the panel, resize the main panel, and resize the Recent Meals and Eat
+  more of… boxes independently.
+- `DietLayout` centralizes panel dimensions, scale, and offset math; `DietScreenEditController`
+  handles drag/resize preview and writes back to client config on release.
+- `DietScreenEditScreen` overlay keeps the world visible (`isPauseScreen=false`) while editing.
+- New client config options: `dietScale`, `dietOffsetX`, `dietOffsetY`, `dietBackgroundOpacity`,
+  `recentMealsBoxScale`, `eatMoreBoxScale`.
+- New **Diet Screen** Cloth Config category with sliders, reset-position button, and hotkey
+  binding entry; defaults in `client_defaults.json` and lang entries updated.
+- `DietScreen` refactored for scaled layout, configurable background opacity, and edit-mode
+  resize handles / preview overlays.
+
+### HUD & Nutrient Colors
+
+- Per-nutrient **#RRGGBB** color editor in the HUD & Display config tab: live preview swatch,
+  validation, per-row reset, and Reset All Colors.
+- `ValueDefinition.colorOverride` wired through `NutrientRegistry.toValueDefinition()` so nutrient
+  colors from `nutrients.json` render in the HUD.
+- Bundled nutrient colors updated: dairy cream (`0xFFE8D5B7`), grains amber (`0xFFD9A521`), and
+  proper ARGB values for all five groups (previously `-1` / white).
+- "Counts toward: X beginner" tooltip line on food items for milestone progress.
+
+### Template Export Commands
+
+- `/nourished export_effects_template` — writes a starter effects datapack to the world folder.
+- `/nourished export_values_template` — writes a starter values/nutrients datapack.
+- `/nourished export_colors_template` — writes resolved HUD colors as `config/colors.json`.
+- `_comment_*` documentation fields in all template export outputs for modpack authors.
+
+### Added
+
+- `EffectRegistry.upsertFromDatapack` — datapack effects replace bundled effects matching
+  (nutrient, trigger, effect) instead of duplicating; threshold is the overridable field.
+- `NourishedDatapackCallbacks.registerCustomEffect` wired to `EffectRegistry.upsertFromDatapack`.
+- `NutrientRegistry.save()` persists in-memory nutrient definitions back to
+  `config/nourished/nutrients.json`; config screen save now calls it alongside other registries.
+- Compat config screen groups food-source mods under `CompatCategory.SOURCE_MOD`; bundled compat
+  JSON files updated to match.
+
+### Changed
+
+- Default **N** keybind now opens the Diet screen (`OPEN_DIET_SCREEN`) instead of the mod config
+  screen (`OPEN_CONFIG` removed).
+- `HudDrawHelpers` border/handle drawing utilities promoted to `public static` for reuse by the
+  diet edit overlay.
+- `NutrientRegistry` load path hardened: validates config in place, falls back to bundled
+  defaults with automatic repair instead of deleting the file on schema mismatch.
+- External/API effect registration replaces an existing entry when (nutrient, trigger, effect)
+  match instead of always appending.
+- Removed unused JEI / REI / EMI `compileOnly` dependencies from `build.gradle` (recipe viewers
+  handled by MarieLib).
+- GitHub Actions `actions/checkout` upgraded from v4 to v5 in `auto-tag.yml` and `codeql.yml`.
+
+### MarieLib & Build
+
+- Bumped MarieLib dependency to **0.1.0-beta.5** (`marie_lib_version_range=[0.1.0-beta.5,)`).
+
+### Fixed
+
+- HUD bars showing white — `colorOverride` now set from `nutrients.json` `color` field.
+- Datapack effect overrides no longer duplicate — upsert dedup key is (nutrient, trigger, effect)
+  only.
+- HUD color config row reset and save now compare against `MarieValueColors.resolvedDefaultArgb`
+  (nutrients.json defaults) instead of palette-only colors — fixes wrong hex after reset and
+  spurious `colors.json` writes when the chosen color matches bundled defaults.
+- Custom HUD colors silently reverting to white on load — ColorRegistry.parseArgbString used Integer.decode on full-alpha 0x-prefixed ARGB strings, which always overflows Integer.parseInt's positive-value range and threw, falling back to white every time; switched to Long.parseLong to match the method's other hex branches.
+- Per-nutrient decay rate overrides in config had no effect — `NourishedContextBuilder` now wires
+  `decayRateFor` from `resolvedDecayRateFor()` so nutrition decay honors per-nutrient sliders.
+- Nutrients registered via API/KubeJS lost on `nutrients.json` reload — registry tracks externally
+  registered defs and reapplies them after reload; `loadDefinitions()` / `syncAndFreeze()` defers
+  ValueRegistry publish until common setup so external registration runs first.
+- External mod food classifications ignored — `NutrientClassificationLookup` now checks
+  `SourceRegistry.getExternalClassification()` before tag/recipe resolution.
+- Tracking screen nutrient bar labels showing raw translation keys — added missing
+  `nourished.screen.tracking.bar.*` lang entries.
+
+### Important Upgrade Notes
+
+If updating from 0.2.6-beta.1:
+
+1. **Requires MarieLib 0.1.0-beta.5+**. Update MarieLib on Modrinth before launching.
+2. The **N** key now opens the Diet screen, not the Nourished config. Use Mods → Nourished →
+   Config or `/nourished` commands for settings.
+3. Diet screen position, scale, and section sizes persist in `config/nourished-client.toml`. Use
+   the Edit Diet Screen keybind or the **Diet Screen** config tab to adjust layout.
+4. Milestone cumulative goals changed — existing worlds may need `/reload` to pick up corrected
+   tier thresholds.
+
 ## [ Nourished 0.2.6-beta.1 ] 2026-6-14
 
 ### Death Nutrition Behavior
@@ -28,20 +135,6 @@
   nutrition reaches 0.5, with matching advancement tab entries under
   `data/nourished/advancement/milestones/`.
 
-### Added
-
-- 18 per-nutrient milestones (beginner/journeyman/master) + perfectly_balanced cross-group milestone with chained advancements
-- NeoForge.EVENT_BUS.addListener(MarieDataManager::registerReloadListener): milestones now actually load from datapacks
-- NourishedDatapackCallbacks.registerCustomEffect wired to EffectRegistry.upsertFromDatapack
-- EffectRegistry.upsertFromDatapack — datapack effects replace bundled effects matching (nutrient, trigger, effect) instead of duplicating
-- NourishedEffectsTemplateCommand — /nourished export_effects_template
-- NourishedValuesTemplateCommand — /nourished export_values_template
-- _comment_\* documentation fields in all template export commands
-- ValueDefinition.colorOverride wired through NutrientRegistry.toValueDefinition() so nutrient colors from nutrients.json render in HUD
-- dairy.json bundled color changed to cream (0xFFE8D5B7), grains.json to amber (0xFFD9A521)
-- Cross-nutrient all milestone support (MilestoneRegistry.getForAll())
-- "Counts toward: X beginner" tooltip line on food items
-
 ### MarieLib & Build
 
 - Bumped MarieLib dependency to **0.1.0-beta.3** (`marie_lib_version_range=[0.1.0-beta.2,)`):
@@ -63,8 +156,6 @@
 - **Stamina module** removed entirely (~2,200 lines). Stamina tracking, HUD, combat/movement
   drain, and `stamina.json` config are gone. Peak Stamina compat integration remains under
   module toggles for servers using that mod.
-- test_fruits milestone and advancement (replaced by full tier chain)
-- Sugars milestone files (no sugars nutrient registered)
 
 ### Changed
 
@@ -82,12 +173,6 @@
 
 - Local MarieLib composite builds no longer hit race conditions where `compileJava` started
   before NeoForge artifacts existed on disk.
-
-- Datapack effect overrides no longer duplicate — upsertFromDatapack dedup key is (nutrient, trigger, effect) only, threshold is the overridable field
-
--Milestone cumulative goals corrected: 0.5 beginner / 2.0 journeyman / 5.0 master (was 5.0 across all tiers)
-
-- HUD bars showing white — colorOverride now set from nutrients.json color field
 
 ### Important Upgrade Notes
 

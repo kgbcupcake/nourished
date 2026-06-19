@@ -38,8 +38,9 @@ import java.util.Set;
 
 /**
  * Loads nutrient definitions from config/nourished/nutrients.json.
- * Writes a default file on first run. Call {@link #load()} before any
- * system that reads nutrient keys, icons, or tags.
+ * Writes a default file on first run. Call {@link #loadDefinitions()} before config spec
+ * construction; call {@link #syncAndFreeze()} during common setup to publish into
+ * {@link ValueRegistry}. {@link #load()} runs both phases for lifecycle/reload callers.
  */
 @ApiStatus.Internal
 public class NutrientRegistry {
@@ -139,6 +140,8 @@ public class NutrientRegistry {
 
     private static volatile boolean bootstrapped = false;
 
+    private static final Map<String, NutrientDef> EXTERNALLY_REGISTERED = new java.util.concurrent.ConcurrentHashMap<>();
+
     private static final String[] DEFAULT_NUTRIENT_RESOURCES = {
             "fruits",
             "vegetables",
@@ -229,7 +232,9 @@ public class NutrientRegistry {
             throw new IllegalArgumentException("Nutrient already registered: " + key);
         }
         if (!INSTANCE.isFrozen()) {
-            INSTANCE.register(key, NutrientDef.fromDefinition(definition));
+            NutrientDef def = NutrientDef.fromDefinition(definition);
+            INSTANCE.register(key, def);
+            EXTERNALLY_REGISTERED.put(key, def);
             Nourished.LOGGER.info("[NutrientRegistry] Registered external nutrient: {}", key);
             return;
         }
@@ -242,20 +247,32 @@ public class NutrientRegistry {
             INSTANCE.registerUnlocked(key, NutrientDef.fromDefinition(definition));
             INSTANCE.freezeUnlocked();
         });
+        EXTERNALLY_REGISTERED.put(key, NutrientDef.fromDefinition(definition));
         Nourished.LOGGER.info("[NutrientRegistry] Registered external nutrient: {}", key);
     }
 
     // ── Loading ───────────────────────────────────────────────────────────────
 
-    public static void load() {
+    /** Loads and parses nutrients.json into this registry without touching {@link ValueRegistry}. */
+    public static void loadDefinitions() {
         if (bootstrapped) {
             return;
         }
         bootstrapped = true;
-        doLoad();
+        doLoadDefinitions();
     }
 
-    private static void doLoad() {
+    /** Publishes loaded nutrients into {@link ValueRegistry} and freezes it. */
+    public static void syncAndFreeze() {
+        syncToValueRegistry();
+    }
+
+    public static void load() {
+        loadDefinitions();
+        syncAndFreeze();
+    }
+
+    private static void doLoadDefinitions() {
         Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
         Path file = configDir.resolve("nutrients.json");
 
@@ -274,7 +291,6 @@ public class NutrientRegistry {
             }
             boolean usedBundledFallback = parse(file);
             FoodNutritionRegistry.clearTagKeyCache();
-            syncToValueRegistry();
             if (usedBundledFallback) {
                 repairConfigFile(file);
             }
@@ -282,7 +298,6 @@ public class NutrientRegistry {
         } catch (IOException e) {
             Nourished.LOGGER.error("[NutrientRegistry] Failed to load nutrients.json, using built-in defaults", e);
             loadDefaults();
-            syncToValueRegistry();
             repairConfigFile(file);
         }
     }
@@ -293,7 +308,8 @@ public class NutrientRegistry {
      */
     public static void reload() {
         Nourished.LOGGER.info("[NutrientRegistry] Reloading nutrients.json");
-        doLoad();
+        doLoadDefinitions();
+        syncAndFreeze();
     }
 
     /** Persists the in-memory registry to config/nourished/nutrients.json. */
@@ -452,6 +468,7 @@ public class NutrientRegistry {
                 usedBundledFallback[0] = true;
                 loadDefaultsUnlocked();
             } else {
+                reapplyExternallyRegisteredUnlocked();
                 INSTANCE.freezeUnlocked();
             }
         });
@@ -463,7 +480,16 @@ public class NutrientRegistry {
         for (NutrientDef def : loadBundledDefaults()) {
             INSTANCE.registerUnlocked(def.key(), def);
         }
+        reapplyExternallyRegisteredUnlocked();
         INSTANCE.freezeUnlocked();
+    }
+
+    private static void reapplyExternallyRegisteredUnlocked() {
+        for (Map.Entry<String, NutrientDef> entry : EXTERNALLY_REGISTERED.entrySet()) {
+            if (!INSTANCE.keysUnlocked().contains(entry.getKey())) {
+                INSTANCE.registerUnlocked(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     private static void loadDefaults() {

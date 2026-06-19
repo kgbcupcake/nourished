@@ -617,10 +617,21 @@ public final class NourishedConfig {
         calorieDisplayMax.set(value);
     }
 
-    public double decayRateFor(String key) {
+    /**
+     * Resolves decay rate for a nutrient: per-nutrient override (when set), else the global slider.
+     */
+    public double resolvedDecayRateFor(String key) {
         ModConfigSpec.DoubleValue value = nutrientDecayRateOverrides.get(key);
-        if (value == null || value.get() < 0d) return decayRate();
-        return value.get();
+        if (value != null && value.get() >= 0d) {
+            return value.get();
+        }
+        return decayRate();
+    }
+
+    /** Shared resolution for synced snapshots and live config (override map, then global). */
+    public static double resolveDecayRate(String key, Map<String, Double> overrides, double globalDecayRate) {
+        Double override = overrides.get(key);
+        return override != null ? override : globalDecayRate;
     }
 
     public double criticalThresholdFor(String key) {

@@ -166,8 +166,7 @@ public record SyncNourishedConfigSnapshot(
 
     /** Resolves decay rate: per-nutrient override takes precedence over global. */
     public double decayRateFor(String key) {
-        Double override = nutrientDecayOverrides.get(key);
-        return override != null ? override : decayRate;
+        return NourishedConfig.resolveDecayRate(key, nutrientDecayOverrides, decayRate);
     }
 
     @Override
