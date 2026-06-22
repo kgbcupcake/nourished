@@ -11,6 +11,7 @@ import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.nutrition.curve.NutrientCurveRegistry;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 
 /**
@@ -30,6 +31,9 @@ public final class NourishedLifecycle {
     public static void register() {
         RegistryLifecycleManager.registerRegistry(
                 "NutrientRegistry", NutrientRegistry::load, NutrientRegistry::reload);
+        RegistryLifecycleManager.registerRegistry(
+                "NutrientCurveRegistry", NutrientCurveRegistry::load, NutrientCurveRegistry::reload,
+                NutrientCurveRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
                 "ColorRegistry", ColorRegistry::load, ColorRegistry::reload, ColorRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(

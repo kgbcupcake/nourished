@@ -2,6 +2,111 @@
 
 <!-- markdownlint-disable MD013 -->
 
+## [ Nourished 0.2.6-beta.3 ] 2026-6-21
+
+### Added
+
+- **Full nutrient export** for modpack authors: `NutrientExportResolver` registers MarieLib export
+  resolver `nourished_nutrients` (per-item nutrients + calories from the live classification
+  cascade). `NutrientFullExporter` writes categorized reference files to
+  `config/nourished/nourished_nutrients_export/` (`fruits.json`, `proteins.json`, etc. — one file
+  per nutrient key, dominant-category grouping).
+- **Export All Foods** button on the Scanner config tab (singleplayer with an active world);
+  same output as the exporter above, with in-GUI toast feedback.
+- **`/nourished export_all`** (op level 2) — server/console alias for the full categorized export.
+- **`config/nourished/OVERRIDES_README.md`** — written on first load when absent; documents
+  `food_overrides.json` schema, export-to-override workflow, and links to the export button /
+  MarieLib dump command.
+- **Per-nutrient response curves** (opt-in, disabled by default): `NutrientCurveRegistry` with
+  presets `FLAT`, `DIMINISHING`, `CONFIDENCE_GATED`, and `SYNERGY`, plus custom grid support.
+  Override stack: bundled defaults → `config/nourished/nutrient_curves.json` → datapack override →
+  KubeJS (`NourishedAPI.registerNutrientCurve`). General tab toggles `enableNutrientCurves` and
+  global `defaultCurvePreset`; Nutrients tab exposes a per-nutrient preset picker. When curves are
+  off, legacy flat scale/clamp math is unchanged.
+- **Config validation framework** — ten MarieLib `ConfigValidator` registrations covering
+  `nutrients.json`, `colors.json`, `food_overrides.json`, `scanner_spec.json`, source overrides/
+  values, effects, food values, locks, and raw food config. Runs automatically after initial registry
+  load; FAIL/WARN counts log to the server console. **`/nourished validate`** (op level 2) prints
+  per-validator status and findings. Client shows a toast on FAIL directing you to run the command.
+- **Tag audit tooling** for modpack authors: `NourishedTagAuditContext` plus two audit rules —
+  `TagInferenceMismatchRule` (bundled tag vs live runtime inference) and `NamespaceBiasRule`
+  (bundled tag vs scanner namespace weights). **`/nourished audit_tags`**, **`/nourished audit`**, and
+  **`/nourished tag`** (aliases, op level 2) scan all bundled nutrient tags and write
+  `config/nourished/tag_audit_report.json`. Chat shows only the report path; full issue/suggestion
+  detail stays in the JSON file. Also available via `/marieslib audit_tags nourished` (same quiet
+  chat behavior).
+- **`/nourished set_all <value> <player>`** (op level 2) — sets every registered nutrient bar to the
+  same fill level (0.0–1.0) in one command, without clearing diminishing-returns memory. Complements
+  the existing per-key **`/nourished set`** and config-default **`/nourished reset`**.
+
+### Fixed
+
+- Existing `config/nourished/nutrients.json` files that still had legacy white (`0xFFFFFFFF` / `-1`)
+  colors for built-in nutrients (fruits, vegetables, proteins, grains, dairy) are auto-repaired on
+  load to the corrected bundled defaults (dairy cream, grains amber, etc.); repaired values are
+  written back to disk so the fix runs once.
+- KubeJS startup scripts failing `requireValueKey` for built-in or persisted nutrients — nutrients
+  now sync into `ValueRegistry` immediately after `NutrientRegistry.loadDefinitions()` in the mod
+  constructor via `syncToValueRegistryUnfrozen()` (without freezing); `syncAndFreeze()` at common
+  setup still resets and re-populates from the same source before freezing, so the early sync is
+  idempotent.
+- Custom nutrients registered via API/KubeJS (`registerExternal`) not immediately classifiable —
+  each external registration now publishes into `ValueRegistry` right away through
+  `syncValueRegistryEntry()`, including mid-script (before common setup) and mid-game (after
+  `ValueRegistry` is already frozen).
+- Food Scanner config tab showing a stale dark list panel after leaving a world — scan results are
+  cleared when no client level is loaded (`canScan()` false), so the list viewport background cannot
+  draw without an active world.
+- Mis-tagged **Fruits Delight** items in bundled nutrient tags — `durian_flesh`, `hawberry_roll`, and
+  `pear_with_rock_sugar` moved from `proteins` to `fruits` (the inference-mismatch cases that
+  motivated the tag audit rules).
+- **`/nourished tag`** crashing with `NoClassDefFoundError: TagAuditReportWriter` when run against a
+  published MarieLib jar — report JSON writing now lives in Nourished as
+  `NourishedTagAuditReportWriter`, so the command no longer depends on MarieLib classes that may not
+  yet be in the Modrinth artifact.
+
+### Changed
+
+- Cloth Config screen refactored into per-tab category classes (`GeneralCategory`,
+  `NutrientsCategory`, `ScannerCategory`, etc.) with shared widgets extracted to
+  `NourishedConfigSharedWidgets`; behavior unchanged, maintenance surface reduced.
+- Tag audit commands no longer spam individual findings into chat — only the written report path is
+  shown in-game; use the JSON report for full issue/suggestion lists.
+- Full food reference export is **`/nourished export_all`** (categorized files under
+  `nourished_nutrients_export/`). There is no `/nourished dump`; use
+  **`/marieslib dump nourished_nutrients`** for MarieLib's single-file export variant.
+
+### MarieLib & Build
+
+- Bumped MarieLib dependency to **0.1.1-beta.1** (`marie_lib_version_range=[0.1.1-beta.1,)`).
+  Requires MarieLib **0.1.1-beta.1+** for:
+  - `ValueRegistry.isFrozen()` (external nutrient registration after freeze)
+  - `MarieAPI.registerExportResolver` / `RegistryExporter` (nutrient export pipeline)
+  - `MarieAPI.registerConfigValidator` / `ValidationRunner` (config validation)
+  - `MarieAPI.registerTagRule` / `registerTagAuditContext` / `TagScanner` (tag audit pipeline)
+  - Consumer command **`/nourished set_all`** (implemented in MarieLib's player command tree)
+  - Local/dev MarieLib builds also ship `TagAuditReportWriter` for `/marieslib audit_tags`; Nourished's
+    own audit commands write reports via `NourishedTagAuditReportWriter` so they work with the
+    published jar alone.
+
+### Important Upgrade Notes
+
+If updating from 0.2.6-beta.2:
+
+1. **Requires MarieLib 0.1.1-beta.1+**. Update MarieLib on Modrinth before launching.
+2. Existing worlds with legacy white built-in nutrient colors in `nutrients.json` are repaired
+   automatically on first load after upgrade; no manual edit needed.
+3. First launch creates `OVERRIDES_README.md` beside `food_overrides.json` if you do not already
+   have one; existing pack edits to that file are never overwritten.
+4. **Nutrient response curves are off by default** — enable `enableNutrientCurves` in General config
+   (or set it in your server config) only when you want curve-based scaling; until then behavior
+   matches prior releases.
+5. Run **`/nourished tag`** (or `/nourished audit` / `/nourished audit_tags`) after upgrading in a
+   modpack world to generate `config/nourished/tag_audit_report.json` and review bundled-tag
+   disagreements with live inference or namespace bias.
+6. Use **`/nourished set_all 0.8 @s`** (example) to fill every nutrient bar to the same level for
+   testing; **`/nourished reset @s`** still restores the configured starting fill instead.
+
 ## [ Nourished 0.2.6-beta.2 ] 2026-6-16
 
 ### Milestones

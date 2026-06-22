@@ -9,6 +9,7 @@ import dev.marie.MariesLib.tracking.DeathNutritionBehavior;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.nutrition.curve.NutrientCurvePreset;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -116,6 +117,10 @@ public final class NourishedConfig {
     // Tag-based food → diet bar gains (FoodNutritionRegistry.computeDietDelta)
     private final ModConfigSpec.DoubleValue nutrientGainScale;
     private final ModConfigSpec.DoubleValue nutrientGainPerBiteMax;
+
+    // Per-nutrient response curves (FoodNutritionRegistry.computeDietDelta — wired in a later prompt)
+    private final ModConfigSpec.BooleanValue enableNutrientCurves;
+    private final ModConfigSpec.ConfigValue<String> defaultCurvePreset;
 
     // Scanner configuration
     private final ModConfigSpec.BooleanValue scannerEnableRecipeInheritance;
@@ -284,6 +289,15 @@ public final class NourishedConfig {
         nutrientGainPerBiteMax = builder
                 .comment("Max fraction (0-1) one bite can add to a single bar from tag-based foods (not food overrides).")
                 .defineInRange("nutrientGainPerBiteMax", ConfigDefaultsLoader.getDouble(defaults, "nutrientGainPerBiteMax", 0.2d), 0.05d, 1.0d);
+        builder.pop();
+
+        builder.push("nutrient_curves");
+        enableNutrientCurves = builder
+                .comment("When true, per-nutrient response curves scale tag-based gains. When false, legacy flat scale/clamp math is used.")
+                .define("enableNutrientCurves", ConfigDefaultsLoader.getBoolean(defaults, "enableNutrientCurves", false));
+        defaultCurvePreset = builder
+                .comment("Global default curve preset for nutrients without an explicit entry in nutrient_curves.json.")
+                .define("defaultCurvePreset", ConfigDefaultsLoader.getString(defaults, "defaultCurvePreset", NutrientCurvePreset.FLAT.name()));
         builder.pop();
 
         builder.push("scanner");
@@ -748,6 +762,33 @@ public final class NourishedConfig {
 
     public void setNutrientGainPerBiteMax(double value) {
         nutrientGainPerBiteMax.set(value);
+    }
+
+    public boolean enableNutrientCurves() {
+        return enableNutrientCurves.get();
+    }
+
+    public void setEnableNutrientCurves(boolean value) {
+        enableNutrientCurves.set(value);
+    }
+
+    public String defaultCurvePreset() {
+        return defaultCurvePreset.get();
+    }
+
+    public void setDefaultCurvePreset(String value) {
+        defaultCurvePreset.set(parseDefaultCurvePreset(value).name());
+    }
+
+    private static NutrientCurvePreset parseDefaultCurvePreset(String value) {
+        if (value == null) {
+            return NutrientCurvePreset.FLAT;
+        }
+        try {
+            return NutrientCurvePreset.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return NutrientCurvePreset.FLAT;
+        }
     }
 
     // Scanner config getters

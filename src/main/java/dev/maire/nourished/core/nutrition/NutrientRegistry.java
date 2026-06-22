@@ -113,6 +113,14 @@ public class NutrientRegistry {
             "dairy", "minecraft:milk_bucket"
     );
     private static final int DEFAULT_COLOR = 0xFFFFFFFF;
+    private static final Set<String> BUILTIN_NUTRIENT_KEYS = Set.of(
+            "fruits",
+            "vegetables",
+            "proteins",
+            "grains",
+            "dairy"
+    );
+    private static volatile Map<String, Integer> bundledBuiltinColorCache;
     private static final float DEFAULT_DECAY_RATE = 0f;
     private static final float DEFAULT_CRITICAL_THRESHOLD = 0f;
     private static final float DEFAULT_LOW_THRESHOLD = 0f;
@@ -235,6 +243,7 @@ public class NutrientRegistry {
             NutrientDef def = NutrientDef.fromDefinition(definition);
             INSTANCE.register(key, def);
             EXTERNALLY_REGISTERED.put(key, def);
+            syncValueRegistryEntry(definition);
             Nourished.LOGGER.info("[NutrientRegistry] Registered external nutrient: {}", key);
             return;
         }
@@ -248,6 +257,7 @@ public class NutrientRegistry {
             INSTANCE.freezeUnlocked();
         });
         EXTERNALLY_REGISTERED.put(key, NutrientDef.fromDefinition(definition));
+        syncValueRegistryEntry(definition);
         Nourished.LOGGER.info("[NutrientRegistry] Registered external nutrient: {}", key);
     }
 
@@ -265,6 +275,22 @@ public class NutrientRegistry {
     /** Publishes loaded nutrients into {@link ValueRegistry} and freezes it. */
     public static void syncAndFreeze() {
         syncToValueRegistry();
+    }
+
+    /**
+     * Publishes currently-loaded nutrient definitions into {@link ValueRegistry} without
+     * freezing it. Call immediately after {@link #loadDefinitions()} in the mod constructor so
+     * KubeJS startup scripts (which run before FMLCommonSetupEvent) can pass requireValueKey
+     * checks for built-in and previously-persisted nutrients. syncAndFreeze() still runs later
+     * at common setup and is idempotent against this — it resets and re-populates from the same
+     * NutrientRegistry source before freezing.
+     */
+    public static void syncToValueRegistryUnfrozen() {
+        for (NutrientDef def : getAll()) {
+            if (ValueRegistry.get(def.key()) == null) {
+                ValueRegistry.register(def.toValueDefinition());
+            }
+        }
     }
 
     public static void load() {
@@ -357,6 +383,28 @@ public class NutrientRegistry {
         ValueRegistry.freezeInternal();
     }
 
+    /**
+     * Publishes a single external nutrient into {@link ValueRegistry} so it passes
+     * requireValueKey checks immediately — including mid-script (before syncAndFreeze runs)
+     * and mid-game (after the registry is already frozen).
+     */
+    private static void syncValueRegistryEntry(ValueDefinition definition) {
+        if (ValueRegistry.get(definition.getId()) != null) {
+            return;
+        }
+        if (!ValueRegistry.isFrozen()) {
+            ValueRegistry.register(definition);
+            return;
+        }
+        List<ValueDefinition> prior = new ArrayList<>(ValueRegistry.getAll());
+        ValueRegistry.resetInternal();
+        for (ValueDefinition d : prior) {
+            ValueRegistry.register(d);
+        }
+        ValueRegistry.register(definition);
+        ValueRegistry.freezeInternal();
+    }
+
     // ── Internals ─────────────────────────────────────────────────────────────
 
     private static void ensureValidConfigFile(Path file, JsonArray arr) throws IOException {
@@ -415,6 +463,7 @@ public class NutrientRegistry {
         }
         final JsonArray configArray = arr;
         boolean[] usedBundledFallback = {false};
+        boolean[] legacyBuiltinColorsRepaired = {false};
         INSTANCE.runWrite(() -> {
             INSTANCE.resetUnlocked();
             if (configArray == null) {
@@ -439,6 +488,11 @@ public class NutrientRegistry {
                 String icon = obj.has("icon") ? obj.get("icon").getAsString() : fallbackIconForKey(key);
                 String displayName = obj.has("display_name") ? obj.get("display_name").getAsString() : key;
                 int color = obj.has("color") ? obj.get("color").getAsInt() : DEFAULT_COLOR;
+                int repairedColor = repairLegacyBuiltinColor(key, color);
+                if (repairedColor != color) {
+                    legacyBuiltinColorsRepaired[0] = true;
+                    color = repairedColor;
+                }
                 float defaultDecayRate = obj.has("default_decay_rate") ? obj.get("default_decay_rate").getAsFloat() : DEFAULT_DECAY_RATE;
                 float criticalThreshold = obj.has("critical_threshold") ? obj.get("critical_threshold").getAsFloat() : DEFAULT_CRITICAL_THRESHOLD;
                 float lowThreshold = obj.has("low_threshold") ? obj.get("low_threshold").getAsFloat() : DEFAULT_LOW_THRESHOLD;
@@ -472,7 +526,37 @@ public class NutrientRegistry {
                 INSTANCE.freezeUnlocked();
             }
         });
+        if (legacyBuiltinColorsRepaired[0]) {
+            save();
+            Nourished.LOGGER.info(
+                    "[NutrientRegistry] Repaired legacy white (0xFFFFFFFF) colors for built-in nutrients in nutrients.json");
+        }
         return usedBundledFallback[0];
+    }
+
+    /**
+     * Replaces the old broken bundled default ({@code 0xFFFFFFFF}) with the corrected bundled color
+     * for the five built-in nutrient keys only; all other keys and colors are unchanged.
+     */
+    private static int repairLegacyBuiltinColor(String key, int color) {
+        if (color != DEFAULT_COLOR || !BUILTIN_NUTRIENT_KEYS.contains(key)) {
+            return color;
+        }
+        Integer bundledColor = bundledBuiltinColorsByKey().get(key);
+        return bundledColor != null ? bundledColor : color;
+    }
+
+    private static Map<String, Integer> bundledBuiltinColorsByKey() {
+        Map<String, Integer> cached = bundledBuiltinColorCache;
+        if (cached != null) {
+            return cached;
+        }
+        Map<String, Integer> colors = new java.util.HashMap<>();
+        for (NutrientDef def : loadBundledDefaults()) {
+            colors.put(def.key(), def.color());
+        }
+        bundledBuiltinColorCache = Map.copyOf(colors);
+        return bundledBuiltinColorCache;
     }
 
     private static void loadDefaultsUnlocked() {

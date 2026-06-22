@@ -1,10 +1,17 @@
 package dev.maire.nourished.kubejs.bindings;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.api.MarieAPI;
 import dev.marie.MariesLib.api.ValueDefinition;
 import dev.marie.MariesLib.core.IMarieLibConfig;
+import dev.marie.MariesLib.curve.math.CurveGrid;
+import dev.marie.MariesLib.curve.serialization.CurveGridJson;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.nutrition.curve.NutrientCurveDef;
+import dev.maire.nourished.core.nutrition.curve.NutrientCurvePreset;
+import dev.maire.nourished.core.nutrition.curve.NutrientCurveRegistry;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
 import net.minecraft.world.entity.player.Player;
@@ -42,6 +49,69 @@ public final class NourishedKubeBindings {
             builder.beneficial(true);
         }
         MarieAPI.registerValue(builder.build());
+    }
+
+    /**
+     * Registers a per-nutrient response curve from a KubeJS script. Highest
+     * priority in the override stack (above config JSON and datapack JSON) —
+     * see NutrientCurveRegistry's documented priority order.
+     *
+     * Script usage, preset form:
+     * NourishedAPI.registerNutrientCurve({
+     *   nutrient: "protein",
+     *   preset: "DIMINISHING"
+     * })
+     *
+     * Script usage, custom grid form:
+     * NourishedAPI.registerNutrientCurve({
+     *   nutrient: "fiber",
+     *   preset: "custom",
+     *   grid: {
+     *     xCells: 5,
+     *     yCells: 5,
+     *     multipliers: [1.0, 1.0, ... ] // (xCells+1) * (yCells+1) values, row-major
+     *   }
+     * })
+     *
+     * @param spec the curve spec — requires "nutrient" and "preset"; "preset": "custom"
+     *             additionally requires a "grid" object matching CurveGrid's JSON schema
+     * @throws IllegalArgumentException if "nutrient" is missing, if "preset" is
+     *         "custom" but "grid" is missing/malformed, or if a curve is already
+     *         registered for this nutrient (registerExternal does not allow
+     *         silent overwrite — matches the existing registerNutrient pattern
+     *         of failing loud on duplicate registration)
+     */
+    public static void registerNutrientCurve(Map<String, Object> spec) {
+        String nutrientKey = requireString(spec, "nutrient");
+        String presetStr = requireString(spec, "preset");
+
+        NutrientCurveDef def;
+        if (NutrientCurveDef.CUSTOM_PRESET_ID.equalsIgnoreCase(presetStr)) {
+            Object gridObj = spec.get("grid");
+            if (!(gridObj instanceof Map<?, ?> gridMap)) {
+                throw new IllegalArgumentException(
+                        "NourishedAPI.registerNutrientCurve: 'grid' is required and must be an object when preset is 'custom'");
+            }
+            JsonObject gridJson = mapToJsonObject(gridMap);
+            CurveGrid grid = CurveGridJson.fromJson(gridJson);
+            if (grid == null) {
+                throw new IllegalArgumentException(
+                        "NourishedAPI.registerNutrientCurve: malformed 'grid' for nutrient '" + nutrientKey + "'");
+            }
+            def = NutrientCurveDef.custom(nutrientKey, grid);
+        } else {
+            NutrientCurvePreset preset;
+            try {
+                preset = NutrientCurvePreset.valueOf(presetStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(
+                        "NourishedAPI.registerNutrientCurve: unknown preset '" + presetStr + "' for nutrient '" + nutrientKey + "'. "
+                                + "Valid presets: FLAT, DIMINISHING, CONFIDENCE_GATED, SYNERGY, or 'custom' with a grid.");
+            }
+            def = NutrientCurveDef.fromPreset(nutrientKey, preset);
+        }
+
+        NutrientCurveRegistry.registerExternal(nutrientKey, def);
     }
 
     public static float getNutrientLevel(Player player, String nutrientKey) {
@@ -95,5 +165,29 @@ public final class NourishedKubeBindings {
             return bool;
         }
         return Boolean.parseBoolean(String.valueOf(value));
+    }
+
+    private static JsonObject mapToJsonObject(Map<?, ?> map) {
+        JsonObject obj = new JsonObject();
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            String key = String.valueOf(entry.getKey());
+            Object value = entry.getValue();
+            if (value instanceof Number n) {
+                obj.addProperty(key, n);
+            } else if (value instanceof List<?> list) {
+                JsonArray arr = new JsonArray();
+                for (Object item : list) {
+                    if (item instanceof Number n) {
+                        arr.add(n);
+                    } else {
+                        arr.add(String.valueOf(item));
+                    }
+                }
+                obj.add(key, arr);
+            } else {
+                obj.addProperty(key, String.valueOf(value));
+            }
+        }
+        return obj;
     }
 }

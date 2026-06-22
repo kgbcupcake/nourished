@@ -658,18 +658,6 @@
       "required": false
     },
     {
-      "id": "fruitsdelight:durian_flesh",
-      "required": false
-    },
-    {
-      "id": "fruitsdelight:hawberry_roll",
-      "required": false
-    },
-    {
-      "id": "fruitsdelight:pear_with_rock_sugar",
-      "required": false
-    },
-    {
       "id": "herbsandharvest:charcuterie_plate_delftware",
       "required": false
     },

@@ -61,7 +61,12 @@ public final class HudNutrientColorsSectionHeaderEntry extends TooltipListEntry<
         graphics.fill(x, y, x + entryWidth, y + h, BG);
         graphics.renderOutline(x, y, entryWidth, h, BORDER);
         Component title = Component.translatable("config.nourished.hudColors.sectionTitle");
-        graphics.drawString(Minecraft.getInstance().font, title, x + 8, y + 8, TEXT, false);
+        String text = NourishedConfigSharedWidgets.ellipsize(
+                Minecraft.getInstance().font,
+                title.getString(),
+                Math.max(0, entryWidth - 16)
+        );
+        graphics.drawString(Minecraft.getInstance().font, text, x + 8, y + 8, TEXT, false);
     }
 
     @Override

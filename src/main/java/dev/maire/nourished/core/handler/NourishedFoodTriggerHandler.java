@@ -7,8 +7,8 @@ import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.marie.MariesLib.tracking.TrackingAttachment;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.maire.nourished.core.NourishedKubeIntegration;
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -58,7 +58,7 @@ public final class NourishedFoodTriggerHandler {
                 return;
             }
             if (PENDING_FINISH.containsKey(player.getUUID())) return;
-            FoodProperties food = stack.getItem().components().get(DataComponents.FOOD);
+            FoodProperties food = FoodNutritionRegistry.foodPropertiesForNutrition(stack, player);
             if (food == null) return;
             fireSourceTriggerAndNotifyFoodEaten(player, stack, food);
         }
@@ -102,7 +102,7 @@ public final class NourishedFoodTriggerHandler {
             }
             PENDING_FINISH.remove(player.getUUID());
             if (!TrackingAttachment.isRegistered()) return;
-            FoodProperties food = stack.getItem().getFoodProperties(stack, player);
+            FoodProperties food = FoodNutritionRegistry.foodPropertiesForNutrition(stack, player);
             if (food == null) return;
             fireSourceTriggerAndNotifyFoodEaten(player, stack, food);
             LAST_SOURCE_ONLY_EAT.put(player.getUUID(), player.level().getGameTime());

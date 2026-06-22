@@ -12,7 +12,7 @@ import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.marie.MariesLib.handler.ReloadPipeline;
+import dev.maire.nourished.core.reload.NourishedReloadHelper;
 import dev.marie.MariesLib.color.ColorRegistry;
 import dev.marie.MariesLib.config.FeatureFlagCache;
 import dev.marie.MariesLib.config.PresetRegistry;
@@ -222,7 +222,7 @@ public final class NourishedImportExport {
             applyFoodValues(root.get(Section.SOURCE_VALUES.jsonKey()));
         }
         NourishedConfig.saveNow();
-        ReloadPipeline.reloadAll();
+        NourishedReloadHelper.reloadAll();
         MarieValueColors.clearOverrides();
     }
 
@@ -573,8 +573,8 @@ public final class NourishedImportExport {
     static String gunzipUtf8(byte[] data) throws IOException {
         final int maxBytes = 1_048_576;
         try (GZIPInputStream in = new GZIPInputStream(new ByteArrayInputStream(data));
-             Reader r = new InputStreamReader(in, StandardCharsets.UTF_8);
-             StringWriter sw = new StringWriter()) {
+    Reader r = new InputStreamReader(in, StandardCharsets.UTF_8);
+StringWriter sw = new StringWriter();) {
             char[] buf = new char[8192];
             int total = 0;
             int n;

@@ -10,10 +10,12 @@ import javax.annotation.Nullable;
 
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.compat.ModCompat;
+import dev.marie.MariesLib.curve.math.CurveGrid;
 import dev.marie.MariesLib.scanner.RecipeInheritanceResolver;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.curve.NutrientCurveRegistry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -32,6 +34,9 @@ import net.minecraft.world.level.Level;
  */
 @ApiStatus.Internal
 public final class FoodNutritionRegistry {
+
+    private static final float NUTRITION_CEIL = 10f;
+    private static final float SATURATION_CEIL = 20f;
 
     private static final Map<String, TagKey<Item>> TAG_KEY_CACHE = new ConcurrentHashMap<>();
 
@@ -173,10 +178,30 @@ public final class FoodNutritionRegistry {
             nutrients.merge(key, contribution, Float::sum);
         }
 
-        float scale = configuredNutrientGainScale();
         Map<String, Float> scaledNutrients = new HashMap<>();
-        for (Map.Entry<String, Float> e : nutrients.entrySet()) {
-            scaledNutrients.put(e.getKey(), e.getValue() * scale);
+        if (NourishedConfig.get().enableNutrientCurves()) {
+            String globalDefaultPreset = NourishedConfig.get().defaultCurvePreset();
+            float intensity = computeNormalizedIntensity(foodNutrition, foodSaturation);
+            for (Map.Entry<String, Float> entry : matchedBars.entrySet()) {
+                float weight = Math.max(0f, entry.getValue());
+                if (weight <= 0f) {
+                    continue;
+                }
+                String key = entry.getKey();
+                float confidence = weight / matchedWeightTotal;
+                CurveGrid grid = NutrientCurveRegistry.resolve(key, globalDefaultPreset);
+                float multiplier = grid.evaluate(intensity, confidence);
+                float baseValue = nutrients.getOrDefault(key, 0f);
+                scaledNutrients.put(key, baseValue * multiplier);
+            }
+            for (String key : NutrientRegistry.getKeys()) {
+                scaledNutrients.putIfAbsent(key, 0f);
+            }
+        } else {
+            float scale = configuredNutrientGainScale();
+            for (Map.Entry<String, Float> e : nutrients.entrySet()) {
+                scaledNutrients.put(e.getKey(), e.getValue() * scale);
+            }
         }
 
         float perBiteMax = configuredNutrientGainPerBiteMax();
@@ -185,6 +210,10 @@ public final class FoodNutritionRegistry {
         }
 
         return new DietDelta(calories, scaledNutrients);
+    }
+
+    private static float computeNormalizedIntensity(int foodNutrition, float foodSaturation) {
+        return (foodNutrition * foodSaturation) / (NUTRITION_CEIL * SATURATION_CEIL);
     }
 
     private static float configuredNutrientGainScale() {
