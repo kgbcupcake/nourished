@@ -154,7 +154,7 @@ public final class NourishedPresetsWidget extends TooltipListEntry<Object> {
 
         saveCurrentButton.setX(sx);
         saveCurrentButton.setY(cy);
-        saveCurrentButton.setWidth(Math.min(240, innerW));
+        saveCurrentButton.setWidth(Math.max(120, innerW));
         saveCurrentButton.active = isEditable();
         saveCurrentButton.render(graphics, mouseX, mouseY, delta);
         cy += BTN_H + PAD;
@@ -206,14 +206,17 @@ public final class NourishedPresetsWidget extends TooltipListEntry<Object> {
             Minecraft mc = Minecraft.getInstance();
             int lockSlot = preset.showLockIcon() ? 18 : 0;
             int textLeft = sx + lockSlot;
-            int textMaxW = innerW - lockSlot - 128;
+            int btnColumnW = 124;
             int btnTop = cy + 4;
-            loadButton.setX(sx + innerW - 120);
-            loadButton.setY(btnTop);
-            loadButton.active = editable;
-            deleteButton.setX(sx + innerW - 60);
+            int btnW = Math.min(56, Math.max(48, btnColumnW / 2 - 2));
+            loadButton.setWidth(btnW);
+            deleteButton.setWidth(btnW);
+            deleteButton.setX(sx + innerW - btnW);
             deleteButton.setY(btnTop);
             deleteButton.active = editable && preset.canDelete();
+            loadButton.setX(sx + innerW - btnW * 2 - 2);
+            loadButton.setY(btnTop);
+            loadButton.active = editable;
 
             graphics.fill(sx, cy, sx + innerW, cy + CARD_H - PAD, 0x28000000);
             graphics.renderOutline(sx, cy, innerW, CARD_H - PAD, 0xFF404040);
@@ -226,19 +229,20 @@ public final class NourishedPresetsWidget extends TooltipListEntry<Object> {
                 graphics.pose().popPose();
             }
 
-            String title = mc.font.plainSubstrByWidth(preset.name(), Math.max(20, textMaxW));
+            int textMaxW = Math.max(20, innerW - lockSlot - btnColumnW - 8);
+            String title = NourishedConfigSharedWidgets.ellipsize(mc.font, preset.name(), textMaxW);
             graphics.drawString(mc.font, title, textLeft, cy + 6, 0xFFFFFF, false);
 
             String desc = preset.description() == null ? "" : preset.description();
             if (!desc.isEmpty()) {
-                String descLine = mc.font.plainSubstrByWidth(desc, Math.max(20, innerW - lockSlot - 8));
+                String descLine = NourishedConfigSharedWidgets.ellipsize(mc.font, desc, textMaxW);
                 graphics.drawString(mc.font, descLine, textLeft, cy + 20, 0xA0A0A0, false);
             }
 
             String authorKey = preset.author() == null ? "" : preset.author();
             if (!authorKey.isEmpty()) {
                 Component by = Component.translatable(configKey("presets.byAuthor"), authorKey);
-                String authorLine = mc.font.plainSubstrByWidth(by.getString(), Math.max(20, innerW - lockSlot - 8));
+                String authorLine = NourishedConfigSharedWidgets.ellipsize(mc.font, by.getString(), textMaxW);
                 graphics.drawString(mc.font, authorLine, textLeft, cy + 36, 0x808080, false);
             }
 

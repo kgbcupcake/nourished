@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 
 import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.MariesLib.api.MarieAPI;
 import dev.marie.MariesLib.api.MarieAPIVersion;
 import dev.marie.MariesLib.api.MarieAPIState;
 import dev.marie.MariesLib.data.MarieDataManager;
@@ -29,9 +30,24 @@ import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.NourishedTrackingData;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.NutrientExportResolver;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.command.NourishedCommand;
+import dev.maire.nourished.config.validation.ColorsValidator;
+import dev.maire.nourished.config.validation.EffectsValidator;
+import dev.maire.nourished.config.validation.FoodOverridesValidator;
+import dev.maire.nourished.config.validation.FoodValuesValidator;
+import dev.maire.nourished.config.validation.LocksValidator;
+import dev.maire.nourished.config.validation.NourishedConfigValidation;
+import dev.maire.nourished.config.validation.NutrientsValidator;
+import dev.maire.nourished.config.validation.RawFoodValidator;
+import dev.maire.nourished.config.validation.ScannerSpecValidator;
+import dev.maire.nourished.config.validation.SourceOverridesValidator;
+import dev.maire.nourished.config.validation.SourceValuesValidator;
 import dev.maire.nourished.core.handler.NourishedFoodTriggerHandler;
+import dev.maire.nourished.core.tagaudit.NourishedTagAuditContext;
+import dev.maire.nourished.core.tagaudit.rules.NamespaceBiasRule;
+import dev.maire.nourished.core.tagaudit.rules.TagInferenceMismatchRule;
 import dev.maire.nourished.core.handler.NourishedGuideJoinHandler;
 import dev.maire.nourished.core.handler.NourishedServerHandler;
 import dev.maire.nourished.core.handler.NourishedTagsHandler;
@@ -40,6 +56,7 @@ import dev.maire.nourished.modules.RawFood.Gut.GutHealthRecoveryHandler;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthTickHandler;
 import dev.maire.nourished.modules.RawFood.handler.RawFoodPenaltyHandler;
 import dev.maire.nourished.core.network.ModNetworking;
+import net.minecraft.core.registries.Registries;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -59,6 +76,10 @@ public class Nourished {
     public Nourished(IEventBus modEventBus, ModContainer modContainer) {
         // Per-nutrient TOML sections are keyed off NutrientRegistry; load before building the spec.
         NutrientRegistry.loadDefinitions();
+        NutrientRegistry.syncToValueRegistryUnfrozen();
+        // ModCompat entries must exist before NourishedConfig builds compatCodeToggles/compatTagToggles.
+        MariesLibBootstrap.attach(Nourished.MODID, modEventBus);
+        ModCompat.initialize();
         NourishedConfig.register(modContainer);
         NourishedClientConfig.register(modContainer);
         modEventBus.addListener(NourishedConfig::onModConfigLoading);
@@ -67,13 +88,29 @@ public class Nourished {
         modEventBus.addListener(NourishedClientConfig::onModConfigReloading);
 
         NourishedLifecycle.register();
-        MariesLibBootstrap.attach(Nourished.MODID, modEventBus);
         NourishedContextBuilder.registerSlim();
+        MarieAPI.registerExportResolver(
+                "nourished_nutrients",
+                Registries.ITEM,
+                new NutrientExportResolver()
+        );
+        MarieAPI.registerConfigValidator(new NutrientsValidator());
+        MarieAPI.registerConfigValidator(new ColorsValidator());
+        MarieAPI.registerConfigValidator(new FoodOverridesValidator());
+        MarieAPI.registerConfigValidator(new ScannerSpecValidator());
+        MarieAPI.registerConfigValidator(new SourceOverridesValidator());
+        MarieAPI.registerConfigValidator(new SourceValuesValidator());
+        MarieAPI.registerConfigValidator(new EffectsValidator());
+        MarieAPI.registerConfigValidator(new FoodValuesValidator());
+        MarieAPI.registerConfigValidator(new LocksValidator());
+        MarieAPI.registerConfigValidator(new RawFoodValidator());
+        MarieAPI.registerTagRule(new TagInferenceMismatchRule());
+        MarieAPI.registerTagRule(new NamespaceBiasRule());
+        MarieAPI.registerTagAuditContext(Nourished.MODID, NourishedTagAuditContext.get());
         MarieDataManager.setCallbacks(new NourishedDatapackCallbacks());
         NeoForge.EVENT_BUS.addListener(MarieDataManager::registerReloadListener);
 
         NourishedKubeIntegration.register();
-        ModCompat.initialize();
         if (ModList.get().isLoaded("peakstamina")) {
             PeakStaminaCompat.register();
         }
@@ -101,6 +138,8 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new GutHealthRecoveryHandler());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
             event.enqueueWork(() -> {
+                // Runs after MariesLibBootstrap.onCommonSetup → RegistryLifecycleManager.loadAll().
+                NourishedConfigValidation.runAfterInitialLoad();
                 NutrientRegistry.syncAndFreeze();
                 ModCompat.discoverUnknownMods();
                 LOGGER.info("[Nourished] Starting AutoCompatDiscovery...");

@@ -99,6 +99,9 @@
   "config.nourished.foodScanner.analysisWritten": "Analysis written to %s",
   "config.nourished.foodScanner.analysisFailed": "Analysis failed — see log for details",
   "config.nourished.foodScanner.writeDatapack": "Write to datapack",
+  "config.nourished.foodScanner.fullExport": "Export All Foods",
+  "config.nourished.foodScanner.fullExportWritten": "Food export written to %s",
+  "config.nourished.foodScanner.fullExportFailed": "Export failed — see log for details",
   "config.nourished.foodScanner.noResults": "No unassigned foods found.",
   "config.nourished.foodScanner.fallbackShort": "fallback: %s",
   "config.nourished.foodScanner.wroteToast": "Written to %s — reload datapacks to apply",
@@ -207,6 +210,10 @@
   "config.nourished.nutrientGainScale.desc": "Multiplier on tag-based food burst before the per-bite cap. Lower = slower bar fill (default 5). Does not affect food override JSON.",
   "config.nourished.nutrientGainPerBiteMax": "Max nutrient gain per bite",
   "config.nourished.nutrientGainPerBiteMax.desc": "Largest fraction (0-100%) one bite can add to a single bar from tag-based foods (default 20%). Lower = more bites to fill a bar.",
+  "config.nourished.enableNutrientCurves": "Enable nutrient response curves",
+  "config.nourished.enableNutrientCurves.desc": "When enabled, per-nutrient response curves scale tag-based gains. When disabled, legacy flat scale/clamp math is used.",
+  "config.nourished.defaultCurvePreset": "Default curve preset",
+  "config.nourished.defaultCurvePreset.desc": "Global default curve shape for nutrients without an explicit entry in nutrient_curves.json.",
   "config.nourished.calorieDisplayMax": "Calorie Display Max",
   "config.nourished.calorieDisplayMax.desc": "Maximum calorie value shown in the UI.",
   "config.nourished.decayRate": "Decay Rate",
@@ -295,6 +302,8 @@
   "config.nourished.nutrient.overrideDecay": "Override %s Decay Rate",
   "config.nourished.nutrient.decayRate": "%s Decay Rate",
   "config.nourished.nutrient.overrideCritical": "Override %s Critical Threshold",
+  "config.nourished.nutrient.curvePreset": "Curve preset: %s",
+  "config.nourished.nutrient.curvePreset.desc": "Overrides the global default curve preset for this nutrient only. Leave blank to use the global default.",
   "config.nourished.nutrient.criticalThreshold": "%s Critical Threshold",
   "config.nourished.importExport.groupTitle": "Import / Export",
   "config.nourished.importExport.groupTitle.desc": "Bundle settings into a JSON file under config/nourished/exports/ or share a compact NCF1: code. Import applies selected sections and reloads JSON registries.",
@@ -413,6 +422,7 @@
   "advancement.nourished.milestones.sugars_master.title": "Confectioner",
   "advancement.nourished.milestones.sugars_master.description": "You have mastered the art of sugar.",
   "advancement.nourished.milestones.perfectly_balanced.title": "Perfectly Balanced",
-  "advancement.nourished.milestones.perfectly_balanced.description": "As all things should be."
+  "advancement.nourished.milestones.perfectly_balanced.description": "As all things should be.",
+  "command.nourished.validate.failToast": "Config validation failed — run /nourished validate"
 
 }

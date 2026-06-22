@@ -29,7 +29,7 @@ final class NourishedConfigLeftCardsLayout {
     private static final int NAV_GAP = 4;
     private static final int CONTENT_GAP = 8;
     private static final int CONTENT_RIGHT_PAD = 12;
-    private static final int CONTENT_MIN_WIDTH = 520;
+    private static final int CONTENT_MIN_WIDTH = 180;
     private static final int COL_SELECTED = 0xFF3A6EA5;
     private static final int COL_UNSELECTED = 0xFF1A1A1A;
     private static final int COL_UNSELECTED_BORDER = 0xFF333333;
@@ -58,8 +58,23 @@ final class NourishedConfigLeftCardsLayout {
         hideWidget(left);
         hideWidget(right);
         ensureSidebarWidget(cloth, tabs, metrics);
+        ensureLayoutKeeper(cloth, tabs);
 
         applyContentLayout(cloth, metrics);
+    }
+
+    private static void ensureLayoutKeeper(ClothConfigScreen cloth, List<ClothConfigTabButton> tabs) {
+        List<Renderable> renderables = getField(cloth, "renderables");
+        if (renderables == null) {
+            return;
+        }
+        for (Renderable renderable : renderables) {
+            if (renderable instanceof LayoutKeeperWidget) {
+                return;
+            }
+        }
+        LayoutKeeperWidget keeper = new LayoutKeeperWidget(cloth, tabs);
+        renderables.add(0, keeper);
     }
 
     private static void hideWidget(AbstractWidget widget) {
@@ -111,11 +126,9 @@ final class NourishedConfigLeftCardsLayout {
     }
 
     private static LayoutMetrics computeMetrics(int screenWidth) {
-        int availableForPanels = Math.max(200, screenWidth - NAV_LEFT - CONTENT_RIGHT_PAD);
-        int desiredNavWidth = Math.min(NAV_WIDTH, Math.max(NAV_WIDTH_MIN, availableForPanels - CONTENT_MIN_WIDTH - CONTENT_GAP));
-        int navWidth = Math.max(NAV_WIDTH_MIN, Math.min(NAV_WIDTH, desiredNavWidth));
+        int navWidth = screenWidth < 500 ? NAV_WIDTH_MIN : NAV_WIDTH;
         int contentLeft = NAV_LEFT + navWidth + CONTENT_GAP;
-        int contentWidth = Math.max(120, screenWidth - contentLeft - CONTENT_RIGHT_PAD);
+        int contentWidth = Math.max(CONTENT_MIN_WIDTH, screenWidth - contentLeft - CONTENT_RIGHT_PAD);
         return new LayoutMetrics(NAV_LEFT, NAV_TOP, navWidth, NAV_ITEM_H, NAV_GAP, contentLeft, contentWidth);
     }
 
@@ -150,6 +163,23 @@ final class NourishedConfigLeftCardsLayout {
             int contentLeft,
             int contentWidth
     ) {}
+
+    private static final class LayoutKeeperWidget implements Renderable {
+        private final ClothConfigScreen cloth;
+        private final List<ClothConfigTabButton> tabs;
+
+        private LayoutKeeperWidget(ClothConfigScreen cloth, List<ClothConfigTabButton> tabs) {
+            this.cloth = cloth;
+            this.tabs = tabs;
+        }
+
+        @Override
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            LayoutMetrics liveMetrics = computeMetrics(cloth.width);
+            applyTabLayout(tabs, liveMetrics);
+            applyContentLayout(cloth, liveMetrics);
+        }
+    }
 
     private static final class SidebarNavWidget extends AbstractWidget {
         private final ClothConfigScreen cloth;

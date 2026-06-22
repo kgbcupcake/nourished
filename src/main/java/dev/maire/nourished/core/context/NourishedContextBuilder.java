@@ -23,6 +23,8 @@ import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.reload.NourishedReloadHelper;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.ItemStack;
 
 @ApiStatus.Internal
 public final class NourishedContextBuilder {
@@ -94,8 +96,9 @@ public final class NourishedContextBuilder {
                 .sourceValueResolver((stack, level) ->
                         NutrientClassificationLookup.resolveNutrientBars(stack, false, level))
                 .sourceDeltaResolver((stack, level, payload, bars) -> {
+                    float realSaturation = resolveRealSaturation(stack);
                     FoodNutritionRegistry.DietDelta d = FoodNutritionRegistry.computeDietDelta(
-                            stack, level, (int) payload, 0f, bars);
+                            stack, level, (int) payload, realSaturation, bars);
                     return new MarieLibContext.SourceDelta(d.calories(), d.nutrients());
                 })
                 .onReloadBroadcast(NourishedReloadHelper::reloadAndBroadcast)
@@ -106,5 +109,18 @@ public final class NourishedContextBuilder {
                     RawFoodClassifier.invalidate();
                 })
                 .build());
+    }
+
+    /**
+     * Resolves real food saturation for the diet delta burst formula.
+     * Previously hardcoded to 0f at this call site, which silently zeroed out
+     * the saturation term in FoodNutritionRegistry.computeDietDelta's burst
+     * calculation for every food ever eaten. FoodProperties is resolved with a
+     * null entity (client-preview-safe per its own contract) since no
+     * LivingEntity is available in this resolver's signature.
+     */
+    private static float resolveRealSaturation(ItemStack stack) {
+        FoodProperties food = FoodNutritionRegistry.foodPropertiesForNutrition(stack, null);
+        return food != null ? food.saturation() : 0f;
     }
 }

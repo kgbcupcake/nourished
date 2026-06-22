@@ -216,14 +216,15 @@ public final class NutrientHudHexColorRowEntry extends TooltipListEntry<Integer>
 
         var font = Minecraft.getInstance().font;
         int nameX = sx + SWATCH + 6;
-        graphics.drawString(font, nutrientLabel, nameX, y + 6, getPreferredTextColor(), false);
-
-        boolean invalid = parseStrictRgbHex(hexBox.getValue()).isEmpty();
-
         int resetW = 56;
-        int hexW = Mth.clamp(entryWidth - 24 - SWATCH - 6 - 8 - resetW - 8, 72, 120);
+        int hexW = Mth.clamp(entryWidth - 24 - SWATCH - 6 - 8 - resetW - 8, 56, 120);
         int resetX = x + entryWidth - resetW - 6;
         int hexX = resetX - 6 - hexW;
+        int nameMaxW = Math.max(0, hexX - nameX - 4);
+        if (nameMaxW > 0) {
+            String nutrientText = NourishedConfigSharedWidgets.ellipsize(font, nutrientLabel.getString(), nameMaxW);
+            graphics.drawString(font, nutrientText, nameX, y + 6, getPreferredTextColor(), false);
+        }
 
         hexBox.setX(hexX);
         hexBox.setY(y + 3);
@@ -231,10 +232,11 @@ public final class NutrientHudHexColorRowEntry extends TooltipListEntry<Integer>
         hexBox.setHeight(18);
         hexBox.setEditable(isEditable());
 
-        resetButton.setX(hexX + hexW + 6);
+        resetButton.setX(resetX);
         resetButton.setY(y + 3);
         resetButton.active = isEditable();
 
+        boolean invalid = parseStrictRgbHex(hexBox.getValue()).isEmpty();
         if (invalid) {
             int border = 0xFFFF3333;
             graphics.renderOutline(hexX - 1, y + 2, hexW + 2, 20, border);

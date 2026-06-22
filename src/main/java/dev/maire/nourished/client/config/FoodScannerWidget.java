@@ -5,7 +5,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import dev.maire.nourished.client.config.NourishedConfigSharedWidgets;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientFullExporter;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.MariesLib.util.MarieValidation;
 import dev.marie.MariesLib.scanner.ItemScanner;
@@ -26,7 +28,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.storage.LevelResource;
-
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Writer;
@@ -63,6 +64,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
     private final Button scanButton;
     private final Button analysisButton;
     private final Button writeButton;
+    private final Button fullExportButton;
     private final List<Row> rows = new ArrayList<>();
     private boolean hasRunScan;
     private boolean analysisRunning;
@@ -91,6 +93,9 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
                 .bounds(0, 0, 140, BUTTON_H)
                 .build();
         this.writeButton = Button.builder(Component.translatable("config.nourished.foodScanner.writeDatapack"), b -> writeDatapack())
+                .bounds(0, 0, 160, BUTTON_H)
+                .build();
+        this.fullExportButton = Button.builder(Component.translatable("config.nourished.foodScanner.fullExport"), b -> fullExport())
                 .bounds(0, 0, 160, BUTTON_H)
                 .build();
     }
@@ -153,6 +158,26 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             mc.getToasts().addToast(new FoodScannerWriteToast(msg));
         }
         requestReferenceRebuilding();
+    }
+
+    private void fullExport() {
+        Minecraft mc = Minecraft.getInstance();
+        MinecraftServer server = mc.getSingleplayerServer();
+        if (server == null) {
+            mc.getToasts().addToast(new FoodScannerNoWorldToast());
+            return;
+        }
+
+        NutrientFullExporter.Result result = NutrientFullExporter.run();
+        if (result.success()) {
+            Component msg = Component.translatable(
+                    "config.nourished.foodScanner.fullExportWritten",
+                    "config/" + Nourished.MODID + "/nourished_nutrients_export/");
+            mc.getToasts().addToast(new FoodScannerWriteToast(msg));
+        } else {
+            mc.getToasts().addToast(new FoodScannerAnalysisErrorToast(
+                    Component.translatable("config.nourished.foodScanner.fullExportFailed")));
+        }
     }
 
     private void writeDatapack() {
@@ -282,6 +307,10 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         return Minecraft.getInstance().getSingleplayerServer() != null && !rows.isEmpty();
     }
 
+    private boolean canFullExport() {
+        return Minecraft.getInstance().getSingleplayerServer() != null;
+    }
+
     private boolean canRunAnalysis() {
         return canScan()
                 && Minecraft.getInstance().getSingleplayerServer() != null
@@ -320,6 +349,9 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         } else if (hasRunScan) {
             h += STATUS_ROW_H + 2;
         }
+        if (rows.isEmpty()) {
+            h += BUTTON_ROW_H;
+        }
         return h;
     }
 
@@ -329,6 +361,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         out.add(scanButton);
         out.add(analysisButton);
         out.add(writeButton);
+        out.add(fullExportButton);
         for (Row row : rows) {
             out.add(row.nutrientButton);
         }
@@ -341,6 +374,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         out.add(scanButton);
         out.add(analysisButton);
         out.add(writeButton);
+        out.add(fullExportButton);
         for (Row row : rows) {
             out.add(row.nutrientButton);
         }
@@ -374,10 +408,16 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             int mouseY,
             boolean isHovered,
             float delta) {
+        if (!canScan() && !rows.isEmpty()) {
+            rows.clear();
+            hasRunScan = false;
+            scroll = 0;
+        }
         if (!isRowVisible(y, getItemHeight())) {
             scanButton.setY(-2000);
             analysisButton.setY(-2000);
             writeButton.setY(-2000);
+            fullExportButton.setY(-2000);
             for (Row row : rows) {
                 row.nutrientButton.setY(-2000);
             }
@@ -390,17 +430,17 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         int sx = x + 4;
         int cy = y + 16;
 
-        scanButton.setX(sx + innerW - 120);
+        scanButton.setWidth(Math.min(120, innerW));
+        scanButton.setX(sx + innerW - scanButton.getWidth());
         scanButton.setY(cy);
-        scanButton.setWidth(120);
         scanButton.setHeight(BUTTON_H);
         scanButton.active = isEditable() && canScan();
         scanButton.render(graphics, mouseX, mouseY, delta);
         cy += BUTTON_ROW_H;
 
-        analysisButton.setX(sx + innerW - 140);
+        analysisButton.setWidth(Math.min(140, innerW));
+        analysisButton.setX(sx + innerW - analysisButton.getWidth());
         analysisButton.setY(cy);
-        analysisButton.setWidth(140);
         analysisButton.setHeight(BUTTON_H);
         analysisButton.active = isEditable() && canRunAnalysis();
         analysisButton.render(graphics, mouseX, mouseY, delta);
@@ -417,7 +457,14 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
                     : (hasRunScan ? Component.translatable("config.nourished.foodScanner.noResults") : null);
             if (hint != null) {
                 graphics.drawString(mc.font, hint, sx, cy, 0xA0A0A0, false);
+                cy += STATUS_ROW_H;
             }
+            fullExportButton.setX(sx);
+            fullExportButton.setY(cy);
+            fullExportButton.setWidth(Math.min(160, innerW));
+            fullExportButton.setHeight(BUTTON_H);
+            fullExportButton.active = isEditable() && canFullExport();
+            fullExportButton.render(graphics, mouseX, mouseY, delta);
             writeButton.active = false;
             writeButton.setY(-2000);
             return;
@@ -454,17 +501,15 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             int textColor = row.uncertain ? COLOR_UNCERTAIN : COLOR_CONFIDENT;
 
             String idStr = row.itemId.toString();
-            int idMaxW = innerW - 240;
-            if (mc.font.width(idStr) > idMaxW) {
-                idStr = mc.font.plainSubstrByWidth(idStr, idMaxW - mc.font.width("...")) + "...";
-            }
+            int btnW = Math.min(110, Math.max(72, innerW / 3));
+            int idMaxW = Math.max(24, innerW - btnW - 12);
+            idStr = NourishedConfigSharedWidgets.ellipsize(mc.font, idStr, idMaxW);
             graphics.drawString(mc.font, idStr, sx + 4, ry + 4, textColor, false);
 
             String spreadStr = String.format("%.1f", row.confidenceSpread);
             String confidenceLabel = row.uncertain ? "?" : "✓";
             graphics.drawString(mc.font, confidenceLabel + " " + spreadStr, sx + 4, ry + 14, 0xAAAAAA, false);
 
-            int btnW = Math.min(110, innerW / 3);
             row.nutrientButton.setX(sx + innerW - btnW - 4);
             row.nutrientButton.setY(ry + 4);
             row.nutrientButton.setWidth(btnW);
@@ -475,11 +520,20 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         graphics.disableScissor();
 
         cy += LIST_VIEWPORT_H + PAD;
+        int bottomBtnW = Math.min(160, Math.max(80, (innerW - 4) / 2));
         writeButton.setX(sx);
         writeButton.setY(cy);
-        writeButton.setWidth(Math.min(200, innerW));
+        writeButton.setWidth(bottomBtnW);
+        writeButton.setHeight(BUTTON_H);
         writeButton.active = isEditable() && canWrite();
         writeButton.render(graphics, mouseX, mouseY, delta);
+
+        fullExportButton.setX(sx + bottomBtnW + 4);
+        fullExportButton.setY(cy);
+        fullExportButton.setWidth(bottomBtnW);
+        fullExportButton.setHeight(BUTTON_H);
+        fullExportButton.active = isEditable() && canFullExport();
+        fullExportButton.render(graphics, mouseX, mouseY, delta);
 
         if (hoveredRow != null && !hoveredRow.topSignals.isEmpty()) {
             List<Component> tooltip = new ArrayList<>();

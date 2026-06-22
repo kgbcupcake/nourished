@@ -316,6 +316,10 @@
       "required": false
     },
     {
+      "id": "fruitsdelight:durian_flesh",
+      "required": false
+    },
+    {
       "id": "fruitsdelight:fig_jello",
       "required": false
     },
@@ -329,6 +333,10 @@
     },
     {
       "id": "fruitsdelight:hawberry_sheet",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:hawberry_roll",
       "required": false
     },
     {
@@ -389,6 +397,10 @@
     },
     {
       "id": "fruitsdelight:pear_juice",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:pear_with_rock_sugar",
       "required": false
     },
     {
