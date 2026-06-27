@@ -4735,6 +4735,9 @@
     { "id": "pamhc2foodextended:bltitem", "required": false },
     { "id": "pamhc2foodextended:coleslawburgeritem", "required": false },
     { "id": "pamhc2foodextended:deluxecheeseburgeritem", "required": false },
-    { "id": "pamhc2foodextended:epicbltitem", "required": false }
+    { "id": "pamhc2foodextended:epicbltitem", "required": false },
+
+    { "id": "farmersdelight:bone_broth", "required": false },
+    { "id": "farmersdelight:pasta_with_meatballs", "required": false }
   ]
 }

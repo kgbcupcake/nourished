@@ -39,8 +39,7 @@ import dev.maire.nourished.config.validation.NourishedConfigValidation;
 import dev.maire.nourished.config.validation.NutrientsValidator;
 import dev.maire.nourished.config.validation.RawFoodValidator;
 import dev.maire.nourished.config.validation.ScannerSpecValidator;
-import dev.maire.nourished.config.validation.SourceOverridesValidator;
-import dev.maire.nourished.config.validation.SourceValuesValidator;
+import dev.maire.nourished.config.validation.SourceClassificationsValidator;
 import dev.maire.nourished.core.handler.NourishedFoodTriggerHandler;
 import dev.maire.nourished.core.tagaudit.NourishedTagAuditContext;
 import dev.maire.nourished.core.tagaudit.rules.NamespaceBiasRule;
@@ -94,8 +93,7 @@ public class Nourished {
         MarieAPI.registerConfigValidator(new ColorsValidator());
         MarieAPI.registerConfigValidator(new FoodOverridesValidator());
         MarieAPI.registerConfigValidator(new ScannerSpecValidator());
-        MarieAPI.registerConfigValidator(new SourceOverridesValidator());
-        MarieAPI.registerConfigValidator(new SourceValuesValidator());
+        MarieAPI.registerConfigValidator(new SourceClassificationsValidator());
         MarieAPI.registerConfigValidator(new EffectsValidator());
         MarieAPI.registerConfigValidator(new FoodValuesValidator());
         MarieAPI.registerConfigValidator(new LocksValidator());
@@ -103,6 +101,9 @@ public class Nourished {
         MarieAPI.registerTagRule(new TagInferenceMismatchRule());
         MarieAPI.registerTagRule(new NamespaceBiasRule());
         MarieAPI.registerTagAuditContext(Nourished.MODID, NourishedTagAuditContext.get());
+
+        NeoForge.EVENT_BUS.register(new NourishedCommand());
+
         MarieDataManager.setCallbacks(new NourishedDatapackCallbacks());
         NeoForge.EVENT_BUS.addListener(MarieDataManager::registerReloadListener);
 
@@ -140,7 +141,6 @@ public class Nourished {
             });
         });
         NeoForge.EVENT_BUS.register(new NourishedGuideJoinHandler());
-        NeoForge.EVENT_BUS.register(new NourishedCommand());
         TrackingAttachment.logAllValueNbtPaths();
         LOGGER.info("[Nourished] Calories NBT path: {}", TrackingAttachment.getTotalNbtPath());
         LOGGER.info("[Nourished] API v{} ready — {} nutrients, {} effects, {} compat entries registered.",
