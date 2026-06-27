@@ -2,6 +2,99 @@
 
 <!-- markdownlint-disable MD013 -->
 
+## [ Nourished 0.2.6-beta.4 ] 2026-6-27
+
+### Added
+
+- **Per-item nutrient weight system**: `NutrientWeightRegistry` loads datapack files from
+  `data/<namespace>/nourished/config/weights/*.json`, mapping item IDs to per-nutrient float
+  weights. Weights are consumed by the classification pipeline to bias multi-nutrient scoring
+  without requiring explicit tag overrides.
+- **Bundled nutrient weight files** for three major food mods:
+  - `FD_nutrient_weights.json`: Farmer's Delight per-item weights
+  - `croptopia_nutrient_weights.json`: Croptopia per-item weights
+  - `pamhc2_nutrient_weights.json`: Pam's HarvestCraft 2 per-item weights
+- **`data/nourished/config/SOURCE_CLASSIFICATIONS_README.md`**: written into the jar bundle;
+  documents the `source_classifications.json` schema and how to add per-source nutrient
+  classification overrides.
+- **`NourishedExportCommands`**: export command logic extracted from `NourishedCommand` into a
+  dedicated class (`exportAll`); `NourishedCommand` now delegates to it cleanly.
+
+### Removed
+
+- **Compat integration hooks** moved out of Nourished into MarieLib — the following classes are
+  gone from this jar:
+  - `dev.maire.nourished.compat.lso.LSOCompat`
+  - `dev.maire.nourished.compat.peakstamina.PeakStaminaCompat`
+  - `dev.maire.nourished.compat.spiceoflifeonion.SpiceOfLifeOnionCompat`
+- **Compat module config toggles** removed: `enablePSStaminaUsage`, `enablePSPenaltyDecay`,
+  `enablePSExhaustionDuration`, `enableSOLDiversityHealth`, `enableSOLDiversityPenalty`,
+  `enableLSOThermalResistance`, `enableLSOBrokenHeartResilience`, and `enableLSOThirstSaturation`
+  are no longer defined in `nourished-common.toml`, `NourishedConfig`, `NourishedModuleCache`, or
+  the Modules config category. Compat behaviour for Peak Stamina, Spice of Life: Onion, and LSO
+  is now governed entirely by MarieLib.
+- **Modules config screen subcategories** for `peakstamina`, `spiceoflife`, and `lso` removed;
+  the Modules tab now groups only `core`, `rawfood`, `ui`, and `other`.
+- **`mod_compat.json`** (`data/nourished/config/mod_compat.json`) removed; replaced by
+  `source_classifications.json` (see Changed).
+- **`SourceValuesValidator`** (`nourished_source_values`) removed — the `source_values.json`
+  registry it validated has been superseded by MarieLib-side infrastructure.
+- **`/nourished validate`** command removed from `NourishedCommand` — validation output is now
+  provided by MarieLib's own command surface; run `/marieslib validate nourished` for per-validator
+  status and findings.
+
+### Changed
+
+- **`source_classifications.json`** replaces `mod_compat.json` and `source_overrides.json` as the
+  canonical per-source nutrient classification file under `data/nourished/config/`; starts empty
+  (`[]`) and is documented by the new `SOURCE_CLASSIFICATIONS_README.md`.
+- **`SourceOverridesValidator` → `SourceClassificationsValidator`**: renamed to match the new
+  file (`source_classifications.json`); validator ID changed from `nourished_source_overrides` to
+  `nourished_source_classifications`.
+- **Recipe inheritance delegated to MarieLib**: `RecipeInheritanceStage` no longer owns a
+  `BoundedLRU` cache or the inline `discoverRecipeIngredients` loop. It now delegates entirely to
+  MarieLib's `RecipeInheritanceResolver`, whose index is pre-built at recipe-manager availability
+  via `RuntimeFoodResolver.buildRecipeIndex(RecipeManager)`. Per-item recipe timeouts and `RECIPE_TIMEOUT` failure reasons are removed; `INGREDIENT_CAP_EXCEEDED` failure reason removed (cap logic lives in MarieLib's resolver).
+- **`NourishedPresetRegistry.applyPresetValues`**: now reads preset values as a `JsonObject` with
+  null-safe field presence checks (`if (v.has(...))`) rather than directly consuming all fields
+  from a `PresetValues` record: partial presets that omit fields no longer reset those config
+  values to unintended defaults.
+- **`FoodOverrideRegistry` override README** updated to clarify the two export paths: the
+  categorized `nourished_nutrients_export/` folder (via Export All Foods button or
+  `/nourished export_all`) is recommended for building `food_overrides.json`; the single-file
+  `/marieslib dump nourished_nutrients` export is documented as a secondary quick-inspection
+  option.
+- **Nutrient tag maintenance** across all five groups: broad reorganization of bundled tags
+  (`fruits.json`, `vegetables.json`, `proteins.json`, `grains.json`, `dairy.json`) to align with
+  expanded weight-file coverage and tag audit findings; net reduction in duplicate / misclassified
+  entries.
+
+### MarieLib & Build
+
+- Bumped MarieLib dependency to **0.1.1-beta.2** (`marie_lib_version_range=[0.1.1-beta.2,)`).
+  Requires MarieLib **0.1.1-beta.2+** for:
+  - `RecipeInheritanceResolver` pre-built index (recipe inheritance delegation)
+  - Compat hooks for Peak Stamina, Spice of Life: Onion, and LSO (moved from Nourished)
+  - `/marieslib validate nourished` command (replaces `/nourished validate`)
+- Removed `spice_of_life_onion_version` from `gradle.properties` (no longer a compile dependency).
+
+### Important Upgrade Notes
+
+If updating from 0.2.6-beta.3:
+
+1. **Requires MarieLib 0.1.1-beta.2+**. Update MarieLib on Modrinth before launching.
+2. **Remove compat module toggles from your server config**: `enablePSStaminaUsage`,
+   `enablePSPenaltyDecay`, `enablePSExhaustionDuration`, `enableSOLDiversityHealth`,
+   `enableSOLDiversityPenalty`, `enableLSOThermalResistance`, `enableLSOBrokenHeartResilience`, and
+   `enableLSOThirstSaturation` are no longer read from `nourished-common.toml`. Delete or ignore
+   these keys; compat is now controlled by MarieLib.
+3. **`/nourished validate` is gone**: use `/marieslib validate nourished` for config validation
+   output going forward.
+4. `mod_compat.json` is no longer used and can be deleted from your config folder. Per-source
+   classification overrides now live in `source_classifications.json`.
+5. The `nourished_source_values` config validator no longer runs; `nourished_source_classifications`
+   replaces it for `source_classifications.json` validation.
+
 ## [ Nourished 0.2.6-beta.3 ] 2026-6-21
 
 ### Added
@@ -80,14 +173,14 @@
 
 - Bumped MarieLib dependency to **0.1.1-beta.1** (`marie_lib_version_range=[0.1.1-beta.1,)`).
   Requires MarieLib **0.1.1-beta.1+** for:
-  - `ValueRegistry.isFrozen()` (external nutrient registration after freeze)
-  - `MarieAPI.registerExportResolver` / `RegistryExporter` (nutrient export pipeline)
-  - `MarieAPI.registerConfigValidator` / `ValidationRunner` (config validation)
-  - `MarieAPI.registerTagRule` / `registerTagAuditContext` / `TagScanner` (tag audit pipeline)
-  - Consumer command **`/nourished set_all`** (implemented in MarieLib's player command tree)
-  - Local/dev MarieLib builds also ship `TagAuditReportWriter` for `/marieslib audit_tags`; Nourished's
-    own audit commands write reports via `NourishedTagAuditReportWriter` so they work with the
-    published jar alone.
+    - `ValueRegistry.isFrozen()` (external nutrient registration after freeze)
+    - `MarieAPI.registerExportResolver` / `RegistryExporter` (nutrient export pipeline)
+    - `MarieAPI.registerConfigValidator` / `ValidationRunner` (config validation)
+    - `MarieAPI.registerTagRule` / `registerTagAuditContext` / `TagScanner` (tag audit pipeline)
+    - Consumer command **`/nourished set_all`** (implemented in MarieLib's player command tree)
+    - Local/dev MarieLib builds also ship `TagAuditReportWriter` for `/marieslib audit_tags`; Nourished's
+      own audit commands write reports via `NourishedTagAuditReportWriter` so they work with the
+      published jar alone.
 
 ### Important Upgrade Notes
 
