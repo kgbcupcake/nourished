@@ -1,10 +1,4 @@
-[![License](https://img.shields.io/github/license/kgbcupcake/nourished)](LICENSE)  
-[![Release](https://img.shields.io/github/v/release/kgbcupcake/nourished?include_prereleases)](https://github.com/kgbcupcake/nourished/releases)  
-[![Stars](https://img.shields.io/github/stars/kgbcupcake/nourished?style=social)](https://github.com/kgbcupcake/nourished/stargazers)  
-[![Issues](https://img.shields.io/github/issues/kgbcupcake/nourished)](https://github.com/kgbcupcake/nourished/issues)  
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen)](https://www.minecraft.net)  
-[![NeoForge](https://img.shields.io/badge/NeoForge-21.1.229-orange)](https://neoforged.net)  
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/kgbcupcake/nourished)
+[![License](https://img.shields.io/github/license/kgbcupcake/nourished)](LICENSE) [![Release](https://img.shields.io/github/v/release/kgbcupcake/nourished?include_prereleases)](https://github.com/kgbcupcake/nourished/releases) [![Stars](https://img.shields.io/github/stars/kgbcupcake/nourished?style=social)](https://github.com/kgbcupcake/nourished/stargazers) [![Issues](https://img.shields.io/github/issues/kgbcupcake/nourished)](https://github.com/kgbcupcake/nourished/issues) [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen)](https://www.minecraft.net) [![NeoForge](https://img.shields.io/badge/NeoForge-21.1.229-orange)](https://neoforged.net) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/kgbcupcake/nourished)
 
 ![Main Menu](Assets/nourished_banner.png)
 
