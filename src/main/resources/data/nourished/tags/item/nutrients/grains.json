@@ -5,11 +5,26 @@
       "id": "#c:foods/bread",
       "required": false
     },
-    "minecraft:bread",
-    "minecraft:baked_potato",
-    "minecraft:cookie",
-    "minecraft:cake",
-    "minecraft:pumpkin_pie",
+    {
+      "id": "minecraft:bread",
+      "required": false
+    },
+    {
+      "id": "minecraft:baked_potato",
+      "required": false
+    },
+    {
+      "id": "minecraft:cookie",
+      "required": false
+    },
+    {
+      "id": "minecraft:cake",
+      "required": false
+    },
+    {
+      "id": "minecraft:pumpkin_pie",
+      "required": false
+    },
     {
       "id": "pamhc2foodextended:jambalayaitem",
       "required": false
@@ -151,19 +166,7 @@
       "required": false
     },
     {
-      "id": "bountifulfares:apple_cider_jar",
-      "required": false
-    },
-    {
-      "id": "bountifulfares:hoary_cider_jar",
-      "required": false
-    },
-    {
       "id": "bountifulfares:meadow_medley",
-      "required": false
-    },
-    {
-      "id": "bountifulfares:plum_cider_jar",
       "required": false
     },
     {
@@ -487,10 +490,6 @@
       "required": false
     },
     {
-      "id": "farmersdelight:apple_cider",
-      "required": false
-    },
-    {
       "id": "farmersdelight:cod_roll",
       "required": false
     },
@@ -507,23 +506,23 @@
       "required": false
     },
     {
-      "id": "farmersdelight:cooking/cooked_rice",
+      "id": "farmersdelight:fried_rice",
       "required": false
     },
     {
-      "id": "farmersdelight:cooking/fried_rice",
+      "id": "farmersdelight:mushroom_rice",
       "required": false
     },
     {
-      "id": "farmersdelight:cooking/mushroom_rice",
+      "id": "farmersdelight:noodle_soup",
       "required": false
     },
     {
-      "id": "farmersdelight:cooking/squid_ink_pasta",
+      "id": "farmersdelight:pasta_with_meatballs",
       "required": false
     },
     {
-      "id": "farmersdelight:cooking/vegetable_noodles",
+      "id": "farmersdelight:pasta_with_mutton_chop",
       "required": false
     },
     {
@@ -532,26 +531,6 @@
     },
     {
       "id": "fruitsdelight:bowl_of_pineapple_fried_rice",
-      "required": false
-    },
-    {
-      "id": "fruitsdelight:hawberry_tea",
-      "required": false
-    },
-    {
-      "id": "fruitsdelight:lychee_cherry_tea",
-      "required": false
-    },
-    {
-      "id": "fruitsdelight:mango_tea",
-      "required": false
-    },
-    {
-      "id": "fruitsdelight:mangosteen_tea",
-      "required": false
-    },
-    {
-      "id": "fruitsdelight:peach_tea",
       "required": false
     },
     {
@@ -628,10 +607,6 @@
     },
     {
       "id": "herbsandharvest:chips",
-      "required": false
-    },
-    {
-      "id": "herbsandharvest:cup_lemonade",
       "required": false
     },
     {
@@ -783,10 +758,6 @@
       "required": false
     },
     {
-      "id": "pamhc2foodextended:applecideritem",
-      "required": false
-    },
-    {
       "id": "pamhc2foodextended:applejellysandwichitem",
       "required": false
     },
@@ -859,15 +830,7 @@
       "required": false
     },
     {
-      "id": "pamhc2foodextended:breadfruitjuiceitem",
-      "required": false
-    },
-    {
       "id": "pamhc2foodextended:breadfruitpieitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:breadfruitsmoothieitem",
       "required": false
     },
     {
@@ -1511,23 +1474,11 @@
       "required": false
     },
     {
-      "id": "vinery:apple_cider",
-      "required": false
-    },
-    {
-      "id": "vinery:apple_wine",
-      "required": false
-    },
-    {
       "id": "vinery:bolvar_wine",
       "required": false
     },
     {
       "id": "vinery:chenet_wine",
-      "required": false
-    },
-    {
-      "id": "vinery:cherry_wine",
       "required": false
     },
     {
@@ -1875,10 +1826,6 @@
       "required": false
     },
     {
-      "id": "croptopia:barley",
-      "required": false
-    },
-    {
       "id": "croptopia:corn_bread",
       "required": false
     },
@@ -1899,23 +1846,11 @@
       "required": false
     },
     {
-      "id": "croptopia:oat",
-      "required": false
-    },
-    {
-      "id": "croptopia:oatmeal",
-      "required": false
-    },
-    {
       "id": "croptopia:popcorn",
       "required": false
     },
     {
       "id": "croptopia:ravioli",
-      "required": false
-    },
-    {
-      "id": "croptopia:rice",
       "required": false
     },
     {
@@ -1951,14 +1886,6 @@
       "required": false
     },
     {
-      "id": "croptopia:french_fries",
-      "required": false
-    },
-    {
-      "id": "croptopia:hashed_brown",
-      "required": false
-    },
-    {
       "id": "croptopia:mashed_potatoes",
       "required": false
     },
@@ -1967,15 +1894,7 @@
       "required": false
     },
     {
-      "id": "croptopia:pineapple_pepperoni_pizza",
-      "required": false
-    },
-    {
       "id": "croptopia:potato_chips",
-      "required": false
-    },
-    {
-      "id": "croptopia:saucy_chips",
       "required": false
     },
     {
@@ -1992,10 +1911,6 @@
     },
     {
       "id": "croptopia:toast_with_jam",
-      "required": false
-    },
-    {
-      "id": "croptopia:banana_nut_bread",
       "required": false
     },
     {
@@ -2039,27 +1954,7 @@
       "required": false
     },
     {
-      "id": "croptopia:tostada",
-      "required": false
-    },
-    {
       "id": "croptopia:carnitas",
-      "required": false
-    },
-    {
-      "id": "croptopia:taco",
-      "required": false
-    },
-    {
-      "id": "croptopia:chimichanga",
-      "required": false
-    },
-    {
-      "id": "croptopia:quesadilla",
-      "required": false
-    },
-    {
-      "id": "croptopia:enchilada",
       "required": false
     },
     {
@@ -2079,31 +1974,11 @@
       "required": false
     },
     {
-      "id": "croptopia:chicken_and_dumplings",
-      "required": false
-    },
-    {
-      "id": "croptopia:chicken_and_noodles",
-      "required": false
-    },
-    {
       "id": "croptopia:beef_wellington",
       "required": false
     },
     {
-      "id": "croptopia:egg_roll",
-      "required": false
-    },
-    {
       "id": "croptopia:sushi",
-      "required": false
-    },
-    {
-      "id": "croptopia:supreme_pizza",
-      "required": false
-    },
-    {
-      "id": "croptopia:pineapple_pepperoni_pizza",
       "required": false
     },
     {
@@ -2120,18 +1995,6 @@
     },
     {
       "id": "croptopia:tuna_sandwich",
-      "required": false
-    },
-    {
-      "id": "croptopia:toast_sandwich",
-      "required": false
-    },
-    {
-      "id": "croptopia:the_big_breakfast",
-      "required": false
-    },
-    {
-      "id": "croptopia:transcendental_breakfast",
       "required": false
     },
     {
@@ -2154,7 +2017,10 @@
       "id": "#c:foods/sweet",
       "required": false
     },
-      "minecraft:honey_bottle",
+    {
+      "id": "minecraft:honey_bottle",
+      "required": false
+    },
     {
       "id": "pamhc2foodcore:chocolatebaritem",
       "required": false
@@ -2253,10 +2119,6 @@
     },
     {
       "id": "farmersdelight:chocolate_pie",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:cooking/hot_cocoa",
       "required": false
     },
     {
@@ -2756,7 +2618,6 @@
       "required": false
     },
     {
-
       "id": "aether:healing_stone",
       "required": false
     },
@@ -4109,10 +3970,6 @@
       "required": false
     },
     {
-      "id": "createfood:sliced_potato",
-      "required": false
-    },
-    {
       "id": "createfood:baked_potato_butter",
       "required": false
     },
@@ -4123,7 +3980,234 @@
     {
       "id": "createfood:bread_slice_bacon",
       "required": false
+    },
+    {
+      "id": "pamhc2foodextended:keylimepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberryrhubarbpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blackberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blueberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cactusfruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:candleberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cranberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:elderberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:huckleberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:juniperberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mulberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:raspberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cantaloupepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greengrapepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:kiwipieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pineapplepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cherrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:orangepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peachpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pearpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:plumpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pawpawpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:soursoppieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:apricotpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bananapieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:datepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:dragonfruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:figpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapefruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mangopieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:papayapieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:persimmonpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pomegranatepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:starfruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:jackfruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:guavapieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lycheepieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:passionfruitpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rambutanpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gooseberrypieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:durianpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemonpieitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:limepieitem",
+      "required": false
+    },
+    {
+      "id": "moredelight:cooked_rice_with_porkchop",
+      "required": false
+    },
+    {
+      "id": "moredelight:loaded_hamburger",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:hamburger",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gourmetbeefburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gourmetmuttonburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gourmetporkburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:onionhamburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:basichamburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:basiccheeseburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:baconcheeseburgeritem",
+      "required": false
+    },
+    {
+      "id": "croptopia:tofuburger",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:hawberry_roll",
+      "required": false
     }
-
   ]
 }

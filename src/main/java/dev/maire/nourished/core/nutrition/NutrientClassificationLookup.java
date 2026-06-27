@@ -62,14 +62,15 @@ public final class NutrientClassificationLookup {
             return Map.of();
         }
 
+        Map<String, Float> tagMatches = FoodNutritionRegistry.getNutrientTagScores(stack.getItem());
+
         if (itemId != null) {
             Map<String, Float> external = SourceRegistry.getExternalClassification(itemId);
             if (external != null && !external.isEmpty()) {
-                return Map.copyOf(external);
+                tagMatches = external;
             }
         }
 
-        Map<String, Float> tagMatches = FoodNutritionRegistry.getNutrientTagScores(stack.getItem());
         Map<String, Float> resolved = RuntimeFoodResolver.getInstance().resolve(stack, recipeManager);
 
         if (tagMatches.isEmpty()) {

@@ -21,3 +21,10 @@ if (gradle.ext.localMarieLibPresent) {
         }
     }
 }
+
+def localMariesCompatDir = file('../MariesCompat')
+gradle.ext.localMariesCompatPresent = new File(localMariesCompatDir, 'build.gradle').exists()
+
+if (gradle.ext.localMariesCompatPresent) {
+    includeBuild('../MariesCompat')
+}

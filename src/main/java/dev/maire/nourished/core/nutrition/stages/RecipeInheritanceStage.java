@@ -7,10 +7,9 @@ import dev.maire.nourished.core.nutrition.MultiNutrientInheritance;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.MariesLib.scan.ResolutionResult;
 import dev.marie.MariesLib.scan.RuntimeCascadeStage;
-import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.marie.MariesLib.scan.ResolutionStageHandler;
 import dev.marie.MariesLib.scan.StageContext;
-import dev.marie.MariesLib.cache.BoundedLRU;
+import dev.marie.MariesLib.scanner.RecipeInheritanceResolver;
 import dev.marie.MariesLib.util.MarieRegistryUtils;
 import dev.marie.MariesLib.classification.ClassificationTraceStep;
 import dev.marie.MariesLib.classification.TraceStepId;
@@ -21,14 +20,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,12 +31,10 @@ import java.util.Set;
 
 /**
  * Stage 3: inherits nutrient classification from confirmed (tag-based) recipe ingredients.
- * Requires at least 2 confirmed ingredient classifications. All recipe-manager access
- * is budget-capped at 5 ms and wrapped in {@code catch (Exception)}.
+ * Requires at least 2 confirmed ingredient classifications. Ingredient discovery is
+ * delegated to {@link RecipeInheritanceResolver}'s pre-built index.
  */
 public final class RecipeInheritanceStage implements ResolutionStageHandler {
-
-    private static final long TIMEOUT_NANOS = 5_000_000L;
 
     private static final Set<ResourceLocation> RECIPE_SKIP = Set.of(
             ResourceLocation.withDefaultNamespace("air"),
@@ -94,10 +87,10 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             "brewery:hops"
     );
 
-    private final BoundedLRU<ResourceLocation, List<ResourceLocation>> recipeCache;
+    private final RecipeInheritanceResolver recipeResolver;
 
-    public RecipeInheritanceStage(BoundedLRU<ResourceLocation, List<ResourceLocation>> recipeCache) {
-        this.recipeCache = recipeCache;
+    public RecipeInheritanceStage(RecipeInheritanceResolver recipeResolver) {
+        this.recipeResolver = recipeResolver;
     }
 
     @Override
@@ -109,26 +102,15 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             return null;
         }
 
-        long start = System.nanoTime();
-
         if (Nourished.LOGGER.isDebugEnabled()) {
             Nourished.LOGGER.debug("[RecipeInheritance] Resolving: {}", itemId);
         }
 
         try {
-            List<ResourceLocation> ingredients = recipeCache.get(itemId);
-            boolean[] capSkipped = {false};
-            if (ingredients == null) {
-                ingredients = discoverRecipeIngredients(itemId, recipeManager, start, capSkipped);
-                if (ingredients == null) {
-                    ctx.setRecipeFailureReason("RECIPE_TIMEOUT");
-                    return null;
-                }
-                recipeCache.put(itemId, ingredients);
-            }
+            List<ResourceLocation> ingredients = recipeResolver.getIngredients(itemId);
 
             if (ingredients.isEmpty()) {
-                ctx.setRecipeFailureReason(capSkipped[0] ? "INGREDIENT_CAP_EXCEEDED" : "NO_RECIPE_FOUND");
+                ctx.setRecipeFailureReason("NO_RECIPE_FOUND");
                 return null;
             }
 
@@ -136,13 +118,6 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             int confirmed = 0;
 
             for (ResourceLocation ingredientId : ingredients) {
-                if (System.nanoTime() - start > TIMEOUT_NANOS) {
-                    RuntimeFoodResolver.recordRecipeTimeout();
-                    Nourished.LOGGER.warn("[RuntimeFoodResolver] Recipe timeout for {}, aborting ({}ns)",
-                            itemId, System.nanoTime() - start);
-                    return null;
-                }
-
                 if (shouldSkipRecipeIngredient(ingredientId)) {
                     if (Nourished.LOGGER.isDebugEnabled()) {
                         Nourished.LOGGER.debug("[RecipeInheritance]   ingredient {} → SKIPPED", ingredientId);
@@ -245,72 +220,6 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
         }
     }
 
-    @Nullable
-    private List<ResourceLocation> discoverRecipeIngredients(
-            ResourceLocation itemId, RecipeManager recipeManager, long startNanos, boolean[] capSkipped
-    ) {
-        Item targetItem = BuiltInRegistries.ITEM.get(itemId);
-        if (targetItem == null) return List.of();
-        ItemStack targetStack = new ItemStack(targetItem);
-
-        for (RecipeHolder<?> holder : recipeManager.getRecipes()) {
-            if (System.nanoTime() - startNanos > TIMEOUT_NANOS) {
-                RuntimeFoodResolver.recordRecipeTimeout();
-                Nourished.LOGGER.warn("[RuntimeFoodResolver] Recipe timeout for {}, aborting ({}ns)",
-                        itemId, System.nanoTime() - startNanos);
-                return null;
-            }
-
-            var recipe = holder.value();
-
-            try {
-                ItemStack recipeResult = recipe.getResultItem(null);
-                if (recipeResult == null || !ItemStack.isSameItem(recipeResult, targetStack)) continue;
-
-                List<Ingredient> recipeIngredients = recipe.getIngredients();
-                Set<ResourceLocation> uniqueIds = new HashSet<>();
-
-                for (Ingredient ingredient : recipeIngredients) {
-                    ItemStack[] items = ingredient.getItems();
-                    if (items.length > 0) {
-                        ResourceLocation ingId = MarieRegistryUtils.itemKey(items[0]);
-                        if (ingId != null && !ingId.equals(itemId)) {
-                            uniqueIds.add(ingId);
-                        }
-                    }
-                }
-
-                if (uniqueIds.size() > 6) {
-                    if (Nourished.LOGGER.isDebugEnabled()) {
-                        Nourished.LOGGER.debug("[RecipeInheritance] {} — skipped, too many unique ingredients ({})",
-                                itemId, uniqueIds.size());
-                    }
-                    capSkipped[0] = true;
-                    continue;
-                }
-                if (uniqueIds.isEmpty()) {
-                    if (Nourished.LOGGER.isDebugEnabled()) {
-                        Nourished.LOGGER.debug("[RecipeInheritance] {} — recipe found but no usable ingredients",
-                                itemId);
-                    }
-                } else {
-                    if (Nourished.LOGGER.isDebugEnabled()) {
-                        Nourished.LOGGER.debug("[RecipeInheritance] {} — found recipe with ingredients: {}",
-                                itemId, uniqueIds);
-                    }
-                    return new ArrayList<>(uniqueIds);
-                }
-            } catch (Exception ignored) {
-                // malformed recipe — skip
-            }
-        }
-
-        if (Nourished.LOGGER.isDebugEnabled()) {
-            Nourished.LOGGER.debug("[RecipeInheritance] {} — no matching recipe found", itemId);
-        }
-        return List.of();
-    }
-
     private static boolean shouldSkipRecipeIngredient(ResourceLocation id) {
         if (RECIPE_SKIP.contains(id)) return true;
         String path = id.getPath();
@@ -381,7 +290,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
         detail.put("ingredientId", ingredientId.toString());
         detail.put("source", source);
         if (nutrients != null && !nutrients.isEmpty()) {
-            detail.put("nutrients", new LinkedHashMap<>(nutrients));
+            detail.put("values", new LinkedHashMap<>(nutrients));
         }
         if (uncertain) {
             detail.put("uncertain", true);

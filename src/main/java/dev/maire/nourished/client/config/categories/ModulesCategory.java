@@ -12,7 +12,6 @@ import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import net.minecraft.network.chat.Component;
-import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public final class ModulesCategory {
         List<ModuleMeta> metas = moduleMetas(config.moduleToggles());
         List<String> editableModuleKeys = new ArrayList<>();
         Map<String, List<AbstractConfigListEntry>> groupedEntries = new LinkedHashMap<>();
-        for (String group : List.of("core", "rawfood", "peakstamina", "spiceoflife", "lso", "ui", "other")) {
+        for (String group : List.of("core", "rawfood", "ui", "other")) {
             groupedEntries.put(group, new ArrayList<>());
         }
         for (ModuleMeta meta : metas) {
@@ -74,9 +73,6 @@ public final class ModulesCategory {
 
         addModuleGroupSubcategory(category, eb, "core", groupedEntries.get("core"));
         addModuleGroupSubcategory(category, eb, "rawfood", groupedEntries.get("rawfood"));
-        addModuleGroupSubcategory(category, eb, "peakstamina", groupedEntries.get("peakstamina"));
-        addModuleGroupSubcategory(category, eb, "spiceoflife", groupedEntries.get("spiceoflife"));
-        addModuleGroupSubcategory(category, eb, "lso", groupedEntries.get("lso"));
         addModuleGroupSubcategory(category, eb, "ui", groupedEntries.get("ui"));
         addModuleGroupSubcategory(category, eb, "other", groupedEntries.get("other"));
 
@@ -119,9 +115,6 @@ public final class ModulesCategory {
     static Component groupTitle(String group) {
         return Component.translatable(switch (group) {
             case "rawfood" -> "config.nourished.modules.group.rawfood";
-            case "peakstamina" -> "config.nourished.modules.group.peakstamina";
-            case "spiceoflife" -> "config.nourished.modules.group.spiceoflife";
-            case "lso" -> "config.nourished.modules.group.lso";
             default -> "config.nourished.modules.group." + group;
         });
     }
@@ -135,24 +128,6 @@ public final class ModulesCategory {
                 "enableEffects", "enableCalorieTracking", "enableSleepBonus",
                     "enableSynergies", "enableMilestones", "enableSeasonHooks", "enableAbsorptionModifiers" -> group = "core";
                 case "enableRawFoodPenalty", "enableGutHealth" -> group = "rawfood";
-                case "enablePSStaminaUsage", "enablePSPenaltyDecay", "enablePSExhaustionDuration" -> {
-                    if (!ModList.get().isLoaded("peakstamina")) {
-                        continue;
-                    }
-                    group = "peakstamina";
-                }
-                case "enableSOLDiversityHealth", "enableSOLDiversityPenalty" -> {
-                    if (!ModList.get().isLoaded("solonion")) {
-                        continue;
-                    }
-                    group = "spiceoflife";
-                }
-                case "enableLSOThermalResistance", "enableLSOBrokenHeartResilience", "enableLSOThirstSaturation" -> {
-                    if (!ModList.get().isLoaded("legendarysurvivaloverhaul")) {
-                        continue;
-                    }
-                    group = "lso";
-                }
                 case "enableHUD", "enableDietScreen", "enableFoodTooltips", "enableToasts", "enableCriticalToasts" -> group = "ui";
                 default -> group = "other";
             }

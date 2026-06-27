@@ -17,9 +17,6 @@ import dev.maire.nourished.core.lifecycle.NourishedLifecycle;
 import dev.marie.MariesLib.core.MariesLibBootstrap;
 import dev.marie.MariesLib.compat.AutoCompatDiscovery;
 import dev.marie.MariesLib.compat.ModCompat;
-import dev.maire.nourished.compat.lso.LSOCompat;
-import dev.maire.nourished.compat.peakstamina.PeakStaminaCompat;
-import dev.maire.nourished.compat.spiceoflifeonion.SpiceOfLifeOnionCompat;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
@@ -42,8 +39,7 @@ import dev.maire.nourished.config.validation.NourishedConfigValidation;
 import dev.maire.nourished.config.validation.NutrientsValidator;
 import dev.maire.nourished.config.validation.RawFoodValidator;
 import dev.maire.nourished.config.validation.ScannerSpecValidator;
-import dev.maire.nourished.config.validation.SourceOverridesValidator;
-import dev.maire.nourished.config.validation.SourceValuesValidator;
+import dev.maire.nourished.config.validation.SourceClassificationsValidator;
 import dev.maire.nourished.core.handler.NourishedFoodTriggerHandler;
 import dev.maire.nourished.core.tagaudit.NourishedTagAuditContext;
 import dev.maire.nourished.core.tagaudit.rules.NamespaceBiasRule;
@@ -60,7 +56,6 @@ import net.minecraft.core.registries.Registries;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -98,8 +93,7 @@ public class Nourished {
         MarieAPI.registerConfigValidator(new ColorsValidator());
         MarieAPI.registerConfigValidator(new FoodOverridesValidator());
         MarieAPI.registerConfigValidator(new ScannerSpecValidator());
-        MarieAPI.registerConfigValidator(new SourceOverridesValidator());
-        MarieAPI.registerConfigValidator(new SourceValuesValidator());
+        MarieAPI.registerConfigValidator(new SourceClassificationsValidator());
         MarieAPI.registerConfigValidator(new EffectsValidator());
         MarieAPI.registerConfigValidator(new FoodValuesValidator());
         MarieAPI.registerConfigValidator(new LocksValidator());
@@ -107,19 +101,13 @@ public class Nourished {
         MarieAPI.registerTagRule(new TagInferenceMismatchRule());
         MarieAPI.registerTagRule(new NamespaceBiasRule());
         MarieAPI.registerTagAuditContext(Nourished.MODID, NourishedTagAuditContext.get());
+
+        NeoForge.EVENT_BUS.register(new NourishedCommand());
+
         MarieDataManager.setCallbacks(new NourishedDatapackCallbacks());
         NeoForge.EVENT_BUS.addListener(MarieDataManager::registerReloadListener);
 
         NourishedKubeIntegration.register();
-        if (ModList.get().isLoaded("peakstamina")) {
-            PeakStaminaCompat.register();
-        }
-        if (ModList.get().isLoaded("solonion")) {
-            SpiceOfLifeOnionCompat.register();
-        }
-        if (ModList.get().isLoaded("legendarysurvivaloverhaul")) {
-            LSOCompat.register();
-        }
         FoodNutritionRegistry.init();
         TrackingData.setInstanceFactory(NourishedTrackingData::new);
         DietAttachment.register(modEventBus);
@@ -153,7 +141,6 @@ public class Nourished {
             });
         });
         NeoForge.EVENT_BUS.register(new NourishedGuideJoinHandler());
-        NeoForge.EVENT_BUS.register(new NourishedCommand());
         TrackingAttachment.logAllValueNbtPaths();
         LOGGER.info("[Nourished] Calories NBT path: {}", TrackingAttachment.getTotalNbtPath());
         LOGGER.info("[Nourished] API v{} ready — {} nutrients, {} effects, {} compat entries registered.",

@@ -83,6 +83,9 @@ public final class FoodNutritionRegistry {
     public static void bindServerRecipeManager(@Nullable RecipeManager recipeManager) {
         serverRecipeManager = recipeManager;
         serverRecipeInheritanceResolver = recipeManager != null ? new RecipeInheritanceResolver(recipeManager) : null;
+        if (recipeManager != null) {
+            RuntimeFoodResolver.getInstance().buildRecipeIndex(recipeManager);
+        }
     }
 
     /**
@@ -122,7 +125,7 @@ public final class FoodNutritionRegistry {
             for (String tagStr : def.tags()) {
                 var tagKey = TAG_KEY_CACHE.computeIfAbsent(tagStr, MarieRegistryUtils::itemTagKey);
                 if (holder.is(tagKey)) {
-                    matches.put(def.key(), 1.0f);
+                    matches.put(def.key(), NutrientWeightRegistry.getWeights(itemId).getOrDefault(def.key(), 1.0f));
                     break;
                 }
             }

@@ -238,15 +238,20 @@ public class FoodOverrideRegistry {
 
                 ## Getting starting values
 
-                Run `/marieslib dump nourished_nutrients` (or use the "Export All Foods" button in \
-                the Scanner tab of the config screen) to write \
-                `nourished_nutrients_export/` — a folder of read-only reference files, one per \
-                nutrient category (`fruits.json`, `proteins.json`, `vegetables.json`, etc.), each \
+                **Categorized export (recommended for overrides):** use the "Export All Foods" button \
+                in the Scanner tab of the config screen, or run `/nourished export_all` (op 2). \
+                Both write `nourished_nutrients_export/` — a folder of read-only reference files, one \
+                per nutrient category (`fruits.json`, `proteins.json`, `vegetables.json`, etc.), each \
                 listing every item Nourished currently resolves into that category, with its live \
                 nutrient values and calories.
 
+                **Single-file export (MarieLib):** `/marieslib dump nourished_nutrients` writes one \
+                file, `nourished_nutrients_export.json`, with the same live data in MarieLib's \
+                `id`/`data` export format. Use this for tooling or quick inspection; the categorized \
+                folder above is easier to copy from when building `food_overrides.json`.
+
                 To turn an export entry into an override, copy it from the relevant category file \
-                into `food_overrides.json` and reshape it from:
+                in `nourished_nutrients_export/` into `food_overrides.json` and reshape it from:
 
                 ```json
                 { "item": "minecraft:steak", "nutrients": { "proteins": 0.8 }, "calories": 60 }

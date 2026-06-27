@@ -228,14 +228,15 @@ public final class NourishedImportExport {
 
     public static PresetRegistry.PresetValues presetValuesFromCurrentConfig() {
         NourishedConfig c = NourishedConfig.get();
-        return new PresetRegistry.PresetValues(
-                c.decayRate(),
-                c.criticalThreshold(),
-                c.lowThreshold(),
-                c.excessThreshold(),
-                c.defaultEffectDurationTicks(),
-                c.enableDecay(),
-                c.enableEffects());
+        JsonObject o = new JsonObject();
+        o.addProperty("decayRate", c.decayRate());
+        o.addProperty("criticalThreshold", c.criticalThreshold());
+        o.addProperty("lowThreshold", c.lowThreshold());
+        o.addProperty("excessThreshold", c.excessThreshold());
+        o.addProperty("defaultEffectDurationTicks", c.defaultEffectDurationTicks());
+        o.addProperty("enableDecay", c.enableDecay());
+        o.addProperty("enableEffects", c.enableEffects());
+        return PresetRegistry.PresetValues.fromJsonObject(o);
     }
 
     private static JsonObject exportModules(NourishedConfig c) {

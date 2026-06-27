@@ -1,0 +1,18 @@
+{
+  "farmersdelight:chicken_soup":       { "proteins": 1.5, "vegetables": 1.0 },
+  "farmersdelight:beef_stew":          { "proteins": 1.5, "vegetables": 1.0 },
+  "farmersdelight:baked_cod_stew":     { "proteins": 1.5, "vegetables": 1.0 },
+  "farmersdelight:fish_stew":          { "proteins": 1.5, "vegetables": 1.0 },
+  "farmersdelight:mutton_wrap":        { "proteins": 1.5, "vegetables": 1.0 },
+  "farmersdelight:noodle_soup":        { "proteins": 1.0, "grains": 1.0, "vegetables": 0.75 },
+  "farmersdelight:stuffed_pumpkin":    { "proteins": 1.5, "vegetables": 1.0 },
+  "farmersdelight:ratatouille":        { "proteins": 1.0, "vegetables": 1.5 },
+  "farmersdelight:hamburger":          { "proteins": 1.5, "grains": 1.0 },
+  "farmersdelight:shepherds_pie":      { "proteins": 1.5, "grains": 1.0 },
+  "farmersdelight:cabbage_rolls":      { "proteins": 1.0, "grains": 1.0, "vegetables": 0.75 },
+  "farmersdelight:steak_and_potatoes":    { "proteins": 1.5, "vegetables": 1.0 },
+  "farmersdelight:bone_broth":            { "proteins": 1.5, "vegetables": 1.0 },
+  "farmersdelight:onion_soup":            { "proteins": 1.0, "vegetables": 1.5 },
+  "farmersdelight:pasta_with_meatballs":  { "proteins": 1.5, "grains": 1.0 },
+  "farmersdelight:pasta_with_mutton_chop": { "proteins": 1.5, "grains": 1.0 }
+}

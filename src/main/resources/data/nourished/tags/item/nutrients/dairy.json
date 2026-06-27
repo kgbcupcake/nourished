@@ -42,7 +42,7 @@
       "required": false
     },
     {
-      "id": "farmersdelight:cooking/glow_berry_custard",
+      "id": "farmersdelight:glow_berry_custard",
       "required": false
     },
     {
@@ -261,7 +261,10 @@
       "id": "herbsandharvest:mayo",
       "required": false
     },
-    "minecraft:milk_bucket",
+    {
+      "id": "minecraft:milk_bucket",
+      "required": false
+    },
     {
       "id": "mynethersdelight:dried_ghast_with_milk",
       "required": false
@@ -348,10 +351,6 @@
     },
     {
       "id": "croptopia:whipping_cream",
-      "required": false
-    },
-    {
-      "id": "croptopia:yoghurt",
       "required": false
     },
     {
@@ -1050,7 +1049,6 @@
       "id": "croptopia:vanilla_ice_cream",
       "required": false
     },
-
     {
       "id": "aquaculturedelight:halibut_with_tartar_sauce",
       "required": false
@@ -1310,7 +1308,14 @@
     {
       "id": "createfood:chocolate_milkshake_bottle",
       "required": false
+    },
+    {
+      "id": "pamhc2foodcore:basiccheeseburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:baconcheeseburgeritem",
+      "required": false
     }
-
   ]
 }
