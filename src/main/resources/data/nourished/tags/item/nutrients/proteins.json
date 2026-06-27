@@ -9,22 +9,70 @@
       "id": "#c:foods/fish",
       "required": false
     },
-    "minecraft:beef",
-    "minecraft:cooked_beef",
-    "minecraft:chicken",
-    "minecraft:cooked_chicken",
-    "minecraft:porkchop",
-    "minecraft:cooked_porkchop",
-    "minecraft:mutton",
-    "minecraft:cooked_mutton",
-    "minecraft:rabbit",
-    "minecraft:cooked_rabbit",
-    "minecraft:salmon",
-    "minecraft:cooked_salmon",
-    "minecraft:cod",
-    "minecraft:cooked_cod",
-    "minecraft:tropical_fish",
-    "minecraft:rotten_flesh",
+    {
+      "id": "minecraft:beef",
+      "required": false
+    },
+    {
+      "id": "minecraft:cooked_beef",
+      "required": false
+    },
+    {
+      "id": "minecraft:chicken",
+      "required": false
+    },
+    {
+      "id": "minecraft:cooked_chicken",
+      "required": false
+    },
+    {
+      "id": "minecraft:porkchop",
+      "required": false
+    },
+    {
+      "id": "minecraft:cooked_porkchop",
+      "required": false
+    },
+    {
+      "id": "minecraft:mutton",
+      "required": false
+    },
+    {
+      "id": "minecraft:cooked_mutton",
+      "required": false
+    },
+    {
+      "id": "minecraft:rabbit",
+      "required": false
+    },
+    {
+      "id": "minecraft:cooked_rabbit",
+      "required": false
+    },
+    {
+      "id": "minecraft:salmon",
+      "required": false
+    },
+    {
+      "id": "minecraft:cooked_salmon",
+      "required": false
+    },
+    {
+      "id": "minecraft:cod",
+      "required": false
+    },
+    {
+      "id": "minecraft:cooked_cod",
+      "required": false
+    },
+    {
+      "id": "minecraft:tropical_fish",
+      "required": false
+    },
+    {
+      "id": "minecraft:rotten_flesh",
+      "required": false
+    },
     {
       "id": "pamhc2foodcore:basichamburgeritem",
       "required": false
@@ -70,6 +118,11 @@
       "required": false
     },
     {
+      "id":"farmersdelight:fried_egg",
+      "required": false
+    },
+
+    {
       "id": "farmersdelight:cooked_salmon_slice",
       "required": false
     },
@@ -94,19 +147,7 @@
       "required": false
     },
     {
-      "id": "farmersdelight:cooking/bone_broth",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:cooking/cabbage_rolls",
-      "required": false
-    },
-    {
       "id": "farmersdelight:cooking/chicken_soup",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:cooking/dumplings",
       "required": false
     },
     {
@@ -115,6 +156,14 @@
     },
     {
       "id": "farmersdelight:cooking/beef_stew",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:dumplings",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cabbage_rolls",
       "required": false
     },
     {
@@ -797,7 +846,10 @@
       "id": "minecolonies:sushi_roll",
       "required": false
     },
-    "minecraft:spider_eye",
+    {
+      "id": "minecraft:spider_eye",
+      "required": false
+    },
     {
       "id": "naturalist:bass",
       "required": false
@@ -3319,19 +3371,11 @@
       "required": false
     },
     {
-      "id": "croptopia:anchovy",
-      "required": false
-    },
-    {
       "id": "croptopia:bacon",
       "required": false
     },
     {
       "id": "croptopia:blackbean",
-      "required": false
-    },
-    {
-      "id": "croptopia:clam",
       "required": false
     },
     {
@@ -3359,10 +3403,6 @@
       "required": false
     },
     {
-      "id": "croptopia:crab",
-      "required": false
-    },
-    {
       "id": "croptopia:crab_legs",
       "required": false
     },
@@ -3375,10 +3415,6 @@
       "required": false
     },
     {
-      "id": "croptopia:frog_legs",
-      "required": false
-    },
-    {
       "id": "croptopia:fried_calamari",
       "required": false
     },
@@ -3387,23 +3423,7 @@
       "required": false
     },
     {
-      "id": "croptopia:fried_frog_legs",
-      "required": false
-    },
-    {
-      "id": "croptopia:glowing_calamari",
-      "required": false
-    },
-    {
       "id": "croptopia:ground_pork",
-      "required": false
-    },
-    {
-      "id": "croptopia:oyster",
-      "required": false
-    },
-    {
-      "id": "croptopia:peanut",
       "required": false
     },
     {
@@ -3415,27 +3435,11 @@
       "required": false
     },
     {
-      "id": "croptopia:roe",
-      "required": false
-    },
-    {
       "id": "croptopia:sausage",
       "required": false
     },
     {
-      "id": "croptopia:shrimp",
-      "required": false
-    },
-    {
       "id": "croptopia:soybean",
-      "required": false
-    },
-    {
-      "id": "croptopia:tofu",
-      "required": false
-    },
-    {
-      "id": "croptopia:tuna",
       "required": false
     },
     {
@@ -3460,10 +3464,6 @@
     },
     {
       "id": "croptopia:burrito",
-      "required": false
-    },
-    {
-      "id": "croptopia:carnitas",
       "required": false
     },
     {
@@ -3539,10 +3539,6 @@
       "required": false
     },
     {
-      "id": "croptopia:protein_bar",
-      "required": false
-    },
-    {
       "id": "croptopia:quesadilla",
       "required": false
     },
@@ -3564,10 +3560,6 @@
     },
     {
       "id": "croptopia:steamed_crab",
-      "required": false
-    },
-    {
-      "id": "croptopia:sushi",
       "required": false
     },
     {
@@ -3595,19 +3587,11 @@
       "required": false
     },
     {
-      "id": "croptopia:tuna_sandwich",
-      "required": false
-    },
-    {
       "id": "croptopia:baked_beans",
       "required": false
     },
     {
       "id": "croptopia:cabbage_roll",
-      "required": false
-    },
-    {
-      "id": "croptopia:calamari",
       "required": false
     },
     {
@@ -3631,14 +3615,6 @@
       "required": false
     },
     {
-      "id": "croptopia:croque_madame",
-      "required": false
-    },
-    {
-      "id": "croptopia:croque_monsieur",
-      "required": false
-    },
-    {
       "id": "croptopia:anchovy_pizza",
       "required": false
     },
@@ -3659,7 +3635,7 @@
       "required": false
     },
     {
-     "id": "aethersdelight:cooked_moa",
+      "id": "aethersdelight:cooked_moa",
       "required": false
     },
     {
@@ -4673,7 +4649,92 @@
     {
       "id": "arsdelight:wilden_meat",
       "required": false
-    }
+    },
+    {
+      "id": "farmersdelight:beef_stew",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:baked_cod_stew",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:chicken_soup",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:fish_stew",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:cod_roll",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:salmon_roll",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:kelp_roll",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:shepherds_pie",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:noodle_soup",
+      "required": false
+    },
+    {
+      "id": "aethersdelight:flying_beef_stew",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:beef_stew",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:chicken_noodle_soup",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:chicken_rice_soup",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:leekbaconsoupitem",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:chicken_pot_pie_slice",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:fig_chicken_stew",
+      "required": false
+    },
 
+    { "id": "croptopia:beef_stew", "required": false },
+    { "id": "croptopia:beef_wellington", "required": false },
+    { "id": "croptopia:cashew_chicken", "required": false },
+    { "id": "croptopia:chicken_and_noodles", "required": false },
+    { "id": "croptopia:chicken_and_rice", "required": false },
+    { "id": "croptopia:egg_roll", "required": false },
+    { "id": "croptopia:fajitas", "required": false },
+    { "id": "croptopia:ham_sandwich", "required": false },
+    { "id": "croptopia:lemon_chicken", "required": false },
+    { "id": "croptopia:taco", "required": false },
+    { "id": "croptopia:tamales", "required": false },
+    { "id": "croptopia:tofu_and_dumplings", "required": false },
+
+    { "id": "pamhc2foodcore:noodlesoupitem", "required": false },
+    { "id": "pamhc2foodcore:stewitem", "required": false },
+
+    { "id": "pamhc2foodextended:bangersandmashitem", "required": false },
+    { "id": "pamhc2foodextended:bltitem", "required": false },
+    { "id": "pamhc2foodextended:coleslawburgeritem", "required": false },
+    { "id": "pamhc2foodextended:deluxecheeseburgeritem", "required": false },
+    { "id": "pamhc2foodextended:epicbltitem", "required": false }
   ]
 }

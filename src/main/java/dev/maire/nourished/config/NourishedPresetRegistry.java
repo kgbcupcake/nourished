@@ -99,15 +99,16 @@ public final class NourishedPresetRegistry {
         }
     }
 
-    public static void applyPresetValues(PresetRegistry.PresetValues values) {
+    public static void applyPresetValues(PresetRegistry.PresetValues preset) {
+        JsonObject v = preset.toJsonObject();
         NourishedConfig config = NourishedConfig.get();
-        config.setDecayRate(clamp(values.decayRate(), 0.0d, 1.0d));
-        config.setCriticalThreshold(clamp(values.criticalThreshold(), 0.0d, 1.0d));
-        config.setLowThreshold(clamp(values.lowThreshold(), 0.0d, 1.0d));
-        config.setExcessThreshold(clamp(values.excessThreshold(), 0.0d, 1.0d));
-        config.setDefaultEffectDurationTicks(clamp(values.defaultEffectDurationTicks(), 20, 72000));
-        config.setEnableDecay(values.enableDecay());
-        config.setEnableEffects(values.enableEffects());
+        if (v.has("decayRate"))                  config.setDecayRate(clamp(v.get("decayRate").getAsDouble(), 0.0d, 1.0d));
+        if (v.has("criticalThreshold"))          config.setCriticalThreshold(clamp(v.get("criticalThreshold").getAsDouble(), 0.0d, 1.0d));
+        if (v.has("lowThreshold"))               config.setLowThreshold(clamp(v.get("lowThreshold").getAsDouble(), 0.0d, 1.0d));
+        if (v.has("excessThreshold"))            config.setExcessThreshold(clamp(v.get("excessThreshold").getAsDouble(), 0.0d, 1.0d));
+        if (v.has("defaultEffectDurationTicks")) config.setDefaultEffectDurationTicks(clamp(v.get("defaultEffectDurationTicks").getAsInt(), 20, 72000));
+        if (v.has("enableDecay"))                config.setEnableDecay(v.get("enableDecay").getAsBoolean());
+        if (v.has("enableEffects"))              config.setEnableEffects(v.get("enableEffects").getAsBoolean());
         NourishedConfig.saveNow();
         NourishedConfig.syncModuleCache();
     }

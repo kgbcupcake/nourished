@@ -52,7 +52,8 @@ public final class RuntimeFoodResolver {
     }
 
     private final BoundedLRU<ResourceLocation, ResolutionResult> resolvedCache = new BoundedLRU<>();
-    private final BoundedLRU<ResourceLocation, List<ResourceLocation>> recipeCache = new BoundedLRU<>();
+    private final dev.marie.MariesLib.scanner.RecipeInheritanceResolver recipeInheritanceResolver =
+            new dev.marie.MariesLib.scanner.RecipeInheritanceResolver(null);
     private final ConcurrentHashMap<String, RunningAverage> namespacePeers = new ConcurrentHashMap<>();
     private final AtomicInteger cacheHits = new AtomicInteger();
     private final AtomicInteger cacheMisses = new AtomicInteger();
@@ -70,7 +71,7 @@ public final class RuntimeFoodResolver {
     private RuntimeFoodResolver() {
         communityTagStage = new CommunityTagStage();
         keywordSuffixStage = new KeywordSuffixStage();
-        recipeInheritanceStage = new RecipeInheritanceStage(recipeCache);
+        recipeInheritanceStage = new RecipeInheritanceStage(recipeInheritanceResolver);
         namespacePeerStage = new NamespacePeerStage();
         hardFallbackStage = new HardFallbackStage();
     }
@@ -515,10 +516,19 @@ public final class RuntimeFoodResolver {
         recipeTimeouts.incrementAndGet();
     }
 
+    public dev.marie.MariesLib.scanner.RecipeInheritanceResolver recipeInheritanceResolver() {
+        return recipeInheritanceResolver;
+    }
+
+    public void buildRecipeIndex(RecipeManager recipeManager) {
+        recipeInheritanceResolver.clearCache();
+        recipeInheritanceResolver.buildIndex(recipeManager);
+    }
+
     public void invalidateCache() {
         int size = resolvedCache.size();
         resolvedCache.clear();
-        recipeCache.clear();
+        recipeInheritanceResolver.clearCache();
         namespacePeers.clear();
         totalResolveNanos.set(0);
         slowestResolveNanos.set(0);

@@ -9,6 +9,7 @@ import dev.marie.MariesLib.registry.RegistryLifecycleManager;
 import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
+import dev.maire.nourished.core.nutrition.NutrientWeightRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurveRegistry;
@@ -44,6 +45,9 @@ public final class NourishedLifecycle {
                 "FoodValueRegistry", FoodValueRegistry::load, FoodValueRegistry::reload, FoodValueRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
                 "FoodOverrideRegistry", FoodOverrideRegistry::load, FoodOverrideRegistry::reload, FoodOverrideRegistry::loadFromDatapack);
+        RegistryLifecycleManager.registerRegistry(
+                "NutrientWeightRegistry", NutrientWeightRegistry::load, NutrientWeightRegistry::reload,
+                NutrientWeightRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
                 "ScannerSpecRegistry", ScannerSpecRegistry::load, ScannerSpecRegistry::reload, ScannerSpecRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(

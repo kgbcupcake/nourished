@@ -9,13 +9,40 @@
       "id": "#c:foods/soup",
       "required": false
     },
-    "minecraft:carrot",
-    "minecraft:golden_carrot",
-    "minecraft:beetroot",
-    "minecraft:beetroot_soup",
-    "minecraft:mushroom_stew",
-    "minecraft:rabbit_stew",
-    "minecraft:suspicious_stew",
+    {
+      "id": "minecraft:carrot",
+      "required": false
+    },
+
+    {
+      "id": "minecraft:baked_potato",
+      "required": false
+    },
+
+    {
+      "id": "minecraft:golden_carrot",
+      "required": false
+    },
+    {
+      "id": "minecraft:beetroot",
+      "required": false
+    },
+    {
+      "id": "minecraft:beetroot_soup",
+      "required": false
+    },
+    {
+      "id": "minecraft:mushroom_stew",
+      "required": false
+    },
+    {
+      "id": "minecraft:rabbit_stew",
+      "required": false
+    },
+    {
+      "id": "minecraft:suspicious_stew",
+      "required": false
+    },
     {
       "id": "farmersdelight:vegetable_soup",
       "required": false
@@ -26,10 +53,6 @@
     },
     {
       "id": "farmersdelight:pumpkin_soup",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:hamburger",
       "required": false
     },
     {
@@ -45,19 +68,7 @@
       "required": false
     },
     {
-      "id": "farmersdelight:cooking/ratatouille",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:cooking/beetroot_soup",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:cooking/onion_soup",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:cooking/rabbit_stew",
+      "id": "farmersdelight:onion_soup",
       "required": false
     },
     {
@@ -142,10 +153,6 @@
     },
     {
       "id": "farm_and_charm:ribwort_tea_cup",
-      "required": false
-    },
-    {
-      "id": "farm_and_charm:strawberry_tea_cup",
       "required": false
     },
     {
@@ -322,18 +329,6 @@
     },
     {
       "id": "expandeddelight:peperonata",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:fruit_salad",
-      "required": false
-    },
-    {
-      "id": "fruitsdelight:bayberry_soup",
-      "required": false
-    },
-    {
-      "id": "fruitsdelight:mango_salad",
       "required": false
     },
     {
@@ -693,10 +688,6 @@
       "required": false
     },
     {
-      "id": "rootsclassic:fruit_salad",
-      "required": false
-    },
-    {
       "id": "rootsclassic:redcurrant",
       "required": false
     },
@@ -989,10 +980,6 @@
       "required": false
     },
     {
-      "id": "moredelight:loaded_hamburger",
-      "required": false
-    },
-    {
       "id": "pamhc2foodextended:honeyglazedcarrotsitem",
       "required": false
     },
@@ -1177,39 +1164,7 @@
       "required": false
     },
     {
-      "id": "croptopia:artichoke",
-      "required": false
-    },
-    {
-      "id": "croptopia:asparagus",
-      "required": false
-    },
-    {
       "id": "croptopia:basil",
-      "required": false
-    },
-    {
-      "id": "croptopia:bellpepper",
-      "required": false
-    },
-    {
-      "id": "croptopia:broccoli",
-      "required": false
-    },
-    {
-      "id": "croptopia:cabbage",
-      "required": false
-    },
-    {
-      "id": "croptopia:cauliflower",
-      "required": false
-    },
-    {
-      "id": "croptopia:celery",
-      "required": false
-    },
-    {
-      "id": "croptopia:chile_pepper",
       "required": false
     },
     {
@@ -1217,43 +1172,7 @@
       "required": false
     },
     {
-      "id": "croptopia:corn",
-      "required": false
-    },
-    {
-      "id": "croptopia:cucumber",
-      "required": false
-    },
-    {
-      "id": "croptopia:eggplant",
-      "required": false
-    },
-    {
-      "id": "croptopia:garlic",
-      "required": false
-    },
-    {
       "id": "croptopia:ginger",
-      "required": false
-    },
-    {
-      "id": "croptopia:greenbean",
-      "required": false
-    },
-    {
-      "id": "croptopia:greenonion",
-      "required": false
-    },
-    {
-      "id": "croptopia:kale",
-      "required": false
-    },
-    {
-      "id": "croptopia:leek",
-      "required": false
-    },
-    {
-      "id": "croptopia:lettuce",
       "required": false
     },
     {
@@ -1265,35 +1184,7 @@
       "required": false
     },
     {
-      "id": "croptopia:onion",
-      "required": false
-    },
-    {
       "id": "croptopia:pepper",
-      "required": false
-    },
-    {
-      "id": "croptopia:radish",
-      "required": false
-    },
-    {
-      "id": "croptopia:rutabaga",
-      "required": false
-    },
-    {
-      "id": "croptopia:sea_lettuce",
-      "required": false
-    },
-    {
-      "id": "croptopia:spinach",
-      "required": false
-    },
-    {
-      "id": "croptopia:squash",
-      "required": false
-    },
-    {
-      "id": "croptopia:sweetpotato",
       "required": false
     },
     {
@@ -1301,35 +1192,11 @@
       "required": false
     },
     {
-      "id": "croptopia:tomatillo",
-      "required": false
-    },
-    {
-      "id": "croptopia:tomato",
-      "required": false
-    },
-    {
       "id": "croptopia:turmeric",
       "required": false
     },
     {
-      "id": "croptopia:turnip",
-      "required": false
-    },
-    {
-      "id": "croptopia:yam",
-      "required": false
-    },
-    {
-      "id": "croptopia:zucchini",
-      "required": false
-    },
-    {
       "id": "croptopia:artichoke_dip",
-      "required": false
-    },
-    {
-      "id": "croptopia:ajvar",
       "required": false
     },
     {
@@ -1385,10 +1252,6 @@
       "required": false
     },
     {
-      "id": "croptopia:kale_smoothie",
-      "required": false
-    },
-    {
       "id": "croptopia:leafy_salad",
       "required": false
     },
@@ -1421,27 +1284,11 @@
       "required": false
     },
     {
-      "id": "croptopia:salsa",
-      "required": false
-    },
-    {
       "id": "croptopia:steamed_broccoli",
       "required": false
     },
     {
-      "id": "croptopia:steamed_green_beans",
-      "required": false
-    },
-    {
       "id": "croptopia:stuffed_artichoke",
-      "required": false
-    },
-    {
-      "id": "croptopia:stuffed_poblanos",
-      "required": false
-    },
-    {
-      "id": "croptopia:tomato_juice",
       "required": false
     },
     {
@@ -1458,14 +1305,6 @@
     },
     {
       "id": "croptopia:refried_beans",
-      "required": false
-    },
-    {
-      "id": "croptopia:stir_fry",
-      "required": false
-    },
-    {
-      "id": "croptopia:nether_wart_stew",
       "required": false
     },
     {
@@ -1506,10 +1345,6 @@
     },
     {
       "id": "croptopia:cheeseburger",
-      "required": false
-    },
-    {
-      "id": "croptopia:blt",
       "required": false
     },
     {
@@ -1589,35 +1424,7 @@
       "required": false
     },
     {
-      "id": "croptopia:cashew_chicken",
-      "required": false
-    },
-    {
-      "id": "croptopia:chicken_and_noodles",
-      "required": false
-    },
-    {
-      "id": "croptopia:chicken_and_rice",
-      "required": false
-    },
-    {
-      "id": "croptopia:egg_roll",
-      "required": false
-    },
-    {
       "id": "croptopia:tofu_and_dumplings",
-      "required": false
-    },
-    {
-      "id": "croptopia:fried_chicken",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:bacon_sandwich",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:chicken_sandwich",
       "required": false
     },
     {
@@ -1640,7 +1447,7 @@
       "id": "bountifulfares:pickled_spongekin",
       "required": false
     },
-     {
+    {
       "id": "aethersdelight:cooked_parsnip",
       "required": false
     },
@@ -2211,7 +2018,22 @@
     {
       "id": "minecraft:dried_kelp",
       "required": false
+    },
+    {
+      "id": "farmersdelight:baked_cod_stew",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:chicken_soup",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:fish_stew",
+      "required": false
+    },
+    {
+      "id": "createfood:sliced_potato",
+      "required": false
     }
-
   ]
 }

@@ -1,4 +1,6 @@
-![Main Menu](Assets/nourished_banner.png)
+[Ask DeepWiki](https://deepwiki.com/kgbcupcake/nourished)
+
+Main Menu
 
 I got sick of Minecraft's food system. There are other nutrition mods out there,
 but none of them did what I wanted or were updated for modern Minecraft,
@@ -8,7 +10,7 @@ so I decided to build my own.
 
 ## Community
 
-Discord: [https://discord.gg/EZnFJsfQup]
+Discord: [[https://discord.gg/EZnFJsfQup]](https://discord.gg/EZnFJsfQup])
 
 Questions, suggestions, and development discussion are welcome.
 
@@ -70,7 +72,7 @@ Resistance can be built up over time, reducing penalty scale. Everything, tiers,
 
 The HUD is the heart of the mod. Five color-coded bars sit on screen while you play;you always know where you stand without opening a menu.
 
-![HUD Edit Mode](Assets/nourished-MiniHud.gif)
+HUD Edit Mode
 
 **Drag it anywhere.** Press the keybind to enter edit mode and reposition the HUD exactly where you want it. Scale it, anchor it to any corner, or hide bars that are at zero.
 
@@ -80,7 +82,7 @@ The HUD is the heart of the mod. Five color-coded bars sit on screen while you p
 
 Open it from your inventory for a full breakdown - trend arrows, balance score, active effects, calorie tracking, and a reset timer.
 
-![Diet Screen](Assets/nourished-MainMenu.gif)
+Diet Screen
 
 Note: The HUD and Diet Screen screenshots were taken using the PureBDCraft resource pack. The UI is fully functional on vanilla textures but will appear in the default Minecraft style without a resource pack installed.
 
@@ -139,7 +141,7 @@ NourishedAPI.registerValue(definition);
 NourishedAPI.registerSourceClassification(foodId, "proteins", 0.15f);
 ```
 
-Read [`API.md`](API.md) for Nourished integration, [`PHILOSOPHY.md`](PHILOSOPHY.md) for stability rules, and [MariesLib API](https://github.com/kgbcupcake/MarieLib/blob/main/API.md) for shared types like `ValueDefinition`. Datapack-only integrations need no Java.
+Read `[API.md](API.md)` for Nourished integration, `[PHILOSOPHY.md](PHILOSOPHY.md)` for stability rules, and [MariesLib API](https://github.com/kgbcupcake/MarieLib/blob/main/API.md) for shared types like `ValueDefinition`. Datapack-only integrations need no Java.
 
 ---
 
@@ -153,7 +155,7 @@ Effects add or replace buff/debuff rules via effects.json
 Food overrides — override specific item nutrition values via food_overrides.json
 Food values — adjust category multipliers via food_values.json
 Colors — customize HUD bar colors via colors.json
-The built-in food scanner (MariesLib tooling, `/nourished scan`) auto-classifies unknown foods and can write datapack output into your save. See [`API.md`](API.md).
+The built-in food scanner (MariesLib tooling, `/nourished scan`) auto-classifies unknown foods and can write datapack output into your save. See `[API.md](API.md)`.
 
 ---
 
