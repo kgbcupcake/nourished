@@ -73,6 +73,9 @@ public final class FoodNutritionRegistry {
         if (stack.is(Items.MILK_BUCKET)) {
             return MILK_BUCKET_FOOD_PROPERTIES;
         }
+        if (!getNutrientTagScores(stack.getItem()).isEmpty()) {
+            return MILK_BUCKET_FOOD_PROPERTIES;
+        }
         return null;
     }
 

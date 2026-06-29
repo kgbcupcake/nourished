@@ -3,7 +3,6 @@ package dev.maire.nourished.core.nutrition.stages;
 import dev.marie.MariesLib.compat.ModCompat;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.nutrition.MultiNutrientInheritance;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.MariesLib.scan.ResolutionResult;
 import dev.marie.MariesLib.scan.RuntimeCascadeStage;
@@ -179,16 +178,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             }
             if (filtered.isEmpty()) return null;
 
-            Map<String, Float> qualifying = MultiNutrientInheritance.filterQualifyingNutrients(
-                    filtered, MultiNutrientInheritance.threshold());
-            if (qualifying.isEmpty()) {
-                if (Nourished.LOGGER.isDebugEnabled()) {
-                    Nourished.LOGGER.debug("[RecipeInheritance] {} — FAILED: all nutrients filtered below threshold",
-                            itemId);
-                }
-                ctx.setRecipeFailureReason("NUTRIENTS_BELOW_THRESHOLD");
-                return null;
-            }
+            Map<String, Float> qualifying = filtered;
 
             if (Nourished.LOGGER.isDebugEnabled()) {
                 Nourished.LOGGER.debug("[RecipeInheritance] {} — SUCCESS: {}", itemId, qualifying);
@@ -197,11 +187,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             Map<String, String> rejectedSignals = new LinkedHashMap<>();
             for (String key : ctx.validKeys()) {
                 if (!qualifying.containsKey(key)) {
-                    if (filtered.containsKey(key)) {
-                        rejectedSignals.put(key, ResolutionResult.REJECT_LOW_CONFIDENCE);
-                    } else {
-                        rejectedSignals.put(key, ResolutionResult.REJECT_NO_MATCHING_KEYWORDS);
-                    }
+                    rejectedSignals.put(key, ResolutionResult.REJECT_NO_MATCHING_KEYWORDS);
                 }
             }
 
