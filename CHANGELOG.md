@@ -2,6 +2,52 @@
 
 <!-- markdownlint-disable MD013 -->
 
+## [ Unreleased ]
+
+### CI / Tooling
+
+- **`check-marielib-update.yml`** GitHub Actions workflow: runs manually (`workflow_dispatch`) or
+  weekly (Mondays at 12:00 UTC), queries GitHub Packages Maven metadata for the latest published
+  MarieLib release, and opens a PR against `dev` bumping `marie_lib_version` and
+  `marie_lib_version_range` in `gradle.properties` when a newer version is found. Does not
+  auto-merge or touch `main`; requires a manually-created `MARIELIB_PACKAGES_TOKEN` repo secret
+  (PAT with `read:packages` scope) since the default `GITHUB_TOKEN` cannot read packages from the
+  separate MarieLib repository.
+
+## [ Nourished 0.2.6-beta.5 ] 2026-6-29
+
+### Added
+
+- **`enableDiminishingReturns` master toggle** for the diminishing-returns system, exposed in the
+  Advanced config tab alongside the existing `diminishingFloor`, `diminishingSteepness`, and
+  `diminishingMidpoint` sliders. When disabled, `diminishingFloor` and `noveltyBonus` are both
+  forced to `1.0` (repeated foods keep full value) on server, client, and client-fallback memory
+  configs alike (`NourishedMemoryConfig`).
+- Config screen **Save & Save All Files** now reloads and re-broadcasts config to connected
+  players when an integrated singleplayer server is running, instead of requiring a manual
+  `/nourished reload` or world rejoin to see changes take effect.
+
+### Changed
+
+- **Items with only nutrient-tag data (no vanilla `FoodProperties`) are now recognized as
+  nutritious food**: `NourishedItems.isNutritiousFood` and `FoodNutritionRegistry.getFoodProperties`
+  both fall back to `FoodNutritionRegistry.getNutrientTagScores`, so tag-only items no longer get
+  silently skipped by the eating/tooltip pipeline.
+- **`RecipeInheritanceStage` simplified**: the multi-nutrient qualifying-threshold filter
+  (`MultiNutrientInheritance.filterQualifyingNutrients`, `NUTRIENTS_BELOW_THRESHOLD` failure
+  reason) was removed — inherited nutrients that pass the earlier filtering stage are used
+  directly, and unmatched keys are now reported as `REJECT_NO_MATCHING_KEYWORDS` rather than being
+  split between low-confidence and no-match reasons.
+- Mod description in `gradle.properties` no longer references a version-specific MarieLib
+  changelog note (`(from v0.2.5-beta.5)`); still requires MarieLib 0.1.0-beta.2+.
+
+### In Progress
+
+- Example **source synergy** datapack entries added under
+  `data/nourished/nourished/source_synergies/` (`hearty_meal`, `balanced_plate`, `breakfast`) —
+  paired-food bonus definitions (`source_a`/`source_b`, time window, bonus value/modifier). Not
+  yet loaded or consumed by any code; not active in this build.
+
 ## [ Nourished 0.2.6-beta.4 ] 2026-6-27
 
 ### Added
@@ -173,12 +219,12 @@ If updating from 0.2.6-beta.3:
 
 - Bumped MarieLib dependency to **0.1.1-beta.1** (`marie_lib_version_range=[0.1.1-beta.1,)`).
   Requires MarieLib **0.1.1-beta.1+** for:
-    - `ValueRegistry.isFrozen()` (external nutrient registration after freeze)
-    - `MarieAPI.registerExportResolver` / `RegistryExporter` (nutrient export pipeline)
-    - `MarieAPI.registerConfigValidator` / `ValidationRunner` (config validation)
-    - `MarieAPI.registerTagRule` / `registerTagAuditContext` / `TagScanner` (tag audit pipeline)
-    - Consumer command **`/nourished set_all`** (implemented in MarieLib's player command tree)
-    - Local/dev MarieLib builds also ship `TagAuditReportWriter` for `/marieslib audit_tags`; Nourished's
+  - `ValueRegistry.isFrozen()` (external nutrient registration after freeze)
+  - `MarieAPI.registerExportResolver` / `RegistryExporter` (nutrient export pipeline)
+  - `MarieAPI.registerConfigValidator` / `ValidationRunner` (config validation)
+  - `MarieAPI.registerTagRule` / `registerTagAuditContext` / `TagScanner` (tag audit pipeline)
+  - Consumer command **`/nourished set_all`** (implemented in MarieLib's player command tree)
+  - Local/dev MarieLib builds also ship `TagAuditReportWriter` for `/marieslib audit_tags`; Nourished's
       own audit commands write reports via `NourishedTagAuditReportWriter` so they work with the
       published jar alone.
 

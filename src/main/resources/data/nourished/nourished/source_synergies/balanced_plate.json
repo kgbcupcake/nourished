@@ -1,0 +1,9 @@
+{
+	"source_a": "minecraft:cooked_chicken",
+	"source_b": "minecraft:carrot",
+	"time_window_ticks": 100,
+	"bonus_value_key": "vegetables",
+	"bonus_amount": 0.02,
+	"value_modifier": 1.05,
+	"modifier_duration_ticks": 100
+}
