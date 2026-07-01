@@ -99,6 +99,9 @@ public final class NourishedConfig {
     private final ModConfigSpec.DoubleValue diminishingSteepness;
     private final ModConfigSpec.DoubleValue diminishingMidpoint;
 
+    // Master toggle for the diminishing returns system
+    private final ModConfigSpec.BooleanValue enableDiminishingReturns;
+
     // Streak multiplier
     private final ModConfigSpec.IntValue streakWindowMs;
     private final ModConfigSpec.DoubleValue streakWeight;
@@ -228,6 +231,9 @@ public final class NourishedConfig {
         memoryWindowCount = builder
                 .comment("Maximum number of distinct food entries tracked in memory.")
                 .defineInRange("memoryWindowCount", ConfigDefaultsLoader.getInt(defaults, "memoryWindowCount", 50), 1, 200);
+        enableDiminishingReturns = builder
+                .comment("When false, diminishing returns are disabled: floor and noveltyBonus are both forced to 1.0.")
+                .define("enableDiminishingReturns", ConfigDefaultsLoader.getBoolean(defaults, "enableDiminishingReturns", true));
         diminishingFloor = builder
                 .comment("Minimum multiplier for heavily repeated foods. 0.15 = 15% credit floor.")
                 .defineInRange("diminishingFloor", ConfigDefaultsLoader.getDouble(defaults, "diminishingFloor", 0.15), 0.0, 1.0);
@@ -710,6 +716,26 @@ public final class NourishedConfig {
 
     public double diminishingMidpoint() {
         return diminishingMidpoint.get();
+    }
+
+    public boolean enableDiminishingReturns() {
+        return enableDiminishingReturns.get();
+    }
+
+    public void setEnableDiminishingReturns(boolean value) {
+        enableDiminishingReturns.set(value);
+    }
+
+    public void setDiminishingFloor(double value) {
+        diminishingFloor.set(value);
+    }
+
+    public void setDiminishingSteepness(double value) {
+        diminishingSteepness.set(value);
+    }
+
+    public void setDiminishingMidpoint(double value) {
+        diminishingMidpoint.set(value);
     }
 
     public int streakWindowMs() {

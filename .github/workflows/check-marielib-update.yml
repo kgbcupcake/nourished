@@ -1,0 +1,71 @@
+name: Check MarieLib Update
+
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: "0 12 * * 1"
+
+jobs:
+    check-update:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            pull-requests: write
+        steps:
+            - uses: actions/checkout@v5
+              with:
+                  ref: dev
+
+            # Requires a Personal Access Token with the `read:packages` scope, stored in the
+            # MARIELIB_PACKAGES_TOKEN repo secret. The default GITHUB_TOKEN cannot read GitHub
+            # Packages from a different repository (kgbcupcake/MarieLib), so this secret must be
+            # created manually in repo settings before this workflow will succeed.
+            - name: Fetch latest MarieLib version from GitHub Packages
+              id: latest
+              env:
+                  MARIELIB_PACKAGES_TOKEN: ${{ secrets.MARIELIB_PACKAGES_TOKEN }}
+              run: |
+                  METADATA_URL="https://maven.pkg.github.com/kgbcupcake/MarieLib/dev/marie/MariesLib/marieslib/maven-metadata.xml"
+
+                  METADATA=$(curl -sSL -f -u "kgbcupcake:${MARIELIB_PACKAGES_TOKEN}" "$METADATA_URL")
+
+                  LATEST_VERSION=$(echo "$METADATA" | grep -oPm1 '(?<=<release>)[^<]+')
+                  if [ -z "$LATEST_VERSION" ]; then
+                    LATEST_VERSION=$(echo "$METADATA" | grep -oP '(?<=<version>)[^<]+' | tail -n1)
+                  fi
+
+                  if [ -z "$LATEST_VERSION" ]; then
+                    echo "Could not parse a version from maven-metadata.xml" >&2
+                    exit 1
+                  fi
+
+                  echo "version=$LATEST_VERSION" >> "$GITHUB_OUTPUT"
+
+            - name: Compare against current pin
+              id: current
+              run: |
+                  CURRENT_VERSION=$(grep '^marie_lib_version=' gradle.properties | cut -d'=' -f2)
+                  echo "version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+
+            - name: Update gradle.properties
+              if: steps.latest.outputs.version != steps.current.outputs.version
+              run: |
+                  NEW_VERSION="${{ steps.latest.outputs.version }}"
+                  sed -i "s/^marie_lib_version=.*/marie_lib_version=${NEW_VERSION}/" gradle.properties
+                  sed -i "s/^marie_lib_version_range=.*/marie_lib_version_range=[${NEW_VERSION},)/" gradle.properties
+
+            - name: Open pull request
+              if: steps.latest.outputs.version != steps.current.outputs.version
+              uses: peter-evans/create-pull-request@v6
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  branch: chore/bump-marielib-${{ steps.latest.outputs.version }}
+                  base: dev
+                  title: "chore: bump MarieLib to ${{ steps.latest.outputs.version }}"
+                  commit-message: "chore: bump MarieLib to ${{ steps.latest.outputs.version }}"
+                  body: |
+                      Automated update: MarieLib ${{ steps.current.outputs.version }} -> ${{ steps.latest.outputs.version }}
+
+                      Bumps `marie_lib_version` and `marie_lib_version_range` in `gradle.properties` to track the
+                      latest published MarieLib release. This PR targets `dev` and is not auto-merged.
+                  add-paths: gradle.properties

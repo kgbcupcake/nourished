@@ -4,6 +4,7 @@ import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.marie.MariesLib.api.MarieAPI;
 import dev.marie.MariesLib.api.ApiStatus;
 import dev.marie.MariesLib.api.MilestoneDefinition;
+import dev.marie.MariesLib.api.SourcePairSynergy;
 import dev.marie.MariesLib.api.ThresholdEffect;
 import dev.marie.MariesLib.api.ValueDefinition;
 import dev.marie.MariesLib.data.MarieDataLoader;
@@ -43,5 +44,10 @@ public final class NourishedDatapackCallbacks implements MarieDataLoader.Callbac
     @Override
     public void registerCustomEffect(ThresholdEffect def) {
         EffectRegistry.upsertFromDatapack(def);
+    }
+
+    @Override
+    public void registerSourcePairSynergy(SourcePairSynergy def) {
+        MarieAPI.registerSourcePairSynergy(def);
     }
 }

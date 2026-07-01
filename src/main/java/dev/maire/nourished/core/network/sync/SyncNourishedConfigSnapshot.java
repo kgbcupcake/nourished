@@ -33,10 +33,11 @@ public record SyncNourishedConfigSnapshot(
         double noveltyBonus,
         double noveltyDecayCap,
         double diminishingFloor,
+        boolean enableDiminishingReturns,
         Map<String, Double> nutrientDecayOverrides
 ) implements CustomPacketPayload {
 
-    public static final int PROTOCOL_VERSION = 3;
+    public static final int PROTOCOL_VERSION = 4;
 
     public static final CustomPacketPayload.Type<SyncNourishedConfigSnapshot> TYPE =
             new CustomPacketPayload.Type<>(
@@ -95,6 +96,7 @@ public record SyncNourishedConfigSnapshot(
                         buf.writeDouble(s.noveltyBonus());
                         buf.writeDouble(s.noveltyDecayCap());
                         buf.writeDouble(s.diminishingFloor());
+                        buf.writeBoolean(s.enableDiminishingReturns());
                         DECAY_OVERRIDES_CODEC.encode(buf, s.nutrientDecayOverrides());
                     },
                     buf -> {
@@ -118,6 +120,7 @@ public record SyncNourishedConfigSnapshot(
                         double noveltyBonus = buf.readDouble();
                         double noveltyDecayCap = buf.readDouble();
                         double diminishingFloor = buf.readDouble();
+                        boolean enableDiminishingReturns = buf.readBoolean();
                         Map<String, Double> overrides = DECAY_OVERRIDES_CODEC.decode(buf);
                         return new SyncNourishedConfigSnapshot(
                                 version, decayRate, decayIntervalTicks, criticalThreshold,
@@ -126,7 +129,7 @@ public record SyncNourishedConfigSnapshot(
                                 enableGutHealth, enableEffects, enableHUD, enableToasts, confidenceSpreadThreshold,
                                 compositeRatioThreshold,
                                 memoryWindowMinutes, noveltyBonus, noveltyDecayCap, diminishingFloor,
-                                overrides
+                                enableDiminishingReturns, overrides
                         );
                     }
             );
@@ -160,6 +163,7 @@ public record SyncNourishedConfigSnapshot(
                 config.noveltyBonus(),
                 config.noveltyDecayCap(),
                 config.diminishingFloor(),
+                config.enableDiminishingReturns(),
                 overrides
         );
     }

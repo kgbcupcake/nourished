@@ -17,11 +17,21 @@ public final class NourishedMemoryConfig {
     public static DiminishingReturnsConfig serverTrackingMemoryConfig() {
         SyncNourishedConfigSnapshot snap = NourishedSyncHandler.getConfigSnapshot();
         if (snap != null) {
+            if (!snap.enableDiminishingReturns()) {
+                return new DiminishingReturnsConfig(
+                        snap.memoryWindowMinutes(), 1.0, 1.0,
+                        1.0, snap.startingNutrientValue());
+            }
             return new DiminishingReturnsConfig(
                     snap.memoryWindowMinutes(), snap.noveltyBonus(), snap.noveltyDecayCap(),
                     snap.diminishingFloor(), snap.startingNutrientValue());
         }
         NourishedConfig cfg = NourishedConfig.get();
+        if (!cfg.enableDiminishingReturns()) {
+            return new DiminishingReturnsConfig(
+                    cfg.memoryWindowMinutes(), 1.0, 1.0,
+                    1.0, cfg.startingNutrientValue());
+        }
         return new DiminishingReturnsConfig(
                 cfg.memoryWindowMinutes(), cfg.noveltyBonus(), cfg.noveltyDecayCap(),
                 cfg.diminishingFloor(), cfg.startingNutrientValue());
@@ -29,7 +39,13 @@ public final class NourishedMemoryConfig {
 
     public static DiminishingReturnsConfig clientOrServerMemoryConfig() {
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            return NourishedClientMemoryConfig.get();
+            DiminishingReturnsConfig base = NourishedClientMemoryConfig.get();
+            if (!NourishedConfig.get().enableDiminishingReturns()) {
+                return new DiminishingReturnsConfig(
+                        base.memoryWindowMinutes(), 1.0, 1.0,
+                        1.0, base.startingValueFill());
+            }
+            return base;
         }
         return serverTrackingMemoryConfig();
     }

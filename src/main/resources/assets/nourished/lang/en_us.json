@@ -423,6 +423,15 @@
   "advancement.nourished.milestones.sugars_master.description": "You have mastered the art of sugar.",
   "advancement.nourished.milestones.perfectly_balanced.title": "Perfectly Balanced",
   "advancement.nourished.milestones.perfectly_balanced.description": "As all things should be.",
-  "command.nourished.validate.failToast": "Config validation failed — run /nourished validate"
+  "command.nourished.validate.failToast": "Config validation failed — run /nourished validate",
+
+  "config.nourished.enableDiminishingReturns": "Enable Diminishing Returns",
+  "config.nourished.enableDiminishingReturns.desc": "When enabled, eating the same food repeatedly in a short window yields progressively less nutrition.",
+  "config.nourished.diminishingFloor": "Diminishing Floor",
+  "config.nourished.diminishingFloor.desc": "Minimum nutrition multiplier that repeated foods can fall to (0–1). Prevents the same food from eventually granting zero nutrition.",
+  "config.nourished.diminishingSteepness": "Diminishing Steepness",
+  "config.nourished.diminishingSteepness.desc": "Controls how sharply nutrition drops off with repetition. Higher values cause faster decay toward the floor.",
+  "config.nourished.diminishingMidpoint": "Diminishing Midpoint",
+  "config.nourished.diminishingMidpoint.desc": "Number of repeated servings at which the nutrition multiplier reaches the halfway point between full value and the floor."
 
 }

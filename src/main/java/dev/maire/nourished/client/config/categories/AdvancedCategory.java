@@ -53,6 +53,49 @@ public final class AdvancedCategory {
             );
         }
 
+        if (!NourishedLockRegistry.isLocked("enableDiminishingReturns")) {
+            category.addEntry(
+                    eb.startBooleanToggle(Component.translatable("config.nourished.enableDiminishingReturns"), config.enableDiminishingReturns())
+                            .setDefaultValue(true)
+                            .setTooltip(Component.translatable("config.nourished.enableDiminishingReturns.desc"))
+                            .setSaveConsumer(config::setEnableDiminishingReturns)
+                            .build()
+            );
+        }
+
+        if (!NourishedLockRegistry.isLocked("diminishingFloor")) {
+            category.addEntry(
+                    eb.startIntSlider(Component.translatable("config.nourished.diminishingFloor"), (int) Math.round(config.diminishingFloor() * 1000), 0, 1000)
+                            .setDefaultValue(150)
+                            .setTextGetter(v -> Component.literal(String.format("%.3f", v / 1000.0)))
+                            .setTooltip(Component.translatable("config.nourished.diminishingFloor.desc"))
+                            .setSaveConsumer(v -> config.setDiminishingFloor(v / 1000.0))
+                            .build()
+            );
+        }
+
+        if (!NourishedLockRegistry.isLocked("diminishingSteepness")) {
+            category.addEntry(
+                    eb.startIntSlider(Component.translatable("config.nourished.diminishingSteepness"), (int) Math.round(config.diminishingSteepness() * 1000), 100, 3000)
+                            .setDefaultValue(800)
+                            .setTextGetter(v -> Component.literal(String.format("%.3f", v / 1000.0)))
+                            .setTooltip(Component.translatable("config.nourished.diminishingSteepness.desc"))
+                            .setSaveConsumer(v -> config.setDiminishingSteepness(v / 1000.0))
+                            .build()
+            );
+        }
+
+        if (!NourishedLockRegistry.isLocked("diminishingMidpoint")) {
+            category.addEntry(
+                    eb.startIntSlider(Component.translatable("config.nourished.diminishingMidpoint"), (int) Math.round(config.diminishingMidpoint() * 1000), 1000, 10000)
+                            .setDefaultValue(2000)
+                            .setTextGetter(v -> Component.literal(String.format("%.3f", v / 1000.0)))
+                            .setTooltip(Component.translatable("config.nourished.diminishingMidpoint.desc"))
+                            .setSaveConsumer(v -> config.setDiminishingMidpoint(v / 1000.0))
+                            .build()
+            );
+        }
+
         addReloadButton(category, eb, false);
     }
 }

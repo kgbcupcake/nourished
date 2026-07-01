@@ -20,11 +20,14 @@ import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurveRegistry;
+import dev.maire.nourished.core.reload.NourishedReloadHelper;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import javax.annotation.Nullable;
@@ -116,6 +119,10 @@ public final class NourishedConfigScreen {
             NourishedClientConfig.saveNow();
             NourishedConfig.saveNow();
             NourishedConfig.syncModuleCache();
+            MinecraftServer integratedServer = Minecraft.getInstance().getSingleplayerServer();
+            if (integratedServer != null) {
+                NourishedReloadHelper.reloadAndBroadcast(integratedServer);
+            }
         });
         builder.setAlwaysShowTabs(true);
         builder.setAfterInitConsumer(NourishedConfigLeftCardsLayout::apply);
