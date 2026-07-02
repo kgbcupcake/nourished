@@ -5,7 +5,7 @@ import dev.marie.framework.api.ApplicationHistoryView;
 import dev.marie.framework.api.ValueModifierContext;
 import dev.marie.framework.api.ValueModifierEvent;
 import dev.marie.framework.config.FeatureFlagCache;
-import dev.marie.framework.core.MarieLibDataProvider;
+import dev.marie.framework.core.MarieDataProvider;
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.core.Nourished;
@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.NeoForge;
 
 @ApiStatus.Internal
-final class NourishedPlayerDataProvider implements MarieLibDataProvider {
+final class NourishedPlayerDataProvider implements MarieDataProvider {
 
     static final NourishedPlayerDataProvider INSTANCE = new NourishedPlayerDataProvider();
 

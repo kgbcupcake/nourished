@@ -43,7 +43,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Nourished-specific config import/export serialization wired into {@link dev.marie.framework.core.MarieLibContext}.
+ * Nourished-specific config import/export serialization wired into {@link dev.marie.framework.core.MarieContext}.
  */
 public final class NourishedImportExport {
 

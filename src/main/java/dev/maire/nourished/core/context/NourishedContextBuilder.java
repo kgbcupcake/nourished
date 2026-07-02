@@ -3,7 +3,7 @@ package dev.maire.nourished.core.context;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.client.MarieClientCache;
 import dev.marie.framework.config.FeatureFlagCache;
-import dev.marie.framework.core.MarieLibContext;
+import dev.marie.framework.core.MarieContext;
 import dev.maire.nourished.client.NourishedClientMemoryConfig;
 import dev.maire.nourished.client.config.ExportConfigScreen;
 import dev.maire.nourished.client.config.ImportConfigScreen;
@@ -32,7 +32,7 @@ public final class NourishedContextBuilder {
     private NourishedContextBuilder() {}
 
     public static void registerSlim() {
-        MarieLibContext.register(MarieLibContext.builder(Nourished.MODID)
+        MarieContext.register(MarieContext.builder(Nourished.MODID)
                 .dataProvider(NourishedPlayerDataProvider.INSTANCE)
                 .effectApplier((player, data) -> {
                     if (FeatureFlagCache.enableEffects()) {
@@ -99,7 +99,7 @@ public final class NourishedContextBuilder {
                     float realSaturation = resolveRealSaturation(stack);
                     FoodNutritionRegistry.DietDelta d = FoodNutritionRegistry.computeDietDelta(
                             stack, level, (int) payload, realSaturation, bars);
-                    return new MarieLibContext.SourceDelta(d.calories(), d.nutrients());
+                    return new MarieContext.SourceDelta(d.calories(), d.nutrients());
                 })
                 .onReloadBroadcast(NourishedReloadHelper::reloadAndBroadcast)
                 .postValueModifierHook(NourishedKubeIntegration::fireNutrientModifier)

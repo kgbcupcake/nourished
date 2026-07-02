@@ -14,7 +14,7 @@ import dev.marie.framework.registry.MarieApiRegistries;
 import dev.marie.framework.registry.RegistryLifecycleManager;
 import dev.maire.nourished.core.context.NourishedContextBuilder;
 import dev.maire.nourished.core.lifecycle.NourishedLifecycle;
-import dev.marie.framework.core.MariesLibBootstrap;
+import dev.marie.framework.core.MarieBootstrap;
 import dev.marie.framework.compat.AutoCompatDiscovery;
 import dev.marie.framework.compat.ModCompat;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -73,7 +73,7 @@ public class Nourished {
         NutrientRegistry.loadDefinitions();
         NutrientRegistry.syncToValueRegistryUnfrozen();
         // ModCompat entries must exist before NourishedConfig builds compatCodeToggles/compatTagToggles.
-        MariesLibBootstrap.attach(Nourished.MODID, modEventBus);
+        MarieBootstrap.attach(Nourished.MODID, modEventBus);
         ModCompat.initialize();
         NourishedConfig.register(modContainer);
         NourishedClientConfig.register(modContainer);
@@ -126,7 +126,7 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new GutHealthRecoveryHandler());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
             event.enqueueWork(() -> {
-                // Runs after MariesLibBootstrap.onCommonSetup → RegistryLifecycleManager.loadAll().
+                // Runs after MarieBootstrap.onCommonSetup → RegistryLifecycleManager.loadAll().
                 NourishedConfigValidation.runAfterInitialLoad();
                 NutrientRegistry.syncAndFreeze();
                 ModCompat.discoverUnknownMods();

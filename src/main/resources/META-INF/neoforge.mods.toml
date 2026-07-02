@@ -31,6 +31,6 @@ side = "BOTH"
 [[dependencies.${mod_id}]]
     modId = "marieslib"
     type = "required"
-    versionRange = "${marie_lib_version_range}"
+    versionRange = "${maries_framework_version_range}"
     ordering = "AFTER"
     side = "BOTH"
