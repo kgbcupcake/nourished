@@ -1,8 +1,8 @@
 package dev.maire.nourished.client;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.client.MarieClientState;
-import dev.marie.MariesLib.tracking.DiminishingReturnsConfig;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.client.MarieClientState;
+import dev.marie.framework.tracking.DiminishingReturnsConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;

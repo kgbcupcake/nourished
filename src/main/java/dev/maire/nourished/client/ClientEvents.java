@@ -1,8 +1,8 @@
 package dev.maire.nourished.client;
 
 import dev.maire.nourished.client.screen.DietScreen;
-import dev.marie.MariesLib.compat.MarieTooltipHelper;
-import dev.marie.MariesLib.config.FeatureFlagCache;
+import dev.marie.framework.compat.MarieTooltipHelper;
+import dev.marie.framework.config.FeatureFlagCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;

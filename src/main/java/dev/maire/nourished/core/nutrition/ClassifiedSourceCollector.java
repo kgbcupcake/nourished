@@ -1,9 +1,9 @@
 package dev.maire.nourished.core.nutrition;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.runtime.SourceRegistry;
-import dev.marie.MariesLib.scanner.ClassificationResult;
-import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.runtime.SourceRegistry;
+import dev.marie.framework.scanner.ClassificationResult;
+import dev.marie.framework.scanner.ScannerSpecRegistry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;

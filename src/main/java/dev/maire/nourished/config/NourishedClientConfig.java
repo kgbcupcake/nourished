@@ -1,11 +1,11 @@
 package dev.maire.nourished.config;
 
 import com.google.gson.JsonObject;
-import dev.marie.MariesLib.config.ConfigDefaultsLoader;
-import dev.marie.MariesLib.config.HudAnchor;
+import dev.marie.framework.config.ConfigDefaultsLoader;
+import dev.marie.framework.config.HudAnchor;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.framework.util.MarieRegistryUtils;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;

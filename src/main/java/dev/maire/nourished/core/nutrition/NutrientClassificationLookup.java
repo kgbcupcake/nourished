@@ -1,9 +1,9 @@
 package dev.maire.nourished.core.nutrition;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.runtime.SourceRegistry;
-import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.runtime.SourceRegistry;
+import dev.marie.framework.scanner.ScannerSpecRegistry;
+import dev.marie.framework.util.MarieRegistryUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

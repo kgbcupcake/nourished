@@ -1,7 +1,7 @@
 package dev.maire.nourished.core.context;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.ValueSourceTrigger;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.ValueSourceTrigger;
 import dev.maire.nourished.config.NourishedModuleCache;
 import net.minecraft.server.level.ServerPlayer;
 

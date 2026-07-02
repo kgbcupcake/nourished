@@ -6,14 +6,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.ValueDefinition;
-import dev.marie.MariesLib.api.registry.ValueRegistry;
-import dev.marie.MariesLib.config.FeatureFlagCache;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.ValueDefinition;
+import dev.marie.framework.api.registry.ValueRegistry;
+import dev.marie.framework.config.FeatureFlagCache;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.registry.AbstractRegistry;
-import dev.marie.MariesLib.runtime.SourceRegistry;
-import dev.marie.MariesLib.util.MarieValidation;
+import dev.marie.framework.registry.AbstractRegistry;
+import dev.marie.framework.runtime.SourceRegistry;
+import dev.marie.framework.util.MarieValidation;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -351,7 +351,7 @@ public class NutrientRegistry {
     }
 
     /**
-     * Registers nutrient tag matches into {@link dev.marie.MariesLib.runtime.SourceRegistry}.
+     * Registers nutrient tag matches into {@link dev.marie.framework.runtime.SourceRegistry}.
      * Must be called after item tags are bound (see {@code NourishedTagsHandler}).
      */
     public static void registerClassificationsFromTags() {

@@ -1,8 +1,8 @@
 package dev.maire.nourished.core.network.sync;
 
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.tracking.TrackingAttachment;
-import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.framework.tracking.TrackingAttachment;
+import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.core.network.ModNetworking;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;

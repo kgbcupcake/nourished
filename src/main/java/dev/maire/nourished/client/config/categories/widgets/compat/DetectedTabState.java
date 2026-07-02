@@ -5,11 +5,11 @@ import dev.maire.nourished.client.config.NourishedConfigScreen.CompatPending;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
-import dev.marie.MariesLib.compat.CompatCategory;
-import dev.marie.MariesLib.compat.CompatEntry;
-import dev.marie.MariesLib.compat.CompatReportEntry;
-import dev.marie.MariesLib.compat.ModCompat;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.framework.compat.CompatCategory;
+import dev.marie.framework.compat.CompatEntry;
+import dev.marie.framework.compat.CompatReportEntry;
+import dev.marie.framework.compat.ModCompat;
+import dev.marie.framework.util.MarieRegistryUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -474,7 +474,7 @@ public final class DetectedTabState {
         renderDetectedScrollIndicator(graphics, rows.size(), visibleRows);
     }
 
-    private static int conflictBadgeWidth(dev.marie.MariesLib.compat.ConflictLevel level, net.minecraft.client.gui.Font font) {
+    private static int conflictBadgeWidth(dev.marie.framework.compat.ConflictLevel level, net.minecraft.client.gui.Font font) {
         String text = switch (level) {
             case FULL_CONFLICT -> "FULL CONFLICT";
             case PARTIAL_CONFLICT -> "PARTIAL";
@@ -620,15 +620,15 @@ public final class DetectedTabState {
                 .orElse("unknown");
     }
 
-    private void drawConflictBadge(GuiGraphics graphics, int x, int y, dev.marie.MariesLib.compat.ConflictLevel level) {
+    private void drawConflictBadge(GuiGraphics graphics, int x, int y, dev.marie.framework.compat.ConflictLevel level) {
         String text;
         int bgColor;
         int borderColor;
-        if (level == dev.marie.MariesLib.compat.ConflictLevel.FULL_CONFLICT) {
+        if (level == dev.marie.framework.compat.ConflictLevel.FULL_CONFLICT) {
             text = "FULL CONFLICT";
             bgColor = 0xFF6B1A1A;
             borderColor = 0xFF8A2F2F;
-        } else if (level == dev.marie.MariesLib.compat.ConflictLevel.PARTIAL_CONFLICT) {
+        } else if (level == dev.marie.framework.compat.ConflictLevel.PARTIAL_CONFLICT) {
             text = "PARTIAL";
             bgColor = 0xFF7A5A00;
             borderColor = 0xFF9C7A18;

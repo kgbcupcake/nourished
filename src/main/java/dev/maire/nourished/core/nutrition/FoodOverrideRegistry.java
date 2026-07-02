@@ -6,11 +6,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.registry.AbstractRegistry;
-import dev.marie.MariesLib.util.MarieResourceLoader;
-import dev.marie.MariesLib.util.MarieValidation;
+import dev.marie.framework.registry.AbstractRegistry;
+import dev.marie.framework.util.MarieResourceLoader;
+import dev.marie.framework.util.MarieValidation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 

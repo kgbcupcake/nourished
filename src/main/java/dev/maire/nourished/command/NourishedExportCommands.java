@@ -1,7 +1,7 @@
 package dev.maire.nourished.command;
 
 import com.mojang.brigadier.context.CommandContext;
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.nutrition.NutrientFullExporter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;

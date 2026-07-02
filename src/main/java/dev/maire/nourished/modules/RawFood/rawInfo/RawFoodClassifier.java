@@ -1,10 +1,10 @@
 package dev.maire.nourished.modules.RawFood.rawInfo;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.tags.NourishedItemTags;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.framework.util.MarieRegistryUtils;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
 import net.minecraft.resources.ResourceLocation;

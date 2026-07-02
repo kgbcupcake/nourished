@@ -1,12 +1,12 @@
 package dev.maire.nourished.core.effect;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.config.FeatureFlagCache;
-import dev.marie.MariesLib.handler.ReloadGuardListener;
-import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.config.FeatureFlagCache;
+import dev.marie.framework.handler.ReloadGuardListener;
+import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.marie.MariesLib.util.MarieEffectUtils;
+import dev.marie.framework.util.MarieEffectUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;

@@ -6,8 +6,8 @@ import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
-import dev.marie.MariesLib.handler.ReloadPipeline;
-import dev.marie.MariesLib.runtime.SourceRegistry;
+import dev.marie.framework.handler.ReloadPipeline;
+import dev.marie.framework.runtime.SourceRegistry;
 import net.minecraft.server.MinecraftServer;
 
 public final class NourishedReloadHelper {

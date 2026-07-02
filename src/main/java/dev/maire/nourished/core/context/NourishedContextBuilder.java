@@ -1,9 +1,9 @@
 package dev.maire.nourished.core.context;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.client.MarieClientCache;
-import dev.marie.MariesLib.config.FeatureFlagCache;
-import dev.marie.MariesLib.core.MarieLibContext;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.client.MarieClientCache;
+import dev.marie.framework.config.FeatureFlagCache;
+import dev.marie.framework.core.MarieLibContext;
 import dev.maire.nourished.client.NourishedClientMemoryConfig;
 import dev.maire.nourished.client.config.ExportConfigScreen;
 import dev.maire.nourished.client.config.ImportConfigScreen;

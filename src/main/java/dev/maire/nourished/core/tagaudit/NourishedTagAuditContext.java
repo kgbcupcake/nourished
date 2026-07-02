@@ -1,7 +1,7 @@
 package dev.maire.nourished.core.tagaudit;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.tagaudit.model.TagAuditContext;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.tagaudit.model.TagAuditContext;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;

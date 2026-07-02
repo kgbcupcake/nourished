@@ -1,7 +1,7 @@
 package dev.maire.nourished.core.diet;
 
 import dev.maire.nourished.core.network.ModNetworking.SyncDietDeltaPayload;
-import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.framework.tracking.TrackingData;
 
 import java.util.List;
 import java.util.Map;

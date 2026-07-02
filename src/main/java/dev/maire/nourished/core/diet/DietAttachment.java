@@ -2,7 +2,7 @@ package dev.maire.nourished.core.diet;
 
 import com.mojang.serialization.Codec;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;

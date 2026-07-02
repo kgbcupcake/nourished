@@ -1,8 +1,8 @@
 package dev.maire.nourished.kubejs.events;
 
 import dev.latvian.mods.kubejs.event.KubeEvent;
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.MarieEvents;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.MarieEvents;
 import net.minecraft.world.entity.player.Player;
 
 @ApiStatus.Experimental

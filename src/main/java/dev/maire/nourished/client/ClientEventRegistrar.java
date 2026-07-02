@@ -1,7 +1,7 @@
 package dev.maire.nourished.client;
 
-import dev.marie.MariesLib.client.MarieClientCache;
-import dev.marie.MariesLib.client.MarieClientState;
+import dev.marie.framework.client.MarieClientCache;
+import dev.marie.framework.client.MarieClientState;
 import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.client.NourishedClientMemoryConfig;
 import dev.maire.nourished.client.screen.DietScreenEditMode;

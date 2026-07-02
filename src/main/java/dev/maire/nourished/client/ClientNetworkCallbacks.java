@@ -1,11 +1,11 @@
 package dev.maire.nourished.client;
 
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.client.MarieClientCache;
-import dev.marie.MariesLib.client.MarieClientState;
-import dev.marie.MariesLib.client.MarieToastManager;
-import dev.marie.MariesLib.tracking.TrackingAttachment;
-import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.framework.client.MarieClientCache;
+import dev.marie.framework.client.MarieClientState;
+import dev.marie.framework.client.MarieToastManager;
+import dev.marie.framework.tracking.TrackingAttachment;
+import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;

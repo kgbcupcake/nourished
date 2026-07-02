@@ -1,11 +1,11 @@
 package dev.maire.nourished.core.handler;
 
-import dev.marie.MariesLib.api.ValueSourceTrigger;
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.MarieAPI;
-import dev.marie.MariesLib.config.FeatureFlagCache;
-import dev.marie.MariesLib.tracking.TrackingAttachment;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.framework.api.ValueSourceTrigger;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.MarieAPI;
+import dev.marie.framework.config.FeatureFlagCache;
+import dev.marie.framework.tracking.TrackingAttachment;
+import dev.marie.framework.util.MarieRegistryUtils;
 import dev.maire.nourished.core.NourishedKubeIntegration;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;

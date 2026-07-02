@@ -1,7 +1,7 @@
 package dev.maire.nourished.core.context;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.scan.ResolutionStageHandler;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.scan.ResolutionStageHandler;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.nutrition.stages.CommunityTagStage;
 import dev.maire.nourished.core.nutrition.stages.HardFallbackStage;

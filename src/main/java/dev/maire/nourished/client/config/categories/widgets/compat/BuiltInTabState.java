@@ -1,8 +1,8 @@
 package dev.maire.nourished.client.config.categories.widgets.compat;
 
 import dev.maire.nourished.client.config.NourishedConfigScreen.CompatPending;
-import dev.marie.MariesLib.compat.CompatEntry;
-import dev.marie.MariesLib.compat.ModCompat;
+import dev.marie.framework.compat.CompatEntry;
+import dev.marie.framework.compat.ModCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;

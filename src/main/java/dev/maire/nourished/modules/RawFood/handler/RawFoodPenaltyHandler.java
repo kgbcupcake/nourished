@@ -1,15 +1,15 @@
 package dev.maire.nourished.modules.RawFood.handler;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.config.NourishedModuleCache;
-import dev.marie.MariesLib.tracking.TrackingAttachment;
-import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.framework.tracking.TrackingAttachment;
+import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
-import dev.marie.MariesLib.util.MarieEffectUtils;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.framework.util.MarieEffectUtils;
+import dev.marie.framework.util.MarieRegistryUtils;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawFoodTierDef;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;

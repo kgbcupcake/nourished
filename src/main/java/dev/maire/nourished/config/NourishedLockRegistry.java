@@ -7,9 +7,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.data.DatapackSchema;
-import dev.marie.MariesLib.registry.AbstractRegistry;
-import dev.marie.MariesLib.util.MarieResourceLoader;
+import dev.marie.framework.data.DatapackSchema;
+import dev.marie.framework.registry.AbstractRegistry;
+import dev.marie.framework.util.MarieResourceLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 

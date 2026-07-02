@@ -1,6 +1,6 @@
 package dev.maire.nourished.client.hud;
 
-import dev.marie.MariesLib.config.HudAnchor;
+import dev.marie.framework.config.HudAnchor;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;

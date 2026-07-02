@@ -1,6 +1,6 @@
 package dev.maire.nourished.core.handler;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.diet.DietAttachment;
 import net.minecraft.core.registries.BuiltInRegistries;

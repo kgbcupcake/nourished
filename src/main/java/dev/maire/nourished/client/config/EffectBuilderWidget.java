@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.config;
 
 import dev.maire.nourished.core.effect.EffectRegistry;
-import dev.marie.MariesLib.client.ClientScreenFactories;
+import dev.marie.framework.client.ClientScreenFactories;
 import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;

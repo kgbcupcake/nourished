@@ -9,16 +9,16 @@ import java.util.Map;
 
 import dev.maire.nourished.client.hud.HudDrawHelpers;
 import dev.maire.nourished.client.NourishedKeys;
-import dev.marie.MariesLib.client.MarieClientCache;
+import dev.marie.framework.client.MarieClientCache;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.client.MarieValueColors;
-import dev.marie.MariesLib.config.FeatureFlagCache;
-import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.framework.client.MarieValueColors;
+import dev.marie.framework.config.FeatureFlagCache;
+import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 

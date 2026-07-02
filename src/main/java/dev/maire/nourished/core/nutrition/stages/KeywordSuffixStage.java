@@ -2,16 +2,16 @@ package dev.maire.nourished.core.nutrition.stages;
 
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.marie.MariesLib.scan.ResolutionResult;
-import dev.marie.MariesLib.scan.RuntimeCascadeStage;
-import dev.marie.MariesLib.scan.ResolutionStageHandler;
-import dev.marie.MariesLib.scan.StageContext;
-import dev.marie.MariesLib.scan.StageMath;
-import dev.marie.MariesLib.scanner.ArchetypePattern;
-import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
-import dev.marie.MariesLib.scanner.ScannerSpecRegistry.Multipliers;
-import dev.marie.MariesLib.scanner.ScannerSpecRegistry.ScannerSpec;
-import dev.marie.MariesLib.scanner.TokenStemmer;
+import dev.marie.framework.scan.ResolutionResult;
+import dev.marie.framework.scan.RuntimeCascadeStage;
+import dev.marie.framework.scan.ResolutionStageHandler;
+import dev.marie.framework.scan.StageContext;
+import dev.marie.framework.scan.StageMath;
+import dev.marie.framework.scanner.ArchetypePattern;
+import dev.marie.framework.scanner.ScannerSpecRegistry;
+import dev.marie.framework.scanner.ScannerSpecRegistry.Multipliers;
+import dev.marie.framework.scanner.ScannerSpecRegistry.ScannerSpec;
+import dev.marie.framework.scanner.TokenStemmer;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;

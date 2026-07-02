@@ -1,8 +1,8 @@
 package dev.maire.nourished.client.hud;
 
-import dev.marie.MariesLib.client.MarieClientCache;
+import dev.marie.framework.client.MarieClientCache;
 import dev.maire.nourished.config.NourishedClientConfig;
-import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.framework.tracking.TrackingData;
 
 import java.util.HashSet;
 import java.util.List;

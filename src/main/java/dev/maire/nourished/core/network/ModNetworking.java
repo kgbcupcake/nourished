@@ -1,12 +1,12 @@
 package dev.maire.nourished.core.network;
 
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
-import dev.marie.MariesLib.tracking.TrackingData;
-import dev.marie.MariesLib.tracking.SourceMemoryEntry;
+import dev.marie.framework.tracking.TrackingData;
+import dev.marie.framework.tracking.SourceMemoryEntry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthSyncPayload;
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;

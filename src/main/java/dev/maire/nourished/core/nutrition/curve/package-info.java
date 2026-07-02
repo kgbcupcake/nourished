@@ -6,4 +6,4 @@
 @ApiStatus.Internal
 package dev.maire.nourished.core.nutrition.curve;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;

@@ -1,7 +1,7 @@
 package dev.maire.nourished.core.nutrition;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.ExportResolver;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.ExportResolver;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;

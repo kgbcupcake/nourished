@@ -1,27 +1,27 @@
 package dev.maire.nourished.core.nutrition;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.scan.CacheStats;
-import dev.marie.MariesLib.scan.ResolutionResult;
-import dev.marie.MariesLib.scan.RuntimeCascadeStage;
-import dev.marie.MariesLib.scan.RuntimeResolutionMerge;
-import dev.marie.MariesLib.scan.StageContext;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.scan.CacheStats;
+import dev.marie.framework.scan.ResolutionResult;
+import dev.marie.framework.scan.RuntimeCascadeStage;
+import dev.marie.framework.scan.RuntimeResolutionMerge;
+import dev.marie.framework.scan.StageContext;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.diagnostics.MarieUnknownItemLogger;
-import dev.marie.MariesLib.cache.BoundedLRU;
-import dev.marie.MariesLib.cache.RunningAverage;
+import dev.marie.framework.diagnostics.MarieUnknownItemLogger;
+import dev.marie.framework.cache.BoundedLRU;
+import dev.marie.framework.cache.RunningAverage;
 import dev.maire.nourished.core.nutrition.stages.CommunityTagStage;
 import dev.maire.nourished.core.nutrition.stages.HardFallbackStage;
 import dev.maire.nourished.core.nutrition.stages.KeywordSuffixStage;
 import dev.maire.nourished.core.nutrition.stages.NamespacePeerStage;
 import dev.maire.nourished.core.nutrition.stages.RecipeInheritanceStage;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
-import dev.marie.MariesLib.classification.ClassificationPipeline;
-import dev.marie.MariesLib.classification.ClassificationTrace;
-import dev.marie.MariesLib.classification.ClassificationTraceStep;
-import dev.marie.MariesLib.classification.TraceStepId;
-import dev.marie.MariesLib.classification.TraceStepStatus;
-import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
+import dev.marie.framework.util.MarieRegistryUtils;
+import dev.marie.framework.classification.ClassificationPipeline;
+import dev.marie.framework.classification.ClassificationTrace;
+import dev.marie.framework.classification.ClassificationTraceStep;
+import dev.marie.framework.classification.TraceStepId;
+import dev.marie.framework.classification.TraceStepStatus;
+import dev.marie.framework.scanner.ScannerSpecRegistry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
@@ -52,8 +52,8 @@ public final class RuntimeFoodResolver {
     }
 
     private final BoundedLRU<ResourceLocation, ResolutionResult> resolvedCache = new BoundedLRU<>();
-    private final dev.marie.MariesLib.scanner.RecipeInheritanceResolver recipeInheritanceResolver =
-            new dev.marie.MariesLib.scanner.RecipeInheritanceResolver(null);
+    private final dev.marie.framework.scanner.RecipeInheritanceResolver recipeInheritanceResolver =
+            new dev.marie.framework.scanner.RecipeInheritanceResolver(null);
     private final ConcurrentHashMap<String, RunningAverage> namespacePeers = new ConcurrentHashMap<>();
     private final AtomicInteger cacheHits = new AtomicInteger();
     private final AtomicInteger cacheMisses = new AtomicInteger();
@@ -516,7 +516,7 @@ public final class RuntimeFoodResolver {
         recipeTimeouts.incrementAndGet();
     }
 
-    public dev.marie.MariesLib.scanner.RecipeInheritanceResolver recipeInheritanceResolver() {
+    public dev.marie.framework.scanner.RecipeInheritanceResolver recipeInheritanceResolver() {
         return recipeInheritanceResolver;
     }
 

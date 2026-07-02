@@ -1,9 +1,9 @@
 package dev.maire.nourished.core.handler;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.MarieAPIState;
-import dev.marie.MariesLib.config.FeatureFlagCache;
-import dev.marie.MariesLib.runtime.SourceRegistry;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.MarieAPIState;
+import dev.marie.framework.config.FeatureFlagCache;
+import dev.marie.framework.runtime.SourceRegistry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;

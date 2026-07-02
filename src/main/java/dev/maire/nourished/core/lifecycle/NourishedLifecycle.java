@@ -1,12 +1,12 @@
 package dev.maire.nourished.core.lifecycle;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.color.ColorRegistry;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.color.ColorRegistry;
 import dev.maire.nourished.config.NourishedLockRegistry;
 import dev.maire.nourished.config.NourishedPresetRegistry;
-import dev.marie.MariesLib.config.ModCompatRegistry;
-import dev.marie.MariesLib.registry.RegistryLifecycleManager;
-import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
+import dev.marie.framework.config.ModCompatRegistry;
+import dev.marie.framework.registry.RegistryLifecycleManager;
+import dev.marie.framework.scanner.ScannerSpecRegistry;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.core.nutrition.NutrientWeightRegistry;

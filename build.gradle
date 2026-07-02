@@ -95,9 +95,9 @@ repositories
 }
 
 dependencies {
-    implementation "dev.marie.MariesLib:marieslib:${marie_lib_version}"
-    if (!gradle.ext.localMarieLibPresent) {
-        additionalRuntimeClasspath "dev.marie.MariesLib:marieslib:${marie_lib_version}"
+    implementation "dev.marie.MariesFramework:mariesframework:${marie_lib_version}"
+    if (!gradle.ext.localMariesFrameworkPresent) {
+        additionalRuntimeClasspath "dev.marie.MariesFramework:mariesframework:${marie_lib_version}"
     }
 
     implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
@@ -149,15 +149,15 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-// Local MarieLib composite build: compile Nourished only after MarieLib classes exist.
-if (gradle.ext.localMarieLibPresent) {
-    def marieLibIncluded = gradle.includedBuilds.find { it.name == 'MarieLib' }
-    if (marieLibIncluded != null) {
+// MariesFramework root is an aggregator (no :classes); shadowJar must finish before compile.
+if (gradle.ext.localMariesFrameworkPresent) {
+    def mariesFrameworkIncluded = gradle.includedBuilds.find { it.name == 'MariesFramework' }
+    if (mariesFrameworkIncluded != null) {
         tasks.named('compileJava').configure {
-            dependsOn marieLibIncluded.task(':classes')
+            dependsOn mariesFrameworkIncluded.task(':shadowJar')
         }
         tasks.named('compileTestJava').configure {
-            dependsOn marieLibIncluded.task(':classes')
+            dependsOn mariesFrameworkIncluded.task(':shadowJar')
         }
     }
 }
