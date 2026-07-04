@@ -71,7 +71,7 @@ public final class NourishedClientConfig {
         hudOffsetX = builder.defineInRange("hudOffsetX", ConfigDefaultsLoader.getInt(defaults, "hudOffsetX", 0), -2000, 2000);
         hudOffsetY = builder.defineInRange("hudOffsetY", ConfigDefaultsLoader.getInt(defaults, "hudOffsetY", 0), -2000, 2000);
         hudBarWidth = builder.defineInRange("hudBarWidth", ConfigDefaultsLoader.getInt(defaults, "hudBarWidth", 60), 40, 120);
-        hudScale = builder.defineInRange("hudScale", ConfigDefaultsLoader.getDouble(defaults, "hudScale", 1.0d), 0.5d, 1.5d);
+        hudScale = builder.defineInRange("hudScale", ConfigDefaultsLoader.getDouble(defaults, "hudScale", 1.0d), 0.3d, 3.0d);
         hudReservedBottom = builder.defineInRange("hudReservedBottom", ConfigDefaultsLoader.getInt(defaults, "hudReservedBottom", 52), 30, 100);
         hudDraggable = builder.define("hudDraggable", ConfigDefaultsLoader.getBoolean(defaults, "hudDraggable", true));
         dietBarDragEnabled = builder.define("dietBarDragEnabled", ConfigDefaultsLoader.getBoolean(defaults, "dietBarDragEnabled", true));

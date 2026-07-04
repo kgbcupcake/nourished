@@ -29,3 +29,22 @@ snaps back below what the live drag preview showed. Do this for both the legacy
 HUDEditScreen/NourishedHUD path and the new HudEditTarget path together, since they share
 NourishedClientConfig's hudScale field as their single source of truth — decide as one change,
 not two.
+
+## Resolution (2026-07-04)
+
+Widened `NourishedClientConfig.java:74`'s `hudScale` `defineInRange` from `(0.5d, 1.5d)` to
+`(0.3d, 3.0d)`, matching the existing preview-clamp constants exactly (chose to widen the config
+rather than narrow the preview). Also updated `HudAndDisplayCategory.java`'s Cloth Config slider,
+which hardcoded its own separate `0.5d, 1.5d` bounds — otherwise the in-game settings slider would
+have visually capped below what drag-resize can now commit.
+
+Before changing anything, checked `HudLayout.compute` at both extremes: all dimensions that could
+go to zero/negative already have `Math.max` floors (iconSize, verticalBarW/H, scaledPad,
+columnGap) and `barW` is fully clamped `(20, 200)`, so nothing breaks numerically. At `scale=3.0`
+panel width grows from ~211px (old max 1.5) to ~414px (horizontal layout, typical label) — real
+but bounded risk of right-edge clipping on unusually small GUI-scaled windows only, not a crash or
+overlap; `panelX`/`panelY` clamping already prevents the panel from going negative or vanishing.
+Vertical-layout mode with many nutrients is already wide at today's 1.5 cap (~426px with 8 keys) —
+not a new problem introduced by this change. Since `HudLayout.compute(mc, keys, scale)` at 0.3-3.0
+is the exact same call the live drag preview has used all along, no new rendering path was
+introduced — proceeded with the full range as originally planned rather than narrowing it.

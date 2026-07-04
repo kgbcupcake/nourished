@@ -63,8 +63,8 @@ public final class HudAndDisplayCategory {
                         eb,
                         Component.translatable("config.nourished.hudScale"),
                         client.hudScale(),
-                        0.5d,
-                        1.5d,
+                        0.3d,
+                        3.0d,
                         1.0d,
                         client::setHudScale
                 )
