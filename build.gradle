@@ -85,7 +85,7 @@ repositories
     maven
     {
     name = 'GitHubPackages'
-    url = 'https://maven.pkg.github.com/kgbcupcake/MarieLib'
+    url = 'https://maven.pkg.github.com/kgbcupcake/MariesLib'
     credentials {
         username = System.getenv('GITHUB_ACTOR') ?: project.findProperty('gpr.user')
         password = System.getenv('GITHUB_TOKEN') ?: project.findProperty('gpr.key')
@@ -95,9 +95,9 @@ repositories
 }
 
 dependencies {
-    implementation "dev.marie.MariesFramework:mariesframework:${maries_framework_version}"
+    implementation "dev.marie.MariesLib:marieslib:${maries_lib_version}"
     if (!gradle.ext.localMariesFrameworkPresent) {
-        additionalRuntimeClasspath "dev.marie.MariesFramework:mariesframework:${maries_framework_version}"
+        additionalRuntimeClasspath "dev.marie.MariesLib:marieslib:${maries_lib_version}"
     }
 
     implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
@@ -149,9 +149,9 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-// MariesFramework root is an aggregator (no :classes); shadowJar must finish before compile.
+// MarieLib root is an aggregator (no :classes); shadowJar must finish before compile.
 if (gradle.ext.localMariesFrameworkPresent) {
-    def mariesFrameworkIncluded = gradle.includedBuilds.find { it.name == 'MariesFramework' }
+    def mariesFrameworkIncluded = gradle.includedBuilds.find { it.name == 'MarieLib' }
     if (mariesFrameworkIncluded != null) {
         tasks.named('compileJava').configure {
             dependsOn mariesFrameworkIncluded.task(':shadowJar')
