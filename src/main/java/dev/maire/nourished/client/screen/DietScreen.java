@@ -82,7 +82,7 @@ public class DietScreen extends Screen {
 
     @Override
     protected void init() {
-        DietLayout.Layout layout = DietLayout.compute(minecraft);
+        DietLayout.Layout layout = DietScreenEditTarget.resolvedPanelLayout(minecraft);
         leftPos = layout.panelX();
         topPos = layout.panelY();
 

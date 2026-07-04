@@ -118,7 +118,7 @@ final class DietScreenEditTarget implements MarieComponent {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         int mx = (int) mouseX;
         int my = (int) mouseY;
-        DietLayout.Layout layout = DietLayout.compute(mc);
+        DietLayout.Layout layout = resolvedPanelLayout(mc);
         RecentMealsComponent recent = freshRecentMeals(layout);
         EatMoreComponent eatMore = freshEatMore(layout, recent);
 
@@ -167,7 +167,7 @@ final class DietScreenEditTarget implements MarieComponent {
 
     @Override
     public void render(RenderContext context, Bounds ignoredBounds) {
-        DietLayout.Layout layout = DietLayout.compute(mc);
+        DietLayout.Layout layout = resolvedPanelLayout(mc);
         RecentMealsComponent recent = freshRecentMeals(layout);
         EatMoreComponent eatMore = freshEatMore(layout, recent);
 
