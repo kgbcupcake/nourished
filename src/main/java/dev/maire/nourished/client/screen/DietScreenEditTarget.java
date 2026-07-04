@@ -63,7 +63,7 @@ final class DietScreenEditTarget implements MarieComponent {
                 recentPreferred.width(), (int) Math.round(recentPreferred.height() * 1.5d)
         );
         recentMealsDrag = new DraggableResizable(this, recentConstraint,
-                (target, bounds) -> DietScreenPersistence.get().save(defaultRecent.id(), toState(bounds)));
+                (target, bounds) -> DietScreenPersistence.get().save(defaultRecent.id(), toRelativeState(bounds)));
 
         Size eatMorePreferred = defaultEatMore.constraint().preferredSize();
         Constraint eatMoreConstraint = boundedConstraint(
@@ -72,7 +72,7 @@ final class DietScreenEditTarget implements MarieComponent {
                 eatMorePreferred.width(), (int) Math.round(eatMorePreferred.height() * 1.5d)
         );
         eatMoreDrag = new DraggableResizable(this, eatMoreConstraint,
-                (target, bounds) -> DietScreenPersistence.get().save(defaultEatMore.id(), toState(bounds)));
+                (target, bounds) -> DietScreenPersistence.get().save(defaultEatMore.id(), toRelativeState(bounds)));
     }
 
     /**
@@ -250,6 +250,25 @@ final class DietScreenEditTarget implements MarieComponent {
 
     private static ComponentState toState(Bounds bounds) {
         return new ComponentState(bounds.x(), bounds.y(), bounds.width(), bounds.height(), false);
+    }
+
+    /**
+     * Converts a committed absolute-screen {@link Bounds} into an offset from the panel's current
+     * resolved position for persistence — see {@link DietScreenPersistence#resolveRelativeToPanel}.
+     * Safe to read the panel's position fresh here rather than from an in-progress drag preview:
+     * {@link #mouseDragged} only ever updates one of {@code panelDrag}/{@code recentMealsDrag}/
+     * {@code eatMoreDrag} at a time, so the panel is never simultaneously mid-drag when a
+     * recent-meals/eat-more commit fires.
+     */
+    private ComponentState toRelativeState(Bounds bounds) {
+        DietLayout.Layout panelLayout = resolvedPanelLayout(mc);
+        return new ComponentState(
+                bounds.x() - panelLayout.panelX(),
+                bounds.y() - panelLayout.panelY(),
+                bounds.width(),
+                bounds.height(),
+                false
+        );
     }
 
     private static int[] scaledMouse(Minecraft mc) {

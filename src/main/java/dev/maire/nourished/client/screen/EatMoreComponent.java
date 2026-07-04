@@ -31,7 +31,7 @@ import java.util.List;
  */
 final class EatMoreComponent implements MarieComponent {
 
-    private static final String ID = "nourished.diet.eatmore";
+    static final String ID = "nourished.diet.eatmore";
 
     private static final int COL_ROW_BG_RGB = 0x001E1E1E;
     private static final int COL_BORDER_LT = 0xFF555555;
@@ -59,7 +59,7 @@ final class EatMoreComponent implements MarieComponent {
         this.localHeight = visible ? eatBoxH + 4 : 0;
 
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
-        this.resolvedBounds = DietScreenPersistence.resolve(ID, layout, startLocalY, bw, localHeight);
+        this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, bw, localHeight);
     }
 
     /** Local (pre-scale) pixel height this section occupies this frame; 0 when hidden or not fitting. */

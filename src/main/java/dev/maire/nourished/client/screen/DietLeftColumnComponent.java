@@ -27,16 +27,16 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Static-rendering port of {@link DietScreen#drawLeftPanel}: today header, calorie/balance
- * summary boxes stay drawn directly (small, non-independent static text/bars not worth their own
- * class), while "Recent Meals" and "Eat more of..." are their own {@link MarieComponent}s —
- * {@link RecentMealsComponent} and {@link EatMoreComponent}. These two are no longer positioned by
- * {@link #layout()} — a {@link Layout} recomputes child position every {@code render()} call,
- * which would silently override any future drag/resize commit on the very next frame. Instead each
- * resolves its own {@link Bounds} once at construction (persisted position if the user has already
- * committed a drag/resize, otherwise today's default stacked position — see
- * {@link DietScreenPersistence#resolve}), and this container renders them directly against that
- * Bounds. {@code layout()}/{@code columnLayout} are kept only for {@link Container} structural
+ * Today header and calorie/balance summary boxes stay drawn directly (small, non-independent
+ * static text/bars not worth their own class), while "Recent Meals" and "Eat more of..." are their
+ * own {@link MarieComponent}s — {@link RecentMealsComponent} and {@link EatMoreComponent}. These
+ * two are no longer positioned by {@link #layout()} — a {@link Layout} recomputes child position
+ * every {@code render()} call, which would silently override any future drag/resize commit on the
+ * very next frame. Instead each resolves its own {@link Bounds} once at construction (an offset
+ * from the panel's current position if the user has already committed a drag/resize, otherwise
+ * today's default stacked position — see {@link DietScreenPersistence#resolveRelativeToPanel}),
+ * and this container renders them directly against that Bounds. {@code layout()}/{@code
+ * columnLayout} are kept only for {@link Container} structural
  * conformance ({@code children()}/{@code addChild()} etc.), not because anything still calls
  * {@code computeBounds()} on them. All coordinates for the header block that stays inline here are
  * expressed in DietScreen's original local (pre-scale) pixel space and converted to absolute screen

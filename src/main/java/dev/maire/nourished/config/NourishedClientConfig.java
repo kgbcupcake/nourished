@@ -56,6 +56,7 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue showActiveEffects;
     private final ModConfigSpec.BooleanValue showCaloriesBox;
     private final ModConfigSpec.BooleanValue showBalanceBox;
+    private final ModConfigSpec.BooleanValue recentMealsEatMoreOffsetMigrationDone;
 
     /** Matches legacy {@code COL_PANEL_BG} alpha ({@code 0xCC}). */
     private static final double DEFAULT_HUD_BACKGROUND_OPACITY = 204.0d / 255.0d;
@@ -147,6 +148,13 @@ public final class NourishedClientConfig {
         showActiveEffects = builder.define("showActiveEffects", ConfigDefaultsLoader.getBoolean(defaults, "showActiveEffects", true));
         showCaloriesBox = builder.define("showCaloriesBox", ConfigDefaultsLoader.getBoolean(defaults, "showCaloriesBox", true));
         showBalanceBox = builder.define("showBalanceBox", ConfigDefaultsLoader.getBoolean(defaults, "showBalanceBox", true));
+        // Internal one-time migration flag — not user-facing, no Cloth Config entry. Guards the
+        // recentmeals/eatmore persisted-position schema change from absolute screen coordinates to
+        // panel-relative offsets: see DietScreenPersistence#resolveRelativeToPanel.
+        recentMealsEatMoreOffsetMigrationDone = builder.define(
+                "recentMealsEatMoreOffsetMigrationDone",
+                false
+        );
         builder.pop();
     }
 
@@ -474,6 +482,14 @@ public final class NourishedClientConfig {
 
     public void setShowBalanceBox(boolean value) {
         showBalanceBox.set(value);
+    }
+
+    public boolean recentMealsEatMoreOffsetMigrationDone() {
+        return recentMealsEatMoreOffsetMigrationDone.get();
+    }
+
+    public void setRecentMealsEatMoreOffsetMigrationDone(boolean value) {
+        recentMealsEatMoreOffsetMigrationDone.set(value);
     }
 
     public void resetDietOffsets() {

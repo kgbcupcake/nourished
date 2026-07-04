@@ -31,7 +31,7 @@ import java.util.Map;
  */
 final class RecentMealsComponent implements MarieComponent {
 
-    private static final String ID = "nourished.diet.recentmeals";
+    static final String ID = "nourished.diet.recentmeals";
 
     private static final int COL_ROW_BG_RGB = 0x001E1E1E;
     private static final int COL_BORDER_LT = 0xFF555555;
@@ -61,7 +61,7 @@ final class RecentMealsComponent implements MarieComponent {
         this.localHeight = visible ? recentHeight + 4 : 0;
 
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
-        this.resolvedBounds = DietScreenPersistence.resolve(ID, layout, startLocalY, bw, localHeight);
+        this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, bw, localHeight);
     }
 
     /** Local (pre-scale) pixel height this section occupies this frame; 0 when hidden or not fitting. */
