@@ -15,6 +15,7 @@ import dev.marie.framework.ui.Bounds;
 import dev.marie.framework.ui.EditModeController;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.Theme;
+import dev.marie.framework.ui.ThemeKey;
 import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -110,6 +111,14 @@ public class DietScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0 && isMouseOverEditModeToggle(DietScreenEditTarget.resolvedPanelLayout(minecraft), mouseX, mouseY)) {
+            if (marieEditModeController != null && marieEditModeController.isActive()) {
+                marieEditModeController.exit();
+            } else {
+                marieEditModeController().enter();
+            }
+            return true;
+        }
         if (button == 0 && NourishedClientConfig.get().dietBarDragEnabled()) {
             DietLayout.Layout layout = currentLayout();
             double s = layout.scale();
@@ -220,7 +229,7 @@ public class DietScreen extends Screen {
         }
 
         DietLayout.Layout layout = currentLayout();
-        drawPanelViaMarieUI(g, minecraft, pt, data, visibleBars);
+        drawPanelViaMarieUI(g, minecraft, pt, data, visibleBars, mx, my);
 
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         if (showIconTooltips && data != null) {
@@ -238,12 +247,87 @@ public class DietScreen extends Screen {
      * resolved here rather than by {@link DietPanelContainer#constraint()}, same pattern as the
      * HUD's MarieUI wiring.
      */
-    private void drawPanelViaMarieUI(GuiGraphics g, Minecraft mc, float partialTick, TrackingData data, List<String> bars) {
+    private void drawPanelViaMarieUI(GuiGraphics g, Minecraft mc, float partialTick, TrackingData data, List<String> bars, int mx, int my) {
         DietLayout.Layout resolvedLayout = DietScreenEditTarget.resolvedPanelLayout(mc);
         DietPanelContainer panel = new DietPanelContainer(data, bars, java.util.Collections.unmodifiableMap(display), resolvedLayout);
         RenderContext context = new GuiGraphicsRenderContext(g, mc, Theme.DARK, partialTick);
         Bounds bounds = new Bounds(resolvedLayout.panelX(), resolvedLayout.panelY(), resolvedLayout.panelW(), resolvedLayout.panelH());
         panel.render(context, bounds);
+
+        boolean editModeActive = marieEditModeController != null && marieEditModeController.isActive();
+        boolean toggleHovered = isMouseOverEditModeToggle(resolvedLayout, mx, my);
+        drawEditModeToggle(context, resolvedLayout, editModeActive, toggleHovered);
+    }
+
+    // ── Edit-mode toggle (top-right corner) ─────────────────────────────────
+    // Local (pre-scale) geometry, inset from the panel's top-right corner: clear of the
+    // centered title (title occupies the middle of the row; this sits far right) and above
+    // the divider at local y=26 (see DietPanelContainer). Right margin (6) and top position
+    // (8) leave 1-2px of breathing room from the panel's 1px border on both edges.
+    private static final int TOGGLE_RIGHT_MARGIN = 6;
+    private static final int TOGGLE_HOUSING_W = 10;
+    private static final int TOGGLE_HOUSING_H = 16;
+    private static final int TOGGLE_HOUSING_TOP = 8;
+    private static final int TOGGLE_LIGHT_SIZE = 6;
+    private static final int TOGGLE_LIGHT_GAP = 1;
+    private static final int TOGGLE_LEVER_INSET = 2;
+    private static final int TOGGLE_LEVER_H = 6;
+
+    private static final int COL_TOGGLE_LIGHT_ON = 0xFF2ECC71;
+    private static final int COL_TOGGLE_LIGHT_OFF = 0xFFE74C3C;
+    private static final int COL_TOGGLE_LIGHT_BORDER = 0xFF101010;
+    private static final int COL_TOGGLE_HOUSING_BG = 0xFF1E1E1E;
+    private static final int COL_TOGGLE_LEVER = 0xFFB0B0B0;
+
+    private static Bounds editModeToggleHousingBounds(DietLayout.Layout layout) {
+        int x2 = DietLayout.toScreenX(layout, WIDTH - TOGGLE_RIGHT_MARGIN);
+        int w = DietLayout.toScreenDim(layout, TOGGLE_HOUSING_W);
+        int h = DietLayout.toScreenDim(layout, TOGGLE_HOUSING_H);
+        return new Bounds(x2 - w, DietLayout.toScreenY(layout, TOGGLE_HOUSING_TOP), w, h);
+    }
+
+    private static Bounds editModeToggleLightBounds(DietLayout.Layout layout, Bounds housing) {
+        int size = DietLayout.toScreenDim(layout, TOGGLE_LIGHT_SIZE);
+        int gap = DietLayout.toScreenDim(layout, TOGGLE_LIGHT_GAP);
+        int x = housing.x() + (housing.width() - size) / 2;
+        int y = housing.y() - gap - size;
+        return new Bounds(x, y, size, size);
+    }
+
+    private static boolean isMouseOverEditModeToggle(DietLayout.Layout layout, double mx, double my) {
+        Bounds housing = editModeToggleHousingBounds(layout);
+        return mx >= housing.x() && my >= housing.y()
+                && mx < housing.x() + housing.width() && my < housing.y() + housing.height();
+    }
+
+    /**
+     * Vertical light-switch: lever sits in the housing's upper half when {@code active}, lower
+     * half when not, and the light above it is solid green/red — the primary at-a-glance signal.
+     * Both are read directly from {@code active} every call (never a cached toggle boolean), so
+     * this can never drift from {@link EditModeController#isActive()}'s live truth.
+     */
+    private void drawEditModeToggle(RenderContext context, DietLayout.Layout layout, boolean active, boolean hovered) {
+        Bounds housing = editModeToggleHousingBounds(layout);
+        Bounds light = editModeToggleLightBounds(layout, housing);
+
+        int lightColor = active ? COL_TOGGLE_LIGHT_ON : COL_TOGGLE_LIGHT_OFF;
+        context.fillRect(light.x(), light.y(), light.width(), light.height(), COL_TOGGLE_LIGHT_BORDER);
+        context.fillRect(light.x() + 1, light.y() + 1, Math.max(0, light.width() - 2), Math.max(0, light.height() - 2), lightColor);
+
+        context.fillRect(housing.x(), housing.y(), housing.width(), housing.height(), COL_TOGGLE_HOUSING_BG);
+        int borderColor = hovered
+                ? context.theme().color(ThemeKey.BORDER_HOVER)
+                : context.theme().color(ThemeKey.BORDER);
+        context.drawBorder(housing.x(), housing.y(), housing.width(), housing.height(), 1, borderColor);
+
+        int leverInset = DietLayout.toScreenDim(layout, TOGGLE_LEVER_INSET);
+        int leverW = Math.max(1, housing.width() - 2 * leverInset);
+        int leverH = DietLayout.toScreenDim(layout, TOGGLE_LEVER_H);
+        int leverX = housing.x() + leverInset;
+        int upperY = housing.y() + leverInset;
+        int lowerY = housing.y() + housing.height() - leverInset - leverH;
+        int leverY = active ? upperY : lowerY;
+        context.fillRect(leverX, leverY, leverW, leverH, COL_TOGGLE_LEVER);
     }
 
     private void drawDietIconTooltips(GuiGraphics g, DietLayout.Layout layout, int mx, int my) {
