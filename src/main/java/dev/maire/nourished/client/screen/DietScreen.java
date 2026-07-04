@@ -106,7 +106,7 @@ public class DietScreen extends Screen {
     }
 
     private DietLayout.Layout currentLayout() {
-        return DietLayout.compute(minecraft);
+        return DietScreenEditTarget.resolvedPanelLayout(minecraft);
     }
 
     @Override
