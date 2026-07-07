@@ -4,12 +4,14 @@ import dev.marie.framework.client.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.Anchor;
 import dev.marie.framework.ui.Bounds;
+import dev.marie.framework.ui.ComponentState;
 import dev.marie.framework.ui.Constraint;
 import dev.marie.framework.ui.DraggableResizable;
 import dev.marie.framework.ui.Insets;
 import dev.marie.framework.ui.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.Size;
+import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
@@ -24,14 +26,22 @@ import java.util.Map;
  * draggable/resizable region (the whole nutrient panel), so it holds a single
  * {@link DraggableResizable} rather than one per sub-region.
  *
- * <p>Position/size are backed directly by {@link NourishedClientConfig}'s existing
- * {@code hudOffsetX}/{@code hudOffsetY}/{@code hudScale} fields — the same ones the normal
- * (non-edit) HUD render path already reads via {@code HudLayout.compute} — rather than a
- * separate keyed persistence store, so there is exactly one source of truth for HUD position.
+ * <p>Position AND size are persisted independently via {@link UiStatePersistence} (same
+ * {@link ComponentState} model {@code DietScreenPersistence} uses for the Diet Screen's panel/
+ * sub-boxes), not derived from a single {@code hudScale} value the way this used to work. A
+ * single derived scale (previously {@code hudScale = bounds.width() / baselinePanelW}, with
+ * {@code panelH} always recomputed from that same scale) cannot represent an independent-axis
+ * edge-resize: a height-only resize would compute an unchanged {@code hudScale} and then discard
+ * the resized height entirely on the next read. {@code hudScale}/{@code hudOffsetX}/{@code
+ * hudOffsetY} are still written on commit and still drive content sizing (icon/label/bar scale)
+ * and the default (never-resized) anchor position — only the outer panel's actual on-screen
+ * {@code panelX/Y/W/H} now come from the independently-persisted {@link ComponentState} once one
+ * exists, via {@link #resolvedLayout}.
  */
 final class HudEditTarget implements MarieComponent {
 
     private static final String ID = "nourished.hud.editwrapper";
+    private static final String PANEL_ID = "nourished.hud.panel";
 
     /** Matches the live preview clamp in {@code NourishedHUD#onEditMouseRelease}'s resize handling. */
     private static final double MIN_SCALE = 0.3d;
@@ -65,9 +75,32 @@ final class HudEditTarget implements MarieComponent {
         panelDrag = new DraggableResizable(this, constraint, (target, bounds) -> commit(bounds));
     }
 
-    /** Resolves the HUD panel's current on-screen bounds: persisted offsets/scale, same as the normal render path. */
+    /**
+     * Resolves the HUD panel's current full {@link HudLayout.Layout}: persisted independent
+     * position/size if the user has committed a main-panel drag/resize (via {@link #commit}),
+     * otherwise today's content-driven default. Content-scale fields (barW, rowH, iconSize,
+     * labelScale, scale, etc.) always come from the freshly-computed {@code computed} layout — only
+     * panelX/Y/W/H are substituted wholesale from the persisted {@link ComponentState}, mirroring
+     * {@code DietScreenEditTarget#resolvedPanelLayout}. Called by both the normal (non-edit) HUD
+     * render path and this class's own edit-mode rendering, so a committed resize is reflected
+     * consistently everywhere — not just while {@link HudEditTarget} itself is active.
+     */
+    static HudLayout.Layout resolvedLayout(Minecraft mc, List<String> keys) {
+        HudLayout.Layout computed = HudLayout.compute(mc, keys);
+        return UiStatePersistence.get().load(PANEL_ID)
+                .map(state -> new HudLayout.Layout(
+                        state.x(), state.y(), state.width(), state.height(),
+                        computed.baseX(), computed.baseY(),
+                        computed.barW(), computed.rowH(), computed.iconSize(), computed.maxLabelSw(),
+                        computed.scaledPad(), computed.labelScale(), computed.scale(), computed.verticalLayout(),
+                        computed.verticalBarW(), computed.verticalBarH(), computed.verticalColumnW()
+                ))
+                .orElse(computed);
+    }
+
+    /** Resolves the HUD panel's current on-screen bounds — see {@link #resolvedLayout}. */
     static Bounds resolvedBounds(Minecraft mc, List<String> keys) {
-        HudLayout.Layout layout = HudLayout.compute(mc, keys);
+        HudLayout.Layout layout = resolvedLayout(mc, keys);
         return new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
     }
 
@@ -83,6 +116,7 @@ final class HudEditTarget implements MarieComponent {
         cc.setHudOffsetX(bounds.x() - scaled.baseX());
         cc.setHudOffsetY(bounds.y() - scaled.baseY());
         NourishedClientConfig.saveNow();
+        UiStatePersistence.get().save(PANEL_ID, new ComponentState(bounds.x(), bounds.y(), bounds.width(), bounds.height(), false));
     }
 
     @Override
@@ -141,6 +175,11 @@ final class HudEditTarget implements MarieComponent {
 
         Bounds handle = DraggableResizable.handleBounds(bounds);
         context.drawResizeHandle(handle.x(), handle.y(), panelDrag.isHandleHovered(mouse[0], mouse[1], bounds), panelDrag.isHandleActive());
+        for (DraggableResizable.Edge edge : DraggableResizable.Edge.values()) {
+            Bounds strip = DraggableResizable.edgeHandleBounds(bounds, edge);
+            context.drawEdgeHandle(strip.x(), strip.y(), strip.width(), strip.height(), mouse[0], mouse[1],
+                    panelDrag.isEdgeHovered(mouse[0], mouse[1], bounds, edge), panelDrag.isEdgeActive(edge));
+        }
     }
 
     private Bounds liveOrDefault(int mx, int my, Bounds fallback) {
@@ -155,15 +194,18 @@ final class HudEditTarget implements MarieComponent {
 
     /**
      * Rebuilds a full {@link HudLayout.Layout} for the derived scale implied by {@code bounds}'
-     * width, but with position pinned to {@code bounds} itself rather than anchor-recomputed — same
-     * approach as {@code DietScreenEditTarget#matchedLayoutFor}, so the live preview rectangle and
-     * the content drawn inside it always agree, even mid-drag.
+     * width, but with position AND size pinned to {@code bounds} itself rather than anchor/
+     * formula-recomputed — same approach as {@code DietScreenEditTarget#matchedLayoutFor}, so the
+     * live preview rectangle and the content drawn inside it always agree, even mid-drag on a
+     * height-only edge (previously this used {@code computed.panelW()/panelH()}, the content-formula
+     * size at the derived scale, which stays locked to the old height during a height-only resize
+     * since the derived scale itself never changes when only height moves).
      */
     private HudLayout.Layout matchedLayoutFor(List<String> keys, Bounds bounds) {
         double derivedScale = Mth.clamp(bounds.width() / (double) baselinePanelW, MIN_SCALE, MAX_SCALE);
         HudLayout.Layout computed = HudLayout.compute(mc, keys, derivedScale);
         return new HudLayout.Layout(
-                bounds.x(), bounds.y(), computed.panelW(), computed.panelH(),
+                bounds.x(), bounds.y(), bounds.width(), bounds.height(),
                 computed.baseX(), computed.baseY(),
                 computed.barW(), computed.rowH(), computed.iconSize(), computed.maxLabelSw(),
                 computed.scaledPad(), computed.labelScale(), computed.scale(), computed.verticalLayout(),

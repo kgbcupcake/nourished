@@ -67,6 +67,38 @@ final class DietPanelContainer implements Container {
         return children;
     }
 
+    /**
+     * The single {@link RecentMealsComponent}/{@link EatMoreComponent}/{@link
+     * ActiveEffectsComponent} instances this container already constructed — for callers (edit mode)
+     * that need to read their {@code resolvedBounds()} or override their render bounds without
+     * constructing a second, independent copy.
+     */
+    RecentMealsComponent recentMealsComponent() {
+        return leftColumn().recentMealsComponent();
+    }
+
+    EatMoreComponent eatMoreComponent() {
+        return leftColumn().eatMoreComponent();
+    }
+
+    ActiveEffectsComponent activeEffectsComponent() {
+        return leftColumn().activeEffectsComponent();
+    }
+
+    /**
+     * Overrides the bounds {@link #render} will use for the recent-meals/eat-more/active-effects
+     * sub-boxes instead of their own {@code resolvedBounds()} — for edit mode's live drag/resize
+     * preview. {@code null} for any param means "use that child's own resolvedBounds()," i.e. the
+     * normal (non-edit) render path is unaffected.
+     */
+    void setSubBoxRenderBounds(Bounds recentMealsBounds, Bounds eatMoreBounds, Bounds activeEffectsBounds) {
+        leftColumn().setSubBoxRenderBounds(recentMealsBounds, eatMoreBounds, activeEffectsBounds);
+    }
+
+    private DietLeftColumnComponent leftColumn() {
+        return (DietLeftColumnComponent) children.get(0);
+    }
+
     @Override
     public void addChild(MarieComponent child) {
         children.add(child);
@@ -92,8 +124,7 @@ final class DietPanelContainer implements Container {
         double opacity = NourishedClientConfig.get().dietBackgroundOpacity();
         int alpha = Math.max(0, Math.min(255, (int) Math.round(opacity * 255.0d)));
         int fill = (alpha << 24) | (COL_BG_RGB & 0x00FFFFFF);
-        context.fillRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), fill);
-        context.drawBorder(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, COL_BORDER);
+        context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, fill, COL_BORDER);
 
         float scale = (float) layout.scale();
         Font font = Minecraft.getInstance().font;
@@ -102,16 +133,39 @@ final class DietPanelContainer implements Container {
         int titleX = bounds.x() + (bounds.width() - titleW) / 2;
         context.drawText(title, titleX, DietLayout.toScreenY(layout, 9), COL_TITLE, scale);
 
+        // Panel-level minimize: below this threshold, the panel shows title-bar only — divider, both
+        // columns (and everything under them, including every sub-box's own collapse behavior), and
+        // the "no player" message all short-circuit here. This is a coarser, higher-priority check
+        // than any per-sub-box HeaderCollapsibleComponent fit-check: those never even get evaluated
+        // once minimized, since Container.super.render (which is what invokes
+        // DietLeftColumnComponent/DietRightColumnComponent, and in turn RecentMeals/EatMore/
+        // ActiveEffects/Calories/Balance) is never reached. The edit-mode toggle and this panel's own
+        // resize handle are drawn by the caller (DietScreenEditTarget/DietScreen), not here, and are
+        // never gated on this — the handle must stay grabbable to un-minimize.
+        if (bounds.height() < DietLayout.toScreenDim(layout, DietLayout.PANEL_MINIMIZED_THRESHOLD_LOCAL_HEIGHT)) {
+            return;
+        }
+
+        // dividerBottom/textY anchor to the panel's live bottom edge (bounds.y() + bounds.height())
+        // instead of DietLayout.toScreenY(layout, DietLayout.HEIGHT - ...) — the latter recomputes a
+        // screen position from the fixed DietLayout.HEIGHT constant via layout.scale() (a width-only
+        // derived value), which silently assumes the panel's actual height always equals
+        // HEIGHT * scale. That's only true under proportional (corner) resize; a panel independently
+        // shrunk shorter via its top/bottom edge has a real bounds.height() smaller than that
+        // assumption, so the divider kept extending past the panel's actual (now shorter) bottom
+        // edge instead of shrinking with it. bounds is this render() call's live, current-frame
+        // Bounds — not cached — so anchoring to its bottom edge directly stays correct regardless of
+        // which axis was independently resized.
         int dividerX = bounds.x() + DietLayout.toScreenDim(layout, DietLayout.SPLIT);
         int dividerTop = DietLayout.toScreenY(layout, 26);
-        int dividerBottom = DietLayout.toScreenY(layout, DietLayout.HEIGHT - 34);
+        int dividerBottom = bounds.y() + bounds.height() - DietLayout.toScreenDim(layout, 34);
         context.fillRect(dividerX, dividerTop, DietLayout.toScreenDim(layout, 1), Math.max(0, dividerBottom - dividerTop), COL_DIVIDER);
 
         if (data == null) {
             String noPlayer = Component.translatable("nourished.screen.diet.no_player").getString();
             int textW = (int) Math.ceil(font.width(noPlayer) * scale);
             int textX = bounds.x() + (bounds.width() - textW) / 2;
-            int textY = DietLayout.toScreenY(layout, DietLayout.HEIGHT / 2);
+            int textY = bounds.y() + bounds.height() / 2;
             context.drawText(noPlayer, textX, textY, COL_GRAY, scale);
             return;
         }

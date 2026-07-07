@@ -57,6 +57,8 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue showCaloriesBox;
     private final ModConfigSpec.BooleanValue showBalanceBox;
     private final ModConfigSpec.BooleanValue recentMealsEatMoreOffsetMigrationDone;
+    private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalOffsetMigrationDone;
+    private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalSizeMigrationDone;
 
     /** Matches legacy {@code COL_PANEL_BG} alpha ({@code 0xCC}). */
     private static final double DEFAULT_HUD_BACKGROUND_OPACITY = 204.0d / 255.0d;
@@ -153,6 +155,22 @@ public final class NourishedClientConfig {
         // panel-relative offsets: see DietScreenPersistence#resolveRelativeToPanel.
         recentMealsEatMoreOffsetMigrationDone = builder.define(
                 "recentMealsEatMoreOffsetMigrationDone",
+                false
+        );
+        // Second one-time migration flag — the persisted x/y offset's meaning changed again, from
+        // an absolute screen-pixel delta from the panel origin (fixed regardless of panel scale) to
+        // a scale-normalized local-unit delta (see DietScreenPersistence#resolveRelativeToPanel):
+        // reusing the flag above wouldn't fire for players who already tripped it under the older
+        // absolute-delta scheme.
+        recentMealsEatMoreLocalOffsetMigrationDone = builder.define(
+                "recentMealsEatMoreLocalOffsetMigrationDone",
+                false
+        );
+        // Third one-time migration flag — width/height's meaning changed too, from an absolute
+        // screen-pixel size (fixed regardless of panel scale) to a scale-normalized local-unit size,
+        // so a box scales with the panel like the position offset already does.
+        recentMealsEatMoreLocalSizeMigrationDone = builder.define(
+                "recentMealsEatMoreLocalSizeMigrationDone",
                 false
         );
         builder.pop();
@@ -490,6 +508,22 @@ public final class NourishedClientConfig {
 
     public void setRecentMealsEatMoreOffsetMigrationDone(boolean value) {
         recentMealsEatMoreOffsetMigrationDone.set(value);
+    }
+
+    public boolean recentMealsEatMoreLocalOffsetMigrationDone() {
+        return recentMealsEatMoreLocalOffsetMigrationDone.get();
+    }
+
+    public void setRecentMealsEatMoreLocalOffsetMigrationDone(boolean value) {
+        recentMealsEatMoreLocalOffsetMigrationDone.set(value);
+    }
+
+    public boolean recentMealsEatMoreLocalSizeMigrationDone() {
+        return recentMealsEatMoreLocalSizeMigrationDone.get();
+    }
+
+    public void setRecentMealsEatMoreLocalSizeMigrationDone(boolean value) {
+        recentMealsEatMoreLocalSizeMigrationDone.set(value);
     }
 
     public void resetDietOffsets() {

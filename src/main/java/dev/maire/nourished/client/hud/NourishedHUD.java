@@ -57,7 +57,7 @@ public final class NourishedHUD {
         if (visibleKeys.isEmpty()) {
             return;
         }
-        HudLayout.Layout layout = HudLayout.compute(mc, visibleKeys);
+        HudLayout.Layout layout = HudEditTarget.resolvedLayout(mc, visibleKeys);
         drawHudPanelViaMarieUI(event.getGuiGraphics(), mc, event.getPartialTick().getGameTimeDeltaPartialTick(false), visibleKeys, layout);
     }
 

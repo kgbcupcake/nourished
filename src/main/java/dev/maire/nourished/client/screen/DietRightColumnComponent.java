@@ -105,7 +105,20 @@ final class DietRightColumnComponent implements MarieComponent {
         int barLeft = rx + 24;
         int barW = Math.max(0, pctColumnRight - maxPctW - 4 - barLeft);
 
+        // Live-height-aware, not the fixed DietLayout.HEIGHT constant: `height` (the field, set in
+        // the constructor) is already the panel's live screen height — see DietPanelContainer's
+        // columnHeight = layout.panelH() — so dividing by layout.scale() recovers it in the same
+        // local-unit space `y` is already expressed in, same technique as
+        // RecentMealsComponent's constructor. Without this, a panel shrunk shorter via its top/
+        // bottom edge never stops drawing rows/the legend past the live bottom edge, so they just
+        // cut off/overlap instead of compacting.
+        int liveLocalHeight = (int) Math.round(height / layout.scale());
+        int maxRowY = liveLocalHeight - DietLayout.PAD;
+
         for (String key : bars) {
+            if (y + 26 > maxRowY) {
+                break;
+            }
             float disp = display.getOrDefault(key, data.values.getOrDefault(key, 0f));
             float real = data.values.getOrDefault(key, 0f);
             float prev = data.lastValues.getOrDefault(key, real);
@@ -118,8 +131,7 @@ final class DietRightColumnComponent implements MarieComponent {
             int bx = rx;
             int by = y;
             int panelFill = panelColorWithOpacity(COL_PANEL_RGB, NourishedClientConfig.get().dietBackgroundOpacity());
-            fillRect(context, bx, by, 20, 20, panelFill);
-            drawBorder(context, bx, by, 20, 20, COL_BORDER_LT);
+            drawRoundedRect(context, bx, by, 20, 20, panelFill, COL_BORDER_LT);
 
             String iconId = NutrientRegistry.getIcon(key);
             Item iconItem = BuiltInRegistries.ITEM.getOptional(ResourceLocation.tryParse(iconId)).orElse(Items.APPLE);
@@ -148,7 +160,11 @@ final class DietRightColumnComponent implements MarieComponent {
             y += ROW_STEP;
         }
 
-        drawLegendBar(context, font, rx, DietLayout.HEIGHT - 66, (DietLayout.WIDTH - DietLayout.PAD) - rx, 34);
+        int legendY = liveLocalHeight - 66;
+        int legendH = 34;
+        if (legendY >= y && legendY + legendH <= liveLocalHeight - DietLayout.PAD) {
+            drawLegendBar(context, font, rx, legendY, (DietLayout.WIDTH - DietLayout.PAD) - rx, legendH);
+        }
     }
 
     private void drawLegendBar(RenderContext context, Font font, int x, int y, int w, int h) {
@@ -247,13 +263,12 @@ final class DietRightColumnComponent implements MarieComponent {
         context.fillRect(sx(localX), sy(localY), sd(localW), sd(localH), color);
     }
 
-    private void drawBorder(RenderContext context, int localX, int localY, int localW, int localH, int color) {
-        context.drawBorder(sx(localX), sy(localY), sd(localW), sd(localH), 1, color);
+    private void drawRoundedRect(RenderContext context, int localX, int localY, int localW, int localH, int fillColor, int borderColor) {
+        context.drawRoundedRect(sx(localX), sy(localY), sd(localW), sd(localH), 1, fillColor, borderColor);
     }
 
     private void drawRoundedBox(RenderContext context, int localX, int localY, int localW, int localH) {
         int fill = panelColorWithOpacity(COL_ROW_BG_RGB, NourishedClientConfig.get().dietBackgroundOpacity());
-        fillRect(context, localX, localY, localW, localH, fill);
-        drawBorder(context, localX, localY, localW, localH, COL_BORDER_LT);
+        drawRoundedRect(context, localX, localY, localW, localH, fill, COL_BORDER_LT);
     }
 }

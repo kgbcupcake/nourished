@@ -11,6 +11,19 @@ public final class DietLayout {
     public static final int SPLIT = 108;
     public static final int PAD = 10;
 
+    /**
+     * Local-unit height floor for the main panel's resize constraint — just enough room for the
+     * title bar (title text sits at local Y=9; the divider/columns start at Y=26), so the panel can
+     * be dragged all the way down to a title-bar-only minimized state instead of stopping at a
+     * two-column content view. See {@link DietPanelContainer}'s minimized short-circuit, gated at
+     * {@link #PANEL_MINIMIZED_THRESHOLD_LOCAL_HEIGHT} (slightly above this floor, not the floor
+     * itself, so there's no razor-thin dead zone between "still floor-clamped" and "now minimized").
+     */
+    public static final int PANEL_MIN_LOCAL_HEIGHT = 40;
+
+    /** See {@link #PANEL_MIN_LOCAL_HEIGHT}. */
+    public static final int PANEL_MINIMIZED_THRESHOLD_LOCAL_HEIGHT = 50;
+
     public record Layout(
             int panelX,
             int panelY,

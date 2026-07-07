@@ -9,6 +9,8 @@ import dev.marie.framework.ui.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.Size;
 import dev.marie.framework.ui.VisibilityRule;
+import dev.marie.framework.ui.visibility.AnyOf;
+import dev.marie.framework.ui.visibility.ConfigToggleVisibility;
 import dev.marie.framework.ui.visibility.ThresholdVisibility;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -59,25 +61,40 @@ final class NutrientBarComponent implements MarieComponent {
     }
 
     /**
-     * Wraps HudVisibility/HudVisibilityRules' hide/show-above thresholds only. Zero-bar dimming,
-     * nutrient-gain flashing, and the resulting composite rule are legacy-path-only for this pass —
-     * flashing composition onto this rule is a follow-up once plain threshold visibility renders correctly.
+     * Wraps HudVisibility/HudVisibilityRules' hide/show-above thresholds, OR'd with the nutrient-gain
+     * flash window (via {@link MarieClientCache#flashAlpha}) so a bar temporarily reveals itself when
+     * its value just increased, even while otherwise threshold-hidden.
      */
     @Override
     public VisibilityRule visibilityRule() {
         NourishedClientConfig cc = NourishedClientConfig.get();
         Float hideAtOrAbove = activeThreshold((float) cc.hudHideAboveThreshold());
         Float showAtOrAbove = activeThreshold((float) cc.hudShowAboveThreshold());
-        return new ThresholdVisibility<>(
+        VisibilityRule threshold = new ThresholdVisibility<>(
                 () -> MarieClientCache.get().values.getOrDefault(nutrientKey, 0f),
                 hideAtOrAbove,
                 showAtOrAbove
         );
+        if (!cc.hudRevealOnNutrientGain()) {
+            return threshold;
+        }
+        VisibilityRule flashing = new ConfigToggleVisibility(() -> MarieClientCache.flashAlpha(nutrientKey) > 0f);
+        return new AnyOf(threshold, flashing);
     }
 
     private static Float activeThreshold(float raw) {
         float clamped = Math.max(0f, Math.min(1f, raw));
         return clamped < 1f - HudVisibilityRules.ZERO_EPSILON ? clamped : null;
+    }
+
+    /** Translucent white highlight over the bar while {@link MarieClientCache#flashAlpha} is decaying, matching the pre-MarieUI legacy renderer's treatment. */
+    private void drawFlashOverlay(RenderContext context, int barX, int barY, int barW, int barH) {
+        float flash = MarieClientCache.flashAlpha(nutrientKey);
+        if (flash > 0f) {
+            int a = (int) (flash * 80);
+            int flashColor = (a << 24) | 0xFFFFFF;
+            context.fillRect(barX, barY, barW, barH, flashColor);
+        }
     }
 
     private static ItemStack resolveIconStack(String key) {
@@ -113,6 +130,7 @@ final class NutrientBarComponent implements MarieComponent {
             context.drawText(pctText, pctX, bounds.y(), pctColor, labelScale);
 
             context.drawVerticalBar(barX, barY, barW, barH, value, bgColor, fillColor);
+            drawFlashOverlay(context, barX, barY, barW, barH);
 
             int labelSw = (int) Math.ceil(font.width(label) * labelScale);
             int labelX = bounds.x() + (bounds.width() - labelSw) / 2;
@@ -130,6 +148,7 @@ final class NutrientBarComponent implements MarieComponent {
             int barX = labelX + hudLayout.maxLabelSw() + HudDrawHelpers.LABEL_BAR_GAP;
             int barY = rowCenterY - HudDrawHelpers.BAR_H / 2;
             context.drawBar(barX, barY, hudLayout.barW(), HudDrawHelpers.BAR_H, value, bgColor, fillColor);
+            drawFlashOverlay(context, barX, barY, hudLayout.barW(), HudDrawHelpers.BAR_H);
 
             int pctX = barX + hudLayout.barW() + HudDrawHelpers.BAR_PCT_GAP;
             context.drawText(pctText, pctX, textY, pctColor, labelScale);

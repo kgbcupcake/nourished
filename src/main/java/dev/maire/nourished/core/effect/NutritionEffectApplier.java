@@ -67,6 +67,7 @@ public final class NutritionEffectApplier {
                 }
                 default -> false;
             };
+
             EffectConflictDetector.checkAndWarn(def, shouldApply, seenActiveEffects);
             applyEffect(player, effectId, effect, shouldApply, def);
             if (shouldApply) {

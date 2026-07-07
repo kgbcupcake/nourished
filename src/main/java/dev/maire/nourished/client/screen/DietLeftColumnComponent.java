@@ -17,13 +17,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -48,13 +45,24 @@ final class DietLeftColumnComponent implements Container {
     private static final int COL_ROW_BG_RGB = 0x001E1E1E;
     private static final int COL_BORDER_LT = 0xFF555555;
     private static final int COL_SEG_EMPTY = 0xFF2A2A2A;
-    private static final int COL_HEADER = 0xFF888888;
     private static final int COL_WHITE = 0xFFFFFFFF;
-    private static final int COL_GRAY = 0xFF666666;
     private static final int COL_GOLD = 0xFFFFD65C;
     private static final int COL_GREEN = 0xFF55FF55;
     private static final int COL_ORANGE = 0xFFFFAA00;
     private static final int COL_RED = 0xFFFF5555;
+
+    // Calories/Balance boxes aren't separate MarieComponents (no independent Bounds/DraggableResizable
+    // of their own — see class javadoc), so they can't literally implement HeaderCollapsibleComponent
+    // (that contract assumes ONE header + ONE body for a single component; these are two independent
+    // header+body pairs drawn inline by this same container). These constants + the fit-checks below
+    // replicate that interface's exact fit-check formula (header must always fit to draw anything;
+    // body only draws if the box's full natural footprint also fits) against the live panel height,
+    // so both boxes shrink/collapse in step with panel resize the same way the sub-boxes do, instead
+    // of always drawing at a fixed size regardless of how little live room remains.
+    private static final int CALORIES_HEADER_LOCAL_HEIGHT = 20;
+    private static final int CALORIES_BODY_LOCAL_HEIGHT = 20;
+    private static final int BALANCE_HEADER_LOCAL_HEIGHT = 30;
+    private static final int BALANCE_BODY_LOCAL_HEIGHT = 20;
 
     private final TrackingData data;
     private final DietLayout.Layout layout;
@@ -63,6 +71,9 @@ final class DietLeftColumnComponent implements Container {
     private final int headerEndLocalY;
     private final List<MarieComponent> children;
     private final Layout columnLayout;
+    private Bounds recentMealsRenderBounds;
+    private Bounds eatMoreRenderBounds;
+    private Bounds activeEffectsRenderBounds;
 
     DietLeftColumnComponent(TrackingData data, DietLayout.Layout layout, int width, int height) {
         this.data = data;
@@ -72,9 +83,39 @@ final class DietLeftColumnComponent implements Container {
         this.headerEndLocalY = computeHeaderEndLocalY();
 
         RecentMealsComponent recentMeals = new RecentMealsComponent(layout, headerEndLocalY);
-        EatMoreComponent eatMore = new EatMoreComponent(layout, headerEndLocalY + recentMeals.localHeight());
-        this.children = new ArrayList<>(List.of(recentMeals, eatMore));
+        int eatMoreStartLocalY = nextSiblingStartLocalY(
+                headerEndLocalY, recentMeals.localHeight(), recentMeals.resolvedBounds(), layout);
+        EatMoreComponent eatMore = new EatMoreComponent(layout, eatMoreStartLocalY);
+        int activeEffectsStartLocalY = nextSiblingStartLocalY(
+                eatMoreStartLocalY, eatMore.localHeight(), eatMore.resolvedBounds(), layout);
+        ActiveEffectsComponent activeEffects = new ActiveEffectsComponent(layout, activeEffectsStartLocalY);
+        this.children = new ArrayList<>(List.of(recentMeals, eatMore, activeEffects));
         this.columnLayout = new VerticalLayout(0);
+    }
+
+    RecentMealsComponent recentMealsComponent() {
+        return (RecentMealsComponent) children.get(0);
+    }
+
+    EatMoreComponent eatMoreComponent() {
+        return (EatMoreComponent) children.get(1);
+    }
+
+    ActiveEffectsComponent activeEffectsComponent() {
+        return (ActiveEffectsComponent) children.get(2);
+    }
+
+    /**
+     * Overrides the bounds {@link #render} passes to the recent-meals/eat-more/active-effects
+     * children instead of their own {@code resolvedBounds()} — for edit mode's live drag/resize
+     * preview, so the single instance built here can be rendered at a live-tracked position without
+     * a second, independently constructed copy. {@code null} for any param means "use that child's
+     * own resolvedBounds()."
+     */
+    void setSubBoxRenderBounds(Bounds recentMealsBounds, Bounds eatMoreBounds, Bounds activeEffectsBounds) {
+        this.recentMealsRenderBounds = recentMealsBounds;
+        this.eatMoreRenderBounds = eatMoreBounds;
+        this.activeEffectsRenderBounds = activeEffectsBounds;
     }
 
     /**
@@ -92,6 +133,36 @@ final class DietLeftColumnComponent implements Container {
             y += 55;
         }
         return y;
+    }
+
+    /**
+     * Where the next stacked element should start, in local (pre-scale) units — advances by
+     * {@code sibling}'s actual <em>footprint height</em> ({@code max(localHeight, resolvedBounds's
+     * height converted to local units)}), not its content-only {@code localHeight()} alone. A box's
+     * rendered height can now diverge from its content height once independently resized/persisted
+     * (drag/resize, {@link DietScreenPersistence}), and the old {@code currentLocalY + localHeight}
+     * formula didn't know that — so a resized-taller RecentMeals box wouldn't push EatMore/Active
+     * Effects down, and they'd render overlapped by it.
+     *
+     * <p>Deliberately uses only {@code resolvedBounds.height()} — never {@code resolvedBounds.y()}
+     * or {@code .x()} — so a box that's been <em>dragged</em> elsewhere (position changed, height
+     * unchanged) doesn't drag its sibling's stacked position along with it; only an actual resize
+     * (height genuinely larger than the natural content height) advances the next element. Using the
+     * box's absolute Y previously coupled Active Effects' position to EatMore being moved, and fed a
+     * position-inflated value back into EatMore's own {@code startLocalY} (used for its {@code
+     * visible}/constraint-preferred-size computation), which could go degenerate whenever RecentMeals
+     * had simply been dragged rather than resized.
+     *
+     * <p>Returns {@code currentLocalY} unchanged when {@code localHeight <= 0} (sibling hidden/not
+     * fitting), matching the old formula's no-op in that case.
+     */
+    static int nextSiblingStartLocalY(int currentLocalY, int localHeight, Bounds resolvedBounds, DietLayout.Layout layout) {
+        if (localHeight <= 0) {
+            return currentLocalY;
+        }
+        int localBoundsHeight = (int) Math.round(resolvedBounds.height() / layout.scale());
+        int footprint = Math.max(localHeight, localBoundsHeight);
+        return currentLocalY + footprint;
     }
 
     @Override
@@ -136,7 +207,12 @@ final class DietLeftColumnComponent implements Container {
         int x = DietLayout.PAD;
         int y = 20;
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
-        int maxY = DietLayout.HEIGHT - DietLayout.PAD;
+
+        // Live-height-aware, same technique as RecentMealsComponent's constructor: layout.panelH()
+        // already reflects the panel's live (possibly independently edge-resized) height, so dividing
+        // by layout.scale() recovers it in the same local-unit space `y` is already expressed in.
+        int liveLocalHeight = (int) Math.round(layout.panelH() / layout.scale());
+        int maxY = liveLocalHeight - DietLayout.PAD;
 
         String todayText = Component.translatable("nourished.screen.diet.today").getString();
         int todayW = font.width(todayText);
@@ -147,43 +223,53 @@ final class DietLeftColumnComponent implements Container {
         y += 10;
 
         if (FeatureFlagCache.enableTotalTracking() && cc.showCaloriesBox()) {
-            drawRoundedBox(context, x - 2, y - 2, bw + 4, 40, cc);
+            if (y + CALORIES_HEADER_LOCAL_HEIGHT <= maxY) {
+                boolean bodyFits = y + CALORIES_HEADER_LOCAL_HEIGHT + CALORIES_BODY_LOCAL_HEIGHT <= maxY;
+                drawRoundedBox(context, x - 2, y - 2, bw + 4, 40, cc);
 
-            drawItem(context, "minecraft:fire_charge", x, y + 3, scale);
-            drawText(context, Component.translatable("nourished.screen.diet.calories_label").getString(), x + 22, y + 4, COL_WHITE, scale);
+                drawItem(context, "minecraft:fire_charge", x, y + 3, scale);
+                drawText(context, Component.translatable("nourished.screen.diet.calories_label").getString(), x + 22, y + 4, COL_WHITE, scale);
 
-            String calStr = (int) data.total + " / " + (int) data.maxTotal;
-            drawText(context, calStr, x + 22, y + 15, COL_GREEN, scale);
+                String calStr = (int) data.total + " / " + (int) data.maxTotal;
+                drawText(context, calStr, x + 22, y + 15, COL_GREEN, scale);
 
-            float calPct = data.maxTotal > 0 ? Mth.clamp(data.total / data.maxTotal, 0f, 1f) : 0f;
-            context.drawBar(sx(x), sy(y + 31), sd(bw), sd(4), calPct, COL_SEG_EMPTY, COL_GREEN);
+                if (bodyFits) {
+                    float calPct = data.maxTotal > 0 ? Mth.clamp(data.total / data.maxTotal, 0f, 1f) : 0f;
+                    context.drawBar(sx(x), sy(y + 31), sd(bw), sd(4), calPct, COL_SEG_EMPTY, COL_GREEN);
+                }
+            }
             y += 45;
         }
 
         if (cc.showBalanceBox()) {
-            drawRoundedBox(context, x - 2, y - 2, bw + 4, 50, cc);
+            if (y + BALANCE_HEADER_LOCAL_HEIGHT <= maxY) {
+                boolean bodyFits = y + BALANCE_HEADER_LOCAL_HEIGHT + BALANCE_BODY_LOCAL_HEIGHT <= maxY;
+                drawRoundedBox(context, x - 2, y - 2, bw + 4, 50, cc);
 
-            drawItem(context, "minecraft:comparator", x, y + 3, scale);
-            drawText(context, Component.translatable("nourished.screen.diet.balance_label").getString(), x + 22, y + 4, COL_WHITE, scale);
+                drawItem(context, "minecraft:comparator", x, y + 3, scale);
+                drawText(context, Component.translatable("nourished.screen.diet.balance_label").getString(), x + 22, y + 4, COL_WHITE, scale);
 
-            String balKey = getBalanceKey(data);
-            int balColor = balanceColor(balKey);
-            String balText = Component.translatable("nourished.screen.diet.balance_state." + balKey).getString();
+                String balKey = getBalanceKey(data);
+                int balColor = balanceColor(balKey);
+                String balText = Component.translatable("nourished.screen.diet.balance_state." + balKey).getString();
 
-            float balanceScale = 1.2f * (10f / 9f);
-            float balTextW = font.width(balText) * balanceScale;
-            int bgAlpha = 51;
-            int bgColor = (bgAlpha << 24) | (balColor & 0x00FFFFFF);
-            context.fillRect(sx(x + 22 - 2), sy(y + 14), sd((int) balTextW + 5), sd(11), bgColor);
-            drawText(context, balText, x + 22, y + 15, balColor, scale * balanceScale);
+                float balanceScale = 1.2f * (10f / 9f);
+                float balTextW = font.width(balText) * balanceScale;
+                int bgAlpha = 51;
+                int bgColor = (bgAlpha << 24) | (balColor & 0x00FFFFFF);
+                context.fillRect(sx(x + 22 - 2), sy(y + 14), sd((int) balTextW + 5), sd(11), bgColor);
+                drawText(context, balText, x + 22, y + 15, balColor, scale * balanceScale);
 
-            float balScore = MarieClientCache.getBalanceScore();
-            int filledPips = Math.round(balScore * 5);
-            int pipTotalW = 5 * 10 + 4 * 3;
-            int pipStartX = x + (bw - pipTotalW) / 2;
-            for (int i = 0; i < 5; i++) {
-                int px = pipStartX + i * 13;
-                context.fillRect(sx(px), sy(y + 38), sd(10), sd(6), i < filledPips ? balColor : COL_SEG_EMPTY);
+                if (bodyFits) {
+                    float balScore = MarieClientCache.getBalanceScore();
+                    int filledPips = Math.round(balScore * 5);
+                    int pipTotalW = 5 * 10 + 4 * 3;
+                    int pipStartX = x + (bw - pipTotalW) / 2;
+                    for (int i = 0; i < 5; i++) {
+                        int px = pipStartX + i * 13;
+                        context.fillRect(sx(px), sy(y + 38), sd(10), sd(6), i < filledPips ? balColor : COL_SEG_EMPTY);
+                    }
+                }
             }
             y += 55;
         }
@@ -191,52 +277,20 @@ final class DietLeftColumnComponent implements Container {
 
         RecentMealsComponent recentMeals = (RecentMealsComponent) children.get(0);
         EatMoreComponent eatMore = (EatMoreComponent) children.get(1);
+        ActiveEffectsComponent activeEffects = (ActiveEffectsComponent) children.get(2);
+
+        Bounds recentMealsBounds = recentMealsRenderBounds != null ? recentMealsRenderBounds : recentMeals.resolvedBounds();
+        Bounds eatMoreBounds = eatMoreRenderBounds != null ? eatMoreRenderBounds : eatMore.resolvedBounds();
+        Bounds activeEffectsBounds = activeEffectsRenderBounds != null ? activeEffectsRenderBounds : activeEffects.resolvedBounds();
 
         if (recentMeals.visibilityRule().isVisible()) {
-            recentMeals.render(context, recentMeals.resolvedBounds());
+            recentMeals.render(context, recentMealsBounds);
         }
         if (eatMore.visibilityRule().isVisible()) {
-            eatMore.render(context, eatMore.resolvedBounds());
+            eatMore.render(context, eatMoreBounds);
         }
-
-        int afterChildrenLocalY = headerEndLocalY + recentMeals.localHeight() + eatMore.localHeight();
-
-        if (cc.showActiveEffects()) {
-            Minecraft mc = Minecraft.getInstance();
-            int effectCount = (mc.player != null) ? mc.player.getActiveEffects().size() : 0;
-            int effectsHeight = 10 + (Math.min(3, effectCount) * 9);
-            if (afterChildrenLocalY + effectsHeight <= maxY) {
-                drawActiveEffects(context, mc, font, x, afterChildrenLocalY, scale);
-            }
-        }
-    }
-
-    private void drawActiveEffects(RenderContext context, Minecraft mc, Font font, int x, int y, float scale) {
-        if (mc.player == null) return;
-
-        drawText(context, Component.translatable("nourished.screen.diet.effects_label").getString(), x, y, COL_HEADER, scale);
-        y += 10;
-
-        Collection<MobEffectInstance> effects = mc.player.getActiveEffects();
-        if (effects.isEmpty()) {
-            drawText(context, Component.translatable("nourished.screen.diet.effects_none").getString(), x, y, COL_GRAY, scale);
-            return;
-        }
-
-        int count = 0;
-        int maxY = DietLayout.HEIGHT - DietLayout.PAD;
-        for (MobEffectInstance effect : effects) {
-            if (count >= 3) break;
-            if (y + 9 > maxY) break;
-            MobEffect type = effect.getEffect().value();
-            String name = Component.translatable(type.getDescriptionId()).getString();
-            int amplifier = effect.getAmplifier();
-            String label = (amplifier > 0 ? name + " " + (amplifier + 1) : name);
-            int color = type.isBeneficial() ? COL_GREEN : COL_RED;
-            String prefix = type.isBeneficial() ? "+ " : "- ";
-            drawText(context, prefix + label, x, y, color, scale);
-            y += 9;
-            count++;
+        if (activeEffects.visibilityRule().isVisible()) {
+            activeEffects.render(context, activeEffectsBounds);
         }
     }
 
@@ -265,8 +319,7 @@ final class DietLeftColumnComponent implements Container {
 
     private void drawRoundedBox(RenderContext context, int localX, int localY, int localW, int localH, NourishedClientConfig cc) {
         int fill = panelColorWithOpacity(COL_ROW_BG_RGB, cc.dietBackgroundOpacity());
-        context.fillRect(sx(localX), sy(localY), sd(localW), sd(localH), fill);
-        context.drawBorder(sx(localX), sy(localY), sd(localW), sd(localH), 1, COL_BORDER_LT);
+        context.drawRoundedRect(sx(localX), sy(localY), sd(localW), sd(localH), 1, fill, COL_BORDER_LT);
     }
 
     private static int panelColorWithOpacity(int rgb, double opacity) {

@@ -21,7 +21,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -93,16 +92,6 @@ public class DietScreen extends Screen {
             visibleBars.add(key);
         }
 
-        int closeW = DietLayout.scaledDim(118, layout.scale());
-        int closeH = DietLayout.scaledDim(18, layout.scale());
-        int closeX = leftPos + DietLayout.scaledDim((WIDTH - 118) / 2, layout.scale());
-        int closeY = topPos + DietLayout.scaledDim(HEIGHT - 22, layout.scale());
-        addRenderableWidget(
-                Button.builder(
-                        Component.translatable("nourished.screen.diet.close"),
-                        b -> onClose()
-                ).bounds(closeX, closeY, closeW, closeH).build()
-        );
     }
 
     private DietLayout.Layout currentLayout() {
@@ -174,7 +163,10 @@ public class DietScreen extends Screen {
      */
     private EditModeController marieEditModeController() {
         if (marieEditModeController == null) {
-            marieEditTarget = new DietScreenEditTarget(minecraft);
+            // marieEditModeController is assigned below, before the exit callback can ever
+            // actually run (it's only reachable via a click inside an already-active edit
+            // overlay) — safe despite referencing the not-yet-assigned field here.
+            marieEditTarget = new DietScreenEditTarget(minecraft, () -> marieEditModeController.exit());
             marieEditModeController = new EditModeController(
                     marieEditTarget,
                     "Drag boxes to reposition, drag corner handles to resize. J or Esc to exit.",
@@ -279,14 +271,14 @@ public class DietScreen extends Screen {
     private static final int COL_TOGGLE_HOUSING_BG = 0xFF1E1E1E;
     private static final int COL_TOGGLE_LEVER = 0xFFB0B0B0;
 
-    private static Bounds editModeToggleHousingBounds(DietLayout.Layout layout) {
+    static Bounds editModeToggleHousingBounds(DietLayout.Layout layout) {
         int x2 = DietLayout.toScreenX(layout, WIDTH - TOGGLE_RIGHT_MARGIN);
         int w = DietLayout.toScreenDim(layout, TOGGLE_HOUSING_W);
         int h = DietLayout.toScreenDim(layout, TOGGLE_HOUSING_H);
         return new Bounds(x2 - w, DietLayout.toScreenY(layout, TOGGLE_HOUSING_TOP), w, h);
     }
 
-    private static Bounds editModeToggleLightBounds(DietLayout.Layout layout, Bounds housing) {
+    static Bounds editModeToggleLightBounds(DietLayout.Layout layout, Bounds housing) {
         int size = DietLayout.toScreenDim(layout, TOGGLE_LIGHT_SIZE);
         int gap = DietLayout.toScreenDim(layout, TOGGLE_LIGHT_GAP);
         int x = housing.x() + (housing.width() - size) / 2;
@@ -294,7 +286,7 @@ public class DietScreen extends Screen {
         return new Bounds(x, y, size, size);
     }
 
-    private static boolean isMouseOverEditModeToggle(DietLayout.Layout layout, double mx, double my) {
+    static boolean isMouseOverEditModeToggle(DietLayout.Layout layout, double mx, double my) {
         Bounds housing = editModeToggleHousingBounds(layout);
         return mx >= housing.x() && my >= housing.y()
                 && mx < housing.x() + housing.width() && my < housing.y() + housing.height();
@@ -306,7 +298,7 @@ public class DietScreen extends Screen {
      * Both are read directly from {@code active} every call (never a cached toggle boolean), so
      * this can never drift from {@link EditModeController#isActive()}'s live truth.
      */
-    private void drawEditModeToggle(RenderContext context, DietLayout.Layout layout, boolean active, boolean hovered) {
+    static void drawEditModeToggle(RenderContext context, DietLayout.Layout layout, boolean active, boolean hovered) {
         Bounds housing = editModeToggleHousingBounds(layout);
         Bounds light = editModeToggleLightBounds(layout, housing);
 
