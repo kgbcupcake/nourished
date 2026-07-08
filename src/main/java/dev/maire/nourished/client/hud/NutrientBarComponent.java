@@ -1,13 +1,13 @@
 package dev.maire.nourished.client.hud;
 
 import dev.marie.framework.client.MarieClientCache;
-import dev.marie.framework.ui.Anchor;
-import dev.marie.framework.ui.Bounds;
-import dev.marie.framework.ui.Constraint;
-import dev.marie.framework.ui.Insets;
-import dev.marie.framework.ui.MarieComponent;
+import dev.marie.framework.ui.geometry.Anchor;
+import dev.marie.framework.ui.geometry.Bounds;
+import dev.marie.framework.ui.component.Constraint;
+import dev.marie.framework.ui.geometry.Insets;
+import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
-import dev.marie.framework.ui.Size;
+import dev.marie.framework.ui.geometry.Size;
 import dev.marie.framework.ui.VisibilityRule;
 import dev.marie.framework.ui.visibility.AnyOf;
 import dev.marie.framework.ui.visibility.ConfigToggleVisibility;

@@ -1,6 +1,6 @@
 package dev.maire.nourished.client.screen;
 
-import dev.marie.framework.ui.Bounds;
+import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.PersistenceProvider;
 import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -134,6 +134,17 @@ final class DietScreenPersistence {
             get().remove(RecentMealsComponent.ID);
             get().remove(EatMoreComponent.ID);
             cc.setRecentMealsEatMoreLocalSizeMigrationDone(true);
+            didWork = true;
+        }
+        // Fourth, independently-gated reset — RecentMeals only (EatMore's per-row formula didn't
+        // change): its per-row local-unit height changed meaning (14 -> 9, to match
+        // ActiveEffectsComponent's fixed line height), so any previously-committed size baked in
+        // under the old 14-per-row constant must be discarded rather than kept — otherwise it
+        // silently keeps overriding today's natural-size formula regardless of the constant fix. See
+        // NourishedClientConfig#recentMealsRowHeightMigrationDone.
+        if (!cc.recentMealsRowHeightMigrationDone()) {
+            get().remove(RecentMealsComponent.ID);
+            cc.setRecentMealsRowHeightMigrationDone(true);
             didWork = true;
         }
         if (didWork) {

@@ -2,10 +2,10 @@ package dev.maire.nourished.client.screen;
 
 import dev.marie.framework.client.MarieClientCache;
 import dev.marie.framework.client.MarieValueColors;
-import dev.marie.framework.ui.Bounds;
-import dev.marie.framework.ui.Constraint;
-import dev.marie.framework.ui.HeaderCollapsibleComponent;
-import dev.marie.framework.ui.MarieComponent;
+import dev.marie.framework.ui.geometry.Bounds;
+import dev.marie.framework.ui.component.Constraint;
+import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
+import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
@@ -67,11 +67,20 @@ final class RecentMealsComponent implements MarieComponent, HeaderCollapsibleCom
         // though it no longer fits, so it just overlaps/cuts off instead of collapsing.
         int liveLocalHeight = (int) Math.round(layout.panelH() / layout.scale());
         int maxY = liveLocalHeight - DietLayout.PAD;
-        int rowH = Math.max(1, (int) Math.round(14 * layout.recentMealsScale()));
+        // Per-item height (9) matches ActiveEffectsComponent's fixed line height exactly — both
+        // boxes draw the same shape of content (icon + colored label, one row per item), so they
+        // share one collapse-threshold constant rather than each having their own separately-tuned
+        // value (this used to be 14 here, which made RecentMeals demand a much taller drag before any
+        // row would show than ActiveEffects did for visually equivalent content). recentMealsScale is
+        // a distinct, legitimate per-box scale (see NourishedClientConfig#recentMealsBoxScale) still
+        // applied on top, same as it already scales the icon/name-offset below.
+        int rowH = Math.max(1, (int) Math.round(9 * layout.recentMealsScale()));
         this.recentHeight = HEADER_LOCAL_HEIGHT + (Math.min(3, recentIds.size()) * rowH);
         boolean showable = cc.showRecentMeals() && !recentIds.isEmpty();
         this.visible = showable && (startLocalY + recentHeight <= maxY);
-        this.localHeight = visible ? recentHeight + 4 : 0;
+        // Bottom pad (8) matches ActiveEffectsComponent's bottom pad exactly — see bodyUnitsFit call
+        // below and ActiveEffectsComponent#render for the identical pad-then-fit pattern.
+        this.localHeight = visible ? recentHeight + 8 : 0;
 
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
         this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, bw, localHeight);
@@ -92,7 +101,7 @@ final class RecentMealsComponent implements MarieComponent, HeaderCollapsibleCom
      * and if a resize commits on exactly that frame the persisted size gets stuck there.
      */
     int naturalLocalHeight() {
-        return recentHeight + 4;
+        return recentHeight + 8;
     }
 
     /**
@@ -140,7 +149,7 @@ final class RecentMealsComponent implements MarieComponent, HeaderCollapsibleCom
         this.contentScale = bounds.width() / (double) bw;
         float scale = (float) contentScale;
         double recentMealsScale = layout.recentMealsScale();
-        int rowH = Math.max(1, (int) Math.round(14 * recentMealsScale));
+        int rowH = Math.max(1, (int) Math.round(9 * recentMealsScale));
         int y = startLocalY;
 
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
@@ -155,14 +164,21 @@ final class RecentMealsComponent implements MarieComponent, HeaderCollapsibleCom
         // recovering a local height from a live size (the EatMoreComponent bug this was audited
         // against) — it never treats bounds.height() as if it were produced by contentScale; it only
         // asks how many contentScale-sized rows fit inside whatever bounds.height() independently
-        // turned out to be. The extra 4-local-unit bottom pad (matching localHeight()'s own "+4")
-        // isn't part of the shared contract, so it's applied here by shrinking the bounds passed in.
-        int bottomPadScreenH = (int) Math.round(4 * contentScale);
+        // turned out to be. The extra 8-local-unit bottom pad (matching localHeight()'s own "+8",
+        // and ActiveEffectsComponent's identical pad) isn't part of the shared contract, so it's
+        // applied here by shrinking the bounds passed in.
+        int bottomPadScreenH = (int) Math.round(8 * contentScale);
         Bounds bodyBounds = new Bounds(bounds.x(), bounds.y(), bounds.width(), Math.max(0, bounds.height() - bottomPadScreenH));
         int rowsToShow = bodyUnitsFit(bodyBounds, contentScale, recentIds.size(), rowH);
 
         int count = 0;
-        float iconScale = 0.75f * (float) recentMealsScale;
+        // Icon must render no taller than rowH (the per-row Y increment below), or consecutive rows
+        // visually overlap regardless of how correct the Y-stepping math is — drawItem's `scale` is a
+        // raw multiplier on a 16px icon (see RenderContext#drawItem), so the icon's rendered height in
+        // local units is 16 * iconScale; deriving iconScale from rowH/16 instead of an unrelated fixed
+        // constant (previously 0.75, which renders a 12-unit-tall icon into a 9-unit row) guarantees
+        // the icon's footprint fits the row it's drawn into.
+        float iconScale = rowH / 16f;
         int nameOffset = (int) Math.round(16 * recentMealsScale);
         for (String id : recentIds) {
             if (count >= rowsToShow) break;

@@ -59,6 +59,7 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue recentMealsEatMoreOffsetMigrationDone;
     private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalOffsetMigrationDone;
     private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalSizeMigrationDone;
+    private final ModConfigSpec.BooleanValue recentMealsRowHeightMigrationDone;
 
     /** Matches legacy {@code COL_PANEL_BG} alpha ({@code 0xCC}). */
     private static final double DEFAULT_HUD_BACKGROUND_OPACITY = 204.0d / 255.0d;
@@ -171,6 +172,19 @@ public final class NourishedClientConfig {
         // so a box scales with the panel like the position offset already does.
         recentMealsEatMoreLocalSizeMigrationDone = builder.define(
                 "recentMealsEatMoreLocalSizeMigrationDone",
+                false
+        );
+        // Fourth one-time migration flag — RecentMeals' per-row local-unit height (the value its
+        // collapse-fit-check and natural-size formula are both built from) changed from 14 to 9 to
+        // match ActiveEffectsComponent's fixed line height. A box already dragged/resized under the
+        // old 14-per-row meaning has its size committed as an absolute local-unit height that has
+        // nothing to do with either constant going forward — it just sits there forever regardless of
+        // which formula computes today's "natural" size, silently overriding it. Reusing an older flag
+        // wouldn't fire for players who never tripped it (already migrated under the size-only change
+        // above), so this needs its own gate, discarding any existing RecentMeals-only persisted size
+        // once so it recomputes fresh against the current constant instead of a stale committed one.
+        recentMealsRowHeightMigrationDone = builder.define(
+                "recentMealsRowHeightMigrationDone",
                 false
         );
         builder.pop();
@@ -524,6 +538,14 @@ public final class NourishedClientConfig {
 
     public void setRecentMealsEatMoreLocalSizeMigrationDone(boolean value) {
         recentMealsEatMoreLocalSizeMigrationDone.set(value);
+    }
+
+    public boolean recentMealsRowHeightMigrationDone() {
+        return recentMealsRowHeightMigrationDone.get();
+    }
+
+    public void setRecentMealsRowHeightMigrationDone(boolean value) {
+        recentMealsRowHeightMigrationDone.set(value);
     }
 
     public void resetDietOffsets() {

@@ -1,11 +1,11 @@
 package dev.maire.nourished.client.screen;
 
 import dev.marie.framework.tracking.TrackingData;
-import dev.marie.framework.ui.Bounds;
-import dev.marie.framework.ui.Constraint;
-import dev.marie.framework.ui.Container;
+import dev.marie.framework.ui.geometry.Bounds;
+import dev.marie.framework.ui.component.Constraint;
+import dev.marie.framework.ui.component.Container;
 import dev.marie.framework.ui.Layout;
-import dev.marie.framework.ui.MarieComponent;
+import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.layout.HorizontalLayout;
 import dev.maire.nourished.config.NourishedClientConfig;

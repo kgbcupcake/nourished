@@ -1,10 +1,10 @@
 package dev.maire.nourished.client.screen;
 
 import dev.marie.framework.client.MarieClientCache;
-import dev.marie.framework.ui.Bounds;
-import dev.marie.framework.ui.Constraint;
-import dev.marie.framework.ui.HeaderCollapsibleComponent;
-import dev.marie.framework.ui.MarieComponent;
+import dev.marie.framework.ui.geometry.Bounds;
+import dev.marie.framework.ui.component.Constraint;
+import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
+import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.Nourished;
