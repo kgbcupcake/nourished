@@ -38,3 +38,5 @@ run/
 log4j2.xml
 bin/
 nourished_banner.png
+.obsidian/
+.smart-env/
