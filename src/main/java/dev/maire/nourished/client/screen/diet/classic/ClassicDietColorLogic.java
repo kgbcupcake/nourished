@@ -1,6 +1,6 @@
 package dev.maire.nourished.client.screen.diet.classic;
 
-import dev.marie.framework.client.MarieValueColors;
+import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.config.NourishedConfig;
 

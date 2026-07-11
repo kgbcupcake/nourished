@@ -3,7 +3,7 @@ package dev.maire.nourished.client.config;
 import com.google.gson.JsonObject;
 
 import dev.maire.nourished.core.Nourished;
-import dev.marie.framework.client.ImportExportToast;
+import dev.marie.framework.client.config.importexport.ImportExportToast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;

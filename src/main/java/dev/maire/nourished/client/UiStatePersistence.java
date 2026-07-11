@@ -2,6 +2,7 @@ package dev.maire.nourished.client;
 
 import dev.marie.framework.ui.PersistenceProvider;
 import dev.marie.framework.ui.persistence.MarieConfigPersistenceProvider;
+import dev.maire.nourished.core.Nourished;
 
 /**
  * Single shared {@link PersistenceProvider} for every independently-positionable/resizable
@@ -14,7 +15,7 @@ import dev.marie.framework.ui.persistence.MarieConfigPersistenceProvider;
  */
 public final class UiStatePersistence {
 
-    private static final PersistenceProvider INSTANCE = new MarieConfigPersistenceProvider();
+    private static final PersistenceProvider INSTANCE = new MarieConfigPersistenceProvider(Nourished.MODID);
 
     private UiStatePersistence() {}
 

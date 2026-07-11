@@ -1,6 +1,6 @@
 package dev.maire.nourished.client.config;
 
-import dev.marie.framework.client.MarieValueColors;
+import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.marie.framework.color.ColorRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;

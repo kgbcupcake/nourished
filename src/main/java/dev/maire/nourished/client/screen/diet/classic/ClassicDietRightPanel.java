@@ -1,6 +1,6 @@
 package dev.maire.nourished.client.screen.diet.classic;
 
-import dev.marie.framework.client.MarieClientCache;
+import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.config.NourishedClientConfig;

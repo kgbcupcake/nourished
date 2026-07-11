@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.NourishedKeys;
-import dev.marie.framework.client.MarieClientCache;
+import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.marie.framework.api.ApiStatus;

@@ -9,7 +9,7 @@ import dev.maire.nourished.core.Nourished;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.api.ValueDefinition;
 import dev.marie.framework.api.registry.ValueRegistry;
-import dev.marie.framework.client.MarieValueColors;
+import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.marie.framework.util.MarieValidation;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;

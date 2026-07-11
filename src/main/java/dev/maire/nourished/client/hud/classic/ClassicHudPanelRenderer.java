@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.hud.classic;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.marie.framework.client.MarieClientCache;
+import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
 import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;

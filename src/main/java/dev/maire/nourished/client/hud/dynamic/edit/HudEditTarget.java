@@ -1,6 +1,6 @@
 package dev.maire.nourished.client.hud.dynamic.edit;
 
-import dev.marie.framework.client.MarieClientCache;
+import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;

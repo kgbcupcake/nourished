@@ -1,9 +1,9 @@
 package dev.maire.nourished.client;
 
 import dev.maire.nourished.core.Nourished;
-import dev.marie.framework.client.MarieClientCache;
-import dev.marie.framework.client.MarieClientState;
-import dev.marie.framework.client.MarieToastManager;
+import dev.marie.framework.client.config.state.MarieClientCache;
+import dev.marie.framework.client.config.state.MarieClientState;
+import dev.marie.framework.client.config.toast.MarieToastManager;
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.core.network.ModNetworking;

@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
-import dev.marie.framework.client.MarieClientCache;
-import dev.marie.framework.client.MarieValueColors;
+import dev.marie.framework.client.config.state.MarieClientCache;
+import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;

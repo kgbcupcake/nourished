@@ -1,6 +1,6 @@
 package dev.maire.nourished.client.hud.dynamic.visibility;
 
-import dev.marie.framework.client.MarieClientCache;
+import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.marie.framework.tracking.TrackingData;
 

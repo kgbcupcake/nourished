@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.hud.dynamic;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.marie.framework.client.MarieValueColors;
+import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;

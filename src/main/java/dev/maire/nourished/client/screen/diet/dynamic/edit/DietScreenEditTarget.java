@@ -1,6 +1,6 @@
 package dev.maire.nourished.client.screen.diet.dynamic.edit;
 
-import dev.marie.framework.client.MarieClientCache;
+import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.AutoGrowPanelContainer;

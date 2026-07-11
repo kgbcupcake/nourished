@@ -2,7 +2,7 @@ package dev.maire.nourished.client.config;
 
 import dev.maire.nourished.config.NourishedPresetRegistry;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.framework.client.ClientScreenFactories;
+import dev.marie.framework.client.config.ClientScreenFactories;
 import dev.marie.framework.config.PresetRegistry.ParsedPreset;
 import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
