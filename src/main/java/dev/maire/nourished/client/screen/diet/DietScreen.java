@@ -1,4 +1,4 @@
-package dev.maire.nourished.client.screen;
+package dev.maire.nourished.client.screen.diet;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -9,6 +9,9 @@ import dev.maire.nourished.client.NourishedKeys;
 import dev.marie.framework.client.MarieClientCache;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
+import dev.maire.nourished.client.screen.diet.dynamic.edit.DietScreenEditTarget;
+import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
+import dev.maire.nourished.client.screen.diet.dynamic.layout.DietPanelContainer;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.ui.geometry.Bounds;
@@ -29,10 +32,7 @@ import net.minecraft.util.Mth;
 public class DietScreen extends Screen {
 
     // ── Panel dimensions (see DietLayout) ─────────────────────────────────────
-    private static final int WIDTH       = DietLayout.WIDTH;
     private static final int HEIGHT      = DietLayout.HEIGHT;
-    private static final int SPLIT       = DietLayout.SPLIT;
-    private static final int PAD         = DietLayout.PAD;
 
     // ── Right panel row geometry ─────────────────────────────────────────────
     private static final int ROW_STEP    = 26;
@@ -111,7 +111,7 @@ public class DietScreen extends Screen {
         if (button == 0 && NourishedClientConfig.get().dietBarDragEnabled()) {
             DietLayout.Layout layout = currentLayout();
             double s = layout.scale();
-            int rx = layout.panelX() + (int) Math.round((SPLIT + PAD) * s);
+            int rx = DietLayout.toScreenX(layout, DietLayout.SPLIT + DietLayout.PAD);
             int y0 = layout.panelY() + (int) Math.round(44 * s);
             int rowStep = Math.max(1, (int) Math.round(ROW_STEP * s));
             int iconSize = Math.max(1, (int) Math.round(20 * s));
@@ -272,7 +272,7 @@ public class DietScreen extends Screen {
     private static final int COL_TOGGLE_LEVER = 0xFFB0B0B0;
 
     static Bounds editModeToggleHousingBounds(DietLayout.Layout layout) {
-        int x2 = DietLayout.toScreenX(layout, WIDTH - TOGGLE_RIGHT_MARGIN);
+        int x2 = layout.panelX() + layout.panelW() - DietLayout.toScreenDim(layout, TOGGLE_RIGHT_MARGIN);
         int w = DietLayout.toScreenDim(layout, TOGGLE_HOUSING_W);
         int h = DietLayout.toScreenDim(layout, TOGGLE_HOUSING_H);
         return new Bounds(x2 - w, DietLayout.toScreenY(layout, TOGGLE_HOUSING_TOP), w, h);
@@ -286,7 +286,7 @@ public class DietScreen extends Screen {
         return new Bounds(x, y, size, size);
     }
 
-    static boolean isMouseOverEditModeToggle(DietLayout.Layout layout, double mx, double my) {
+    public static boolean isMouseOverEditModeToggle(DietLayout.Layout layout, double mx, double my) {
         Bounds housing = editModeToggleHousingBounds(layout);
         return mx >= housing.x() && my >= housing.y()
                 && mx < housing.x() + housing.width() && my < housing.y() + housing.height();
@@ -298,7 +298,7 @@ public class DietScreen extends Screen {
      * Both are read directly from {@code active} every call (never a cached toggle boolean), so
      * this can never drift from {@link EditModeController#isActive()}'s live truth.
      */
-    static void drawEditModeToggle(RenderContext context, DietLayout.Layout layout, boolean active, boolean hovered) {
+    public static void drawEditModeToggle(RenderContext context, DietLayout.Layout layout, boolean active, boolean hovered) {
         Bounds housing = editModeToggleHousingBounds(layout);
         Bounds light = editModeToggleLightBounds(layout, housing);
 
@@ -324,7 +324,7 @@ public class DietScreen extends Screen {
 
     private void drawDietIconTooltips(GuiGraphics g, DietLayout.Layout layout, int mx, int my) {
         double s = layout.scale();
-        int rx = layout.panelX() + (int) Math.round((SPLIT + PAD) * s);
+        int rx = DietLayout.toScreenX(layout, DietLayout.SPLIT + DietLayout.PAD);
         int y = layout.panelY() + (int) Math.round((30 + 14) * s);
         int rowStep = Math.max(1, (int) Math.round(ROW_STEP * s));
         int iconSize = Math.max(1, (int) Math.round(20 * s));

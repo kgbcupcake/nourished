@@ -1,4 +1,4 @@
-package dev.maire.nourished.client.hud;
+package dev.maire.nourished.client.hud.dynamic.modules;
 
 import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
@@ -9,6 +9,8 @@ import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.layout.HorizontalLayout;
 import dev.marie.framework.ui.layout.VerticalLayout;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
+import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
 import dev.maire.nourished.config.NourishedClientConfig;
 
 import java.util.ArrayList;
@@ -22,13 +24,13 @@ import java.util.Map;
  * {@link HorizontalLayout}; "horizontal" bars (rows) stack top-to-bottom via {@link VerticalLayout} —
  * same crossed naming as {@link HudLayout}'s own vertical/horizontal terminology.
  */
-final class NutrientPanelContainer implements Container {
+public final class NutrientPanelContainer implements Container {
 
     private final List<MarieComponent> children = new ArrayList<>();
     private final Layout layout;
     private final HudLayout.Layout hudLayout;
 
-    NutrientPanelContainer(List<String> keys, HudLayout.Layout hudLayout, Map<String, Float> displayValues) {
+    public NutrientPanelContainer(List<String> keys, HudLayout.Layout hudLayout, Map<String, Float> displayValues) {
         this.hudLayout = hudLayout;
         boolean verticalMode = hudLayout.verticalLayout();
         for (String key : keys) {

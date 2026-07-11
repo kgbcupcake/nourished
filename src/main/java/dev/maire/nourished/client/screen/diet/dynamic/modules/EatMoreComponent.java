@@ -1,11 +1,14 @@
-package dev.maire.nourished.client.screen;
+package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
 import dev.marie.framework.client.MarieClientCache;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
+import dev.marie.framework.ui.component.SelfPositioningModule;
 import dev.marie.framework.ui.RenderContext;
+import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.Nourished;
 import net.minecraft.client.Minecraft;
@@ -30,9 +33,9 @@ import java.util.List;
  * {@link DietLeftColumnComponent} can position whatever follows it without re-deriving this
  * section's fit/visibility logic.
  */
-final class EatMoreComponent implements MarieComponent, HeaderCollapsibleComponent {
+public final class EatMoreComponent implements MarieComponent, HeaderCollapsibleComponent, SelfPositioningModule {
 
-    static final String ID = "nourished.diet.eatmore";
+    public static final String ID = "nourished.diet.eatmore";
     private static final int HEADER_LOCAL_HEIGHT = 10;
     /** Local height of the one row of suggestion icons — standard 16x16 item icon size. */
     private static final int ICON_ROW_LOCAL_HEIGHT = 16;
@@ -64,14 +67,15 @@ final class EatMoreComponent implements MarieComponent, HeaderCollapsibleCompone
         this.eatBoxH = Math.max(1, (int) Math.round(46 * layout.eatMoreScale()));
         boolean showable = cc.showEatMoreOf() && !neglected.isEmpty();
         this.visible = showable && (startLocalY + eatBoxH <= maxY);
-        this.localHeight = visible ? eatBoxH + 4 : 0;
+        this.localHeight = visible ? eatBoxH + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
         this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, bw, localHeight);
     }
 
     /** Local (pre-scale) pixel height this section occupies this frame; 0 when hidden or not fitting. */
-    int localHeight() {
+    @Override
+    public int localHeight() {
         return localHeight;
     }
 
@@ -80,8 +84,8 @@ final class EatMoreComponent implements MarieComponent, HeaderCollapsibleCompone
      * RecentMealsComponent#naturalLocalHeight()}'s javadoc for why resize-clamp reference sizes must
      * use this instead of {@link #localHeight()}.
      */
-    int naturalLocalHeight() {
-        return eatBoxH + 4;
+    public int naturalLocalHeight() {
+        return eatBoxH + DietScreenModules.MODULE_GAP_LOCAL;
     }
 
     /**
@@ -90,12 +94,13 @@ final class EatMoreComponent implements MarieComponent, HeaderCollapsibleCompone
      * recomputed every frame, since a Layout recomputing this on every {@code render()} call would
      * silently override any future drag/resize commit on the very next frame.
      */
-    Bounds resolvedBounds() {
+    @Override
+    public Bounds resolvedBounds() {
         return resolvedBounds;
     }
 
     /** Whether this section fits at all (config-enabled, has data, and its stacked position fits the live panel height) — see constructor. */
-    boolean isVisible() {
+    public boolean isVisible() {
         return visible;
     }
 
@@ -126,47 +131,39 @@ final class EatMoreComponent implements MarieComponent, HeaderCollapsibleCompone
 
         int x = DietLayout.PAD;
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
-        this.contentScale = bounds.width() / (double) bw;
+        // min() of both ratios so a single-axis resize can't hide content.
+        double widthScale = bounds.width() / (double) bw;
+        double heightScale = bounds.height() / (double) eatBoxH;
+        this.contentScale = Math.min(widthScale, heightScale);
         float scale = (float) contentScale;
 
-        // Outer box + header always render — shared HeaderCollapsibleComponent contract, matching
-        // RecentMealsComponent/ActiveEffectsComponent: only the icon row (body) collapses below a
-        // size threshold, instead of the whole content block (header included) hiding together.
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
         int y = startLocalY;
         String suggestionHeader = Component.translatable("nourished.screen.diet.suggestion_label").getString();
-        drawText(context, font.plainSubstrByWidth(suggestionHeader, bw), x, y, COL_HEADER, scale);
+        drawText(context, font.plainSubstrByWidth(suggestionHeader, bw), x, y + DietScreenModules.HEADER_TOP_PADDING_LOCAL, COL_HEADER, scale);
         y += HEADER_LOCAL_HEIGHT;
 
-        // Reserve the same trailing 4-local-unit bottom pad naturalLocalHeight()/localHeight already
-        // budget for this box (eatBoxH + 4) — RecentMealsComponent's fit-check does the equivalent
-        // (see its render()), but this one previously checked bodyBlockFits against the raw bounds
-        // with no pad reserved, making its effective fit threshold ~2 local units lower than
-        // RecentMeals' equivalent one-row threshold. That gap meant EatMore could still show its icon
-        // row at box heights where RecentMeals had already collapsed to header-only, even though both
-        // boxes' own natural-height formulas reserve the same kind of trailing pad.
-        int bottomPadScreenH = (int) Math.round(4 * contentScale);
-        Bounds bodyBounds = new Bounds(bounds.x(), bounds.y(), bounds.width(), Math.max(0, bounds.height() - bottomPadScreenH));
-        if (!bodyBlockFits(bodyBounds, contentScale, ICON_ROW_LOCAL_HEIGHT)) {
-            return;
-        }
-
-        for (int col = 0; col < Math.min(2, neglected.size()); col++) {
-            String categoryKey = neglected.get(col);
-            TagKey<Item> tag = TagKey.create(Registries.ITEM,
-                    ResourceLocation.parse(Nourished.MODID + ":nutrients/" + categoryKey));
-            Item exampleItem = null;
-            for (Item item : BuiltInRegistries.ITEM) {
-                if (item.builtInRegistryHolder().is(tag)) {
-                    exampleItem = item;
-                    break;
+        context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
+        try {
+            for (int col = 0; col < Math.min(2, neglected.size()); col++) {
+                String categoryKey = neglected.get(col);
+                TagKey<Item> tag = TagKey.create(Registries.ITEM,
+                        ResourceLocation.parse(Nourished.MODID + ":nutrients/" + categoryKey));
+                Item exampleItem = null;
+                for (Item item : BuiltInRegistries.ITEM) {
+                    if (item.builtInRegistryHolder().is(tag)) {
+                        exampleItem = item;
+                        break;
+                    }
                 }
-            }
-            if (exampleItem == null) continue;
+                if (exampleItem == null) continue;
 
-            int suggestionColW = (bw - 4) / 2;
-            int colX = x + col * suggestionColW;
-            context.drawItem(new ItemStack(exampleItem), sx(colX), sy(y), scale);
+                int suggestionColW = (bw - 4) / 2;
+                int colX = x + col * suggestionColW;
+                context.drawItem(new ItemStack(exampleItem), sx(colX), sy(y), scale);
+            }
+        } finally {
+            context.popClip();
         }
     }
 

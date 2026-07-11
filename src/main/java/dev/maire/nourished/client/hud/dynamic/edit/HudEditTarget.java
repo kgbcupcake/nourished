@@ -1,4 +1,4 @@
-package dev.maire.nourished.client.hud;
+package dev.maire.nourished.client.hud.dynamic.edit;
 
 import dev.marie.framework.client.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
@@ -11,7 +11,13 @@ import dev.marie.framework.ui.geometry.Insets;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.geometry.Size;
+import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
 import dev.maire.nourished.client.UiStatePersistence;
+import dev.maire.nourished.client.hud.NourishedHUD;
+import dev.maire.nourished.client.hud.classic.ClassicHudPanelRenderer;
+import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
+import dev.maire.nourished.client.hud.dynamic.modules.NutrientPanelContainer;
+import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
@@ -22,7 +28,7 @@ import java.util.Map;
 
 /**
  * Single stable {@link MarieComponent} target for the HUD's MarieUI edit mode. Unlike
- * {@link dev.maire.nourished.client.screen.DietScreenEditTarget} this wraps exactly one
+ * {@link dev.maire.nourished.client.screen.diet.dynamic.edit.DietScreenEditTarget} this wraps exactly one
  * draggable/resizable region (the whole nutrient panel), so it holds a single
  * {@link DraggableResizable} rather than one per sub-region.
  *
@@ -38,7 +44,7 @@ import java.util.Map;
  * {@code panelX/Y/W/H} now come from the independently-persisted {@link ComponentState} once one
  * exists, via {@link #resolvedLayout}.
  */
-final class HudEditTarget implements MarieComponent {
+public final class HudEditTarget implements MarieComponent {
 
     private static final String ID = "nourished.hud.editwrapper";
     private static final String PANEL_ID = "nourished.hud.panel";
@@ -51,7 +57,7 @@ final class HudEditTarget implements MarieComponent {
     private final DraggableResizable panelDrag;
     private final int baselinePanelW;
 
-    HudEditTarget(Minecraft mc) {
+    public HudEditTarget(Minecraft mc) {
         this.mc = mc;
 
         List<String> keys = currentVisibleKeys();
@@ -85,7 +91,7 @@ final class HudEditTarget implements MarieComponent {
      * render path and this class's own edit-mode rendering, so a committed resize is reflected
      * consistently everywhere — not just while {@link HudEditTarget} itself is active.
      */
-    static HudLayout.Layout resolvedLayout(Minecraft mc, List<String> keys) {
+    public static HudLayout.Layout resolvedLayout(Minecraft mc, List<String> keys) {
         HudLayout.Layout computed = HudLayout.compute(mc, keys);
         return UiStatePersistence.get().load(PANEL_ID)
                 .map(state -> new HudLayout.Layout(
@@ -116,7 +122,7 @@ final class HudEditTarget implements MarieComponent {
         cc.setHudOffsetX(bounds.x() - scaled.baseX());
         cc.setHudOffsetY(bounds.y() - scaled.baseY());
         NourishedClientConfig.saveNow();
-        UiStatePersistence.get().save(PANEL_ID, new ComponentState(bounds.x(), bounds.y(), bounds.width(), bounds.height(), false));
+        UiStatePersistence.get().save(PANEL_ID, new ComponentState(bounds.x(), bounds.y(), bounds.width(), bounds.height(), false, false, false, 0));
     }
 
     @Override
@@ -170,8 +176,15 @@ final class HudEditTarget implements MarieComponent {
 
         Map<String, Float> displayValues = NourishedHUD.currentDisplayValues();
         HudLayout.Layout matchedLayout = matchedLayoutFor(keys, bounds);
-        NutrientPanelContainer panel = new NutrientPanelContainer(keys, matchedLayout, displayValues);
-        panel.render(context, bounds);
+        if (NourishedClientConfig.get().hudClassicMode() && context instanceof GuiGraphicsRenderContext guiContext) {
+            TrackingData data = MarieClientCache.get();
+            ClassicHudPanelRenderer.drawPanel(
+                    guiContext.graphics(), mc, data, keys, matchedLayout, bounds.x(), bounds.y(), displayValues
+            );
+        } else {
+            NutrientPanelContainer panel = new NutrientPanelContainer(keys, matchedLayout, displayValues);
+            panel.render(context, bounds);
+        }
 
         Bounds handle = DraggableResizable.handleBounds(bounds);
         context.drawResizeHandle(handle.x(), handle.y(), panelDrag.isHandleHovered(mouse[0], mouse[1], bounds), panelDrag.isHandleActive());

@@ -119,6 +119,19 @@ public final class DietScreenCategory {
                         .build()
         );
         category.addEntry(
+                eb.startBooleanToggle(Component.translatable("config.nourished.showDietScreenButton"), client.showDietScreenButton())
+                        .setDefaultValue(true)
+                        .setSaveConsumer(client::setShowDietScreenButton)
+                        .build()
+        );
+        category.addEntry(
+                eb.startBooleanToggle(Component.translatable("config.nourished.dietScreenClassicMode"), client.dietScreenClassicMode())
+                        .setDefaultValue(false)
+                        .setSaveConsumer(client::setDietScreenClassicMode)
+                        .setTooltip(Component.translatable("config.nourished.dietScreenClassicMode.desc"))
+                        .build()
+        );
+        category.addEntry(
                 eb.startKeyCodeField(
                                 Component.translatable("config.nourished.dietEditHotkey"),
                                 NourishedKeys.EDIT_DIET_SCREEN.getKey()

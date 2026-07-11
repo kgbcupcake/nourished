@@ -144,6 +144,13 @@ public final class HudAndDisplayCategory {
                         .build()
         );
         category.addEntry(
+                eb.startBooleanToggle(Component.translatable("config.nourished.hudClassicMode"), client.hudClassicMode())
+                        .setDefaultValue(false)
+                        .setSaveConsumer(client::setHudClassicMode)
+                        .setTooltip(Component.translatable("config.nourished.hudClassicMode.desc"))
+                        .build()
+        );
+        category.addEntry(
                 eb.startKeyCodeField(
                                 Component.translatable("config.nourished.hudEditHotkey"),
                                 NourishedKeys.EDIT_HUD.getKey()

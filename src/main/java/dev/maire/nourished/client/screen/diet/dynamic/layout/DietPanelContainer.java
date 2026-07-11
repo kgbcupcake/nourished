@@ -1,4 +1,4 @@
-package dev.maire.nourished.client.screen;
+package dev.maire.nourished.client.screen.diet.dynamic.layout;
 
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Bounds;
@@ -8,6 +8,11 @@ import dev.marie.framework.ui.Layout;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.layout.HorizontalLayout;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.ActiveEffectsComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.BalanceComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -29,7 +34,7 @@ import java.util.Map;
  * independently-resizable recent-meals and eat-more sub-boxes are flattened into the two column
  * leaves here rather than becoming their own draggable/resizable {@link MarieComponent}s.
  */
-final class DietPanelContainer implements Container {
+public final class DietPanelContainer implements Container {
 
     private static final int COL_BG_RGB = 0x00141414;
     private static final int COL_BORDER = 0xFF3A3A3A;
@@ -42,17 +47,17 @@ final class DietPanelContainer implements Container {
     private final List<MarieComponent> children;
     private final Layout columnLayout;
 
-    DietPanelContainer(TrackingData data, List<String> bars, Map<String, Float> displayValues, DietLayout.Layout layout) {
+    public DietPanelContainer(TrackingData data, List<String> bars, Map<String, Float> displayValues, DietLayout.Layout layout) {
         this.layout = layout;
         this.data = data;
 
         int gap = DietLayout.toScreenDim(layout, 1);
-        int leftWidth = DietLayout.toScreenDim(layout, DietLayout.SPLIT);
-        int rightWidth = Math.max(0, layout.panelW() - leftWidth - gap);
+        Bounds panelBounds = new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
+        DietLayout.ColumnGeometry geometry = DietLayout.columnGeometry(layout, panelBounds);
         int columnHeight = layout.panelH();
 
-        DietLeftColumnComponent left = new DietLeftColumnComponent(data, layout, leftWidth, columnHeight);
-        DietRightColumnComponent right = new DietRightColumnComponent(data, bars, displayValues, layout, rightWidth, columnHeight);
+        DietLeftColumnComponent left = new DietLeftColumnComponent(data, layout, geometry.leftWidth(), columnHeight);
+        DietRightColumnComponent right = new DietRightColumnComponent(data, bars, displayValues, layout, geometry.rightWidth(), columnHeight);
         this.children = new ArrayList<>(List.of(left, right));
         this.columnLayout = new HorizontalLayout(gap);
     }
@@ -73,26 +78,34 @@ final class DietPanelContainer implements Container {
      * that need to read their {@code resolvedBounds()} or override their render bounds without
      * constructing a second, independent copy.
      */
-    RecentMealsComponent recentMealsComponent() {
+    public RecentMealsComponent recentMealsComponent() {
         return leftColumn().recentMealsComponent();
     }
 
-    EatMoreComponent eatMoreComponent() {
+    public EatMoreComponent eatMoreComponent() {
         return leftColumn().eatMoreComponent();
     }
 
-    ActiveEffectsComponent activeEffectsComponent() {
+    public ActiveEffectsComponent activeEffectsComponent() {
         return leftColumn().activeEffectsComponent();
     }
 
+    public CaloriesComponent caloriesComponent() {
+        return leftColumn().caloriesComponent();
+    }
+
+    public BalanceComponent balanceComponent() {
+        return leftColumn().balanceComponent();
+    }
+
     /**
-     * Overrides the bounds {@link #render} will use for the recent-meals/eat-more/active-effects
-     * sub-boxes instead of their own {@code resolvedBounds()} — for edit mode's live drag/resize
-     * preview. {@code null} for any param means "use that child's own resolvedBounds()," i.e. the
-     * normal (non-edit) render path is unaffected.
+     * Overrides the bounds {@link #render} will use for the calories/balance/recent-meals/eat-more/
+     * active-effects sub-boxes instead of their own {@code resolvedBounds()} — for edit mode's live
+     * drag/resize preview. {@code null} for any param means "use that child's own resolvedBounds(),"
+     * i.e. the normal (non-edit) render path is unaffected.
      */
-    void setSubBoxRenderBounds(Bounds recentMealsBounds, Bounds eatMoreBounds, Bounds activeEffectsBounds) {
-        leftColumn().setSubBoxRenderBounds(recentMealsBounds, eatMoreBounds, activeEffectsBounds);
+    public void setSubBoxRenderBounds(Bounds caloriesBounds, Bounds balanceBounds, Bounds recentMealsBounds, Bounds eatMoreBounds, Bounds activeEffectsBounds) {
+        leftColumn().setSubBoxRenderBounds(caloriesBounds, balanceBounds, recentMealsBounds, eatMoreBounds, activeEffectsBounds);
     }
 
     private DietLeftColumnComponent leftColumn() {
@@ -156,9 +169,9 @@ final class DietPanelContainer implements Container {
         // edge instead of shrinking with it. bounds is this render() call's live, current-frame
         // Bounds — not cached — so anchoring to its bottom edge directly stays correct regardless of
         // which axis was independently resized.
-        int dividerX = bounds.x() + DietLayout.toScreenDim(layout, DietLayout.SPLIT);
+        int dividerX = DietLayout.columnGeometry(layout, bounds).dividerX();
         int dividerTop = DietLayout.toScreenY(layout, 26);
-        int dividerBottom = bounds.y() + bounds.height() - DietLayout.toScreenDim(layout, 34);
+        int dividerBottom = bounds.y() + bounds.height() - DietLayout.toScreenDim(layout, DietLayout.PANEL_BOTTOM_MARGIN_LOCAL);
         context.fillRect(dividerX, dividerTop, DietLayout.toScreenDim(layout, 1), Math.max(0, dividerBottom - dividerTop), COL_DIVIDER);
 
         if (data == null) {

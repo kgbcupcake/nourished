@@ -1,4 +1,4 @@
-package dev.maire.nourished.client.hud;
+package dev.maire.nourished.client.hud.dynamic.modules;
 
 import dev.marie.framework.client.MarieClientCache;
 import dev.marie.framework.ui.geometry.Anchor;
@@ -12,6 +12,9 @@ import dev.marie.framework.ui.VisibilityRule;
 import dev.marie.framework.ui.visibility.AnyOf;
 import dev.marie.framework.ui.visibility.ConfigToggleVisibility;
 import dev.marie.framework.ui.visibility.ThresholdVisibility;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
+import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
+import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibilityRules;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;

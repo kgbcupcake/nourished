@@ -1,4 +1,4 @@
-package dev.maire.nourished.client.hud;
+package dev.maire.nourished.client.hud.dynamic.visibility;
 
 import dev.marie.framework.client.MarieClientCache;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -8,11 +8,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-final class HudVisibility {
+public final class HudVisibility {
 
     private HudVisibility() {}
 
-    static List<String> visibleKeys(TrackingData data, List<String> keys, NourishedClientConfig cc) {
+    public static List<String> visibleKeys(TrackingData data, List<String> keys, NourishedClientConfig cc) {
         Set<String> flashingKeys;
         if (cc.hudRevealOnNutrientGain()) {
             flashingKeys = new HashSet<>();
@@ -35,7 +35,7 @@ final class HudVisibility {
         );
     }
 
-    static boolean dimZeroRow(float truePct, NourishedClientConfig cc) {
+    public static boolean dimZeroRow(float truePct, NourishedClientConfig cc) {
         return cc.hudShowZeroBars() && truePct <= HudVisibilityRules.ZERO_EPSILON;
     }
 }

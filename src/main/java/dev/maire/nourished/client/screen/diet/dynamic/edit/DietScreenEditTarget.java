@@ -1,147 +1,146 @@
-package dev.maire.nourished.client.screen;
+package dev.maire.nourished.client.screen.diet.dynamic.edit;
 
 import dev.marie.framework.client.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
-import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
+import dev.marie.framework.ui.component.AutoGrowPanelContainer;
 import dev.marie.framework.ui.component.ComponentState;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.edit.DraggableResizable;
-import dev.marie.framework.ui.geometry.Insets;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
-import dev.marie.framework.ui.geometry.Size;
+import dev.maire.nourished.client.screen.diet.DietScreen;
+import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
+import dev.maire.nourished.client.screen.diet.dynamic.layout.DietPanelLayoutResolver;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.ActiveEffectsComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.BalanceComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLeftColumnComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.layout.DietPanelContainer;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.DietScreenModules;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.client.Minecraft;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static dev.maire.nourished.client.screen.diet.dynamic.layout.DietSubBoxConstraints.SUMMARY_BOX_LOCAL_WIDTH;
+import static dev.maire.nourished.client.screen.diet.dynamic.layout.DietSubBoxConstraints.liveSubBoxConstraint;
+import static dev.maire.nourished.client.screen.diet.dynamic.layout.DietSubBoxConstraints.naturalPreferredSize;
+
 /**
- * Single stable {@link MarieComponent} target for the Diet Screen's MarieUI edit mode. Owns four
- * {@link DraggableResizable} trackers (main panel, recent-meals, eat-more, active-effects) as
- * long-lived fields — unlike {@link DietPanelContainer}/{@link DietLeftColumnComponent}/{@link
- * RecentMealsComponent}/{@link EatMoreComponent}/{@link ActiveEffectsComponent}, which are rebuilt
- * every frame for the normal render path, this object must survive across the many frames a single
- * drag/resize gesture spans (mouseClicked on frame N through mouseReleased on frame N+k), per the
- * confirmed cross-frame-survival requirement — so {@link DietScreen} holds exactly one instance,
- * lazily constructed on first entry into edit mode.
- *
- * <p>Per-frame data (current {@link TrackingData}, bar order) is re-fetched fresh on every
- * {@link #render}/{@link #mouseClicked} call rather than cached, matching how the normal path
- * already re-fetches every frame. Nutrient bar values shown while editing are the raw/live values
- * (no lerp/animation) — edit mode never animates values.
+ * Long-lived {@link MarieComponent} target for Diet Screen edit mode — holds the drag/resize
+ * trackers across the multiple frames a gesture spans, unlike the normal render path's components
+ * which are rebuilt fresh each frame.
  */
-final class DietScreenEditTarget implements MarieComponent {
+public final class DietScreenEditTarget implements MarieComponent {
 
     private static final String ID = "nourished.diet.editwrapper";
-    static final String PANEL_ID = "nourished.diet.panel";
+    public static final String PANEL_ID = "nourished.diet.panel";
 
     private final Minecraft mc;
     private final Runnable exitEditMode;
     private final DraggableResizable panelDrag;
+    private final DraggableResizable caloriesDrag;
+    private final DraggableResizable balanceDrag;
     private final DraggableResizable recentMealsDrag;
     private final DraggableResizable eatMoreDrag;
     private final DraggableResizable activeEffectsDrag;
 
-    /**
-     * The exact {@code resolvedBounds()} render() last drew the sub-boxes at, cached here so
-     * mouseClicked's hit-test reads the literal on-screen truth instead of reconstructing a second,
-     * independent {@link RecentMealsComponent}/{@link EatMoreComponent}/{@link
-     * ActiveEffectsComponent} to approximate it — closing off the class of bug fixed for the render
-     * path (two independently-derived Bounds for what should be one source of truth), this time for
-     * the click path. Null until the first render().
-     */
+    private Bounds lastCaloriesResolvedBounds;
+    private Bounds lastBalanceResolvedBounds;
     private Bounds lastRecentResolvedBounds;
     private Bounds lastEatMoreResolvedBounds;
     private Bounds lastActiveEffectsResolvedBounds;
 
-    DietScreenEditTarget(Minecraft mc, Runnable exitEditMode) {
+    public DietScreenEditTarget(Minecraft mc, Runnable exitEditMode) {
         this.mc = mc;
         this.exitEditMode = exitEditMode;
 
         DietLayout.Layout baseLayout = DietLayout.compute(mc);
-        RecentMealsComponent defaultRecent = freshRecentMeals(baseLayout);
-        EatMoreComponent defaultEatMore = freshEatMore(baseLayout, defaultRecent);
-        ActiveEffectsComponent defaultActiveEffects = freshActiveEffects(baseLayout, defaultRecent, defaultEatMore);
+        List<MarieComponent> baseModules = DietScreenModules.build(baseLayout, DietLeftColumnComponent.computeHeaderEndLocalY());
+        CaloriesComponent defaultCalories = DietScreenModules.find(baseModules, CaloriesComponent.class);
+        BalanceComponent defaultBalance = DietScreenModules.find(baseModules, BalanceComponent.class);
+        RecentMealsComponent defaultRecent = DietScreenModules.find(baseModules, RecentMealsComponent.class);
+        EatMoreComponent defaultEatMore = DietScreenModules.find(baseModules, EatMoreComponent.class);
+        ActiveEffectsComponent defaultActiveEffects = DietScreenModules.find(baseModules, ActiveEffectsComponent.class);
 
-        // Height floor is PANEL_MIN_LOCAL_HEIGHT (title-bar only), not HEIGHT*0.5 — the panel can now
-        // be dragged all the way down to a minimized state (see DietPanelContainer) instead of
-        // stopping at a two-column content view. Width floor is unchanged.
-        Constraint panelConstraint = boundedConstraint(
-                baseLayout.panelW(), baseLayout.panelH(),
-                DietLayout.scaledDim(DietLayout.WIDTH, 0.5d), DietLayout.scaledDim(DietLayout.PANEL_MIN_LOCAL_HEIGHT, 1.0d),
-                DietLayout.scaledDim(DietLayout.WIDTH, 1.5d), DietLayout.scaledDim(DietLayout.HEIGHT, 1.5d)
-        );
+        Constraint panelConstraint = DietPanelLayoutResolver.panelConstraint(baseLayout);
+        DraggableResizable[] panelDragRef = new DraggableResizable[1];
         panelDrag = new DraggableResizable(this, panelConstraint,
-                (target, bounds) -> DietScreenPersistence.get().save(PANEL_ID, toState(bounds)));
-
-        // Each starting constraint below is only a placeholder good for this construction instant
-        // (baseLayout's scale) — render() overwrites it every frame via setConstraint(...) once the
-        // live panel scale is known, so it never actually goes stale mid-session.
-        recentMealsDrag = new DraggableResizable(this, liveSubBoxConstraint(naturalPreferredSize(baseLayout, defaultRecent.naturalLocalHeight())),
                 (target, bounds) -> {
-                    // Guards the commit itself, not just the clamp's reference size: MarieClientCache
-                    // starts every session with an empty recentSourceIds list until the first server
-                    // sync arrives (confirmed via logs — real, lasted 12+s after the last restart), and
-                    // a resize/drag that happens to release during that window would otherwise persist
-                    // a bogus size/position derived from that momentarily-degenerate (empty) reference.
-                    if (MarieClientCache.getRecentSourceIds().isEmpty()) {
-                        return;
-                    }
-                    DietScreenPersistence.get().save(defaultRecent.id(), toRelativeState(bounds));
+                    AutoGrowPanelContainer.ManualOverride existing = DietPanelLayoutResolver.existingManualOverride();
+                    AutoGrowPanelContainer.ManualOverride override = AutoGrowPanelContainer.withCommit(existing, panelDragRef[0]);
+                    int leftMargin = panelDragRef[0].lastCommitWasLeftEdge()
+                            ? Math.max(0, DietPanelLayoutResolver.persistedLeftMargin() + (bounds.width() - resolvedPanelLayout(mc).panelW()))
+                            : DietPanelLayoutResolver.persistedLeftMargin();
+
+                    DietScreenPersistence.get().save(PANEL_ID, new ComponentState(
+                            bounds.x(), bounds.y(), bounds.width(), bounds.height(), false,
+                            override.widthManual(), override.heightManual(), leftMargin));
                 });
+        panelDragRef[0] = panelDrag;
 
-        eatMoreDrag = new DraggableResizable(this, liveSubBoxConstraint(naturalPreferredSize(baseLayout, defaultEatMore.naturalLocalHeight())),
-                (target, bounds) -> {
-                    // Same guard for consistency, though EatMore's own naturalLocalHeight() doesn't
-                    // depend on neglected's size (eatBoxH is a fixed value) — this only blocks
-                    // committing a gesture while the box isn't actually visible/interactive at all.
-                    if (MarieClientCache.getNeglectedCategories().isEmpty()) {
-                        return;
-                    }
-                    DietScreenPersistence.get().save(defaultEatMore.id(), toRelativeState(bounds));
-                });
+        // Forward-reference indirection: each drag reads its own lastCommitAffected* from inside its
+        // own onCommit lambda, so it needs a ref cell like panelDrag does.
+        DraggableResizable[] caloriesDragRef = new DraggableResizable[1];
+        DraggableResizable[] balanceDragRef = new DraggableResizable[1];
+        DraggableResizable[] recentMealsDragRef = new DraggableResizable[1];
+        DraggableResizable[] eatMoreDragRef = new DraggableResizable[1];
+        DraggableResizable[] activeEffectsDragRef = new DraggableResizable[1];
 
-        activeEffectsDrag = new DraggableResizable(this, liveSubBoxConstraint(naturalPreferredSize(baseLayout, defaultActiveEffects.naturalLocalHeight())),
+        caloriesDrag = new DraggableResizable(this, liveSubBoxConstraint(naturalPreferredSize(baseLayout, defaultCalories.naturalLocalHeight(), SUMMARY_BOX_LOCAL_WIDTH)),
                 (target, bounds) -> {
-                    // Same guard for consistency, though ActiveEffectsComponent's naturalLocalHeight()
-                    // already floors its line count at 1 even with zero active effects — this only
-                    // blocks committing while there's no player to read effects from at all.
                     if (mc.player == null) {
                         return;
                     }
-                    DietScreenPersistence.get().save(defaultActiveEffects.id(), toRelativeState(bounds));
+                    DietScreenPersistence.get().save(defaultCalories.id(), toRelativeState(bounds, defaultCalories.id(), caloriesDragRef[0]));
                 });
+        caloriesDragRef[0] = caloriesDrag;
+
+        balanceDrag = new DraggableResizable(this, liveSubBoxConstraint(naturalPreferredSize(baseLayout, defaultBalance.naturalLocalHeight(), SUMMARY_BOX_LOCAL_WIDTH)),
+                (target, bounds) -> {
+                    if (mc.player == null) {
+                        return;
+                    }
+                    DietScreenPersistence.get().save(defaultBalance.id(), toRelativeState(bounds, defaultBalance.id(), balanceDragRef[0]));
+                });
+        balanceDragRef[0] = balanceDrag;
+
+        recentMealsDrag = new DraggableResizable(this, liveSubBoxConstraint(naturalPreferredSize(baseLayout, defaultRecent.naturalLocalHeight())),
+                (target, bounds) -> {
+                    if (MarieClientCache.getRecentSourceIds().isEmpty()) {
+                        return;
+                    }
+                    DietScreenPersistence.get().save(defaultRecent.id(), toRelativeState(bounds, defaultRecent.id(), recentMealsDragRef[0]));
+                });
+        recentMealsDragRef[0] = recentMealsDrag;
+
+        eatMoreDrag = new DraggableResizable(this, liveSubBoxConstraint(naturalPreferredSize(baseLayout, defaultEatMore.naturalLocalHeight())),
+                (target, bounds) -> {
+                    if (MarieClientCache.getNeglectedCategories().isEmpty()) {
+                        return;
+                    }
+                    DietScreenPersistence.get().save(defaultEatMore.id(), toRelativeState(bounds, defaultEatMore.id(), eatMoreDragRef[0]));
+                });
+        eatMoreDragRef[0] = eatMoreDrag;
+
+        activeEffectsDrag = new DraggableResizable(this, liveSubBoxConstraint(naturalPreferredSize(baseLayout, defaultActiveEffects.naturalLocalHeight())),
+                (target, bounds) -> {
+                    if (mc.player == null) {
+                        return;
+                    }
+                    DietScreenPersistence.get().save(defaultActiveEffects.id(), toRelativeState(bounds, defaultActiveEffects.id(), activeEffectsDragRef[0]));
+                });
+        activeEffectsDragRef[0] = activeEffectsDrag;
     }
 
-    /**
-     * Resolves the main panel's current {@link DietLayout.Layout}: persisted position/size if the
-     * user has committed a main-panel drag/resize, otherwise today's default centered position —
-     * used by both this class's own edit-mode rendering and {@link DietScreen}'s normal (non-edit)
-     * MarieUI render path, so a committed resize is reflected consistently everywhere (background,
-     * columns, and internal font/icon/bar scale all derive from one matched Layout, avoiding a
-     * mismatch between the outer resized rectangle and content sized for the un-resized default).
-     *
-     * <p>{@code panelW}/{@code panelH} are the independently-resolved screen pixels from {@code
-     * resolved} directly — NOT recomputed from a single width-derived scale (the bug that made a
-     * height-only edge-resize revert on the next read: {@code resolved.height()} was being read from
-     * persistence and then immediately discarded in favor of {@code HEIGHT * derivedScale}, silently
-     * forcing the height back into a fixed ratio with the width). {@code derivedScale} itself is
-     * still width-only, matching {@link RecentMealsComponent}/{@link EatMoreComponent}'s own
-     * {@code contentScale} convention — it drives font/icon/row content scaling via {@code
-     * DietLayout.toScreenX/Y/Dim}, but must never be used to reconstruct the outer panel's height.
-     */
-    static DietLayout.Layout resolvedPanelLayout(Minecraft mc) {
-        DietLayout.Layout baseLayout = DietLayout.compute(mc);
-        Bounds resolved = DietScreenPersistence.resolve(PANEL_ID, baseLayout, 0, DietLayout.WIDTH, DietLayout.HEIGHT);
-        NourishedClientConfig cc = NourishedClientConfig.get();
-        double derivedScale = resolved.width() / (double) DietLayout.WIDTH;
-        return new DietLayout.Layout(
-                resolved.x(), resolved.y(), resolved.width(), resolved.height(),
-                resolved.x(), resolved.y(),
-                derivedScale, cc.recentMealsBoxScale(), cc.eatMoreBoxScale()
-        );
+    public static DietLayout.Layout resolvedPanelLayout(Minecraft mc) {
+        return DietPanelLayoutResolver.resolvedPanelLayout(mc);
     }
 
     @Override
@@ -149,13 +148,6 @@ final class DietScreenEditTarget implements MarieComponent {
         return ID;
     }
 
-    /**
-     * Unused: {@link DraggableResizable} clamps against the {@link Constraint} passed to its own
-     * constructor, never against {@code target.constraint()} — confirmed by prior investigation
-     * (its {@code clampWidth}/{@code clampHeight} read the constructor-supplied field, not the
-     * target). {@link dev.marie.framework.ui.EditModeController}/{@link
-     * dev.marie.framework.ui.EditOverlayScreen} never call {@code target.constraint()} either.
-     */
     @Override
     public Constraint constraint() {
         return Constraint.preferred(0, 0);
@@ -167,18 +159,17 @@ final class DietScreenEditTarget implements MarieComponent {
         int my = (int) mouseY;
         DietLayout.Layout layout = resolvedPanelLayout(mc);
 
-        // Checked first: the toggle sits inside the panel's own bounds, which
-        // DraggableResizable.mouseClicked treats as the whole drag-start region, so it must claim
-        // the click before panelDrag ever sees it.
         if (button == 0 && DietScreen.isMouseOverEditModeToggle(layout, mouseX, mouseY)) {
             exitEditMode.run();
             return true;
         }
 
-        // Hit-test against the exact Bounds render() last drew (cached below), not a freshly
-        // reconstructed instance that only algebraically ought to match — see class-level field
-        // javadoc. Falls through to the next check (rather than throwing) on the one frame this can
-        // be null: a click landing before render() has ever run once for this edit session.
+        if (lastCaloriesResolvedBounds != null && caloriesDrag.mouseClicked(mx, my, lastCaloriesResolvedBounds)) {
+            return true;
+        }
+        if (lastBalanceResolvedBounds != null && balanceDrag.mouseClicked(mx, my, lastBalanceResolvedBounds)) {
+            return true;
+        }
         if (lastRecentResolvedBounds != null && recentMealsDrag.mouseClicked(mx, my, lastRecentResolvedBounds)) {
             return true;
         }
@@ -188,7 +179,7 @@ final class DietScreenEditTarget implements MarieComponent {
         if (lastActiveEffectsResolvedBounds != null && activeEffectsDrag.mouseClicked(mx, my, lastActiveEffectsResolvedBounds)) {
             return true;
         }
-        Bounds panelBounds = DietScreenPersistence.resolve(PANEL_ID, layout, 0, DietLayout.WIDTH, DietLayout.HEIGHT);
+        Bounds panelBounds = new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
         return panelDrag.mouseClicked(mx, my, panelBounds);
     }
 
@@ -197,6 +188,14 @@ final class DietScreenEditTarget implements MarieComponent {
         int mx = (int) mouseX;
         int my = (int) mouseY;
         boolean any = false;
+        if (caloriesDrag.isDragging() || caloriesDrag.isResizing()) {
+            caloriesDrag.mouseDragged(mx, my);
+            any = true;
+        }
+        if (balanceDrag.isDragging() || balanceDrag.isResizing()) {
+            balanceDrag.mouseDragged(mx, my);
+            any = true;
+        }
         if (recentMealsDrag.isDragging() || recentMealsDrag.isResizing()) {
             recentMealsDrag.mouseDragged(mx, my);
             any = true;
@@ -218,12 +217,16 @@ final class DietScreenEditTarget implements MarieComponent {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        boolean any = recentMealsDrag.isDragging() || recentMealsDrag.isResizing()
+        boolean any = caloriesDrag.isDragging() || caloriesDrag.isResizing()
+                || balanceDrag.isDragging() || balanceDrag.isResizing()
+                || recentMealsDrag.isDragging() || recentMealsDrag.isResizing()
                 || eatMoreDrag.isDragging() || eatMoreDrag.isResizing()
                 || activeEffectsDrag.isDragging() || activeEffectsDrag.isResizing()
                 || panelDrag.isDragging() || panelDrag.isResizing();
         int mx = (int) mouseX;
         int my = (int) mouseY;
+        caloriesDrag.mouseReleased(mx, my);
+        balanceDrag.mouseReleased(mx, my);
         recentMealsDrag.mouseReleased(mx, my);
         eatMoreDrag.mouseReleased(mx, my);
         activeEffectsDrag.mouseReleased(mx, my);
@@ -234,97 +237,87 @@ final class DietScreenEditTarget implements MarieComponent {
     @Override
     public void render(RenderContext context, Bounds ignoredBounds) {
         DietLayout.Layout layout = resolvedPanelLayout(mc);
+        panelDrag.setConstraint(DietPanelLayoutResolver.panelConstraint(layout));
 
         int[] mouse = scaledMouse(mc);
         int mx = mouse[0];
         int my = mouse[1];
 
-        Bounds panelDefault = DietScreenPersistence.resolve(PANEL_ID, layout, 0, DietLayout.WIDTH, DietLayout.HEIGHT);
+        Bounds panelDefault = new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
         Bounds panelBounds = liveOrDefault(panelDrag, mx, my, panelDefault);
 
         TrackingData data = mc.player != null ? MarieClientCache.get() : null;
         List<String> bars = NourishedClientConfig.get().effectiveDietBarOrder();
         Map<String, Float> displayValues = data != null ? data.values : Map.of();
 
-        // Exactly one RecentMealsComponent/EatMoreComponent instance is constructed per frame —
-        // the one DietPanelContainer builds internally — read back via its getters. The previous
-        // design also constructed a second, independent "overlay" copy from a different Layout
-        // (resolvedPanelLayout, the last-committed state) than the container's own
-        // (matchedPanelLayout, the live drag preview); those two diverged whenever the main panel
-        // was actively being dragged, producing two different resolved Bounds for what should be
-        // one box — confirmed via debug logging. Fixed by resolving the live-or-default bounds from
-        // the container's own instance, then feeding it back as a render-bounds override instead of
-        // rendering a second copy.
         DietLayout.Layout matchedPanelLayout = matchedLayoutFor(panelBounds);
         DietPanelContainer panel = new DietPanelContainer(data, bars, displayValues, matchedPanelLayout);
+        CaloriesComponent calories = panel.caloriesComponent();
+        BalanceComponent balance = panel.balanceComponent();
         RecentMealsComponent recent = panel.recentMealsComponent();
         EatMoreComponent eatMore = panel.eatMoreComponent();
         ActiveEffectsComponent activeEffects = panel.activeEffectsComponent();
 
-        // Refreshed every frame from the live panel scale (matchedPanelLayout), not just once at
-        // edit-mode entry — a resize-handle clamp frozen at whatever scale was active when this
-        // DietScreenEditTarget was constructed converts wrong once the panel's actual scale drifts
-        // away from that (e.g. re-entering edit mode later at a different persisted panel size): a
-        // screen-pixel minimum computed at the old scale, divided back down by a very different live
-        // scale at commit time, can produce a persisted local-unit size near zero. See
-        // DraggableResizable#setConstraint.
-        //
-        // Deliberately uses naturalLocalHeight() (content-driven, always positive), NOT
-        // component.constraint().preferredSize() (visibility-gated, floors to a 1px-tall preferred
-        // size whenever the box isn't showing this exact frame) — the latter caused this exact class
-        // of bug: a clamp rebuilt every frame from a preferred size that can momentarily collapse to
-        // ~1px, committed on the wrong frame, produces a persisted size stuck near zero.
+        caloriesDrag.setConstraint(liveSubBoxConstraint(naturalPreferredSize(matchedPanelLayout, calories.naturalLocalHeight(), SUMMARY_BOX_LOCAL_WIDTH)));
+        balanceDrag.setConstraint(liveSubBoxConstraint(naturalPreferredSize(matchedPanelLayout, balance.naturalLocalHeight(), SUMMARY_BOX_LOCAL_WIDTH)));
         recentMealsDrag.setConstraint(liveSubBoxConstraint(naturalPreferredSize(matchedPanelLayout, recent.naturalLocalHeight())));
         eatMoreDrag.setConstraint(liveSubBoxConstraint(naturalPreferredSize(matchedPanelLayout, eatMore.naturalLocalHeight())));
         activeEffectsDrag.setConstraint(liveSubBoxConstraint(naturalPreferredSize(matchedPanelLayout, activeEffects.naturalLocalHeight())));
 
-        Bounds recentBounds = clampToParent(liveOrDefault(recentMealsDrag, mx, my, recent.resolvedBounds()), panelBounds);
-        Bounds eatMoreBounds = clampToParent(liveOrDefault(eatMoreDrag, mx, my, eatMore.resolvedBounds()), panelBounds);
-        Bounds activeEffectsBounds = clampToParent(liveOrDefault(activeEffectsDrag, mx, my, activeEffects.resolvedBounds()), panelBounds);
-        panel.setSubBoxRenderBounds(recentBounds, eatMoreBounds, activeEffectsBounds);
+        Bounds caloriesR = calories.resolvedBounds();
+        Bounds balanceR = balance.resolvedBounds();
+        Bounds recentR = recent.resolvedBounds();
+        Bounds eatMoreR = eatMore.resolvedBounds();
+        Bounds activeEffectsR = activeEffects.resolvedBounds();
+        caloriesDrag.setSnapTargets(xEdges(panelBounds, balanceR, recentR, eatMoreR, activeEffectsR), yEdges(panelBounds, balanceR, recentR, eatMoreR, activeEffectsR));
+        balanceDrag.setSnapTargets(xEdges(panelBounds, caloriesR, recentR, eatMoreR, activeEffectsR), yEdges(panelBounds, caloriesR, recentR, eatMoreR, activeEffectsR));
+        recentMealsDrag.setSnapTargets(xEdges(panelBounds, caloriesR, balanceR, eatMoreR, activeEffectsR), yEdges(panelBounds, caloriesR, balanceR, eatMoreR, activeEffectsR));
+        eatMoreDrag.setSnapTargets(xEdges(panelBounds, caloriesR, balanceR, recentR, activeEffectsR), yEdges(panelBounds, caloriesR, balanceR, recentR, activeEffectsR));
+        activeEffectsDrag.setSnapTargets(xEdges(panelBounds, caloriesR, balanceR, recentR, eatMoreR), yEdges(panelBounds, caloriesR, balanceR, recentR, eatMoreR));
 
-        // Cache the canonical (not-currently-dragging) resolvedBounds() for mouseClicked to hit-test
-        // against next click — see the field javadoc. Intentionally the committed resolvedBounds(),
-        // not the live-preview recentBounds/eatMoreBounds/activeEffectsBounds, matching what a fresh
-        // click should compare against (DraggableResizable.mouseClicked's own contract: "current
-        // committed bounds").
+        Bounds caloriesBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(caloriesDrag, mx, my, calories.resolvedBounds()), matchedPanelLayout);
+        Bounds balanceBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(balanceDrag, mx, my, balance.resolvedBounds()), matchedPanelLayout);
+        Bounds recentBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(recentMealsDrag, mx, my, recent.resolvedBounds()), matchedPanelLayout);
+        Bounds eatMoreBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(eatMoreDrag, mx, my, eatMore.resolvedBounds()), matchedPanelLayout);
+        Bounds activeEffectsBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(activeEffectsDrag, mx, my, activeEffects.resolvedBounds()), matchedPanelLayout);
+        panel.setSubBoxRenderBounds(caloriesBounds, balanceBounds, recentBounds, eatMoreBounds, activeEffectsBounds);
+
+        lastCaloriesResolvedBounds = calories.resolvedBounds();
+        lastBalanceResolvedBounds = balance.resolvedBounds();
         lastRecentResolvedBounds = recent.resolvedBounds();
         lastEatMoreResolvedBounds = eatMore.resolvedBounds();
         lastActiveEffectsResolvedBounds = activeEffects.resolvedBounds();
 
         panel.render(context, panelBounds);
 
-        // Each sub-box's handle is gated on its own isVisible() — false when the box is fully hidden
-        // (config-disabled, no data, or its stacked position no longer fits the live panel height,
-        // e.g. the panel has been minimized — see DietPanelContainer's minimized short-circuit). Not
-        // the same thing as EatMoreComponent's older per-content contentFits gate removed last round
-        // (that tracked its own icon-row collapse, a state that still renders a box+header); this is
-        // "does this section exist on screen AT ALL right now" — without it, a hidden section's
-        // handle rendered as a leftover icon with nothing behind it. The panel's own handle is never
-        // gated: it must stay clickable even when minimized, since dragging it is how the panel is
-        // un-minimized.
-        drawHandle(context, panelDrag, panelBounds, mx, my);
+        drawHandle(context, panelDrag, panelBounds, mx, my, true);
+        if (calories.isVisible()) {
+            drawHandle(context, caloriesDrag, caloriesBounds, mx, my, false);
+        }
+        if (balance.isVisible()) {
+            drawHandle(context, balanceDrag, balanceBounds, mx, my, false);
+        }
         if (recent.isVisible()) {
-            drawHandle(context, recentMealsDrag, recentBounds, mx, my);
+            drawHandle(context, recentMealsDrag, recentBounds, mx, my, false);
         }
         if (eatMore.isVisible()) {
-            drawHandle(context, eatMoreDrag, eatMoreBounds, mx, my);
+            drawHandle(context, eatMoreDrag, eatMoreBounds, mx, my, false);
         }
         if (activeEffects.isVisible()) {
-            drawHandle(context, activeEffectsDrag, activeEffectsBounds, mx, my);
+            drawHandle(context, activeEffectsDrag, activeEffectsBounds, mx, my, false);
         }
 
-        // Anchored to matchedPanelLayout (derived from the live panelBounds preview), not the
-        // static resolvedPanelLayout, so it tracks the panel's actual on-screen rectangle while
-        // it's being dragged/resized, not just its last-committed position. Always drawn active:
-        // if this is rendering at all, edit mode is definitionally on.
         boolean toggleHovered = DietScreen.isMouseOverEditModeToggle(matchedPanelLayout, mx, my);
         DietScreen.drawEditModeToggle(context, matchedPanelLayout, true, toggleHovered);
     }
 
-    private static void drawHandle(RenderContext context, DraggableResizable drag, Bounds bounds, int mx, int my) {
+    private static void drawHandle(RenderContext context, DraggableResizable drag, Bounds bounds, int mx, int my, boolean withBottomLeftCorner) {
         Bounds handle = DraggableResizable.handleBounds(bounds);
-        context.drawResizeHandle(handle.x(), handle.y(), drag.isHandleHovered(mx, my, bounds), drag.isHandleActive());
+        context.drawResizeHandle(handle.x(), handle.y(), drag.isHandleHovered(mx, my, bounds), drag.isCornerActive());
+        if (withBottomLeftCorner) {
+            Bounds handleBL = DraggableResizable.handleBoundsBottomLeft(bounds);
+            context.drawResizeHandle(handleBL.x(), handleBL.y(), drag.isHandleBottomLeftHovered(mx, my, bounds), drag.isBottomLeftCornerActive());
+        }
         for (DraggableResizable.Edge edge : DraggableResizable.Edge.values()) {
             Bounds strip = DraggableResizable.edgeHandleBounds(bounds, edge);
             context.drawEdgeHandle(strip.x(), strip.y(), strip.width(), strip.height(), mx, my,
@@ -332,19 +325,22 @@ final class DietScreenEditTarget implements MarieComponent {
         }
     }
 
-    /**
-     * Confines {@code child} to {@code parent}'s rectangle: shrinks width/height down to the
-     * parent's own dimensions first, then slides x/y so the whole box sits within the parent's
-     * bounds. Applied to the live drag/resize preview (not just the settled/persisted value handled
-     * by {@link DietScreenPersistence#resolveRelativeToPanel}) so a sub-box can't visibly leave the
-     * main panel mid-gesture either.
-     */
-    private static Bounds clampToParent(Bounds child, Bounds parent) {
-        int w = Math.min(child.width(), parent.width());
-        int h = Math.min(child.height(), parent.height());
-        int x = Math.max(parent.x(), Math.min(child.x(), parent.x() + parent.width() - w));
-        int y = Math.max(parent.y(), Math.min(child.y(), parent.y() + parent.height() - h));
-        return new Bounds(x, y, w, h);
+    private static List<Integer> xEdges(Bounds... boxes) {
+        List<Integer> lines = new ArrayList<>(boxes.length * 2);
+        for (Bounds b : boxes) {
+            lines.add(b.x());
+            lines.add(b.x() + b.width());
+        }
+        return lines;
+    }
+
+    private static List<Integer> yEdges(Bounds... boxes) {
+        List<Integer> lines = new ArrayList<>(boxes.length * 2);
+        for (Bounds b : boxes) {
+            lines.add(b.y());
+            lines.add(b.y() + b.height());
+        }
+        return lines;
     }
 
     private static Bounds liveOrDefault(DraggableResizable drag, int mx, int my, Bounds fallback) {
@@ -357,129 +353,45 @@ final class DietScreenEditTarget implements MarieComponent {
         return fallback;
     }
 
+    /** Live left-edge drag -> margin source; live right-edge/corner -> right column; otherwise -> persisted. */
     /**
-     * Same fix as {@link #resolvedPanelLayout}: {@code panelBounds}' own width/height are used
-     * directly, not recomputed from a width-only {@code derivedScale} — this is the live drag/resize
-     * preview path, so during an active height-only edge-resize this must reflect the live height
-     * immediately, not just after commit.
+     * Margin only ever reacts to a LEFT-edge (or bottom-left-corner) drag, as this frame's live
+     * width delta added onto the persisted margin. A right-edge/corner drag never touches it — the
+     * right column absorbs that delta instead, exactly like it always did. This is what keeps
+     * grabbing the opposite handle from instantly snapping the other side: the margin simply isn't
+     * read from "which handle is active" at all unless that handle is the one that owns it.
      */
-    private static DietLayout.Layout matchedLayoutFor(Bounds panelBounds) {
+    private DietLayout.Layout matchedLayoutFor(Bounds panelBounds) {
         NourishedClientConfig cc = NourishedClientConfig.get();
-        double derivedScale = panelBounds.width() / (double) DietLayout.WIDTH;
+        int leftMargin;
+        if (panelDrag.isEdgeActive(DraggableResizable.Edge.LEFT) || panelDrag.isBottomLeftCornerActive()) {
+            int widthBeforeGesture = resolvedPanelLayout(mc).panelW();
+            leftMargin = Math.max(0, DietPanelLayoutResolver.persistedLeftMargin() + (panelBounds.width() - widthBeforeGesture));
+        } else {
+            leftMargin = DietPanelLayoutResolver.persistedLeftMargin();
+        }
         return new DietLayout.Layout(
                 panelBounds.x(), panelBounds.y(), panelBounds.width(), panelBounds.height(),
                 panelBounds.x(), panelBounds.y(),
-                derivedScale, cc.recentMealsBoxScale(), cc.eatMoreBoxScale()
+                cc.dietScale(), cc.recentMealsBoxScale(), cc.eatMoreBoxScale(),
+                leftMargin
         );
     }
 
-    private static RecentMealsComponent freshRecentMeals(DietLayout.Layout layout) {
-        int headerEndLocalY = DietLeftColumnComponent.computeHeaderEndLocalY();
-        return new RecentMealsComponent(layout, headerEndLocalY);
-    }
-
-    private static EatMoreComponent freshEatMore(DietLayout.Layout layout, RecentMealsComponent recent) {
-        int headerEndLocalY = DietLeftColumnComponent.computeHeaderEndLocalY();
-        int eatMoreStartLocalY = DietLeftColumnComponent.nextSiblingStartLocalY(
-                headerEndLocalY, recent.localHeight(), recent.resolvedBounds(), layout);
-        return new EatMoreComponent(layout, eatMoreStartLocalY);
-    }
-
-    private static ActiveEffectsComponent freshActiveEffects(DietLayout.Layout layout, RecentMealsComponent recent, EatMoreComponent eatMore) {
-        int headerEndLocalY = DietLeftColumnComponent.computeHeaderEndLocalY();
-        int eatMoreStartLocalY = DietLeftColumnComponent.nextSiblingStartLocalY(
-                headerEndLocalY, recent.localHeight(), recent.resolvedBounds(), layout);
-        int activeEffectsStartLocalY = DietLeftColumnComponent.nextSiblingStartLocalY(
-                eatMoreStartLocalY, eatMore.localHeight(), eatMore.resolvedBounds(), layout);
-        return new ActiveEffectsComponent(layout, activeEffectsStartLocalY);
-    }
-
-    private static Constraint boundedConstraint(int prefW, int prefH, int minW, int minH, int maxW, int maxH) {
-        return new Constraint(
-                new Size(prefW, prefH),
-                new Size(minW, minH),
-                new Size(maxW, maxH),
-                false, false, true, true,
-                Anchor.TOP_LEFT, Insets.NONE, Insets.NONE
-        );
-    }
-
-    /** Width stays at the same [0.5x, 1.5x] range as the main panel's own resize constraint. */
-    private static final double SUBBOX_MIN_WIDTH_MULTIPLIER = 0.5d;
-    private static final double SUBBOX_MAX_WIDTH_MULTIPLIER = 1.5d;
-    private static final double SUBBOX_MIN_HEIGHT_MULTIPLIER = 0.5d;
-
-    /**
-     * Height max is deliberately much larger than width's 1.5x: these boxes' natural content height
-     * is small (recent-meals/eat-more/active-effects are ~40-56 local units by default, versus the
-     * main panel's 268), so 1.5x of that is only a handful of extra pixels — nowhere near enough
-     * downward room for RecentMeals to show meaningfully more than its natural 3 rows, or
-     * ActiveEffects more than its natural handful of lines, now that both collapse cleanly instead of
-     * overflowing when they don't fit. 4x gives real headroom (e.g. RecentMeals' natural ~56 local
-     * units -> up to ~224, room for a dozen-plus rows) while still being clamped to the panel's own
-     * bounds by {@link #clampToParent}/{@code DietScreenPersistence#clampToPanel} regardless.
-     */
-    private static final double SUBBOX_MAX_HEIGHT_MULTIPLIER = 4.0d;
-
-    /**
-     * Builds the bounded {@link Constraint} for a recent-meals/eat-more/active-effects resize
-     * handle from {@code pref} — the box's current-frame preferred screen size, i.e. already
-     * expressed at whatever panel scale is live <em>this frame</em>, unlike the one-time {@code
-     * recentPreferred}/{@code eatMorePreferred}/{@code activeEffectsPreferred} captured in the
-     * constructor from {@code baseLayout}. Called fresh every {@link #render} so the clamp never
-     * goes stale relative to the panel's current scale.
-     */
-    private static Constraint liveSubBoxConstraint(Size pref) {
-        return boundedConstraint(
-                pref.width(), pref.height(),
-                (int) Math.round(pref.width() * SUBBOX_MIN_WIDTH_MULTIPLIER), (int) Math.round(pref.height() * SUBBOX_MIN_HEIGHT_MULTIPLIER),
-                (int) Math.round(pref.width() * SUBBOX_MAX_WIDTH_MULTIPLIER), (int) Math.round(pref.height() * SUBBOX_MAX_HEIGHT_MULTIPLIER)
-        );
-    }
-
-    /**
-     * The box's reference screen size at {@code layout}'s current scale — width from the fixed
-     * structural constant {@code bw} (the left column's width), height from {@code naturalLocalHeight}
-     * (content-driven, always positive; see {@link RecentMealsComponent#naturalLocalHeight()}). Used
-     * as {@link #liveSubBoxConstraint}'s input instead of the component's own visibility-gated
-     * {@code constraint().preferredSize()}.
-     */
-    private static Size naturalPreferredSize(DietLayout.Layout layout, int naturalLocalHeight) {
-        int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
-        return new Size(DietLayout.toScreenDim(layout, bw), DietLayout.toScreenDim(layout, naturalLocalHeight));
-    }
-
-    private static ComponentState toState(Bounds bounds) {
-        return new ComponentState(bounds.x(), bounds.y(), bounds.width(), bounds.height(), false);
-    }
-
-    /**
-     * Converts a committed absolute-screen {@link Bounds} into an offset+size relative to the
-     * panel's current resolved position for persistence — see {@link
-     * DietScreenPersistence#resolveRelativeToPanel}. Both the position offset and the width/height
-     * are normalized into the panel's local (pre-scale) unit space by dividing by the current
-     * {@code panelLayout.scale()}, mirroring {@code resolveRelativeToPanel}'s own
-     * {@code startLocalY * scale}/{@code localWidth * scale} default-position/size formulas, so a
-     * committed drag/resize keeps tracking proportionally with the panel if it's later resized —
-     * rather than freezing as an absolute pixel delta/size that falls out of sync as the panel grows
-     * or shrinks (per the user's explicit ask: these boxes should scale with the panel like a normal
-     * child widget, while still allowing an independent size/position on top of that). Safe to read
-     * the panel's position fresh here rather than from an in-progress drag preview: {@link
-     * #mouseDragged} only ever updates one of {@code panelDrag}/{@code recentMealsDrag}/{@code
-     * eatMoreDrag} at a time, so the panel is never simultaneously mid-drag when a recent-meals/
-     * eat-more commit fires.
-     */
-    private ComponentState toRelativeState(Bounds bounds) {
+    /** Normalized against panelX + leftMargin, matching DietScreenPersistence#resolveRelativeToPanel's read-back base. */
+    private ComponentState toRelativeState(Bounds bounds, String componentId, DraggableResizable drag) {
         DietLayout.Layout panelLayout = resolvedPanelLayout(mc);
-        Bounds panelBounds = new Bounds(panelLayout.panelX(), panelLayout.panelY(), panelLayout.panelW(), panelLayout.panelH());
-        Bounds clamped = clampToParent(bounds, panelBounds);
+        Bounds clamped = DietPanelLayoutResolver.clampToParent(bounds, panelLayout);
         double scale = panelLayout.scale();
+        AutoGrowPanelContainer.ManualOverride existing = DietPanelLayoutResolver.existingManualOverride(componentId);
+        AutoGrowPanelContainer.ManualOverride override = AutoGrowPanelContainer.withCommit(existing, drag);
+        int contentX = panelLayout.panelX() + panelLayout.leftMargin();
         return new ComponentState(
-                (int) Math.round((clamped.x() - panelLayout.panelX()) / scale),
+                (int) Math.round((clamped.x() - contentX) / scale),
                 (int) Math.round((clamped.y() - panelLayout.panelY()) / scale),
                 (int) Math.round(clamped.width() / scale),
                 (int) Math.round(clamped.height() / scale),
-                false
+                false, override.widthManual(), override.heightManual(), 0
         );
     }
 

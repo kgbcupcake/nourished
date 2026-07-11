@@ -7,8 +7,8 @@ import org.lwjgl.glfw.GLFW;
 
 public final class NourishedKeys {
 
-    public static final KeyMapping EDIT_HUD = new KeyMapping(
-            "key.nourished.editHUD",
+     public static final KeyMapping EDIT_HUD = new KeyMapping(
+        "key.nourished.editHUD",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_H,
             "key.categories.nourished"

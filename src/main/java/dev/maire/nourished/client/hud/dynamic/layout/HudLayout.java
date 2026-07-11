@@ -1,15 +1,16 @@
-package dev.maire.nourished.client.hud;
+package dev.maire.nourished.client.hud.dynamic.layout;
 
 import dev.marie.framework.config.HudAnchor;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 
 import java.util.List;
 
-final class HudLayout {
+public final class HudLayout {
 
-    record Layout(
+    public record Layout(
             int panelX, int panelY, int panelW, int panelH,
             int baseX, int baseY,
             int barW, int rowH, int iconSize, int maxLabelSw,
@@ -20,11 +21,11 @@ final class HudLayout {
 
     private HudLayout() {}
 
-    static Layout compute(Minecraft mc, List<String> keys) {
+    public static Layout compute(Minecraft mc, List<String> keys) {
         return compute(mc, keys, NourishedClientConfig.get().hudScale());
     }
 
-    static Layout compute(Minecraft mc, List<String> keys, double scale) {
+    public static Layout compute(Minecraft mc, List<String> keys, double scale) {
         NourishedClientConfig cc = NourishedClientConfig.get();
         boolean verticalLayout = cc.hudVerticalLayout();
         float labelScale = (float) (HudDrawHelpers.BASE_LABEL_SCALE * scale);

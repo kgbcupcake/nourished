@@ -1,10 +1,11 @@
-package dev.maire.nourished.client.screen;
+package dev.maire.nourished.client.screen.diet.dynamic.layout;
 
 import dev.marie.framework.client.MarieClientCache;
 import dev.marie.framework.client.MarieValueColors;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
+import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -33,10 +34,12 @@ import java.util.Map;
  * constructor to a shape it wasn't designed for, so this pass ports {@code drawRightPanel}'s row
  * logic directly instead, same principle as {@link DietLeftColumnComponent}.
  */
-final class DietRightColumnComponent implements MarieComponent {
+final class DietRightColumnComponent implements MarieComponent, HeaderCollapsibleComponent {
 
     private static final int BAR_H = 9;
     private static final int ROW_STEP = 26;
+    /** Local height of the "Intake Breakdown" title + separator line block, before the row list starts (y=30 to y=44). */
+    private static final int HEADER_LOCAL_HEIGHT = 14;
     private static final int COL_PANEL_RGB = 0x001E1E1E;
     private static final int COL_ROW_BG_RGB = 0x001E1E1E;
     private static final int COL_BORDER = 0xFF3A3A3A;
@@ -77,6 +80,11 @@ final class DietRightColumnComponent implements MarieComponent {
     }
 
     @Override
+    public int headerLocalHeight() {
+        return HEADER_LOCAL_HEIGHT;
+    }
+
+    @Override
     public void render(RenderContext context, Bounds bounds) {
         if (data == null) {
             return;
@@ -105,20 +113,20 @@ final class DietRightColumnComponent implements MarieComponent {
         int barLeft = rx + 24;
         int barW = Math.max(0, pctColumnRight - maxPctW - 4 - barLeft);
 
-        // Live-height-aware, not the fixed DietLayout.HEIGHT constant: `height` (the field, set in
-        // the constructor) is already the panel's live screen height — see DietPanelContainer's
-        // columnHeight = layout.panelH() — so dividing by layout.scale() recovers it in the same
-        // local-unit space `y` is already expressed in, same technique as
-        // RecentMealsComponent's constructor. Without this, a panel shrunk shorter via its top/
-        // bottom edge never stops drawing rows/the legend past the live bottom edge, so they just
-        // cut off/overlap instead of compacting.
+        // Height can shrink below natural (minimize), so rows/legend hide as they stop fitting.
+        // Width can't (panelConstraint floors it at natural), so it needs no such handling.
         int liveLocalHeight = (int) Math.round(height / layout.scale());
         int maxRowY = liveLocalHeight - DietLayout.PAD;
 
+        Bounds rowProbeBounds = new Bounds(0, 0, width, DietLayout.toScreenDim(layout, Math.max(0, maxRowY - 30)));
+        int rowsToShow = bodyUnitsFit(rowProbeBounds, layout.scale(), bars.size(), ROW_STEP);
+
+        int rowCount = 0;
         for (String key : bars) {
-            if (y + 26 > maxRowY) {
+            if (rowCount >= rowsToShow) {
                 break;
             }
+            rowCount++;
             float disp = display.getOrDefault(key, data.values.getOrDefault(key, 0f));
             float real = data.values.getOrDefault(key, 0f);
             float prev = data.lastValues.getOrDefault(key, real);
@@ -239,6 +247,14 @@ final class DietRightColumnComponent implements MarieComponent {
 
     // ── Coordinate + drawing helpers ─────────────────────────────────────────
 
+    /**
+     * The divider's live screen X — {@code toScreenX(layout, SPLIT)} — is the one position that
+     * must NEVER move due to this column's own content-scale (it's owned by {@link
+     * DietLayout#columnGeometry}, driven only by {@link DietLayout.Layout#leftMargin}, same as
+     * everywhere else the divider is drawn/clamped against). Every local X here is anchored relative
+     * to {@code SPLIT} and scaled by {@link #contentScale} from that fixed point, so shrinking this
+     * column's content never drags the divider along with it.
+     */
     private int sx(int localX) {
         return DietLayout.toScreenX(layout, localX);
     }

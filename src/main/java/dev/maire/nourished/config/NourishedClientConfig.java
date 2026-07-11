@@ -44,18 +44,21 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue hudRevealOnNutrientGain;
     private final ModConfigSpec.DoubleValue hudBackgroundOpacity;
     private final ModConfigSpec.BooleanValue hudVerticalLayout;
+    private final ModConfigSpec.BooleanValue hudClassicMode;
     private final ModConfigSpec.ConfigValue<List<? extends String>> dietBarOrder;
     private final ModConfigSpec.DoubleValue dietScale;
     private final ModConfigSpec.IntValue dietOffsetX;
     private final ModConfigSpec.IntValue dietOffsetY;
     private final ModConfigSpec.DoubleValue recentMealsBoxScale;
     private final ModConfigSpec.DoubleValue eatMoreBoxScale;
+    private final ModConfigSpec.BooleanValue dietScreenClassicMode;
     private final ModConfigSpec.DoubleValue dietBackgroundOpacity;
     private final ModConfigSpec.BooleanValue showRecentMeals;
     private final ModConfigSpec.BooleanValue showEatMoreOf;
     private final ModConfigSpec.BooleanValue showActiveEffects;
     private final ModConfigSpec.BooleanValue showCaloriesBox;
     private final ModConfigSpec.BooleanValue showBalanceBox;
+    private final ModConfigSpec.BooleanValue showDietScreenButton;
     private final ModConfigSpec.BooleanValue recentMealsEatMoreOffsetMigrationDone;
     private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalOffsetMigrationDone;
     private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalSizeMigrationDone;
@@ -109,6 +112,10 @@ public final class NourishedClientConfig {
                 "hudVerticalLayout",
                 ConfigDefaultsLoader.getBoolean(defaults, "hudVerticalLayout", false)
         );
+        hudClassicMode = builder.define(
+                "hudClassicMode",
+                ConfigDefaultsLoader.getBoolean(defaults, "hudClassicMode", false)
+        );
         dietBarOrder = builder.defineListAllowEmpty(
                 "dietBarOrder",
                 List::of,
@@ -140,6 +147,10 @@ public final class NourishedClientConfig {
                 0.5d,
                 1.5d
         );
+        dietScreenClassicMode = builder.define(
+                "dietScreenClassicMode",
+                ConfigDefaultsLoader.getBoolean(defaults, "dietScreenClassicMode", false)
+        );
         dietBackgroundOpacity = builder.defineInRange(
                 "dietBackgroundOpacity",
                 ConfigDefaultsLoader.getDouble(defaults, "dietBackgroundOpacity", DEFAULT_HUD_BACKGROUND_OPACITY),
@@ -151,6 +162,7 @@ public final class NourishedClientConfig {
         showActiveEffects = builder.define("showActiveEffects", ConfigDefaultsLoader.getBoolean(defaults, "showActiveEffects", true));
         showCaloriesBox = builder.define("showCaloriesBox", ConfigDefaultsLoader.getBoolean(defaults, "showCaloriesBox", true));
         showBalanceBox = builder.define("showBalanceBox", ConfigDefaultsLoader.getBoolean(defaults, "showBalanceBox", true));
+        showDietScreenButton = builder.define("showDietScreenButton", ConfigDefaultsLoader.getBoolean(defaults, "showDietScreenButton", true));
         // Internal one-time migration flag — not user-facing, no Cloth Config entry. Guards the
         // recentmeals/eatmore persisted-position schema change from absolute screen coordinates to
         // panel-relative offsets: see DietScreenPersistence#resolveRelativeToPanel.
@@ -392,6 +404,20 @@ public final class NourishedClientConfig {
     }
 
     /**
+     * When true, the always-on HUD draws via {@link dev.maire.nourished.client.hud.classic.ClassicHudPanelRenderer}
+     * (pre-MarieUI raw {@code GuiGraphics} rendering) instead of the MarieUI component tree. Drag/
+     * resize/edit-mode interaction is unaffected either way — both render paths share the same
+     * {@code HudEditTarget}/{@code EditModeController} interaction layer.
+     */
+    public boolean hudClassicMode() {
+        return hudClassicMode.get();
+    }
+
+    public void setHudClassicMode(boolean value) {
+        hudClassicMode.set(value);
+    }
+
+    /**
      * Registry order, or saved order from config with any new nutrients appended.
      */
     public List<String> effectiveDietBarOrder() {
@@ -468,6 +494,18 @@ public final class NourishedClientConfig {
         eatMoreBoxScale.set(value);
     }
 
+    /**
+     * When true, the Diet Screen opens as {@link dev.maire.nourished.client.screen.diet.classic.ClassicDietScreen}
+     * (pre-MarieUI raw {@code GuiGraphics} rendering) instead of the MarieUI {@code DietScreen}.
+     */
+    public boolean dietScreenClassicMode() {
+        return dietScreenClassicMode.get();
+    }
+
+    public void setDietScreenClassicMode(boolean value) {
+        dietScreenClassicMode.set(value);
+    }
+
     public double dietBackgroundOpacity() {
         return dietBackgroundOpacity.get();
     }
@@ -514,6 +552,21 @@ public final class NourishedClientConfig {
 
     public void setShowBalanceBox(boolean value) {
         showBalanceBox.set(value);
+    }
+
+    /**
+     * Whether the Diet Screen's inventory-GUI shortcut button (see {@link
+     * dev.maire.nourished.client.ClientEvents#onScreenInit}) is added at all. Deliberately does NOT
+     * gate {@link dev.maire.nourished.client.NourishedKeys#OPEN_DIET_SCREEN} — the keybind must keep
+     * opening the Diet Screen regardless of this setting; only the button's own presence in the
+     * inventory screen depends on it.
+     */
+    public boolean showDietScreenButton() {
+        return showDietScreenButton.get();
+    }
+
+    public void setShowDietScreenButton(boolean value) {
+        showDietScreenButton.set(value);
     }
 
     public boolean recentMealsEatMoreOffsetMigrationDone() {

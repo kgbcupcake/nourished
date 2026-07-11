@@ -1,68 +1,54 @@
-package dev.maire.nourished.client.screen;
+package dev.maire.nourished.client.screen.diet.dynamic.layout;
 
-import dev.marie.framework.client.MarieClientCache;
-import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Bounds;
+import dev.marie.framework.ui.component.AutoGrowPanelContainer;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.Container;
 import dev.marie.framework.ui.Layout;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.layout.VerticalLayout;
-import dev.maire.nourished.config.NourishedClientConfig;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.ActiveEffectsComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.BalanceComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.DietScreenModules;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Today header and calorie/balance summary boxes stay drawn directly (small, non-independent
- * static text/bars not worth their own class), while "Recent Meals" and "Eat more of..." are their
- * own {@link MarieComponent}s — {@link RecentMealsComponent} and {@link EatMoreComponent}. These
- * two are no longer positioned by {@link #layout()} — a {@link Layout} recomputes child position
- * every {@code render()} call, which would silently override any future drag/resize commit on the
- * very next frame. Instead each resolves its own {@link Bounds} once at construction (an offset
- * from the panel's current position if the user has already committed a drag/resize, otherwise
- * today's default stacked position — see {@link DietScreenPersistence#resolveRelativeToPanel}),
- * and this container renders them directly against that Bounds. {@code layout()}/{@code
- * columnLayout} are kept only for {@link Container} structural
- * conformance ({@code children()}/{@code addChild()} etc.), not because anything still calls
- * {@code computeBounds()} on them. All coordinates for the header block that stays inline here are
+ * Only the "Today" header stays drawn directly here now (small static text/icon, not worth its own
+ * class). Calories, Balance, Recent Meals, Eat more of..., and Active Effects are all independent
+ * {@link MarieComponent}s — {@link CaloriesComponent}, {@link BalanceComponent}, {@link
+ * RecentMealsComponent}, {@link EatMoreComponent}, {@link ActiveEffectsComponent} — built via {@link
+ * DietScreenModules#build} from {@link dev.marie.framework.ui.component.ModuleRegistry} rather than
+ * hardcoded fields, and looked up here by type via {@link DietScreenModules#find} rather than list
+ * position. None of them are positioned by {@link #layout()} — a {@link Layout} recomputes child
+ * position every {@code render()} call, which would silently override any future drag/resize commit
+ * on the very next frame. Instead each resolves its own {@link Bounds} once at construction (an
+ * offset from the panel's current position if the user has already committed a drag/resize,
+ * otherwise today's default stacked position — see {@link DietScreenPersistence
+ * #resolveRelativeToPanel}), and this container renders them directly against that Bounds.
+ * {@code layout()}/{@code columnLayout} are kept only for {@link Container} structural conformance
+ * ({@code children()}/{@code addChild()} etc.), not because anything still calls
+ * {@code computeBounds()} on them. All coordinates for the "Today" header that stays inline here are
  * expressed in DietScreen's original local (pre-scale) pixel space and converted to absolute screen
  * pixels via {@link DietLayout}'s {@code toScreenX}/{@code toScreenY}/{@code toScreenDim} helpers,
  * same as {@link DietPanelContainer}.
  */
-final class DietLeftColumnComponent implements Container {
+public final class DietLeftColumnComponent implements Container {
 
-    private static final int COL_ROW_BG_RGB = 0x001E1E1E;
-    private static final int COL_BORDER_LT = 0xFF555555;
-    private static final int COL_SEG_EMPTY = 0xFF2A2A2A;
-    private static final int COL_WHITE = 0xFFFFFFFF;
     private static final int COL_GOLD = 0xFFFFD65C;
-    private static final int COL_GREEN = 0xFF55FF55;
-    private static final int COL_ORANGE = 0xFFFFAA00;
-    private static final int COL_RED = 0xFFFF5555;
-
-    // Calories/Balance boxes aren't separate MarieComponents (no independent Bounds/DraggableResizable
-    // of their own — see class javadoc), so they can't literally implement HeaderCollapsibleComponent
-    // (that contract assumes ONE header + ONE body for a single component; these are two independent
-    // header+body pairs drawn inline by this same container). These constants + the fit-checks below
-    // replicate that interface's exact fit-check formula (header must always fit to draw anything;
-    // body only draws if the box's full natural footprint also fits) against the live panel height,
-    // so both boxes shrink/collapse in step with panel resize the same way the sub-boxes do, instead
-    // of always drawing at a fixed size regardless of how little live room remains.
-    private static final int CALORIES_HEADER_LOCAL_HEIGHT = 20;
-    private static final int CALORIES_BODY_LOCAL_HEIGHT = 20;
-    private static final int BALANCE_HEADER_LOCAL_HEIGHT = 30;
-    private static final int BALANCE_BODY_LOCAL_HEIGHT = 20;
 
     private final TrackingData data;
     private final DietLayout.Layout layout;
@@ -74,6 +60,8 @@ final class DietLeftColumnComponent implements Container {
     private Bounds recentMealsRenderBounds;
     private Bounds eatMoreRenderBounds;
     private Bounds activeEffectsRenderBounds;
+    private Bounds caloriesRenderBounds;
+    private Bounds balanceRenderBounds;
 
     DietLeftColumnComponent(TrackingData data, DietLayout.Layout layout, int width, int height) {
         this.data = data;
@@ -82,57 +70,57 @@ final class DietLeftColumnComponent implements Container {
         this.height = height;
         this.headerEndLocalY = computeHeaderEndLocalY();
 
-        RecentMealsComponent recentMeals = new RecentMealsComponent(layout, headerEndLocalY);
-        int eatMoreStartLocalY = nextSiblingStartLocalY(
-                headerEndLocalY, recentMeals.localHeight(), recentMeals.resolvedBounds(), layout);
-        EatMoreComponent eatMore = new EatMoreComponent(layout, eatMoreStartLocalY);
-        int activeEffectsStartLocalY = nextSiblingStartLocalY(
-                eatMoreStartLocalY, eatMore.localHeight(), eatMore.resolvedBounds(), layout);
-        ActiveEffectsComponent activeEffects = new ActiveEffectsComponent(layout, activeEffectsStartLocalY);
-        this.children = new ArrayList<>(List.of(recentMeals, eatMore, activeEffects));
+        this.children = DietScreenModules.build(layout, headerEndLocalY);
         this.columnLayout = new VerticalLayout(0);
     }
 
     RecentMealsComponent recentMealsComponent() {
-        return (RecentMealsComponent) children.get(0);
+        return DietScreenModules.find(children, RecentMealsComponent.class);
     }
 
     EatMoreComponent eatMoreComponent() {
-        return (EatMoreComponent) children.get(1);
+        return DietScreenModules.find(children, EatMoreComponent.class);
     }
 
     ActiveEffectsComponent activeEffectsComponent() {
-        return (ActiveEffectsComponent) children.get(2);
+        return DietScreenModules.find(children, ActiveEffectsComponent.class);
+    }
+
+    CaloriesComponent caloriesComponent() {
+        return DietScreenModules.find(children, CaloriesComponent.class);
+    }
+
+    BalanceComponent balanceComponent() {
+        return DietScreenModules.find(children, BalanceComponent.class);
     }
 
     /**
-     * Overrides the bounds {@link #render} passes to the recent-meals/eat-more/active-effects
-     * children instead of their own {@code resolvedBounds()} — for edit mode's live drag/resize
-     * preview, so the single instance built here can be rendered at a live-tracked position without
-     * a second, independently constructed copy. {@code null} for any param means "use that child's
-     * own resolvedBounds()."
+     * Overrides the bounds {@link #render} passes to the calories/balance/recent-meals/eat-more/
+     * active-effects children instead of their own {@code resolvedBounds()} — for edit mode's live
+     * drag/resize preview, so the single instance built here can be rendered at a live-tracked
+     * position without a second, independently constructed copy. {@code null} for any param means
+     * "use that child's own resolvedBounds()."
      */
-    void setSubBoxRenderBounds(Bounds recentMealsBounds, Bounds eatMoreBounds, Bounds activeEffectsBounds) {
+    void setSubBoxRenderBounds(Bounds caloriesBounds, Bounds balanceBounds, Bounds recentMealsBounds, Bounds eatMoreBounds, Bounds activeEffectsBounds) {
+        this.caloriesRenderBounds = caloriesBounds;
+        this.balanceRenderBounds = balanceBounds;
         this.recentMealsRenderBounds = recentMealsBounds;
         this.eatMoreRenderBounds = eatMoreBounds;
         this.activeEffectsRenderBounds = activeEffectsBounds;
     }
 
     /**
-     * Local (pre-scale) Y just past the today/calorie/balance header block — matches the original
-     * cursor. Package-private (not private) so {@link DietScreenEditTarget} can derive the same
-     * recent-meals/eat-more start position for its edit-mode overlay without duplicating this logic.
+     * Local (pre-scale) Y just past the "Today" header block (still drawn inline — see {@link
+     * #render}) — the start position handed to the first module in {@link DietScreenModules#build}'s
+     * chain. Calories/Balance are no longer pre-added here: as of their extraction into {@link
+     * CaloriesComponent}/{@link BalanceComponent}, they're chained modules like RecentMeals/EatMore/
+     * ActiveEffects, so their space is accounted for by the chain itself (via {@link
+     * #nextSiblingStartLocalY}), not by this method precomputing their height in advance. Package-
+     * private (not private) so {@link DietScreenEditTarget} can derive the same chain-start position
+     * for its edit-mode overlay without duplicating this logic.
      */
-    static int computeHeaderEndLocalY() {
-        NourishedClientConfig cc = NourishedClientConfig.get();
-        int y = 20 + 10;
-        if (FeatureFlagCache.enableTotalTracking() && cc.showCaloriesBox()) {
-            y += 45;
-        }
-        if (cc.showBalanceBox()) {
-            y += 55;
-        }
-        return y;
+    public static int computeHeaderEndLocalY() {
+        return 20 + 10;
     }
 
     /**
@@ -155,14 +143,15 @@ final class DietLeftColumnComponent implements Container {
      *
      * <p>Returns {@code currentLocalY} unchanged when {@code localHeight <= 0} (sibling hidden/not
      * fitting), matching the old formula's no-op in that case.
+     *
+     * <p>Delegates to {@link AutoGrowPanelContainer#nextSiblingStartLocalY} (marie-ui) — this used
+     * to be the one implementation; it's now also reused by {@link
+     * DietScreenModules#naturalContentEndLocalY} to sum the same modules' natural total height for
+     * panel auto-grow, so the chaining formula itself lives in marie-ui rather than being
+     * duplicated between the two callers.
      */
-    static int nextSiblingStartLocalY(int currentLocalY, int localHeight, Bounds resolvedBounds, DietLayout.Layout layout) {
-        if (localHeight <= 0) {
-            return currentLocalY;
-        }
-        int localBoundsHeight = (int) Math.round(resolvedBounds.height() / layout.scale());
-        int footprint = Math.max(localHeight, localBoundsHeight);
-        return currentLocalY + footprint;
+    public static int nextSiblingStartLocalY(int currentLocalY, int localHeight, Bounds resolvedBounds, DietLayout.Layout layout) {
+        return AutoGrowPanelContainer.nextSiblingStartLocalY(currentLocalY, localHeight, resolvedBounds, layout.scale());
     }
 
     @Override
@@ -200,7 +189,6 @@ final class DietLeftColumnComponent implements Container {
         if (data == null) {
             return;
         }
-        NourishedClientConfig cc = NourishedClientConfig.get();
         Font font = Minecraft.getInstance().font;
         float scale = (float) layout.scale();
 
@@ -208,81 +196,31 @@ final class DietLeftColumnComponent implements Container {
         int y = 20;
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
 
-        // Live-height-aware, same technique as RecentMealsComponent's constructor: layout.panelH()
-        // already reflects the panel's live (possibly independently edge-resized) height, so dividing
-        // by layout.scale() recovers it in the same local-unit space `y` is already expressed in.
-        int liveLocalHeight = (int) Math.round(layout.panelH() / layout.scale());
-        int maxY = liveLocalHeight - DietLayout.PAD;
-
         String todayText = Component.translatable("nourished.screen.diet.today").getString();
         int todayW = font.width(todayText);
         int todayGroupW = 16 + 4 + todayW;
         int todayStartX = x + (bw - todayGroupW) / 2;
         drawItem(context, "minecraft:sunflower", todayStartX, y - 8, scale);
         drawText(context, todayText, todayStartX + 20, y - 4, COL_GOLD, scale);
-        y += 10;
 
-        if (FeatureFlagCache.enableTotalTracking() && cc.showCaloriesBox()) {
-            if (y + CALORIES_HEADER_LOCAL_HEIGHT <= maxY) {
-                boolean bodyFits = y + CALORIES_HEADER_LOCAL_HEIGHT + CALORIES_BODY_LOCAL_HEIGHT <= maxY;
-                drawRoundedBox(context, x - 2, y - 2, bw + 4, 40, cc);
+        CaloriesComponent calories = caloriesComponent();
+        BalanceComponent balance = balanceComponent();
+        RecentMealsComponent recentMeals = recentMealsComponent();
+        EatMoreComponent eatMore = eatMoreComponent();
+        ActiveEffectsComponent activeEffects = activeEffectsComponent();
 
-                drawItem(context, "minecraft:fire_charge", x, y + 3, scale);
-                drawText(context, Component.translatable("nourished.screen.diet.calories_label").getString(), x + 22, y + 4, COL_WHITE, scale);
-
-                String calStr = (int) data.total + " / " + (int) data.maxTotal;
-                drawText(context, calStr, x + 22, y + 15, COL_GREEN, scale);
-
-                if (bodyFits) {
-                    float calPct = data.maxTotal > 0 ? Mth.clamp(data.total / data.maxTotal, 0f, 1f) : 0f;
-                    context.drawBar(sx(x), sy(y + 31), sd(bw), sd(4), calPct, COL_SEG_EMPTY, COL_GREEN);
-                }
-            }
-            y += 45;
-        }
-
-        if (cc.showBalanceBox()) {
-            if (y + BALANCE_HEADER_LOCAL_HEIGHT <= maxY) {
-                boolean bodyFits = y + BALANCE_HEADER_LOCAL_HEIGHT + BALANCE_BODY_LOCAL_HEIGHT <= maxY;
-                drawRoundedBox(context, x - 2, y - 2, bw + 4, 50, cc);
-
-                drawItem(context, "minecraft:comparator", x, y + 3, scale);
-                drawText(context, Component.translatable("nourished.screen.diet.balance_label").getString(), x + 22, y + 4, COL_WHITE, scale);
-
-                String balKey = getBalanceKey(data);
-                int balColor = balanceColor(balKey);
-                String balText = Component.translatable("nourished.screen.diet.balance_state." + balKey).getString();
-
-                float balanceScale = 1.2f * (10f / 9f);
-                float balTextW = font.width(balText) * balanceScale;
-                int bgAlpha = 51;
-                int bgColor = (bgAlpha << 24) | (balColor & 0x00FFFFFF);
-                context.fillRect(sx(x + 22 - 2), sy(y + 14), sd((int) balTextW + 5), sd(11), bgColor);
-                drawText(context, balText, x + 22, y + 15, balColor, scale * balanceScale);
-
-                if (bodyFits) {
-                    float balScore = MarieClientCache.getBalanceScore();
-                    int filledPips = Math.round(balScore * 5);
-                    int pipTotalW = 5 * 10 + 4 * 3;
-                    int pipStartX = x + (bw - pipTotalW) / 2;
-                    for (int i = 0; i < 5; i++) {
-                        int px = pipStartX + i * 13;
-                        context.fillRect(sx(px), sy(y + 38), sd(10), sd(6), i < filledPips ? balColor : COL_SEG_EMPTY);
-                    }
-                }
-            }
-            y += 55;
-        }
-        // y is now headerEndLocalY.
-
-        RecentMealsComponent recentMeals = (RecentMealsComponent) children.get(0);
-        EatMoreComponent eatMore = (EatMoreComponent) children.get(1);
-        ActiveEffectsComponent activeEffects = (ActiveEffectsComponent) children.get(2);
-
+        Bounds caloriesBounds = caloriesRenderBounds != null ? caloriesRenderBounds : calories.resolvedBounds();
+        Bounds balanceBounds = balanceRenderBounds != null ? balanceRenderBounds : balance.resolvedBounds();
         Bounds recentMealsBounds = recentMealsRenderBounds != null ? recentMealsRenderBounds : recentMeals.resolvedBounds();
         Bounds eatMoreBounds = eatMoreRenderBounds != null ? eatMoreRenderBounds : eatMore.resolvedBounds();
         Bounds activeEffectsBounds = activeEffectsRenderBounds != null ? activeEffectsRenderBounds : activeEffects.resolvedBounds();
 
+        if (calories.visibilityRule().isVisible()) {
+            calories.render(context, caloriesBounds);
+        }
+        if (balance.visibilityRule().isVisible()) {
+            balance.render(context, balanceBounds);
+        }
         if (recentMeals.visibilityRule().isVisible()) {
             recentMeals.render(context, recentMealsBounds);
         }
@@ -317,33 +255,4 @@ final class DietLeftColumnComponent implements Container {
         context.drawItem(new ItemStack(item), sx(localX), sy(localY), scale);
     }
 
-    private void drawRoundedBox(RenderContext context, int localX, int localY, int localW, int localH, NourishedClientConfig cc) {
-        int fill = panelColorWithOpacity(COL_ROW_BG_RGB, cc.dietBackgroundOpacity());
-        context.drawRoundedRect(sx(localX), sy(localY), sd(localW), sd(localH), 1, fill, COL_BORDER_LT);
-    }
-
-    private static int panelColorWithOpacity(int rgb, double opacity) {
-        int alpha = Mth.clamp((int) Math.round(opacity * 255.0d), 0, 255);
-        return (alpha << 24) | (rgb & 0x00FFFFFF);
-    }
-
-    private static String getBalanceKey(TrackingData data) {
-        dev.maire.nourished.config.NourishedConfig config = dev.maire.nourished.config.NourishedConfig.get();
-        float critical = (float) config.criticalThreshold();
-        float excessThreshold = (float) config.excessThreshold();
-        boolean low = data.values.values().stream().anyMatch(v -> v < critical);
-        boolean excess = data.values.values().stream().anyMatch(v -> v > excessThreshold);
-        if (low) return "low";
-        if (excess) return "excess";
-        return "balanced";
-    }
-
-    private static int balanceColor(String key) {
-        return switch (key) {
-            case "balanced" -> COL_GREEN;
-            case "low" -> COL_ORANGE;
-            case "excess" -> COL_RED;
-            default -> COL_WHITE;
-        };
-    }
 }

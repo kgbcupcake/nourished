@@ -1,6 +1,7 @@
-package dev.maire.nourished.client.screen;
+package dev.maire.nourished.client.screen.diet.dynamic.layout;
 
 import dev.maire.nourished.config.NourishedClientConfig;
+import dev.marie.framework.ui.geometry.Bounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 
@@ -11,19 +12,12 @@ public final class DietLayout {
     public static final int SPLIT = 108;
     public static final int PAD = 10;
 
-    /**
-     * Local-unit height floor for the main panel's resize constraint — just enough room for the
-     * title bar (title text sits at local Y=9; the divider/columns start at Y=26), so the panel can
-     * be dragged all the way down to a title-bar-only minimized state instead of stopping at a
-     * two-column content view. See {@link DietPanelContainer}'s minimized short-circuit, gated at
-     * {@link #PANEL_MINIMIZED_THRESHOLD_LOCAL_HEIGHT} (slightly above this floor, not the floor
-     * itself, so there's no razor-thin dead zone between "still floor-clamped" and "now minimized").
-     */
+    /** Floor for the panel's height resize — small enough to shrink to a title-bar-only minimized state. */
     public static final int PANEL_MIN_LOCAL_HEIGHT = 40;
-
-    /** See {@link #PANEL_MIN_LOCAL_HEIGHT}. */
     public static final int PANEL_MINIMIZED_THRESHOLD_LOCAL_HEIGHT = 50;
+    public static final int PANEL_BOTTOM_MARGIN_LOCAL = 34;
 
+    /** {@code leftMargin} is dead space between the panel's left edge and the left column's content, from widening the panel via its left edge — zero by default. */
     public record Layout(
             int panelX,
             int panelY,
@@ -33,7 +27,8 @@ public final class DietLayout {
             int baseY,
             double scale,
             double recentMealsScale,
-            double eatMoreScale
+            double eatMoreScale,
+            int leftMargin
     ) {}
 
     private DietLayout() {}
@@ -75,7 +70,8 @@ public final class DietLayout {
                 baseY,
                 scale,
                 recentMealsScale,
-                eatMoreScale
+                eatMoreScale,
+                0
         );
     }
 
@@ -84,7 +80,7 @@ public final class DietLayout {
     }
 
     public static int toScreenX(Layout layout, int localX) {
-        return layout.panelX() + (int) Math.round(localX * layout.scale());
+        return layout.panelX() + layout.leftMargin() + (int) Math.round(localX * layout.scale());
     }
 
     public static int toScreenY(Layout layout, int localY) {
@@ -93,5 +89,18 @@ public final class DietLayout {
 
     public static int toScreenDim(Layout layout, int localDim) {
         return Math.max(1, (int) Math.round(localDim * layout.scale()));
+    }
+
+    /** Single source of truth for the column split — every caller (render, drag preview, clamps) must go through this. */
+    public record ColumnGeometry(int leftX, int leftWidth, int dividerX, int rightX, int rightWidth) {}
+
+    public static ColumnGeometry columnGeometry(Layout layout, Bounds panelBounds) {
+        int gap = toScreenDim(layout, 1);
+        int leftX = panelBounds.x() + layout.leftMargin();
+        int leftWidth = toScreenDim(layout, SPLIT);
+        int dividerX = leftX + leftWidth;
+        int rightX = dividerX + gap;
+        int rightWidth = Math.max(0, (panelBounds.x() + panelBounds.width()) - rightX);
+        return new ColumnGeometry(leftX, leftWidth, dividerX, rightX, rightWidth);
     }
 }

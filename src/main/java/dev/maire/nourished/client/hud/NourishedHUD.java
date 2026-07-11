@@ -10,6 +10,12 @@ import dev.marie.framework.ui.edit.EditModeController;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.Theme;
 import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
+import dev.maire.nourished.client.hud.classic.ClassicHudPanelRenderer;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
+import dev.maire.nourished.client.hud.dynamic.edit.HudEditTarget;
+import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
+import dev.maire.nourished.client.hud.dynamic.modules.NutrientPanelContainer;
+import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -58,7 +64,13 @@ public final class NourishedHUD {
             return;
         }
         HudLayout.Layout layout = HudEditTarget.resolvedLayout(mc, visibleKeys);
-        drawHudPanelViaMarieUI(event.getGuiGraphics(), mc, event.getPartialTick().getGameTimeDeltaPartialTick(false), visibleKeys, layout);
+        if (cc.hudClassicMode()) {
+            ClassicHudPanelRenderer.drawPanel(
+                    event.getGuiGraphics(), mc, data, visibleKeys, layout, layout.panelX(), layout.panelY(), displayValues
+            );
+        } else {
+            drawHudPanelViaMarieUI(event.getGuiGraphics(), mc, event.getPartialTick().getGameTimeDeltaPartialTick(false), visibleKeys, layout);
+        }
     }
 
     public static void onClientTick(ClientTickEvent.Post event) {
@@ -77,7 +89,7 @@ public final class NourishedHUD {
     /**
      * Lazily builds the MarieUI edit-mode wrapper + controller on first entry (the HUD has no
      * {@link net.minecraft.client.gui.screens.Screen} of its own to construct these in, unlike
-     * {@link dev.maire.nourished.client.screen.DietScreen}, so they live here as statics instead),
+     * {@link dev.maire.nourished.client.screen.diet.DietScreen}, so they live here as statics instead),
      * then reuses the same instances for the rest of the session.
      */
     private static EditModeController marieEditModeController() {
@@ -93,8 +105,8 @@ public final class NourishedHUD {
         return marieEditModeController;
     }
 
-    /** Package-private accessor for {@link HudEditTarget}'s render path, which reuses the same lerped values as the normal HUD render. */
-    static Map<String, Float> currentDisplayValues() {
+    /** Accessor for {@link HudEditTarget}'s render path, which reuses the same lerped values as the normal HUD render. */
+    public static Map<String, Float> currentDisplayValues() {
         return displayValues;
     }
 

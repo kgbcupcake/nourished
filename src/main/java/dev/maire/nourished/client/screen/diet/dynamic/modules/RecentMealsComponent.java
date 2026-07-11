@@ -1,4 +1,4 @@
-package dev.maire.nourished.client.screen;
+package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
 import dev.marie.framework.client.MarieClientCache;
 import dev.marie.framework.client.MarieValueColors;
@@ -6,7 +6,10 @@ import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
+import dev.marie.framework.ui.component.SelfPositioningModule;
 import dev.marie.framework.ui.RenderContext;
+import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import net.minecraft.client.Minecraft;
@@ -30,16 +33,31 @@ import java.util.Map;
  * {@link DietLeftColumnComponent} can position whatever follows it without re-deriving this
  * section's fit/visibility logic.
  */
-final class RecentMealsComponent implements MarieComponent, HeaderCollapsibleComponent {
+public final class RecentMealsComponent implements MarieComponent, HeaderCollapsibleComponent, SelfPositioningModule {
 
     private static final int HEADER_LOCAL_HEIGHT = 10;
 
-    static final String ID = "nourished.diet.recentmeals";
+    public static final String ID = "nourished.diet.recentmeals";
 
     private static final int COL_ROW_BG_RGB = 0x001E1E1E;
     private static final int COL_BORDER_LT = 0xFF555555;
     private static final int COL_HEADER = 0xFF888888;
     private static final int COL_WHITE = 0xFFFFFFFF;
+
+    /**
+     * Hard character-count ceiling for a meal name, applied on top of the pixel-width truncation
+     * check below — a backstop against font-metric/rounding edge cases the pixel check alone hasn't
+     * reliably caught (e.g. "Cooked Llama Meat" still overflowing at typical sizes even with the
+     * live-bounds pixel fix). Derived from the box's narrowest supported width, not its natural one:
+     * {@code bw - nameOffset} (88 - 11 = 77 local units, itself scale-invariant under the two-axis
+     * proportional content scale — see {@code contentScale}'s derivation above) at
+     * {@code DietScreenEditTarget}'s 60% min-size floor gives ~46 local units of guaranteed available
+     * width, divided by 6px — a deliberately generous per-character estimate for Minecraft's default
+     * font (most glyphs are narrower; this errs conservative rather than truncating too early) — for
+     * a floor of ~7-12 characters; rounded up slightly to 12 so short-but-real names ("Hamburger",
+     * "Melon Slice") aren't clipped, while "Cooked Llama Meat" (18 chars) always is.
+     */
+    private static final int MAX_NAME_CHARS = 12;
 
     private final DietLayout.Layout layout;
     private final int startLocalY;
@@ -80,14 +98,15 @@ final class RecentMealsComponent implements MarieComponent, HeaderCollapsibleCom
         this.visible = showable && (startLocalY + recentHeight <= maxY);
         // Bottom pad (8) matches ActiveEffectsComponent's bottom pad exactly — see bodyUnitsFit call
         // below and ActiveEffectsComponent#render for the identical pad-then-fit pattern.
-        this.localHeight = visible ? recentHeight + 8 : 0;
+        this.localHeight = visible ? recentHeight + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
         this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, bw, localHeight);
     }
 
     /** Local (pre-scale) pixel height this section occupies this frame; 0 when hidden or not fitting. */
-    int localHeight() {
+    @Override
+    public int localHeight() {
         return localHeight;
     }
 
@@ -100,8 +119,8 @@ final class RecentMealsComponent implements MarieComponent, HeaderCollapsibleCom
      * visibility-gated height can collapse to near-zero on any frame visibility happens to be false,
      * and if a resize commits on exactly that frame the persisted size gets stuck there.
      */
-    int naturalLocalHeight() {
-        return recentHeight + 8;
+    public int naturalLocalHeight() {
+        return recentHeight + DietScreenModules.MODULE_GAP_LOCAL;
     }
 
     /**
@@ -110,12 +129,13 @@ final class RecentMealsComponent implements MarieComponent, HeaderCollapsibleCom
      * recomputed every frame, since a Layout recomputing this on every {@code render()} call would
      * silently override any future drag/resize commit on the very next frame.
      */
-    Bounds resolvedBounds() {
+    @Override
+    public Bounds resolvedBounds() {
         return resolvedBounds;
     }
 
     /** Whether this section fits at all (config-enabled, has data, and its stacked position fits the live panel height) — see constructor. */
-    boolean isVisible() {
+    public boolean isVisible() {
         return visible;
     }
 
@@ -141,77 +161,73 @@ final class RecentMealsComponent implements MarieComponent, HeaderCollapsibleCom
         if (!visible) {
             return;
         }
-        Font font = Minecraft.getInstance().font;
         NourishedClientConfig cc = NourishedClientConfig.get();
 
         int x = DietLayout.PAD;
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
-        this.contentScale = bounds.width() / (double) bw;
-        float scale = (float) contentScale;
         double recentMealsScale = layout.recentMealsScale();
         int rowH = Math.max(1, (int) Math.round(9 * recentMealsScale));
         int y = startLocalY;
+
+        // min() of both ratios so a single-axis resize can't hide content.
+        double widthScale = bounds.width() / (double) bw;
+        double heightScale = bounds.height() / (double) recentHeight;
+        this.contentScale = Math.min(widthScale, heightScale);
+        float scale = (float) contentScale;
 
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
         drawText(context, Component.translatable("nourished.screen.diet.recent_label").getString(), x, y, COL_HEADER, scale);
         y += HEADER_LOCAL_HEIGHT;
 
-        // Row count reflows with the box's live (possibly edge-resized) height instead of a fixed
-        // cap of 3 — shared HeaderCollapsibleComponent#bodyUnitsFit contract: rows are drawn at a
-        // fixed contentScale-derived screen size (icon/text SIZE is untouched — see class javadoc),
-        // so contentScale is also the correct "screen pixels per local unit" ratio for measuring how
-        // many of those fixed-size rows fit in bounds.height(). This is not the same computation as
-        // recovering a local height from a live size (the EatMoreComponent bug this was audited
-        // against) — it never treats bounds.height() as if it were produced by contentScale; it only
-        // asks how many contentScale-sized rows fit inside whatever bounds.height() independently
-        // turned out to be. The extra 8-local-unit bottom pad (matching localHeight()'s own "+8",
-        // and ActiveEffectsComponent's identical pad) isn't part of the shared contract, so it's
-        // applied here by shrinking the bounds passed in.
-        int bottomPadScreenH = (int) Math.round(8 * contentScale);
-        Bounds bodyBounds = new Bounds(bounds.x(), bounds.y(), bounds.width(), Math.max(0, bounds.height() - bottomPadScreenH));
-        int rowsToShow = bodyUnitsFit(bodyBounds, contentScale, recentIds.size(), rowH);
+        int naturalRowCount = Math.min(3, recentIds.size());
+        float iconScale = rowH / 16f; // fits the icon exactly within rowH
+        float rowScale = scale * (float) recentMealsScale; // folds the recentMealsScale config knob into label size
+        int nameOffset = rowH + 2;
+        Font font = Minecraft.getInstance().font;
+        // Recomputed from the box's actual LIVE bounds.width()/contentScale every frame, not the
+        // fixed natural-size `bw` — bw only equals bounds.width()/contentScale when width is the
+        // binding axis of the two-axis content scale; when a height-only resize is the binding axis
+        // instead, text renders smaller than what the box's real width would allow, and truncating
+        // against fixed bw under-uses that extra room (or, before this fix, truncated nothing at all).
+        int availableLocalWidth = (int) Math.round(bounds.width() / contentScale) - nameOffset;
+        int maxNameFontPx = (int) Math.max(0, Math.round(availableLocalWidth / recentMealsScale));
+        context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
+        try {
+            int count = 0;
+            for (String id : recentIds) {
+                if (count >= naturalRowCount) break;
+                count++;
 
-        int count = 0;
-        // Icon must render no taller than rowH (the per-row Y increment below), or consecutive rows
-        // visually overlap regardless of how correct the Y-stepping math is — drawItem's `scale` is a
-        // raw multiplier on a 16px icon (see RenderContext#drawItem), so the icon's rendered height in
-        // local units is 16 * iconScale; deriving iconScale from rowH/16 instead of an unrelated fixed
-        // constant (previously 0.75, which renders a 12-unit-tall icon into a 9-unit row) guarantees
-        // the icon's footprint fits the row it's drawn into.
-        float iconScale = rowH / 16f;
-        int nameOffset = (int) Math.round(16 * recentMealsScale);
-        for (String id : recentIds) {
-            if (count >= rowsToShow) break;
-            count++;
+                ResourceLocation itemId = ResourceLocation.tryParse(id);
+                if (itemId == null) {
+                    continue;
+                }
+                ItemStack recent = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
+                String name = recent.getHoverName().getString();
+                boolean overCharCap = name.length() > MAX_NAME_CHARS;
+                if (overCharCap) {
+                    name = name.substring(0, MAX_NAME_CHARS);
+                }
+                if (overCharCap || font.width(name) > maxNameFontPx) {
+                    int ellipsisW = font.width("...");
+                    int budget = Math.max(0, maxNameFontPx - ellipsisW);
+                    name = font.plainSubstrByWidth(name, budget) + "...";
+                }
+                context.drawItem(recent, sx(x), sy(y), scale * iconScale);
 
-            ResourceLocation itemId = ResourceLocation.tryParse(id);
-            if (itemId == null) {
-                continue;
-            }
-            ItemStack recent = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
-            String name = recent.getHoverName().getString();
-            // Skip the whole row (icon + name) rather than truncating with "..." when the full name
-            // doesn't fit — a cut-off name reads as broken UI, whereas hiding it matches this box's
-            // existing collapse-on-shrink behavior (fewer rows draw as the box shrinks; this is the
-            // same "hide rather than degrade" choice applied to width instead of height). The row
-            // slot is still consumed (y still advances below) so remaining rows don't shift up to
-            // fill the gap.
-            if (font.width(name) > bw - nameOffset) {
+                Map<String, Float> nutrientBars = NutrientClassificationLookup.resolveBars(recent.getItem());
+                String nutrientKey = nutrientBars.entrySet().stream()
+                        .max(Comparator.comparingDouble(Map.Entry::getValue))
+                        .map(Map.Entry::getKey)
+                        .orElse(null);
+                int nameColor = nutrientKey != null
+                        ? MarieValueColors.baseColorArgb(nutrientKey)
+                        : COL_WHITE;
+                drawText(context, name, x + nameOffset, y, nameColor, rowScale);
                 y += rowH;
-                continue;
             }
-            context.drawItem(recent, sx(x), sy(y), scale * iconScale);
-
-            Map<String, Float> nutrientBars = NutrientClassificationLookup.resolveBars(recent.getItem());
-            String nutrientKey = nutrientBars.entrySet().stream()
-                    .max(Comparator.comparingDouble(Map.Entry::getValue))
-                    .map(Map.Entry::getKey)
-                    .orElse(null);
-            int nameColor = nutrientKey != null
-                    ? MarieValueColors.baseColorArgb(nutrientKey)
-                    : COL_WHITE;
-            drawText(context, name, x + nameOffset, y + 3, nameColor, scale);
-            y += rowH;
+        } finally {
+            context.popClip();
         }
     }
 

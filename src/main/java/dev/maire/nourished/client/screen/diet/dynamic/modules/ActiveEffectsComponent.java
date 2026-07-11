@@ -1,10 +1,13 @@
-package dev.maire.nourished.client.screen;
+package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
+import dev.marie.framework.ui.component.SelfPositioningModule;
 import dev.marie.framework.ui.RenderContext;
+import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -22,9 +25,9 @@ import java.util.Collection;
  * them enough overlapped it with no way to fix that short of shrinking them back down. Making it a
  * real module with its own persisted {@link Bounds} lets the player drag it out of the way instead.
  */
-final class ActiveEffectsComponent implements MarieComponent, HeaderCollapsibleComponent {
+public final class ActiveEffectsComponent implements MarieComponent, HeaderCollapsibleComponent, SelfPositioningModule {
 
-    static final String ID = "nourished.diet.activeeffects";
+    public static final String ID = "nourished.diet.activeeffects";
     private static final int HEADER_LOCAL_HEIGHT = 10;
 
     private static final int COL_ROW_BG_RGB = 0x001E1E1E;
@@ -61,14 +64,15 @@ final class ActiveEffectsComponent implements MarieComponent, HeaderCollapsibleC
         int liveLocalHeight = (int) Math.round(layout.panelH() / layout.scale());
         int maxY = liveLocalHeight - DietLayout.PAD;
         this.visible = cc.showActiveEffects() && mc.player != null && (startLocalY + effectsBoxH <= maxY);
-        this.localHeight = visible ? effectsBoxH + 8 : 0;
+        this.localHeight = visible ? effectsBoxH + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
         this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, bw, localHeight);
     }
 
     /** Local (pre-scale) pixel height this section occupies this frame; 0 when hidden or not fitting. */
-    int localHeight() {
+    @Override
+    public int localHeight() {
         return localHeight;
     }
 
@@ -77,8 +81,8 @@ final class ActiveEffectsComponent implements MarieComponent, HeaderCollapsibleC
      * RecentMealsComponent#naturalLocalHeight()}'s javadoc for why resize-clamp reference sizes must
      * use this instead of {@link #localHeight()}.
      */
-    int naturalLocalHeight() {
-        return effectsBoxH + 8;
+    public int naturalLocalHeight() {
+        return effectsBoxH + DietScreenModules.MODULE_GAP_LOCAL;
     }
 
     /**
@@ -87,12 +91,13 @@ final class ActiveEffectsComponent implements MarieComponent, HeaderCollapsibleC
      * every frame, since a Layout recomputing this on every {@code render()} call would silently
      * override any future drag/resize commit on the very next frame.
      */
-    Bounds resolvedBounds() {
+    @Override
+    public Bounds resolvedBounds() {
         return resolvedBounds;
     }
 
     /** Whether this section fits at all (config-enabled, has a player, and its stacked position fits the live panel height) — see constructor. */
-    boolean isVisible() {
+    public boolean isVisible() {
         return visible;
     }
 
@@ -125,45 +130,45 @@ final class ActiveEffectsComponent implements MarieComponent, HeaderCollapsibleC
 
         int x = DietLayout.PAD;
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
-        this.contentScale = bounds.width() / (double) bw;
-        float scale = (float) contentScale;
         int y = startLocalY;
 
         Collection<MobEffectInstance> effects = mc.player.getActiveEffects();
 
+        // min() of both ratios so a single-axis resize can't hide content.
+        double widthScale = bounds.width() / (double) bw;
+        double heightScale = bounds.height() / (double) effectsBoxH;
+        this.contentScale = Math.min(widthScale, heightScale);
+        float scale = (float) contentScale;
+
         NourishedClientConfig cc = NourishedClientConfig.get();
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
-        // Cosmetic: slightly smaller than body text and nudged down a couple local units, purely a
-        // visual tweak — HEADER_LOCAL_HEIGHT (the layout reservation below) is untouched.
-        drawText(context, Component.translatable("nourished.screen.diet.effects_label").getString(), x, y + 2, COL_HEADER, scale * 0.9f);
+        // Slightly smaller than body text, purely a visual tweak — HEADER_LOCAL_HEIGHT (the layout reservation below) is untouched.
+        drawText(context, Component.translatable("nourished.screen.diet.effects_label").getString(), x, y + DietScreenModules.HEADER_TOP_PADDING_LOCAL, COL_HEADER, scale * 0.9f);
         y += HEADER_LOCAL_HEIGHT;
 
         if (effects.isEmpty()) {
             return;
         }
 
-        // Line count reflows with the box's live (possibly edge-resized) height instead of shrinking
-        // text to force everything to fit — shared HeaderCollapsibleComponent#bodyUnitsFit contract,
-        // same collapse-on-shrink behavior as RecentMealsComponent's rows. Reserves the same trailing
-        // 8-local-unit bottom pad naturalLocalHeight()/localHeight already budget for this box
-        // (effectsBoxH + 8) — see EatMoreComponent's render() for the same fix and why omitting this
-        // pad here would make this box's fit threshold inconsistent with its own natural-size formula.
-        int bottomPadScreenH = (int) Math.round(8 * contentScale);
-        Bounds bodyBounds = new Bounds(bounds.x(), bounds.y(), bounds.width(), Math.max(0, bounds.height() - bottomPadScreenH));
-        int linesToShow = bodyUnitsFit(bodyBounds, contentScale, effects.size(), 9);
-
-        int count = 0;
-        for (MobEffectInstance effect : effects) {
-            if (count >= linesToShow) break;
-            MobEffect type = effect.getEffect().value();
-            String name = Component.translatable(type.getDescriptionId()).getString();
-            int amplifier = effect.getAmplifier();
-            String label = (amplifier > 0 ? name + " " + (amplifier + 1) : name);
-            int color = type.isBeneficial() ? COL_GREEN : COL_RED;
-            String prefix = type.isBeneficial() ? "+ " : "- ";
-            drawText(context, prefix + label, x, y, color, scale);
-            y += 9;
-            count++;
+        // Content is always drawn (no fit-check gate) — pushClip/popClip stays only as a backstop.
+        int naturalLineCount = Math.min(3, effects.size());
+        context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
+        try {
+            int count = 0;
+            for (MobEffectInstance effect : effects) {
+                if (count >= naturalLineCount) break;
+                MobEffect type = effect.getEffect().value();
+                String name = Component.translatable(type.getDescriptionId()).getString();
+                int amplifier = effect.getAmplifier();
+                String label = (amplifier > 0 ? name + " " + (amplifier + 1) : name);
+                int color = type.isBeneficial() ? COL_GREEN : COL_RED;
+                String prefix = type.isBeneficial() ? "+ " : "- ";
+                drawText(context, prefix + label, x, y, color, scale);
+                y += 9;
+                count++;
+            }
+        } finally {
+            context.popClip();
         }
     }
 
