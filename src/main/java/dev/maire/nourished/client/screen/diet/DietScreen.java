@@ -153,6 +153,13 @@ public class DietScreen extends Screen {
             marieEditModeController().enter();
             return true;
         }
+        if (NourishedKeys.OPEN_DIET_SCREEN.matches(keyCode, scanCode)) {
+            onClose();
+            while (NourishedKeys.OPEN_DIET_SCREEN.consumeClick()) {
+                // drain the queued click so ClientEvents.onClientTick doesn't reopen next tick
+            }
+            return true;
+        }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 

@@ -71,7 +71,7 @@ public final class RuntimeFoodResolver {
     private RuntimeFoodResolver() {
         communityTagStage = new CommunityTagStage();
         keywordSuffixStage = new KeywordSuffixStage();
-        recipeInheritanceStage = new RecipeInheritanceStage(recipeInheritanceResolver);
+        recipeInheritanceStage = new RecipeInheritanceStage(recipeInheritanceResolver, communityTagStage, keywordSuffixStage);
         namespacePeerStage = new NamespacePeerStage();
         hardFallbackStage = new HardFallbackStage();
     }
@@ -157,22 +157,6 @@ public final class RuntimeFoodResolver {
                     .build();
         }
 
-        ResolutionResult cached = resolvedCache.get(itemId);
-        if (cached != null) {
-            cacheHits.incrementAndGet();
-            Map<String, Object> cacheDetail = new LinkedHashMap<>();
-            cacheDetail.put("cacheKey", itemId.toString());
-            cacheDetail.put("hit", true);
-            traceOut.add(new ClassificationTraceStep(
-                    TraceStepId.RESOLVER_CACHE,
-                    TraceStepStatus.SUCCESS,
-                    "Cache hit",
-                    cacheDetail));
-
-            return buildTraceFromResult(itemId.toString(), cached.withCacheHit(true), traceOut);
-        }
-
-        cacheMisses.incrementAndGet();
         ResolutionResult result = resolveUncached(stack, itemId, recipeManager, traceOut);
         return buildTraceFromResult(itemId.toString(), result, traceOut);
     }

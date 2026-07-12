@@ -12,10 +12,13 @@ import dev.maire.nourished.core.nutrition.stages.RecipeInheritanceStage;
 @ApiStatus.Internal
 public final class NourishedResolverStages {
 
+    private static final CommunityTagStage COMMUNITY_TAG_STAGE = new CommunityTagStage();
+    private static final KeywordSuffixStage KEYWORD_SUFFIX_STAGE = new KeywordSuffixStage();
+
     public static final ResolutionStageHandler[] STAGES = {
-            new CommunityTagStage(),
-            new KeywordSuffixStage(),
-            new RecipeInheritanceStage(RuntimeFoodResolver.getInstance().recipeInheritanceResolver()),
+            COMMUNITY_TAG_STAGE,
+            KEYWORD_SUFFIX_STAGE,
+            new RecipeInheritanceStage(RuntimeFoodResolver.getInstance().recipeInheritanceResolver(), COMMUNITY_TAG_STAGE, KEYWORD_SUFFIX_STAGE),
             new NamespacePeerStage(),
             new HardFallbackStage(),
     };
