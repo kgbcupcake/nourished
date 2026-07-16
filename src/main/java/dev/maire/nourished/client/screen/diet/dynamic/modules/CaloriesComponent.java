@@ -39,6 +39,8 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
     private final int startLocalY;
     private final TrackingData data;
     private final boolean visible;
+    private final boolean bodyVisible;
+    private final int renderedContentHeight;
     private final int localHeight;
     private final Bounds resolvedBounds;
     private Bounds anchorBounds;
@@ -52,11 +54,15 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         Minecraft mc = Minecraft.getInstance();
         this.data = mc.player != null ? MarieClientCache.get() : null;
 
-        int liveLocalHeight = (int) Math.round(layout.panelH() / layout.scale());
-        int maxY = liveLocalHeight - DietLayout.PAD;
-        this.visible = FeatureFlagCache.enableTotalTracking() && cc.showCaloriesBox() && data != null
-                && (startLocalY + BOX_LOCAL_HEIGHT <= maxY);
-        this.localHeight = visible ? BOX_LOCAL_HEIGHT + DietScreenModules.MODULE_GAP_LOCAL : 0;
+        // The progress bar is one indivisible body block (not a repeating list) — the header
+        // (icon + calorie count text) is the true floor; short of room for the bar too, the box
+        // shrinks to header-only instead of vanishing outright.
+        boolean headerVisible = FeatureFlagCache.enableTotalTracking() && cc.showCaloriesBox() && data != null
+                && DietLayout.headerFitsInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT);
+        this.visible = headerVisible;
+        this.bodyVisible = headerVisible && DietLayout.bodyBlockFitsInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT, BODY_LOCAL_HEIGHT);
+        this.renderedContentHeight = visible ? HEADER_LOCAL_HEIGHT + (bodyVisible ? BODY_LOCAL_HEIGHT : 0) : 0;
+        this.localHeight = visible ? renderedContentHeight + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
         int boxLocalWidth = DietLayout.SPLIT - DietLayout.PAD * 2 + 4;
         this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, boxLocalWidth, localHeight);
@@ -104,10 +110,13 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         if (!visible) {
             return;
         }
-        // min() of both ratios so a single-axis resize can't hide content.
+        // min() of both ratios so a single-axis resize can't hide content. Divides by
+        // renderedContentHeight (this frame's actual header[+bar] extent), not the full natural
+        // BOX_LOCAL_HEIGHT — so a graceful header-only shrink doesn't also squash the header's own
+        // text scale.
         int boxLocalWidth = DietLayout.SPLIT - DietLayout.PAD * 2 + 4;
         double widthScale = bounds.width() / (double) boxLocalWidth;
-        double heightScale = bounds.height() / (double) BOX_LOCAL_HEIGHT;
+        double heightScale = bounds.height() / (double) Math.max(1, renderedContentHeight);
         this.contentScale = Math.min(widthScale, heightScale);
         float scale = (float) contentScale;
 
@@ -122,6 +131,9 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
             String calStr = (int) data.total + " / " + (int) data.maxTotal;
             drawText(context, calStr, 24, 17, COL_GREEN, scale);
 
+            if (!bodyVisible) {
+                return;
+            }
             int barLocalWidth = DietLayout.SPLIT - DietLayout.PAD * 2;
             float calPct = data.maxTotal > 0 ? Mth.clamp(data.total / data.maxTotal, 0f, 1f) : 0f;
             context.drawBar(sx(2), sy(startLocalY + 33), sd(barLocalWidth), sd(4), calPct, COL_SEG_EMPTY, COL_GREEN);

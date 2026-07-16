@@ -48,7 +48,10 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
     private final int startLocalY;
     private final List<String> neglected;
     private final boolean visible;
+    private final boolean bodyVisible;
     private final int eatBoxH;
+    private final int naturalTotalHeight;
+    private final int renderedContentHeight;
     private final int localHeight;
     private final Bounds resolvedBounds;
     private Bounds anchorBounds;
@@ -60,14 +63,21 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         this.neglected = MarieClientCache.getNeglectedCategories();
 
         NourishedClientConfig cc = NourishedClientConfig.get();
-        // Live-height-aware — see RecentMealsComponent's constructor javadoc for why this reads
-        // layout.panelH()/layout.scale() instead of the fixed DietLayout.HEIGHT constant.
-        int liveLocalHeight = (int) Math.round(layout.panelH() / layout.scale());
-        int maxY = liveLocalHeight - DietLayout.PAD;
         this.eatBoxH = Math.max(1, (int) Math.round(46 * layout.eatMoreScale()));
         boolean showable = cc.showEatMoreOf() && !neglected.isEmpty();
-        this.visible = showable && (startLocalY + eatBoxH <= maxY);
-        this.localHeight = visible ? eatBoxH + DietScreenModules.MODULE_GAP_LOCAL : 0;
+        // Unlike Calories/Balance, the icon row IS this module's entire information — there's no
+        // separate always-visible summary text covering the same ground once it's gone. So instead
+        // of an all-or-nothing toggle, it shrinks continuously (bodyBlockRoomInPanel) and renders at
+        // whatever scale the remaining room allows, only dropping out once there's truly zero room
+        // left. The header is still the absolute floor.
+        boolean headerVisible = showable && DietLayout.headerFitsInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT);
+        int bodyLocalHeight = Math.max(0, eatBoxH - HEADER_LOCAL_HEIGHT);
+        this.naturalTotalHeight = HEADER_LOCAL_HEIGHT + bodyLocalHeight;
+        int bodyRoom = headerVisible ? DietLayout.bodyBlockRoomInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT, bodyLocalHeight) : 0;
+        this.visible = headerVisible;
+        this.bodyVisible = bodyRoom > 0;
+        this.renderedContentHeight = visible ? HEADER_LOCAL_HEIGHT + bodyRoom : 0;
+        this.localHeight = visible ? renderedContentHeight + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
         this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, bw, localHeight);
@@ -131,9 +141,13 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
 
         int x = DietLayout.PAD;
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
-        // min() of both ratios so a single-axis resize can't hide content.
+        // min() of both ratios so a single-axis resize can't hide content. Divides by
+        // naturalTotalHeight (the full header+icon-row extent), not the shrunk renderedContentHeight
+        // — the icon row IS this module's whole point, so as room runs out it shrinks smoothly
+        // (icons and header both scale down together) instead of the icons popping out entirely
+        // while an now-empty "Eat more of..." header lingers with nothing under it.
         double widthScale = bounds.width() / (double) bw;
-        double heightScale = bounds.height() / (double) eatBoxH;
+        double heightScale = bounds.height() / (double) Math.max(1, naturalTotalHeight);
         this.contentScale = Math.min(widthScale, heightScale);
         float scale = (float) contentScale;
 
@@ -142,6 +156,10 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         String suggestionHeader = Component.translatable("nourished.screen.diet.suggestion_label").getString();
         drawText(context, font.plainSubstrByWidth(suggestionHeader, bw), x, y + DietScreenModules.HEADER_TOP_PADDING_LOCAL, COL_HEADER, scale);
         y += HEADER_LOCAL_HEIGHT;
+
+        if (!bodyVisible) {
+            return;
+        }
 
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {

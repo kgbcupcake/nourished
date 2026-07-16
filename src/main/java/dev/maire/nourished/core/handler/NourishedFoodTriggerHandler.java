@@ -1,8 +1,8 @@
 package dev.maire.nourished.core.handler;
 
-import dev.marie.framework.api.ValueSourceTrigger;
+import dev.marie.framework.api.value.ValueSourceTrigger;
 import dev.marie.framework.api.ApiStatus;
-import dev.marie.framework.api.MarieAPI;
+import dev.marie.framework.api.marieapi.MarieAPI;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.marie.framework.util.MarieRegistryUtils;

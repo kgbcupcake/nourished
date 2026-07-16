@@ -237,7 +237,15 @@ public final class DietScreenEditTarget implements MarieComponent {
     @Override
     public void render(RenderContext context, Bounds ignoredBounds) {
         DietLayout.Layout layout = resolvedPanelLayout(mc);
-        panelDrag.setConstraint(DietPanelLayoutResolver.panelConstraint(layout));
+        // The left-edge/corner floor otherwise bakes in the *current* leftMargin, which grows in
+        // lockstep with a left-edge drag — locking the panel at whatever width just created that
+        // margin. Zeroing the margin here lets the same gesture shrink it back down again.
+        boolean shrinkingLeftEdge = panelDrag.isEdgeActive(DraggableResizable.Edge.LEFT) || panelDrag.isBottomLeftCornerActive();
+        DietLayout.Layout constraintLayout = shrinkingLeftEdge
+                ? new DietLayout.Layout(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH(),
+                        layout.baseX(), layout.baseY(), layout.scale(), layout.recentMealsScale(), layout.eatMoreScale(), 0)
+                : layout;
+        panelDrag.setConstraint(DietPanelLayoutResolver.panelConstraint(constraintLayout));
 
         int[] mouse = scaledMouse(mc);
         int mx = mouse[0];

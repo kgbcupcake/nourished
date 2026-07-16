@@ -64,6 +64,8 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
     private final List<String> recentIds;
     private final boolean visible;
     private final int recentHeight;
+    private final int rowsShown;
+    private final int renderedContentHeight;
     private final int localHeight;
     private final Bounds resolvedBounds;
     private Bounds anchorBounds;
@@ -75,16 +77,6 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         this.recentIds = MarieClientCache.getRecentSourceIds();
 
         NourishedClientConfig cc = NourishedClientConfig.get();
-        // Live-height-aware, not the fixed DietLayout.HEIGHT constant: the main panel's own height
-        // can now be edge-resized independently of width (see DietScreenEditTarget#resolvedPanelLayout/
-        // matchedLayoutFor), and layout.panelH() already reflects that live value — dividing by
-        // layout.scale() recovers it in the same local-unit space startLocalY/recentHeight are
-        // already expressed in, using the exact same width-derived scale every other local-Y-to-
-        // screen conversion in this box already uses (not a "recovered aspect ratio" assumption).
-        // Without this, a panel shrunk shorter via its top/bottom edge never hides this section even
-        // though it no longer fits, so it just overlaps/cuts off instead of collapsing.
-        int liveLocalHeight = (int) Math.round(layout.panelH() / layout.scale());
-        int maxY = liveLocalHeight - DietLayout.PAD;
         // Per-item height (9) matches ActiveEffectsComponent's fixed line height exactly — both
         // boxes draw the same shape of content (icon + colored label, one row per item), so they
         // share one collapse-threshold constant rather than each having their own separately-tuned
@@ -93,12 +85,20 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         // a distinct, legitimate per-box scale (see NourishedClientConfig#recentMealsBoxScale) still
         // applied on top, same as it already scales the icon/name-offset below.
         int rowH = Math.max(1, (int) Math.round(9 * layout.recentMealsScale()));
-        this.recentHeight = HEADER_LOCAL_HEIGHT + (Math.min(3, recentIds.size()) * rowH);
+        int naturalRows = Math.min(3, recentIds.size());
+        this.recentHeight = HEADER_LOCAL_HEIGHT + (naturalRows * rowH);
         boolean showable = cc.showRecentMeals() && !recentIds.isEmpty();
-        this.visible = showable && (startLocalY + recentHeight <= maxY);
-        // Bottom pad (8) matches ActiveEffectsComponent's bottom pad exactly — see bodyUnitsFit call
-        // below and ActiveEffectsComponent#render for the identical pad-then-fit pattern.
-        this.localHeight = visible ? recentHeight + DietScreenModules.MODULE_GAP_LOCAL : 0;
+        // Live-height-aware, not the fixed DietLayout.HEIGHT constant — see DietLayout#fitsInPanel's
+        // javadoc. The header alone is the true floor: once even that can't fit, the whole box is
+        // gone; short of that, rows drop one at a time (stackedBodyUnitsFit) instead of the box
+        // vanishing outright the moment the full natural row count stops fitting.
+        boolean headerVisible = showable && DietLayout.headerFitsInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT);
+        this.visible = headerVisible;
+        this.rowsShown = headerVisible
+                ? DietLayout.stackedBodyUnitsFit(layout, startLocalY, HEADER_LOCAL_HEIGHT, rowH, naturalRows)
+                : 0;
+        this.renderedContentHeight = visible ? HEADER_LOCAL_HEIGHT + rowsShown * rowH : 0;
+        this.localHeight = visible ? renderedContentHeight + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
         this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, bw, localHeight);
@@ -169,9 +169,12 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         int rowH = Math.max(1, (int) Math.round(9 * recentMealsScale));
         int y = startLocalY;
 
-        // min() of both ratios so a single-axis resize can't hide content.
+        // min() of both ratios so a single-axis resize can't hide content. Divides by
+        // renderedContentHeight (this frame's actual header+rowsShown extent), not the full natural
+        // recentHeight — otherwise a graceful row-count shrink would also shrink the remaining rows'
+        // text/icon scale instead of just showing fewer full-size rows.
         double widthScale = bounds.width() / (double) bw;
-        double heightScale = bounds.height() / (double) recentHeight;
+        double heightScale = bounds.height() / (double) Math.max(1, renderedContentHeight);
         this.contentScale = Math.min(widthScale, heightScale);
         float scale = (float) contentScale;
 
@@ -179,7 +182,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         drawText(context, Component.translatable("nourished.screen.diet.recent_label").getString(), x, y, COL_HEADER, scale);
         y += HEADER_LOCAL_HEIGHT;
 
-        int naturalRowCount = Math.min(3, recentIds.size());
+        int naturalRowCount = rowsShown;
         float iconScale = rowH / 16f; // fits the icon exactly within rowH
         float rowScale = scale * (float) recentMealsScale; // folds the recentMealsScale config knob into label size
         int nameOffset = rowH + 2;

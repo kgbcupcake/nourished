@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.mojang.brigadier.context.CommandContext;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.framework.api.ApiStatus;
-import dev.marie.framework.api.ValueDefinition;
+import dev.marie.framework.api.value.ValueDefinition;
 import dev.marie.framework.api.registry.ValueRegistry;
 import dev.marie.framework.data.DatapackSchema;
 import dev.marie.framework.util.MarieValidation;

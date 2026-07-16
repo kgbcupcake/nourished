@@ -1,9 +1,9 @@
 package dev.maire.nourished.core.context;
 
 import dev.marie.framework.api.ApiStatus;
-import dev.marie.framework.api.ApplicationHistoryView;
-import dev.marie.framework.api.ValueModifierContext;
-import dev.marie.framework.api.ValueModifierEvent;
+import dev.marie.framework.api.reporting.ApplicationHistoryView;
+import dev.marie.framework.api.value.ValueModifierContext;
+import dev.marie.framework.api.value.ValueModifierEvent;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.core.MarieDataProvider;
 import dev.marie.framework.tracking.TrackingAttachment;

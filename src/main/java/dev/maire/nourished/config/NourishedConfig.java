@@ -5,7 +5,7 @@ import dev.marie.framework.compat.ModCompat;
 import dev.marie.framework.config.ConfigDefaultsLoader;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.config.MarieModFeatureFlags;
-import dev.marie.framework.tracking.DeathNutritionBehavior;
+import dev.marie.framework.tracking.RespawnValueBehavior;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -609,8 +609,8 @@ public final class NourishedConfig {
         startingNutrientValue.set(value);
     }
 
-    public DeathNutritionBehavior deathNutritionBehavior() {
-        return DeathNutritionBehavior.fromConfigId(deathNutritionBehavior.get());
+    public RespawnValueBehavior deathNutritionBehavior() {
+        return RespawnValueBehavior.fromConfigId(deathNutritionBehavior.get());
     }
 
     public String deathNutritionBehaviorConfigId() {
@@ -618,7 +618,7 @@ public final class NourishedConfig {
     }
 
     public void setDeathNutritionBehavior(String value) {
-        deathNutritionBehavior.set(DeathNutritionBehavior.fromConfigId(value).configId());
+        deathNutritionBehavior.set(RespawnValueBehavior.fromConfigId(value).configId());
     }
 
     public int calorieDisplayMax() {

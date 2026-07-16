@@ -5,9 +5,9 @@ import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 
 import dev.marie.framework.api.ApiStatus;
-import dev.marie.framework.api.MarieAPI;
-import dev.marie.framework.api.MarieAPIVersion;
-import dev.marie.framework.api.MarieAPIState;
+import dev.marie.framework.api.marieapi.MarieAPI;
+import dev.marie.framework.api.marieapi.MarieAPIVersion;
+import dev.marie.framework.api.marieapi.MarieAPIState;
 import dev.marie.framework.data.MarieDataManager;
 import dev.maire.nourished.core.datapack.NourishedDatapackCallbacks;
 import dev.marie.framework.registry.MarieApiRegistries;
@@ -136,7 +136,7 @@ public class Nourished {
                 } catch (Exception e) {
                     LOGGER.error("[Nourished] AutoCompatDiscovery failed.", e);
                 }
-                MarieApiRegistries.freezeModOnlyRegistriesAfterCommonSetup();
+                MarieApiRegistries.freezeValueTrackingOnlyRegistriesAfterCommonSetup();
                 MarieAPIState.close();
             });
         });

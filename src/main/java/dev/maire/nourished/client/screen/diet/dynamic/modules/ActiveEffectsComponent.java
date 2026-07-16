@@ -1,21 +1,21 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
-import dev.marie.framework.ui.geometry.Bounds;
+import java.util.Collection;
+
+import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
+import dev.maire.nourished.config.NourishedClientConfig;
+import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.component.SelfPositioningModule;
-import dev.marie.framework.ui.RenderContext;
-import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
-import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
-import dev.maire.nourished.config.NourishedClientConfig;
+import dev.marie.framework.ui.geometry.Bounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
-
-import java.util.Collection;
 
 /**
  * Independently draggable/resizable port of the "Active Effects" block that used to live inline in
@@ -40,6 +40,8 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
     private final int startLocalY;
     private final boolean visible;
     private final int effectsBoxH;
+    private final int linesShown;
+    private final int renderedContentHeight;
     private final int localHeight;
     private final Bounds resolvedBounds;
     private Bounds anchorBounds;
@@ -52,19 +54,15 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         NourishedClientConfig cc = NourishedClientConfig.get();
         Minecraft mc = Minecraft.getInstance();
         int effectCount = (mc.player != null) ? mc.player.getActiveEffects().size() : 0;
-        int lineCount = Math.max(1, Math.min(3, effectCount));
-        this.effectsBoxH = HEADER_LOCAL_HEIGHT + lineCount * 9;
-        // Revisits the earlier "clampToPanel already guarantees containment, nothing left to
-        // prevent" reasoning: containment within the panel rectangle isn't the same as not
-        // overlapping RecentMeals/EatMore above it or getting cut off — a panel shrunk shorter via
-        // its top/bottom edge left this section always "visible" and got clamped/slid to fit the
-        // live rectangle with no regard for whether it still fit its stacked position at all. Now
-        // live-height-aware like RecentMealsComponent/EatMoreComponent, so it collapses cleanly
-        // instead. See RecentMealsComponent's constructor javadoc for why panelH()/scale() is used.
-        int liveLocalHeight = (int) Math.round(layout.panelH() / layout.scale());
-        int maxY = liveLocalHeight - DietLayout.PAD;
-        this.visible = cc.showActiveEffects() && mc.player != null && (startLocalY + effectsBoxH <= maxY);
-        this.localHeight = visible ? effectsBoxH + DietScreenModules.MODULE_GAP_LOCAL : 0;
+        int naturalLineCount = Math.max(1, Math.min(3, effectCount));
+        this.effectsBoxH = HEADER_LOCAL_HEIGHT + naturalLineCount * 9; 
+        boolean headerVisible = cc.showActiveEffects() && mc.player != null && DietLayout.headerFitsInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT);
+        this.visible = headerVisible;
+        this.linesShown = headerVisible
+                ? DietLayout.stackedBodyUnitsFit(layout, startLocalY, HEADER_LOCAL_HEIGHT, 9, naturalLineCount)
+                : 0;
+        this.renderedContentHeight = visible ? HEADER_LOCAL_HEIGHT + linesShown * 9 : 0;
+        this.localHeight = visible ? renderedContentHeight + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
         this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, bw, localHeight);
@@ -134,9 +132,12 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
 
         Collection<MobEffectInstance> effects = mc.player.getActiveEffects();
 
-        // min() of both ratios so a single-axis resize can't hide content.
+        // min() of both ratios so a single-axis resize can't hide content. Divides by
+        // renderedContentHeight (this frame's actual header+linesShown extent), not the full
+        // natural effectsBoxH — otherwise a graceful line-count shrink would also shrink the
+        // remaining lines' text scale instead of just showing fewer full-size lines.
         double widthScale = bounds.width() / (double) bw;
-        double heightScale = bounds.height() / (double) effectsBoxH;
+        double heightScale = bounds.height() / (double) Math.max(1, renderedContentHeight);
         this.contentScale = Math.min(widthScale, heightScale);
         float scale = (float) contentScale;
 
@@ -150,8 +151,9 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
             return;
         }
 
-        // Content is always drawn (no fit-check gate) — pushClip/popClip stays only as a backstop.
-        int naturalLineCount = Math.min(3, effects.size());
+        // pushClip/popClip stays only as a backstop — linesShown already reflects how many lines
+        // actually fit in the panel's live vertical space (see constructor).
+        int naturalLineCount = linesShown;
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             int count = 0;

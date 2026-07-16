@@ -1,12 +1,12 @@
 package dev.maire.nourished.core.datapack;
 
 import dev.maire.nourished.core.effect.EffectRegistry;
-import dev.marie.framework.api.MarieAPI;
+import dev.marie.framework.api.marieapi.MarieAPI;
 import dev.marie.framework.api.ApiStatus;
-import dev.marie.framework.api.MilestoneDefinition;
-import dev.marie.framework.api.SourcePairSynergy;
-import dev.marie.framework.api.ThresholdEffect;
-import dev.marie.framework.api.ValueDefinition;
+import dev.marie.framework.api.progression.MilestoneDefinition;
+import dev.marie.framework.api.source.SourcePairSynergy;
+import dev.marie.framework.api.effects.ThresholdEffect;
+import dev.marie.framework.api.value.ValueDefinition;
 import dev.marie.framework.data.MarieDataLoader;
 import dev.marie.framework.registry.MarieApiRegistries;
 import dev.marie.framework.runtime.SourceRegistry;

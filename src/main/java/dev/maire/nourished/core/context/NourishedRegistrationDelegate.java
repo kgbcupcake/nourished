@@ -1,8 +1,8 @@
 package dev.maire.nourished.core.context;
 
 import dev.marie.framework.api.ApiStatus;
-import dev.marie.framework.api.ThresholdEffect;
-import dev.marie.framework.api.ValueDefinition;
+import dev.marie.framework.api.effects.ThresholdEffect;
+import dev.marie.framework.api.value.ValueDefinition;
 import dev.marie.framework.core.MarieRegistrationDelegate;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.marie.framework.runtime.SourceRegistry;

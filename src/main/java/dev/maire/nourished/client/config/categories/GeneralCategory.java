@@ -4,7 +4,7 @@ import dev.maire.nourished.client.config.NourishedConfigSharedWidgets;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.NourishedLockRegistry;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurvePreset;
-import dev.marie.framework.tracking.DeathNutritionBehavior;
+import dev.marie.framework.tracking.RespawnValueBehavior;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -64,7 +64,7 @@ public final class GeneralCategory {
                                     Component.translatable("config.nourished.deathNutritionBehavior"),
                                     config.deathNutritionBehaviorConfigId()
                             )
-                            .setDefaultValue(DeathNutritionBehavior.PRESERVE.configId())
+                            .setDefaultValue(RespawnValueBehavior.PRESERVE.configId())
                             .setTooltip(Component.translatable("config.nourished.deathNutritionBehavior.desc"))
                             .setSaveConsumer(config::setDeathNutritionBehavior)
                             .build()

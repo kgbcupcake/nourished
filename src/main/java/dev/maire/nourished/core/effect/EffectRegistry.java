@@ -75,7 +75,7 @@ public class EffectRegistry {
      * Registers an externally-defined effect via the public API.
      * Called by {@link dev.maire.nourished.api.NourishedAPI#registerCustomEffect}.
      */
-    public static void registerExternal(dev.marie.framework.api.ThresholdEffect definition) {
+    public static void registerExternal(dev.marie.framework.api.effects.ThresholdEffect definition) {
         String trigger = switch (definition.getThresholdType()) {
             case CRITICAL -> "below";
             case LOW -> "below";
@@ -116,7 +116,7 @@ public class EffectRegistry {
         Nourished.LOGGER.info("[EffectRegistry] Registered external effect (replaced existing if matched): {}", def.id());
     }
 
-    public static void upsertFromDatapack(dev.marie.framework.api.ThresholdEffect definition) {
+    public static void upsertFromDatapack(dev.marie.framework.api.effects.ThresholdEffect definition) {
         String trigger = switch (definition.getThresholdType()) {
             case CRITICAL, LOW -> "below";
             case EXCESS -> "above";

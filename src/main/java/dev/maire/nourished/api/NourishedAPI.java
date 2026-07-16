@@ -1,18 +1,18 @@
 package dev.maire.nourished.api;
 
-import dev.marie.framework.api.AbsorptionModifier;
+import dev.marie.framework.api.effects.AbsorptionModifier;
 import dev.marie.framework.api.ApiStatus;
-import dev.marie.framework.api.SourcePairSynergy;
-import dev.marie.framework.api.MarieAPIState;
-import dev.marie.framework.api.MarieAPIVersion;
-import dev.marie.framework.api.MarieSeasonHook;
-import dev.marie.framework.api.ApplicationHistoryView;
-import dev.marie.framework.api.MilestoneDefinition;
-import dev.marie.framework.api.ProfileDefinition;
-import dev.marie.framework.api.ReportProvider;
-import dev.marie.framework.api.SynergyDefinition;
-import dev.marie.framework.api.ThresholdEffect;
-import dev.marie.framework.api.ValueDefinition;
+import dev.marie.framework.api.source.SourcePairSynergy;
+import dev.marie.framework.api.marieapi.MarieAPIState;
+import dev.marie.framework.api.marieapi.MarieAPIVersion;
+import dev.marie.framework.api.marie.MarieSeasonHook;
+import dev.marie.framework.api.reporting.ApplicationHistoryView;
+import dev.marie.framework.api.progression.MilestoneDefinition;
+import dev.marie.framework.api.progression.ProfileDefinition;
+import dev.marie.framework.api.reporting.ReportProvider;
+import dev.marie.framework.api.effects.SynergyDefinition;
+import dev.marie.framework.api.effects.ThresholdEffect;
+import dev.marie.framework.api.value.ValueDefinition;
 import dev.marie.framework.api.registry.AbsorptionModifierRegistry;
 import dev.marie.framework.api.registry.MilestoneRegistry;
 import dev.marie.framework.api.registry.ProfileRegistry;
@@ -125,12 +125,12 @@ public final class NourishedAPI {
      * @return aggregated player diet state snapshot
      */
     @ApiStatus.Stable
-    public static dev.marie.framework.api.MariePlayerData getTrackingData(Player player) {
+    public static dev.marie.framework.api.marie.MariePlayerData getTrackingData(Player player) {
         Map<String, Float> nutrients = new LinkedHashMap<>();
         for (String valueKey : NutrientRegistry.getKeys()) {
             nutrients.put(valueKey, getValueLevel(player, valueKey));
         }
-        return new dev.marie.framework.api.MariePlayerData(
+        return new dev.marie.framework.api.marie.MariePlayerData(
                 getTotal(player),
                 Collections.unmodifiableMap(nutrients),
                 getSourceMemory(player)
@@ -138,7 +138,7 @@ public final class NourishedAPI {
     }
 
     /**
-     * Applies a direct nutrient delta by posting a {@link dev.marie.framework.api.ValueModifierEvent}
+     * Applies a direct nutrient delta by posting a {@link dev.marie.framework.api.value.ValueModifierEvent}
      * and then applying the final event amount if the event is not cancelled.
      *
      * @param player      the player to modify
@@ -148,10 +148,10 @@ public final class NourishedAPI {
     @ApiStatus.Stable
     public static void modifyValue(Player player, String valueKey, float delta) {
         MarieRegistryUtils.requireValueKey(valueKey, "NourishedAPI.modifyValue");
-        dev.marie.framework.api.ValueModifierContext ctx =
-                dev.marie.framework.api.ValueModifierContext.of(player, API_MODIFIER_SOURCE, valueKey);
-        dev.marie.framework.api.ValueModifierEvent modifierEvent =
-                new dev.marie.framework.api.ValueModifierEvent(ctx, delta);
+        dev.marie.framework.api.value.ValueModifierContext ctx =
+                dev.marie.framework.api.value.ValueModifierContext.of(player, API_MODIFIER_SOURCE, valueKey);
+        dev.marie.framework.api.value.ValueModifierEvent modifierEvent =
+                new dev.marie.framework.api.value.ValueModifierEvent(ctx, delta);
         NeoForge.EVENT_BUS.post(modifierEvent);
         if (modifierEvent.isCanceled()) {
             return;
@@ -231,7 +231,7 @@ public final class NourishedAPI {
             org.slf4j.LoggerFactory.getLogger(NourishedAPI.class).warn("[NourishedAPI] registerSourceClassification: item '{}' not found in BuiltInRegistries.ITEM", sourceId);
         }
         MarieRegistryUtils.requireValueKey(valueKey, "NourishedAPI.registerSourceClassification");
-        dev.marie.framework.api.MarieAPI.registerSourceClassification(sourceId, valueKey, amount);
+        dev.marie.framework.api.marieapi.MarieAPI.registerSourceClassification(sourceId, valueKey, amount);
     }
 
     /**

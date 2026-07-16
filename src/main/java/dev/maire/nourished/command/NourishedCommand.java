@@ -40,7 +40,6 @@ public final class NourishedCommand {
                 .then(Commands.literal("tag")
                     .requires(s -> s.hasPermission(2))
                     .executes(NourishedTagAuditCommand::run))
-                .then(TempRuntimeFoodTraceCommand.register())
         );
     }
 }

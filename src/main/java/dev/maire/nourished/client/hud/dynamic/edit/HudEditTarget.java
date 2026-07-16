@@ -4,6 +4,7 @@ import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
+import dev.marie.framework.ui.component.AutoGrowPanelContainer;
 import dev.marie.framework.ui.component.ComponentState;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.edit.DraggableResizable;
@@ -21,7 +22,6 @@ import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.Mth;
 
 import java.util.List;
 import java.util.Map;
@@ -32,30 +32,33 @@ import java.util.Map;
  * draggable/resizable region (the whole nutrient panel), so it holds a single
  * {@link DraggableResizable} rather than one per sub-region.
  *
+ * <p>Dragging is purely spatial now, on every edge and both corners: content size (icon/bar/text
+ * scale) always comes from {@link HudLayout#compute(Minecraft, List)}'s own {@code cc.hudScale()} —
+ * the same single config value classic mode already renders from — never from the on-screen box's
+ * dimensions. Resizing the box only changes how much reserved blank room surrounds that
+ * fixed-size content: {@code leftMargin} on the left (grown only by a LEFT-edge/bottom-left-corner
+ * drag), and free trailing space on the right/bottom for any other resize, since content no longer
+ * stretches to fill the box (see {@code NutrientBarComponent#constraint}'s {@code
+ * expandHorizontal = false} and {@link HudLayout.Layout#naturalPanelW}). Width and height each
+ * follow {@link AutoGrowPanelContainer}'s existing manual/auto split (the same one {@code
+ * DietPanelLayoutResolver} uses): auto-sized to content's natural size until the player explicitly
+ * drags a handle affecting that axis, at which point {@link #commit} marks it manual and the
+ * dragged size is respected — not silently overwritten — until they resize that axis again.
+ *
  * <p>Position AND size are persisted independently via {@link UiStatePersistence} (same
  * {@link ComponentState} model {@code DietScreenPersistence} uses for the Diet Screen's panel/
- * sub-boxes), not derived from a single {@code hudScale} value the way this used to work. A
- * single derived scale (previously {@code hudScale = bounds.width() / baselinePanelW}, with
- * {@code panelH} always recomputed from that same scale) cannot represent an independent-axis
- * edge-resize: a height-only resize would compute an unchanged {@code hudScale} and then discard
- * the resized height entirely on the next read. {@code hudScale}/{@code hudOffsetX}/{@code
- * hudOffsetY} are still written on commit and still drive content sizing (icon/label/bar scale)
- * and the default (never-resized) anchor position — only the outer panel's actual on-screen
- * {@code panelX/Y/W/H} now come from the independently-persisted {@link ComponentState} once one
- * exists, via {@link #resolvedLayout}.
+ * sub-boxes).
  */
 public final class HudEditTarget implements MarieComponent {
 
     private static final String ID = "nourished.hud.editwrapper";
     private static final String PANEL_ID = "nourished.hud.panel";
 
-    /** Matches the live preview clamp in {@code NourishedHUD#onEditMouseRelease}'s resize handling. */
-    private static final double MIN_SCALE = 0.3d;
-    private static final double MAX_SCALE = 3.0d;
+    /** How much bigger than content's natural size the box may be dragged, on either axis. */
+    private static final double MAX_MARGIN_MULTIPLIER = 5.0d;
 
     private final Minecraft mc;
     private final DraggableResizable panelDrag;
-    private final int baselinePanelW;
 
     public HudEditTarget(Minecraft mc) {
         this.mc = mc;
@@ -64,17 +67,12 @@ public final class HudEditTarget implements MarieComponent {
         if (keys.isEmpty()) {
             keys = NutrientRegistry.getKeys();
         }
-        HudLayout.Layout base1x = HudLayout.compute(mc, keys, 1.0d);
-        this.baselinePanelW = base1x.panelW();
-
-        HudLayout.Layout preferred = HudLayout.compute(mc, keys);
-        HudLayout.Layout min = HudLayout.compute(mc, keys, MIN_SCALE);
-        HudLayout.Layout max = HudLayout.compute(mc, keys, MAX_SCALE);
+        HudLayout.Layout natural = HudLayout.compute(mc, keys);
 
         Constraint constraint = new Constraint(
-                new Size(preferred.panelW(), preferred.panelH()),
-                new Size(min.panelW(), min.panelH()),
-                new Size(max.panelW(), max.panelH()),
+                new Size(natural.panelW(), natural.panelH()),
+                new Size(natural.panelW(), natural.panelH()),
+                new Size((int) (natural.panelW() * MAX_MARGIN_MULTIPLIER), (int) (natural.panelH() * MAX_MARGIN_MULTIPLIER)),
                 false, false, true, true,
                 Anchor.TOP_LEFT, Insets.NONE, Insets.NONE
         );
@@ -85,23 +83,44 @@ public final class HudEditTarget implements MarieComponent {
      * Resolves the HUD panel's current full {@link HudLayout.Layout}: persisted independent
      * position/size if the user has committed a main-panel drag/resize (via {@link #commit}),
      * otherwise today's content-driven default. Content-scale fields (barW, rowH, iconSize,
-     * labelScale, scale, etc.) always come from the freshly-computed {@code computed} layout — only
-     * panelX/Y/W/H are substituted wholesale from the persisted {@link ComponentState}, mirroring
-     * {@code DietScreenEditTarget#resolvedPanelLayout}. Called by both the normal (non-edit) HUD
-     * render path and this class's own edit-mode rendering, so a committed resize is reflected
-     * consistently everywhere — not just while {@link HudEditTarget} itself is active.
+     * labelScale, scale, etc.) always come from {@code natural} — {@code cc.hudScale()}-derived,
+     * never from the box — so they're identical whether or not a resize was ever committed.
+     *
+     * <p>Width and height each auto-follow {@code natural}'s content-driven size unless the player
+     * explicitly resized that axis ({@link AutoGrowPanelContainer}'s manual/auto split, same one
+     * {@code DietPanelLayoutResolver} uses) — this is what lets a third-party mod register more
+     * nutrients via {@link dev.maire.nourished.api.NourishedAPI} and have the box grow to fit them
+     * instead of clipping into a stale persisted size the player never touched.
+     *
+     * <p>Called by both the normal (non-edit) HUD render path and this class's own edit-mode
+     * rendering, so a committed resize is reflected consistently everywhere — not just while
+     * {@link HudEditTarget} itself is active.
      */
     public static HudLayout.Layout resolvedLayout(Minecraft mc, List<String> keys) {
-        HudLayout.Layout computed = HudLayout.compute(mc, keys);
+        HudLayout.Layout natural = HudLayout.compute(mc, keys);
         return UiStatePersistence.get().load(PANEL_ID)
-                .map(state -> new HudLayout.Layout(
-                        state.x(), state.y(), state.width(), state.height(),
-                        computed.baseX(), computed.baseY(),
-                        computed.barW(), computed.rowH(), computed.iconSize(), computed.maxLabelSw(),
-                        computed.scaledPad(), computed.labelScale(), computed.scale(), computed.verticalLayout(),
-                        computed.verticalBarW(), computed.verticalBarH(), computed.verticalColumnW()
-                ))
-                .orElse(computed);
+                .map(state -> {
+                    AutoGrowPanelContainer.ManualOverride override =
+                            new AutoGrowPanelContainer.ManualOverride(state.widthManual(), state.heightManual());
+                    int width = AutoGrowPanelContainer.resolveWidth(override, state.width(), natural.panelW());
+                    int height = AutoGrowPanelContainer.resolveHeight(override, state.height(), natural.panelH());
+                    return new HudLayout.Layout(
+                            state.x(), state.y(), width, height,
+                            natural.baseX(), natural.baseY(),
+                            natural.barW(), natural.rowH(), natural.iconSize(), natural.maxLabelSw(),
+                            natural.scaledPad(), natural.labelScale(), natural.scale(), natural.verticalLayout(),
+                            natural.verticalBarW(), natural.verticalBarH(), natural.verticalColumnW(),
+                            natural.panelW(), natural.panelH(), state.leftMargin()
+                    );
+                })
+                .orElse(natural);
+    }
+
+    /** Only grown/shrunk by a left-edge (or bottom-left-corner) gesture — any other resize/reposition leaves it untouched. */
+    private static int persistedLeftMargin() {
+        return UiStatePersistence.get().load(PANEL_ID)
+                .map(ComponentState::leftMargin)
+                .orElse(0);
     }
 
     /** Resolves the HUD panel's current on-screen bounds — see {@link #resolvedLayout}. */
@@ -110,19 +129,28 @@ public final class HudEditTarget implements MarieComponent {
         return new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
     }
 
+    private static AutoGrowPanelContainer.ManualOverride existingManualOverride() {
+        return UiStatePersistence.get().load(PANEL_ID)
+                .map(s -> new AutoGrowPanelContainer.ManualOverride(s.widthManual(), s.heightManual()))
+                .orElse(AutoGrowPanelContainer.ManualOverride.NONE);
+    }
+
     private void commit(Bounds bounds) {
-        NourishedClientConfig cc = NourishedClientConfig.get();
         List<String> keys = currentVisibleKeys();
         if (keys.isEmpty()) {
             return;
         }
-        double derivedScale = Mth.clamp(bounds.width() / (double) baselinePanelW, MIN_SCALE, MAX_SCALE);
-        HudLayout.Layout scaled = HudLayout.compute(mc, keys, derivedScale);
-        cc.setHudScale(derivedScale);
-        cc.setHudOffsetX(bounds.x() - scaled.baseX());
-        cc.setHudOffsetY(bounds.y() - scaled.baseY());
-        NourishedClientConfig.saveNow();
-        UiStatePersistence.get().save(PANEL_ID, new ComponentState(bounds.x(), bounds.y(), bounds.width(), bounds.height(), false, false, false, 0));
+        // Read before this commit's own save below overwrites it — same "pre-gesture" width the
+        // margin delta needs, mirroring DietScreenEditTarget's panelDrag onCommit.
+        int widthBeforeGesture = resolvedBounds(mc, keys).width();
+        int leftMargin = panelDrag.lastCommitWasLeftEdge()
+                ? Math.max(0, persistedLeftMargin() + (bounds.width() - widthBeforeGesture))
+                : persistedLeftMargin();
+        AutoGrowPanelContainer.ManualOverride existing = existingManualOverride();
+        AutoGrowPanelContainer.ManualOverride override = AutoGrowPanelContainer.withCommit(existing, panelDrag);
+        UiStatePersistence.get().save(PANEL_ID, new ComponentState(
+                bounds.x(), bounds.y(), bounds.width(), bounds.height(), false,
+                override.widthManual(), override.heightManual(), leftMargin));
     }
 
     @Override
@@ -188,6 +216,8 @@ public final class HudEditTarget implements MarieComponent {
 
         Bounds handle = DraggableResizable.handleBounds(bounds);
         context.drawResizeHandle(handle.x(), handle.y(), panelDrag.isHandleHovered(mouse[0], mouse[1], bounds), panelDrag.isHandleActive());
+        Bounds handleBL = DraggableResizable.handleBoundsBottomLeft(bounds);
+        context.drawResizeHandle(handleBL.x(), handleBL.y(), panelDrag.isHandleBottomLeftHovered(mouse[0], mouse[1], bounds), panelDrag.isBottomLeftCornerActive());
         for (DraggableResizable.Edge edge : DraggableResizable.Edge.values()) {
             Bounds strip = DraggableResizable.edgeHandleBounds(bounds, edge);
             context.drawEdgeHandle(strip.x(), strip.y(), strip.width(), strip.height(), mouse[0], mouse[1],
@@ -206,23 +236,29 @@ public final class HudEditTarget implements MarieComponent {
     }
 
     /**
-     * Rebuilds a full {@link HudLayout.Layout} for the derived scale implied by {@code bounds}'
-     * width, but with position AND size pinned to {@code bounds} itself rather than anchor/
-     * formula-recomputed — same approach as {@code DietScreenEditTarget#matchedLayoutFor}, so the
-     * live preview rectangle and the content drawn inside it always agree, even mid-drag on a
-     * height-only edge (previously this used {@code computed.panelW()/panelH()}, the content-formula
-     * size at the derived scale, which stays locked to the old height during a height-only resize
-     * since the derived scale itself never changes when only height moves).
+     * Rebuilds a full {@link HudLayout.Layout} for the live preview {@code bounds}, with position
+     * AND size pinned to {@code bounds} itself rather than anchor/formula-recomputed — same
+     * approach as {@code DietScreenEditTarget#matchedLayoutFor}, so the live preview rectangle and
+     * the content drawn inside it always agree. Content-scale fields come from {@code natural}
+     * ({@code cc.hudScale()}-only) regardless of {@code bounds} — dragging never rescales content,
+     * only {@link #resolvedLayout}'s doc explains why width/height are still independently tracked.
      */
     private HudLayout.Layout matchedLayoutFor(List<String> keys, Bounds bounds) {
-        double derivedScale = Mth.clamp(bounds.width() / (double) baselinePanelW, MIN_SCALE, MAX_SCALE);
-        HudLayout.Layout computed = HudLayout.compute(mc, keys, derivedScale);
+        // Live left-edge (or bottom-left-corner) drag -> grows the margin by this gesture's width
+        // delta; any other gesture leaves it exactly as last persisted. Mirrors
+        // DietScreenEditTarget#matchedLayoutFor's leftMargin handling.
+        int widthBeforeGesture = resolvedBounds(mc, keys).width();
+        int leftMargin = (panelDrag.isEdgeActive(DraggableResizable.Edge.LEFT) || panelDrag.isBottomLeftCornerActive())
+                ? Math.max(0, persistedLeftMargin() + (bounds.width() - widthBeforeGesture))
+                : persistedLeftMargin();
+        HudLayout.Layout natural = HudLayout.compute(mc, keys);
         return new HudLayout.Layout(
                 bounds.x(), bounds.y(), bounds.width(), bounds.height(),
-                computed.baseX(), computed.baseY(),
-                computed.barW(), computed.rowH(), computed.iconSize(), computed.maxLabelSw(),
-                computed.scaledPad(), computed.labelScale(), computed.scale(), computed.verticalLayout(),
-                computed.verticalBarW(), computed.verticalBarH(), computed.verticalColumnW()
+                natural.baseX(), natural.baseY(),
+                natural.barW(), natural.rowH(), natural.iconSize(), natural.maxLabelSw(),
+                natural.scaledPad(), natural.labelScale(), natural.scale(), natural.verticalLayout(),
+                natural.verticalBarW(), natural.verticalBarH(), natural.verticalColumnW(),
+                natural.panelW(), natural.panelH(), leftMargin
         );
     }
 

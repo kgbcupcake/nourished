@@ -12,6 +12,46 @@
 
 ---
 
+[ nourished 0.2.7-beta] - 2026-07-13
+
+### Added
+
+- Restored classic (pre-MarieUI) HUD and Diet Screen renderers behind new `hudClassicMode` / `dietScreenClassicMode` config toggles, reusing the shared drag/resize edit-mode infrastructure instead of reviving the old hand-rolled edit screens.
+- Added `DietPanelLayoutResolver` and `DietSubBoxConstraints` for resolving diet panel layout and left-column sub-box resize constraints from persisted state.
+- Added `BalanceComponent` and `CaloriesComponent` as independent, self-positioning Diet Screen modules.
+- Added per-item food override support so a datapack override can replace both nutrient bar weights and full source deltas (calories + nutrients) for an item.
+- Added free spatial HUD panel resizing on every edge and corner, independent of content scale — resizing the box now reserves margin/free space around fixed-size content instead of rescaling it, mirroring how the Diet Screen panel already behaved.
+- Added `GuiGraphicsRenderContext.graphics()` escape hatch so classic renderers can issue raw `GuiGraphics` calls from within a MarieUI-managed render context.
+- Added community-tag and keyword-suffix fallback classification inside recipe inheritance ingredient scoring, so ingredients missing a confirmed nutrient tag can still contribute via those stages when confidence is high enough, backed by a much larger built-in keyword-suffix dictionary.
+- Added `excluded_items.json` to fully exclude specific items from nutrient tracking (checked before tag matching, external classification, and runtime inference) — for decoy items or non-food edibles that shouldn't move any bar, independent of `food_overrides.json`'s value corrections. Vanilla hunger/saturation restoration is unaffected.
+- Added graceful overflow handling for Diet Screen left-column sub-boxes (Calories, Balance, Eat More, Recent Meals, Active Effects): shrinking the panel now collapses each box to header-only, drops rows/lines one at a time, or smoothly shrinks its content (Eat More's icon row) as space runs out, instead of the whole box popping in/out the instant it no longer fits at full size. The right-column intake legend now anchors directly below the last drawn row instead of a fixed offset from the panel's bottom edge.
+- HUD nutrient bars/columns are now centered within the panel box when it's resized larger than its content needs, in both row-stacked and column layouts.
+
+### Changed
+
+- Reorganized `client/hud/` and `client/screen/diet/` into `dynamic/{layout,modules,edit,visibility,persistence}` and `classic` packages to separate MarieUI and legacy UI implementations.
+- HUD nutrient panel background now renders with rounded corners to match the classic renderer.
+- Updated imports across API, config, context, effect, handler, nutrition, kubejs, and template classes to match MarieLib's restructured package layout (e.g. `dev.marie.framework.api.value`, `.effects`, `.marieapi`, `.progression`, `.reporting`, `.source`).
+- Renamed `DeathNutritionBehavior` to `RespawnValueBehavior` (MarieLib rename) and updated all references.
+- Renamed `MarieApiRegistries.freezeModOnlyRegistriesAfterCommonSetup` to `freezeValueTrackingOnlyRegistriesAfterCommonSetup`.
+- Removed the per-item resolution cache from `RuntimeFoodResolver` in favor of always resolving uncached, now that ingredient scoring can consult the community-tag/keyword-suffix stages.
+- Moved config overrides (`food_overrides.json`, `source_classifications.json`, `excluded_items.json` and their READMEs) from `config/nourished/` directly into a new `config/nourished/overrides/` subfolder. **Breaking:** update any datapacks/scripts that read or write these files at the old path.
+
+### Fixed
+
+- Fixed the Diet Screen open keybind so pressing it while a Diet Screen (classic or MarieUI) is already open now closes it instead of leaving a duplicate/reopened screen.
+- Fixed classic HUD/Diet Screen left-edge resize so shrinking the panel back down actually reduces the reserved left margin instead of getting stuck at the width that created it.
+- Fixed classic Eat More panel resize clamping so it cannot grow large enough to push Active Effects below its minimum rendering budget within the fixed left-column layout.
+- Fixed The `food_overrides.json` not being wired into the `RuntimeFoodResolver` so overrides were not being applied at runtime.
+
+## Notes
+
+> A lot has changed in this update and some of the changes are breaking. Please read the changelog carefully and check your configs and datapacks for any necessary updates. this also include MariesLib updates aswell whicj there was a massive refactor of the package structure and some class renames. Please check the MariesLib changelog for more details.
+
+### Removed
+
+- Removed `TempRuntimeFoodTraceCommand` from `/nourished` command registration.
+
 ## [ Nourished 0.2.6-beta.5 ] - 2026-06-29
 
 ### Added

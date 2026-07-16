@@ -65,7 +65,7 @@ public final class ClassicHudPanelRenderer {
             NourishedClientConfig cc
     ) {
         int columnGap = Math.max(2, (int) Math.round(HudDrawHelpers.VERTICAL_COLUMN_GAP * layout.scale()));
-        int contentX = panelX + layout.scaledPad();
+        int contentX = panelX + layout.scaledPad() + layout.leftMargin();
         int pctH = (int) Math.ceil(9 * layout.labelScale());
         int barTop = panelY + layout.scaledPad() + pctH + 2;
         int labelY = barTop + layout.verticalBarH() + 2;
@@ -146,7 +146,7 @@ public final class ClassicHudPanelRenderer {
             Map<String, Float> displayValues,
             NourishedClientConfig cc
     ) {
-        int contentX = panelX + layout.scaledPad();
+        int contentX = panelX + layout.scaledPad() + layout.leftMargin();
         int y = panelY + layout.scaledPad();
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);

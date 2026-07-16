@@ -2,8 +2,8 @@ package dev.maire.nourished.kubejs.internal;
 
 import dev.latvian.mods.kubejs.script.ScriptsLoadedEvent;
 import dev.marie.framework.api.ApiStatus;
-import dev.marie.framework.api.MarieEvents;
-import dev.marie.framework.api.ValueModifierContext;
+import dev.marie.framework.api.marie.MarieEvents;
+import dev.marie.framework.api.value.ValueModifierContext;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.kubejs.NourishedKubeEvents;

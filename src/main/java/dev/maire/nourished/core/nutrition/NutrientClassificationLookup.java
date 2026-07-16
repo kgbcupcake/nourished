@@ -2,6 +2,7 @@ package dev.maire.nourished.core.nutrition;
 
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.runtime.SourceRegistry;
+import dev.marie.framework.scanner.ExcludedItemsRegistry;
 import dev.marie.framework.scanner.ScannerSpecRegistry;
 import dev.marie.framework.util.MarieRegistryUtils;
 import net.minecraft.resources.ResourceLocation;
@@ -12,6 +13,7 @@ import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Resolves nutrient bar weights from datapack tags and the runtime classifier cascade.
@@ -58,7 +60,18 @@ public final class NutrientClassificationLookup {
     public static Map<String, Float> resolveNutrientBars(
             ItemStack stack, boolean warnIfUnmatched, @Nullable RecipeManager recipeManager) {
         ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
-        if (itemId != null && ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())) {
+
+        if (itemId != null) {
+            Optional<FoodOverrideRegistry.FoodOverride> override =
+                    FoodOverrideRegistry.getOverride(itemId.toString());
+            if (override.isPresent()) {
+                return Map.copyOf(override.get().nutrients());
+            }
+        }
+
+        if (itemId != null
+                && (ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())
+                        || ExcludedItemsRegistry.isExcluded(itemId.toString()))) {
             return Map.of();
         }
 

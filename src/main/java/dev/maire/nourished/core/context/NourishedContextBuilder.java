@@ -17,14 +17,20 @@ import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.reload.NourishedReloadHelper;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
+import dev.marie.framework.util.MarieRegistryUtils;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Map;
+import java.util.Optional;
 
 @ApiStatus.Internal
 public final class NourishedContextBuilder {
@@ -96,6 +102,15 @@ public final class NourishedContextBuilder {
                 .sourceValueResolver((stack, level) ->
                         NutrientClassificationLookup.resolveNutrientBars(stack, false, level))
                 .sourceDeltaResolver((stack, level, payload, bars) -> {
+                    ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
+                    if (itemId != null) {
+                        Optional<FoodOverrideRegistry.FoodOverride> override =
+                                FoodOverrideRegistry.getOverride(itemId.toString());
+                        if (override.isPresent()) {
+                            FoodOverrideRegistry.FoodOverride o = override.get();
+                            return new MarieContext.SourceDelta(o.calories(), Map.copyOf(o.nutrients()));
+                        }
+                    }
                     float realSaturation = resolveRealSaturation(stack);
                     FoodNutritionRegistry.DietDelta d = FoodNutritionRegistry.computeDietDelta(
                             stack, level, (int) payload, realSaturation, bars);

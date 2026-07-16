@@ -42,6 +42,8 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
     private final int startLocalY;
     private final TrackingData data;
     private final boolean visible;
+    private final boolean bodyVisible;
+    private final int renderedContentHeight;
     private final int localHeight;
     private final Bounds resolvedBounds;
     private Bounds anchorBounds;
@@ -55,10 +57,14 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         Minecraft mc = Minecraft.getInstance();
         this.data = mc.player != null ? MarieClientCache.get() : null;
 
-        int liveLocalHeight = (int) Math.round(layout.panelH() / layout.scale());
-        int maxY = liveLocalHeight - DietLayout.PAD;
-        this.visible = cc.showBalanceBox() && data != null && (startLocalY + BOX_LOCAL_HEIGHT <= maxY);
-        this.localHeight = visible ? BOX_LOCAL_HEIGHT + DietScreenModules.MODULE_GAP_LOCAL : 0;
+        // The pip row is one indivisible body block (not a repeating list) — the header (icon +
+        // label + balance state text) is the true floor; short of room for the pips too, the box
+        // shrinks to header-only instead of vanishing outright.
+        boolean headerVisible = cc.showBalanceBox() && data != null && DietLayout.headerFitsInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT);
+        this.visible = headerVisible;
+        this.bodyVisible = headerVisible && DietLayout.bodyBlockFitsInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT, BODY_LOCAL_HEIGHT);
+        this.renderedContentHeight = visible ? HEADER_LOCAL_HEIGHT + (bodyVisible ? BODY_LOCAL_HEIGHT : 0) : 0;
+        this.localHeight = visible ? renderedContentHeight + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
         int boxLocalWidth = DietLayout.SPLIT - DietLayout.PAD * 2 + 4;
         this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, boxLocalWidth, localHeight);
@@ -105,10 +111,13 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
             return;
         }
         Minecraft mc = Minecraft.getInstance();
-        // min() of both ratios so a single-axis resize can't hide content.
+        // min() of both ratios so a single-axis resize can't hide content. Divides by
+        // renderedContentHeight (this frame's actual header[+pips] extent), not the full natural
+        // BOX_LOCAL_HEIGHT — so a graceful header-only shrink doesn't also squash the header's own
+        // text scale.
         int boxLocalWidth = DietLayout.SPLIT - DietLayout.PAD * 2 + 4;
         double widthScale = bounds.width() / (double) boxLocalWidth;
-        double heightScale = bounds.height() / (double) BOX_LOCAL_HEIGHT;
+        double heightScale = bounds.height() / (double) Math.max(1, renderedContentHeight);
         this.contentScale = Math.min(widthScale, heightScale);
         float scale = (float) contentScale;
 
@@ -132,6 +141,9 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
             context.fillRect(sx(22), sy(startLocalY + 16), sd((int) balTextW + 5), sd(11), bgColor);
             drawText(context, balText, 24, 17, balColor, scale * balanceScale);
 
+            if (!bodyVisible) {
+                return;
+            }
             int barLocalWidth = DietLayout.SPLIT - DietLayout.PAD * 2;
             float balScore = MarieClientCache.getBalanceScore();
             int filledPips = Math.round(balScore * 5);

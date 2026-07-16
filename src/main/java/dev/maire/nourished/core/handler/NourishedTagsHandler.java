@@ -1,7 +1,7 @@
 package dev.maire.nourished.core.handler;
 
 import dev.marie.framework.api.ApiStatus;
-import dev.marie.framework.api.MarieAPIState;
+import dev.marie.framework.api.marieapi.MarieAPIState;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.runtime.SourceRegistry;
 import dev.maire.nourished.core.Nourished;

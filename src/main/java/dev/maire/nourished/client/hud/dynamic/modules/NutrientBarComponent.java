@@ -53,14 +53,21 @@ final class NutrientBarComponent implements MarieComponent {
         if (verticalMode) {
             int textH = (int) Math.ceil(9 * hudLayout.labelScale());
             int contentH = textH + 2 + hudLayout.verticalBarH() + 2 + textH;
-            return Constraint.fixed(hudLayout.verticalColumnW(), contentH);
+            // CENTER so HorizontalLayout vertically centers each column when the box is taller than
+            // content needs, same reasoning as the horizontal-mode CENTER below.
+            return Constraint.fixed(hudLayout.verticalColumnW(), contentH).withAnchor(Anchor.CENTER);
         }
-        int contentW = hudLayout.panelW() - hudLayout.scaledPad() * 2;
+        // naturalPanelW, not panelW: the on-screen box can be freely resized wider than content
+        // needs (see HudEditTarget) without rescaling content, so content must size itself from its
+        // own natural (scale-only) width, not whatever the box currently measures. CENTER anchor lets
+        // VerticalLayout's existing horizontal-centering offset place each row in the middle of
+        // whatever width is actually available, instead of pinning it flush to the left.
+        int contentW = hudLayout.naturalPanelW() - hudLayout.scaledPad() * 2;
         Size preferred = new Size(contentW, hudLayout.rowH());
         Size minSize = new Size(0, hudLayout.rowH());
         Size maxSize = new Size(Integer.MAX_VALUE, hudLayout.rowH());
-        return new Constraint(preferred, minSize, maxSize, true, false, true, false,
-                Anchor.TOP_LEFT, Insets.NONE, Insets.NONE);
+        return new Constraint(preferred, minSize, maxSize, false, false, true, false,
+                Anchor.CENTER, Insets.NONE, Insets.NONE);
     }
 
     /**

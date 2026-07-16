@@ -84,15 +84,29 @@ public final class NutrientPanelContainer implements Container {
         NourishedClientConfig cc = NourishedClientConfig.get();
         double bgOpacity = cc.hudBackgroundOpacity();
         if (bgOpacity > 0d) {
-            context.fillRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), HudDrawHelpers.panelColor(bgOpacity));
+            // Same single-color look as the classic renderer's HudDrawHelpers#drawRoundedRect (fill
+            // and border matching) — this just swaps the square fillRect for RenderContext's built-in
+            // rounded-rect primitive so the panel gets its notched corners back.
+            int panelColor = HudDrawHelpers.panelColor(bgOpacity);
+            context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 2, panelColor, panelColor);
         }
         int pad = hudLayout.scaledPad();
-        Bounds content = new Bounds(
-                bounds.x() + pad,
-                bounds.y() + pad,
-                Math.max(0, bounds.width() - 2 * pad),
-                Math.max(0, bounds.height() - 2 * pad)
-        );
+        int leftMargin = hudLayout.leftMargin();
+        int availableW = Math.max(0, bounds.width() - 2 * pad - leftMargin);
+        int availableH = Math.max(0, bounds.height() - 2 * pad);
+
+        int contentY = bounds.y() + pad;
+        if (!hudLayout.verticalLayout()) {
+            // VerticalLayout (row-stacking mode) has no built-in "center the whole stack" concept —
+            // it only positions each row's own horizontal offset via Anchor (see
+            // NutrientBarComponent's CENTER anchor). Column mode uses HorizontalLayout instead, which
+            // already centers each column vertically per-child via that same Anchor mechanism, so it
+            // needs no help here — only row-stacking mode needs the block itself nudged down.
+            int naturalContentH = Math.max(0, hudLayout.naturalPanelH() - 2 * pad);
+            contentY += Math.max(0, (availableH - naturalContentH) / 2);
+        }
+
+        Bounds content = new Bounds(bounds.x() + pad + leftMargin, contentY, availableW, availableH);
         Container.super.render(context, content);
     }
 

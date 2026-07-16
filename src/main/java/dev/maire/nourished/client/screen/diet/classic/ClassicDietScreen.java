@@ -149,14 +149,22 @@ public class ClassicDietScreen extends Screen {
         }
         return classicEditModeController;
     }
-    @Override
+    
+@Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (NourishedKeys.EDIT_DIET_SCREEN.matches(keyCode, scanCode)) {
             classicEditModeController().enter();
             return true;
         }
+        if (NourishedKeys.OPEN_DIET_SCREEN.matches(keyCode, scanCode)) {
+            onClose();
+            while (NourishedKeys.OPEN_DIET_SCREEN.consumeClick()) {
+                // drain queued click so ClientEvents.onClientTick doesn't instantly reopen this screen
+            }
+            return true;
+        }
         return super.keyPressed(keyCode, scanCode, modifiers);
-    }
+    } 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (dragBarFromIndex != null && button == 0) {

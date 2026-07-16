@@ -8,6 +8,7 @@ import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.DietScreenModules;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -168,9 +169,14 @@ final class DietRightColumnComponent implements MarieComponent, HeaderCollapsibl
             y += ROW_STEP;
         }
 
-        int legendY = liveLocalHeight - 66;
+        // Stacked right after the last drawn row (same shared fit-check every left-column sub-box
+        // uses), not a fixed distance from the panel's bottom edge — the old fixed `-66` anchor made
+        // its own second half of the fit check (`legendY + legendH <= liveLocalHeight - PAD`)
+        // unconditionally true regardless of panel height, so visibility was silently governed by
+        // `legendY >= y` alone and could go stale against the actual row count/position.
+        int legendY = y + DietScreenModules.MODULE_GAP_LOCAL;
         int legendH = 34;
-        if (legendY >= y && legendY + legendH <= liveLocalHeight - DietLayout.PAD) {
+        if (DietLayout.fitsInPanel(layout, legendY, legendH)) {
             drawLegendBar(context, font, rx, legendY, (DietLayout.WIDTH - DietLayout.PAD) - rx, legendH);
         }
     }
