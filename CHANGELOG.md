@@ -9,6 +9,7 @@
 - Added auto-generated `Read_Me/` README files (`LOCKS_README.md`, `EFFECTS_README.md`, `FOOD_VALUES_README.md`, `NUTRIENTS_README.md`, `NUTRIENT_CURVES_README.md`, `RAW_FOOD_README.md`) written from bundled resources into each registry's config directory on first load, if not already present.
 - Wired Nourished's tooltip lines into MarieLib's `TooltipColorRegistry`/`TooltipMessageRegistry`, including an `excluded` message key and `nourished.tooltip.excluded` lang entry for excluded items. Added `NourishedTooltipDefaults` to seed `tooltip_colors.json`/`tooltip_messages.json` with Nourished's real nutrient colors and excluded-item message on first run.
 - Added `TOOLTIP_COLORS_README.md` / `TOOLTIP_MESSAGES_README.md` to Nourished's own `data/nourished/config/` resources: MarieLib's bundled copies were never reachable at runtime (looked up under `data/<modId>/config/...` using Nourished's own modId, but bundled under marie-ui's `marieslib` namespace instead), so each consumer now needs its own copy.
+- Added `COLORS_README.md` / `SCANNER_SPEC_README.md` to Nourished's own `data/nourished/config/` resources for the same reason: MarieLib's `ColorRegistry`/`ScannerSpecRegistry` bundled their READMEs under marie-core's own `marieslib` namespace instead of the consuming mod's, so they were never reachable.
 
 ### Changed
 
