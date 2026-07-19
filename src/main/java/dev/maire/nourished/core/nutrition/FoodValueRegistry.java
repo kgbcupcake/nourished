@@ -116,6 +116,30 @@ public class FoodValueRegistry {
             Nourished.LOGGER.error("[FoodValueRegistry] Failed to load food_values.json, using built-in defaults", e);
             loadDefaults();
         }
+
+        try {
+            Path readmeDir = configDir.resolve("Read_Me");
+            Files.createDirectories(readmeDir);
+            writeReadmeIfAbsent(readmeDir);
+        } catch (IOException e) {
+            Nourished.LOGGER.warn("[FoodValueRegistry] Failed to write FOOD_VALUES_README.md", e);
+        }
+    }
+
+    private static void writeReadmeIfAbsent(Path readmeDir) throws IOException {
+        Path readme = readmeDir.resolve("FOOD_VALUES_README.md");
+        if (Files.exists(readme)) {
+            return;
+        }
+        String resourcePath = "/data/" + Nourished.MODID + "/config/FOOD_VALUES_README.md";
+        try (InputStream in = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(resourcePath.substring(1))) {
+            if (in == null) {
+                Nourished.LOGGER.warn("[FoodValueRegistry] No bundled FOOD_VALUES_README.md, skipping write");
+                return;
+            }
+            Files.copy(in, readme);
+        }
     }
 
     public static void reload() {

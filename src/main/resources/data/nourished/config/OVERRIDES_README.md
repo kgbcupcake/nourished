@@ -2,6 +2,8 @@
 
 `food_overrides.json` lets you override nutrient values and calories for any specific item, regardless of how Nourished classified it elsewhere.
 
+`nutrients` is merged with normal tag/scanner classification, not a full replacement: any key you list overrides that nutrient's value, and any key you omit still falls back to whatever Nourished would normally classify for that item. To zero out a nutrient entirely, list it explicitly with a value of `0`. `calories` is always a full override.
+
 ## Schema
 
 ```json
@@ -19,7 +21,7 @@
 ```
 
 - `item`: the item's registry id (e.g. `minecraft:steak`, `farmersdelight:onion`)
-- `nutrients`: nutrient key to weight (matches the keys shown in `/marieslib status` or your registered nutrients)
+- `nutrients`: nutrient key to weight (matches the keys shown in `/marieslib status` or your registered nutrients); merged over normal classification — omitted keys fall back to tag-based values, listed keys (including `0`) win
 - `calories`: integer calorie value for this item
 - `enabled`: set to `false` to disable an override without deleting it
 

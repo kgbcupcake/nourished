@@ -21,6 +21,7 @@ import dev.marie.framework.classification.ClassificationTrace;
 import dev.marie.framework.classification.ClassificationTraceStep;
 import dev.marie.framework.classification.TraceStepId;
 import dev.marie.framework.classification.TraceStepStatus;
+import dev.marie.framework.scanner.ExcludedItemsRegistry;
 import dev.marie.framework.scanner.ScannerSpecRegistry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -254,7 +255,8 @@ public final class RuntimeFoodResolver {
     ResolutionResult resolveUncached(ItemStack stack, ResourceLocation itemId,
                                      @Nullable RecipeManager recipeManager,
                                      @Nullable List<ClassificationTraceStep> traceOut) {
-        if (ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())) {
+        if (ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())
+                || ExcludedItemsRegistry.isExcluded(itemId.toString())) {
             return new ResolutionResult(
                     Map.of(), Map.of(), List.of(), Map.of(), Map.of(),
                     false, 0f, RuntimeCascadeStage.HARD_FALLBACK, "excluded_items");

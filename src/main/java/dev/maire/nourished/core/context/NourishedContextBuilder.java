@@ -107,8 +107,7 @@ public final class NourishedContextBuilder {
                         Optional<FoodOverrideRegistry.FoodOverride> override =
                                 FoodOverrideRegistry.getOverride(itemId.toString());
                         if (override.isPresent()) {
-                            FoodOverrideRegistry.FoodOverride o = override.get();
-                            return new MarieContext.SourceDelta(o.calories(), Map.copyOf(o.nutrients()));
+                            return new MarieContext.SourceDelta(override.get().calories(), Map.copyOf(bars));
                         }
                     }
                     float realSaturation = resolveRealSaturation(stack);

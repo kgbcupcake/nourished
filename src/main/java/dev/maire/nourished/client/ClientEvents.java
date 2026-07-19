@@ -3,7 +3,7 @@ package dev.maire.nourished.client;
 import dev.maire.nourished.client.screen.diet.DietScreen;
 import dev.maire.nourished.client.screen.diet.classic.ClassicDietScreen;
 import dev.maire.nourished.config.NourishedClientConfig;
-import dev.marie.framework.compat.MarieTooltipHelper;
+import dev.marie.framework.tooltips.MarieTooltipHelper;
 import dev.marie.framework.config.FeatureFlagCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

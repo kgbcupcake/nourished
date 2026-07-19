@@ -61,18 +61,14 @@ public final class NutrientClassificationLookup {
             ItemStack stack, boolean warnIfUnmatched, @Nullable RecipeManager recipeManager) {
         ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
 
-        if (itemId != null) {
-            Optional<FoodOverrideRegistry.FoodOverride> override =
-                    FoodOverrideRegistry.getOverride(itemId.toString());
-            if (override.isPresent()) {
-                return Map.copyOf(override.get().nutrients());
-            }
-        }
+        Optional<FoodOverrideRegistry.FoodOverride> override = itemId != null
+                ? FoodOverrideRegistry.getOverride(itemId.toString())
+                : Optional.empty();
 
         if (itemId != null
                 && (ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())
                         || ExcludedItemsRegistry.isExcluded(itemId.toString()))) {
-            return Map.of();
+            return override.isPresent() ? Map.copyOf(override.get().nutrients()) : Map.of();
         }
 
         Map<String, Float> tagMatches = FoodNutritionRegistry.getNutrientTagScores(stack.getItem());
@@ -86,12 +82,21 @@ public final class NutrientClassificationLookup {
 
         Map<String, Float> resolved = RuntimeFoodResolver.getInstance().resolve(stack, recipeManager);
 
+        Map<String, Float> classification;
         if (tagMatches.isEmpty()) {
-            return resolved.isEmpty() ? Map.of() : resolved;
+            classification = resolved.isEmpty() ? Map.of() : resolved;
+        } else if (resolved.isEmpty()) {
+            classification = tagMatches;
+        } else {
+            classification = TagRuntimeBlend.blend(tagMatches, resolved).result();
         }
-        if (resolved.isEmpty()) {
-            return tagMatches;
+
+        if (override.isEmpty()) {
+            return classification;
         }
-        return TagRuntimeBlend.blend(tagMatches, resolved).result();
+
+        Map<String, Float> merged = new java.util.LinkedHashMap<>(classification);
+        merged.putAll(override.get().nutrients());
+        return Map.copyOf(merged);
     }
 }

@@ -58,5 +58,9 @@ public final class NourishedLifecycle {
         RegistryLifecycleManager.registerRegistry(
                 "NourishedPresetRegistry", NourishedPresetRegistry::ensureBuiltInFilesOnDisk,
                 NourishedPresetRegistry::reload);
+
+        // NutrientRegistry.loadDefinitions() already ran in the mod constructor, so real
+        // nutrient colors are available here for seeding tooltip_colors.json's defaults.
+        NourishedTooltipDefaults.seed();
     }
 }

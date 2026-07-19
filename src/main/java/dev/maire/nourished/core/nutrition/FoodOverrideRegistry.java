@@ -85,21 +85,37 @@ public class FoodOverrideRegistry {
     public static void load() {
         Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
         Path overridesDir = configDir.resolve("overrides");
-        Path file = overridesDir.resolve("food_overrides.json");
+        Path dataDir = overridesDir.resolve("Overrides");
+        Path readmeDir = overridesDir.resolve("Read_Me");
+        Path file = dataDir.resolve("food_overrides.json");
+        Path oldFile = overridesDir.resolve("food_overrides.json");
 
         try {
-            Files.createDirectories(overridesDir);
+            Files.createDirectories(dataDir);
+            Files.createDirectories(readmeDir);
+            if (Files.exists(oldFile) && !Files.exists(file)) {
+                Files.move(oldFile, file);
+            }
             if (!Files.exists(file)) {
                 writeDefaults(file);
                 Nourished.LOGGER.info("[FoodOverrideRegistry] Wrote default food_overrides.json");
             }
-            writeReadmeIfAbsent(overridesDir);
             parse(file);
             Nourished.LOGGER.info("[FoodOverrideRegistry] Loaded {} overrides from config folder", INSTANCE.size());
         } catch (IOException e) {
             Nourished.LOGGER.error("[FoodOverrideRegistry] Failed to load food_overrides.json", e);
             INSTANCE.reset();
             INSTANCE.freeze();
+        }
+
+        try {
+            Path oldReadme = overridesDir.resolve("OVERRIDES_README.md");
+            if (Files.exists(oldReadme)) {
+                Files.deleteIfExists(oldReadme);
+            }
+            writeReadmeIfAbsent(readmeDir);
+        } catch (IOException e) {
+            Nourished.LOGGER.warn("[FoodOverrideRegistry] Failed to write OVERRIDES_README.md", e);
         }
     }
 
@@ -153,7 +169,7 @@ public class FoodOverrideRegistry {
      */
     public static void save() {
         Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("overrides").resolve("food_overrides.json");
+        Path file = configDir.resolve("overrides").resolve("Overrides").resolve("food_overrides.json");
         try {
             writeRegistry(file);
             Nourished.LOGGER.info("[FoodOverrideRegistry] Saved food_overrides.json");
@@ -204,12 +220,12 @@ public class FoodOverrideRegistry {
         }
     }
 
-    private static void writeReadmeIfAbsent(Path overridesDir) throws IOException {
-        Path readme = overridesDir.resolve("OVERRIDES_README.md");
+    private static void writeReadmeIfAbsent(Path readmeDir) throws IOException {
+        Path readme = readmeDir.resolve("OVERRIDES_README.md");
         if (Files.exists(readme)) {
             return;
         }
-        MarieValidation.assertPathUnder(readme, overridesDir, "FoodOverrideRegistry");
+        MarieValidation.assertPathUnder(readme, readmeDir, "FoodOverrideRegistry");
         try (InputStream in = FoodOverrideRegistry.class.getResourceAsStream(
                 "/data/" + Nourished.MODID + "/config/OVERRIDES_README.md")) {
             if (in == null) {

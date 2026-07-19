@@ -14,6 +14,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -92,6 +93,30 @@ public final class NourishedLockRegistry {
             SERVER_ONLY.reset();
             LOCKED.freeze();
             SERVER_ONLY.freeze();
+        }
+
+        try {
+            Path readmeDir = configDir.resolve("Read_Me");
+            Files.createDirectories(readmeDir);
+            writeReadmeIfAbsent(readmeDir);
+        } catch (IOException e) {
+            Nourished.LOGGER.warn("[NourishedLockRegistry] Failed to write LOCKS_README.md", e);
+        }
+    }
+
+    private static void writeReadmeIfAbsent(Path readmeDir) throws IOException {
+        Path readme = readmeDir.resolve("LOCKS_README.md");
+        if (Files.exists(readme)) {
+            return;
+        }
+        String resourcePath = "/data/" + Nourished.MODID + "/config/LOCKS_README.md";
+        try (InputStream in = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(resourcePath.substring(1))) {
+            if (in == null) {
+                Nourished.LOGGER.warn("[NourishedLockRegistry] No bundled LOCKS_README.md, skipping write");
+                return;
+            }
+            Files.copy(in, readme);
         }
     }
 

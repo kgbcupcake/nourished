@@ -4,6 +4,22 @@
 
 ## [ Unreleased ]
 
+### Added
+
+- Added auto-generated `Read_Me/` README files (`LOCKS_README.md`, `EFFECTS_README.md`, `FOOD_VALUES_README.md`, `NUTRIENTS_README.md`, `NUTRIENT_CURVES_README.md`, `RAW_FOOD_README.md`) written from bundled resources into each registry's config directory on first load, if not already present.
+- Wired Nourished's tooltip lines into MarieLib's `TooltipColorRegistry`/`TooltipMessageRegistry`, including an `excluded` message key and `nourished.tooltip.excluded` lang entry for excluded items. Added `NourishedTooltipDefaults` to seed `tooltip_colors.json`/`tooltip_messages.json` with Nourished's real nutrient colors and excluded-item message on first run.
+- Added `TOOLTIP_COLORS_README.md` / `TOOLTIP_MESSAGES_README.md` to Nourished's own `data/nourished/config/` resources: MarieLib's bundled copies were never reachable at runtime (looked up under `data/<modId>/config/...` using Nourished's own modId, but bundled under marie-ui's `marieslib` namespace instead), so each consumer now needs its own copy.
+
+### Changed
+
+- `food_overrides.json` moved from `config/nourished/overrides/` into `config/nourished/overrides/Overrides/`, with its README moved into a new `overrides/Read_Me/` folder; existing files are migrated automatically on load.
+- `food_overrides.json`'s `nutrients` now merges over normal tag/scanner classification instead of fully replacing it: any key you list overrides that nutrient's value (including explicit `0` to zero it out), and any omitted key still falls back to whatever Nourished would normally classify. `calories` remains a full override. (`NutrientClassificationLookup`, `NourishedContextBuilder`, `OVERRIDES_README.md`)
+- Updated import for MarieLib's tooltip package restructure (`dev.marie.framework.compat.MarieTooltipHelper` → `dev.marie.framework.tooltips.MarieTooltipHelper`).
+
+### Fixed
+
+- `RuntimeFoodResolver` now also checks `ExcludedItemsRegistry.isExcluded(...)` (in addition to `ScannerSpecRegistry`'s `excludedItems()`) before running the inference cascade, matching `NutrientClassificationLookup`'s exclusion check. Previously an item excluded only via `excluded_items.json` could still enter full inference if resolved directly through `RuntimeFoodResolver`.
+
 ### CI / Tooling
 
 - Added `check-marielib-update.yml` GitHub Actions workflow to check MarieLib package updates weekly (Mondays 12:00 UTC) or via manual dispatch.

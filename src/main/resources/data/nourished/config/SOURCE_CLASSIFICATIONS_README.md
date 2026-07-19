@@ -1,10 +1,10 @@
-# Nourished — Source Classifications
+# Nourished: Source Classifications
 
-`source_classifications.json` manually assigns nutrient values to specific
+`source_classifications.json` you can manually assign nutrient values to specific
 items, bypassing the scanner and tag pipeline entirely. Use this when an
 item's automatic classification is wrong and you want to correct it directly.
 
-If you instead want an item to contribute nothing at all, use
+If you want an item to contribute nothing at all, use
 `excluded_items.json`: that removes an item from nutrient tracking entirely
 rather than reassigning its values.
 

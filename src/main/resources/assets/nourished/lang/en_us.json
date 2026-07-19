@@ -41,6 +41,7 @@
   "nourished.tooltip.diminished": "⚠ Diminished (%s)",
   "nourished.tooltip.fresh": "✔ Full value",
   "nourished.tooltip.unclassified": "Unclassified — no nutrient tag and no confident guess",
+  "nourished.tooltip.excluded": "Excluded from nutrition tracking",
   "nourished.tooltip.light_food": "Can be eaten for nutrients when hunger is full (no hunger restore).",
   "nourished.inventory.tooltip": "Nutritional Values",
   "nourished.screen.diet.tooltip.nourish": "nourish",
