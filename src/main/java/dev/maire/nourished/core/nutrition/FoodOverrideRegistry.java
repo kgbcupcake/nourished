@@ -6,15 +6,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.registry.AbstractRegistry;
-import dev.marie.MariesLib.util.MarieResourceLoader;
-import dev.marie.MariesLib.util.MarieValidation;
+import dev.marie.framework.registry.AbstractRegistry;
+import dev.marie.framework.util.MarieResourceLoader;
+import dev.marie.framework.util.MarieValidation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -26,13 +27,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Loads per-item food overrides from config/nourished/food_overrides.json.
+ * Loads per-item food overrides from config/nourished/overrides/food_overrides.json.
  * This is an escape hatch for modpack creators who want to override specific items.
  * <p>
  * <b>Priority / Override Stack (lowest to highest):</b>
  * <ol>
  *   <li>Hardcoded Java defaults (empty)</li>
- *   <li>config/nourished/food_overrides.json</li>
+ *   <li>config/nourished/overrides/food_overrides.json</li>
  *   <li>data/nourished/config/food_overrides.json (datapack override)</li>
  * </ol>
  */
@@ -83,21 +84,38 @@ public class FoodOverrideRegistry {
 
     public static void load() {
         Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("food_overrides.json");
+        Path overridesDir = configDir.resolve("overrides");
+        Path dataDir = overridesDir.resolve("Overrides");
+        Path readmeDir = overridesDir.resolve("Read_Me");
+        Path file = dataDir.resolve("food_overrides.json");
+        Path oldFile = overridesDir.resolve("food_overrides.json");
 
         try {
-            Files.createDirectories(configDir);
+            Files.createDirectories(dataDir);
+            Files.createDirectories(readmeDir);
+            if (Files.exists(oldFile) && !Files.exists(file)) {
+                Files.move(oldFile, file);
+            }
             if (!Files.exists(file)) {
                 writeDefaults(file);
                 Nourished.LOGGER.info("[FoodOverrideRegistry] Wrote default food_overrides.json");
             }
-            writeReadmeIfAbsent(configDir);
             parse(file);
             Nourished.LOGGER.info("[FoodOverrideRegistry] Loaded {} overrides from config folder", INSTANCE.size());
         } catch (IOException e) {
             Nourished.LOGGER.error("[FoodOverrideRegistry] Failed to load food_overrides.json", e);
             INSTANCE.reset();
             INSTANCE.freeze();
+        }
+
+        try {
+            Path oldReadme = overridesDir.resolve("OVERRIDES_README.md");
+            if (Files.exists(oldReadme)) {
+                Files.deleteIfExists(oldReadme);
+            }
+            writeReadmeIfAbsent(readmeDir);
+        } catch (IOException e) {
+            Nourished.LOGGER.warn("[FoodOverrideRegistry] Failed to write OVERRIDES_README.md", e);
         }
     }
 
@@ -151,7 +169,7 @@ public class FoodOverrideRegistry {
      */
     public static void save() {
         Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("food_overrides.json");
+        Path file = configDir.resolve("overrides").resolve("Overrides").resolve("food_overrides.json");
         try {
             writeRegistry(file);
             Nourished.LOGGER.info("[FoodOverrideRegistry] Saved food_overrides.json");
@@ -202,74 +220,19 @@ public class FoodOverrideRegistry {
         }
     }
 
-    private static void writeReadmeIfAbsent(Path configDir) throws IOException {
-        Path readme = configDir.resolve("OVERRIDES_README.md");
+    private static void writeReadmeIfAbsent(Path readmeDir) throws IOException {
+        Path readme = readmeDir.resolve("OVERRIDES_README.md");
         if (Files.exists(readme)) {
             return;
         }
-        MarieValidation.assertPathUnder(readme, configDir, "FoodOverrideRegistry");
-        String content = """
-                # Nourished — Food Overrides
-
-                `food_overrides.json` lets you override nutrient values and calories for any \
-                specific item, regardless of how Nourished classified it elsewhere.
-
-                ## Schema
-
-                ```json
-                [
-                  {
-                    "item": "minecraft:steak",
-                    "nutrients": {
-                      "proteins": 0.8,
-                      "fats": 0.2
-                    },
-                    "calories": 60,
-                    "enabled": true
-                  }
-                ]
-                ```
-
-                - `item` — the item's registry id (e.g. `minecraft:steak`, `farmersdelight:onion`)
-                - `nutrients` — nutrient key to weight (matches the keys shown in `/marieslib status` \
-                or your registered nutrients)
-                - `calories` — integer calorie value for this item
-                - `enabled` — set to `false` to disable an override without deleting it
-
-                ## Getting starting values
-
-                **Categorized export (recommended for overrides):** use the "Export All Foods" button \
-                in the Scanner tab of the config screen, or run `/nourished export_all` (op 2). \
-                Both write `nourished_nutrients_export/` — a folder of read-only reference files, one \
-                per nutrient category (`fruits.json`, `proteins.json`, `vegetables.json`, etc.), each \
-                listing every item Nourished currently resolves into that category, with its live \
-                nutrient values and calories.
-
-                **Single-file export (MarieLib):** `/marieslib dump nourished_nutrients` writes one \
-                file, `nourished_nutrients_export.json`, with the same live data in MarieLib's \
-                `id`/`data` export format. Use this for tooling or quick inspection; the categorized \
-                folder above is easier to copy from when building `food_overrides.json`.
-
-                To turn an export entry into an override, copy it from the relevant category file \
-                in `nourished_nutrients_export/` into `food_overrides.json` and reshape it from:
-
-                ```json
-                { "item": "minecraft:steak", "nutrients": { "proteins": 0.8 }, "calories": 60 }
-                ```
-
-                to:
-
-                ```json
-                { "item": "minecraft:steak", "nutrients": { "proteins": 0.8 }, "calories": 60, "enabled": true }
-                ```
-
-                (the export entries already include the `item` field — just add `"enabled": true`)
-
-                The export files are reference only — editing them does nothing on their own. Only \
-                entries actually present in `food_overrides.json` take effect.
-                """.stripIndent();
-        try (Writer w = Files.newBufferedWriter(readme)) {
-            w.write(content);
+        MarieValidation.assertPathUnder(readme, readmeDir, "FoodOverrideRegistry");
+        try (InputStream in = FoodOverrideRegistry.class.getResourceAsStream(
+                "/data/" + Nourished.MODID + "/config/OVERRIDES_README.md")) {
+            if (in == null) {
+                Nourished.LOGGER.warn("[FoodOverrideRegistry] No bundled OVERRIDES_README.md, skipping write");
+                return;
+            }
+            Files.copy(in, readme);
         }
     }
 

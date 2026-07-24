@@ -1,7 +1,7 @@
 package dev.maire.nourished.core;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.ValueModifierContext;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.value.ValueModifierContext;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.fml.ModList;
 

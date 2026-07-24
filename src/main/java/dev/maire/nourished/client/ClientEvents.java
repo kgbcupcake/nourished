@@ -1,11 +1,14 @@
 package dev.maire.nourished.client;
 
-import dev.maire.nourished.client.screen.DietScreen;
-import dev.marie.MariesLib.compat.MarieTooltipHelper;
-import dev.marie.MariesLib.config.FeatureFlagCache;
+import dev.maire.nourished.client.screen.diet.DietScreen;
+import dev.maire.nourished.client.screen.diet.classic.ClassicDietScreen;
+import dev.maire.nourished.config.NourishedClientConfig;
+import dev.marie.framework.tooltips.MarieTooltipHelper;
+import dev.marie.framework.config.FeatureFlagCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -23,7 +26,7 @@ public final class ClientEvents {
     private static final class InventoryDietButton extends Button {
         InventoryDietButton(int x, int y) {
             super(x, y, 20, 20, Component.empty(),
-                    b -> Minecraft.getInstance().setScreen(new DietScreen()),
+                    b -> Minecraft.getInstance().setScreen(openDietScreen()),
                     b -> Component.empty());
         }
 
@@ -41,6 +44,10 @@ public final class ClientEvents {
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!(event.getScreen() instanceof InventoryScreen screen)) return;
         if (!FeatureFlagCache.enableTrackingScreen()) return;
+        // Only gates the button's own presence — deliberately does NOT touch
+        // NourishedKeys.OPEN_DIET_SCREEN's handling in onClientTick below, so the keybind keeps
+        // opening the Diet Screen regardless of this setting.
+        if (!NourishedClientConfig.get().showDietScreenButton()) return;
 
         int x = screen.getGuiLeft() - 26;
         int y = screen.getGuiTop() + 60;
@@ -71,7 +78,11 @@ public final class ClientEvents {
             if (!FeatureFlagCache.enableTrackingScreen()) {
                 continue;
             }
-            mc.setScreen(new DietScreen());
+            mc.setScreen(openDietScreen());
         }
+    }
+
+    private static Screen openDietScreen() {
+        return NourishedClientConfig.get().dietScreenClassicMode() ? new ClassicDietScreen() : new DietScreen();
     }
 }

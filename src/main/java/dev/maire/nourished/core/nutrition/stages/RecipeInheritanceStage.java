@@ -1,18 +1,19 @@
 package dev.maire.nourished.core.nutrition.stages;
 
-import dev.marie.MariesLib.compat.ModCompat;
+import dev.marie.framework.compat.ModCompat;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.marie.MariesLib.scan.ResolutionResult;
-import dev.marie.MariesLib.scan.RuntimeCascadeStage;
-import dev.marie.MariesLib.scan.ResolutionStageHandler;
-import dev.marie.MariesLib.scan.StageContext;
-import dev.marie.MariesLib.scanner.RecipeInheritanceResolver;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
-import dev.marie.MariesLib.classification.ClassificationTraceStep;
-import dev.marie.MariesLib.classification.TraceStepId;
-import dev.marie.MariesLib.classification.TraceStepStatus;
+import dev.marie.framework.runtime.ComponentClassifier;
+import dev.marie.framework.scan.ResolutionResult;
+import dev.marie.framework.scan.RuntimeCascadeStage;
+import dev.marie.framework.scan.ResolutionStageHandler;
+import dev.marie.framework.scan.StageContext;
+import dev.marie.framework.scanner.RecipeInheritanceResolver;
+import dev.marie.framework.util.MarieRegistryUtils;
+import dev.marie.framework.classification.ClassificationTraceStep;
+import dev.marie.framework.classification.TraceStepId;
+import dev.marie.framework.classification.TraceStepStatus;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -87,9 +88,17 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
     );
 
     private final RecipeInheritanceResolver recipeResolver;
+    private final CommunityTagStage communityTagStage;
+    private final KeywordSuffixStage keywordSuffixStage;
 
-    public RecipeInheritanceStage(RecipeInheritanceResolver recipeResolver) {
+    public RecipeInheritanceStage(
+            RecipeInheritanceResolver recipeResolver,
+            CommunityTagStage communityTagStage,
+            KeywordSuffixStage keywordSuffixStage
+    ) {
         this.recipeResolver = recipeResolver;
+        this.communityTagStage = communityTagStage;
+        this.keywordSuffixStage = keywordSuffixStage;
     }
 
     @Override
@@ -133,7 +142,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                     continue;
                 }
 
-                Map<String, Float> tagMatches = collectConfirmedNutrientTags(ingredientItem, ingredientId);
+                Map<String, Float> tagMatches = collectConfirmedNutrientTags(ingredientItem, ingredientId, ctx);
                 if (Nourished.LOGGER.isDebugEnabled()) {
                     Nourished.LOGGER.debug("[RecipeInheritance]   ingredient {} → tags: {} (confirmed: {})",
                             ingredientId, tagMatches, confirmed);
@@ -237,16 +246,40 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
      * Mirrors {@link dev.maire.nourished.core.nutrition.FoodNutritionRegistry#collectNutrientTagMatches}
      * logic including compat toggles.
      */
-    private static Map<String, Float> collectConfirmedNutrientTags(Item item, ResourceLocation itemId) {
+    private Map<String, Float> collectConfirmedNutrientTags(Item item, ResourceLocation itemId, StageContext ctx) {
         Map<String, Float> matches = new LinkedHashMap<>();
         var holder = new ItemStack(item).getItemHolder();
 
+        boolean missingSomeKey = false;
         for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
+            boolean found = false;
             for (String tagStr : def.tags()) {
                 var tagKey = MarieRegistryUtils.itemTagKey(tagStr);
                 if (holder.is(tagKey)) {
                     matches.put(def.key(), 1.0f);
+                    found = true;
                     break;
+                }
+            }
+            if (!found) {
+                missingSomeKey = true;
+            }
+        }
+
+        if (missingSomeKey) {
+            ResolutionResult classified = ComponentClassifier.classify(
+                    new ItemStack(item),
+                    null,
+                    ctx.validKeys(),
+                    List.of(communityTagStage, keywordSuffixStage)
+            );
+            if (classified != null && !classified.values().isEmpty()) {
+                float spreadThreshold = (float) NourishedConfig.get().scannerConfidenceSpreadThreshold();
+                boolean uncertain = spreadThreshold > 0f && classified.confidence() < spreadThreshold;
+                if (!uncertain) {
+                    for (Map.Entry<String, Float> e : classified.values().entrySet()) {
+                        matches.putIfAbsent(e.getKey(), e.getValue());
+                    }
                 }
             }
         }

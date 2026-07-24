@@ -1,8 +1,8 @@
 package dev.maire.nourished.modules.RawFood.rawInfo;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.tracking.TrackingAttachment;
-import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.tracking.TrackingAttachment;
+import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
 import net.minecraft.server.level.ServerPlayer;

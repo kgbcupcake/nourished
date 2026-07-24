@@ -1,6 +1,6 @@
 package dev.maire.nourished.core.nutrition;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.Comparator;

@@ -1,7 +1,7 @@
 package dev.maire.nourished.config.validation;
 
-import dev.marie.MariesLib.config.validation.ValidationResult;
-import dev.marie.MariesLib.config.validation.ValidationRunner;
+import dev.marie.framework.config.validation.ValidationResult;
+import dev.marie.framework.config.validation.ValidationRunner;
 import dev.maire.nourished.core.Nourished;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -9,7 +9,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import java.util.List;
 
 /**
- * Runs registered config validators once after {@link dev.marie.MariesLib.registry.RegistryLifecycleManager#loadAll()}.
+ * Runs registered config validators once after {@link dev.marie.framework.registry.RegistryLifecycleManager#loadAll()}.
  */
 public final class NourishedConfigValidation {
 

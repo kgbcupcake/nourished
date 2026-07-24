@@ -3,7 +3,7 @@ package dev.maire.nourished.core.nutrition;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;

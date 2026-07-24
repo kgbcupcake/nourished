@@ -3,4 +3,4 @@
  */
 package dev.maire.nourished.core.tagaudit.rules;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;

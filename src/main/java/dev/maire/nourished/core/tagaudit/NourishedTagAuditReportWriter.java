@@ -5,11 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.tagaudit.model.TagFixSuggestion;
-import dev.marie.MariesLib.tagaudit.model.TagIssue;
-import dev.marie.MariesLib.tagaudit.model.TagReport;
-import dev.marie.MariesLib.util.MarieValidation;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.tagaudit.model.TagFixSuggestion;
+import dev.marie.framework.tagaudit.model.TagIssue;
+import dev.marie.framework.tagaudit.model.TagReport;
+import dev.marie.framework.util.MarieValidation;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package dev.maire.nourished.client.hud;
+package dev.maire.nourished.client.hud.dynamic.visibility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.Set;
  */
 public final class HudVisibilityRules {
 
-    static final float ZERO_EPSILON = 1e-4f;
+    public static final float ZERO_EPSILON = 1e-4f;
 
     private HudVisibilityRules() {}
 

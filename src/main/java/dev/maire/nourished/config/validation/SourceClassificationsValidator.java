@@ -1,9 +1,9 @@
 package dev.maire.nourished.config.validation;
 
-import dev.marie.MariesLib.api.ConfigValidator;
-import dev.marie.MariesLib.config.validation.Finding;
-import dev.marie.MariesLib.config.validation.ValidationResult;
-import dev.marie.MariesLib.runtime.SourceClassificationRegistry;
+import dev.marie.framework.api.ConfigValidator;
+import dev.marie.framework.config.validation.Finding;
+import dev.marie.framework.config.validation.ValidationResult;
+import dev.marie.framework.runtime.SourceClassificationRegistry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 

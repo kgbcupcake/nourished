@@ -1,6 +1,6 @@
 package dev.maire.nourished.core.context;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.config.NourishedConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;

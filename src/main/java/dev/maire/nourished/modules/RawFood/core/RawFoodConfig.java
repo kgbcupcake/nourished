@@ -6,14 +6,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.tags.NourishedItemTags;
-import dev.marie.MariesLib.util.MarieJsonUtils;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
-import dev.marie.MariesLib.util.MarieResourceLoader;
-import dev.marie.MariesLib.util.MarieValidation;
+import dev.marie.framework.util.MarieJsonUtils;
+import dev.marie.framework.util.MarieRegistryUtils;
+import dev.marie.framework.util.MarieResourceLoader;
+import dev.marie.framework.util.MarieValidation;
 import dev.maire.nourished.modules.RawFood.rawInfo.CookednessResolver;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodResistanceConfig;
 import net.minecraft.resources.ResourceLocation;
@@ -219,6 +219,30 @@ public class RawFoodConfig {
         } catch (IOException e) {
             Nourished.LOGGER.error("[RawFoodConfig] Failed to load raw_food.json, using built-in defaults", e);
             loadDefaults();
+        }
+
+        try {
+            Path readmeDir = configDir.resolve("Read_Me");
+            Files.createDirectories(readmeDir);
+            writeReadmeIfAbsent(readmeDir);
+        } catch (IOException e) {
+            Nourished.LOGGER.warn("[RawFoodConfig] Failed to write RAW_FOOD_README.md", e);
+        }
+    }
+
+    private static void writeReadmeIfAbsent(Path readmeDir) throws IOException {
+        Path readme = readmeDir.resolve("RAW_FOOD_README.md");
+        if (Files.exists(readme)) {
+            return;
+        }
+        String resourcePath = "/data/" + Nourished.MODID + "/config/RAW_FOOD_README.md";
+        try (InputStream in = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(resourcePath.substring(1))) {
+            if (in == null) {
+                Nourished.LOGGER.warn("[RawFoodConfig] No bundled RAW_FOOD_README.md, skipping write");
+                return;
+            }
+            Files.copy(in, readme);
         }
     }
 

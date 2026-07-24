@@ -12,6 +12,7 @@
   "hudRevealOnNutrientGain": true,
   "hudBackgroundOpacity": 0.796078431372549,
   "hudVerticalLayout": false,
+  "hudClassicMode": false,
   "dietScale": 1.0,
   "dietBackgroundOpacity": 0.796078431372549,
   "dietOffsetX": 0,
@@ -22,5 +23,7 @@
   "showEatMoreOf": true,
   "showActiveEffects": true,
   "showCaloriesBox": true,
-  "showBalanceBox": true
+  "showBalanceBox": true,
+  "showDietScreenButton": true,
+  "dietScreenClassicMode": false
 }

@@ -8,13 +8,38 @@
 
 ---
 
+## The HUD
+
+![Main Menu](Assets/nourished-MiniHud.gif)
+
+> The HUD is the heart of the mod. Five color-coded bars sit on screen while you play;you always know where you stand without opening a menu.
+
+HUD Edit Mode
+
+**Drag it anywhere.** Press the keybind to enter edit mode and reposition the HUD exactly where you want it. Scale it, anchor it to any corner, or hide bars that are at zero.
+
+---
+
+## The Diet Screen
+
+![Main Menu](Assets/nourished-MainMenu.gif)
+
+> Open it from your inventory for a full breakdown - trend arrows, balance score, active effects, calorie tracking, and a reset timer coming in soon.
+
+> Note: The HUD and Diet Screen screenshots were taken using the PureBDCraft resource pack. The UI is fully functional on vanilla textures but will appear in the default Minecraft style without a resource pack installed.
+
+---
+
+## Modularity
+
+Every feature in Nourished is a module toggle. Turn off decay, effects, the HUD, toasts, calorie tracking, or the diet screen independently. Modpack authors can lock modules server-side.
+
 ## Community
 
 Discord: [[https://discord.gg/EZnFJsfQup]](https://discord.gg/EZnFJsfQup])
+Questions, suggestions, and development discussion are welcome.
 
 ## Features
-
-Questions, suggestions, and development discussion are welcome.
 
 ❤️ What you gain
 When you have all five food groups are above 75%, you get:
@@ -49,9 +74,9 @@ Diminishing returns apply - eating the same food repeatedly gives less credit ea
 
 ---
 
----
+<details>
 
-## 🥩 Raw Food & Gut Health
+<summary>🥩 Raw Food & Gut Health</summary>
 
 Eating raw or undercooked food has consequences. Nourished tracks a **gut health** value for every player that degrades when you eat raw food and recovers over time from cooked food and dietary variety.
 
@@ -68,31 +93,7 @@ Eating the same raw food repeatedly within a memory window increases sensitivity
 
 Resistance can be built up over time, reducing penalty scale. Everything, tiers, durations, nutrient penalties, recovery rates, is configurable via `config/nourished/raw_food.json` and server module toggles.
 
----
-
-## The HUD
-
-The HUD is the heart of the mod. Five color-coded bars sit on screen while you play;you always know where you stand without opening a menu.
-
-HUD Edit Mode
-
-**Drag it anywhere.** Press the keybind to enter edit mode and reposition the HUD exactly where you want it. Scale it, anchor it to any corner, or hide bars that are at zero.
-
----
-
-## The Diet Screen
-
-Open it from your inventory for a full breakdown - trend arrows, balance score, active effects, calorie tracking, and a reset timer.
-
-Diet Screen
-
-Note: The HUD and Diet Screen screenshots were taken using the PureBDCraft resource pack. The UI is fully functional on vanilla textures but will appear in the default Minecraft style without a resource pack installed.
-
----
-
-## Modularity
-
-Every feature in Nourished is a module toggle. Turn off decay, effects, the HUD, toasts, calorie tracking, or the diet screen independently. Modpack authors can lock modules server-side.
+</details>
 
 ## 🔧 Configurable to your server
 

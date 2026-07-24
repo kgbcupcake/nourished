@@ -6,18 +6,18 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.marie.MariesLib.client.MarieValueColors;
+import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.reload.NourishedReloadHelper;
-import dev.marie.MariesLib.color.ColorRegistry;
-import dev.marie.MariesLib.config.FeatureFlagCache;
-import dev.marie.MariesLib.config.PresetRegistry;
-import dev.marie.MariesLib.util.MarieJsonUtils;
-import dev.marie.MariesLib.util.MarieValidation;
+import dev.marie.framework.color.ColorRegistry;
+import dev.marie.framework.config.FeatureFlagCache;
+import dev.marie.framework.config.PresetRegistry;
+import dev.marie.framework.util.MarieJsonUtils;
+import dev.marie.framework.util.MarieValidation;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -43,7 +43,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Nourished-specific config import/export serialization wired into {@link dev.marie.MariesLib.core.MarieLibContext}.
+ * Nourished-specific config import/export serialization wired into {@link dev.marie.framework.core.MarieContext}.
  */
 public final class NourishedImportExport {
 

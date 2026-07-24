@@ -4,24 +4,24 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.MarieAPI;
-import dev.marie.MariesLib.api.MarieAPIVersion;
-import dev.marie.MariesLib.api.MarieAPIState;
-import dev.marie.MariesLib.data.MarieDataManager;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.marieapi.MarieAPI;
+import dev.marie.framework.api.marieapi.MarieAPIVersion;
+import dev.marie.framework.api.marieapi.MarieAPIState;
+import dev.marie.framework.data.MarieDataManager;
 import dev.maire.nourished.core.datapack.NourishedDatapackCallbacks;
-import dev.marie.MariesLib.registry.MarieApiRegistries;
-import dev.marie.MariesLib.registry.RegistryLifecycleManager;
+import dev.marie.framework.registry.MarieApiRegistries;
+import dev.marie.framework.registry.RegistryLifecycleManager;
 import dev.maire.nourished.core.context.NourishedContextBuilder;
 import dev.maire.nourished.core.lifecycle.NourishedLifecycle;
-import dev.marie.MariesLib.core.MariesLibBootstrap;
-import dev.marie.MariesLib.compat.AutoCompatDiscovery;
-import dev.marie.MariesLib.compat.ModCompat;
+import dev.marie.framework.core.MarieBootstrap;
+import dev.marie.framework.compat.AutoCompatDiscovery;
+import dev.marie.framework.compat.ModCompat;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
-import dev.marie.MariesLib.tracking.TrackingAttachment;
-import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.framework.tracking.TrackingAttachment;
+import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.client.ClientEventRegistrar;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.NourishedTrackingData;
@@ -73,7 +73,7 @@ public class Nourished {
         NutrientRegistry.loadDefinitions();
         NutrientRegistry.syncToValueRegistryUnfrozen();
         // ModCompat entries must exist before NourishedConfig builds compatCodeToggles/compatTagToggles.
-        MariesLibBootstrap.attach(Nourished.MODID, modEventBus);
+        MarieBootstrap.attach(Nourished.MODID, modEventBus);
         ModCompat.initialize();
         NourishedConfig.register(modContainer);
         NourishedClientConfig.register(modContainer);
@@ -126,7 +126,7 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new GutHealthRecoveryHandler());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
             event.enqueueWork(() -> {
-                // Runs after MariesLibBootstrap.onCommonSetup → RegistryLifecycleManager.loadAll().
+                // Runs after MarieBootstrap.onCommonSetup → RegistryLifecycleManager.loadAll().
                 NourishedConfigValidation.runAfterInitialLoad();
                 NutrientRegistry.syncAndFreeze();
                 ModCompat.discoverUnknownMods();
@@ -136,7 +136,7 @@ public class Nourished {
                 } catch (Exception e) {
                     LOGGER.error("[Nourished] AutoCompatDiscovery failed.", e);
                 }
-                MarieApiRegistries.freezeModOnlyRegistriesAfterCommonSetup();
+                MarieApiRegistries.freezeValueTrackingOnlyRegistriesAfterCommonSetup();
                 MarieAPIState.close();
             });
         });

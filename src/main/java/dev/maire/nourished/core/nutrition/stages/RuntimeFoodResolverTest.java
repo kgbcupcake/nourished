@@ -1,9 +1,9 @@
 package dev.maire.nourished.core.nutrition.stages;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.scanner.TokenStemmer;
-import dev.marie.MariesLib.scan.CacheStats;
+import dev.marie.framework.scanner.TokenStemmer;
+import dev.marie.framework.scan.CacheStats;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import net.minecraft.resources.ResourceLocation;

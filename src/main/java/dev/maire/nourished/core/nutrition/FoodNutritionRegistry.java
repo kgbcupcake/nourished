@@ -8,11 +8,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.compat.ModCompat;
-import dev.marie.MariesLib.curve.math.CurveGrid;
-import dev.marie.MariesLib.scanner.RecipeInheritanceResolver;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.compat.ModCompat;
+import dev.marie.framework.curve.math.CurveGrid;
+import dev.marie.framework.scanner.RecipeInheritanceResolver;
+import dev.marie.framework.util.MarieRegistryUtils;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurveRegistry;
@@ -30,7 +30,7 @@ import net.minecraft.world.level.Level;
 
 /**
  * Food-specific helpers retained after classification migration to
- * {@link dev.marie.MariesLib.runtime.SourceRegistry}.
+ * {@link dev.marie.framework.runtime.SourceRegistry}.
  */
 @ApiStatus.Internal
 public final class FoodNutritionRegistry {

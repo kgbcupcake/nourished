@@ -1,7 +1,7 @@
 package dev.maire.nourished.config.validation;
 
-import dev.marie.MariesLib.config.validation.Finding;
-import dev.marie.MariesLib.config.validation.ValidationResult;
+import dev.marie.framework.config.validation.Finding;
+import dev.marie.framework.config.validation.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;

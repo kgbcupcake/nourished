@@ -1,8 +1,8 @@
 package dev.maire.nourished.core.nutrition;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.registry.AbstractRegistry;
-import dev.marie.MariesLib.scanner.TokenStemmer;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.registry.AbstractRegistry;
+import dev.marie.framework.scanner.TokenStemmer;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashSet;

@@ -1,8 +1,8 @@
 package dev.maire.nourished.kubejs.internal;
 
 import dev.latvian.mods.kubejs.event.EventHandler;
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.kubejs.internal.KubeGuard;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.kubejs.internal.KubeGuard;
 import dev.maire.nourished.kubejs.NourishedKubeEvents;
 
 import java.util.concurrent.ConcurrentHashMap;

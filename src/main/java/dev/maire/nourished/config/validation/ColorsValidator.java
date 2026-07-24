@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.marie.MariesLib.api.ConfigValidator;
-import dev.marie.MariesLib.config.validation.Finding;
-import dev.marie.MariesLib.config.validation.ValidationResult;
+import dev.marie.framework.api.ConfigValidator;
+import dev.marie.framework.config.validation.Finding;
+import dev.marie.framework.config.validation.ValidationResult;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.neoforged.fml.loading.FMLPaths;
@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Reads color keys from {@code config/nourished/colors.json} because {@link dev.marie.MariesLib.color.ColorRegistry}
- * has no bulk key accessor ({@link dev.marie.MariesLib.color.ColorRegistry#getArgb(String)} only).
+ * Reads color keys from {@code config/nourished/colors.json} because {@link dev.marie.framework.color.ColorRegistry}
+ * has no bulk key accessor ({@link dev.marie.framework.color.ColorRegistry#getArgb(String)} only).
  */
 public final class ColorsValidator implements ConfigValidator {
 

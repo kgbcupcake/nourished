@@ -4,4 +4,4 @@
 @ApiStatus.Internal
 package dev.maire.nourished.modules.RawFood.core;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;

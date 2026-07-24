@@ -1,9 +1,9 @@
 package dev.maire.nourished.core.context;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.client.MarieClientCache;
-import dev.marie.MariesLib.config.FeatureFlagCache;
-import dev.marie.MariesLib.core.MarieLibContext;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.client.config.state.MarieClientCache;
+import dev.marie.framework.config.FeatureFlagCache;
+import dev.marie.framework.core.MarieContext;
 import dev.maire.nourished.client.NourishedClientMemoryConfig;
 import dev.maire.nourished.client.config.ExportConfigScreen;
 import dev.maire.nourished.client.config.ImportConfigScreen;
@@ -17,14 +17,20 @@ import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.reload.NourishedReloadHelper;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
+import dev.marie.framework.util.MarieRegistryUtils;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Map;
+import java.util.Optional;
 
 @ApiStatus.Internal
 public final class NourishedContextBuilder {
@@ -32,7 +38,7 @@ public final class NourishedContextBuilder {
     private NourishedContextBuilder() {}
 
     public static void registerSlim() {
-        MarieLibContext.register(MarieLibContext.builder(Nourished.MODID)
+        MarieContext.register(MarieContext.builder(Nourished.MODID)
                 .dataProvider(NourishedPlayerDataProvider.INSTANCE)
                 .effectApplier((player, data) -> {
                     if (FeatureFlagCache.enableEffects()) {
@@ -96,10 +102,18 @@ public final class NourishedContextBuilder {
                 .sourceValueResolver((stack, level) ->
                         NutrientClassificationLookup.resolveNutrientBars(stack, false, level))
                 .sourceDeltaResolver((stack, level, payload, bars) -> {
+                    ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
+                    if (itemId != null) {
+                        Optional<FoodOverrideRegistry.FoodOverride> override =
+                                FoodOverrideRegistry.getOverride(itemId.toString());
+                        if (override.isPresent()) {
+                            return new MarieContext.SourceDelta(override.get().calories(), Map.copyOf(bars));
+                        }
+                    }
                     float realSaturation = resolveRealSaturation(stack);
                     FoodNutritionRegistry.DietDelta d = FoodNutritionRegistry.computeDietDelta(
                             stack, level, (int) payload, realSaturation, bars);
-                    return new MarieLibContext.SourceDelta(d.calories(), d.nutrients());
+                    return new MarieContext.SourceDelta(d.calories(), d.nutrients());
                 })
                 .onReloadBroadcast(NourishedReloadHelper::reloadAndBroadcast)
                 .postValueModifierHook(NourishedKubeIntegration::fireNutrientModifier)

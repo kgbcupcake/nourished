@@ -9,12 +9,12 @@ import dev.maire.nourished.client.config.NourishedConfigSharedWidgets;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientFullExporter;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.marie.MariesLib.util.MarieValidation;
-import dev.marie.MariesLib.scanner.ItemScanner;
-import dev.marie.MariesLib.scanner.ClassificationResult;
-import dev.marie.MariesLib.scanner.ClassificationSignal;
-import dev.maire.nourished.core.nutrition.ClassifiedSourceCollector;
-import dev.marie.MariesLib.scanner.analysis.MultiValueAnalysisPipeline;
+import dev.marie.framework.util.MarieValidation;
+import dev.marie.framework.scanner.ItemScanner;
+import dev.marie.framework.scanner.ClassificationResult;
+import dev.marie.framework.scanner.ClassificationSignal;
+import dev.marie.framework.runtime.SourceCollector;
+import dev.marie.framework.scanner.analysis.MultiValueAnalysisPipeline;
 import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
@@ -136,7 +136,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         server.execute(() -> {
             try {
                 MultiValueAnalysisPipeline.runFullRegistry(
-                        ClassifiedSourceCollector.collectAllClassifiedSources(), 0.15f, 0.35f, 0.10f);
+                        SourceCollector.collectAllClassifiedSources(server.getRecipeManager()), 0.15f, 0.35f, 0.10f);
                 mc.execute(() -> finishAnalysis(mc, null));
             } catch (RuntimeException ex) {
                 mc.execute(() -> finishAnalysis(mc, ex));

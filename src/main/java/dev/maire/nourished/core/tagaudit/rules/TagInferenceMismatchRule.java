@@ -1,11 +1,11 @@
 package dev.maire.nourished.core.tagaudit.rules;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.tagaudit.model.TagAuditContext;
-import dev.marie.MariesLib.tagaudit.model.TagAuditSeverity;
-import dev.marie.MariesLib.tagaudit.model.TagFixSuggestion;
-import dev.marie.MariesLib.tagaudit.model.TagIssue;
-import dev.marie.MariesLib.tagaudit.rule.TagRule;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.tagaudit.model.TagAuditContext;
+import dev.marie.framework.tagaudit.model.TagAuditSeverity;
+import dev.marie.framework.tagaudit.model.TagFixSuggestion;
+import dev.marie.framework.tagaudit.model.TagIssue;
+import dev.marie.framework.tagaudit.rule.TagRule;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;

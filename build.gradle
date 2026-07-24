@@ -85,7 +85,7 @@ repositories
     maven
     {
     name = 'GitHubPackages'
-    url = 'https://maven.pkg.github.com/kgbcupcake/MarieLib'
+    url = 'https://maven.pkg.github.com/kgbcupcake/MariesLib'
     credentials {
         username = System.getenv('GITHUB_ACTOR') ?: project.findProperty('gpr.user')
         password = System.getenv('GITHUB_TOKEN') ?: project.findProperty('gpr.key')
@@ -95,9 +95,9 @@ repositories
 }
 
 dependencies {
-    implementation "dev.marie.MariesLib:marieslib:${marie_lib_version}"
-    if (!gradle.ext.localMarieLibPresent) {
-        additionalRuntimeClasspath "dev.marie.MariesLib:marieslib:${marie_lib_version}"
+    implementation "dev.marie.MariesLib:marieslib:${maries_lib_version}"
+    if (!gradle.ext.localMariesFrameworkPresent) {
+        additionalRuntimeClasspath "dev.marie.MariesLib:marieslib:${maries_lib_version}"
     }
 
     implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
@@ -127,7 +127,7 @@ tasks.named('processResources', ProcessResources).configure {
             mod_version            : mod_version,
             mod_authors            : mod_authors,
             mod_description        : mod_description,
-            marie_lib_version_range: marie_lib_version_range,
+            maries_framework_version_range: maries_framework_version_range,
 
     ]
     inputs.properties replaceProperties
@@ -149,15 +149,15 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-// Local MarieLib composite build: compile Nourished only after MarieLib classes exist.
-if (gradle.ext.localMarieLibPresent) {
-    def marieLibIncluded = gradle.includedBuilds.find { it.name == 'MarieLib' }
-    if (marieLibIncluded != null) {
+// MarieLib root is an aggregator (no :classes); shadowJar must finish before compile.
+if (gradle.ext.localMariesFrameworkPresent) {
+    def mariesFrameworkIncluded = gradle.includedBuilds.find { it.name == 'MarieLib' }
+    if (mariesFrameworkIncluded != null) {
         tasks.named('compileJava').configure {
-            dependsOn marieLibIncluded.task(':classes')
+            dependsOn mariesFrameworkIncluded.task(':shadowJar')
         }
         tasks.named('compileTestJava').configure {
-            dependsOn marieLibIncluded.task(':classes')
+            dependsOn mariesFrameworkIncluded.task(':shadowJar')
         }
     }
 }

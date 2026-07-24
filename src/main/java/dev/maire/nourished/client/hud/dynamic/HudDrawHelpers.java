@@ -1,7 +1,7 @@
-package dev.maire.nourished.client.hud;
+package dev.maire.nourished.client.hud.dynamic;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.marie.MariesLib.client.MarieValueColors;
+import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -16,17 +16,17 @@ import net.minecraft.world.item.Items;
 
 public final class HudDrawHelpers {
 
-    static final int BAR_H = 5;
-    static final int VERTICAL_BAR_W = 6;
-    static final int VERTICAL_BAR_H = 36;
-    static final int VERTICAL_COLUMN_GAP = 4;
-    static final int ROW_GAP = 0;
-    static final int PANEL_PAD = 8;
-    static final int ICON_LABEL_GAP = 2;
-    static final int LABEL_BAR_GAP = 2;
-    static final int BAR_PCT_GAP = 4;
-    static final float BASE_LABEL_SCALE = 6f / 9f;
-    static final int MARGIN = 6;
+    public static final int BAR_H = 5;
+    public static final int VERTICAL_BAR_W = 6;
+    public static final int VERTICAL_BAR_H = 36;
+    public static final int VERTICAL_COLUMN_GAP = 4;
+    public static final int ROW_GAP = 0;
+    public static final int PANEL_PAD = 8;
+    public static final int ICON_LABEL_GAP = 2;
+    public static final int LABEL_BAR_GAP = 2;
+    public static final int BAR_PCT_GAP = 4;
+    public static final float BASE_LABEL_SCALE = 6f / 9f;
+    public static final int MARGIN = 6;
     static final int RESIZE_HANDLE_SIZE = 8;
 
     private static final int PANEL_RGB = 0x00101010;
@@ -48,16 +48,16 @@ public final class HudDrawHelpers {
 
     private HudDrawHelpers() {}
 
-    static int panelColor(double opacity) {
+    public static int panelColor(double opacity) {
         int alpha = Mth.clamp((int) Math.round(opacity * 255.0d), 0, 255);
         return (alpha << 24) | PANEL_RGB;
     }
 
-    static String nutrientLabel(String key) {
+    public static String nutrientLabel(String key) {
         return NutrientRegistry.getLabel(key);
     }
 
-    static void drawRoundedBar(GuiGraphics g, int x, int y, int w, int h, float pct, int bgColor, int fillColor) {
+    public static void drawRoundedBar(GuiGraphics g, int x, int y, int w, int h, float pct, int bgColor, int fillColor) {
         g.fill(x, y + 1, x + w, y + h - 1, bgColor);
         g.fill(x + 1, y, x + w - 1, y + 1, bgColor);
         g.fill(x + 1, y + h - 1, x + w - 1, y + h, bgColor);
@@ -76,7 +76,7 @@ public final class HudDrawHelpers {
     }
 
     /** Vertical bar: fill grows upward from the bottom edge. */
-    static void drawRoundedVerticalBar(GuiGraphics g, int x, int y, int w, int h, float pct, int bgColor, int fillColor) {
+    public static void drawRoundedVerticalBar(GuiGraphics g, int x, int y, int w, int h, float pct, int bgColor, int fillColor) {
         g.fill(x + 1, y, x + w - 1, y + h, bgColor);
         g.fill(x, y + 1, x + 1, y + h - 1, bgColor);
         g.fill(x + w - 1, y + 1, x + w, y + h - 1, bgColor);
@@ -94,7 +94,7 @@ public final class HudDrawHelpers {
         }
     }
 
-    static void drawRoundedRect(GuiGraphics g, int x, int y, int w, int h, int r, int color) {
+    public static void drawRoundedRect(GuiGraphics g, int x, int y, int w, int h, int r, int color) {
         g.fill(x + r, y, x + w - r, y + h, color);
         g.fill(x, y + r, x + r, y + h - r, color);
         g.fill(x + w - r, y + r, x + w, y + h - r, color);
@@ -147,7 +147,7 @@ public final class HudDrawHelpers {
         g.drawString(mc.font, msg, bx + 4, 8, COL_EDIT_BANNER, false);
     }
 
-    static void renderIcon(GuiGraphics g, String key, int x, int y, int iconSize) {
+    public static void renderIcon(GuiGraphics g, String key, int x, int y, int iconSize) {
         String iconId = NutrientRegistry.getIcon(key);
         ResourceLocation iconLoc = ResourceLocation.tryParse(iconId);
         var item = iconLoc == null
@@ -163,7 +163,7 @@ public final class HudDrawHelpers {
         pose.popPose();
     }
 
-    static void drawScaledLabel(GuiGraphics g, Minecraft mc, String text, int x, int y, int color, float scale) {
+    public static void drawScaledLabel(GuiGraphics g, Minecraft mc, String text, int x, int y, int color, float scale) {
         PoseStack pose = g.pose();
         pose.pushPose();
         pose.translate(x, y, 0);
@@ -172,7 +172,7 @@ public final class HudDrawHelpers {
         pose.popPose();
     }
 
-    static int barFillColor(String key, float v) {
+    public static int barFillColor(String key, float v) {
         NourishedConfig cfg = NourishedConfig.get();
         boolean beneficial = NutrientRegistry.isBeneficial(key);
         if (beneficial) {
@@ -193,7 +193,7 @@ public final class HudDrawHelpers {
         return MarieValueColors.baseColorArgb(key);
     }
 
-    static int pctColor(String key, float v) {
+    public static int pctColor(String key, float v) {
         NourishedConfig cfg = NourishedConfig.get();
         boolean beneficial = NutrientRegistry.isBeneficial(key);
         if (beneficial) {
@@ -230,11 +230,11 @@ public final class HudDrawHelpers {
         return COL_HANDLE_ACTIVE;
     }
 
-    static int labelColor() {
+    public static int labelColor() {
         return COL_LABEL;
     }
 
-    static int barBackgroundColor() {
+    public static int barBackgroundColor() {
         return COL_BAR_BG;
     }
 }

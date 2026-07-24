@@ -6,14 +6,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.ValueDefinition;
-import dev.marie.MariesLib.api.registry.ValueRegistry;
-import dev.marie.MariesLib.config.FeatureFlagCache;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.value.ValueDefinition;
+import dev.marie.framework.api.registry.ValueRegistry;
+import dev.marie.framework.config.FeatureFlagCache;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.registry.AbstractRegistry;
-import dev.marie.MariesLib.runtime.SourceRegistry;
-import dev.marie.MariesLib.util.MarieValidation;
+import dev.marie.framework.registry.AbstractRegistry;
+import dev.marie.framework.runtime.SourceRegistry;
+import dev.marie.framework.util.MarieValidation;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -296,6 +296,33 @@ public class NutrientRegistry {
     public static void load() {
         loadDefinitions();
         syncAndFreeze();
+        writeReadme();
+    }
+
+    private static void writeReadme() {
+        try {
+            Path readmeDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("Read_Me");
+            Files.createDirectories(readmeDir);
+            writeReadmeIfAbsent(readmeDir);
+        } catch (IOException e) {
+            Nourished.LOGGER.warn("[NutrientRegistry] Failed to write NUTRIENTS_README.md", e);
+        }
+    }
+
+    private static void writeReadmeIfAbsent(Path readmeDir) throws IOException {
+        Path readme = readmeDir.resolve("NUTRIENTS_README.md");
+        if (Files.exists(readme)) {
+            return;
+        }
+        String resourcePath = "/data/" + Nourished.MODID + "/config/NUTRIENTS_README.md";
+        try (InputStream in = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(resourcePath.substring(1))) {
+            if (in == null) {
+                Nourished.LOGGER.warn("[NutrientRegistry] No bundled NUTRIENTS_README.md, skipping write");
+                return;
+            }
+            Files.copy(in, readme);
+        }
     }
 
     private static void doLoadDefinitions() {
@@ -351,7 +378,7 @@ public class NutrientRegistry {
     }
 
     /**
-     * Registers nutrient tag matches into {@link dev.marie.MariesLib.runtime.SourceRegistry}.
+     * Registers nutrient tag matches into {@link dev.marie.framework.runtime.SourceRegistry}.
      * Must be called after item tags are bound (see {@code NourishedTagsHandler}).
      */
     public static void registerClassificationsFromTags() {

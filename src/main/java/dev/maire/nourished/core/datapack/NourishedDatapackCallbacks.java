@@ -1,15 +1,15 @@
 package dev.maire.nourished.core.datapack;
 
 import dev.maire.nourished.core.effect.EffectRegistry;
-import dev.marie.MariesLib.api.MarieAPI;
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.MilestoneDefinition;
-import dev.marie.MariesLib.api.SourcePairSynergy;
-import dev.marie.MariesLib.api.ThresholdEffect;
-import dev.marie.MariesLib.api.ValueDefinition;
-import dev.marie.MariesLib.data.MarieDataLoader;
-import dev.marie.MariesLib.registry.MarieApiRegistries;
-import dev.marie.MariesLib.runtime.SourceRegistry;
+import dev.marie.framework.api.marieapi.MarieAPI;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.progression.MilestoneDefinition;
+import dev.marie.framework.api.source.SourcePairSynergy;
+import dev.marie.framework.api.effects.ThresholdEffect;
+import dev.marie.framework.api.value.ValueDefinition;
+import dev.marie.framework.data.MarieDataLoader;
+import dev.marie.framework.registry.MarieApiRegistries;
+import dev.marie.framework.runtime.SourceRegistry;
 import net.minecraft.resources.ResourceLocation;
 
 @ApiStatus.Internal

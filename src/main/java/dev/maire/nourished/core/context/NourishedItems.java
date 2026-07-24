@@ -1,6 +1,6 @@
 package dev.maire.nourished.core.context;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;

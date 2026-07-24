@@ -1,12 +1,12 @@
 package dev.maire.nourished.modules.RawFood.rawInfo;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
-import dev.marie.MariesLib.scanner.ClassificationResult;
-import dev.marie.MariesLib.scanner.TokenStemmer;
-import dev.marie.MariesLib.scanner.ScanCache;
-import dev.marie.MariesLib.scanner.ItemScanner;
+import dev.marie.framework.scanner.ClassificationResult;
+import dev.marie.framework.scanner.TokenStemmer;
+import dev.marie.framework.scanner.ScanCache;
+import dev.marie.framework.scanner.ItemScanner;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;

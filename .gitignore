@@ -37,8 +37,17 @@ run/
 .cursorrules
 log4j2.xml
 bin/
-Dev_Docs/ARCHITECTURE_AUDIT.md
-Dev_Docs/audit.md
-Dev_Docs
 nourished_banner.png
-src/main/java/dev/maire/nourished/nourished.xml
+.obsidian/
+.smart-env/
+Release notes..md
+Hub.md
+Sever Start.md
+patchouli_books.md
+"Git- Enhancement's"/
+Release notes..md
+Hub.md
+Sever Start.md
+patchouli_books.md
+RoadMap.md
+"Git- Enhancement's"/

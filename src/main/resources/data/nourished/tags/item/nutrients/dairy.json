@@ -2,451 +2,51 @@
   "replace": false,
   "values": [
     {
-      "id": "herbsandharvest:aged_swiss",
+      "id": "aquaculturedelight:halibut_with_tartar_sauce",
       "required": false
     },
     {
-      "id": "herbsandharvest:caravane",
+      "id": "brewinandchewin:flaxen_cheese_wedge",
       "required": false
     },
     {
-      "id": "herbsandharvest:caravane_wedge",
+      "id": "brewinandchewin:ham_and_cheese_sandwich",
       "required": false
     },
     {
-      "id": "herbsandharvest:chevre",
+      "id": "brewinandchewin:scarlet_cheese_wedge",
       "required": false
     },
     {
-      "id": "herbsandharvest:chevre_wedge",
+      "id": "caupona:milk",
       "required": false
     },
     {
-      "id": "herbsandharvest:feta",
+      "id": "caupona:scalded_milk",
       "required": false
     },
     {
-      "id": "herbsandharvest:feta_wedge",
+      "id": "cocktailsdelight:half_and_half",
       "required": false
     },
     {
-      "id": "herbsandharvest:swiss_wedge",
+      "id": "countriesdelight:gelato",
       "required": false
     },
     {
-      "id": "farm_and_charm:butter",
+      "id": "countriesdelight:milkshake",
       "required": false
     },
     {
-      "id": "farmersdelight:milk_bottle",
+      "id": "countriesdelight:mochi",
       "required": false
     },
     {
-      "id": "farmersdelight:glow_berry_custard",
+      "id": "countriesdelight:tiramisu",
       "required": false
     },
     {
-      "id": "pamhc2foodcore:freshmilkitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodcore:appleyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodcore:glowberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodcore:melonyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodcore:sweetberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodcore:mayonaiseitem",
-      "required": false
-    },
-    {
-      "id": "croptopia:yoghurt",
-      "required": false
-    },
-    {
-      "id": "minecolonies:yogurt_with_berries",
-      "required": false
-    },
-    {
-      "id": "fruitsdelight:blueberry_custard",
-      "required": false
-    },
-    {
-      "id": "createfood:yogurt_bowl_berry",
-      "required": false
-    },
-    {
-      "id": "createfood:yogurt_bowl_chorus_fruit",
-      "required": false
-    },
-    {
-      "id": "createfood:yogurt_bowl_glow_berry",
-      "required": false
-    },
-    {
-      "id": "ends_delight:chorus_fruit_milk_tea",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:apricotyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:bananayogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:blackberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:blueberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:breadfruityogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:cactusfruityogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:candleberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:cherryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:cranberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:dateyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:elderberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:figyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:gooseberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:grapefruityogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:grapeyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:greengrapeyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:guavayogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:huckleberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:jackfruityogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:juniperberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:lemonyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:limeyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:lycheeyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:mangoyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:mulberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:orangeyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:papayayogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:passionfruityogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:peachyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:pearyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:pineappleyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:plumyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:pomegranateyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:rambutanyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:raspberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:starfruityogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:strawberryyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:tamarindyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:paneeritem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:paneertikkamasalaitem",
-      "required": false
-    },
-    {
-      "id": "herbsandharvest:mayo",
-      "required": false
-    },
-    {
-      "id": "minecraft:milk_bucket",
-      "required": false
-    },
-    {
-      "id": "mynethersdelight:dried_ghast_with_milk",
-      "required": false
-    },
-    {
-      "id": "mynethersdelight:hot_cream",
-      "required": false
-    },
-    {
-      "id": "mynethersdelight:plate_of_ghasta_with_cream",
-      "required": false
-    },
-    {
-      "id": "hearthandharvest:chocolate_milk_bottle",
-      "required": false
-    },
-    {
-      "id": "hearthandharvest:goat_milk_bottle",
-      "required": false
-    },
-    {
-      "id": "rusticdelight:milk_coffee",
-      "required": false
-    },
-    {
-      "id": "moredelight:hamburger_with_egg",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:cheesedanishitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:cheeseontoastitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:crackersandcheeseitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:custarditem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:eggnogitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:herbcheeseballitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:soymilkitem",
-      "required": false
-    },
-    {
-      "id": "croptopia:butter",
-      "required": false
-    },
-    {
-      "id": "croptopia:cheese",
-      "required": false
-    },
-    {
-      "id": "croptopia:crema",
-      "required": false
-    },
-    {
-      "id": "croptopia:grilled_cheese",
-      "required": false
-    },
-    {
-      "id": "croptopia:horchata",
-      "required": false
-    },
-    {
-      "id": "croptopia:milk_bottle",
-      "required": false
-    },
-    {
-      "id": "croptopia:soy_milk",
-      "required": false
-    },
-    {
-      "id": "croptopia:whipping_cream",
-      "required": false
-    },
-    {
-      "id": "croptopia:burrito",
-      "required": false
-    },
-    {
-      "id": "croptopia:carnitas",
-      "required": false
-    },
-    {
-      "id": "croptopia:quesadilla",
-      "required": false
-    },
-    {
-      "id": "croptopia:enchilada",
-      "required": false
-    },
-    {
-      "id": "croptopia:chimichanga",
-      "required": false
-    },
-    {
-      "id": "croptopia:cheeseburger",
-      "required": false
-    },
-    {
-      "id": "croptopia:supreme_pizza",
-      "required": false
-    },
-    {
-      "id": "croptopia:pineapple_pepperoni_pizza",
-      "required": false
-    },
-    {
-      "id": "croptopia:anchovy_pizza",
-      "required": false
-    },
-    {
-      "id": "croptopia:cheese_pizza",
-      "required": false
-    },
-    {
-      "id": "croptopia:croque_madame",
-      "required": false
-    },
-    {
-      "id": "croptopia:croque_monsieur",
-      "required": false
-    },
-    {
-      "id": "croptopia:eggplant_parmesan",
-      "required": false
-    },
-    {
-      "id": "croptopia:shepherds_pie",
-      "required": false
-    },
-    {
-      "id": "croptopia:the_big_breakfast",
-      "required": false
-    },
-    {
-      "id": "croptopia:transcendental_breakfast",
-      "required": false
-    },
-    {
-      "id": "croptopia:chicken_and_dumplings",
-      "required": false
-    },
-    {
-      "id": "croptopia:tostada",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodcore:chorusyogurtitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodcore:icecreamitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodcore:chocolateicecreamitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodcore:caramelicecreamitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodcore:cookiesandmilkitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodcore:chocolatemilkitem",
+      "id": "crabbersdelight:coconut_milk",
       "required": false
     },
     {
@@ -519,6 +119,34 @@
     },
     {
       "id": "createfood:apple_ice_cream_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:apple_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:baked_potato_butter_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:baked_potato_butter_sour_cream",
+      "required": false
+    },
+    {
+      "id": "createfood:bar_of_white_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_cheese_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_cheese_onion_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:beef_bun_peanut_butter",
       "required": false
     },
     {
@@ -611,6 +239,258 @@
     },
     {
       "id": "createfood:berry_ice_cream_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:berry_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:bread_slice_peanut_butter",
+      "required": false
+    },
+    {
+      "id": "createfood:butterscotch",
+      "required": false
+    },
+    {
+      "id": "createfood:butterscotch_chip_chocolate_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:butterscotch_chip_ice_cream_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:butterscotch_chip_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:butterscotch_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:butterscotch_fudge_ice_cream_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:butterscotch_pretzel_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:butterscotch_white_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:caramel_chip_chocolate_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:caramel_chip_ice_cream_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:caramel_chip_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:caramel_fudge_ice_cream_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:caramel_white_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:cheese_biscuit",
+      "required": false
+    },
+    {
+      "id": "createfood:cheese_biscuit_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:cheese_calzone",
+      "required": false
+    },
+    {
+      "id": "createfood:cheese_pizza_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:cheese_potato_dumplings",
+      "required": false
+    },
+    {
+      "id": "createfood:cheese_pretzel_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:cheese_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:cheese_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_bacon_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_onion",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_onion_bacon_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:cheeseburger_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:chicken_cheeseburger_lettuce_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_chip_chocolate_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_chip_ice_cream_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_chip_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_cake_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_cake_slice_butterscotch",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_cake_slice_caramel",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_cake_slice_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_cake_slice_dark_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_cake_slice_toffee",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_cake_slice_white_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_chocolate_cake_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_chocolate_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_chocolate_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_chocolate_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_frosting_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_mini_waffle",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cream_sweet_roll",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_custard_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_fudge_ice_cream_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_graham_cracker_apple_ice_cream",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_graham_cracker_chocolate_ice_cream",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_graham_cracker_chorus_fruit_ice_cream",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_graham_cracker_ice_cream",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_graham_cracker_melon_ice_cream",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_ice_cream_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_ice_cream_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_ice_cream_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_milk_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_milkshake_bottle",
       "required": false
     },
     {
@@ -710,11 +590,47 @@
       "required": false
     },
     {
+      "id": "createfood:chorus_fruit_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:condensed_milk_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_cake_slice",
+      "required": false
+    },
+    {
       "id": "createfood:cream_cake_slice_chorus_fruit",
       "required": false
     },
     {
       "id": "createfood:cream_cake_slice_glow_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_chocolate_cake_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_chocolate_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_chocolate_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_chocolate_pastry",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_chocolate_sweet_roll",
       "required": false
     },
     {
@@ -730,6 +646,26 @@
       "required": false
     },
     {
+      "id": "createfood:cream_cupcake",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_dark_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_donut",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_frosting_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_mini_waffle",
+      "required": false
+    },
+    {
       "id": "createfood:cream_mini_waffle_chorus_fruit",
       "required": false
     },
@@ -742,6 +678,10 @@
       "required": false
     },
     {
+      "id": "createfood:cream_pastry",
+      "required": false
+    },
+    {
       "id": "createfood:cream_sweet_roll_chorus_fruit",
       "required": false
     },
@@ -751,6 +691,50 @@
     },
     {
       "id": "createfood:cream_sweet_roll_sweet_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_white_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:custard_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:custard_sugar_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:dark_chocolate_chip_chocolate_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:dark_chocolate_chip_ice_cream_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:dark_chocolate_chip_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:egg_burrito_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:eggplant_bun_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:eggplant_bun_cheese_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:eggplant_bun_cheese_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:eggplant_cheeseburger",
       "required": false
     },
     {
@@ -850,6 +834,78 @@
       "required": false
     },
     {
+      "id": "createfood:glow_berry_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:grilled_cheese_sandwich",
+      "required": false
+    },
+    {
+      "id": "createfood:hamburger_peanut_butter",
+      "required": false
+    },
+    {
+      "id": "createfood:hollow_white_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:hot_chocolate_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:hot_white_chocolate_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:ice_cream_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:ice_cream_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:macaroni_bowl_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:magma_cream_marshmallow",
+      "required": false
+    },
+    {
+      "id": "createfood:magma_cream_marshmallow_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:marshmallow_hot_chocolate_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:marshmallow_hot_dark_chocolate_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:marshmallow_hot_white_chocolate_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:marshmallow_white_chocolate",
+      "required": false
+    },
+    {
+      "id": "createfood:marshmallow_white_chocolate_fudge",
+      "required": false
+    },
+    {
+      "id": "createfood:mashed_potatoes_bowl_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:mashed_potatoes_bowl_sour_cream",
+      "required": false
+    },
+    {
       "id": "createfood:melon_cream_cake_slice",
       "required": false
     },
@@ -918,6 +974,42 @@
       "required": false
     },
     {
+      "id": "createfood:melon_milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:milkshake_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:mozzarella_sticks",
+      "required": false
+    },
+    {
+      "id": "createfood:mushroom_pizza_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:nacho_bowl_sour_cream",
+      "required": false
+    },
+    {
+      "id": "createfood:onion_pizza_slice",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_butter",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:pasta_plate_cheese_tomato_sauce",
+      "required": false
+    },
+    {
       "id": "createfood:peanut_butter_apple_jam_sandwich",
       "required": false
     },
@@ -930,251 +1022,7 @@
       "required": false
     },
     {
-      "id": "croptopia:mango_ice_cream",
-      "required": false
-    },
-    {
-      "id": "croptopia:pecan_ice_cream",
-      "required": false
-    },
-    {
-      "id": "croptopia:strawberry_ice_cream",
-      "required": false
-    },
-    {
-      "id": "farmersdelight:sweet_berry_cheesecake_slice",
-      "required": false
-    },
-    {
-      "id": "herbsandharvest:blueberry_cheesecake_slice",
-      "required": false
-    },
-    {
-      "id": "herbsandharvest:raspberry_cheesecake_slice",
-      "required": false
-    },
-    {
-      "id": "createfood:apple_milkshake_bottle",
-      "required": false
-    },
-    {
-      "id": "createfood:berry_milkshake_bottle",
-      "required": false
-    },
-    {
-      "id": "createfood:melon_milkshake_bottle",
-      "required": false
-    },
-    {
-      "id": "createfood:glow_berry_milkshake_bottle",
-      "required": false
-    },
-    {
-      "id": "createfood:chorus_fruit_milkshake_bottle",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:cherryicecreamitem",
-      "required": false
-    },
-    {
-      "id": "croptopia:cheese_cake",
-      "required": false
-    },
-    {
-      "id": "croptopia:banana_cream_pie",
-      "required": false
-    },
-    {
-      "id": "fruitsdelight:mango_milkshake",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:fruitcreamfestivalbreaditem",
-      "required": false
-    },
-    {
-      "id": "mynethersdelight:hot_cream_cone",
-      "required": false
-    },
-    {
-      "id": "dungeonsdelight:taro_milk_tea",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:chocolatemilkshakeitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:mintchocolatechipicecreamitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:mochaicecreamitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:neapolitanicecreamitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:nuttoppedicecreamitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:peanutbuttercookiesitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:peanutbuttercupitem",
-      "required": false
-    },
-    {
-      "id": "pamhc2foodextended:vanillaicecreamitem",
-      "required": false
-    },
-    {
-      "id": "croptopia:chocolate_ice_cream",
-      "required": false
-    },
-    {
-      "id": "croptopia:chocolate_milkshake",
-      "required": false
-    },
-    {
-      "id": "croptopia:rum_raisin_ice_cream",
-      "required": false
-    },
-    {
-      "id": "croptopia:vanilla_ice_cream",
-      "required": false
-    },
-    {
-      "id": "aquaculturedelight:halibut_with_tartar_sauce",
-      "required": false
-    },
-    {
-      "id": "brewinandchewin:flaxen_cheese_wedge",
-      "required": false
-    },
-    {
-      "id": "brewinandchewin:ham_and_cheese_sandwich",
-      "required": false
-    },
-    {
-      "id": "brewinandchewin:scarlet_cheese_wedge",
-      "required": false
-    },
-    {
-      "id": "crabbersdelight:coconut_milk",
-      "required": false
-    },
-    {
-      "id": "createfood:bar_of_white_chocolate",
-      "required": false
-    },
-    {
-      "id": "createfood:beef_bun_cheese_lettuce_tomato",
-      "required": false
-    },
-    {
-      "id": "createfood:beef_bun_cheese_onion_lettuce",
-      "required": false
-    },
-    {
-      "id": "createfood:butterscotch_chocolate",
-      "required": false
-    },
-    {
-      "id": "createfood:butterscotch_white_chocolate",
-      "required": false
-    },
-    {
-      "id": "createfood:caramel_white_chocolate",
-      "required": false
-    },
-    {
-      "id": "createfood:cheese_biscuit_sandwich",
-      "required": false
-    },
-    {
-      "id": "createfood:cheeseburger_bacon_lettuce_tomato",
-      "required": false
-    },
-    {
-      "id": "createfood:cheeseburger_lettuce",
-      "required": false
-    },
-    {
-      "id": "createfood:cheeseburger_onion",
-      "required": false
-    },
-    {
-      "id": "createfood:cheeseburger_tomato",
-      "required": false
-    },
-    {
-      "id": "createfood:chicken_cheeseburger_lettuce_tomato",
-      "required": false
-    },
-    {
-      "id": "createfood:chocolate_cream_mini_waffle",
-      "required": false
-    },
-    {
-      "id": "createfood:chocolate_graham_cracker_chocolate_ice_cream",
-      "required": false
-    },
-    {
-      "id": "createfood:chocolate_graham_cracker_ice_cream",
-      "required": false
-    },
-    {
-      "id": "createfood:chocolate_ice_cream_bowl",
-      "required": false
-    },
-    {
-      "id": "createfood:cream_chocolate_pastry",
-      "required": false
-    },
-    {
-      "id": "createfood:eggplant_cheeseburger",
-      "required": false
-    },
-    {
-      "id": "createfood:hollow_white_chocolate",
-      "required": false
-    },
-    {
-      "id": "createfood:hot_chocolate_bottle",
-      "required": false
-    },
-    {
-      "id": "createfood:hot_white_chocolate_bottle",
-      "required": false
-    },
-    {
-      "id": "createfood:ice_cream_bowl",
-      "required": false
-    },
-    {
-      "id": "createfood:marshmallow_white_chocolate",
-      "required": false
-    },
-    {
-      "id": "createfood:marshmallow_white_chocolate_fudge",
-      "required": false
-    },
-    {
-      "id": "createfood:mushroom_pizza_slice",
-      "required": false
-    },
-    {
-      "id": "createfood:onion_pizza_slice",
-      "required": false
-    },
-    {
-      "id": "createfood:pasta_plate_cheese_tomato_sauce",
+      "id": "createfood:pumpkin_custard_bottle",
       "required": false
     },
     {
@@ -1202,11 +1050,203 @@
       "required": false
     },
     {
+      "id": "createfood:yogurt_bowl_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:yogurt_bowl_chorus_fruit",
+      "required": false
+    },
+    {
+      "id": "createfood:yogurt_bowl_glow_berry",
+      "required": false
+    },
+    {
+      "id": "croptopia:anchovy_pizza",
+      "required": false
+    },
+    {
+      "id": "croptopia:banana_cream_pie",
+      "required": false
+    },
+    {
+      "id": "croptopia:burrito",
+      "required": false
+    },
+    {
+      "id": "croptopia:butter",
+      "required": false
+    },
+    {
+      "id": "croptopia:carnitas",
+      "required": false
+    },
+    {
+      "id": "croptopia:cheese",
+      "required": false
+    },
+    {
+      "id": "croptopia:cheese_cake",
+      "required": false
+    },
+    {
+      "id": "croptopia:cheese_pizza",
+      "required": false
+    },
+    {
+      "id": "croptopia:cheeseburger",
+      "required": false
+    },
+    {
+      "id": "croptopia:chicken_and_dumplings",
+      "required": false
+    },
+    {
+      "id": "croptopia:chimichanga",
+      "required": false
+    },
+    {
+      "id": "croptopia:chocolate_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:chocolate_milkshake",
+      "required": false
+    },
+    {
+      "id": "croptopia:crema",
+      "required": false
+    },
+    {
+      "id": "croptopia:croque_madame",
+      "required": false
+    },
+    {
+      "id": "croptopia:croque_monsieur",
+      "required": false
+    },
+    {
+      "id": "croptopia:eggplant_parmesan",
+      "required": false
+    },
+    {
+      "id": "croptopia:enchilada",
+      "required": false
+    },
+    {
+      "id": "croptopia:grilled_cheese",
+      "required": false
+    },
+    {
+      "id": "croptopia:horchata",
+      "required": false
+    },
+    {
+      "id": "croptopia:mango_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:milk_bottle",
+      "required": false
+    },
+    {
+      "id": "croptopia:pecan_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:pineapple_pepperoni_pizza",
+      "required": false
+    },
+    {
+      "id": "croptopia:quesadilla",
+      "required": false
+    },
+    {
+      "id": "croptopia:rum_raisin_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:shepherds_pie",
+      "required": false
+    },
+    {
+      "id": "croptopia:soy_milk",
+      "required": false
+    },
+    {
+      "id": "croptopia:strawberry_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:supreme_pizza",
+      "required": false
+    },
+    {
+      "id": "croptopia:the_big_breakfast",
+      "required": false
+    },
+    {
+      "id": "croptopia:tostada",
+      "required": false
+    },
+    {
+      "id": "croptopia:transcendental_breakfast",
+      "required": false
+    },
+    {
+      "id": "croptopia:vanilla_ice_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:whipping_cream",
+      "required": false
+    },
+    {
+      "id": "croptopia:yoghurt",
+      "required": false
+    },
+    {
+      "id": "divinerpg:cheese",
+      "required": false
+    },
+    {
+      "id": "dndesires:chocolate_milkshake",
+      "required": false
+    },
+    {
+      "id": "dndesires:glowberry_milkshake",
+      "required": false
+    },
+    {
+      "id": "dndesires:pumpkin_milkshake",
+      "required": false
+    },
+    {
+      "id": "dndesires:strawberry_milkshake",
+      "required": false
+    },
+    {
+      "id": "dndesires:vanilla_milkshake",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:aurora_ice_cream",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:breeze_cream_cone",
+      "required": false
+    },
+    {
       "id": "dungeonsdelight:monster_mousse",
       "required": false
     },
     {
       "id": "dungeonsdelight:sculk_mayo",
+      "required": false
+    },
+    {
+      "id": "dungeonsdelight:taro_milk_tea",
       "required": false
     },
     {
@@ -1218,7 +1258,535 @@
       "required": false
     },
     {
+      "id": "eggdelight:custard",
+      "required": false
+    },
+    {
       "id": "endersdelight:strange_eclair",
+      "required": false
+    },
+    {
+      "id": "ends_delight:chorus_fruit_milk_tea",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:cheese_sandwich",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:cheese_slice",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:goat_cheese_slice",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:grilled_cheese",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:honeyed_goat_cheese_tart_slice",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:mac_and_cheese",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:peanut_butter",
+      "required": false
+    },
+    {
+      "id": "expandeddelight:peanut_butter_honey_sandwich",
+      "required": false
+    },
+    {
+      "id": "extradelight:affogato",
+      "required": false
+    },
+    {
+      "id": "extradelight:apple_cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:apple_custard",
+      "required": false
+    },
+    {
+      "id": "extradelight:apple_ice_cream",
+      "required": false
+    },
+    {
+      "id": "extradelight:blood_chocolate_bar",
+      "required": false
+    },
+    {
+      "id": "extradelight:blood_chocolate_dipped_coffee_bean",
+      "required": false
+    },
+    {
+      "id": "extradelight:blood_chocolate_dipped_marshmallow",
+      "required": false
+    },
+    {
+      "id": "extradelight:blood_chocolate_filled_bar",
+      "required": false
+    },
+    {
+      "id": "extradelight:blood_chocolate_syrup_bottle",
+      "required": false
+    },
+    {
+      "id": "extradelight:butter",
+      "required": false
+    },
+    {
+      "id": "extradelight:butterscotch",
+      "required": false
+    },
+    {
+      "id": "extradelight:caramel_cheescake_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:caramel_custard",
+      "required": false
+    },
+    {
+      "id": "extradelight:caramel_sauce",
+      "required": false
+    },
+    {
+      "id": "extradelight:cheese",
+      "required": false
+    },
+    {
+      "id": "extradelight:cheese_sandwich",
+      "required": false
+    },
+    {
+      "id": "extradelight:cheese_souffle",
+      "required": false
+    },
+    {
+      "id": "extradelight:cheeseburger_pickle",
+      "required": false
+    },
+    {
+      "id": "extradelight:cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:cheesymite_scroll",
+      "required": false
+    },
+    {
+      "id": "extradelight:chili_cheese_cornbread_muffin",
+      "required": false
+    },
+    {
+      "id": "extradelight:chocolate_cake",
+      "required": false
+    },
+    {
+      "id": "extradelight:chocolate_cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:chocolate_custard",
+      "required": false
+    },
+    {
+      "id": "extradelight:chocolate_ice_cream",
+      "required": false
+    },
+    {
+      "id": "extradelight:chocolate_mousse",
+      "required": false
+    },
+    {
+      "id": "extradelight:coffee_cake_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:cookie_dough_ice_cream",
+      "required": false
+    },
+    {
+      "id": "extradelight:cream_corn",
+      "required": false
+    },
+    {
+      "id": "extradelight:croque_madame",
+      "required": false
+    },
+    {
+      "id": "extradelight:croque_monsieur",
+      "required": false
+    },
+    {
+      "id": "extradelight:dark_chocolate_bar",
+      "required": false
+    },
+    {
+      "id": "extradelight:dark_chocolate_dipped_coffee_bean",
+      "required": false
+    },
+    {
+      "id": "extradelight:dark_chocolate_dipped_marshmallow",
+      "required": false
+    },
+    {
+      "id": "extradelight:dark_chocolate_filled_bar",
+      "required": false
+    },
+    {
+      "id": "extradelight:dark_chocolate_syrup_bottle",
+      "required": false
+    },
+    {
+      "id": "extradelight:eton_mess",
+      "required": false
+    },
+    {
+      "id": "extradelight:fluffer_nutter",
+      "required": false
+    },
+    {
+      "id": "extradelight:grapefruit_sorbet",
+      "required": false
+    },
+    {
+      "id": "extradelight:grilled_cheese",
+      "required": false
+    },
+    {
+      "id": "extradelight:hazelnut_spread_bottle",
+      "required": false
+    },
+    {
+      "id": "extradelight:honey_cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:honey_custard",
+      "required": false
+    },
+    {
+      "id": "extradelight:honey_ice_cream",
+      "required": false
+    },
+    {
+      "id": "extradelight:ice_cream",
+      "required": false
+    },
+    {
+      "id": "extradelight:ice_cream_sundae",
+      "required": false
+    },
+    {
+      "id": "extradelight:key_lime_pie_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:lemon_curd",
+      "required": false
+    },
+    {
+      "id": "extradelight:lemon_meringue_pie_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:macaroni_cheese",
+      "required": false
+    },
+    {
+      "id": "extradelight:marshmallow",
+      "required": false
+    },
+    {
+      "id": "extradelight:marshmallow_fluff_bottle",
+      "required": false
+    },
+    {
+      "id": "extradelight:marshmallow_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:milk_chocolate_bar",
+      "required": false
+    },
+    {
+      "id": "extradelight:milk_chocolate_dipped_apple_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:milk_chocolate_dipped_bacon",
+      "required": false
+    },
+    {
+      "id": "extradelight:milk_chocolate_dipped_coffee_bean",
+      "required": false
+    },
+    {
+      "id": "extradelight:milk_chocolate_dipped_graham_cracker",
+      "required": false
+    },
+    {
+      "id": "extradelight:milk_chocolate_dipped_marshmallow",
+      "required": false
+    },
+    {
+      "id": "extradelight:milk_chocolate_filled_bar",
+      "required": false
+    },
+    {
+      "id": "extradelight:milk_chocolate_syrup_bottle",
+      "required": false
+    },
+    {
+      "id": "extradelight:milk_tart_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:mint_chip_ice_cream",
+      "required": false
+    },
+    {
+      "id": "extradelight:nut_butter_cookie",
+      "required": false
+    },
+    {
+      "id": "extradelight:nut_butter_custard",
+      "required": false
+    },
+    {
+      "id": "extradelight:nut_butter_ice_cream",
+      "required": false
+    },
+    {
+      "id": "extradelight:pavlova_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:peanut_butter_bottle",
+      "required": false
+    },
+    {
+      "id": "extradelight:pumpkin_cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:pumpkin_custard",
+      "required": false
+    },
+    {
+      "id": "extradelight:pumpkin_ice_cream",
+      "required": false
+    },
+    {
+      "id": "extradelight:quiche_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:rocky_road",
+      "required": false
+    },
+    {
+      "id": "extradelight:scotcharoo",
+      "required": false
+    },
+    {
+      "id": "extradelight:sticky_toffee_pudding_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:stuffed_apple_ice_cream",
+      "required": false
+    },
+    {
+      "id": "extradelight:tarte_tatin_slice",
+      "required": false
+    },
+    {
+      "id": "extradelight:toffee",
+      "required": false
+    },
+    {
+      "id": "extradelight:white_chocolate_bar",
+      "required": false
+    },
+    {
+      "id": "extradelight:white_chocolate_dipped_coffee_bean",
+      "required": false
+    },
+    {
+      "id": "extradelight:white_chocolate_dipped_marshmallow",
+      "required": false
+    },
+    {
+      "id": "extradelight:white_chocolate_filled_bar",
+      "required": false
+    },
+    {
+      "id": "extradelight:white_chocolate_syrup_bottle",
+      "required": false
+    },
+    {
+      "id": "farm_and_charm:butter",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:glow_berry_custard",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:milk_bottle",
+      "required": false
+    },
+    {
+      "id": "farmersdelight:sweet_berry_cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:cheeseburger",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:chocolate_custard",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:chocolate_icecream_scoop",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:chorus_custard",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:chorus_icecream_sandwich",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:chorus_icecream_scoop",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:fresh_cheese",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:glow_berry_icecream_sandwich",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:icecream_sandwich",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:icecream_scoop",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:mochi",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:mochi_icecream",
+      "required": false
+    },
+    {
+      "id": "farmersdelight_extended:sweet_berry_icecream_sandwich",
+      "required": false
+    },
+    {
+      "id": "farmerspizzeria:cheese_pizza_slice",
+      "required": false
+    },
+    {
+      "id": "farmerspizzeria:dorblu_cheese_wedge",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:blueberry_custard",
+      "required": false
+    },
+    {
+      "id": "fruitsdelight:mango_milkshake",
+      "required": false
+    },
+    {
+      "id": "fungidelight:truffle_ice_cream",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:cheddar_cheese_slice",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:chocolate_milk_bottle",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:goat_cheese_slice",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:goat_milk_bottle",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:peanut_butter",
+      "required": false
+    },
+    {
+      "id": "hearthandharvest:peanut_butter_cookie",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:aged_cheddar",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:aged_swiss",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:blueberry_cheesecake_slice",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:caravane",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:caravane_wedge",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:chevre",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:chevre_wedge",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:feta",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:feta_wedge",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:mayo",
+      "required": false
+    },
+    {
+      "id": "herbsandharvest:raspberry_cheesecake_slice",
       "required": false
     },
     {
@@ -1226,7 +1794,15 @@
       "required": false
     },
     {
+      "id": "herbsandharvest:swiss_wedge",
+      "required": false
+    },
+    {
       "id": "iceandfire:cannoli",
+      "required": false
+    },
+    {
+      "id": "iceandfire:ghost_cream",
       "required": false
     },
     {
@@ -1242,6 +1818,14 @@
       "required": false
     },
     {
+      "id": "minecolonies:yogurt_with_berries",
+      "required": false
+    },
+    {
+      "id": "minecraft:milk_bucket",
+      "required": false
+    },
+    {
       "id": "moredelight:creamy_pasta_with_chicken_cuts",
       "required": false
     },
@@ -1250,7 +1834,271 @@
       "required": false
     },
     {
+      "id": "moredelight:hamburger_with_egg",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:dried_ghast_with_milk",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:hot_cream",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:hot_cream_cone",
+      "required": false
+    },
+    {
+      "id": "mynethersdelight:plate_of_ghasta_with_cream",
+      "required": false
+    },
+    {
+      "id": "neapolitan:adzuki_curry",
+      "required": false
+    },
+    {
+      "id": "neapolitan:adzuki_ice_cream",
+      "required": false
+    },
+    {
+      "id": "neapolitan:adzuki_milkshake",
+      "required": false
+    },
+    {
+      "id": "neapolitan:banana_ice_cream",
+      "required": false
+    },
+    {
+      "id": "neapolitan:banana_milkshake",
+      "required": false
+    },
+    {
+      "id": "neapolitan:chocolate_bar",
+      "required": false
+    },
+    {
+      "id": "neapolitan:chocolate_ice_cream",
+      "required": false
+    },
+    {
+      "id": "neapolitan:chocolate_milkshake",
+      "required": false
+    },
+    {
+      "id": "neapolitan:chocolate_spider_eye",
+      "required": false
+    },
+    {
+      "id": "neapolitan:chocolate_strawberries",
+      "required": false
+    },
+    {
+      "id": "neapolitan:cooked_mint_chops",
+      "required": false
+    },
+    {
+      "id": "neapolitan:dried_banana",
+      "required": false
+    },
+    {
+      "id": "neapolitan:dried_vanilla_pods",
+      "required": false
+    },
+    {
+      "id": "neapolitan:mint_candies",
+      "required": false
+    },
+    {
+      "id": "neapolitan:mint_chocolate",
+      "required": false
+    },
+    {
+      "id": "neapolitan:mint_ice_cream",
+      "required": false
+    },
+    {
+      "id": "neapolitan:mint_leaves",
+      "required": false
+    },
+    {
+      "id": "neapolitan:mint_milkshake",
+      "required": false
+    },
+    {
+      "id": "neapolitan:neapolitan_ice_cream",
+      "required": false
+    },
+    {
+      "id": "neapolitan:roasted_adzuki_beans",
+      "required": false
+    },
+    {
+      "id": "neapolitan:strawberry_ice_cream",
+      "required": false
+    },
+    {
+      "id": "neapolitan:strawberry_milkshake",
+      "required": false
+    },
+    {
+      "id": "neapolitan:strawberry_scones",
+      "required": false
+    },
+    {
+      "id": "neapolitan:vanilla_chocolate_fingers",
+      "required": false
+    },
+    {
+      "id": "neapolitan:vanilla_fudge",
+      "required": false
+    },
+    {
+      "id": "neapolitan:vanilla_ice_cream",
+      "required": false
+    },
+    {
+      "id": "neapolitan:vanilla_milkshake",
+      "required": false
+    },
+    {
+      "id": "neapolitan:vanilla_pudding",
+      "required": false
+    },
+    {
+      "id": "neapolitan:white_strawberries",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:appleyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:baconcheeseburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:basiccheeseburgeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:butteritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:caramelicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chocolateicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chocolatemilkitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:chorusyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:cookiesandmilkitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:creamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:freshmilkitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:glowberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:grilledcheeseitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:icecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:mayonaiseitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:melonyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:sweetberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodcore:yogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:apricotyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:bananayogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blackberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:blueberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:breadfruityogurtitem",
+      "required": false
+    },
+    {
       "id": "pamhc2foodextended:broccolimacitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cactusfruityogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:candleberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cheesedanishitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cheeseontoastitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cherryicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cherryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:chocolatemilkshakeitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:crackersandcheeseitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:cranberryyogurtitem",
       "required": false
     },
     {
@@ -1266,19 +2114,187 @@
       "required": false
     },
     {
+      "id": "pamhc2foodextended:custarditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:dateyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:eggnogitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:elderberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:figyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:fruitcreamfestivalbreaditem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:gooseberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapefruityogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:grapeyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:greengrapeyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:guavayogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:herbcheeseballitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:huckleberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:jackfruityogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:juniperberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lemonyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:limeyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:lycheeyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mangoyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mintchocolatechipicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mochaicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:mulberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:neapolitanicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:nuttoppedicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:orangeyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:paneeritem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:paneertikkamasalaitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:papayayogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:passionfruityogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peachyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peanutbuttercookiesitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:peanutbuttercupitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:pearyogurtitem",
+      "required": false
+    },
+    {
       "id": "pamhc2foodextended:pepperonipizzaitem",
       "required": false
     },
     {
-      "id": "pamhc2foodcore:butteritem",
+      "id": "pamhc2foodextended:pineappleyogurtitem",
       "required": false
     },
     {
-      "id": "pamhc2foodcore:yogurtitem",
+      "id": "pamhc2foodextended:plumyogurtitem",
       "required": false
     },
     {
-      "id": "pamhc2foodcore:creamitem",
+      "id": "pamhc2foodextended:pomegranateyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:rambutanyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:raspberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:soymilkitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:starfruityogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:strawberryyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:tamarindyogurtitem",
+      "required": false
+    },
+    {
+      "id": "pamhc2foodextended:vanillaicecreamitem",
+      "required": false
+    },
+    {
+      "id": "pizzadelight:cheese_slice",
+      "required": false
+    },
+    {
+      "id": "pizzadelight:hotdog",
       "required": false
     },
     {
@@ -1286,35 +2302,63 @@
       "required": false
     },
     {
-      "id": "pamhc2foodcore:grilledcheeseitem",
+      "id": "ramadandelight:mahalabia",
       "required": false
     },
     {
-      "id": "createfood:cream_frosting_bottle",
+      "id": "ramadandelight:quiche_slice",
       "required": false
     },
     {
-      "id": "herbsandharvest:aged_cheddar",
+      "id": "refurbished_furniture:cheese",
       "required": false
     },
     {
-      "id": "createfood:condensed_milk_bottle",
+      "id": "refurbished_furniture:cheese_toastie",
       "required": false
     },
     {
-      "id": "createfood:milkshake_bottle",
+      "id": "rusticdelight:cherry_blossom_cheesecake_slice",
       "required": false
     },
     {
-      "id": "createfood:chocolate_milkshake_bottle",
+      "id": "rusticdelight:milk_coffee",
       "required": false
     },
     {
-      "id": "pamhc2foodcore:basiccheeseburgeritem",
+      "id": "seeddelight:cherry_ice_cream",
       "required": false
     },
     {
-      "id": "pamhc2foodcore:baconcheeseburgeritem",
+      "id": "seeddelight:milk_cherry_mouss",
+      "required": false
+    },
+    {
+      "id": "sushigocrafting:cheese",
+      "required": false
+    },
+    {
+      "id": "sweet_delight:chocolateeclair",
+      "required": false
+    },
+    {
+      "id": "sweet_delight:honeyeclair",
+      "required": false
+    },
+    {
+      "id": "sweet_delight:milk_ice_cream",
+      "required": false
+    },
+    {
+      "id": "sweet_delight:snowy_ice_cream",
+      "required": false
+    },
+    {
+      "id": "sweet_delight:sweetberrypancakes",
+      "required": false
+    },
+    {
+      "id": "ubesdelight:leche_flan",
       "required": false
     }
   ]

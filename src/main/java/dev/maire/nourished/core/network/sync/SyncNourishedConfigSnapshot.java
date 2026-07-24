@@ -2,7 +2,7 @@ package dev.maire.nourished.core.network.sync;
 
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;

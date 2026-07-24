@@ -1,30 +1,41 @@
-package dev.maire.nourished.client.hud;
+package dev.maire.nourished.client.hud.dynamic.layout;
 
-import dev.marie.MariesLib.config.HudAnchor;
+import dev.marie.framework.config.HudAnchor;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 
 import java.util.List;
 
-final class HudLayout {
+public final class HudLayout {
 
-    record Layout(
+    public record Layout(
             int panelX, int panelY, int panelW, int panelH,
             int baseX, int baseY,
             int barW, int rowH, int iconSize, int maxLabelSw,
             int scaledPad, float labelScale, double scale,
             boolean verticalLayout,
-            int verticalBarW, int verticalBarH, int verticalColumnW
+            int verticalBarW, int verticalBarH, int verticalColumnW,
+            /** Content's own natural, scale-only width/height — {@code panelW}/{@code panelH} above
+             * may be larger once the player has freely dragged the on-screen box (see {@code
+             * HudEditTarget}), since resizing the box no longer rescales content; these are what
+             * content itself is actually sized from, and what {@code NutrientPanelContainer} centers
+             * that content within when the box is bigger than they are. */
+            int naturalPanelW, int naturalPanelH,
+            /** Reserved blank space before content on the left, grown only by dragging the panel's
+             * left edge (or bottom-left corner) in edit mode — see {@code HudEditTarget}. Zero here;
+             * only {@code HudEditTarget#resolvedLayout}/{@code #matchedLayoutFor} ever set it non-zero. */
+            int leftMargin
     ) {}
 
     private HudLayout() {}
 
-    static Layout compute(Minecraft mc, List<String> keys) {
+    public static Layout compute(Minecraft mc, List<String> keys) {
         return compute(mc, keys, NourishedClientConfig.get().hudScale());
     }
 
-    static Layout compute(Minecraft mc, List<String> keys, double scale) {
+    public static Layout compute(Minecraft mc, List<String> keys, double scale) {
         NourishedClientConfig cc = NourishedClientConfig.get();
         boolean verticalLayout = cc.hudVerticalLayout();
         float labelScale = (float) (HudDrawHelpers.BASE_LABEL_SCALE * scale);
@@ -79,7 +90,7 @@ final class HudLayout {
         return new Layout(
                 panelX, panelY, panelW, panelH, baseX, baseY,
                 barW, rowH, iconSize, maxLabelSw, scaledPad, labelScale, scale, verticalLayout,
-                verticalBarW, verticalBarH, verticalColumnW
+                verticalBarW, verticalBarH, verticalColumnW, panelW, panelH, 0
         );
     }
 }

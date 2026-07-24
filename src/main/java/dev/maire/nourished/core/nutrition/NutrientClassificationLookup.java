@@ -1,9 +1,10 @@
 package dev.maire.nourished.core.nutrition;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.runtime.SourceRegistry;
-import dev.marie.MariesLib.scanner.ScannerSpecRegistry;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.runtime.SourceRegistry;
+import dev.marie.framework.scanner.ExcludedItemsRegistry;
+import dev.marie.framework.scanner.ScannerSpecRegistry;
+import dev.marie.framework.util.MarieRegistryUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -12,6 +13,7 @@ import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Resolves nutrient bar weights from datapack tags and the runtime classifier cascade.
@@ -58,8 +60,15 @@ public final class NutrientClassificationLookup {
     public static Map<String, Float> resolveNutrientBars(
             ItemStack stack, boolean warnIfUnmatched, @Nullable RecipeManager recipeManager) {
         ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
-        if (itemId != null && ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())) {
-            return Map.of();
+
+        Optional<FoodOverrideRegistry.FoodOverride> override = itemId != null
+                ? FoodOverrideRegistry.getOverride(itemId.toString())
+                : Optional.empty();
+
+        if (itemId != null
+                && (ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())
+                        || ExcludedItemsRegistry.isExcluded(itemId.toString()))) {
+            return override.isPresent() ? Map.copyOf(override.get().nutrients()) : Map.of();
         }
 
         Map<String, Float> tagMatches = FoodNutritionRegistry.getNutrientTagScores(stack.getItem());
@@ -73,12 +82,21 @@ public final class NutrientClassificationLookup {
 
         Map<String, Float> resolved = RuntimeFoodResolver.getInstance().resolve(stack, recipeManager);
 
+        Map<String, Float> classification;
         if (tagMatches.isEmpty()) {
-            return resolved.isEmpty() ? Map.of() : resolved;
+            classification = resolved.isEmpty() ? Map.of() : resolved;
+        } else if (resolved.isEmpty()) {
+            classification = tagMatches;
+        } else {
+            classification = TagRuntimeBlend.blend(tagMatches, resolved).result();
         }
-        if (resolved.isEmpty()) {
-            return tagMatches;
+
+        if (override.isEmpty()) {
+            return classification;
         }
-        return TagRuntimeBlend.blend(tagMatches, resolved).result();
+
+        Map<String, Float> merged = new java.util.LinkedHashMap<>(classification);
+        merged.putAll(override.get().nutrients());
+        return Map.copyOf(merged);
     }
 }

@@ -1,11 +1,11 @@
 package dev.maire.nourished.config;
 
 import com.google.gson.JsonObject;
-import dev.marie.MariesLib.config.ConfigDefaultsLoader;
-import dev.marie.MariesLib.config.HudAnchor;
+import dev.marie.framework.config.ConfigDefaultsLoader;
+import dev.marie.framework.config.HudAnchor;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.framework.util.MarieRegistryUtils;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -44,18 +44,25 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue hudRevealOnNutrientGain;
     private final ModConfigSpec.DoubleValue hudBackgroundOpacity;
     private final ModConfigSpec.BooleanValue hudVerticalLayout;
+    private final ModConfigSpec.BooleanValue hudClassicMode;
     private final ModConfigSpec.ConfigValue<List<? extends String>> dietBarOrder;
     private final ModConfigSpec.DoubleValue dietScale;
     private final ModConfigSpec.IntValue dietOffsetX;
     private final ModConfigSpec.IntValue dietOffsetY;
     private final ModConfigSpec.DoubleValue recentMealsBoxScale;
     private final ModConfigSpec.DoubleValue eatMoreBoxScale;
+    private final ModConfigSpec.BooleanValue dietScreenClassicMode;
     private final ModConfigSpec.DoubleValue dietBackgroundOpacity;
     private final ModConfigSpec.BooleanValue showRecentMeals;
     private final ModConfigSpec.BooleanValue showEatMoreOf;
     private final ModConfigSpec.BooleanValue showActiveEffects;
     private final ModConfigSpec.BooleanValue showCaloriesBox;
     private final ModConfigSpec.BooleanValue showBalanceBox;
+    private final ModConfigSpec.BooleanValue showDietScreenButton;
+    private final ModConfigSpec.BooleanValue recentMealsEatMoreOffsetMigrationDone;
+    private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalOffsetMigrationDone;
+    private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalSizeMigrationDone;
+    private final ModConfigSpec.BooleanValue recentMealsRowHeightMigrationDone;
 
     /** Matches legacy {@code COL_PANEL_BG} alpha ({@code 0xCC}). */
     private static final double DEFAULT_HUD_BACKGROUND_OPACITY = 204.0d / 255.0d;
@@ -71,7 +78,7 @@ public final class NourishedClientConfig {
         hudOffsetX = builder.defineInRange("hudOffsetX", ConfigDefaultsLoader.getInt(defaults, "hudOffsetX", 0), -2000, 2000);
         hudOffsetY = builder.defineInRange("hudOffsetY", ConfigDefaultsLoader.getInt(defaults, "hudOffsetY", 0), -2000, 2000);
         hudBarWidth = builder.defineInRange("hudBarWidth", ConfigDefaultsLoader.getInt(defaults, "hudBarWidth", 60), 40, 120);
-        hudScale = builder.defineInRange("hudScale", ConfigDefaultsLoader.getDouble(defaults, "hudScale", 1.0d), 0.5d, 1.5d);
+        hudScale = builder.defineInRange("hudScale", ConfigDefaultsLoader.getDouble(defaults, "hudScale", 1.0d), 0.3d, 3.0d);
         hudReservedBottom = builder.defineInRange("hudReservedBottom", ConfigDefaultsLoader.getInt(defaults, "hudReservedBottom", 52), 30, 100);
         hudDraggable = builder.define("hudDraggable", ConfigDefaultsLoader.getBoolean(defaults, "hudDraggable", true));
         dietBarDragEnabled = builder.define("dietBarDragEnabled", ConfigDefaultsLoader.getBoolean(defaults, "dietBarDragEnabled", true));
@@ -105,6 +112,10 @@ public final class NourishedClientConfig {
                 "hudVerticalLayout",
                 ConfigDefaultsLoader.getBoolean(defaults, "hudVerticalLayout", false)
         );
+        hudClassicMode = builder.define(
+                "hudClassicMode",
+                ConfigDefaultsLoader.getBoolean(defaults, "hudClassicMode", false)
+        );
         dietBarOrder = builder.defineListAllowEmpty(
                 "dietBarOrder",
                 List::of,
@@ -136,6 +147,10 @@ public final class NourishedClientConfig {
                 0.5d,
                 1.5d
         );
+        dietScreenClassicMode = builder.define(
+                "dietScreenClassicMode",
+                ConfigDefaultsLoader.getBoolean(defaults, "dietScreenClassicMode", false)
+        );
         dietBackgroundOpacity = builder.defineInRange(
                 "dietBackgroundOpacity",
                 ConfigDefaultsLoader.getDouble(defaults, "dietBackgroundOpacity", DEFAULT_HUD_BACKGROUND_OPACITY),
@@ -147,6 +162,43 @@ public final class NourishedClientConfig {
         showActiveEffects = builder.define("showActiveEffects", ConfigDefaultsLoader.getBoolean(defaults, "showActiveEffects", true));
         showCaloriesBox = builder.define("showCaloriesBox", ConfigDefaultsLoader.getBoolean(defaults, "showCaloriesBox", true));
         showBalanceBox = builder.define("showBalanceBox", ConfigDefaultsLoader.getBoolean(defaults, "showBalanceBox", true));
+        showDietScreenButton = builder.define("showDietScreenButton", ConfigDefaultsLoader.getBoolean(defaults, "showDietScreenButton", true));
+        // Internal one-time migration flag — not user-facing, no Cloth Config entry. Guards the
+        // recentmeals/eatmore persisted-position schema change from absolute screen coordinates to
+        // panel-relative offsets: see DietScreenPersistence#resolveRelativeToPanel.
+        recentMealsEatMoreOffsetMigrationDone = builder.define(
+                "recentMealsEatMoreOffsetMigrationDone",
+                false
+        );
+        // Second one-time migration flag — the persisted x/y offset's meaning changed again, from
+        // an absolute screen-pixel delta from the panel origin (fixed regardless of panel scale) to
+        // a scale-normalized local-unit delta (see DietScreenPersistence#resolveRelativeToPanel):
+        // reusing the flag above wouldn't fire for players who already tripped it under the older
+        // absolute-delta scheme.
+        recentMealsEatMoreLocalOffsetMigrationDone = builder.define(
+                "recentMealsEatMoreLocalOffsetMigrationDone",
+                false
+        );
+        // Third one-time migration flag — width/height's meaning changed too, from an absolute
+        // screen-pixel size (fixed regardless of panel scale) to a scale-normalized local-unit size,
+        // so a box scales with the panel like the position offset already does.
+        recentMealsEatMoreLocalSizeMigrationDone = builder.define(
+                "recentMealsEatMoreLocalSizeMigrationDone",
+                false
+        );
+        // Fourth one-time migration flag — RecentMeals' per-row local-unit height (the value its
+        // collapse-fit-check and natural-size formula are both built from) changed from 14 to 9 to
+        // match ActiveEffectsComponent's fixed line height. A box already dragged/resized under the
+        // old 14-per-row meaning has its size committed as an absolute local-unit height that has
+        // nothing to do with either constant going forward — it just sits there forever regardless of
+        // which formula computes today's "natural" size, silently overriding it. Reusing an older flag
+        // wouldn't fire for players who never tripped it (already migrated under the size-only change
+        // above), so this needs its own gate, discarding any existing RecentMeals-only persisted size
+        // once so it recomputes fresh against the current constant instead of a stale committed one.
+        recentMealsRowHeightMigrationDone = builder.define(
+                "recentMealsRowHeightMigrationDone",
+                false
+        );
         builder.pop();
     }
 
@@ -184,7 +236,16 @@ public final class NourishedClientConfig {
             for (String line : lines) {
                 String trimmed = line.trim();
                 if (trimmed.startsWith("hideZeroNutrients")
-                        || trimmed.startsWith("hudShowBelowThreshold")) {
+                        || trimmed.startsWith("hudShowBelowThreshold")
+                        // Superseded by each Diet Screen sub-box's own persisted ComponentState#contentScale
+                        // (DietScreenPersistence), keyed alongside its position/size rather than duplicated
+                        // here as a separate global config value — any zoom level set under the old scheme
+                        // is simply dropped, same as every other one-time reset migration in this file.
+                        || trimmed.startsWith("caloriesContentScale")
+                        || trimmed.startsWith("balanceContentScale")
+                        || trimmed.startsWith("recentMealsContentScale")
+                        || trimmed.startsWith("eatMoreContentScale")
+                        || trimmed.startsWith("activeEffectsContentScale")) {
                     changed = true;
                     continue;
                 }
@@ -352,6 +413,20 @@ public final class NourishedClientConfig {
     }
 
     /**
+     * When true, the always-on HUD draws via {@link dev.maire.nourished.client.hud.classic.ClassicHudPanelRenderer}
+     * (pre-MarieUI raw {@code GuiGraphics} rendering) instead of the MarieUI component tree. Drag/
+     * resize/edit-mode interaction is unaffected either way — both render paths share the same
+     * {@code HudEditTarget}/{@code EditModeController} interaction layer.
+     */
+    public boolean hudClassicMode() {
+        return hudClassicMode.get();
+    }
+
+    public void setHudClassicMode(boolean value) {
+        hudClassicMode.set(value);
+    }
+
+    /**
      * Registry order, or saved order from config with any new nutrients appended.
      */
     public List<String> effectiveDietBarOrder() {
@@ -428,6 +503,18 @@ public final class NourishedClientConfig {
         eatMoreBoxScale.set(value);
     }
 
+    /**
+     * When true, the Diet Screen opens as {@link dev.maire.nourished.client.screen.diet.classic.ClassicDietScreen}
+     * (pre-MarieUI raw {@code GuiGraphics} rendering) instead of the MarieUI {@code DietScreen}.
+     */
+    public boolean dietScreenClassicMode() {
+        return dietScreenClassicMode.get();
+    }
+
+    public void setDietScreenClassicMode(boolean value) {
+        dietScreenClassicMode.set(value);
+    }
+
     public double dietBackgroundOpacity() {
         return dietBackgroundOpacity.get();
     }
@@ -474,6 +561,53 @@ public final class NourishedClientConfig {
 
     public void setShowBalanceBox(boolean value) {
         showBalanceBox.set(value);
+    }
+
+    /**
+     * Whether the Diet Screen's inventory-GUI shortcut button (see {@link
+     * dev.maire.nourished.client.ClientEvents#onScreenInit}) is added at all. Deliberately does NOT
+     * gate {@link dev.maire.nourished.client.NourishedKeys#OPEN_DIET_SCREEN} — the keybind must keep
+     * opening the Diet Screen regardless of this setting; only the button's own presence in the
+     * inventory screen depends on it.
+     */
+    public boolean showDietScreenButton() {
+        return showDietScreenButton.get();
+    }
+
+    public void setShowDietScreenButton(boolean value) {
+        showDietScreenButton.set(value);
+    }
+
+    public boolean recentMealsEatMoreOffsetMigrationDone() {
+        return recentMealsEatMoreOffsetMigrationDone.get();
+    }
+
+    public void setRecentMealsEatMoreOffsetMigrationDone(boolean value) {
+        recentMealsEatMoreOffsetMigrationDone.set(value);
+    }
+
+    public boolean recentMealsEatMoreLocalOffsetMigrationDone() {
+        return recentMealsEatMoreLocalOffsetMigrationDone.get();
+    }
+
+    public void setRecentMealsEatMoreLocalOffsetMigrationDone(boolean value) {
+        recentMealsEatMoreLocalOffsetMigrationDone.set(value);
+    }
+
+    public boolean recentMealsEatMoreLocalSizeMigrationDone() {
+        return recentMealsEatMoreLocalSizeMigrationDone.get();
+    }
+
+    public void setRecentMealsEatMoreLocalSizeMigrationDone(boolean value) {
+        recentMealsEatMoreLocalSizeMigrationDone.set(value);
+    }
+
+    public boolean recentMealsRowHeightMigrationDone() {
+        return recentMealsRowHeightMigrationDone.get();
+    }
+
+    public void setRecentMealsRowHeightMigrationDone(boolean value) {
+        recentMealsRowHeightMigrationDone.set(value);
     }
 
     public void resetDietOffsets() {

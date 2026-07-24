@@ -1,13 +1,13 @@
 package dev.maire.nourished.core.context;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.ApplicationHistoryView;
-import dev.marie.MariesLib.api.ValueModifierContext;
-import dev.marie.MariesLib.api.ValueModifierEvent;
-import dev.marie.MariesLib.config.FeatureFlagCache;
-import dev.marie.MariesLib.core.MarieLibDataProvider;
-import dev.marie.MariesLib.tracking.TrackingAttachment;
-import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.reporting.ApplicationHistoryView;
+import dev.marie.framework.api.value.ValueModifierContext;
+import dev.marie.framework.api.value.ValueModifierEvent;
+import dev.marie.framework.config.FeatureFlagCache;
+import dev.marie.framework.core.MarieDataProvider;
+import dev.marie.framework.tracking.TrackingAttachment;
+import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.NourishedKubeIntegration;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.NeoForge;
 
 @ApiStatus.Internal
-final class NourishedPlayerDataProvider implements MarieLibDataProvider {
+final class NourishedPlayerDataProvider implements MarieDataProvider {
 
     static final NourishedPlayerDataProvider INSTANCE = new NourishedPlayerDataProvider();
 

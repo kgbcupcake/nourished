@@ -1,7 +1,7 @@
 package dev.maire.nourished.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.templates.NourishedColorsTemplateCommand;
 import dev.maire.nourished.templates.NourishedEffectsTemplateCommand;

@@ -44,15 +44,15 @@ jobs:
             - name: Compare against current pin
               id: current
               run: |
-                  CURRENT_VERSION=$(grep '^marie_lib_version=' gradle.properties | cut -d'=' -f2)
+                  CURRENT_VERSION=$(grep '^maries_framework_version=' gradle.properties | cut -d'=' -f2)
                   echo "version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
 
             - name: Update gradle.properties
               if: steps.latest.outputs.version != steps.current.outputs.version
               run: |
                   NEW_VERSION="${{ steps.latest.outputs.version }}"
-                  sed -i "s/^marie_lib_version=.*/marie_lib_version=${NEW_VERSION}/" gradle.properties
-                  sed -i "s/^marie_lib_version_range=.*/marie_lib_version_range=[${NEW_VERSION},)/" gradle.properties
+                  sed -i "s/^maries_framework_version=.*/maries_framework_version=${NEW_VERSION}/" gradle.properties
+                  sed -i "s/^maries_framework_version_range=.*/maries_framework_version_range=[${NEW_VERSION},)/" gradle.properties
 
             - name: Open pull request
               if: steps.latest.outputs.version != steps.current.outputs.version
@@ -66,6 +66,6 @@ jobs:
                   body: |
                       Automated update: MarieLib ${{ steps.current.outputs.version }} -> ${{ steps.latest.outputs.version }}
 
-                      Bumps `marie_lib_version` and `marie_lib_version_range` in `gradle.properties` to track the
+                      Bumps `maries_framework_version` and `maries_framework_version_range` in `gradle.properties` to track the
                       latest published MarieLib release. This PR targets `dev` and is not auto-merged.
                   add-paths: gradle.properties

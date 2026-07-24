@@ -1,7 +1,7 @@
 package dev.maire.nourished.config.validation;
 
-import dev.marie.MariesLib.api.ConfigValidator;
-import dev.marie.MariesLib.config.validation.ValidationResult;
+import dev.marie.framework.api.ConfigValidator;
+import dev.marie.framework.config.validation.ValidationResult;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;

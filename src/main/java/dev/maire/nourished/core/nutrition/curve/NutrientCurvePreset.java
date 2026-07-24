@@ -1,7 +1,7 @@
 package dev.maire.nourished.core.nutrition.curve;
 
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.curve.math.CurveGrid;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.curve.math.CurveGrid;
 
 /**
  * Named response-curve shapes for nutrient contribution scaling. Each maps

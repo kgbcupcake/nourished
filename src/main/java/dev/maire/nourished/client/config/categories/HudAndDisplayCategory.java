@@ -7,8 +7,8 @@ import dev.maire.nourished.client.config.NutrientHudHexColorRowEntry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.marie.MariesLib.color.ColorRegistry;
-import dev.marie.MariesLib.config.HudAnchor;
+import dev.marie.framework.color.ColorRegistry;
+import dev.marie.framework.config.HudAnchor;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -63,8 +63,8 @@ public final class HudAndDisplayCategory {
                         eb,
                         Component.translatable("config.nourished.hudScale"),
                         client.hudScale(),
-                        0.5d,
-                        1.5d,
+                        0.3d,
+                        3.0d,
                         1.0d,
                         client::setHudScale
                 )
@@ -141,6 +141,13 @@ public final class HudAndDisplayCategory {
                 eb.startBooleanToggle(Component.translatable("config.nourished.hudVerticalLayout"), client.hudVerticalLayout())
                         .setDefaultValue(false)
                         .setSaveConsumer(client::setHudVerticalLayout)
+                        .build()
+        );
+        category.addEntry(
+                eb.startBooleanToggle(Component.translatable("config.nourished.hudClassicMode"), client.hudClassicMode())
+                        .setDefaultValue(false)
+                        .setSaveConsumer(client::setHudClassicMode)
+                        .setTooltip(Component.translatable("config.nourished.hudClassicMode.desc"))
                         .build()
         );
         category.addEntry(

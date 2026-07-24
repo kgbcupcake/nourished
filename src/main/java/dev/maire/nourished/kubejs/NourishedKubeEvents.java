@@ -2,7 +2,7 @@ package dev.maire.nourished.kubejs;
 
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.kubejs.events.NourishedFoodEatenEvent;
 import dev.maire.nourished.kubejs.events.NourishedGutHealthChangedEvent;
 import dev.maire.nourished.kubejs.events.NourishedNutrientChangedEvent;

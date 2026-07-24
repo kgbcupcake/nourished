@@ -6,13 +6,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.marie.MariesLib.api.ApiStatus;
+import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.registry.ListRegistry;
-import dev.marie.MariesLib.data.DatapackSchema;
-import dev.marie.MariesLib.util.MarieJsonUtils;
-import dev.marie.MariesLib.util.MarieResourceLoader;
-import dev.marie.MariesLib.util.MarieValidation;
+import dev.marie.framework.registry.ListRegistry;
+import dev.marie.framework.data.DatapackSchema;
+import dev.marie.framework.util.MarieJsonUtils;
+import dev.marie.framework.util.MarieResourceLoader;
+import dev.marie.framework.util.MarieValidation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -75,7 +75,7 @@ public class EffectRegistry {
      * Registers an externally-defined effect via the public API.
      * Called by {@link dev.maire.nourished.api.NourishedAPI#registerCustomEffect}.
      */
-    public static void registerExternal(dev.marie.MariesLib.api.ThresholdEffect definition) {
+    public static void registerExternal(dev.marie.framework.api.effects.ThresholdEffect definition) {
         String trigger = switch (definition.getThresholdType()) {
             case CRITICAL -> "below";
             case LOW -> "below";
@@ -116,7 +116,7 @@ public class EffectRegistry {
         Nourished.LOGGER.info("[EffectRegistry] Registered external effect (replaced existing if matched): {}", def.id());
     }
 
-    public static void upsertFromDatapack(dev.marie.MariesLib.api.ThresholdEffect definition) {
+    public static void upsertFromDatapack(dev.marie.framework.api.effects.ThresholdEffect definition) {
         String trigger = switch (definition.getThresholdType()) {
             case CRITICAL, LOW -> "below";
             case EXCESS -> "above";
@@ -178,6 +178,30 @@ public class EffectRegistry {
         } catch (IOException e) {
             Nourished.LOGGER.error("[EffectRegistry] Failed to load effects.json, using built-in defaults", e);
             loadDefaults();
+        }
+
+        try {
+            Path readmeDir = configDir.resolve("Read_Me");
+            Files.createDirectories(readmeDir);
+            writeReadmeIfAbsent(readmeDir);
+        } catch (IOException e) {
+            Nourished.LOGGER.warn("[EffectRegistry] Failed to write EFFECTS_README.md", e);
+        }
+    }
+
+    private static void writeReadmeIfAbsent(Path readmeDir) throws IOException {
+        Path readme = readmeDir.resolve("EFFECTS_README.md");
+        if (Files.exists(readme)) {
+            return;
+        }
+        String resourcePath = "/data/" + Nourished.MODID + "/config/EFFECTS_README.md";
+        try (InputStream in = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(resourcePath.substring(1))) {
+            if (in == null) {
+                Nourished.LOGGER.warn("[EffectRegistry] No bundled EFFECTS_README.md, skipping write");
+                return;
+            }
+            Files.copy(in, readme);
         }
     }
 

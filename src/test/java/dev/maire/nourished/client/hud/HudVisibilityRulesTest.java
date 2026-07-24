@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.hud;
 
+import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibilityRules;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

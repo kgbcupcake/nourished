@@ -1,6 +1,6 @@
 package dev.maire.nourished.client;
 
-import dev.marie.MariesLib.client.ImportExportToast;
+import dev.marie.framework.client.config.importexport.ImportExportToast;
 import net.minecraft.network.chat.Component;
 
 /**

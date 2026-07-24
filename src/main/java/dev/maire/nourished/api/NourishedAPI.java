@@ -1,34 +1,34 @@
 package dev.maire.nourished.api;
 
-import dev.marie.MariesLib.api.AbsorptionModifier;
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.SourcePairSynergy;
-import dev.marie.MariesLib.api.MarieAPIState;
-import dev.marie.MariesLib.api.MarieAPIVersion;
-import dev.marie.MariesLib.api.MarieSeasonHook;
-import dev.marie.MariesLib.api.ApplicationHistoryView;
-import dev.marie.MariesLib.api.MilestoneDefinition;
-import dev.marie.MariesLib.api.ProfileDefinition;
-import dev.marie.MariesLib.api.ReportProvider;
-import dev.marie.MariesLib.api.SynergyDefinition;
-import dev.marie.MariesLib.api.ThresholdEffect;
-import dev.marie.MariesLib.api.ValueDefinition;
-import dev.marie.MariesLib.api.registry.AbsorptionModifierRegistry;
-import dev.marie.MariesLib.api.registry.MilestoneRegistry;
-import dev.marie.MariesLib.api.registry.ProfileRegistry;
-import dev.marie.MariesLib.api.registry.ReportProviderRegistry;
-import dev.marie.MariesLib.api.registry.SeasonHookRegistry;
-import dev.marie.MariesLib.api.registry.SynergyRegistry;
-import dev.marie.MariesLib.compat.CompatDefinition;
-import dev.marie.MariesLib.config.FeatureFlagCache;
+import dev.marie.framework.api.effects.AbsorptionModifier;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.source.SourcePairSynergy;
+import dev.marie.framework.api.marieapi.MarieAPIState;
+import dev.marie.framework.api.marieapi.MarieAPIVersion;
+import dev.marie.framework.api.marie.MarieSeasonHook;
+import dev.marie.framework.api.reporting.ApplicationHistoryView;
+import dev.marie.framework.api.progression.MilestoneDefinition;
+import dev.marie.framework.api.progression.ProfileDefinition;
+import dev.marie.framework.api.reporting.ReportProvider;
+import dev.marie.framework.api.effects.SynergyDefinition;
+import dev.marie.framework.api.effects.ThresholdEffect;
+import dev.marie.framework.api.value.ValueDefinition;
+import dev.marie.framework.api.registry.AbsorptionModifierRegistry;
+import dev.marie.framework.api.registry.MilestoneRegistry;
+import dev.marie.framework.api.registry.ProfileRegistry;
+import dev.marie.framework.api.registry.ReportProviderRegistry;
+import dev.marie.framework.api.registry.SeasonHookRegistry;
+import dev.marie.framework.api.registry.SynergyRegistry;
+import dev.marie.framework.compat.CompatDefinition;
+import dev.marie.framework.config.FeatureFlagCache;
 import dev.maire.nourished.core.Nourished;
-import dev.marie.MariesLib.tracking.TrackingAttachment;
-import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.framework.tracking.TrackingAttachment;
+import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
-import dev.marie.MariesLib.api.impl.EmptyApplicationHistoryView;
+import dev.marie.framework.api.impl.EmptyApplicationHistoryView;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.marie.MariesLib.util.MarieRegistryUtils;
+import dev.marie.framework.util.MarieRegistryUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -125,12 +125,12 @@ public final class NourishedAPI {
      * @return aggregated player diet state snapshot
      */
     @ApiStatus.Stable
-    public static dev.marie.MariesLib.api.MariePlayerData getTrackingData(Player player) {
+    public static dev.marie.framework.api.marie.MariePlayerData getTrackingData(Player player) {
         Map<String, Float> nutrients = new LinkedHashMap<>();
         for (String valueKey : NutrientRegistry.getKeys()) {
             nutrients.put(valueKey, getValueLevel(player, valueKey));
         }
-        return new dev.marie.MariesLib.api.MariePlayerData(
+        return new dev.marie.framework.api.marie.MariePlayerData(
                 getTotal(player),
                 Collections.unmodifiableMap(nutrients),
                 getSourceMemory(player)
@@ -138,7 +138,7 @@ public final class NourishedAPI {
     }
 
     /**
-     * Applies a direct nutrient delta by posting a {@link dev.marie.MariesLib.api.ValueModifierEvent}
+     * Applies a direct nutrient delta by posting a {@link dev.marie.framework.api.value.ValueModifierEvent}
      * and then applying the final event amount if the event is not cancelled.
      *
      * @param player      the player to modify
@@ -148,10 +148,10 @@ public final class NourishedAPI {
     @ApiStatus.Stable
     public static void modifyValue(Player player, String valueKey, float delta) {
         MarieRegistryUtils.requireValueKey(valueKey, "NourishedAPI.modifyValue");
-        dev.marie.MariesLib.api.ValueModifierContext ctx =
-                dev.marie.MariesLib.api.ValueModifierContext.of(player, API_MODIFIER_SOURCE, valueKey);
-        dev.marie.MariesLib.api.ValueModifierEvent modifierEvent =
-                new dev.marie.MariesLib.api.ValueModifierEvent(ctx, delta);
+        dev.marie.framework.api.value.ValueModifierContext ctx =
+                dev.marie.framework.api.value.ValueModifierContext.of(player, API_MODIFIER_SOURCE, valueKey);
+        dev.marie.framework.api.value.ValueModifierEvent modifierEvent =
+                new dev.marie.framework.api.value.ValueModifierEvent(ctx, delta);
         NeoForge.EVENT_BUS.post(modifierEvent);
         if (modifierEvent.isCanceled()) {
             return;
@@ -223,7 +223,7 @@ public final class NourishedAPI {
     @ApiStatus.Stable
     public static void registerSourceClassification(ResourceLocation sourceId, String valueKey, float amount) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
-        dev.marie.MariesLib.util.MarieValidation.requireNonNullId(sourceId, "NourishedAPI.registerSourceClassification");
+        dev.marie.framework.util.MarieValidation.requireNonNullId(sourceId, "NourishedAPI.registerSourceClassification");
         if (!Float.isFinite(amount))
             throw new IllegalArgumentException(
                     "NourishedAPI.registerSourceClassification.amount must be finite");
@@ -231,7 +231,7 @@ public final class NourishedAPI {
             org.slf4j.LoggerFactory.getLogger(NourishedAPI.class).warn("[NourishedAPI] registerSourceClassification: item '{}' not found in BuiltInRegistries.ITEM", sourceId);
         }
         MarieRegistryUtils.requireValueKey(valueKey, "NourishedAPI.registerSourceClassification");
-        dev.marie.MariesLib.api.MarieAPI.registerSourceClassification(sourceId, valueKey, amount);
+        dev.marie.framework.api.marieapi.MarieAPI.registerSourceClassification(sourceId, valueKey, amount);
     }
 
     /**
@@ -285,7 +285,7 @@ public final class NourishedAPI {
     @ApiStatus.Stable
     public static void registerCompatEntry(CompatDefinition definition) {
         if (!MarieAPIState.isRegistrationAllowed()) throw new IllegalStateException("NourishedAPI registration is closed — register during mod initialization only.");
-        dev.marie.MariesLib.compat.ModCompat.registerExternal(definition);
+        dev.marie.framework.compat.ModCompat.registerExternal(definition);
     }
 
     /**

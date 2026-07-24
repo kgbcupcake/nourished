@@ -2,7 +2,7 @@
 
 ## What Nourished Is
 
-Nourished is a nutrition gameplay mod for NeoForge 1.21.1. It tracks food-group balance, rewards variety, and applies configurable buffs and debuffs. Under the hood it runs on MariesLib — the engine, scanner, and tracking layer live there. Nourished is the food-domain implementation players actually install.
+Nourished is a nutrition gameplay mod for NeoForge 1.21.1. It tracks food-group balance, rewards variety, and applies configurable buffs and debuffs. Under the hood it runs on MariesLib, the engine, scanner, and tracking layer live there. Nourished is the food-domain implementation players actually install.
 
 If you're building a new Marie mod with your own value bars (not nutrition), depend on [MariesLib](https://github.com/kgbcupcake/MarieLib/blob/main/PHILOSOPHY.md) directly.
 

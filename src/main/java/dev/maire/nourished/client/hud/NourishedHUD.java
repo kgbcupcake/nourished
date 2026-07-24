@@ -1,18 +1,27 @@
 package dev.maire.nourished.client.hud;
 
-import dev.marie.MariesLib.client.MarieClientCache;
+import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.maire.nourished.client.NourishedKeys;
-import dev.marie.MariesLib.config.FeatureFlagCache;
+import dev.marie.framework.config.FeatureFlagCache;
 import dev.maire.nourished.config.NourishedClientConfig;
-import dev.marie.MariesLib.tracking.TrackingData;
+import dev.marie.framework.tracking.TrackingData;
+import dev.marie.framework.ui.geometry.Bounds;
+import dev.marie.framework.ui.edit.EditModeController;
+import dev.marie.framework.ui.RenderContext;
+import dev.marie.framework.ui.Theme;
+import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
+import dev.maire.nourished.client.hud.classic.ClassicHudPanelRenderer;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
+import dev.maire.nourished.client.hud.dynamic.edit.HudEditTarget;
+import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
+import dev.maire.nourished.client.hud.dynamic.modules.NutrientPanelContainer;
+import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.util.Mth;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,16 +32,8 @@ public final class NourishedHUD {
     private static final Map<String, Float> displayValues = new HashMap<>();
     private static long lastNano = 0;
 
-    private static boolean hudDragging;
-    private static boolean hudResizing;
-    private static int dragGrabOffsetX;
-    private static int dragGrabOffsetY;
-    private static int dragAnchorBaseX;
-    private static int dragAnchorBaseY;
-    private static int resizeOriginX;
-    private static int resizeOriginY;
-    private static double resizeBaseDiagonal;
-    private static double resizePreviewScale;
+    private static HudEditTarget marieEditTarget;
+    private static EditModeController marieEditModeController;
 
     private NourishedHUD() {}
 
@@ -62,159 +63,13 @@ public final class NourishedHUD {
         if (visibleKeys.isEmpty()) {
             return;
         }
-        HudLayout.Layout layout = HudLayout.compute(mc, visibleKeys);
-        drawHudPanel(
-                event.getGuiGraphics(),
-                mc,
-                data,
-                visibleKeys,
-                layout,
-                layout.panelX(),
-                layout.panelY()
-        );
-    }
-
-    public static void renderForEditScreen(GuiGraphics g, Minecraft mc) {
-        if (!FeatureFlagCache.enableHUD()) {
-            return;
-        }
-        LocalPlayer player = mc.player;
-        if (player == null || !player.isAlive()) {
-            return;
-        }
-
-        TrackingData data = MarieClientCache.get();
-        List<String> keys = NutrientRegistry.getKeys();
-        if (keys.isEmpty()) {
-            return;
-        }
-
-        advanceLerp(data, keys);
-        NourishedClientConfig cc = NourishedClientConfig.get();
-        List<String> orderedKeys = cc.effectiveDietBarOrder();
-        List<String> visibleKeys = HudVisibility.visibleKeys(data, orderedKeys, cc);
-        if (visibleKeys.isEmpty()) {
-            HudDrawHelpers.drawEditBanner(g, mc);
-            return;
-        }
-        HudLayout.Layout layout = HudLayout.compute(mc, visibleKeys);
-        int[] m = scaledMouse(mc);
-        if (hudResizing) {
-            double dist = Math.hypot(m[0] - resizeOriginX, m[1] - resizeOriginY);
-            resizePreviewScale = Mth.clamp(dist / Math.max(1.0d, resizeBaseDiagonal), 0.3d, 3.0d);
-            layout = HudLayout.compute(mc, visibleKeys, resizePreviewScale);
-        }
-
-        int panelX = layout.panelX();
-        int panelY = layout.panelY();
-        if (hudDragging) {
-            panelX = Mth.clamp(m[0] - dragGrabOffsetX, 0, Math.max(0, mc.getWindow().getGuiScaledWidth() - layout.panelW()));
-            panelY = Mth.clamp(m[1] - dragGrabOffsetY, 0, Math.max(0, mc.getWindow().getGuiScaledHeight() - layout.panelH()));
-        } else if (hudResizing) {
-            panelX = resizeOriginX;
-            panelY = resizeOriginY;
-        }
-
-        boolean hovered = m[0] >= panelX && m[1] >= panelY
-                && m[0] < panelX + layout.panelW() && m[1] < panelY + layout.panelH();
-        g.fill(panelX - 2, panelY - 2, panelX + layout.panelW() + 2, panelY + layout.panelH() + 2, HudDrawHelpers.editOverlayColor());
-        if (hovered || hudDragging || hudResizing) {
-            HudDrawHelpers.drawBorder(g, panelX - 1, panelY - 1, layout.panelW() + 2, layout.panelH() + 2, 1, HudDrawHelpers.hoverBorderColor());
-        }
-        if (hudResizing) {
-            HudDrawHelpers.drawDashedBorder(g, panelX - 2, panelY - 2, layout.panelW() + 4, layout.panelH() + 4, HudDrawHelpers.dashedPreviewColor());
-        }
-
-        drawHudPanel(g, mc, data, visibleKeys, layout, panelX, panelY);
-        boolean handleHovered = HudDrawHelpers.isOverResizeHandle(m[0], m[1], panelX, panelY, layout.panelW(), layout.panelH());
-        HudDrawHelpers.drawResizeHandle(g, mc, panelX, panelY, layout.panelW(), layout.panelH(), handleHovered, hudResizing, m[0], m[1]);
-        if (hudResizing) {
-            String scaleText = String.format("Scale: %.1fx", resizePreviewScale);
-            int textX = panelX + Math.max(0, (layout.panelW() - mc.font.width(scaleText)) / 2);
-            g.drawString(mc.font, scaleText, textX, panelY + layout.panelH() + 6, HudDrawHelpers.handleActiveColor(), false);
-        }
-        HudDrawHelpers.drawEditBanner(g, mc);
-    }
-
-    public static void onEditMousePress(int mx, int my, int button) {
-        if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) {
-            return;
-        }
-        Minecraft mc = Minecraft.getInstance();
-        List<String> keys = NutrientRegistry.getKeys();
-        if (keys.isEmpty()) {
-            return;
-        }
-        TrackingData data = MarieClientCache.get();
-        NourishedClientConfig cc = NourishedClientConfig.get();
-        List<String> visibleKeys = HudVisibility.visibleKeys(data, cc.effectiveDietBarOrder(), cc);
-        if (visibleKeys.isEmpty()) {
-            return;
-        }
-
-        HudLayout.Layout layout = HudLayout.compute(mc, visibleKeys);
-        int panelX = layout.panelX();
-        int panelY = layout.panelY();
-        boolean overHandle = HudDrawHelpers.isOverResizeHandle(mx, my, panelX, panelY, layout.panelW(), layout.panelH());
-
-        if (overHandle) {
-            hudResizing = true;
-            hudDragging = false;
-            resizeOriginX = panelX;
-            resizeOriginY = panelY;
-            HudLayout.Layout baseScaleLayout = HudLayout.compute(mc, visibleKeys, 1.0d);
-            resizeBaseDiagonal = Math.hypot(baseScaleLayout.panelW(), baseScaleLayout.panelH());
-            resizePreviewScale = layout.scale();
-            return;
-        }
-
-        boolean over = mx >= panelX && my >= panelY && mx < panelX + layout.panelW() && my < panelY + layout.panelH();
-        if (over) {
-            hudDragging = true;
-            hudResizing = false;
-            dragGrabOffsetX = mx - panelX;
-            dragGrabOffsetY = my - panelY;
-            dragAnchorBaseX = layout.baseX();
-            dragAnchorBaseY = layout.baseY();
-        }
-    }
-
-    public static void onEditMouseRelease(int mx, int my, int button) {
-        if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) {
-            return;
-        }
-        Minecraft mc = Minecraft.getInstance();
-        List<String> keys = NutrientRegistry.getKeys();
-        if (keys.isEmpty()) {
-            return;
-        }
-        TrackingData data = MarieClientCache.get();
-        NourishedClientConfig cc = NourishedClientConfig.get();
-        List<String> visibleKeys = HudVisibility.visibleKeys(data, cc.effectiveDietBarOrder(), cc);
-        if (visibleKeys.isEmpty()) {
-            return;
-        }
-
-        if (hudDragging) {
-            HudLayout.Layout layout = HudLayout.compute(mc, visibleKeys);
-            int sw = mc.getWindow().getGuiScaledWidth();
-            int sh = mc.getWindow().getGuiScaledHeight();
-            int px = Mth.clamp(mx - dragGrabOffsetX, 0, Math.max(0, sw - layout.panelW()));
-            int py = Mth.clamp(my - dragGrabOffsetY, 0, Math.max(0, sh - layout.panelH()));
-            cc.setHudOffsetX(px - dragAnchorBaseX);
-            cc.setHudOffsetY(py - dragAnchorBaseY);
-            NourishedClientConfig.saveNow();
-            hudDragging = false;
-            return;
-        }
-        if (hudResizing) {
-            double finalScale = Mth.clamp(resizePreviewScale, 0.3d, 3.0d);
-            cc.setHudScale(finalScale);
-            HudLayout.Layout scaled = HudLayout.compute(mc, visibleKeys, finalScale);
-            cc.setHudOffsetX(resizeOriginX - scaled.baseX());
-            cc.setHudOffsetY(resizeOriginY - scaled.baseY());
-            NourishedClientConfig.saveNow();
-            hudResizing = false;
+        HudLayout.Layout layout = HudEditTarget.resolvedLayout(mc, visibleKeys);
+        if (cc.hudClassicMode()) {
+            ClassicHudPanelRenderer.drawPanel(
+                    event.getGuiGraphics(), mc, data, visibleKeys, layout, layout.panelX(), layout.panelY(), displayValues
+            );
+        } else {
+            drawHudPanelViaMarieUI(event.getGuiGraphics(), mc, event.getPartialTick().getGameTimeDeltaPartialTick(false), visibleKeys, layout);
         }
     }
 
@@ -227,20 +82,44 @@ public final class NourishedHUD {
             return;
         }
         while (NourishedKeys.EDIT_HUD.consumeClick()) {
-            HUDEditMode.setActive(true);
+            marieEditModeController().enter();
         }
     }
 
-    private static void drawHudPanel(
-            GuiGraphics g,
-            Minecraft mc,
-            TrackingData data,
-            List<String> keys,
-            HudLayout.Layout layout,
-            int panelX,
-            int panelY
-    ) {
-        HudPanelRenderer.drawPanel(g, mc, data, keys, layout, panelX, panelY, displayValues);
+    /**
+     * Lazily builds the MarieUI edit-mode wrapper + controller on first entry (the HUD has no
+     * {@link net.minecraft.client.gui.screens.Screen} of its own to construct these in, unlike
+     * {@link dev.maire.nourished.client.screen.diet.DietScreen}, so they live here as statics instead),
+     * then reuses the same instances for the rest of the session.
+     */
+    private static EditModeController marieEditModeController() {
+        if (marieEditModeController == null) {
+            marieEditTarget = new HudEditTarget(Minecraft.getInstance());
+            marieEditModeController = new EditModeController(
+                    marieEditTarget,
+                    "Drag the HUD panel to reposition, drag the corner handle to resize. H or Esc to exit.",
+                    NourishedKeys.EDIT_HUD.getKey().getValue(),
+                    () -> {}
+            );
+        }
+        return marieEditModeController;
+    }
+
+    /** Accessor for {@link HudEditTarget}'s render path, which reuses the same lerped values as the normal HUD render. */
+    public static Map<String, Float> currentDisplayValues() {
+        return displayValues;
+    }
+
+    /**
+     * Renders the nutrient HUD panel via the MarieUI Component/Container tree. MarieUI has no root/
+     * screen anchoring resolver of its own yet, so the {@link Bounds} passed to the panel is
+     * resolved here rather than by {@link NutrientPanelContainer#constraint()}.
+     */
+    private static void drawHudPanelViaMarieUI(GuiGraphics g, Minecraft mc, float partialTick, List<String> keys, HudLayout.Layout layout) {
+        NutrientPanelContainer panel = new NutrientPanelContainer(keys, layout, java.util.Collections.unmodifiableMap(displayValues));
+        RenderContext context = new GuiGraphicsRenderContext(g, mc, Theme.DARK, partialTick);
+        Bounds bounds = new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
+        panel.render(context, bounds);
     }
 
     private static void advanceLerp(TrackingData data, List<String> keys) {
@@ -255,8 +134,4 @@ public final class NourishedHUD {
         }
     }
 
-    private static int[] scaledMouse(Minecraft mc) {
-        double s = mc.getWindow().getGuiScale();
-        return new int[]{(int) (mc.mouseHandler.xpos() / s), (int) (mc.mouseHandler.ypos() / s)};
-    }
 }

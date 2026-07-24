@@ -2,12 +2,12 @@ package dev.maire.nourished.kubejs.bindings;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import dev.marie.MariesLib.api.ApiStatus;
-import dev.marie.MariesLib.api.MarieAPI;
-import dev.marie.MariesLib.api.ValueDefinition;
-import dev.marie.MariesLib.core.IMarieLibConfig;
-import dev.marie.MariesLib.curve.math.CurveGrid;
-import dev.marie.MariesLib.curve.serialization.CurveGridJson;
+import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.api.marieapi.MarieAPI;
+import dev.marie.framework.api.value.ValueDefinition;
+import dev.marie.framework.core.IMarieConfig;
+import dev.marie.framework.curve.math.CurveGrid;
+import dev.marie.framework.curve.serialization.CurveGridJson;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurveDef;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurvePreset;
@@ -120,7 +120,7 @@ public final class NourishedKubeBindings {
 
     public static boolean isNutrientCritical(Player player, String nutrientKey) {
         float level = MarieAPI.getValueLevel(player, nutrientKey);
-        float threshold = IMarieLibConfig.get().criticalThresholdFor(nutrientKey);
+        float threshold = IMarieConfig.get().criticalThresholdFor(nutrientKey);
         return level >= 0 && level < threshold;
     }
 

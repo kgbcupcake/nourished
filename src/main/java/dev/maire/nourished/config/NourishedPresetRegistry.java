@@ -6,9 +6,9 @@ import com.google.gson.JsonObject;
 
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.effect.EffectRegistry;
-import dev.marie.MariesLib.config.PresetRegistry;
-import dev.marie.MariesLib.data.DatapackSchema;
-import dev.marie.MariesLib.util.MarieValidation;
+import dev.marie.framework.config.PresetRegistry;
+import dev.marie.framework.data.DatapackSchema;
+import dev.marie.framework.util.MarieValidation;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
