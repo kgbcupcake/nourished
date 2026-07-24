@@ -94,58 +94,21 @@ public final class DietLayout {
     }
 
     /**
-     * Whether a sub-box's header alone still fits at {@code startLocalY} — a box's absolute floor
-     * before it disappears entirely. Once this is false, nothing about the box (not even its
-     * header) has room to render.
+     * How much of a block naturally {@code naturalLocalHeight} tall, starting at {@code
+     * startLocalY}, still fits — continuous {@code 0..naturalLocalHeight}, not the all-or-nothing
+     * floor {@link #fitsInPanel} gives. A sub-box collapsing from its full
+     * size down to nothing is jarring precisely at the boundary where it flips from "renders in
+     * full" to "renders nothing at all" (a 1px panel-height change removing an entire header's
+     * worth of content) — callers that want a smooth, continuous shrink instead (a box's whole
+     * content block scaling down together as room tightens, only actually vanishing once there's no
+     * meaningful room left) should divide their render-time content scale by {@code
+     * naturalLocalHeight} against this room, not gate on a boolean.
      */
-    public static boolean headerFitsInPanel(Layout layout, int startLocalY, int headerLocalHeight) {
-        return fitsInPanel(layout, startLocalY, headerLocalHeight);
-    }
-
-    /**
-     * Whether a fixed (non-repeating) body block below the header still fits — for sub-boxes whose
-     * body is one indivisible chunk (Calories' bar, Balance's squares, EatMore's icon row) rather
-     * than a list of same-sized rows. The header still renders even when this is false; only the
-     * body collapses, so the box shrinks to header-only instead of vanishing outright.
-     */
-    public static boolean bodyBlockFitsInPanel(Layout layout, int startLocalY, int headerLocalHeight, int bodyLocalHeight) {
-        return fitsInPanel(layout, startLocalY, headerLocalHeight + bodyLocalHeight);
-    }
-
-    /**
-     * How much of a fixed body block (0..{@code bodyLocalHeight}) still fits below the header at
-     * {@code startLocalY} — a continuous counterpart to {@link #bodyBlockFitsInPanel}, for bodies
-     * whose only content IS the thing being asked to disappear (EatMore's icon row carries the
-     * module's entire information; there's no separate always-visible summary the way Calories'
-     * number or Balance's state text already covers). Lets that content shrink smoothly (scaled down
-     * with the room available) as the panel tightens, instead of popping from full-size to nothing
-     * the instant it no longer fits whole.
-     */
-    public static int bodyBlockRoomInPanel(Layout layout, int startLocalY, int headerLocalHeight, int bodyLocalHeight) {
+    public static int roomInPanel(Layout layout, int startLocalY, int naturalLocalHeight) {
         int liveLocalHeight = (int) Math.round(layout.panelH() / layout.scale());
         int maxY = liveLocalHeight - PAD;
-        int room = maxY - startLocalY - headerLocalHeight;
-        return Math.max(0, Math.min(bodyLocalHeight, room));
-    }
-
-    /**
-     * How many repeating body rows of {@code unitLocalHeight} fit below the header at {@code
-     * startLocalY}, clamped to {@code [0, availableUnits]} — the panel-stack-relative equivalent of
-     * {@link dev.marie.framework.ui.component.HeaderCollapsibleComponent#bodyUnitsFit}, which needs
-     * an independently-resolved {@link Bounds} these panel-stacked sub-boxes don't have (their
-     * position is a running local-Y offset in the panel's own stack, not a Bounds of their own).
-     * Lets RecentMeals/ActiveEffects show as many lines as still fit instead of an all-or-nothing
-     * gate on the full natural row count.
-     */
-    public static int stackedBodyUnitsFit(Layout layout, int startLocalY, int headerLocalHeight, int unitLocalHeight, int availableUnits) {
-        if (unitLocalHeight <= 0) {
-            return 0;
-        }
-        int liveLocalHeight = (int) Math.round(layout.panelH() / layout.scale());
-        int maxY = liveLocalHeight - PAD;
-        int roomForBody = maxY - startLocalY - headerLocalHeight;
-        int fit = (int) Math.floor(roomForBody / (double) unitLocalHeight);
-        return Math.max(0, Math.min(availableUnits, fit));
+        int room = maxY - startLocalY;
+        return Math.max(0, Math.min(naturalLocalHeight, room));
     }
 
     public static int toScreenX(Layout layout, int localX) {

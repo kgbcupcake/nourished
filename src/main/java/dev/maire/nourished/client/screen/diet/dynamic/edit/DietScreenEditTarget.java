@@ -25,6 +25,7 @@ import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +51,7 @@ public final class DietScreenEditTarget implements MarieComponent {
     private final DraggableResizable recentMealsDrag;
     private final DraggableResizable eatMoreDrag;
     private final DraggableResizable activeEffectsDrag;
+    private final DietZoomController zoom = new DietZoomController();
 
     private Bounds lastCaloriesResolvedBounds;
     private Bounds lastBalanceResolvedBounds;
@@ -164,23 +166,64 @@ public final class DietScreenEditTarget implements MarieComponent {
             return true;
         }
 
-        if (lastCaloriesResolvedBounds != null && caloriesDrag.mouseClicked(mx, my, lastCaloriesResolvedBounds)) {
-            return true;
+        if (lastCaloriesResolvedBounds != null) {
+            if (zoomClickConsumed(DietZoomController.Box.CALORIES, lastCaloriesResolvedBounds, button, mx, my)) {
+                return true;
+            }
+            if (caloriesDrag.mouseClicked(mx, my, lastCaloriesResolvedBounds)) {
+                return true;
+            }
         }
-        if (lastBalanceResolvedBounds != null && balanceDrag.mouseClicked(mx, my, lastBalanceResolvedBounds)) {
-            return true;
+        if (lastBalanceResolvedBounds != null) {
+            if (zoomClickConsumed(DietZoomController.Box.BALANCE, lastBalanceResolvedBounds, button, mx, my)) {
+                return true;
+            }
+            if (balanceDrag.mouseClicked(mx, my, lastBalanceResolvedBounds)) {
+                return true;
+            }
         }
-        if (lastRecentResolvedBounds != null && recentMealsDrag.mouseClicked(mx, my, lastRecentResolvedBounds)) {
-            return true;
+        if (lastRecentResolvedBounds != null) {
+            if (zoomClickConsumed(DietZoomController.Box.RECENT_MEALS, lastRecentResolvedBounds, button, mx, my)) {
+                return true;
+            }
+            if (recentMealsDrag.mouseClicked(mx, my, lastRecentResolvedBounds)) {
+                return true;
+            }
         }
-        if (lastEatMoreResolvedBounds != null && eatMoreDrag.mouseClicked(mx, my, lastEatMoreResolvedBounds)) {
-            return true;
+        if (lastEatMoreResolvedBounds != null) {
+            if (zoomClickConsumed(DietZoomController.Box.EAT_MORE, lastEatMoreResolvedBounds, button, mx, my)) {
+                return true;
+            }
+            if (eatMoreDrag.mouseClicked(mx, my, lastEatMoreResolvedBounds)) {
+                return true;
+            }
         }
-        if (lastActiveEffectsResolvedBounds != null && activeEffectsDrag.mouseClicked(mx, my, lastActiveEffectsResolvedBounds)) {
-            return true;
+        if (lastActiveEffectsResolvedBounds != null) {
+            if (zoomClickConsumed(DietZoomController.Box.ACTIVE_EFFECTS, lastActiveEffectsResolvedBounds, button, mx, my)) {
+                return true;
+            }
+            if (activeEffectsDrag.mouseClicked(mx, my, lastActiveEffectsResolvedBounds)) {
+                return true;
+            }
         }
         Bounds panelBounds = new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
         return panelDrag.mouseClicked(mx, my, panelBounds);
+    }
+
+    /** Feeds a click to {@code box}'s double-click recognizer, hit-tested per {@link DietZoomController#onClick}. */
+    private boolean zoomClickConsumed(DietZoomController.Box box, Bounds bounds, int button, int mx, int my) {
+        return zoom.onClick(box, button, mx, my, bounds);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        Map<DietZoomController.Box, Bounds> bounds = new EnumMap<>(DietZoomController.Box.class);
+        if (lastCaloriesResolvedBounds != null) bounds.put(DietZoomController.Box.CALORIES, lastCaloriesResolvedBounds);
+        if (lastBalanceResolvedBounds != null) bounds.put(DietZoomController.Box.BALANCE, lastBalanceResolvedBounds);
+        if (lastRecentResolvedBounds != null) bounds.put(DietZoomController.Box.RECENT_MEALS, lastRecentResolvedBounds);
+        if (lastEatMoreResolvedBounds != null) bounds.put(DietZoomController.Box.EAT_MORE, lastEatMoreResolvedBounds);
+        if (lastActiveEffectsResolvedBounds != null) bounds.put(DietZoomController.Box.ACTIVE_EFFECTS, lastActiveEffectsResolvedBounds);
+        return zoom.handleScroll(scrollY, resolvedPanelLayout(mc), bounds);
     }
 
     @Override
@@ -259,7 +302,13 @@ public final class DietScreenEditTarget implements MarieComponent {
         Map<String, Float> displayValues = data != null ? data.values : Map.of();
 
         DietLayout.Layout matchedPanelLayout = matchedLayoutFor(panelBounds);
-        DietPanelContainer panel = new DietPanelContainer(data, bars, displayValues, matchedPanelLayout);
+        applyLiveSubBoxOverrides(mx, my);
+        DietPanelContainer panel;
+        try {
+            panel = new DietPanelContainer(data, bars, displayValues, matchedPanelLayout);
+        } finally {
+            DietScreenPersistence.clearLiveOverrides();
+        }
         CaloriesComponent calories = panel.caloriesComponent();
         BalanceComponent balance = panel.balanceComponent();
         RecentMealsComponent recent = panel.recentMealsComponent();
@@ -299,20 +348,31 @@ public final class DietScreenEditTarget implements MarieComponent {
         panel.render(context, panelBounds);
 
         drawHandle(context, panelDrag, panelBounds, mx, my, true);
+        drawSizeLabel(context, panelDrag, panelBounds);
         if (calories.isVisible()) {
             drawHandle(context, caloriesDrag, caloriesBounds, mx, my, false);
+            drawSizeLabel(context, caloriesDrag, caloriesBounds);
+            drawZoomLabel(context, DietZoomController.Box.CALORIES, caloriesBounds, DietScreenPersistence.contentScale(CaloriesComponent.ID));
         }
         if (balance.isVisible()) {
             drawHandle(context, balanceDrag, balanceBounds, mx, my, false);
+            drawSizeLabel(context, balanceDrag, balanceBounds);
+            drawZoomLabel(context, DietZoomController.Box.BALANCE, balanceBounds, DietScreenPersistence.contentScale(BalanceComponent.ID));
         }
         if (recent.isVisible()) {
             drawHandle(context, recentMealsDrag, recentBounds, mx, my, false);
+            drawSizeLabel(context, recentMealsDrag, recentBounds);
+            drawZoomLabel(context, DietZoomController.Box.RECENT_MEALS, recentBounds, DietScreenPersistence.contentScale(RecentMealsComponent.ID));
         }
         if (eatMore.isVisible()) {
             drawHandle(context, eatMoreDrag, eatMoreBounds, mx, my, false);
+            drawSizeLabel(context, eatMoreDrag, eatMoreBounds);
+            drawZoomLabel(context, DietZoomController.Box.EAT_MORE, eatMoreBounds, DietScreenPersistence.contentScale(EatMoreComponent.ID));
         }
         if (activeEffects.isVisible()) {
             drawHandle(context, activeEffectsDrag, activeEffectsBounds, mx, my, false);
+            drawSizeLabel(context, activeEffectsDrag, activeEffectsBounds);
+            drawZoomLabel(context, DietZoomController.Box.ACTIVE_EFFECTS, activeEffectsBounds, DietScreenPersistence.contentScale(ActiveEffectsComponent.ID));
         }
 
         boolean toggleHovered = DietScreen.isMouseOverEditModeToggle(matchedPanelLayout, mx, my);
@@ -333,6 +393,77 @@ public final class DietScreenEditTarget implements MarieComponent {
         }
     }
 
+    /**
+     * Debug aid: while {@code drag} is actively being dragged or resized, shows {@code bounds}'
+     * live pixel size next to whichever handle/edge is driving the gesture, to correlate box size
+     * with things like {@link ActiveEffectsComponent}'s visibility threshold.
+     */
+    private static void drawSizeLabel(RenderContext context, DraggableResizable drag, Bounds bounds) {
+        if (!(drag.isDragging() || drag.isResizing())) {
+            return;
+        }
+        String label = bounds.width() + " x " + bounds.height();
+        int lx;
+        int ly;
+        if (drag.isCornerActive()) {
+            Bounds handle = DraggableResizable.handleBounds(bounds);
+            lx = handle.x() + DraggableResizable.RESIZE_HANDLE_SIZE + 4;
+            ly = handle.y() + DraggableResizable.RESIZE_HANDLE_SIZE + 4;
+        } else if (drag.isBottomLeftCornerActive()) {
+            Bounds handle = DraggableResizable.handleBoundsBottomLeft(bounds);
+            lx = handle.x();
+            ly = handle.y() + DraggableResizable.RESIZE_HANDLE_SIZE + 4;
+        } else {
+            DraggableResizable.Edge activeEdge = null;
+            for (DraggableResizable.Edge edge : DraggableResizable.Edge.values()) {
+                if (drag.isEdgeActive(edge)) {
+                    activeEdge = edge;
+                    break;
+                }
+            }
+            if (activeEdge != null) {
+                switch (activeEdge) {
+                    case LEFT -> {
+                        lx = bounds.x() - 40;
+                        ly = bounds.y() + bounds.height() / 2 - 4;
+                    }
+                    case RIGHT -> {
+                        lx = bounds.x() + bounds.width() + 6;
+                        ly = bounds.y() + bounds.height() / 2 - 4;
+                    }
+                    case TOP -> {
+                        lx = bounds.x() + bounds.width() / 2 - 20;
+                        ly = bounds.y() - 12;
+                    }
+                    default -> {
+                        lx = bounds.x() + bounds.width() / 2 - 20;
+                        ly = bounds.y() + bounds.height() + 6;
+                    }
+                }
+            } else {
+                // Plain reposition drag — no handle is active, so anchor near the box's top-left.
+                lx = bounds.x() + 4;
+                ly = bounds.y() - 12;
+            }
+        }
+        drawShadowedText(context, label, lx, ly);
+    }
+
+    /** While {@code box} is in double-click zoom mode (see {@link DietZoomController}), shows its current contentScale multiplier below the box so scroll-wheel adjustments are visible. */
+    private void drawZoomLabel(RenderContext context, DietZoomController.Box box, Bounds bounds, double contentScale) {
+        if (!zoom.isZoomed(box)) {
+            return;
+        }
+        String label = "zoom x" + String.format("%.2f", contentScale);
+        drawShadowedText(context, label, bounds.x() + 4, bounds.y() + bounds.height() + 6);
+    }
+
+    /** Light text over a dark 1px drop-shadow, for legibility against any background. */
+    private static void drawShadowedText(RenderContext context, String text, int x, int y) {
+        context.drawText(text, x + 1, y + 1, 0xFF000000, 0.75f);
+        context.drawText(text, x, y, 0xFFFFFFFF, 0.75f);
+    }
+
     private static List<Integer> xEdges(Bounds... boxes) {
         List<Integer> lines = new ArrayList<>(boxes.length * 2);
         for (Bounds b : boxes) {
@@ -349,6 +480,33 @@ public final class DietScreenEditTarget implements MarieComponent {
             lines.add(b.y() + b.height());
         }
         return lines;
+    }
+
+    /**
+     * Registers this frame's live drag/resize preview (if any) for each sub-box in {@link
+     * DietScreenPersistence}'s override map, so the module chain built by the {@code
+     * DietPanelContainer} constructed right after this call sees the box actually being dragged at
+     * its live size/position instead of its last-committed one — see {@link
+     * DietScreenPersistence#setLiveOverride}. Caller must pair this with {@link
+     * DietScreenPersistence#clearLiveOverrides()} once that construction is done so the override
+     * doesn't leak into the normal (non-edit-mode) render path.
+     */
+    private void applyLiveSubBoxOverrides(int mx, int my) {
+        applyLiveOverride(caloriesDrag, CaloriesComponent.ID, mx, my);
+        applyLiveOverride(balanceDrag, BalanceComponent.ID, mx, my);
+        applyLiveOverride(recentMealsDrag, RecentMealsComponent.ID, mx, my);
+        applyLiveOverride(eatMoreDrag, EatMoreComponent.ID, mx, my);
+        applyLiveOverride(activeEffectsDrag, ActiveEffectsComponent.ID, mx, my);
+    }
+
+    private static void applyLiveOverride(DraggableResizable drag, String componentId, int mx, int my) {
+        if (!drag.isDragging() && !drag.isResizing()) {
+            return;
+        }
+        Bounds preview = drag.mouseDragged(mx, my);
+        if (preview != null) {
+            DietScreenPersistence.setLiveOverride(componentId, preview);
+        }
     }
 
     private static Bounds liveOrDefault(DraggableResizable drag, int mx, int my, Bounds fallback) {
@@ -386,7 +544,14 @@ public final class DietScreenEditTarget implements MarieComponent {
         );
     }
 
-    /** Normalized against panelX + leftMargin, matching DietScreenPersistence#resolveRelativeToPanel's read-back base. */
+    /**
+     * Normalized against panelX + leftMargin, matching DietScreenPersistence#resolveRelativeToPanel's
+     * read-back base. Read-modify-write against the box's existing persisted {@link ComponentState}
+     * (falling back to record defaults only if nothing is persisted yet) rather than constructing a
+     * fresh one — only x/y/width/height/collapsed/widthManual/heightManual come from this drag/resize;
+     * every other field (e.g. {@code contentScale}, and anything the record gains later) is copied
+     * through from the loaded state so a drag/resize commit can't silently wipe it out.
+     */
     private ComponentState toRelativeState(Bounds bounds, String componentId, DraggableResizable drag) {
         DietLayout.Layout panelLayout = resolvedPanelLayout(mc);
         Bounds clamped = DietPanelLayoutResolver.clampToParent(bounds, panelLayout);
@@ -394,12 +559,14 @@ public final class DietScreenEditTarget implements MarieComponent {
         AutoGrowPanelContainer.ManualOverride existing = DietPanelLayoutResolver.existingManualOverride(componentId);
         AutoGrowPanelContainer.ManualOverride override = AutoGrowPanelContainer.withCommit(existing, drag);
         int contentX = panelLayout.panelX() + panelLayout.leftMargin();
+        ComponentState base = DietScreenPersistence.get().load(componentId)
+                .orElseGet(() -> new ComponentState(0, 0, 0, 0, false, false, false, 0));
         return new ComponentState(
                 (int) Math.round((clamped.x() - contentX) / scale),
                 (int) Math.round((clamped.y() - panelLayout.panelY()) / scale),
                 (int) Math.round(clamped.width() / scale),
                 (int) Math.round(clamped.height() / scale),
-                false, override.widthManual(), override.heightManual(), 0
+                false, override.widthManual(), override.heightManual(), base.leftMargin(), base.contentScale()
         );
     }
 

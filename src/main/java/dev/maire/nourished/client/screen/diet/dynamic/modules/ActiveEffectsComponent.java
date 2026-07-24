@@ -55,13 +55,17 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         Minecraft mc = Minecraft.getInstance();
         int effectCount = (mc.player != null) ? mc.player.getActiveEffects().size() : 0;
         int naturalLineCount = Math.max(1, Math.min(3, effectCount));
-        this.effectsBoxH = HEADER_LOCAL_HEIGHT + naturalLineCount * 9; 
-        boolean headerVisible = cc.showActiveEffects() && mc.player != null && DietLayout.headerFitsInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT);
-        this.visible = headerVisible;
-        this.linesShown = headerVisible
-                ? DietLayout.stackedBodyUnitsFit(layout, startLocalY, HEADER_LOCAL_HEIGHT, 9, naturalLineCount)
-                : 0;
-        this.renderedContentHeight = visible ? HEADER_LOCAL_HEIGHT + linesShown * 9 : 0;
+        this.effectsBoxH = HEADER_LOCAL_HEIGHT + naturalLineCount * 9;
+        // Continuous fade instead of an all-or-nothing header floor, and instead of dropping whole
+        // effect lines one at a time as room tightens (the old stackedBodyUnitsFit behavior): every
+        // natural line still draws, just scaled down together with the header (see render()'s
+        // heightScale, divided by the fixed effectsBoxH rather than this frame's shrunk room) — the
+        // box only actually disappears once there's less than MIN_VISIBLE_ROOM_LOCAL of room left.
+        boolean enabled = cc.showActiveEffects() && mc.player != null;
+        int room = enabled ? DietLayout.roomInPanel(layout, startLocalY, effectsBoxH) : 0;
+        this.visible = room >= DietScreenModules.MIN_VISIBLE_ROOM_LOCAL;
+        this.linesShown = naturalLineCount;
+        this.renderedContentHeight = visible ? room : 0;
         this.localHeight = visible ? renderedContentHeight + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
@@ -131,31 +135,47 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         int y = startLocalY;
 
         Collection<MobEffectInstance> effects = mc.player.getActiveEffects();
-
-        // min() of both ratios so a single-axis resize can't hide content. Divides by
-        // renderedContentHeight (this frame's actual header+linesShown extent), not the full
-        // natural effectsBoxH — otherwise a graceful line-count shrink would also shrink the
-        // remaining lines' text scale instead of just showing fewer full-size lines.
-        double widthScale = bounds.width() / (double) bw;
-        double heightScale = bounds.height() / (double) Math.max(1, renderedContentHeight);
-        this.contentScale = Math.min(widthScale, heightScale);
-        float scale = (float) contentScale;
-
         NourishedClientConfig cc = NourishedClientConfig.get();
+
+        // min() of both ratios so a single-axis resize can't hide content. Divides by the fixed
+        // effectsBoxH (the full natural header+lines extent), not this frame's shrunk
+        // renderedContentHeight — so the header and every effect line scale down together
+        // continuously as room tightens, instead of the header staying full-size right up until
+        // it's clipped off.
+        double widthScale = bounds.width() / (double) bw;
+        double heightScale = bounds.height() / (double) effectsBoxH;
+        this.contentScale = Math.min(widthScale, heightScale);
+        // contentScale (fitScale) still drives sx/sy unchanged below; the persisted zoom multiplier
+        // only affects the size passed to the header/line text draw calls. Clamped to a flat
+        // [fitScale*0.5, fitScale*3.0] range (see zoomedTextIconScale's javadoc) — real containment
+        // against the box's own edges comes from the pushClip(bounds...) below, not from this range.
+        float scale = DietScreenModules.zoomedTextIconScale(contentScale, widthScale, heightScale, DietScreenPersistence.contentScale(ID));
+        // Header-to-first-line and line-to-line advance must grow by the same ratio zoom grows text
+        // draw size by — otherwise bigger zoomed lines visually collide into the next line's still-
+        // unzoomed vertical slot, same bug just fixed in RecentMealsComponent (see its render() for
+        // the full derivation). zoomRatio is exactly 1.0 whenever zoom is at/below fitScale (scale ==
+        // contentScale), so this is a no-op at the default, unzoomed state. Purely cosmetic (keeps
+        // lines from visually colliding) — pushClip below is what actually bounds on-screen overflow.
+        double zoomRatio = contentScale > 0 ? scale / contentScale : 1.0d;
+        int zoomedHeaderAdvance = Math.max(1, (int) Math.round(HEADER_LOCAL_HEIGHT * zoomRatio));
+        int zoomedLineAdvance = Math.max(1, (int) Math.round(9 * zoomRatio));
+
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
-        // Slightly smaller than body text, purely a visual tweak — HEADER_LOCAL_HEIGHT (the layout reservation below) is untouched.
-        drawText(context, Component.translatable("nourished.screen.diet.effects_label").getString(), x, y + DietScreenModules.HEADER_TOP_PADDING_LOCAL, COL_HEADER, scale * 0.9f);
-        y += HEADER_LOCAL_HEIGHT;
 
-        if (effects.isEmpty()) {
-            return;
-        }
-
-        // pushClip/popClip stays only as a backstop — linesShown already reflects how many lines
-        // actually fit in the panel's live vertical space (see constructor).
         int naturalLineCount = linesShown;
+        // Clip wraps the header now too (not just the lines) — a continuously-shrinking box can be
+        // shorter than even the header's own natural height, and without this the header text would
+        // render past the box's actual (shrunk) bottom edge instead of fading out with it.
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
+            // Slightly smaller than body text, purely a visual tweak — HEADER_LOCAL_HEIGHT (the layout reservation below) is untouched.
+            drawText(context, Component.translatable("nourished.screen.diet.effects_label").getString(), x, y + DietScreenModules.HEADER_TOP_PADDING_LOCAL, COL_HEADER, scale * 0.9f);
+            y += zoomedHeaderAdvance;
+
+            if (effects.isEmpty()) {
+                return;
+            }
+
             int count = 0;
             for (MobEffectInstance effect : effects) {
                 if (count >= naturalLineCount) break;
@@ -166,7 +186,7 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
                 int color = type.isBeneficial() ? COL_GREEN : COL_RED;
                 String prefix = type.isBeneficial() ? "+ " : "- ";
                 drawText(context, prefix + label, x, y, color, scale);
-                y += 9;
+                y += zoomedLineAdvance;
                 count++;
             }
         } finally {

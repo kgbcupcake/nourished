@@ -149,8 +149,29 @@ public final class DietLeftColumnComponent implements Container {
      * DietScreenModules#naturalContentEndLocalY} to sum the same modules' natural total height for
      * panel auto-grow, so the chaining formula itself lives in marie-ui rather than being
      * duplicated between the two callers.
+     *
+     * <p>One exception to "position never affects the advance": a sibling whose resolved X has
+     * drifted away from the column's own left edge ({@code contentX}) by more than {@link
+     * #OUT_OF_FLOW_X_TOLERANCE} is no longer sitting <em>in</em> the single-width vertical column at
+     * all — the classic case being {@code EatMoreComponent} dragged to sit beside {@code
+     * RecentMealsComponent} instead of below it, both still left-aligned to the panel edge in the
+     * "natural" case but diverging in X the moment either is dragged sideways. Reserving that box's
+     * full height for whoever comes next (as the height-only rule above does) then reserves dead
+     * space nothing is actually rendered into — the next module (frequently {@code
+     * ActiveEffectsComponent}) gets pushed down by a box's height despite that box no longer
+     * occupying that vertical slot, which can push it (and its header/body fit checks) past the
+     * live panel's bottom edge even though the box that would have caused that lives visibly
+     * elsewhere on screen. This check only gates whether the advance happens at all — X is never fed
+     * into <em>how far</em> it advances (still {@code resolvedBounds.height()} alone), so it can't
+     * reintroduce the Y-feedback degeneracy the javadoc above already ruled out.
      */
+    private static final int OUT_OF_FLOW_X_TOLERANCE = 6;
+
     public static int nextSiblingStartLocalY(int currentLocalY, int localHeight, Bounds resolvedBounds, DietLayout.Layout layout) {
+        int contentX = layout.panelX() + layout.leftMargin();
+        if (Math.abs(resolvedBounds.x() - contentX) > OUT_OF_FLOW_X_TOLERANCE) {
+            return currentLocalY;
+        }
         return AutoGrowPanelContainer.nextSiblingStartLocalY(currentLocalY, localHeight, resolvedBounds, layout.scale());
     }
 

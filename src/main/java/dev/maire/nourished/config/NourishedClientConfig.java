@@ -236,7 +236,16 @@ public final class NourishedClientConfig {
             for (String line : lines) {
                 String trimmed = line.trim();
                 if (trimmed.startsWith("hideZeroNutrients")
-                        || trimmed.startsWith("hudShowBelowThreshold")) {
+                        || trimmed.startsWith("hudShowBelowThreshold")
+                        // Superseded by each Diet Screen sub-box's own persisted ComponentState#contentScale
+                        // (DietScreenPersistence), keyed alongside its position/size rather than duplicated
+                        // here as a separate global config value — any zoom level set under the old scheme
+                        // is simply dropped, same as every other one-time reset migration in this file.
+                        || trimmed.startsWith("caloriesContentScale")
+                        || trimmed.startsWith("balanceContentScale")
+                        || trimmed.startsWith("recentMealsContentScale")
+                        || trimmed.startsWith("eatMoreContentScale")
+                        || trimmed.startsWith("activeEffectsContentScale")) {
                     changed = true;
                     continue;
                 }

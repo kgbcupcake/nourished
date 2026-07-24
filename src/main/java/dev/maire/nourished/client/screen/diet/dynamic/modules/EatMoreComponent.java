@@ -48,7 +48,6 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
     private final int startLocalY;
     private final List<String> neglected;
     private final boolean visible;
-    private final boolean bodyVisible;
     private final int eatBoxH;
     private final int naturalTotalHeight;
     private final int renderedContentHeight;
@@ -65,18 +64,14 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         NourishedClientConfig cc = NourishedClientConfig.get();
         this.eatBoxH = Math.max(1, (int) Math.round(46 * layout.eatMoreScale()));
         boolean showable = cc.showEatMoreOf() && !neglected.isEmpty();
-        // Unlike Calories/Balance, the icon row IS this module's entire information — there's no
-        // separate always-visible summary text covering the same ground once it's gone. So instead
-        // of an all-or-nothing toggle, it shrinks continuously (bodyBlockRoomInPanel) and renders at
-        // whatever scale the remaining room allows, only dropping out once there's truly zero room
-        // left. The header is still the absolute floor.
-        boolean headerVisible = showable && DietLayout.headerFitsInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT);
-        int bodyLocalHeight = Math.max(0, eatBoxH - HEADER_LOCAL_HEIGHT);
-        this.naturalTotalHeight = HEADER_LOCAL_HEIGHT + bodyLocalHeight;
-        int bodyRoom = headerVisible ? DietLayout.bodyBlockRoomInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT, bodyLocalHeight) : 0;
-        this.visible = headerVisible;
-        this.bodyVisible = bodyRoom > 0;
-        this.renderedContentHeight = visible ? HEADER_LOCAL_HEIGHT + bodyRoom : 0;
+        // Continuous fade instead of an all-or-nothing header floor — same pattern as
+        // Calories/Balance/RecentMeals now: header and icon row scale down together as room
+        // tightens (see render()'s heightScale, already divided by the fixed naturalTotalHeight),
+        // only actually disappearing once there's less than MIN_VISIBLE_ROOM_LOCAL of room left.
+        this.naturalTotalHeight = eatBoxH;
+        int room = showable ? DietLayout.roomInPanel(layout, startLocalY, naturalTotalHeight) : 0;
+        this.visible = room >= DietScreenModules.MIN_VISIBLE_ROOM_LOCAL;
+        this.renderedContentHeight = visible ? room : 0;
         this.localHeight = visible ? renderedContentHeight + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
@@ -149,20 +144,27 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         double widthScale = bounds.width() / (double) bw;
         double heightScale = bounds.height() / (double) Math.max(1, naturalTotalHeight);
         this.contentScale = Math.min(widthScale, heightScale);
-        float scale = (float) contentScale;
+        // contentScale (fitScale) still drives sx/sy unchanged below; the persisted zoom multiplier
+        // is applied here, at draw time, only to the size passed to the header/icon draw calls —
+        // there's no construction-time scale to fold it into, unlike eatBoxH's use of
+        // layout.eatMoreScale() above, which governs the box's structural height instead. Clamped to
+        // a flat [fitScale*0.5, fitScale*3.0] range (see zoomedTextIconScale's javadoc) — real
+        // containment against the box's own edges comes from the pushClip(bounds...) below, not from
+        // this range, so it no longer needs to be derived from widthScale/heightScale.
+        float scale = DietScreenModules.zoomedTextIconScale(contentScale, widthScale, heightScale, DietScreenPersistence.contentScale(ID));
 
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
         int y = startLocalY;
-        String suggestionHeader = Component.translatable("nourished.screen.diet.suggestion_label").getString();
-        drawText(context, font.plainSubstrByWidth(suggestionHeader, bw), x, y + DietScreenModules.HEADER_TOP_PADDING_LOCAL, COL_HEADER, scale);
-        y += HEADER_LOCAL_HEIGHT;
 
-        if (!bodyVisible) {
-            return;
-        }
-
+        // Clip wraps the header now too (not just the icon row) — a continuously-shrinking box can
+        // be shorter than even the header's own natural height, and without this the header text
+        // would render past the box's actual (shrunk) bottom edge instead of fading out with it.
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
+            String suggestionHeader = Component.translatable("nourished.screen.diet.suggestion_label").getString();
+            drawText(context, font.plainSubstrByWidth(suggestionHeader, bw), x, y + DietScreenModules.HEADER_TOP_PADDING_LOCAL, COL_HEADER, scale);
+            y += HEADER_LOCAL_HEIGHT;
+
             for (int col = 0; col < Math.min(2, neglected.size()); col++) {
                 String categoryKey = neglected.get(col);
                 TagKey<Item> tag = TagKey.create(Registries.ITEM,

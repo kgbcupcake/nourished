@@ -14,13 +14,9 @@ import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+
+import static dev.maire.nourished.client.screen.diet.dynamic.layout.DietSubBoxConstraints.SUMMARY_BOX_LOCAL_WIDTH;
 
 /** Independent Balance summary box module — same self-positioning/collapse/drag-resize pattern as {@link CaloriesComponent}/{@link RecentMealsComponent}/{@link EatMoreComponent}/{@link ActiveEffectsComponent}. */
 public final class BalanceComponent implements MarieComponent, HeaderCollapsibleComponent, SelfPositioningModule {
@@ -30,44 +26,37 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
     private static final int BODY_LOCAL_HEIGHT = 20;
     private static final int BOX_LOCAL_HEIGHT = HEADER_LOCAL_HEIGHT + BODY_LOCAL_HEIGHT;
 
-    private static final int COL_ROW_BG_RGB = 0x001E1E1E;
-    private static final int COL_BORDER_LT = 0xFF555555;
-    private static final int COL_WHITE = 0xFFFFFFFF;
-    private static final int COL_GREEN = 0xFF55FF55;
     private static final int COL_ORANGE = 0xFFFFAA00;
     private static final int COL_RED = 0xFFFF5555;
-    private static final int COL_SEG_EMPTY = 0xFF2A2A2A;
 
     private final DietLayout.Layout layout;
     private final int startLocalY;
     private final TrackingData data;
     private final boolean visible;
-    private final boolean bodyVisible;
     private final int renderedContentHeight;
     private final int localHeight;
     private final Bounds resolvedBounds;
-    private Bounds anchorBounds;
+    private final SummaryBoxRenderSupport support;
     private double contentScale = 1.0d;
 
     BalanceComponent(DietLayout.Layout layout, int startLocalY) {
         this.layout = layout;
         this.startLocalY = startLocalY;
+        this.support = new SummaryBoxRenderSupport(startLocalY);
 
         NourishedClientConfig cc = NourishedClientConfig.get();
         Minecraft mc = Minecraft.getInstance();
         this.data = mc.player != null ? MarieClientCache.get() : null;
 
-        // The pip row is one indivisible body block (not a repeating list) — the header (icon +
-        // label + balance state text) is the true floor; short of room for the pips too, the box
-        // shrinks to header-only instead of vanishing outright.
-        boolean headerVisible = cc.showBalanceBox() && data != null && DietLayout.headerFitsInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT);
-        this.visible = headerVisible;
-        this.bodyVisible = headerVisible && DietLayout.bodyBlockFitsInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT, BODY_LOCAL_HEIGHT);
-        this.renderedContentHeight = visible ? HEADER_LOCAL_HEIGHT + (bodyVisible ? BODY_LOCAL_HEIGHT : 0) : 0;
+        // Continuous fade instead of an all-or-nothing header floor — see CaloriesComponent's
+        // constructor comment; same pattern, header+pips scale down together as room tightens.
+        boolean enabled = cc.showBalanceBox() && data != null;
+        int room = enabled ? DietLayout.roomInPanel(layout, startLocalY, BOX_LOCAL_HEIGHT) : 0;
+        this.visible = room >= DietScreenModules.MIN_VISIBLE_ROOM_LOCAL;
+        this.renderedContentHeight = visible ? room : 0;
         this.localHeight = visible ? renderedContentHeight + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
-        int boxLocalWidth = DietLayout.SPLIT - DietLayout.PAD * 2 + 4;
-        this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, boxLocalWidth, localHeight);
+        this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, SUMMARY_BOX_LOCAL_WIDTH, localHeight);
     }
 
     @Override
@@ -100,34 +89,38 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
 
     @Override
     public Constraint constraint() {
-        int boxLocalWidth = DietLayout.SPLIT - DietLayout.PAD * 2 + 4;
-        return Constraint.preferred(DietLayout.toScreenDim(layout, boxLocalWidth), DietLayout.toScreenDim(layout, localHeight));
+        return Constraint.preferred(DietLayout.toScreenDim(layout, SUMMARY_BOX_LOCAL_WIDTH), DietLayout.toScreenDim(layout, localHeight));
     }
 
     @Override
     public void render(RenderContext context, Bounds bounds) {
-        this.anchorBounds = bounds;
         if (!visible) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
-        // min() of both ratios so a single-axis resize can't hide content. Divides by
-        // renderedContentHeight (this frame's actual header[+pips] extent), not the full natural
-        // BOX_LOCAL_HEIGHT — so a graceful header-only shrink doesn't also squash the header's own
-        // text scale.
-        int boxLocalWidth = DietLayout.SPLIT - DietLayout.PAD * 2 + 4;
-        double widthScale = bounds.width() / (double) boxLocalWidth;
-        double heightScale = bounds.height() / (double) Math.max(1, renderedContentHeight);
-        this.contentScale = Math.min(widthScale, heightScale);
-        float scale = (float) contentScale;
-
         NourishedClientConfig cc = NourishedClientConfig.get();
-        drawOuterBox(context, bounds.width(), bounds.height(), cc);
+
+        // min() of both ratios so a single-axis resize can't hide content. Divides by the fixed
+        // BOX_LOCAL_HEIGHT (the full natural header+pips extent), not this frame's shrunk
+        // renderedContentHeight — so header and pips scale down together continuously as room
+        // tightens, instead of the header staying full-size right up until it's clipped off.
+        double widthScale = bounds.width() / (double) SUMMARY_BOX_LOCAL_WIDTH;
+        double heightScale = bounds.height() / (double) BOX_LOCAL_HEIGHT;
+        this.contentScale = Math.min(widthScale, heightScale);
+        // contentScale (fitScale) still drives sx/sy/sd/outer-box sizing unchanged; the persisted
+        // per-box zoom multiplier only affects the size passed to text/icon draw calls below, and is
+        // clamped to a flat [fitScale*0.5, fitScale*3.0] range (see zoomedTextIconScale's javadoc) —
+        // real containment against the box's own edges comes from this box's own pushClip, not from
+        // this range.
+        float scale = DietScreenModules.zoomedTextIconScale(contentScale, widthScale, heightScale, DietScreenPersistence.contentScale(ID));
+        support.begin(bounds, contentScale);
+
+        support.drawOuterBox(context, bounds.width(), bounds.height(), cc);
 
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
-            drawItem(context, "minecraft:comparator", 2, 5, scale);
-            drawText(context, Component.translatable("nourished.screen.diet.balance_label").getString(), 24, 6, COL_WHITE, scale);
+            support.drawItem(context, "minecraft:comparator", 2, 5, scale);
+            support.drawText(context, Component.translatable("nourished.screen.diet.balance_label").getString(), 24, 6, SummaryBoxRenderSupport.COL_WHITE, scale);
 
             String balKey = getBalanceKey(data);
             int balColor = balanceColor(balKey);
@@ -138,20 +131,17 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
             float balTextW = font.width(balText) * balanceScale;
             int bgAlpha = 51;
             int bgColor = (bgAlpha << 24) | (balColor & 0x00FFFFFF);
-            context.fillRect(sx(22), sy(startLocalY + 16), sd((int) balTextW + 5), sd(11), bgColor);
-            drawText(context, balText, 24, 17, balColor, scale * balanceScale);
+            context.fillRect(support.sx(22), support.sy(startLocalY + 16), support.sd((int) balTextW + 5), support.sd(11), bgColor);
+            support.drawText(context, balText, 24, 17, balColor, scale * balanceScale);
 
-            if (!bodyVisible) {
-                return;
-            }
-            int barLocalWidth = DietLayout.SPLIT - DietLayout.PAD * 2;
+            int barLocalWidth = SUMMARY_BOX_LOCAL_WIDTH - 4;
             float balScore = MarieClientCache.getBalanceScore();
             int filledPips = Math.round(balScore * 5);
             int pipTotalW = 5 * 10 + 4 * 3;
             int pipStartX = (barLocalWidth - pipTotalW) / 2 + 2;
             for (int i = 0; i < 5; i++) {
                 int px = pipStartX + i * 13;
-                context.fillRect(sx(px), sy(startLocalY + 40), sd(10), sd(6), i < filledPips ? balColor : COL_SEG_EMPTY);
+                context.fillRect(support.sx(px), support.sy(startLocalY + 40), support.sd(10), support.sd(6), i < filledPips ? balColor : SummaryBoxRenderSupport.COL_SEG_EMPTY);
             }
         } finally {
             context.popClip();
@@ -171,43 +161,10 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
 
     private static int balanceColor(String key) {
         return switch (key) {
-            case "balanced" -> COL_GREEN;
+            case "balanced" -> SummaryBoxRenderSupport.COL_GREEN;
             case "low" -> COL_ORANGE;
             case "excess" -> COL_RED;
-            default -> COL_WHITE;
+            default -> SummaryBoxRenderSupport.COL_WHITE;
         };
-    }
-
-    // ── Coordinate + drawing helpers ─────────────────────────────────────────
-
-    private int sx(int localX) {
-        return anchorBounds.x() + (int) Math.round(localX * contentScale);
-    }
-
-    private int sy(int localY) {
-        return anchorBounds.y() + (int) Math.round((localY - startLocalY) * contentScale);
-    }
-
-    private int sd(int localDim) {
-        return (int) Math.round(localDim * contentScale);
-    }
-
-    private void drawText(RenderContext context, String text, int localX, int localY, int color, float scale) {
-        context.drawText(text, sx(localX), sy(startLocalY + localY), color, scale);
-    }
-
-    private void drawItem(RenderContext context, String itemId, int localX, int localY, float scale) {
-        Item item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(itemId)).orElse(Items.APPLE);
-        context.drawItem(new ItemStack(item), sx(localX), sy(startLocalY + localY), scale);
-    }
-
-    private void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc) {
-        int fill = panelColorWithOpacity(COL_ROW_BG_RGB, cc.dietBackgroundOpacity());
-        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, COL_BORDER_LT);
-    }
-
-    private static int panelColorWithOpacity(int rgb, double opacity) {
-        int alpha = Mth.clamp((int) Math.round(opacity * 255.0d), 0, 255);
-        return (alpha << 24) | (rgb & 0x00FFFFFF);
     }
 }

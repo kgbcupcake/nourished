@@ -88,16 +88,15 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         int naturalRows = Math.min(3, recentIds.size());
         this.recentHeight = HEADER_LOCAL_HEIGHT + (naturalRows * rowH);
         boolean showable = cc.showRecentMeals() && !recentIds.isEmpty();
-        // Live-height-aware, not the fixed DietLayout.HEIGHT constant — see DietLayout#fitsInPanel's
-        // javadoc. The header alone is the true floor: once even that can't fit, the whole box is
-        // gone; short of that, rows drop one at a time (stackedBodyUnitsFit) instead of the box
-        // vanishing outright the moment the full natural row count stops fitting.
-        boolean headerVisible = showable && DietLayout.headerFitsInPanel(layout, startLocalY, HEADER_LOCAL_HEIGHT);
-        this.visible = headerVisible;
-        this.rowsShown = headerVisible
-                ? DietLayout.stackedBodyUnitsFit(layout, startLocalY, HEADER_LOCAL_HEIGHT, rowH, naturalRows)
-                : 0;
-        this.renderedContentHeight = visible ? HEADER_LOCAL_HEIGHT + rowsShown * rowH : 0;
+        // Continuous fade instead of an all-or-nothing header floor, and instead of dropping whole
+        // rows one at a time as room tightens (the old stackedBodyUnitsFit behavior): every natural
+        // row still draws, just scaled down together with the header (see render()'s heightScale,
+        // divided by the fixed recentHeight rather than this frame's shrunk room) — the box only
+        // actually disappears once there's less than MIN_VISIBLE_ROOM_LOCAL of room left.
+        int room = showable ? DietLayout.roomInPanel(layout, startLocalY, recentHeight) : 0;
+        this.visible = room >= DietScreenModules.MIN_VISIBLE_ROOM_LOCAL;
+        this.rowsShown = naturalRows;
+        this.renderedContentHeight = visible ? room : 0;
         this.localHeight = visible ? renderedContentHeight + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
         int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
@@ -169,33 +168,76 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         int rowH = Math.max(1, (int) Math.round(9 * recentMealsScale));
         int y = startLocalY;
 
-        // min() of both ratios so a single-axis resize can't hide content. Divides by
-        // renderedContentHeight (this frame's actual header+rowsShown extent), not the full natural
-        // recentHeight — otherwise a graceful row-count shrink would also shrink the remaining rows'
-        // text/icon scale instead of just showing fewer full-size rows.
+        // min() of both ratios so a single-axis resize can't hide content. Divides by the fixed
+        // recentHeight (the full natural header+rows extent), not this frame's shrunk
+        // renderedContentHeight — so the header and every row scale down together continuously as
+        // room tightens, instead of the header staying full-size right up until it's clipped off.
         double widthScale = bounds.width() / (double) bw;
-        double heightScale = bounds.height() / (double) Math.max(1, renderedContentHeight);
+        double heightScale = bounds.height() / (double) recentHeight;
         this.contentScale = Math.min(widthScale, heightScale);
-        float scale = (float) contentScale;
+        // contentScale (fitScale) still drives sx/sy/availableLocalWidth unchanged below; the
+        // persisted zoom multiplier only affects the size passed to text/icon draw calls (header,
+        // icon, row name). zoomedTextIconScale now clamps to a flat [fitScale*0.5, fitScale*3.0]
+        // range rather than deriving from widthScale/heightScale — see its javadoc. Whatever `scale`
+        // comes back, the pushClip(bounds...) below is what actually keeps drawn content from
+        // escaping the box; this clamp just keeps zoom in a usable range, not a containment guarantee.
+        float scale = DietScreenModules.zoomedTextIconScale(contentScale, widthScale, heightScale, DietScreenPersistence.contentScale(ID));
+        // Row spacing (and the header's own gap before the first row) must grow by the same ratio
+        // zoom grows text/icon draw size by — otherwise the bigger zoomed glyphs visually collide
+        // into the next row's still-unzoomed vertical slot. zoomRatio is exactly 1.0 whenever zoom
+        // is at/below fitScale (scale == contentScale), so this is a no-op at the default,
+        // unzoomed state. Applied to the LOCAL (pre-scale) Y advance fed into sy(), which then
+        // reapplies contentScale — so the resulting on-screen spacing is contentScale * (rowH *
+        // zoomRatio) == rowH * scale, matching the icon's own on-screen footprint (scale * iconScale
+        // * 16 == scale * rowH) exactly, at any zoom level. This is purely cosmetic (keeps rows from
+        // visually colliding with each other) — it does not bound on-screen overflow past the box's
+        // own edges; pushClip below does that regardless of how large `scale` gets.
+        double zoomRatio = contentScale > 0 ? scale / contentScale : 1.0d;
+        int zoomedHeaderAdvance = Math.max(1, (int) Math.round(HEADER_LOCAL_HEIGHT * zoomRatio));
+        int zoomedRowH = Math.max(1, (int) Math.round(rowH * zoomRatio));
 
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
-        drawText(context, Component.translatable("nourished.screen.diet.recent_label").getString(), x, y, COL_HEADER, scale);
-        y += HEADER_LOCAL_HEIGHT;
 
         int naturalRowCount = rowsShown;
-        float iconScale = rowH / 16f; // fits the icon exactly within rowH
+        float iconScale = rowH / 16f; // fits the icon exactly within rowH — deliberately the flat, unzoomed rowH: this is a size ratio, not a position advance, and scale already carries the zoom
         float rowScale = scale * (float) recentMealsScale; // folds the recentMealsScale config knob into label size
         int nameOffset = rowH + 2;
         Font font = Minecraft.getInstance().font;
-        // Recomputed from the box's actual LIVE bounds.width()/contentScale every frame, not the
-        // fixed natural-size `bw` — bw only equals bounds.width()/contentScale when width is the
-        // binding axis of the two-axis content scale; when a height-only resize is the binding axis
-        // instead, text renders smaller than what the box's real width would allow, and truncating
-        // against fixed bw under-uses that extra room (or, before this fix, truncated nothing at all).
-        int availableLocalWidth = (int) Math.round(bounds.width() / contentScale) - nameOffset;
-        int maxNameFontPx = (int) Math.max(0, Math.round(availableLocalWidth / recentMealsScale));
+        // Cosmetic truncation budget, not a containment guarantee — actual containment is the
+        // pushClip(bounds...) below, which hard-clips anything drawn oversized at the box's real
+        // edge regardless of `rowScale`. Without this budget an oversized name would still get
+        // scissor-clipped exactly at the box edge, just mid-glyph; truncating ahead of time turns
+        // that into a clean "...". Recomputed from the box's actual LIVE bounds.width() every frame,
+        // budgeted against the ACTUAL draw scale (rowScale) rather than contentScale — the name is
+        // positioned via sx() (which maps local X through contentScale) but drawn via Font at
+        // rowScale, and those two diverge once zoom pushes rowScale above contentScale.
+        // font.width(name) returns the raw (scale-1) pixel width Font measures internally, so the
+        // budget must be in that same raw unit — i.e. remaining screen pixels divided by rowScale.
+        int nameOffsetScreenPx = (int) Math.round(nameOffset * contentScale);
+        int availableNameScreenPx = bounds.width() - nameOffsetScreenPx;
+        int maxNameFontPx = rowScale > 0f ? (int) Math.max(0, Math.floor(availableNameScreenPx / rowScale)) : 0;
+        // Real containment: everything drawn below (header + rows) is hard-clipped to the box's own
+        // live bounds via the GL scissor test, so nothing — however oversized `scale` makes it — can
+        // ever paint outside this box, regardless of whether the truncation math above is exact. A
+        // continuously-shrinking box can also be shorter than even the header's own natural height,
+        // and without this the header text would render past the box's actual (shrunk) bottom edge
+        // instead of fading out with it.
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
+            // Header gets the same width-aware truncation as row names below, for the same cosmetic
+            // reason (clean "..." instead of a mid-glyph scissor cut) — it used to draw unconditionally
+            // at `scale` with no width check at all.
+            String header = Component.translatable("nourished.screen.diet.recent_label").getString();
+            int headerOffsetScreenPx = (int) Math.round(x * contentScale);
+            int availableHeaderScreenPx = bounds.width() - headerOffsetScreenPx;
+            int maxHeaderFontPx = scale > 0f ? (int) Math.max(0, Math.floor(availableHeaderScreenPx / scale)) : 0;
+            if (font.width(header) > maxHeaderFontPx) {
+                int headerEllipsisW = font.width("...");
+                int headerBudget = Math.max(0, maxHeaderFontPx - headerEllipsisW);
+                header = font.plainSubstrByWidth(header, headerBudget) + "...";
+            }
+            drawText(context, header, x, y, COL_HEADER, scale);
+            y += zoomedHeaderAdvance;
             int count = 0;
             for (String id : recentIds) {
                 if (count >= naturalRowCount) break;
@@ -227,7 +269,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                         ? MarieValueColors.baseColorArgb(nutrientKey)
                         : COL_WHITE;
                 drawText(context, name, x + nameOffset, y, nameColor, rowScale);
-                y += rowH;
+                y += zoomedRowH;
             }
         } finally {
             context.popClip();
