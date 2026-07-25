@@ -51,7 +51,7 @@
 - Added a per-box text/icon zoom to all five Diet Screen left-column sub-boxes (Calories/Balance/Recent Meals/Eat more
   of.../Active Effects), independent of each box's own proportional fit scale: left-double-click a box in edit mode to
   enter zoom mode (scroll adjusts that box's zoom),
-  -right-double-click to exit. Zoom is persisted per box via MarieLib's `ComponentState#contentScale` (the same store as
+  right-double-click to exit. Zoom is persisted per box via MarieLib's `ComponentState#contentScale` (the same store as
   each box's own position/size, keyed by component ID) instead of the previous standalone `caloriesContentScale`/
   `balanceContentScale`/`recentMealsContentScale`/`eatMoreContentScale`/`activeEffectsContentScale`
   `nourished-client.toml` entries, which are now obsolete and stripped on load (any previously-set zoom resets to
