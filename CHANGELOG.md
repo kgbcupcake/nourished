@@ -4,38 +4,6 @@
 
 ## [ Unreleased ]
 
-### Added
-
-- Added auto-generated `Read_Me/` README files (`LOCKS_README.md`, `EFFECTS_README.md`, `FOOD_VALUES_README.md`, `NUTRIENTS_README.md`, `NUTRIENT_CURVES_README.md`, `RAW_FOOD_README.md`) written from bundled resources into each registry's config directory on first load, if not already present.
-- Wired Nourished's tooltip lines into MarieLib's `TooltipColorRegistry`/`TooltipMessageRegistry`, including an `excluded` message key and `nourished.tooltip.excluded` lang entry for excluded items. Added `NourishedTooltipDefaults` to seed `tooltip_colors.json`/`tooltip_messages.json` with Nourished's real nutrient colors and excluded-item message on first run.
-- Added `TOOLTIP_COLORS_README.md` / `TOOLTIP_MESSAGES_README.md` to Nourished's own `data/nourished/config/` resources: MarieLib's bundled copies were never reachable at runtime (looked up under `data/<modId>/config/...` using Nourished's own modId, but bundled under marie-ui's `marieslib` namespace instead), so each consumer now needs its own copy.
-- Added `COLORS_README.md` / `SCANNER_SPEC_README.md` to Nourished's own `data/nourished/config/` resources for the same reason: MarieLib's `ColorRegistry`/`ScannerSpecRegistry` bundled their READMEs under marie-core's own `marieslib` namespace instead of the consuming mod's, so they were never reachable.
-- Added a debug-only live size readout (`width x height`) next to the active resize handle while dragging/resizing a Diet Screen edit-mode box, to help correlate box size with `ActiveEffectsComponent`'s visibility threshold. No config toggle — it only shows during an active drag.
-- Added a per-box text/icon zoom to all five Diet Screen left-column sub-boxes (Calories/Balance/Recent Meals/Eat more of.../Active Effects), independent of each box's own proportional fit scale: left-double-click a box in edit mode to enter zoom mode (scroll adjusts that box's zoom), right-double-click to exit. Zoom is persisted per box via MarieLib's `ComponentState#contentScale` (the same store as each box's own position/size, keyed by component ID) instead of the previous standalone `caloriesContentScale`/`balanceContentScale`/`recentMealsContentScale`/`eatMoreContentScale`/`activeEffectsContentScale` `nourished-client.toml` entries, which are now obsolete and stripped on load (any previously-set zoom resets to default, same as other one-time persisted-schema changes in this file). Zoom stays live-clamped every render to that box's own current single-axis fit range, so it can never exceed what a single-axis-only resize of that box would already produce, and never shrinks/grows the box's own outer rectangle. A small "zoom x_.__" label shows under a box in edit mode while it's zoomed.
-
-### Changed
-
-- `food_overrides.json` moved from `config/nourished/overrides/` into `config/nourished/overrides/Overrides/`, with its README moved into a new `overrides/Read_Me/` folder; existing files are migrated automatically on load.
-- `food_overrides.json`'s `nutrients` now merges over normal tag/scanner classification instead of fully replacing it: any key you list overrides that nutrient's value (including explicit `0` to zero it out), and any omitted key still falls back to whatever Nourished would normally classify. `calories` remains a full override. (`NutrientClassificationLookup`, `NourishedContextBuilder`, `OVERRIDES_README.md`)
-- Updated import for MarieLib's tooltip package restructure (`dev.marie.framework.compat.MarieTooltipHelper` → `dev.marie.framework.tooltips.MarieTooltipHelper`).
-- `CaloriesComponent`/`BalanceComponent` now share their local-to-screen coordinate mapping and draw helpers (`sx`/`sy`/`sd`/`drawText`/`drawItem`/`drawOuterBox`) via a new `SummaryBoxRenderSupport`, removing the duplicate implementations that previously lived in both classes identically. `RecentMealsComponent`/`EatMoreComponent`/`ActiveEffectsComponent` remain independent, per their existing separation.
-
-### Changed
-
-- Diet Screen left-column sub-boxes (Calories/Balance/Recent Meals/Eat more of.../Active Effects) no longer collapse from fully-visible to fully-gone the instant their header stops fitting. Each box's header and body content now scale down together continuously as the panel shrinks — the same style of shrink `EatMoreComponent`'s icon row already used — and only actually disappear once there's less than a handful of local units of room left. Recent Meals/Active Effects also no longer drop whole rows/lines one at a time as room tightens; every natural row/line still draws, just smaller, until the box itself fades out. Removed the now-unused hard-cutoff helpers (`DietLayout#headerFitsInPanel`/`#bodyBlockFitsInPanel`/`#bodyBlockRoomInPanel`/`#stackedBodyUnitsFit`) in favor of the new continuous `DietLayout#roomInPanel`. The continuous fade only applies to a box's own natural (never manually dragged/resized) size — a sub-box the player has independently resized keeps rendering at that persisted size regardless of how the main panel is later resized, since its size is that box's own property, not something the panel should silently override.
-
-### Fixed
-
-- `RuntimeFoodResolver` now also checks `ExcludedItemsRegistry.isExcluded(...)` (in addition to `ScannerSpecRegistry`'s `excludedItems()`) before running the inference cascade, matching `NutrientClassificationLookup`'s exclusion check. Previously an item excluded only via `excluded_items.json` could still enter full inference if resolved directly through `RuntimeFoodResolver`.
-- Fixed `RecentMealsComponent`'s meal rows overlapping at higher zoom: the zoomed text/icon draw size grew with the box's per-box zoom multiplier, but the row-to-row (and header-to-first-row) vertical spacing stayed fixed at the unzoomed size, so bigger zoomed rows visually collided into their neighbors instead of spreading apart. The row (and header) vertical advance is now stretched by the same ratio zoom grows draw size by, so spacing and content grow together; fewer rows now visibly fit at higher zoom, which is expected (the existing `pushClip` already hides the rest gracefully). The shared zoom ceiling in `DietScreenModules#zoomedTextIconScale` (`max(widthScale, heightScale)`) needed no RecentMeals-specific change: because the row/header advance is derived from the already-clamped draw scale, the screen-pixel height header+rows consume at any given scale reduces algebraically to `recentHeight * scale`, making the existing `heightScale` already the exact scale at which content fills the box's live height.
-- Fixed `ActiveEffectsComponent`'s effect lines overlapping at higher zoom, the same latent bug as `RecentMealsComponent` above (header-to-first-line and line-to-line advance now stretch by the same zoom ratio as text draw size). The shared zoom ceiling again needed no per-box adjustment, including for this box's dynamic effect count: `effectsBoxH` is a fixed per-instance reference captured from the player's *current* effect count at construction (mirroring `recentHeight`), and a fresh instance is built (and `effectsBoxH` re-derived) every render pass, so the same algebraic reduction to `effectsBoxH * scale` holds regardless of how many effects are active.
-- Fixed Diet Screen edit-mode boxes (Calories/Balance/Recent Meals/Eat more of.../Active Effects) not reflowing live while an earlier box in the stack was being dragged or resized: the sibling-stacking chain only ever read a box's last *committed* size, so a box being grown mid-drag visually overlapped whatever came after it, and `ActiveEffectsComponent` could appear to vanish mid-drag even with room on screen because its fit check was still evaluated against the stale, pre-drag start position. `DietScreenPersistence` now accepts a per-frame live override (set by `DietScreenEditTarget` for whichever box is actively dragging, cleared right after) so the module chain sees the box's true live bounds.
-- Fixed `ActiveEffectsComponent` staying hidden (or losing its effect lines) with visibly empty room left in the panel: the left column's sibling-stacking chain reserves a box's full natural height for whatever comes after it based on registration order alone, regardless of where that box actually renders. A box dragged sideways out of the single-width column — e.g. `EatMoreComponent` repositioned to sit beside `RecentMealsComponent` instead of below it, a common manual layout — still reserved its full height as dead space in the chain, pushing Active Effects' start position down into that unused gap and past the panel's live bottom edge. `DietLeftColumnComponent#nextSiblingStartLocalY` now skips the height reservation for a sibling whose resolved X has drifted away from the column's own left edge, since it's no longer occupying a vertical slot in the flow.
-- Fixed the per-box zoom scroll range being nearly dead: `DietScreenModules#zoomedTextIconScale`'s clamp floor (`min(widthScale, heightScale)`) was mathematically identical to the `fitScale` value already being scaled, so scrolling the zoom multiplier below 1.0 always clamped straight back to fit-scale with no visible effect. The floor is now a real fraction of `fitScale` (half of it) instead, since shrinking below fit-scale is always safe — it only makes content smaller than the box, never clips it. The ceiling (`max(widthScale, heightScale)`) is unchanged.
-- Fixed `EatMoreComponent`'s double-click not entering zoom mode: its default (never manually repositioned) Y position is chained after `RecentMealsComponent`'s resolved height, which depends on how many recent meals are currently tracked — a value that can change frame-to-frame, shifting `EatMoreComponent`'s resolved bounds between the two clicks of a double-click and failing the second click's hit-test. `DietZoomController#onClick` now snapshots the bounds a box's first click hit-tested against and reuses that same snapshot for a following click within the double-click window, instead of re-reading live bounds on each click.
-- Fixed `RecentMealsComponent` text/icons overflowing past the box's edges at higher zoom, and per-box zoom appearing dead for boxes (like `EatMoreComponent`) that hadn't been resized non-uniformly. All five left-column sub-boxes already wrap their entire zoomed draw (header included) in a `context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height())` scissor around the box's own live bounds, so that clip — not any scale math — is what actually guarantees zoomed content can never paint outside the box, however large `scale` gets. `DietScreenModules#zoomedTextIconScale`'s ceiling no longer needs to be derived per-axis from `widthScale`/`heightScale` at all (the previous `max(widthScale, heightScale)` was only safe on the height axis, and briefly `widthScale` alone, both explored while chasing this) — it's now a flat `fitScale * 3.0` (paired with the existing `fitScale * 0.5` floor), giving every box a real, resize-independent 6x zoom range regardless of its aspect ratio. `RecentMealsComponent`'s row-name and header truncation (budgeted against each string's actual draw scale, not the stale `contentScale`) is kept as a cosmetic nicety — a clean "..." instead of a mid-glyph scissor cut — rather than the thing preventing overflow.
-- Fixed a Diet Screen sub-box's per-box zoom silently resetting to default on the next drag or resize of that same box: `DietScreenEditTarget#toRelativeState` (the shared commit callback for all five left-column sub-boxes) constructed a brand-new `ComponentState` from the drag/resize geometry alone, defaulting `contentScale` (and `leftMargin`) back to their record defaults instead of preserving whatever was already persisted. It now loads the box's existing `ComponentState` first and copies every field it doesn't itself own (`contentScale`, `leftMargin`) through from that loaded state, the same read-modify-write pattern `DietScreenPersistence#adjustContentScale` already used correctly.
-
 ### CI / Tooling
 
 - Added `check-marielib-update.yml` GitHub Actions workflow to check MarieLib package updates weekly (Mondays 12:00 UTC) or via manual dispatch.
@@ -47,8 +15,10 @@
 [ nourished 0.2.7-beta] - 2026-07-13
  ## Notes
 
-> A lot has changed in this update and some of the changes are breaking. Please read the changelog carefully and check your configs and datapacks for any necessary updates. this also include MariesLib updates aswell whicj there was a massive refactor of the package structure and some class renames. Please check the MariesLib changelog for more details.
-
+> A lot has changed in this update and some of the changes are breaking. Please read the changelog carefully and check
+> your configs and datapacks for any necessary updates. This also includes MariesLib updates
+> several packages/classes were renamed or moved (tooltip helpers, override file layout). Please check the MariesLib
+> changelog for details.
 
 ### Added
 
@@ -62,6 +32,33 @@
 - Added `excluded_items.json` to fully exclude specific items from nutrient tracking (checked before tag matching, external classification, and runtime inference) — for decoy items or non-food edibles that shouldn't move any bar, independent of `food_overrides.json`'s value corrections. Vanilla hunger/saturation restoration is unaffected.
 - Added graceful overflow handling for Diet Screen left-column sub-boxes (Calories, Balance, Eat More, Recent Meals, Active Effects): shrinking the panel now collapses each box to header-only, drops rows/lines one at a time, or smoothly shrinks its content (Eat More's icon row) as space runs out, instead of the whole box popping in/out the instant it no longer fits at full size. The right-column intake legend now anchors directly below the last drawn row instead of a fixed offset from the panel's bottom edge.
 - HUD nutrient bars/columns are now centered within the panel box when it's resized larger than its content needs, in both row-stacked and column layouts.
+- Added auto-generated `Read_Me/` README files (`LOCKS_README.md`, `EFFECTS_README.md`, `FOOD_VALUES_README.md`,
+  `NUTRIENTS_README.md`, `NUTRIENT_CURVES_README.md`, `RAW_FOOD_README.md`) written from bundled resources into each
+  registry's config directory on first load, if not already present.
+- Wired Nourished's tooltip lines into MarieLib's `TooltipColorRegistry`/`TooltipMessageRegistry`, including an
+  `excluded` message key and `nourished.tooltip.excluded` lang entry for excluded items. Added
+  `NourishedTooltipDefaults` to seed `tooltip_colors.json`/`tooltip_messages.json` with Nourished's real nutrient colors
+  and excluded-item message on first run.
+- Added `TOOLTIP_COLORS_README.md` / `TOOLTIP_MESSAGES_README.md` to Nourished's own `data/nourished/config/` resources:
+  MarieLib's bundled copies were never reachable at runtime (looked up under `data/<modId>/config/...` using Nourished's
+  own modId, but bundled under marie-ui's `marieslib` namespace instead), so each consumer now needs its own copy.
+- Added `COLORS_README.md` / `SCANNER_SPEC_README.md` to Nourished's own `data/nourished/config/` resources for the same
+  reason: MarieLib's `ColorRegistry`/`ScannerSpecRegistry` bundled their READMEs under marie-core's own `marieslib`
+  namespace instead of the consuming mod's, so they were never reachable.
+- Added a debug-only live size readout (`width x height`) next to the active resize handle while dragging/resizing a
+  Diet Screen edit-mode box, to help correlate box size with `ActiveEffectsComponent`'s visibility threshold. No config
+  toggle — it only shows during an active drag.
+- Added a per-box text/icon zoom to all five Diet Screen left-column sub-boxes (Calories/Balance/Recent Meals/Eat more
+  of.../Active Effects), independent of each box's own proportional fit scale: left-double-click a box in edit mode to
+  enter zoom mode (scroll adjusts that box's zoom),
+  -right-double-click to exit. Zoom is persisted per box via MarieLib's `ComponentState#contentScale` (the same store as
+  each box's own position/size, keyed by component ID) instead of the previous standalone `caloriesContentScale`/
+  `balanceContentScale`/`recentMealsContentScale`/`eatMoreContentScale`/`activeEffectsContentScale`
+  `nourished-client.toml` entries, which are now obsolete and stripped on load (any previously-set zoom resets to
+  default, same as other one-time persisted-schema changes in this file). Zoom stays live-clamped every render to that
+  box's own current single-axis fit range, so it can never exceed what a single-axis-only resize of that box would
+  already produce, and never shrinks/grows the box's own outer rectangle. A small "zoom x_.__" label shows under a box
+  in edit mode while it's zoomed.
 
 ### Changed
 
@@ -72,6 +69,29 @@
 - Renamed `MarieApiRegistries.freezeModOnlyRegistriesAfterCommonSetup` to `freezeValueTrackingOnlyRegistriesAfterCommonSetup`.
 - Removed the per-item resolution cache from `RuntimeFoodResolver` in favor of always resolving uncached, now that ingredient scoring can consult the community-tag/keyword-suffix stages.
 - Moved config overrides (`food_overrides.json`, `source_classifications.json`, `excluded_items.json` and their READMEs) from `config/nourished/` directly into a new `config/nourished/overrides/` subfolder. **Breaking:** update any datapacks/scripts that read or write these files at the old path.
+- `food_overrides.json` moved from `config/nourished/overrides/` into `config/nourished/overrides/Overrides/`, with its
+  README moved into a new `overrides/Read_Me/` folder; existing files are migrated automatically on load.
+- `food_overrides.json`'s `nutrients` now merges over normal tag/scanner classification instead of fully replacing it:
+  any key you list overrides that nutrient's value (including explicit `0` to zero it out), and any omitted key still
+  falls back to whatever Nourished would normally classify. `calories` remains a full override. (
+  `NutrientClassificationLookup`, `NourishedContextBuilder`, `OVERRIDES_README.md`)
+- Updated import for MarieLib's tooltip package restructure (`dev.marie.framework.compat.MarieTooltipHelper` →
+  `dev.marie.framework.tooltips.MarieTooltipHelper`).
+- `CaloriesComponent`/`BalanceComponent` now share their local-to-screen coordinate mapping and draw helpers (`sx`/`sy`/
+  `sd`/`drawText`/`drawItem`/`drawOuterBox`) via a new `SummaryBoxRenderSupport`, removing the duplicate implementations
+  that previously lived in both classes identically. `RecentMealsComponent`/`EatMoreComponent`/`ActiveEffectsComponent`
+  remain independent, per their existing separation.
+- Diet Screen left-column sub-boxes (Calories/Balance/Recent Meals/Eat more of.../Active Effects) no longer collapse
+  from fully-visible to fully-gone the instant their header stops fitting. Each box's header and body content now scale
+  down together continuously as the panel shrinks — the same style of shrink `EatMoreComponent`'s icon row already
+  used — and only actually disappear once there's less than a handful of local units of room left. Recent Meals/Active
+  Effects also no longer drop whole rows/lines one at a time as room tightens; every natural row/line still draws, just
+  smaller, until the box itself fades out.
+- Removed the now-unused hard-cutoff helpers (`DietLayout#headerFitsInPanel`/`#bodyBlockFitsInPanel`/
+  `#bodyBlockRoomInPanel`/`#stackedBodyUnitsFit`) in favor of the new continuous `DietLayout#roomInPanel`.
+- The continuous fade only applies to a box's own natural (never manually dragged/resized) size — a sub-box the player
+  has independently resized keeps rendering at that persisted size regardless of how the main panel is later resized,
+  since its size is that box's own property, not something the panel should silently override.
 
 ### Fixed
 
@@ -79,7 +99,69 @@
 - Fixed classic HUD/Diet Screen left-edge resize so shrinking the panel back down actually reduces the reserved left margin instead of getting stuck at the width that created it.
 - Fixed classic Eat More panel resize clamping so it cannot grow large enough to push Active Effects below its minimum rendering budget within the fixed left-column layout.
 - Fixed The `food_overrides.json` not being wired into the `RuntimeFoodResolver` so overrides were not being applied at runtime.
-
+- `RuntimeFoodResolver` now also checks `ExcludedItemsRegistry.isExcluded(...)` (in addition to `ScannerSpecRegistry`'s
+  `excludedItems()`) before running the inference cascade, matching `NutrientClassificationLookup`'s exclusion check.
+  Previously an item excluded only via `excluded_items.json` could still enter full inference if resolved directly
+  through `RuntimeFoodResolver`.
+- Fixed `RecentMealsComponent`'s meal rows overlapping at higher zoom: the zoomed text/icon draw size grew with the
+  box's per-box zoom multiplier, but the row-to-row (and header-to-first-row) vertical spacing stayed fixed at the
+  unzoomed size, so bigger zoomed rows visually collided into their neighbors instead of spreading apart. The row (and
+  header) vertical advance is now stretched by the same ratio zoom grows draw size by, so spacing and content grow
+  together; fewer rows now visibly fit at higher zoom, which is expected (the existing `pushClip` already hides the rest
+  gracefully). The shared zoom ceiling in `DietScreenModules#zoomedTextIconScale` (`max(widthScale, heightScale)`)
+  needed no RecentMeals-specific change: because the row/header advance is derived from the already-clamped draw scale,
+  the screen-pixel height header+rows consume at any given scale reduces algebraically to `recentHeight * scale`, making
+  the existing `heightScale` already the exact scale at which content fills the box's live height.
+- Fixed `ActiveEffectsComponent`'s effect lines overlapping at higher zoom, the same latent bug as
+  `RecentMealsComponent` above (header-to-first-line and line-to-line advance now stretch by the same zoom ratio as text
+  draw size). The shared zoom ceiling again needed no per-box adjustment, including for this box's dynamic effect count:
+  `effectsBoxH` is a fixed per-instance reference captured from the player's *current* effect count at construction (
+  mirroring `recentHeight`), and a fresh instance is built (and `effectsBoxH` re-derived) every render pass, so the same
+  algebraic reduction to `effectsBoxH * scale` holds regardless of how many effects are active.
+- Fixed Diet Screen edit-mode boxes (Calories/Balance/Recent Meals/Eat more of.../Active Effects) not reflowing live
+  while an earlier box in the stack was being dragged or resized: the sibling-stacking chain only ever read a box's last
+  *committed* size, so a box being grown mid-drag visually overlapped whatever came after it, and
+  `ActiveEffectsComponent` could appear to vanish mid-drag even with room on screen because its fit check was still
+  evaluated against the stale, pre-drag start position. `DietScreenPersistence` now accepts a per-frame live override (
+  set by `DietScreenEditTarget` for whichever box is actively dragging, cleared right after) so the module chain sees
+  the box's true live bounds.
+- Fixed `ActiveEffectsComponent` staying hidden (or losing its effect lines) with visibly empty room left in the panel:
+  the left column's sibling-stacking chain reserves a box's full natural height for whatever comes after it based on
+  registration order alone, regardless of where that box actually renders. A box dragged sideways out of the
+  single-width column — e.g. `EatMoreComponent` repositioned to sit beside `RecentMealsComponent` instead of below it, a
+  common manual layout — still reserved its full height as dead space in the chain, pushing Active Effects' start
+  position down into that unused gap and past the panel's live bottom edge.
+  `DietLeftColumnComponent#nextSiblingStartLocalY` now skips the height reservation for a sibling whose resolved X has
+  drifted away from the column's own left edge, since it's no longer occupying a vertical slot in the flow.
+- Fixed the per-box zoom scroll range being nearly dead: `DietScreenModules#zoomedTextIconScale`'s clamp floor (
+  `min(widthScale, heightScale)`) was mathematically identical to the `fitScale` value already being scaled, so
+  scrolling the zoom multiplier below 1.0 always clamped straight back to fit-scale with no visible effect. The floor is
+  now a real fraction of `fitScale` (half of it) instead, since shrinking below fit-scale is always safe — it only makes
+  content smaller than the box, never clips it. The ceiling (`max(widthScale, heightScale)`) is unchanged.
+- Fixed `EatMoreComponent`'s double-click not entering zoom mode: its default (never manually repositioned) Y position
+  is chained after `RecentMealsComponent`'s resolved height, which depends on how many recent meals are currently
+  tracked — a value that can change frame-to-frame, shifting `EatMoreComponent`'s resolved bounds between the two clicks
+  of a double-click and failing the second click's hit-test. `DietZoomController#onClick` now snapshots the bounds a
+  box's first click hit-tested against and reuses that same snapshot for a following click within the double-click
+  window, instead of re-reading live bounds on each click.
+- Fixed `RecentMealsComponent` text/icons overflowing past the box's edges at higher zoom, and per-box zoom appearing
+  dead for boxes (like `EatMoreComponent`) that hadn't been resized non-uniformly. All five left-column sub-boxes
+  already wrap their entire zoomed draw (header included) in a
+  `context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height())` scissor around the box's own live bounds,
+  so that clip — not any scale math — is what actually guarantees zoomed content can never paint outside the box,
+  however large `scale` gets. `DietScreenModules#zoomedTextIconScale`'s ceiling no longer needs to be derived per-axis
+  from `widthScale`/`heightScale` at all (the previous `max(widthScale, heightScale)` was only safe on the height axis,
+  and briefly `widthScale` alone, both explored while chasing this) — it's now a flat `fitScale * 3.0` (paired with the
+  existing `fitScale * 0.5` floor), giving every box a real, resize-independent 6x zoom range regardless of its aspect
+  ratio. `RecentMealsComponent`'s row-name and header truncation (budgeted against each string's actual draw scale, not
+  the stale `contentScale`) is kept as a cosmetic nicety — a clean "..." instead of a mid-glyph scissor cut — rather
+  than the thing preventing overflow.
+- Fixed a Diet Screen sub-box's per-box zoom silently resetting to default on the next drag or resize of that same box:
+  `DietScreenEditTarget#toRelativeState` (the shared commit callback for all five left-column sub-boxes) constructed a
+  brand-new `ComponentState` from the drag/resize geometry alone, defaulting `contentScale` (and `leftMargin`) back to
+  their record defaults instead of preserving whatever was already persisted. It now loads the box's existing
+  `ComponentState` first and copies every field it doesn't itself own (`contentScale`, `leftMargin`) through from that
+  loaded state, the same read-modify-write pattern `DietScreenPersistence#adjustContentScale` already used correctly.
 
 ### Removed
 
