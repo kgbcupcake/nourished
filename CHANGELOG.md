@@ -4,6 +4,10 @@
 
 ## [ Unreleased ]
 
+### Fixed
+
+- Wired up `registerCompatEntry` in `NourishedDatapackCallbacks`. The 34 datapack-driven compat entries under `data/nourished/nourished/compat/` were being parsed on every datapack apply but silently discarded, since the callback had no override and defaulted to a no-op — none of them ever actually took effect. They now register into `ModCompat` and apply as intended.
+
 ### CI / Tooling
 
 - Added `check-marielib-update.yml` GitHub Actions workflow to check MarieLib package updates weekly (Mondays 12:00 UTC) or via manual dispatch.

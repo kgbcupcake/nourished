@@ -7,6 +7,8 @@ import dev.marie.framework.api.progression.MilestoneDefinition;
 import dev.marie.framework.api.source.SourcePairSynergy;
 import dev.marie.framework.api.effects.ThresholdEffect;
 import dev.marie.framework.api.value.ValueDefinition;
+import dev.marie.framework.compat.CompatDefinition;
+import dev.marie.framework.compat.ModCompat;
 import dev.marie.framework.data.MarieDataLoader;
 import dev.marie.framework.registry.MarieApiRegistries;
 import dev.marie.framework.runtime.SourceRegistry;
@@ -49,5 +51,10 @@ public final class NourishedDatapackCallbacks implements MarieDataLoader.Callbac
     @Override
     public void registerSourcePairSynergy(SourcePairSynergy def) {
         MarieAPI.registerSourcePairSynergy(def);
+    }
+
+    @Override
+    public void registerCompatEntry(CompatDefinition def) {
+        ModCompat.registerExternal(def);
     }
 }

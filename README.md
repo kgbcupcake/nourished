@@ -41,57 +41,47 @@ Questions, suggestions, and development discussion are welcome.
 
 ## Features
 
-❤️ What you gain
-When you have all five food groups are above 75%, you get:
+❤️ **What you gain**: when all five food groups are above 75%:
 
-Health Boost I — passively while balanced
-Regeneration I — passively while balanced
+- Health Boost I:  passive while balanced
+- Regeneration I:  passive while balanced
 
-When all five food groups are above 75%, you get:
+| Group | Neglect Penalty | Balance Buff |
+|---|---|---|
+| 🌾 Grains | Weakness I | ✓ |
+| 🥦 Vegetables | Slowness I | ✓ |
+| 🥩 Proteins | Mining Fatigue I | ✓ |
+| 🍎 Fruits | Unluck I | ✓ |
+| 🍬 Sugars | — | — |
+| 🥛 Dairy | — | ✓ |
 
-| Group         | Neglect Penalty  | Balance Buff |
-| ------------- | ---------------- | ------------ |
-| 🌾 Grains     | Weakness I       | ✓            |
-| 🥦 Vegetables | Slowness I       | ✓            |
-| 🥩 Proteins   | Mining Fatigue I | ✓            |
-| 🍎 Fruits     | Unluck I         | ✓            |
-| 🍬 Sugars     | —                | —            |
-| 🥛 Dairy      | —                | ✓            |
-
----
-
-Sugars and Dairy have no penalty effect by default these groups are tracked and affect your balance score but do not apply a debuff when depleted. Dairy still counts toward the balance buff. This is configurable.
+Sugars and Dairy have no penalty effect by default: both are tracked and affect your balance score, but only Dairy counts toward the balance buff. Configurable.
 
 ## 🍽️ Eating at full hunger
 
-Vanilla hunger normally blocks eating at full hunger; Nourished still counts nutrition when your bar is full. Light foods berries, fruits, and snacks can be eaten for nutrients without restoring hunger. Heavy meals follow vanilla rules by default.
+Vanilla blocks eating at full hunger; Nourished still counts nutrition when your hunger bar is full. Light foods (berries, fruits, snacks) can be eaten for nutrients without restoring hunger. Heavy meals follow vanilla rules by default. Both configurable: `blockHeavyMeals` and `blockLightFood`.
 
-Both behaviors are configurable: `blockHeavyMeals` and `blockLightFood` toggles give server admins full control.
-
-All effects are fully configurable and can be disabled per-module.
-
-Diminishing returns apply - eating the same food repeatedly gives less credit each time, encouraging real variety.
+Diminishing returns apply:  eating the same food repeatedly gives less credit each time, encouraging real variety.
 
 ---
 
 <details>
-
 <summary>🥩 Raw Food & Gut Health</summary>
 
-Eating raw or undercooked food has consequences. Nourished tracks a **gut health** value for every player that degrades when you eat raw food and recovers over time from cooked food and dietary variety.
+Eating raw or undercooked food has consequences. Nourished tracks a **gut health** value per player that degrades when you eat raw food and recovers over time from cooked food and dietary variety.
 
-Raw foods are classified into four tiers:
+Raw foods classify into four tiers:
 
-| Tier   | Effect                           |
-| ------ | -------------------------------- |
-| Fine   | No penalty                       |
-| Mild   | Minor debuff, short duration     |
+| Tier | Effect |
+|---|---|
+| Fine | No penalty |
+| Mild | Minor debuff, short duration |
 | Medium | Moderate debuff, longer duration |
 | Severe | Strong debuff, extended duration |
 
-Eating the same raw food repeatedly within a memory window increases sensitivity, the more you do it, the worse the penalty gets. Gut health recovers passively and faster when you eat cooked food and maintain dietary diversity.
+Eating the same raw food repeatedly within a memory window increases sensitivity, the more you do it, the worse the penalty gets. Gut health recovers passively, faster with cooked food and dietary diversity. Resistance builds up over time, reducing penalty scale.
 
-Resistance can be built up over time, reducing penalty scale. Everything, tiers, durations, nutrient penalties, recovery rates, is configurable via `config/nourished/raw_food.json` and server module toggles.
+Everything — tiers, durations, nutrient penalties, recovery rates:  is configurable via `config/nourished/raw_food.json` and server module toggles. This is currently the only true gameplay module beyond core nutrition tracking (Stamina, mentioned in older docs, is a compat integration with the separate Peak Stamina mod, not a native Nourished module).
 
 </details>
 
@@ -102,41 +92,36 @@ Everything ships with sensible defaults. Everything can be changed:
 - Toggle individual modules on or off
 - Adjust decay rates and thresholds per nutrient
 - Add, remove, or replace effects via `effects.json`
-- Override anything through datapacks — no file editing needed
-- Control eating behavior with `blockHeavyMeals` and `blockLightFood` toggles
+- Override anything through datapacks: no file editing needed
+- Control eating behavior with `blockHeavyMeals` and `blockLightFood`
 - Save and share full config snapshots with a single share code
 
 ---
 
-## 🤝 Broad Mod Compatibility
+## 🤝 Broad mod compatibility
 
-If a mod adds food with `FoodProperties`, Nourished handles it automatically. No data files to write, no configs to edit.
+If a mod adds food with `FoodProperties`, Nourished handles it automatically, no data files to write, no configs to edit. On top of that, 30+ mods have dedicated compat entries for tighter integration:
 
-| Mod                         | Status                                   |
-| --------------------------- | ---------------------------------------- |
-| Farmer's Delight            | ✅ Full                                  |
-| Pam's HarvestCraft 2        | ✅ Full                                  |
-| Create: Food                | ✅ Full                                  |
-| Croptopia                   | ✅ Full                                  |
-| Farmer's Croptopia          | ✅ Full                                  |
-| Croptopia Delight           | ✅ Full                                  |
-| Farm & Charm                | ✅ Full                                  |
-| Ender's Delight             | ✅ Full                                  |
-| L_Ender's Delight           | ✅ Full                                  |
-| Ars Delight                 | ✅ Full                                  |
-| Autochef's Delight          | ✅ Full                                  |
-| Spice of Life: Onion        | ✅ Full                                  |
-| KubeJS                      | ✅ Full scripting support                |
-| Peak Stamina                | ✅ Nutrition affects stamina             |
-| JEI / REI / EMI             | ✅ Tooltips in recipe viewers            |
-| Legendary Survival Overhaul | ⚠️ Effects disabled (LSO takes priority) |
-| Any mod with FoodProperties | ✅ Auto-classified                       |
+**Delight-family & source mods:** Farmer's Delight, Ars Flavors Delight, Autochef's Delight, Cataclysm Delight, Create: Food, Croptopia, Croptopia Delight, Farmer's Croptopia, Ender's Delight, Ends Delight, Expanded Delight, Let's Do Bakery/Brewery/Herbal Brews, More Delight, Naturalist, Ocean's Delight, Pam's HarvestCraft 2 (core, crops, extended, trees), Spice of Life: Onion
+
+**Farming & seasons:** Botany Pots, Crop Critters, Ecliptic Seasons, Farming for Blockheads, Serene Seasons, Mama's Herbs
+
+**Survival overhaul:** Cold Sweat, Legendary Survival Overhaul ⚠️ *(effects disabled — LSO takes priority)*, Tough as Nails
+
+**Other integrations:**
+
+| Mod | Status |
+|---|---|
+| KubeJS | ✅ Full scripting support |
+| Peak Stamina | ✅ Nutrition affects stamina |
+| JEI / REI / EMI | ✅ Tooltips in recipe viewers |
+| Any mod with `FoodProperties` | ✅ Auto-classified |
 
 ---
 
 ## 🌐 For mod developers
 
-Nourished runs on [MariesLib](https://github.com/kgbcupcake/MarieLib) — install both mods. The nutrition API is a thin facade over the library:
+Nourished runs on [MariesLib](https://github.com/kgbcupcake/MariesLib): install both mods. `NourishedAPI` is a thin, stable facade over the library:
 
 ```java
 float level = NourishedAPI.getValueLevel(player, "proteins");
@@ -144,27 +129,30 @@ NourishedAPI.registerValue(definition);
 NourishedAPI.registerSourceClassification(foodId, "proteins", 0.15f);
 ```
 
-Read `[API.md](API.md)` for Nourished integration, `[PHILOSOPHY.md](PHILOSOPHY.md)` for stability rules, and [MariesLib API](https://github.com/kgbcupcake/MarieLib/blob/main/API.md) for shared types like `ValueDefinition`. Datapack-only integrations need no Java.
+See [API.md](API.md) for the full reference, verified directly against source. Datapack-only integrations need no Java at all.
 
 ---
 
-## 📦 Datapack Support
+## 📦 Datapack support
 
 Everything in Nourished can be driven by datapacks with zero Java code:
 
-Nutrients — define custom food groups
-Food classification — assign items to nutrient bars via item tags under data/nourished/tags/item/nutrients/
-Effects add or replace buff/debuff rules via effects.json
-Food overrides — override specific item nutrition values via food_overrides.json
-Food values — adjust category multipliers via food_values.json
-Colors — customize HUD bar colors via colors.json
-The built-in food scanner (MariesLib tooling, `/nourished scan`) auto-classifies unknown foods and can write datapack output into your save. See `[API.md](API.md)`.
+- **Nutrients**:  define custom food groups
+- **Food classification**:  assign items to nutrient bars via item tags under `data/nourished/tags/item/nutrients/`
+- **Effects**:  add or replace buff/debuff rules via `effects.json`
+- **Food overrides**:  override specific item nutrition values via `food_overrides.json`
+- **Excluded items**:  fully exclude specific items from tracking via `excluded_items.json`
+- **Colors**:  customize HUD bar colors via `colors.json`
+
+The built-in food scanner (MariesLib tooling, `/nourished scan`) auto-classifies unknown foods and can write datapack output into your save. See [API.md](API.md).
+
+For contributing new food-classification coverage to `scanner_spec.json` itself, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-## 🟨 KubeJS Support
+## 🟨 KubeJS support
 
-Full KubeJS scripting support for custom nutrient events, food classifications, and diet hooks — no Java required.
+Scripting support for nutrient events, food classifications, and diet hooks: no Java required.
 
 ```js
 NourishedEvents.nutrientChanged(event => {
@@ -174,30 +162,20 @@ NourishedEvents.nutrientChanged(event => {
 })
 ```
 
----
-
-## 🚧 Current Focus
-
-- Balancing nutrient decay
-- Expanding datapack support
-- Improving multiplayer syncing
-- Additional compat integrations
-- More HUD customization
-
----
+See [API.md](API.md#kubejs) for the full event list.
 
 ---
 
 ## ⚙️ Requirements
 
-|                  |                                                                |
-| ---------------- | -------------------------------------------------------------- |
-| **Minecraft**    | 1.21.1                                                         |
-| **NeoForge**     | 21.1.x                                                         |
-| **MarieLib**     | **v0.1.0-beta.1** ( ⚠️ Going forward from **v0.2.5-beta.5**. ) |
-| **Cloth Config** | required at runtime                                            |
-| **Patchouli**    | optional (in-game guide)                                       |
-| **Java**         | 21                                                             |
+|  |  |
+|---|---|
+| **Minecraft** | 1.21.1 |
+| **NeoForge** | 21.1.x |
+| **MariesLib** | **0.1.1-beta.5+** (hard dependency — install alongside this mod) |
+| **Cloth Config** | required at runtime |
+| **Patchouli** | optional (in-game guide) |
+| **Java** | 21 |
 
 ---
 
@@ -208,9 +186,7 @@ MIT
 ## Links
 
 - [Modrinth](https://modrinth.com/mod/nourished)
-- [MariesLib](https://github.com/kgbcupcake/MarieLib) (required dependency)
-- [Contributing](docs/CONTRIBUTING.md)
+- [MariesLib](https://github.com/kgbcupcake/MariesLib) (required dependency)
+- [Contributing](CONTRIBUTING.md)
 - [API.md](API.md)
-- [PHILOSOPHY.md](PHILOSOPHY.md)
-- [ARCHITECTURE.md](ARCHITECTURE.md)
-- [RoadMap.md](RoadMap.md)
+- [Changelog](CHANGELOG.md)
