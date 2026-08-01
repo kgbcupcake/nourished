@@ -18,7 +18,7 @@ public final class HardFallbackStage implements ResolutionStageHandler {
 
     @Override
     public ResolutionResult resolve(ResourceLocation itemId, StageContext ctx) {
-        Nourished.LOGGER.debug("[RuntimeFoodResolver] No classification for {}, returning unclassified", itemId);
+        Nourished.LOGGER.debug("[RuntimeResolver] No classification for {}, returning unclassified", itemId);
         return new ResolutionResult(
                 Map.of(), Map.of(),
                 List.of(), Map.of(), Map.of(),

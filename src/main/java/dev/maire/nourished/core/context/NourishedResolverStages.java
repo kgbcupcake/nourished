@@ -1,8 +1,8 @@
 package dev.maire.nourished.core.context;
 
 import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.runtime.RuntimeResolver;
 import dev.marie.framework.scan.ResolutionStageHandler;
-import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.nutrition.stages.CommunityTagStage;
 import dev.maire.nourished.core.nutrition.stages.HardFallbackStage;
 import dev.maire.nourished.core.nutrition.stages.KeywordSuffixStage;
@@ -18,7 +18,7 @@ public final class NourishedResolverStages {
     public static final ResolutionStageHandler[] STAGES = {
             COMMUNITY_TAG_STAGE,
             KEYWORD_SUFFIX_STAGE,
-            new RecipeInheritanceStage(RuntimeFoodResolver.getInstance().recipeInheritanceResolver(), COMMUNITY_TAG_STAGE, KEYWORD_SUFFIX_STAGE),
+            new RecipeInheritanceStage(RuntimeResolver.getInstance().recipeInheritanceResolver(), COMMUNITY_TAG_STAGE, KEYWORD_SUFFIX_STAGE),
             new NamespacePeerStage(),
             new HardFallbackStage(),
     };
