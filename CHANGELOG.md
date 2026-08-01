@@ -4,9 +4,14 @@
 
 ## [ Unreleased ]
 
+### Added
+
+- Added `INSTANCE_TAGS_README.md`, bundled and copied by MariesLib into `config/nourished/instance_tags/` on load, documenting the single consolidated `instance_tags.json` file (categories keyed within one JSON object) that folder holds.
+
 ### Fixed
 
 - Wired up `registerCompatEntry` in `NourishedDatapackCallbacks`. The 34 datapack-driven compat entries under `data/nourished/nourished/compat/` were being parsed on every datapack apply but silently discarded, since the callback had no override and defaulted to a no-op — none of them ever actually took effect. They now register into `ModCompat` and apply as intended.
+- `CommunityTagStage` was a hand-written duplicate of MariesLib's `CommunityTagResolutionStage`, but diverged in behavior: it always deposited into the shared community-tag signal and returned `null` instead of returning a result, so the community-tag cascade never actually terminated, and it never ran the instance-tags OR-check at all. It now delegates directly to MariesLib's `CommunityTagResolutionStage`, so a community-tag match (including instance-tags) is correctly recognized as a confirmed classification wherever this stage is used — most notably in recipe-ingredient confirmation during recipe inheritance.
 
 ### CI / Tooling
 

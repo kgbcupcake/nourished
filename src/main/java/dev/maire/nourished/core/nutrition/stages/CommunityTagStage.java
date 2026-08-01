@@ -1,52 +1,26 @@
 package dev.maire.nourished.core.nutrition.stages;
 
-import dev.maire.nourished.core.Nourished;
 import dev.marie.framework.scan.ResolutionResult;
 import dev.marie.framework.scan.ResolutionStageHandler;
 import dev.marie.framework.scan.StageContext;
-import dev.marie.framework.scanner.ScannerSpecRegistry;
-import dev.marie.framework.scanner.ScannerSpecRegistry.ScannerSpec;
-import net.minecraft.core.registries.Registries;
+import dev.marie.framework.scanner.stages.CommunityTagResolutionStage;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * Stage 1: matches the item against community {@code c:foods/*} tags and accumulates
- * nutrient weight contributions from scanner spec community tag weights.
+ * Delegates to marie-core's {@link CommunityTagResolutionStage} instead of maintaining a second
+ * copy of community-tag matching. Kept as a distinct type (rather than using
+ * {@link CommunityTagResolutionStage} directly) because {@link RecipeInheritanceStage}'s
+ * constructor requires this exact type.
  */
 public final class CommunityTagStage implements ResolutionStageHandler {
+
+    private final CommunityTagResolutionStage delegate = new CommunityTagResolutionStage();
 
     @Override
     @Nullable
     public ResolutionResult resolve(ResourceLocation itemId, StageContext ctx) {
-        ScannerSpec spec = ScannerSpecRegistry.get();
-        Map<String, Map<String, Float>> communityTagWeights = spec.communityTagWeights();
-        Map<String, Float> contributions = new HashMap<>();
-
-        for (Map.Entry<String, Map<String, Float>> entry : communityTagWeights.entrySet()) {
-            String suffix = entry.getKey();
-            ResourceLocation tagLoc = ResourceLocation.tryParse("c:foods/" + suffix);
-            if (tagLoc == null) {
-                Nourished.LOGGER.debug("[RuntimeFoodResolver] Skipping invalid community tag suffix: {}", suffix);
-                continue;
-            }
-            TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagLoc);
-            if (ctx.holder().is(tagKey)) {
-                for (Map.Entry<String, Float> contrib : entry.getValue().entrySet()) {
-                    contributions.merge(contrib.getKey(), contrib.getValue(), Float::sum);
-                }
-            }
-        }
-
-        if (contributions.isEmpty()) return null;
-
-        // Deposit into context for KeywordSuffixStage to merge — do not return early
-        ctx.communityTagSignal().putAll(contributions);
-        return null;
+        return delegate.resolve(itemId, ctx);
     }
 }
