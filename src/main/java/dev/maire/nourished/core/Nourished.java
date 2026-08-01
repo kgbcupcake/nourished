@@ -20,6 +20,14 @@ import dev.marie.framework.compat.ModCompat;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
+import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientConfig;
+import dev.maire.nourished.modules.activity_driven_nutrient.handler.ActivityModuleDispatcher;
+import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityModuleRegistry;
+import dev.maire.nourished.modules.activity_driven_nutrient.modules.CombatModule;
+import dev.maire.nourished.modules.activity_driven_nutrient.modules.MiningModule;
+import dev.maire.nourished.modules.activity_driven_nutrient.modules.SprintDecayModule;
+import dev.maire.nourished.modules.activity_driven_nutrient.handler.StarvationModule;
+import dev.maire.nourished.modules.activity_driven_nutrient.modules.SwimDecayModule;
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.client.ClientEventRegistrar;
@@ -77,10 +85,13 @@ public class Nourished {
         ModCompat.initialize();
         NourishedConfig.register(modContainer);
         NourishedClientConfig.register(modContainer);
+        ActivityDrivenNutrientConfig.register(modContainer);
         modEventBus.addListener(NourishedConfig::onModConfigLoading);
         modEventBus.addListener(NourishedConfig::onModConfigReloading);
         modEventBus.addListener(NourishedClientConfig::onModConfigLoading);
         modEventBus.addListener(NourishedClientConfig::onModConfigReloading);
+        modEventBus.addListener(ActivityDrivenNutrientConfig::onModConfigLoading);
+        modEventBus.addListener(ActivityDrivenNutrientConfig::onModConfigReloading);
 
         NourishedLifecycle.register();
         NourishedContextBuilder.registerSlim();
@@ -124,6 +135,12 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new RawFoodPenaltyHandler());
         NeoForge.EVENT_BUS.register(new GutHealthTickHandler());
         NeoForge.EVENT_BUS.register(new GutHealthRecoveryHandler());
+        ActivityModuleRegistry.register(new SprintDecayModule());
+        ActivityModuleRegistry.register(new SwimDecayModule());
+        ActivityModuleRegistry.register(new MiningModule());
+        ActivityModuleRegistry.register(new CombatModule());
+        NeoForge.EVENT_BUS.register(new ActivityModuleDispatcher());
+        NeoForge.EVENT_BUS.register(new StarvationModule());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
             event.enqueueWork(() -> {
                 // Runs after MarieBootstrap.onCommonSetup → RegistryLifecycleManager.loadAll().

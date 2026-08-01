@@ -153,7 +153,7 @@ public final class NourishedConfigSharedWidgets {
                     valueScaled,
                     minScaled,
                     maxScaled,
-                    Component.empty(),
+                    Component.translatable("text.cloth-config.reset_value"),
                     () -> defaultScaled,
                     v -> saveConsumer.accept(v / (double) scale),
                     () -> tooltip.length > 0 ? Optional.of(tooltip) : Optional.empty(),
@@ -244,7 +244,7 @@ public final class NourishedConfigSharedWidgets {
                 java.util.function.Function<Integer, Component> textGetter,
                 Supplier<Boolean> enabledSupplier
         ) {
-            super(fieldName, value, minimum, maximum, resetButtonKey, defaultValue, saveConsumer, tooltipSupplier, requiresRestart);
+            super(fieldName, minimum, maximum, value, resetButtonKey, defaultValue, saveConsumer, tooltipSupplier, requiresRestart);
             this.enabledSupplier = enabledSupplier;
             setTextGetter(textGetter);
         }

@@ -22,6 +22,8 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurveRegistry;
 import dev.maire.nourished.core.reload.NourishedReloadHelper;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
+import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityDrivenNutrientCategory;
+import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientConfig;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.client.Minecraft;
@@ -67,6 +69,7 @@ public final class NourishedConfigScreen {
         ScannerCategory.addScannerCategory(config, builder, entryBuilder);
         AdvancedCategory.addAdvancedCategory(config, builder, entryBuilder, modulePending);
         CompatibilityCategory.addCompatibilityCategory(config, builder, entryBuilder, compatPending);
+        ActivityDrivenNutrientCategory.addActivityDrivenNutrientCategory(builder, entryBuilder);
 
         builder.setSavingRunnable(() -> {
             for (Map.Entry<String, PendingOverride> entry : decayOverrides.entrySet()) {
@@ -118,6 +121,7 @@ public final class NourishedConfigScreen {
             MarieValueColors.clearOverrides();
             NourishedClientConfig.saveNow();
             NourishedConfig.saveNow();
+            ActivityDrivenNutrientConfig.saveNow();
             NourishedConfig.syncModuleCache();
             MinecraftServer integratedServer = Minecraft.getInstance().getSingleplayerServer();
             if (integratedServer != null) {

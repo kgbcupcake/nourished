@@ -40,6 +40,11 @@ public final class NourishedCommand {
                 .then(Commands.literal("tag")
                     .requires(s -> s.hasPermission(2))
                     .executes(NourishedTagAuditCommand::run))
+                .then(Commands.literal("debug")
+                    .requires(s -> s.hasPermission(2))
+                    .then(Commands.literal("activitylog")
+                        .requires(s -> s.hasPermission(2))
+                        .executes(NourishedActivityLogCommand::run)))
         );
     }
 }
