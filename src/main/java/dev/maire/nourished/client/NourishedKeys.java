@@ -35,6 +35,13 @@ public final class NourishedKeys {
             "key.categories.nourished"
     );
 
+    public static final KeyMapping EDIT_CALORIE_HUD = new KeyMapping(
+            "key.nourished.editCalorieHud",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_C,
+            "key.categories.nourished"
+    );
+
     private NourishedKeys() {}
 
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
@@ -42,5 +49,6 @@ public final class NourishedKeys {
         event.register(OPEN_DIET_SCREEN);
         event.register(EDIT_DIET_SCREEN);
         event.register(EDIT_ACTIVITY_LOG_HUD);
+        event.register(EDIT_CALORIE_HUD);
     }
 }

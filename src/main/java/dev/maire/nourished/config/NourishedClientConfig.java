@@ -46,6 +46,7 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue hudVerticalLayout;
     private final ModConfigSpec.BooleanValue hudClassicMode;
     private final ModConfigSpec.BooleanValue enableActivityLogHud;
+    private final ModConfigSpec.BooleanValue enableCalorieHistoryHud;
     private final ModConfigSpec.ConfigValue<List<? extends String>> dietBarOrder;
     private final ModConfigSpec.DoubleValue dietScale;
     private final ModConfigSpec.IntValue dietOffsetX;
@@ -121,6 +122,10 @@ public final class NourishedClientConfig {
         enableActivityLogHud = builder.define(
                 "enableActivityLogHud",
                 ConfigDefaultsLoader.getBoolean(defaults, "enableActivityLogHud", true)
+        );
+        enableCalorieHistoryHud = builder.define(
+                "enableCalorieHistoryHud",
+                ConfigDefaultsLoader.getBoolean(defaults, "enableCalorieHistoryHud", true)
         );
         dietBarOrder = builder.defineListAllowEmpty(
                 "dietBarOrder",
@@ -440,6 +445,15 @@ public final class NourishedClientConfig {
 
     public void setEnableActivityLogHud(boolean value) {
         enableActivityLogHud.set(value);
+    }
+
+    /** When false, {@link dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen} never renders/ticks. */
+    public boolean enableCalorieHistoryHud() {
+        return enableCalorieHistoryHud.get();
+    }
+
+    public void setEnableCalorieHistoryHud(boolean value) {
+        enableCalorieHistoryHud.set(value);
     }
 
     /**

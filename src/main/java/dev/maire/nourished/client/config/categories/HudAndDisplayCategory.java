@@ -170,6 +170,39 @@ public final class HudAndDisplayCategory {
                         .setTooltip(Component.translatable("config.nourished.enableActivityLogHud.desc"))
                         .build()
         );
+        category.addEntry(
+                eb.startKeyCodeField(
+                                Component.translatable("config.nourished.activityLogHudEditHotkey"),
+                                NourishedKeys.EDIT_ACTIVITY_LOG_HUD.getKey()
+                        )
+                        .setDefaultValue(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_K))
+                        .setKeySaveConsumer(key -> {
+                            NourishedKeys.EDIT_ACTIVITY_LOG_HUD.setKey(key);
+                            KeyMapping.resetMapping();
+                            Minecraft.getInstance().options.save();
+                        })
+                        .build()
+        );
+        category.addEntry(
+                eb.startBooleanToggle(Component.translatable("config.nourished.enableCalorieHistoryHud"), client.enableCalorieHistoryHud())
+                        .setDefaultValue(true)
+                        .setSaveConsumer(client::setEnableCalorieHistoryHud)
+                        .setTooltip(Component.translatable("config.nourished.enableCalorieHistoryHud.desc"))
+                        .build()
+        );
+        category.addEntry(
+                eb.startKeyCodeField(
+                                Component.translatable("config.nourished.calorieHudEditHotkey"),
+                                NourishedKeys.EDIT_CALORIE_HUD.getKey()
+                        )
+                        .setDefaultValue(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_C))
+                        .setKeySaveConsumer(key -> {
+                            NourishedKeys.EDIT_CALORIE_HUD.setKey(key);
+                            KeyMapping.resetMapping();
+                            Minecraft.getInstance().options.save();
+                        })
+                        .build()
+        );
 
         category.addEntry(new HudNutrientColorsSectionHeaderEntry());
         List<NutrientHudHexColorRowEntry> hudNutrientColorRows = new ArrayList<>();
