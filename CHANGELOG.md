@@ -7,6 +7,11 @@
 ### Added
 
 - Added `INSTANCE_TAGS_README.md`, bundled and copied by MariesLib into `config/nourished/instance_tags/` on load, documenting the single consolidated `instance_tags.json` file (categories keyed within one JSON object) that folder holds.
+- Added activity-driven nutrient modules: sprint/swim decay boosts, per-block mining cost, per-kill combat cost, and a one-time starvation penalty applied when a nutrient crosses into critical. Each module (`SprintDecayModule`, `SwimDecayModule`, `MiningModule`, `CombatModule`, `StarvationModule`) is independently toggleable and dispatched through `ActivityModuleDispatcher`/`ActivityModuleRegistry`.
+- Added a config-screen category (`ActivityDrivenNutrientCategory`) for adjusting activity-driven nutrient toggles, costs, and per-module HUD log colors.
+- Added the Activity Log HUD panel (`ActivityLogHudPanel`): a draggable/resizable, config-toggleable (`enableActivityLogHud`) on-screen log of recent activity-driven nutrient effects for the local player, with its own edit-mode keybind (default `K`), fed by a small client-side ring buffer (`ActivityLogClientBuffer`) synced per-entry from the server.
+- Migrated activity-driven nutrient settings off the old `ModConfig.Type.SERVER` TOML spec onto a JSON registry (`ActivityDrivenNutrientRegistry`) at `config/nourished/modules/activity/activity_config.json`, with its own `ACTIVITY_CONFIG_README.md`, datapack override support, and five per-module ARGB colors (mining/combat/sprint/swim/starvation) used to color each Activity Log HUD line — editable via new swatch+hex+reset rows in the config screen, falling back to the theme's default text color when unset.
+- Server→client sync for the activity-driven nutrient registry now goes through MarieLib's new generic `MarieResourcesAPI` config-sync mechanism (`registerConfigSyncSupplier`/`registerConfigSyncClientHandler`/`broadcastConfigSyncReload`/`getConfigSyncState`) instead of NeoForge's built-in `ModConfig.Type.SERVER` sync, matching the JSON-registry pattern the rest of Nourished's config already uses.
 
 ### Fixed
 
@@ -21,8 +26,11 @@
 
 ---
 
+[ nourished 0.2.7-beta.1]
+
 [ nourished 0.2.7-beta] - 2026-07-13
- ## Notes
+
+## Notes
 
 > A lot has changed in this update and some of the changes are breaking. Please read the changelog carefully and check
 > your configs and datapacks for any necessary updates. This also includes MariesLib updates
@@ -66,7 +74,7 @@
   `nourished-client.toml` entries, which are now obsolete and stripped on load (any previously-set zoom resets to
   default, same as other one-time persisted-schema changes in this file). Zoom stays live-clamped every render to that
   box's own current single-axis fit range, so it can never exceed what a single-axis-only resize of that box would
-  already produce, and never shrinks/grows the box's own outer rectangle. A small "zoom x_.__" label shows under a box
+  already produce, and never shrinks/grows the box's own outer rectangle. A small "zoom x\_.\_\_" label shows under a box
   in edit mode while it's zoomed.
 
 ### Changed
@@ -124,12 +132,12 @@
 - Fixed `ActiveEffectsComponent`'s effect lines overlapping at higher zoom, the same latent bug as
   `RecentMealsComponent` above (header-to-first-line and line-to-line advance now stretch by the same zoom ratio as text
   draw size). The shared zoom ceiling again needed no per-box adjustment, including for this box's dynamic effect count:
-  `effectsBoxH` is a fixed per-instance reference captured from the player's *current* effect count at construction (
+  `effectsBoxH` is a fixed per-instance reference captured from the player's _current_ effect count at construction (
   mirroring `recentHeight`), and a fresh instance is built (and `effectsBoxH` re-derived) every render pass, so the same
   algebraic reduction to `effectsBoxH * scale` holds regardless of how many effects are active.
 - Fixed Diet Screen edit-mode boxes (Calories/Balance/Recent Meals/Eat more of.../Active Effects) not reflowing live
   while an earlier box in the stack was being dragged or resized: the sibling-stacking chain only ever read a box's last
-  *committed* size, so a box being grown mid-drag visually overlapped whatever came after it, and
+  _committed_ size, so a box being grown mid-drag visually overlapped whatever came after it, and
   `ActiveEffectsComponent` could appear to vanish mid-drag even with room on screen because its fit check was still
   evaluated against the stale, pre-drag start position. `DietScreenPersistence` now accepts a per-frame live override (
   set by `DietScreenEditTarget` for whichever box is actively dragging, cleared right after) so the module chain sees

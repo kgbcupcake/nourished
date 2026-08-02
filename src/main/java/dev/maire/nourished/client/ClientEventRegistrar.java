@@ -6,6 +6,8 @@ import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.client.NourishedClientMemoryConfig;
 import dev.maire.nourished.client.screen.diet.dynamic.edit.DietModuleResetCommand;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.DietScreenModules;
+import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogClientBuffer;
+import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
@@ -22,6 +24,8 @@ public final class ClientEventRegistrar {
         NeoForge.EVENT_BUS.addListener(ClientEvents::onClientTick);
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onRenderGuiPost);
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onClientTick);
+        NeoForge.EVENT_BUS.addListener(ActivityLogHudPanel::onRenderGuiPost);
+        NeoForge.EVENT_BUS.addListener(ActivityLogHudPanel::onClientTick);
         NeoForge.EVENT_BUS.addListener(ClientEventRegistrar::onLogout);
         // TEMPORARY dev-only command — see DietModuleResetCommand's own javadoc for removal instructions.
         NeoForge.EVENT_BUS.addListener(DietModuleResetCommand::register);
@@ -32,5 +36,6 @@ public final class ClientEventRegistrar {
         MarieClientState.reset();
         MarieClientCache.resetDiagnostics();
         NourishedClientMemoryConfig.resetClientMemoryDiagnostics();
+        ActivityLogClientBuffer.reset();
     }
 }

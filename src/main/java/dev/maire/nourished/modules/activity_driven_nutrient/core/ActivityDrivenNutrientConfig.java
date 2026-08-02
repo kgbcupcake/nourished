@@ -1,222 +1,123 @@
 package dev.maire.nourished.modules.activity_driven_nutrient.core;
 
-import dev.maire.nourished.core.Nourished;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import dev.marie.framework.network.SyncState;
+import dev.marie.framework.resources.api.MarieResourcesAPI;
 
 /**
- * Server-synced settings for the activity-driven nutrient modules (sprint/swim/mining/combat/
- * starvation). Stored in {@code nourished-activity-driven-nutrient.toml}. Unlike {@link
- * dev.maire.nourished.config.NourishedConfig}, this is a real {@link ModConfig.Type#SERVER} spec:
- * values are unavailable on the client until synced from a joined/started server.
+ * Thin facade over {@link ActivityDrivenNutrientRegistry}, kept so
+ * {@code ActivityModuleDispatcher}, {@code StarvationModule}, and the module classes don't need to
+ * change their {@code ActivityDrivenNutrientConfig.get().xEnabled()/xCostPerY()} call sites.
+ * Formerly a real {@link net.neoforged.neoforge.common.ModConfigSpec}-backed
+ * {@code ModConfig.Type.SERVER} spec; now backed by the JSON registry and marie-resources's generic
+ * config-sync mechanism.
  */
 public final class ActivityDrivenNutrientConfig {
 
-    private static ActivityDrivenNutrientConfig INSTANCE;
-    private static ModConfigSpec SPEC;
-    private static volatile ModConfig boundConfig;
+    private static final ActivityDrivenNutrientConfig INSTANCE = new ActivityDrivenNutrientConfig();
 
-    private final ModConfigSpec.BooleanValue enabled;
-    private final ModConfigSpec.BooleanValue sprintEnabled;
-    private final ModConfigSpec.BooleanValue swimEnabled;
-    private final ModConfigSpec.BooleanValue miningEnabled;
-    private final ModConfigSpec.BooleanValue combatEnabled;
-    private final ModConfigSpec.BooleanValue starvationEnabled;
-    private final ModConfigSpec.DoubleValue miningCostPerBlock;
-    private final ModConfigSpec.DoubleValue combatCostPerKill;
-    private final ModConfigSpec.DoubleValue sprintDecayBoost;
-    private final ModConfigSpec.DoubleValue swimDecayBoost;
-    private final ModConfigSpec.DoubleValue starvationPenalty;
-
-    private ActivityDrivenNutrientConfig(ModConfigSpec.Builder builder) {
-        builder.push("activity_driven_nutrient");
-        enabled = builder
-                .comment("Master toggle for the activity-driven nutrient modules")
-                .define("enabled", true);
-        sprintEnabled = builder
-                .comment("When true, sprinting drains/affects nutrients")
-                .define("sprintEnabled", true);
-        swimEnabled = builder
-                .comment("When true, swimming drains/affects nutrients")
-                .define("swimEnabled", true);
-        miningEnabled = builder
-                .comment("When true, mining drains/affects nutrients")
-                .define("miningEnabled", true);
-        combatEnabled = builder
-                .comment("When true, combat drains/affects nutrients")
-                .define("combatEnabled", true);
-        starvationEnabled = builder
-                .comment("When true, starvation drains/affects nutrients")
-                .define("starvationEnabled", true);
-        // Small placeholder magnitudes — mining fires once per block broken (very frequent) so its
-        // per-fire cost is kept tiny; combat/starvation fire much less often so can afford a bigger
-        // one-time bite. Same order of magnitude as RawFoodTierDef's -0.03..-0.08 one-time nutrient
-        // penalties and NourishedConfig's default 0.001-per-decay-tick passive decay rate. Tune per
-        // playtesting — these are conservative starting points, not balanced values.
-        miningCostPerBlock = builder
-                .comment("Nutrient cost (per bar) applied once per block broken.")
-                .defineInRange("miningCostPerBlock", 0.0005d, 0.0d, 0.1d);
-        combatCostPerKill = builder
-                .comment("Nutrient cost (per bar) applied once per entity killed.")
-                .defineInRange("combatCostPerKill", 0.01d, 0.0d, 0.5d);
-        sprintDecayBoost = builder
-                .comment("Extra nutrient subtraction (per bar) applied on top of passive decay each time the sprint tick-trigger fires while sprinting.")
-                .defineInRange("sprintDecayBoost", 0.0004d, 0.0d, 0.1d);
-        swimDecayBoost = builder
-                .comment("Extra nutrient subtraction (per bar) applied on top of passive decay each time the swim tick-trigger fires while swimming.")
-                .defineInRange("swimDecayBoost", 0.0004d, 0.0d, 0.1d);
-        starvationPenalty = builder
-                .comment("One-time nutrient penalty (per bar) applied when a nutrient crosses into critical.")
-                .defineInRange("starvationPenalty", 0.02d, 0.0d, 0.5d);
-        builder.pop();
-    }
-
-    public static void register(ModContainer modContainer) {
-        if (INSTANCE != null) {
-            return;
-        }
-        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
-        INSTANCE = new ActivityDrivenNutrientConfig(builder);
-        SPEC = builder.build();
-        modContainer.registerConfig(ModConfig.Type.SERVER, SPEC, Nourished.MODID + "-activity-driven-nutrient.toml");
-    }
-
-    public static void onModConfigLoading(ModConfigEvent.Loading event) {
-        bindIfOurs(event.getConfig());
-    }
-
-    public static void onModConfigReloading(ModConfigEvent.Reloading event) {
-        bindIfOurs(event.getConfig());
-    }
-
-    private static void bindIfOurs(ModConfig config) {
-        if (!Nourished.MODID.equals(config.getModId()) || config.getType() != ModConfig.Type.SERVER) {
-            return;
-        }
-        if (config.getSpec() != SPEC) {
-            return;
-        }
-        boundConfig = config;
-    }
+    private ActivityDrivenNutrientConfig() {}
 
     public static ActivityDrivenNutrientConfig get() {
-        if (INSTANCE == null) {
-            throw new IllegalStateException("ActivityDrivenNutrientConfig has not been registered yet.");
-        }
         return INSTANCE;
     }
 
-    public static ModConfigSpec spec() {
-        return SPEC;
-    }
-
     /**
-     * True once this SERVER-type config has been loaded/synced (integrated server bound, or synced
-     * from a joined dedicated server). False before that — values still hold in-memory defaults and
-     * must not be treated as real.
+     * True once the client has received its first synced snapshot for this registry (or, on the
+     * logical server itself, always true since values are loaded locally).
      */
     public static boolean isSynced() {
-        return boundConfig != null;
+        return MarieResourcesAPI.getConfigSyncState(ActivityDrivenNutrientRegistry.SYNC_ID) == SyncState.ACTIVE;
     }
 
     public static void saveNow() {
-        var cfg = boundConfig;
-        if (cfg == null) {
-            return;
-        }
-        var loaded = cfg.getLoadedConfig();
-        if (loaded != null) {
-            loaded.save();
-        }
+        ActivityDrivenNutrientRegistry.save();
     }
 
     public boolean enabled() {
-        return enabled.get();
+        return ActivityDrivenNutrientRegistry.enabled();
     }
 
     public void setEnabled(boolean value) {
-        enabled.set(value);
+        ActivityDrivenNutrientRegistry.setEnabled(value);
     }
 
     public boolean sprintEnabled() {
-        return sprintEnabled.get();
+        return ActivityDrivenNutrientRegistry.sprintEnabled();
     }
 
     public void setSprintEnabled(boolean value) {
-        sprintEnabled.set(value);
+        ActivityDrivenNutrientRegistry.setSprintEnabled(value);
     }
 
     public boolean swimEnabled() {
-        return swimEnabled.get();
+        return ActivityDrivenNutrientRegistry.swimEnabled();
     }
 
     public void setSwimEnabled(boolean value) {
-        swimEnabled.set(value);
+        ActivityDrivenNutrientRegistry.setSwimEnabled(value);
     }
 
     public boolean miningEnabled() {
-        return miningEnabled.get();
+        return ActivityDrivenNutrientRegistry.miningEnabled();
     }
 
     public void setMiningEnabled(boolean value) {
-        miningEnabled.set(value);
+        ActivityDrivenNutrientRegistry.setMiningEnabled(value);
     }
 
     public boolean combatEnabled() {
-        return combatEnabled.get();
+        return ActivityDrivenNutrientRegistry.combatEnabled();
     }
 
     public void setCombatEnabled(boolean value) {
-        combatEnabled.set(value);
+        ActivityDrivenNutrientRegistry.setCombatEnabled(value);
     }
 
     public boolean starvationEnabled() {
-        return starvationEnabled.get();
+        return ActivityDrivenNutrientRegistry.starvationEnabled();
     }
 
     public void setStarvationEnabled(boolean value) {
-        starvationEnabled.set(value);
+        ActivityDrivenNutrientRegistry.setStarvationEnabled(value);
     }
 
     public float miningCostPerBlock() {
-        return miningCostPerBlock.get().floatValue();
+        return (float) ActivityDrivenNutrientRegistry.miningCostPerBlock();
     }
 
     public void setMiningCostPerBlock(double value) {
-        miningCostPerBlock.set(value);
+        ActivityDrivenNutrientRegistry.setMiningCostPerBlock(value);
     }
 
     public float combatCostPerKill() {
-        return combatCostPerKill.get().floatValue();
+        return (float) ActivityDrivenNutrientRegistry.combatCostPerKill();
     }
 
     public void setCombatCostPerKill(double value) {
-        combatCostPerKill.set(value);
+        ActivityDrivenNutrientRegistry.setCombatCostPerKill(value);
     }
 
     public float sprintDecayBoost() {
-        return sprintDecayBoost.get().floatValue();
+        return (float) ActivityDrivenNutrientRegistry.sprintDecayBoost();
     }
 
     public void setSprintDecayBoost(double value) {
-        sprintDecayBoost.set(value);
+        ActivityDrivenNutrientRegistry.setSprintDecayBoost(value);
     }
 
     public float swimDecayBoost() {
-        return swimDecayBoost.get().floatValue();
+        return (float) ActivityDrivenNutrientRegistry.swimDecayBoost();
     }
 
     public void setSwimDecayBoost(double value) {
-        swimDecayBoost.set(value);
+        ActivityDrivenNutrientRegistry.setSwimDecayBoost(value);
     }
 
     public float starvationPenalty() {
-        return starvationPenalty.get().floatValue();
+        return (float) ActivityDrivenNutrientRegistry.starvationPenalty();
     }
 
     public void setStarvationPenalty(double value) {
-        starvationPenalty.set(value);
+        ActivityDrivenNutrientRegistry.setStarvationPenalty(value);
     }
 }

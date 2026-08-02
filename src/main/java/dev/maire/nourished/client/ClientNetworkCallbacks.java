@@ -11,6 +11,7 @@ import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthSyncPayload;
+import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogClientBuffer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.api.distmarker.Dist;
@@ -51,6 +52,12 @@ public final class ClientNetworkCallbacks {
                 GutHealthSyncPayload.TYPE,
                 GutHealthSyncPayload.STREAM_CODEC,
                 ClientNetworkCallbacks::onGutHealth
+        );
+
+        registrar.playToClient(
+                ModNetworking.SyncActivityLogEntryPayload.TYPE,
+                ModNetworking.SyncActivityLogEntryPayload.STREAM_CODEC,
+                ClientNetworkCallbacks::onActivityLogEntry
         );
     }
 
@@ -116,5 +123,10 @@ public final class ClientNetworkCallbacks {
                 player.setData(GutHealthAttachment.GUT.get(), gut);
             }
         });
+    }
+
+    public static void onActivityLogEntry(ModNetworking.SyncActivityLogEntryPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> ActivityLogClientBuffer.append(
+                payload.moduleId(), payload.description(), payload.timestampMillis()));
     }
 }

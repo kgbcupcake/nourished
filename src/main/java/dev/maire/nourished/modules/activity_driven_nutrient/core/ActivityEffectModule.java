@@ -21,6 +21,6 @@ public interface ActivityEffectModule {
     /** Whether this module is currently active — implementations read their own config getter. */
     boolean enabled();
 
-    /** Applies this module's effect for {@code trigger}. */
-    void onTrigger(ServerPlayer player, ValueSourceTrigger trigger);
+    /** Applies this module's effect for {@code trigger}. Returns {@code true} if an effect was actually applied. */
+    boolean onTrigger(ServerPlayer player, ValueSourceTrigger trigger);
 }

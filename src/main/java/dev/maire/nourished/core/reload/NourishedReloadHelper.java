@@ -5,7 +5,9 @@ import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
+import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientRegistry;
 import dev.marie.framework.handler.ReloadPipeline;
+import dev.marie.framework.resources.api.MarieResourcesAPI;
 import dev.marie.framework.runtime.RuntimeResolver;
 import dev.marie.framework.runtime.SourceRegistry;
 import net.minecraft.server.MinecraftServer;
@@ -28,6 +30,7 @@ public final class NourishedReloadHelper {
         NourishedSyncHandler.setConfigSnapshot(
                 SyncNourishedConfigSnapshot.fromConfig(NourishedConfig.get()));
         NourishedSyncHandler.broadcastConfigReload(server);
+        MarieResourcesAPI.broadcastConfigSyncReload(server, ActivityDrivenNutrientRegistry.SYNC_ID);
     }
 
     private static void invalidateClassificationCaches() {

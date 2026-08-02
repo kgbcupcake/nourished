@@ -32,10 +32,11 @@ public final class SwimDecayModule implements ActivityEffectModule {
     }
 
     @Override
-    public void onTrigger(ServerPlayer player, ValueSourceTrigger trigger) {
+    public boolean onTrigger(ServerPlayer player, ValueSourceTrigger trigger) {
         if (!TICK_SOURCE_ID.equals(trigger.sourceId())) {
-            return;
+            return false;
         }
         ActivityNutrientEffects.applyUniformDelta(player, -ActivityDrivenNutrientConfig.get().swimDecayBoost());
+        return true;
     }
 }

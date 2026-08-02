@@ -24,8 +24,10 @@ import dev.marie.framework.config.FeatureFlagCache;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.marie.framework.tracking.TrackingData;
+import dev.marie.framework.tracking.tracker.definition.TrackerHistoryEntry;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.marie.framework.api.impl.EmptyApplicationHistoryView;
+import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.framework.util.MarieRegistryUtils;
@@ -36,6 +38,7 @@ import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -52,6 +55,9 @@ import java.util.Map;
 public final class NourishedAPI {
 
     private static final ResourceLocation API_MODIFIER_SOURCE = ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "api");
+
+    /** MarieLib tracker id for the calories daily tracker (see {@link #getYesterdayCalories(Player)}). */
+    public static final ResourceLocation CALORIES_TRACKER_ID = ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "calories");
 
     private NourishedAPI() {}
 
@@ -115,6 +121,38 @@ public final class NourishedAPI {
     @ApiStatus.Stable
     public static float getTotalCount(Player player) {
         return getTotal(player);
+    }
+
+    /**
+     * Returns the player's calorie total from the most recently completed daily period.
+     *
+     * @param player the player to query
+     * @return the previous day's calorie total, or {@code -1.0f} if calorie history is
+     *         disabled ({@code enableCalorieHistory}) or no history exists yet
+     */
+    @ApiStatus.Stable
+    public static float getYesterdayCalories(Player player) {
+        if (player == null || !NourishedConfig.get().enableCalorieHistory()) {
+            return -1.0f;
+        }
+        List<TrackerHistoryEntry> history = getCalorieHistory(player);
+        return history.isEmpty() ? -1.0f : history.get(0).value();
+    }
+
+    /**
+     * Returns the player's completed-period calorie history, most recent first, bounded by
+     * {@code calorieHistoryRetentionDays}.
+     *
+     * @param player the player to query
+     * @return the calorie history, or an empty list if calorie history is disabled
+     *         ({@code enableCalorieHistory}) or no history exists yet
+     */
+    @ApiStatus.Stable
+    public static List<TrackerHistoryEntry> getCalorieHistory(Player player) {
+        if (player == null || !NourishedConfig.get().enableCalorieHistory()) {
+            return List.of();
+        }
+        return dev.marie.framework.api.marieapi.MarieAPI.getTrackerHistory(player, CALORIES_TRACKER_ID);
     }
 
     /**

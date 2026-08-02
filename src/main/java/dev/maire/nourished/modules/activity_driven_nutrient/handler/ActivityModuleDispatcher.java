@@ -4,6 +4,7 @@ import dev.marie.framework.api.marie.MarieEvents;
 import dev.marie.framework.api.value.ValueSourceTrigger;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientConfig;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityEffectModule;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityModuleRegistry;
@@ -38,8 +39,12 @@ public final class ActivityModuleDispatcher {
                 Nourished.LOGGER.debug("[ActivityModuleDispatcher] {} -> module={} player={}",
                         trigger.type(), module.id(), serverPlayer.getName().getString());
             }
-            module.onTrigger(serverPlayer, trigger);
-            ActivityEffectLog.record(module.id(), serverPlayer.getName().getString(), describeEffect(module.id()));
+            if (!module.onTrigger(serverPlayer, trigger)) {
+                continue;
+            }
+            ActivityEffectLog.Entry entry = ActivityEffectLog.record(
+                    module.id(), serverPlayer.getName().getString(), describeEffect(module.id()));
+            ModNetworking.sendActivityLogEntry(serverPlayer, entry);
         }
     }
 

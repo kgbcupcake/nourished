@@ -6,6 +6,7 @@ import dev.marie.framework.tracking.SourceMemoryEntry;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthSyncPayload;
+import dev.maire.nourished.modules.activity_driven_nutrient.handler.ActivityEffectLog;
 import dev.marie.framework.api.ApiStatus;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -63,6 +64,12 @@ public class ModNetworking {
                 (payload, context) -> {}
         );
 
+        registrar.playToClient(
+                SyncActivityLogEntryPayload.TYPE,
+                SyncActivityLogEntryPayload.STREAM_CODEC,
+                (payload, context) -> {}
+        );
+
     }
 
     /** Send lightweight client sync. Call on every food eat and decay tick. */
@@ -78,6 +85,12 @@ public class ModNetworking {
     /** Send gut health sync to client. Call on raw food eat, cooked food recovery, and gut tick. */
     public static void syncGutHealth(ServerPlayer player, GutHealthData gut) {
         PacketDistributor.sendToPlayer(player, new GutHealthSyncPayload(gut.getGutHealth(), gut.getSensitivity()));
+    }
+
+    /** Send one activity effect log entry to the owning player's Activity Log HUD. */
+    public static void sendActivityLogEntry(ServerPlayer player, ActivityEffectLog.Entry entry) {
+        PacketDistributor.sendToPlayer(player, new SyncActivityLogEntryPayload(
+                entry.moduleId(), entry.description(), entry.timestamp().toEpochMilli()));
     }
 
     private static void encodeFoodMemoryMap(FriendlyByteBuf buf, Map<String, SourceMemoryEntry> map) {
@@ -212,6 +225,33 @@ public class ModNetworking {
 
         @Override
         public CustomPacketPayload.Type<SyncDietDeltaPayload> type() {
+            return TYPE;
+        }
+    }
+
+    // ── Activity Log Entry Payload ───────────────────────────────────────────────
+
+    /** One {@link ActivityEffectLog.Entry}, minus {@code playerName} — the client only needs its own. */
+    public record SyncActivityLogEntryPayload(
+            String moduleId, String description, long timestampMillis
+    ) implements CustomPacketPayload {
+
+        public static final CustomPacketPayload.Type<SyncActivityLogEntryPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "sync_activity_log_entry"));
+
+        public static final StreamCodec<FriendlyByteBuf, SyncActivityLogEntryPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, payload) -> {
+                            buf.writeUtf(payload.moduleId());
+                            buf.writeUtf(payload.description());
+                            buf.writeLong(payload.timestampMillis());
+                        },
+                        buf -> new SyncActivityLogEntryPayload(buf.readUtf(), buf.readUtf(), buf.readLong())
+                );
+
+        @Override
+        public CustomPacketPayload.Type<SyncActivityLogEntryPayload> type() {
             return TYPE;
         }
     }

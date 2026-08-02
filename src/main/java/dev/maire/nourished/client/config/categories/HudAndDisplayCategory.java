@@ -163,6 +163,13 @@ public final class HudAndDisplayCategory {
                         })
                         .build()
         );
+        category.addEntry(
+                eb.startBooleanToggle(Component.translatable("config.nourished.enableActivityLogHud"), client.enableActivityLogHud())
+                        .setDefaultValue(true)
+                        .setSaveConsumer(client::setEnableActivityLogHud)
+                        .setTooltip(Component.translatable("config.nourished.enableActivityLogHud.desc"))
+                        .build()
+        );
 
         category.addEntry(new HudNutrientColorsSectionHeaderEntry());
         List<NutrientHudHexColorRowEntry> hudNutrientColorRows = new ArrayList<>();

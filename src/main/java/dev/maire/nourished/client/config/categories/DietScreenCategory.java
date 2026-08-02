@@ -113,6 +113,12 @@ public final class DietScreenCategory {
                         .build()
         );
         category.addEntry(
+                eb.startBooleanToggle(Component.translatable("config.nourished.showYesterdayCalories"), client.showYesterdayCalories())
+                        .setDefaultValue(true)
+                        .setSaveConsumer(client::setShowYesterdayCalories)
+                        .build()
+        );
+        category.addEntry(
                 eb.startBooleanToggle(Component.translatable("config.nourished.showBalanceBox"), client.showBalanceBox())
                         .setDefaultValue(true)
                         .setSaveConsumer(client::setShowBalanceBox)

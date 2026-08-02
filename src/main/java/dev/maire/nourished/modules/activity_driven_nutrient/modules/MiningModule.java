@@ -25,7 +25,8 @@ public final class MiningModule implements ActivityEffectModule {
     }
 
     @Override
-    public void onTrigger(ServerPlayer player, ValueSourceTrigger trigger) {
+    public boolean onTrigger(ServerPlayer player, ValueSourceTrigger trigger) {
         ActivityNutrientEffects.applyUniformDelta(player, -ActivityDrivenNutrientConfig.get().miningCostPerBlock());
+        return true;
     }
 }

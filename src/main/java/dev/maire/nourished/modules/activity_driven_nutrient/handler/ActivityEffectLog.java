@@ -19,11 +19,13 @@ public final class ActivityEffectLog {
 
     public record Entry(String moduleId, String playerName, String description, Instant timestamp) {}
 
-    public static synchronized void record(String moduleId, String playerName, String description) {
+    public static synchronized Entry record(String moduleId, String playerName, String description) {
         if (ENTRIES.size() == CAPACITY) {
             ENTRIES.removeFirst();
         }
-        ENTRIES.addLast(new Entry(moduleId, playerName, description, Instant.now()));
+        Entry entry = new Entry(moduleId, playerName, description, Instant.now());
+        ENTRIES.addLast(entry);
+        return entry;
     }
 
     /** Newest-last snapshot of currently buffered entries. */

@@ -28,11 +28,19 @@ public final class NourishedKeys {
             "key.categories.nourished"
     );
 
+    public static final KeyMapping EDIT_ACTIVITY_LOG_HUD = new KeyMapping(
+            "key.nourished.editActivityLogHud",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_K,
+            "key.categories.nourished"
+    );
+
     private NourishedKeys() {}
 
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(EDIT_HUD);
         event.register(OPEN_DIET_SCREEN);
         event.register(EDIT_DIET_SCREEN);
+        event.register(EDIT_ACTIVITY_LOG_HUD);
     }
 }

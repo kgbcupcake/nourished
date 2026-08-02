@@ -20,7 +20,7 @@ import dev.marie.framework.compat.ModCompat;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
-import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientConfig;
+import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientRegistry;
 import dev.maire.nourished.modules.activity_driven_nutrient.handler.ActivityModuleDispatcher;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityModuleRegistry;
 import dev.maire.nourished.modules.activity_driven_nutrient.modules.CombatModule;
@@ -85,13 +85,11 @@ public class Nourished {
         ModCompat.initialize();
         NourishedConfig.register(modContainer);
         NourishedClientConfig.register(modContainer);
-        ActivityDrivenNutrientConfig.register(modContainer);
         modEventBus.addListener(NourishedConfig::onModConfigLoading);
         modEventBus.addListener(NourishedConfig::onModConfigReloading);
         modEventBus.addListener(NourishedClientConfig::onModConfigLoading);
         modEventBus.addListener(NourishedClientConfig::onModConfigReloading);
-        modEventBus.addListener(ActivityDrivenNutrientConfig::onModConfigLoading);
-        modEventBus.addListener(ActivityDrivenNutrientConfig::onModConfigReloading);
+        ActivityDrivenNutrientRegistry.registerSync();
 
         NourishedLifecycle.register();
         NourishedContextBuilder.registerSlim();
@@ -147,6 +145,11 @@ public class Nourished {
                 NourishedConfigValidation.runAfterInitialLoad();
                 NutrientRegistry.syncAndFreeze();
                 ModCompat.discoverUnknownMods();
+                if (NourishedConfig.get().enableCalorieHistory()) {
+                    MarieAPI.registerTracker(dev.marie.framework.tracking.tracker.definition.TrackerDefinition.daily(
+                            dev.maire.nourished.api.NourishedAPI.CALORIES_TRACKER_ID,
+                            NourishedConfig.get().calorieHistoryRetentionDays()));
+                }
                 LOGGER.info("[Nourished] Starting AutoCompatDiscovery...");
                 try (var scope = MarieAPIState.openForDatapackReload()) {
                     AutoCompatDiscovery.discover();
