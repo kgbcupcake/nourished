@@ -7,7 +7,9 @@ import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel;
 import dev.marie.framework.client.config.cloth.ColorHexRowWidget;
+import dev.marie.framework.client.config.cloth.ColorPairRowGroup;
 import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.color.ColorRegistry;
 import dev.marie.framework.config.HudAnchor;
@@ -198,10 +200,12 @@ public final class HudAndDisplayCategory {
                         client::setActivityLogHudBackgroundOpacity
                 )
         );
-        category.addEntry(new ColorHexRowWidget(
-                ColorKey.of(ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "panel.activityLogHud")),
+        for (ColorHexRowWidget row : ColorPairRowGroup.buildRows(
+                ActivityLogHudPanel.COLORS,
                 Component.translatable("config.nourished.activityLogHudBackgroundColor"),
-                Component.translatable("config.nourished.hudColors.row.tooltip")));
+                Component.translatable("config.nourished.activityLogHudTextColor"))) {
+            category.addEntry(row);
+        }
         category.addEntry(new HudNutrientColorsSectionHeaderEntry());
         List<ColorHexRowWidget> nutrientColorRows = new ArrayList<>();
         for (String valueKey : NutrientRegistry.getKeys()) {

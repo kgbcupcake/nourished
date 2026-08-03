@@ -11,6 +11,7 @@ import dev.marie.framework.api.marieapi.MarieAPIState;
 import dev.marie.framework.color.ColorDefinition;
 import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.color.ColorRegistry;
+import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.data.MarieDataManager;
 import dev.maire.nourished.core.datapack.NourishedDatapackCallbacks;
 import dev.marie.framework.registry.MarieApiRegistries;
@@ -23,6 +24,8 @@ import dev.marie.framework.compat.ModCompat;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
+import dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen;
+import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientRegistry;
 import dev.maire.nourished.modules.activity_driven_nutrient.handler.ActivityModuleDispatcher;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityModuleRegistry;
@@ -186,7 +189,7 @@ public class Nourished {
      */
     private static void registerColorDefinitions() {
         for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
-            MarieAPI.registerColor(ColorDefinition.of(
+            MarieColors.registerColor(ColorDefinition.of(
                     ColorKey.of(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "nutrient." + def.key())),
                     def.color()));
         }
@@ -195,12 +198,11 @@ public class Nourished {
         // before this feature existed; alpha here is nominal since draw time composes the real
         // alpha from each panel's own opacity config value.
         int defaultPanelArgb = 0xFF101010;
-        MarieAPI.registerColor(ColorDefinition.of(
-                ColorKey.of(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "panel.calorieHud")),
-                defaultPanelArgb));
-        MarieAPI.registerColor(ColorDefinition.of(
-                ColorKey.of(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "panel.activityLogHud")),
-                defaultPanelArgb));
+        // Matches ThemeKey.TEXT_PRIMARY (0xFFE0E0E0) — the flat text color both panels drew before
+        // this feature existed.
+        int defaultTextArgb = 0xFFE0E0E0;
+        CalorieHudScreen.COLORS = MarieColors.registerColorPair(MODID, "calorieHud", defaultPanelArgb, defaultTextArgb);
+        ActivityLogHudPanel.COLORS = MarieColors.registerColorPair(MODID, "activityLogHud", defaultPanelArgb, defaultTextArgb);
     }
 
     /**

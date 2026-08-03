@@ -42,6 +42,7 @@ public final class ColorsValidator implements ConfigValidator {
     private static final String NUTRIENT_PREFIX = Nourished.MODID + ":nutrient.";
     private static final String ACTIVITY_PREFIX = Nourished.MODID + ":activity.";
     private static final String PANEL_PREFIX = Nourished.MODID + ":panel.";
+    private static final String TEXT_PREFIX = Nourished.MODID + ":text.";
 
     @Override
     public ValidationResult validate() {
@@ -95,8 +96,9 @@ public final class ColorsValidator implements ConfigValidator {
     /**
      * Accepts both the legacy raw nutrient key (e.g. {@code "protein"}) and the new namespaced
      * {@code ColorKey} strings ({@code nourished:nutrient.<key>}, {@code nourished:activity.<id>},
-     * {@code nourished:panel.<id>}) that {@code ColorHexRowWidget}/{@code MarieAPI.resolveColor} now
-     * read/write — activity and panel colors were never nutrient keys to begin with.
+     * {@code nourished:panel.<id>}, {@code nourished:text.<id>}) that {@code ColorHexRowWidget}/
+     * {@code MarieAPI.resolveColor} now read/write — activity, panel, and text colors were never
+     * nutrient keys to begin with.
      */
     private static boolean isKnownColorKey(String key, Set<String> validNutrientKeys) {
         if (validNutrientKeys.contains(key)) {
@@ -105,6 +107,6 @@ public final class ColorsValidator implements ConfigValidator {
         if (key.startsWith(NUTRIENT_PREFIX)) {
             return validNutrientKeys.contains(key.substring(NUTRIENT_PREFIX.length()));
         }
-        return key.startsWith(ACTIVITY_PREFIX) || key.startsWith(PANEL_PREFIX);
+        return key.startsWith(ACTIVITY_PREFIX) || key.startsWith(PANEL_PREFIX) || key.startsWith(TEXT_PREFIX);
     }
 }

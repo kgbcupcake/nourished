@@ -5,9 +5,9 @@ import dev.maire.nourished.client.config.categories.widgets.ModuleToggleListEntr
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.NourishedLockRegistry;
-import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen;
 import dev.marie.framework.client.config.cloth.ColorHexRowWidget;
-import dev.marie.framework.color.ColorKey;
+import dev.marie.framework.client.config.cloth.ColorPairRowGroup;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -15,7 +15,6 @@ import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Map;
@@ -96,10 +95,12 @@ public final class CalorieHistoryCategory {
                         client::setCalorieHudBackgroundOpacity
                 )
         );
-        category.addEntry(new ColorHexRowWidget(
-                ColorKey.of(ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "panel.calorieHud")),
+        for (ColorHexRowWidget row : ColorPairRowGroup.buildRows(
+                CalorieHudScreen.COLORS,
                 Component.translatable("config.nourished.calorieHudBackgroundColor"),
-                Component.translatable("config.nourished.hudColors.row.tooltip")));
+                Component.translatable("config.nourished.calorieHudTextColor"))) {
+            category.addEntry(row);
+        }
 
         addReloadButton(category, eb, false);
     }

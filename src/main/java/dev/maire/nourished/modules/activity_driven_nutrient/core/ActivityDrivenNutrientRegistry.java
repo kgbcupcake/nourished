@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-import dev.marie.framework.api.marieapi.MarieAPI;
 import dev.marie.framework.color.ColorDefinition;
 import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.color.ColorRegistry;
+import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.resources.api.MarieResourcesAPI;
 import dev.marie.framework.util.MarieJsonUtils;
 import dev.marie.framework.util.MarieResourceLoader;
@@ -184,7 +184,7 @@ public final class ActivityDrivenNutrientRegistry {
     /** Registers each module's {@link ColorDefinition} default. Must run during mod init. */
     public static void registerColors() {
         for (Map.Entry<String, Integer> entry : DEFAULT_COLORS.entrySet()) {
-            MarieAPI.registerColor(ColorDefinition.of(colorKey(entry.getKey()), entry.getValue()));
+            MarieColors.registerColor(ColorDefinition.of(colorKey(entry.getKey()), entry.getValue()));
         }
     }
 
@@ -229,7 +229,7 @@ public final class ActivityDrivenNutrientRegistry {
         if (!DEFAULT_COLORS.containsKey(moduleId)) {
             return Optional.empty();
         }
-        return Optional.of(MarieAPI.resolveColor(colorKey(moduleId)));
+        return Optional.of(MarieColors.resolveColor(colorKey(moduleId)));
     }
 
     public static int getDefaultColor(String moduleId) {

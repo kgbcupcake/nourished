@@ -1,8 +1,8 @@
 package dev.maire.nourished.client.hud.dynamic;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.marie.framework.api.marieapi.MarieAPI;
 import dev.marie.framework.color.ColorKey;
+import dev.marie.framework.color.MarieColors;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -66,7 +66,7 @@ public final class HudDrawHelpers {
 
     /** Resolves a nutrient's effective color (user/datapack override, or its registered default). */
     public static int nutrientColorArgb(String key) {
-        return MarieAPI.resolveColor(ColorKey.of(
+        return MarieColors.resolveColor(ColorKey.of(
                 ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "nutrient." + key)));
     }
 

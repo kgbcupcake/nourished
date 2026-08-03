@@ -1,8 +1,8 @@
 package dev.maire.nourished.client.hud.caloriehistory;
 
-import dev.marie.framework.api.marieapi.MarieAPI;
 import dev.marie.framework.client.config.state.MarieClientCache;
-import dev.marie.framework.color.ColorKey;
+import dev.marie.framework.color.ColorKeyPair;
+import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.tracking.tracker.definition.TrackerHistoryEntry;
 import dev.marie.framework.ui.RenderContext;
@@ -26,7 +26,6 @@ import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -191,11 +190,11 @@ public final class CalorieHudScreen implements MarieComponent {
                 .orElseGet(() -> new Bounds(DEFAULT_X, DEFAULT_Y, natural.width(), natural.height()));
     }
 
-    private static final ColorKey PANEL_COLOR_KEY = ColorKey.of(
-            ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "panel.calorieHud"));
+    /** Set by {@link Nourished#registerColorDefinitions()} at mod init. */
+    public static ColorKeyPair COLORS;
 
     private static void drawPanel(RenderContext context, Bounds bounds, List<Row> rows) {
-        int panelRgb = MarieAPI.resolveColor(PANEL_COLOR_KEY);
+        int panelRgb = MarieColors.resolveColor(COLORS.background());
         int panelColor = HudDrawHelpers.panelColorWithOpacity(
                 panelRgb, NourishedClientConfig.get().calorieHudBackgroundOpacity());
         context.fillRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), panelColor);
@@ -203,15 +202,13 @@ public final class CalorieHudScreen implements MarieComponent {
                 context.theme().color(ThemeKey.BORDER));
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
+            int textColor = MarieColors.resolveColor(COLORS.text());
             int maxRows = Math.max(0, (bounds.height() - PADDING * 2) / LINE_HEIGHT);
             int visible = Math.min(rows.size(), maxRows);
             int y = bounds.y() + PADDING;
             for (int i = 0; i < visible; i++) {
                 Row row = rows.get(i);
-                int color = row.live()
-                        ? context.theme().color(ThemeKey.TEXT_PRIMARY)
-                        : context.theme().color(ThemeKey.TEXT_SECONDARY);
-                context.drawText(row.text(), bounds.x() + PADDING, y, color, 1f);
+                context.drawText(row.text(), bounds.x() + PADDING, y, textColor, 1f);
                 y += LINE_HEIGHT;
             }
         } finally {

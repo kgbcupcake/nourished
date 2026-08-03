@@ -1,7 +1,7 @@
 package dev.maire.nourished.modules.activity_driven_nutrient.client;
 
-import dev.marie.framework.api.marieapi.MarieAPI;
-import dev.marie.framework.color.ColorKey;
+import dev.marie.framework.color.ColorKeyPair;
+import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.Theme;
 import dev.marie.framework.ui.ThemeKey;
@@ -19,10 +19,8 @@ import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.config.NourishedClientConfig;
-import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientRegistry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
@@ -157,11 +155,11 @@ public final class ActivityLogHudPanel implements MarieComponent {
                 .orElseGet(() -> new Bounds(DEFAULT_X, DEFAULT_Y, natural.width(), natural.height()));
     }
 
-    private static final ColorKey PANEL_COLOR_KEY = ColorKey.of(
-            ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "panel.activityLogHud"));
+    /** Set by {@code Nourished#registerColorDefinitions()} at mod init. */
+    public static ColorKeyPair COLORS;
 
     private static void drawPanel(RenderContext context, Bounds bounds, List<ActivityLogClientBuffer.Row> rows) {
-        int panelRgb = MarieAPI.resolveColor(PANEL_COLOR_KEY);
+        int panelRgb = MarieColors.resolveColor(COLORS.background());
         int panelColor = HudDrawHelpers.panelColorWithOpacity(
                 panelRgb, NourishedClientConfig.get().activityLogHudBackgroundOpacity());
         context.fillRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), panelColor);
@@ -169,6 +167,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
                 context.theme().color(ThemeKey.BORDER));
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
+            int defaultTextColor = MarieColors.resolveColor(COLORS.text());
             int maxRows = Math.max(0, (bounds.height() - PADDING * 2) / LINE_HEIGHT);
             int visible = Math.min(rows.size(), maxRows);
             int y = bounds.y() + PADDING;
@@ -176,7 +175,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
                 ActivityLogClientBuffer.Row row = rows.get(i);
                 String line = row.description() + " x" + row.count();
                 int color = ActivityDrivenNutrientRegistry.getColor(row.moduleId())
-                        .orElseGet(() -> context.theme().color(ThemeKey.TEXT_PRIMARY));
+                        .orElse(defaultTextColor);
                 context.drawText(line, bounds.x() + PADDING, y, color, 1f);
                 y += LINE_HEIGHT;
             }
