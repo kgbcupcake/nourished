@@ -210,7 +210,8 @@ public class Nourished {
      * raw nutrient key, e.g. {@code "protein"}) to the new namespaced {@link ColorKey} string (e.g.
      * {@code "nourished:nutrient.protein"}) that {@code ColorHexRowWidget}/{@code MarieAPI.resolveColor}
      * now read/write. Safe to call on every load: skips any nutrient whose new key already has an
-     * override, and never deletes the old entry, so this can't lose data even if re-run.
+     * override, and removes the legacy entry after copying it so this only ever migrates a given
+     * key once, letting a player's reset of the new key stick on subsequent launches.
      */
     private static void migrateNutrientColorKeys() {
         boolean migratedAny = false;
@@ -225,6 +226,7 @@ public class Nourished {
                 continue;
             }
             ColorRegistry.setArgb(newKey, legacy.get());
+            ColorRegistry.remove(key);
             migratedAny = true;
             LOGGER.info("[Nourished] Migrated custom nutrient color '{}' ({}) to new key '{}'",
                     key, String.format("0x%08X", legacy.get()), newKey);

@@ -3,6 +3,7 @@ package dev.maire.nourished.client.hud.caloriehistory;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.color.ColorKeyPair;
 import dev.marie.framework.color.MarieColors;
+import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.tracking.tracker.definition.TrackerHistoryEntry;
 import dev.marie.framework.ui.RenderContext;
@@ -23,7 +24,6 @@ import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.config.NourishedClientConfig;
-import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -104,7 +104,7 @@ public final class CalorieHudScreen implements MarieComponent {
     }
 
     public static void onRenderGuiPost(RenderGuiEvent.Post event) {
-        if (!NourishedConfig.get().enableCalorieHistory() || !NourishedClientConfig.get().enableCalorieHistoryHud()) {
+        if (!FeatureFlagCache.enableCalorieHistory() || !NourishedClientConfig.get().enableCalorieHistoryHud()) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
@@ -166,7 +166,7 @@ public final class CalorieHudScreen implements MarieComponent {
         if (mc.player == null || mc.screen != null) {
             return;
         }
-        if (!NourishedConfig.get().enableCalorieHistory() || !NourishedClientConfig.get().enableCalorieHistoryHud()) {
+        if (!FeatureFlagCache.enableCalorieHistory() || !NourishedClientConfig.get().enableCalorieHistoryHud()) {
             return;
         }
         while (NourishedKeys.EDIT_CALORIE_HUD.consumeClick()) {

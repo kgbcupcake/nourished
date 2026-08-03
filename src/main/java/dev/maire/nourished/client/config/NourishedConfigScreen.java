@@ -121,7 +121,9 @@ public final class NourishedConfigScreen {
             RawFoodConfig.save();
             NourishedClientConfig.saveNow();
             NourishedConfig.saveNow();
-            ActivityDrivenNutrientConfig.saveNow();
+            if (ActivityDrivenNutrientConfig.isSynced()) {
+                ActivityDrivenNutrientConfig.saveNow();
+            }
             NourishedConfig.syncModuleCache();
             MinecraftServer integratedServer = Minecraft.getInstance().getSingleplayerServer();
             if (integratedServer != null) {

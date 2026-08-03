@@ -428,7 +428,8 @@ public final class NourishedConfig {
                 c.isModuleEnabled("enableMilestones"),
                 c.isModuleEnabled("enableSeasonHooks"),
                 c.isModuleEnabled("enableAbsorptionModifiers"),
-                c.isModuleEnabled("enableDebugLogging")
+                c.isModuleEnabled("enableDebugLogging"),
+                c.isModuleEnabled("enableCalorieHistory")
         ));
     }
 
