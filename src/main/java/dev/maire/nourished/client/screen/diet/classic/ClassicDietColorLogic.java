@@ -1,7 +1,7 @@
 package dev.maire.nourished.client.screen.diet.classic;
 
-import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.marie.framework.tracking.TrackingData;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.config.NourishedConfig;
 
 /**
@@ -33,7 +33,7 @@ final class ClassicDietColorLogic {
     }
 
     static int nutrientBaseColor(String key) {
-        return MarieValueColors.baseColorArgb(key);
+        return HudDrawHelpers.nutrientColorArgb(key);
     }
 
     static int balanceColor(String key) {

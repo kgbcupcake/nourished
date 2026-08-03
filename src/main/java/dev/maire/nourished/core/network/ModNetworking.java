@@ -150,6 +150,7 @@ public class ModNetworking {
             Map<String, Float> lastNutrients,
             float calories,
             float maxCalories,
+            float todayCalorieTrackerValue,
             float balanceScore,
             List<String> recentFoodIds,
             List<String> neglectedCategories,
@@ -198,6 +199,7 @@ public class ModNetworking {
                             NUTRIENT_MAP_CODEC.encode(buf, payload.lastNutrients());
                             buf.writeFloat(payload.calories());
                             buf.writeFloat(payload.maxCalories());
+                            buf.writeFloat(payload.todayCalorieTrackerValue());
                             buf.writeFloat(payload.balanceScore());
                             RECENT_FOOD_IDS_CODEC.encode(buf, payload.recentFoodIds());
                             NEGLECTED_CATEGORIES_CODEC.encode(buf, payload.neglectedCategories());
@@ -210,6 +212,7 @@ public class ModNetworking {
                         buf -> new SyncDietDeltaPayload(
                                 NUTRIENT_MAP_CODEC.decode(buf),
                                 NUTRIENT_MAP_CODEC.decode(buf),
+                                buf.readFloat(),
                                 buf.readFloat(),
                                 buf.readFloat(),
                                 buf.readFloat(),

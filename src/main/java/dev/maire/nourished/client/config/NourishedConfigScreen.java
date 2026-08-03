@@ -1,6 +1,7 @@
 package dev.maire.nourished.client.config;
 
 import dev.maire.nourished.client.config.categories.AdvancedCategory;
+import dev.maire.nourished.client.config.categories.CalorieHistoryCategory;
 import dev.maire.nourished.client.config.categories.CompatibilityCategory;
 import dev.maire.nourished.client.config.categories.DietScreenCategory;
 import dev.maire.nourished.client.config.categories.EffectsCategory;
@@ -12,7 +13,6 @@ import dev.maire.nourished.client.config.categories.NutrientsCategory;
 import dev.maire.nourished.client.config.categories.PresetsCategory;
 import dev.maire.nourished.client.config.categories.ScannerCategory;
 import dev.maire.nourished.client.config.categories.ThresholdCategory;
-import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.marie.framework.color.ColorRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
@@ -62,7 +62,7 @@ public final class NourishedConfigScreen {
         GeneralCategory.addGeneralCategory(config, builder, entryBuilder);
         ThresholdCategory.addThresholdCategory(config, builder, entryBuilder);
         EffectsCategory.addEffectsCategory(config, builder, entryBuilder);
-        HudAndDisplayCategory.addHudAndDisplayCategory(config, client, builder, entryBuilder);
+        HudAndDisplayCategory.addHudAndDisplayCategory(config, client, builder, entryBuilder, parent);
         DietScreenCategory.addDietScreenCategory(client, builder, entryBuilder);
         NutrientsCategory.addNutrientsCategory(config, builder, entryBuilder, decayOverrides, criticalOverrides, curvePresetPending);
         FoodValuesCategory.addFoodValuesCategory(builder, entryBuilder, foodValuePending);
@@ -70,6 +70,7 @@ public final class NourishedConfigScreen {
         AdvancedCategory.addAdvancedCategory(config, builder, entryBuilder, modulePending);
         CompatibilityCategory.addCompatibilityCategory(config, builder, entryBuilder, compatPending);
         ActivityDrivenNutrientCategory.addActivityDrivenNutrientCategory(builder, entryBuilder);
+        CalorieHistoryCategory.addCalorieHistoryCategory(config, client, builder, entryBuilder, modulePending);
 
         builder.setSavingRunnable(() -> {
             for (Map.Entry<String, PendingOverride> entry : decayOverrides.entrySet()) {
@@ -118,7 +119,6 @@ public final class NourishedConfigScreen {
             NutrientRegistry.save();
             NutrientCurveRegistry.save();
             RawFoodConfig.save();
-            MarieValueColors.clearOverrides();
             NourishedClientConfig.saveNow();
             NourishedConfig.saveNow();
             ActivityDrivenNutrientConfig.saveNow();

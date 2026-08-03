@@ -4,12 +4,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
+import dev.marie.framework.api.marieapi.MarieAPI;
+import dev.marie.framework.color.ColorDefinition;
+import dev.marie.framework.color.ColorKey;
+import dev.marie.framework.color.ColorRegistry;
 import dev.marie.framework.resources.api.MarieResourcesAPI;
 import dev.marie.framework.util.MarieJsonUtils;
 import dev.marie.framework.util.MarieResourceLoader;
 import dev.marie.framework.util.MarieValidation;
 import dev.maire.nourished.core.Nourished;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -64,7 +69,18 @@ public final class ActivityDrivenNutrientRegistry {
     private static volatile double swimDecayBoost = 0.0004d;
     private static volatile double starvationPenalty = 0.02d;
 
+    /**
+     * Legacy per-module colors loaded from {@code activity_config.json}'s {@code "colors"} block.
+     * No longer the live source for {@link #getColor}/{@link #setColor} (those now delegate to
+     * {@link ColorRegistry} via {@link MarieAPI}) — this map only feeds the one-time migration in
+     * {@link #migrateLegacyColorsToColorRegistry()}. {@code activity_config.json} stops writing a
+     * {@code "colors"} block going forward (see {@link #writeCurrent}), so on any install that never
+     * had one this simply mirrors {@link #DEFAULT_COLORS}.
+     */
     private static final Map<String, Integer> COLORS = new LinkedHashMap<>(DEFAULT_COLORS);
+
+    /** Whether the most recently loaded {@code activity_config.json} had a legacy {@code "colors"} block. */
+    private static volatile boolean legacyColorsSectionPresent = false;
 
     private ActivityDrivenNutrientRegistry() {}
 
@@ -160,34 +176,80 @@ public final class ActivityDrivenNutrientRegistry {
 
     // ── Per-module colors ────────────────────────────────────────────────────────────────────
 
+    /** {@link ColorKey} identity for {@code moduleId}, namespaced under {@code activity.<moduleId>}. */
+    private static ColorKey colorKey(String moduleId) {
+        return ColorKey.of(ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "activity." + moduleId));
+    }
+
+    /** Registers each module's {@link ColorDefinition} default. Must run during mod init. */
+    public static void registerColors() {
+        for (Map.Entry<String, Integer> entry : DEFAULT_COLORS.entrySet()) {
+            MarieAPI.registerColor(ColorDefinition.of(colorKey(entry.getKey()), entry.getValue()));
+        }
+    }
+
+    /**
+     * One-time migration of any custom color a user had set under the old {@code activity_config.json}
+     * {@code "colors"} block (loaded into {@link #COLORS} by {@link #load}/{@link #reload}) into
+     * {@link ColorRegistry} under the new {@link ColorKey}. Safe to call on every load: guarded by
+     * checking whether the new key already has an override (skips already-migrated modules), and by
+     * {@link #legacyColorsSectionPresent}, which triggers rewriting {@code activity_config.json}
+     * (via {@link #save}) to drop the legacy block once migration has run, so it can't re-fire.
+     */
+    public static void migrateLegacyColorsToColorRegistry() {
+        boolean migratedAny = false;
+        for (Map.Entry<String, Integer> entry : DEFAULT_COLORS.entrySet()) {
+            String moduleId = entry.getKey();
+            int def = entry.getValue();
+            Integer legacy = COLORS.get(moduleId);
+            if (legacy == null || legacy == def) {
+                continue;
+            }
+            String newKey = colorKey(moduleId).id().toString();
+            if (ColorRegistry.getArgb(newKey).isPresent()) {
+                continue;
+            }
+            ColorRegistry.setArgb(newKey, legacy);
+            migratedAny = true;
+            Nourished.LOGGER.info(
+                    "[ActivityDrivenNutrientRegistry] Migrated custom color for activity module '{}' ({}) to ColorRegistry key '{}'",
+                    moduleId, String.format("0x%08X", legacy), newKey);
+        }
+        if (migratedAny) {
+            ColorRegistry.save();
+        }
+        if (legacyColorsSectionPresent) {
+            legacyColorsSectionPresent = false;
+            save();
+        }
+    }
+
     /** Effective color for {@code moduleId} (override or built-in default), or empty if {@code moduleId} is unknown. */
     public static Optional<Integer> getColor(String moduleId) {
-        Integer v = COLORS.get(moduleId);
-        if (v != null) {
-            return Optional.of(v);
+        if (!DEFAULT_COLORS.containsKey(moduleId)) {
+            return Optional.empty();
         }
-        Integer def = DEFAULT_COLORS.get(moduleId);
-        return def == null ? Optional.empty() : Optional.of(def);
+        return Optional.of(MarieAPI.resolveColor(colorKey(moduleId)));
     }
 
     public static int getDefaultColor(String moduleId) {
         return DEFAULT_COLORS.getOrDefault(moduleId, 0xFFFFFFFF);
     }
 
-    /** Puts or replaces a module's color (alpha forced to 0xFF). */
+    /** Puts or replaces a module's color override (alpha forced to 0xFF) in {@link ColorRegistry}. */
     public static void setColor(String moduleId, int argb) {
         int opaque = (argb & 0x00_FF_FF_FF) | 0xFF00_0000;
-        COLORS.put(moduleId, opaque);
+        int def = getDefaultColor(moduleId);
+        if ((opaque & 0x00_FF_FF_FF) == (def & 0x00_FF_FF_FF)) {
+            ColorRegistry.remove(colorKey(moduleId).id().toString());
+        } else {
+            ColorRegistry.setArgb(colorKey(moduleId).id().toString(), opaque);
+        }
     }
 
-    /** Resets a module's color back to its built-in default. */
+    /** Resets a module's color back to its built-in default by clearing its {@link ColorRegistry} override. */
     public static void resetColor(String moduleId) {
-        Integer def = DEFAULT_COLORS.get(moduleId);
-        if (def != null) {
-            COLORS.put(moduleId, def);
-        } else {
-            COLORS.remove(moduleId);
-        }
+        ColorRegistry.remove(colorKey(moduleId).id().toString());
     }
 
     // ── Load / save / reload / datapack — mirrors ColorRegistry's shape ────────────────────────
@@ -280,6 +342,7 @@ public final class ActivityDrivenNutrientRegistry {
         starvationPenalty = 0.02d;
         COLORS.clear();
         COLORS.putAll(DEFAULT_COLORS);
+        legacyColorsSectionPresent = false;
     }
 
     private static void parseFile(Path file) throws IOException {
@@ -309,7 +372,8 @@ public final class ActivityDrivenNutrientRegistry {
 
         COLORS.clear();
         COLORS.putAll(DEFAULT_COLORS);
-        if (root.has("colors") && root.get("colors").isJsonObject()) {
+        legacyColorsSectionPresent = root.has("colors") && root.get("colors").isJsonObject();
+        if (legacyColorsSectionPresent) {
             JsonObject colors = root.getAsJsonObject("colors");
             for (String moduleId : DEFAULT_COLORS.keySet()) {
                 if (colors.has(moduleId)) {
@@ -355,12 +419,9 @@ public final class ActivityDrivenNutrientRegistry {
         root.addProperty("sprintDecayBoost", sprintDecayBoost);
         root.addProperty("swimDecayBoost", swimDecayBoost);
         root.addProperty("starvationPenalty", starvationPenalty);
-
-        JsonObject colors = new JsonObject();
-        for (Map.Entry<String, Integer> e : COLORS.entrySet()) {
-            colors.addProperty(e.getKey(), String.format("0x%08X", e.getValue()));
-        }
-        root.add("colors", colors);
+        // Colors now live in colors.json via ColorRegistry (see #registerColors/#getColor/#setColor);
+        // no "colors" block is written here going forward. #parseFromReader still reads one if
+        // present, purely to feed #migrateLegacyColorsToColorRegistry on old files.
 
         Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
         MarieValidation.assertPathUnder(file, configDir, "ActivityDrivenNutrientRegistry");
@@ -390,12 +451,8 @@ public final class ActivityDrivenNutrientRegistry {
         tag.putDouble("sprintDecayBoost", sprintDecayBoost);
         tag.putDouble("swimDecayBoost", swimDecayBoost);
         tag.putDouble("starvationPenalty", starvationPenalty);
-
-        CompoundTag colorsTag = new CompoundTag();
-        for (Map.Entry<String, Integer> e : COLORS.entrySet()) {
-            colorsTag.putInt(e.getKey(), e.getValue());
-        }
-        tag.put("colors", colorsTag);
+        // Colors are no longer part of the server→client sync: they resolve entirely client-side via
+        // MarieAPI.resolveColor/ColorRegistry now, same as every other color in the mod.
         return tag;
     }
 
@@ -412,14 +469,5 @@ public final class ActivityDrivenNutrientRegistry {
         sprintDecayBoost = tag.getDouble("sprintDecayBoost");
         swimDecayBoost = tag.getDouble("swimDecayBoost");
         starvationPenalty = tag.getDouble("starvationPenalty");
-
-        if (tag.contains("colors")) {
-            CompoundTag colorsTag = tag.getCompound("colors");
-            for (String moduleId : DEFAULT_COLORS.keySet()) {
-                if (colorsTag.contains(moduleId)) {
-                    COLORS.put(moduleId, colorsTag.getInt(moduleId));
-                }
-            }
-        }
     }
 }

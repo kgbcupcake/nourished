@@ -47,6 +47,8 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue hudClassicMode;
     private final ModConfigSpec.BooleanValue enableActivityLogHud;
     private final ModConfigSpec.BooleanValue enableCalorieHistoryHud;
+    private final ModConfigSpec.DoubleValue calorieHudBackgroundOpacity;
+    private final ModConfigSpec.DoubleValue activityLogHudBackgroundOpacity;
     private final ModConfigSpec.ConfigValue<List<? extends String>> dietBarOrder;
     private final ModConfigSpec.DoubleValue dietScale;
     private final ModConfigSpec.IntValue dietOffsetX;
@@ -126,6 +128,18 @@ public final class NourishedClientConfig {
         enableCalorieHistoryHud = builder.define(
                 "enableCalorieHistoryHud",
                 ConfigDefaultsLoader.getBoolean(defaults, "enableCalorieHistoryHud", true)
+        );
+        calorieHudBackgroundOpacity = builder.defineInRange(
+                "calorieHudBackgroundOpacity",
+                ConfigDefaultsLoader.getDouble(defaults, "calorieHudBackgroundOpacity", DEFAULT_HUD_BACKGROUND_OPACITY),
+                0.0d,
+                1.0d
+        );
+        activityLogHudBackgroundOpacity = builder.defineInRange(
+                "activityLogHudBackgroundOpacity",
+                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudBackgroundOpacity", DEFAULT_HUD_BACKGROUND_OPACITY),
+                0.0d,
+                1.0d
         );
         dietBarOrder = builder.defineListAllowEmpty(
                 "dietBarOrder",
@@ -454,6 +468,22 @@ public final class NourishedClientConfig {
 
     public void setEnableCalorieHistoryHud(boolean value) {
         enableCalorieHistoryHud.set(value);
+    }
+
+    public double calorieHudBackgroundOpacity() {
+        return calorieHudBackgroundOpacity.get();
+    }
+
+    public void setCalorieHudBackgroundOpacity(double value) {
+        calorieHudBackgroundOpacity.set(value);
+    }
+
+    public double activityLogHudBackgroundOpacity() {
+        return activityLogHudBackgroundOpacity.get();
+    }
+
+    public void setActivityLogHudBackgroundOpacity(double value) {
+        activityLogHudBackgroundOpacity.set(value);
     }
 
     /**

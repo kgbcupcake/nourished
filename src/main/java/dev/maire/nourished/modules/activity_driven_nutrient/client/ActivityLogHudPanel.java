@@ -1,5 +1,7 @@
 package dev.maire.nourished.modules.activity_driven_nutrient.client;
 
+import dev.marie.framework.api.marieapi.MarieAPI;
+import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.Theme;
 import dev.marie.framework.ui.ThemeKey;
@@ -15,9 +17,12 @@ import dev.marie.framework.ui.geometry.Size;
 import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
 import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.UiStatePersistence;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.config.NourishedClientConfig;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientRegistry;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
@@ -152,9 +157,14 @@ public final class ActivityLogHudPanel implements MarieComponent {
                 .orElseGet(() -> new Bounds(DEFAULT_X, DEFAULT_Y, natural.width(), natural.height()));
     }
 
+    private static final ColorKey PANEL_COLOR_KEY = ColorKey.of(
+            ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "panel.activityLogHud"));
+
     private static void drawPanel(RenderContext context, Bounds bounds, List<ActivityLogClientBuffer.Row> rows) {
-        context.fillRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(),
-                context.theme().color(ThemeKey.PANEL_BACKGROUND));
+        int panelRgb = MarieAPI.resolveColor(PANEL_COLOR_KEY);
+        int panelColor = HudDrawHelpers.panelColorWithOpacity(
+                panelRgb, NourishedClientConfig.get().activityLogHudBackgroundOpacity());
+        context.fillRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), panelColor);
         context.drawBorder(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1,
                 context.theme().color(ThemeKey.BORDER));
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());

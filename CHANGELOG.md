@@ -15,6 +15,8 @@
 
 ### Fixed
 
+- Editing a nutrient/activity/panel hex color in the config screen now updates the HUD live as you type, instead of only after Save+reopen — `ColorHexRowWidget` (MarieLib) now pushes the in-progress value to a transient preview override that `MarieAPI.resolveColor` reads immediately.
+- The HUD colors "Reset All" button no longer closes and reopens the whole config screen to show the cleared colors; it now calls `ColorHexRowWidget.syncFromEffectiveColor()` on each visible row directly.
 - Wired up `registerCompatEntry` in `NourishedDatapackCallbacks`. The 34 datapack-driven compat entries under `data/nourished/nourished/compat/` were being parsed on every datapack apply but silently discarded, since the callback had no override and defaulted to a no-op — none of them ever actually took effect. They now register into `ModCompat` and apply as intended.
 - `CommunityTagStage` was a hand-written duplicate of MariesLib's `CommunityTagResolutionStage`, but diverged in behavior: it always deposited into the shared community-tag signal and returned `null` instead of returning a result, so the community-tag cascade never actually terminated, and it never ran the instance-tags OR-check at all. It now delegates directly to MariesLib's `CommunityTagResolutionStage`, so a community-tag match (including instance-tags) is correctly recognized as a confirmed classification wherever this stage is used — most notably in recipe-ingredient confirmation during recipe inheritance.
 

@@ -2,6 +2,7 @@ package dev.maire.nourished.client.hud.caloriehistory;
 
 import dev.marie.framework.api.marieapi.MarieAPI;
 import dev.marie.framework.client.config.state.MarieClientCache;
+import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.tracking.tracker.definition.TrackerHistoryEntry;
 import dev.marie.framework.ui.RenderContext;
@@ -20,9 +21,12 @@ import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
 import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.UiStatePersistence;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.core.Nourished;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -126,20 +130,25 @@ public final class CalorieHudScreen implements MarieComponent {
      * Live "Today" row (if any) followed by completed-period history, newest first, already
      * retention-capped server-side.
      *
-     * <p>The "Today" row uses {@link MarieAPI#getCurrentTrackerValue}, not {@code
-     * NourishedAPI#getTotal} ({@code CaloriesComponent}'s "current" value) — that field is a
-     * decaying calorie gauge, a different quantity than the tracker's per-day accumulation shown
-     * in every other row of this panel. Matching the history rows' own units keeps Today/Yesterday/N
-     * days ago comparable within this one panel.
+     * <p>The "Today" row reads {@link TrackingData#trackingAccumulators} off {@link
+     * MarieClientCache#get()}, not {@code NourishedAPI#getTotal} ({@code CaloriesComponent}'s
+     * "current" value, a decaying calorie gauge — a different quantity than the tracker's per-day
+     * accumulation shown in every other row of this panel) and not {@code
+     * MarieAPI#getCurrentTrackerValue} against {@code mc.player} directly (the client-side player
+     * entity's own attachment is only ever written on a full tracking sync — login/respawn/
+     * dimension change — never on the lightweight delta sync that fires per food-eaten, so that
+     * read showed a permanently stale, usually-zero value). {@code MarieClientCache} is the
+     * snapshot Nourished's delta-sync pipeline actually keeps current, and matches the units of
+     * the history rows below it.
      */
     private static List<Row> currentRows() {
         List<Row> rows = new ArrayList<>();
         Minecraft mc = Minecraft.getInstance();
+        TrackingData data = MarieClientCache.get();
         if (mc.player != null) {
-            float today = MarieAPI.getCurrentTrackerValue(mc.player, NourishedAPI.CALORIES_TRACKER_ID);
+            float today = data.trackingAccumulators.getOrDefault(NourishedAPI.CALORIES_TRACKER_ID, 0f);
             rows.add(new Row(Component.translatable("nourished.hud.calorieHistory.today", (int) today).getString(), true));
         }
-        TrackingData data = MarieClientCache.get();
         List<TrackerHistoryEntry> history = data.trackingHistory.get(NourishedAPI.CALORIES_TRACKER_ID);
         if (history != null) {
             for (int i = 0; i < history.size(); i++) {
@@ -182,9 +191,14 @@ public final class CalorieHudScreen implements MarieComponent {
                 .orElseGet(() -> new Bounds(DEFAULT_X, DEFAULT_Y, natural.width(), natural.height()));
     }
 
+    private static final ColorKey PANEL_COLOR_KEY = ColorKey.of(
+            ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "panel.calorieHud"));
+
     private static void drawPanel(RenderContext context, Bounds bounds, List<Row> rows) {
-        context.fillRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(),
-                context.theme().color(ThemeKey.PANEL_BACKGROUND));
+        int panelRgb = MarieAPI.resolveColor(PANEL_COLOR_KEY);
+        int panelColor = HudDrawHelpers.panelColorWithOpacity(
+                panelRgb, NourishedClientConfig.get().calorieHudBackgroundOpacity());
+        context.fillRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), panelColor);
         context.drawBorder(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1,
                 context.theme().color(ThemeKey.BORDER));
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());

@@ -6,18 +6,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.reload.NourishedReloadHelper;
+import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.color.ColorRegistry;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.config.PresetRegistry;
 import dev.marie.framework.util.MarieJsonUtils;
 import dev.marie.framework.util.MarieValidation;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -223,7 +224,6 @@ public final class NourishedImportExport {
         }
         NourishedConfig.saveNow();
         NourishedReloadHelper.reloadAll();
-        MarieValueColors.clearOverrides();
     }
 
     public static PresetRegistry.PresetValues presetValuesFromCurrentConfig() {
@@ -316,10 +316,15 @@ public final class NourishedImportExport {
         return o;
     }
 
+    /** {@link ColorKey} string for a nutrient key, matching the mapping {@code ColorHexRowWidget}/{@code MarieAPI.resolveColor} use. */
+    private static String nutrientColorRegistryKey(String key) {
+        return ColorKey.of(ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "nutrient." + key)).id().toString();
+    }
+
     private static JsonArray exportNutrientColors() {
         JsonArray arr = new JsonArray();
         for (String key : NutrientRegistry.getKeys()) {
-            ColorRegistry.getArgb(key).ifPresent(argb -> {
+            ColorRegistry.getArgb(nutrientColorRegistryKey(key)).ifPresent(argb -> {
                 JsonObject obj = new JsonObject();
                 obj.addProperty("key", key);
                 obj.addProperty("argb", String.format(Locale.ROOT, "0x%08X", argb));
@@ -512,16 +517,56 @@ public final class NourishedImportExport {
         return out;
     }
 
-    private static void applyNutrientColors(JsonElement el) throws IOException {
+    /**
+     * Merges imported nutrient colors into {@link ColorRegistry} by key, rather than overwriting
+     * colors.json wholesale — that file now also holds activity-module and panel color overrides,
+     * which a blind overwrite of just the nutrient entries would silently discard.
+     */
+    private static void applyNutrientColors(JsonElement el) {
         if (!el.isJsonArray()) {
             return;
         }
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Files.createDirectories(configDir);
-        Path file = configDir.resolve("colors.json");
-        try (Writer w = Files.newBufferedWriter(file)) {
-            new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(el.getAsJsonArray(), w);
+        for (JsonElement entryEl : el.getAsJsonArray()) {
+            if (!entryEl.isJsonObject()) {
+                continue;
+            }
+            JsonObject obj = entryEl.getAsJsonObject();
+            if (!obj.has("key") || !obj.has("argb")) {
+                continue;
+            }
+            String key = obj.get("key").getAsString();
+            if (!NutrientRegistry.getKeys().contains(key)) {
+                continue;
+            }
+            Integer argb = parseArgbString(obj.get("argb").getAsString());
+            if (argb != null) {
+                ColorRegistry.setArgb(nutrientColorRegistryKey(key), argb);
+            }
         }
+        ColorRegistry.save();
+    }
+
+    private static Integer parseArgbString(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String s = raw.trim();
+        try {
+            if (s.startsWith("0x") || s.startsWith("0X")) {
+                return (int) (Long.parseLong(s.substring(2), 16) & 0xFF_FF_FF_FFL);
+            }
+            if (s.startsWith("#")) {
+                s = s.substring(1);
+            }
+            if (s.length() == 6) {
+                return (int) (Long.parseLong(s, 16) & 0xFF_FF_FFL) | 0xFF00_0000;
+            }
+            if (s.length() == 8) {
+                return (int) (Long.parseLong(s, 16) & 0xFF_FF_FF_FFL);
+            }
+        } catch (NumberFormatException ignored) {
+        }
+        return null;
     }
 
     private static void applyFoodValues(JsonElement el) throws IOException {

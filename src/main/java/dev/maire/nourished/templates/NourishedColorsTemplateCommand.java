@@ -9,7 +9,7 @@ import dev.maire.nourished.core.Nourished;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.api.value.ValueDefinition;
 import dev.marie.framework.api.registry.ValueRegistry;
-import dev.marie.framework.client.config.render.MarieValueColors;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.marie.framework.util.MarieValidation;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -82,7 +82,7 @@ public final class NourishedColorsTemplateCommand {
     }
 
     private static JsonObject buildColorEntry(String key) {
-        int argb = MarieValueColors.baseColorArgb(key);
+        int argb = HudDrawHelpers.nutrientColorArgb(key);
         JsonObject obj = new JsonObject();
         obj.addProperty("_comment_key", "nutrient/value key — must match a registered value id");
         obj.addProperty("key", key);

@@ -53,17 +53,6 @@ public final class AdvancedCategory {
             );
         }
 
-        if (!NourishedLockRegistry.isLocked("calorieHistoryRetentionDays")) {
-            category.addEntry(
-                    eb.startIntSlider(Component.translatable("config.nourished.calorieHistoryRetentionDays"), config.calorieHistoryRetentionDays(), 1, 90)
-                            .setDefaultValue(7)
-                            .setTextGetter(v -> Component.literal(String.valueOf(v)))
-                            .setTooltip(Component.translatable("config.nourished.calorieHistoryRetentionDays.desc"))
-                            .setSaveConsumer(config::setCalorieHistoryRetentionDays)
-                            .build()
-            );
-        }
-
         if (!NourishedLockRegistry.isLocked("enableDiminishingReturns")) {
             category.addEntry(
                     eb.startBooleanToggle(Component.translatable("config.nourished.enableDiminishingReturns"), config.enableDiminishingReturns())

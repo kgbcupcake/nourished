@@ -98,6 +98,9 @@ public final class ClientNetworkCallbacks {
             nextDiet.lastValues.putAll(payload.lastNutrients());
             nextDiet.total = payload.calories();
             nextDiet.maxTotal = payload.maxCalories();
+            nextDiet.trackingAccumulators.put(
+                    dev.maire.nourished.api.NourishedAPI.CALORIES_TRACKER_ID,
+                    payload.todayCalorieTrackerValue());
             nextDiet.sourceMemory.clear();
             nextDiet.sourceMemory.putAll(payload.foodMemory());
             nextDiet.categoryMemory.clear();
