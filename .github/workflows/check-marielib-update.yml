@@ -23,7 +23,19 @@ jobs:
               run: |
                   METADATA_URL="https://maven.pkg.github.com/kgbcupcake/MariesLib/dev/marie/MariesLib/marieslib/maven-metadata.xml"
 
-                  METADATA=$(curl -sSL -f -u "kgbcupcake:${MARIELIB_PACKAGES_TOKEN}" "$METADATA_URL")
+                  echo "Token length: ${#MARIELIB_PACKAGES_TOKEN}"
+
+                  set +e
+                  METADATA=$(curl -v -sSL -u "kgbcupcake:${MARIELIB_PACKAGES_TOKEN}" -w "\nHTTP_STATUS:%{http_code}\n" "$METADATA_URL")
+                  CURL_EXIT=$?
+                  set -e
+                  echo "curl exit code: $CURL_EXIT"
+                  echo "$METADATA"
+
+                  if [ "$CURL_EXIT" -ne 0 ]; then
+                    echo "curl failed with exit code $CURL_EXIT" >&2
+                    exit 1
+                  fi
 
                   LATEST_VERSION=$(echo "$METADATA" | grep -oPm1 '(?<=<release>)[^<]+')
                   if [ -z "$LATEST_VERSION" ]; then
