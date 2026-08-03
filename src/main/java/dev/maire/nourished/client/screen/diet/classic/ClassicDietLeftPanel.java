@@ -1,9 +1,9 @@
 package dev.maire.nourished.client.screen.diet.classic;
 
 import dev.marie.framework.client.config.state.MarieClientCache;
-import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.Nourished;
@@ -136,7 +136,7 @@ final class ClassicDietLeftPanel {
                             .map(Map.Entry::getKey)
                             .orElse(null);
                     int nameColor = nutrientKey != null
-                            ? MarieValueColors.baseColorArgb(nutrientKey)
+                            ? HudDrawHelpers.nutrientColorArgb(nutrientKey)
                             : ClassicDietDrawHelpers.COL_WHITE;
                     g.drawString(mc.font, truncated, x + nameOffset, y + 3, nameColor, false);
                     y += rowH;

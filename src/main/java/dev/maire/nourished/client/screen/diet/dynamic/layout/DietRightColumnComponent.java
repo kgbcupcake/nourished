@@ -1,13 +1,13 @@
 package dev.maire.nourished.client.screen.diet.dynamic.layout;
 
 import dev.marie.framework.client.config.state.MarieClientCache;
-import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.DietScreenModules;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
@@ -243,7 +243,7 @@ final class DietRightColumnComponent implements MarieComponent, HeaderCollapsibl
     }
 
     private static int nutrientBaseColor(String key) {
-        return MarieValueColors.baseColorArgb(key);
+        return HudDrawHelpers.nutrientColorArgb(key);
     }
 
     private static int panelColorWithOpacity(int rgb, double opacity) {

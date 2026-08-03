@@ -1,6 +1,7 @@
 package dev.maire.nourished.client.config;
 
 import dev.maire.nourished.client.config.categories.AdvancedCategory;
+import dev.maire.nourished.client.config.categories.CalorieHistoryCategory;
 import dev.maire.nourished.client.config.categories.CompatibilityCategory;
 import dev.maire.nourished.client.config.categories.DietScreenCategory;
 import dev.maire.nourished.client.config.categories.EffectsCategory;
@@ -12,7 +13,6 @@ import dev.maire.nourished.client.config.categories.NutrientsCategory;
 import dev.maire.nourished.client.config.categories.PresetsCategory;
 import dev.maire.nourished.client.config.categories.ScannerCategory;
 import dev.maire.nourished.client.config.categories.ThresholdCategory;
-import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.marie.framework.color.ColorRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
@@ -22,6 +22,8 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurveRegistry;
 import dev.maire.nourished.core.reload.NourishedReloadHelper;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
+import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityDrivenNutrientCategory;
+import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientConfig;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.client.Minecraft;
@@ -60,13 +62,15 @@ public final class NourishedConfigScreen {
         GeneralCategory.addGeneralCategory(config, builder, entryBuilder);
         ThresholdCategory.addThresholdCategory(config, builder, entryBuilder);
         EffectsCategory.addEffectsCategory(config, builder, entryBuilder);
-        HudAndDisplayCategory.addHudAndDisplayCategory(config, client, builder, entryBuilder);
+        HudAndDisplayCategory.addHudAndDisplayCategory(config, client, builder, entryBuilder, parent);
         DietScreenCategory.addDietScreenCategory(client, builder, entryBuilder);
         NutrientsCategory.addNutrientsCategory(config, builder, entryBuilder, decayOverrides, criticalOverrides, curvePresetPending);
         FoodValuesCategory.addFoodValuesCategory(builder, entryBuilder, foodValuePending);
         ScannerCategory.addScannerCategory(config, builder, entryBuilder);
         AdvancedCategory.addAdvancedCategory(config, builder, entryBuilder, modulePending);
         CompatibilityCategory.addCompatibilityCategory(config, builder, entryBuilder, compatPending);
+        ActivityDrivenNutrientCategory.addActivityDrivenNutrientCategory(builder, entryBuilder);
+        CalorieHistoryCategory.addCalorieHistoryCategory(config, client, builder, entryBuilder, modulePending);
 
         builder.setSavingRunnable(() -> {
             for (Map.Entry<String, PendingOverride> entry : decayOverrides.entrySet()) {
@@ -115,9 +119,9 @@ public final class NourishedConfigScreen {
             NutrientRegistry.save();
             NutrientCurveRegistry.save();
             RawFoodConfig.save();
-            MarieValueColors.clearOverrides();
             NourishedClientConfig.saveNow();
             NourishedConfig.saveNow();
+            ActivityDrivenNutrientConfig.saveNow();
             NourishedConfig.syncModuleCache();
             MinecraftServer integratedServer = Minecraft.getInstance().getSingleplayerServer();
             if (integratedServer != null) {

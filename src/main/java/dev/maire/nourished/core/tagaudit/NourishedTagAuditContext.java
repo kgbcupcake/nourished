@@ -1,11 +1,11 @@
 package dev.maire.nourished.core.tagaudit;
 
 import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.runtime.RuntimeResolver;
 import dev.marie.framework.tagaudit.model.TagAuditContext;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -71,20 +71,26 @@ public final class NourishedTagAuditContext implements TagAuditContext {
     @Override
     @Nullable
     public Function<ResourceLocation, Map<String, Float>> liveInferenceLookup() {
-        // Calls RuntimeFoodResolver.resolve() directly, bypassing NutrientClassificationLookup.resolveNutrientBars.
+        // Calls RuntimeResolver.resolve() directly, bypassing NutrientClassificationLookup.resolveNutrientBars.
         // resolveNutrientBars short-circuits on SourceRegistry.getExternalClassification, which holds
         // tag-derived classifications registered by NutrientRegistry.registerClassificationsFromTags —
         // so calling it here would echo the tag back rather than providing independent inference,
-        // making tag-vs-inference comparison circular and useless. RuntimeFoodResolver.resolve()
+        // making tag-vs-inference comparison circular and useless. RuntimeResolver.resolve()
         // has no SourceRegistry access path: it only checks its own LRU cache and the keyword/recipe/
         // peer/fallback cascade, so results are genuinely independent of the datapack tag data.
+        //
+        // Intentionally uses RuntimeResolver's native sourceItemFilter() gate unwrapped (gate
+        // reconciliation decision — see migration notes): this is the audit/diagnostic path, so
+        // it deliberately sees a broader item set (including tag-only items with no FoodProperties)
+        // than the live gameplay lookup in NutrientClassificationLookup, which keeps the stricter
+        // FoodProperties gate. Do not add that gate here — the wider net is intentional.
         return itemId -> {
             Item item = BuiltInRegistries.ITEM.get(itemId);
             if (item == null) {
                 return Map.of();
             }
             ItemStack stack = new ItemStack(item);
-            return RuntimeFoodResolver.getInstance().resolve(stack, null);
+            return RuntimeResolver.getInstance().resolve(stack, null);
         };
     }
 

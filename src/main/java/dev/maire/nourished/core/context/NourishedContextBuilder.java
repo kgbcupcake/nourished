@@ -20,8 +20,8 @@ import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.core.nutrition.RuntimeFoodResolver;
 import dev.maire.nourished.core.reload.NourishedReloadHelper;
+import dev.marie.framework.runtime.RuntimeResolver;
 import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodClassifier;
 import dev.marie.framework.util.MarieRegistryUtils;
 import net.minecraft.client.gui.screens.Screen;
@@ -119,7 +119,7 @@ public final class NourishedContextBuilder {
                 .postValueModifierHook(NourishedKubeIntegration::fireNutrientModifier)
                 .onCacheInvalidated(() -> {
                     FoodFamilyResolver.clearCache();
-                    RuntimeFoodResolver.getInstance().invalidateCache();
+                    RuntimeResolver.getInstance().invalidateCache();
                     RawFoodClassifier.invalidate();
                 })
                 .build());

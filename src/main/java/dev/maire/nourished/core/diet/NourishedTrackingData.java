@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.diet;
 
+import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.core.network.ModNetworking.SyncDietDeltaPayload;
 import dev.marie.framework.tracking.TrackingData;
 
@@ -25,6 +26,7 @@ public final class NourishedTrackingData extends TrackingData {
                 Map.copyOf(lastValues),
                 total,
                 maxTotal,
+                trackingAccumulators.getOrDefault(NourishedAPI.CALORIES_TRACKER_ID, 0f),
                 getBalanceScore(),
                 recentFoodIds,
                 neglectedCategories,

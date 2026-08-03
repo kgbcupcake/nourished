@@ -52,6 +52,9 @@ public final class NourishedConfig {
     // config.nourished.enableCalorieTracking
     // config.nourished.enableCalorieTracking.desc
     private final ModConfigSpec.BooleanValue enableCalorieTracking;
+    // config.nourished.enableCalorieHistory
+    // config.nourished.enableCalorieHistory.desc
+    private final ModConfigSpec.BooleanValue enableCalorieHistory;
     // config.nourished.enableDietScreen
     // config.nourished.enableDietScreen.desc
     private final ModConfigSpec.BooleanValue enableDietScreen;
@@ -88,6 +91,9 @@ public final class NourishedConfig {
     // config.nourished.calorieDisplayMax
     // config.nourished.calorieDisplayMax.desc
     private final ModConfigSpec.IntValue calorieDisplayMax;
+    // config.nourished.calorieHistoryRetentionDays
+    // config.nourished.calorieHistoryRetentionDays.desc
+    private final ModConfigSpec.IntValue calorieHistoryRetentionDays;
 
     // Food Memory
     private final ModConfigSpec.IntValue memoryWindowMinutes;
@@ -158,6 +164,7 @@ public final class NourishedConfig {
         enableToasts = defineModuleToggle(builder, "enableToasts", "When false, NourishedToastManager never queues toasts", ConfigDefaultsLoader.getBoolean(defaults, "enableToasts", true));
         enableFoodTooltips = defineModuleToggle(builder, "enableFoodTooltips", "When false, food tooltips do not show nutrient info", ConfigDefaultsLoader.getBoolean(defaults, "enableFoodTooltips", true));
         enableCalorieTracking = defineModuleToggle(builder, "enableCalorieTracking", "When false, TrackingData.addTotal() is never called and calorie display is hidden", ConfigDefaultsLoader.getBoolean(defaults, "enableCalorieTracking", true));
+        enableCalorieHistory = defineModuleToggle(builder, "enableCalorieHistory", "When false, the calories tracker is never registered with MarieLib and no daily history is recorded", ConfigDefaultsLoader.getBoolean(defaults, "enableCalorieHistory", true));
         enableDietScreen = defineModuleToggle(builder, "enableDietScreen", "When false, the keybind to open DietScreen does nothing", ConfigDefaultsLoader.getBoolean(defaults, "enableDietScreen", true));
         enableCriticalToasts = defineModuleToggle(builder, "enableCriticalToasts", "Separate from enableToasts, controls only the critical-threshold toast specifically", ConfigDefaultsLoader.getBoolean(defaults, "enableCriticalToasts", true));
         enableSleepBonus = defineModuleToggle(builder, "enableSleepBonus", "When true, sleeping with all nutrient bars above 50% grants Regeneration I for 30 seconds", ConfigDefaultsLoader.getBoolean(defaults, "enableSleepBonus", true));
@@ -221,6 +228,9 @@ public final class NourishedConfig {
         calorieDisplayMax = builder
                 .comment("Maximum calorie value for display purposes")
                 .defineInRange("calorieDisplayMax", ConfigDefaultsLoader.getInt(defaults, "calorieDisplayMax", 2000), 100, 100000);
+        calorieHistoryRetentionDays = builder
+                .comment("Number of completed daily periods of calorie history retained per player.")
+                .defineInRange("calorieHistoryRetentionDays", ConfigDefaultsLoader.getInt(defaults, "calorieHistoryRetentionDays", 7), 1, 90);
         defineModuleToggle(builder, "enableDebugLogging", "When true, writes detailed nutrition diagnostics to config/nourished/debug/", ConfigDefaultsLoader.getBoolean(defaults, "enableDebugLogging", false));
         builder.pop();
 
@@ -521,6 +531,14 @@ public final class NourishedConfig {
         enableCalorieTracking.set(value);
     }
 
+    public boolean enableCalorieHistory() {
+        return enableCalorieHistory.get();
+    }
+
+    public void setEnableCalorieHistory(boolean value) {
+        enableCalorieHistory.set(value);
+    }
+
     public boolean enableDietScreen() {
         return enableDietScreen.get();
     }
@@ -627,6 +645,20 @@ public final class NourishedConfig {
 
     public void setCalorieDisplayMax(int value) {
         calorieDisplayMax.set(value);
+    }
+
+    /**
+     * Configured calorie history retention in days, clamped to MarieLib's configured
+     * {@code trackerMaxRetention()} so Nourished never requests a retention MarieLib will reject.
+     */
+    public int calorieHistoryRetentionDays() {
+        int configured = calorieHistoryRetentionDays.get();
+        int marieMax = dev.marie.framework.core.IMarieConfig.get().trackerMaxRetention();
+        return Math.min(configured, marieMax);
+    }
+
+    public void setCalorieHistoryRetentionDays(int value) {
+        calorieHistoryRetentionDays.set(value);
     }
 
     /**

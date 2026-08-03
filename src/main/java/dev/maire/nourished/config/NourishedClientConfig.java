@@ -45,6 +45,10 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.DoubleValue hudBackgroundOpacity;
     private final ModConfigSpec.BooleanValue hudVerticalLayout;
     private final ModConfigSpec.BooleanValue hudClassicMode;
+    private final ModConfigSpec.BooleanValue enableActivityLogHud;
+    private final ModConfigSpec.BooleanValue enableCalorieHistoryHud;
+    private final ModConfigSpec.DoubleValue calorieHudBackgroundOpacity;
+    private final ModConfigSpec.DoubleValue activityLogHudBackgroundOpacity;
     private final ModConfigSpec.ConfigValue<List<? extends String>> dietBarOrder;
     private final ModConfigSpec.DoubleValue dietScale;
     private final ModConfigSpec.IntValue dietOffsetX;
@@ -57,6 +61,7 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue showEatMoreOf;
     private final ModConfigSpec.BooleanValue showActiveEffects;
     private final ModConfigSpec.BooleanValue showCaloriesBox;
+    private final ModConfigSpec.BooleanValue showYesterdayCalories;
     private final ModConfigSpec.BooleanValue showBalanceBox;
     private final ModConfigSpec.BooleanValue showDietScreenButton;
     private final ModConfigSpec.BooleanValue recentMealsEatMoreOffsetMigrationDone;
@@ -116,6 +121,26 @@ public final class NourishedClientConfig {
                 "hudClassicMode",
                 ConfigDefaultsLoader.getBoolean(defaults, "hudClassicMode", false)
         );
+        enableActivityLogHud = builder.define(
+                "enableActivityLogHud",
+                ConfigDefaultsLoader.getBoolean(defaults, "enableActivityLogHud", true)
+        );
+        enableCalorieHistoryHud = builder.define(
+                "enableCalorieHistoryHud",
+                ConfigDefaultsLoader.getBoolean(defaults, "enableCalorieHistoryHud", true)
+        );
+        calorieHudBackgroundOpacity = builder.defineInRange(
+                "calorieHudBackgroundOpacity",
+                ConfigDefaultsLoader.getDouble(defaults, "calorieHudBackgroundOpacity", DEFAULT_HUD_BACKGROUND_OPACITY),
+                0.0d,
+                1.0d
+        );
+        activityLogHudBackgroundOpacity = builder.defineInRange(
+                "activityLogHudBackgroundOpacity",
+                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudBackgroundOpacity", DEFAULT_HUD_BACKGROUND_OPACITY),
+                0.0d,
+                1.0d
+        );
         dietBarOrder = builder.defineListAllowEmpty(
                 "dietBarOrder",
                 List::of,
@@ -161,6 +186,7 @@ public final class NourishedClientConfig {
         showEatMoreOf = builder.define("showEatMoreOf", ConfigDefaultsLoader.getBoolean(defaults, "showEatMoreOf", true));
         showActiveEffects = builder.define("showActiveEffects", ConfigDefaultsLoader.getBoolean(defaults, "showActiveEffects", true));
         showCaloriesBox = builder.define("showCaloriesBox", ConfigDefaultsLoader.getBoolean(defaults, "showCaloriesBox", true));
+        showYesterdayCalories = builder.define("showYesterdayCalories", ConfigDefaultsLoader.getBoolean(defaults, "showYesterdayCalories", true));
         showBalanceBox = builder.define("showBalanceBox", ConfigDefaultsLoader.getBoolean(defaults, "showBalanceBox", true));
         showDietScreenButton = builder.define("showDietScreenButton", ConfigDefaultsLoader.getBoolean(defaults, "showDietScreenButton", true));
         // Internal one-time migration flag — not user-facing, no Cloth Config entry. Guards the
@@ -426,6 +452,40 @@ public final class NourishedClientConfig {
         hudClassicMode.set(value);
     }
 
+    /** When false, {@link dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel} never renders/ticks. */
+    public boolean enableActivityLogHud() {
+        return enableActivityLogHud.get();
+    }
+
+    public void setEnableActivityLogHud(boolean value) {
+        enableActivityLogHud.set(value);
+    }
+
+    /** When false, {@link dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen} never renders/ticks. */
+    public boolean enableCalorieHistoryHud() {
+        return enableCalorieHistoryHud.get();
+    }
+
+    public void setEnableCalorieHistoryHud(boolean value) {
+        enableCalorieHistoryHud.set(value);
+    }
+
+    public double calorieHudBackgroundOpacity() {
+        return calorieHudBackgroundOpacity.get();
+    }
+
+    public void setCalorieHudBackgroundOpacity(double value) {
+        calorieHudBackgroundOpacity.set(value);
+    }
+
+    public double activityLogHudBackgroundOpacity() {
+        return activityLogHudBackgroundOpacity.get();
+    }
+
+    public void setActivityLogHudBackgroundOpacity(double value) {
+        activityLogHudBackgroundOpacity.set(value);
+    }
+
     /**
      * Registry order, or saved order from config with any new nutrients appended.
      */
@@ -553,6 +613,14 @@ public final class NourishedClientConfig {
 
     public void setShowCaloriesBox(boolean value) {
         showCaloriesBox.set(value);
+    }
+
+    public boolean showYesterdayCalories() {
+        return showYesterdayCalories.get();
+    }
+
+    public void setShowYesterdayCalories(boolean value) {
+        showYesterdayCalories.set(value);
     }
 
     public boolean showBalanceBox() {

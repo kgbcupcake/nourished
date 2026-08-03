@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.compat.ModCompat;
 import dev.marie.framework.curve.math.CurveGrid;
+import dev.marie.framework.runtime.RuntimeResolver;
 import dev.marie.framework.scanner.RecipeInheritanceResolver;
 import dev.marie.framework.util.MarieRegistryUtils;
 import dev.maire.nourished.config.NourishedConfig;
@@ -87,7 +88,7 @@ public final class FoodNutritionRegistry {
         serverRecipeManager = recipeManager;
         serverRecipeInheritanceResolver = recipeManager != null ? new RecipeInheritanceResolver(recipeManager) : null;
         if (recipeManager != null) {
-            RuntimeFoodResolver.getInstance().buildRecipeIndex(recipeManager);
+            RuntimeResolver.getInstance().buildRecipeIndex(recipeManager);
         }
     }
 

@@ -1,0 +1,46 @@
+name: Enforce Changelog
+
+on:
+    pull_request:
+        types: [opened, synchronize, reopened, labeled, unlabeled]
+        branches: [dev, main]
+
+jobs:
+    check-changelog:
+        runs-on: ubuntu-latest
+        # Backstop for anything that doesn't go through Claude Code's own commit-time changelog
+        # hook (external contributors, direct pushes, bot PRs): fails the check if a PR changes
+        # code but never touches CHANGELOG.md's "[ Unreleased ]" section.
+        steps:
+            - uses: actions/checkout@v5
+              with:
+                  fetch-depth: 0
+
+            - name: Check for CHANGELOG.md changes
+              if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
+              run: |
+                  BASE_SHA="${{ github.event.pull_request.base.sha }}"
+                  HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+                  CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+
+                  # Doc/workflow-only PRs (README, CI config, changelog itself) don't need an entry.
+                  NON_TRIVIAL=$(echo "$CHANGED_FILES" | grep -vE '^(CHANGELOG\.md|README\.md|\.github/)' || true)
+                  if [ -z "$NON_TRIVIAL" ]; then
+                    echo "Only docs/workflow files changed, skipping changelog check."
+                    exit 0
+                  fi
+
+                  if ! echo "$CHANGED_FILES" | grep -qx 'CHANGELOG.md'; then
+                    echo "::error::This PR changes code but does not update CHANGELOG.md." >&2
+                    echo "Add an entry under the \"[ Unreleased ]\" section describing this change," >&2
+                    echo "or apply the 'skip-changelog' label if this PR genuinely needs none." >&2
+                    exit 1
+                  fi
+
+                  if ! git diff "$BASE_SHA" "$HEAD_SHA" -- CHANGELOG.md | grep -qE '^\+- '; then
+                    echo "::error::CHANGELOG.md changed but no new bullet entry was added." >&2
+                    exit 1
+                  fi
+
+                  echo "CHANGELOG.md was updated."

@@ -209,7 +209,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                     "recipe ingredient inheritance");
 
         } catch (Exception e) {
-            Nourished.LOGGER.warn("[RuntimeFoodResolver] Recipe exception for {}: {}", itemId, e.getMessage());
+            Nourished.LOGGER.warn("[RuntimeResolver] Recipe exception for {}: {}", itemId, e.getMessage());
             ctx.setRecipeFailureReason("RECIPE_EXCEPTION");
             return null;
         }

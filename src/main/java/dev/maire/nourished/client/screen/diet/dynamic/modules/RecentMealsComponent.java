@@ -1,13 +1,13 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
 import dev.marie.framework.client.config.state.MarieClientCache;
-import dev.marie.framework.client.config.render.MarieValueColors;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.component.SelfPositioningModule;
 import dev.marie.framework.ui.RenderContext;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -266,7 +266,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                         .map(Map.Entry::getKey)
                         .orElse(null);
                 int nameColor = nutrientKey != null
-                        ? MarieValueColors.baseColorArgb(nutrientKey)
+                        ? HudDrawHelpers.nutrientColorArgb(nutrientKey)
                         : COL_WHITE;
                 drawText(context, name, x + nameOffset, y, nameColor, rowScale);
                 y += zoomedRowH;

@@ -6,6 +6,8 @@ import dev.marie.framework.api.marieapi.MarieAPI;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.marie.framework.util.MarieRegistryUtils;
+import dev.maire.nourished.api.NourishedAPI;
+import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.NourishedKubeIntegration;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -121,12 +123,20 @@ public final class NourishedFoodTriggerHandler {
     ) {
         ResourceLocation itemId = MarieRegistryUtils.itemKey(stack);
         Map<String, Float> before = snapshotNutrientLevels(player);
+        float totalBefore = NourishedAPI.getTotal(player);
         MarieAPI.fireSourceTrigger(
                 player,
                 ValueSourceTrigger.itemConsumed(itemId, food.nutrition()),
                 stack);
         Map<String, Float> deltas = computeNutrientDeltas(before, snapshotNutrientLevels(player));
         NourishedKubeIntegration.fireFoodEaten(player, itemId.toString(), deltas);
+
+        if (NourishedConfig.get().enableCalorieHistory()) {
+            float totalDelta = NourishedAPI.getTotal(player) - totalBefore;
+            if (totalDelta != 0f) {
+                MarieAPI.incrementTracker(player, NourishedAPI.CALORIES_TRACKER_ID, totalDelta);
+            }
+        }
     }
 
     private static Map<String, Float> snapshotNutrientLevels(ServerPlayer player) {

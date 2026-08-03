@@ -3,10 +3,14 @@ package dev.maire.nourished.client.config.categories;
 import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.config.HudNutrientColorsResetAllEntry;
 import dev.maire.nourished.client.config.HudNutrientColorsSectionHeaderEntry;
-import dev.maire.nourished.client.config.NutrientHudHexColorRowEntry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel;
+import dev.marie.framework.client.config.cloth.ColorHexRowWidget;
+import dev.marie.framework.client.config.cloth.ColorPairRowGroup;
+import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.color.ColorRegistry;
 import dev.marie.framework.config.HudAnchor;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -19,7 +23,9 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -30,7 +36,7 @@ import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.*;
 
 public final class HudAndDisplayCategory {
     private HudAndDisplayCategory() {}
-    public static void addHudAndDisplayCategory(NourishedConfig config, NourishedClientConfig client, ConfigBuilder builder, ConfigEntryBuilder eb) {
+    public static void addHudAndDisplayCategory(NourishedConfig config, NourishedClientConfig client, ConfigBuilder builder, ConfigEntryBuilder eb, Screen parent) {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.hud_display"));
         category.addEntry(new HudQuickActionsListEntry(client));
 
@@ -163,25 +169,71 @@ public final class HudAndDisplayCategory {
                         })
                         .build()
         );
-
+        category.addEntry(
+                eb.startBooleanToggle(Component.translatable("config.nourished.enableActivityLogHud"), client.enableActivityLogHud())
+                        .setDefaultValue(true)
+                        .setSaveConsumer(client::setEnableActivityLogHud)
+                        .setTooltip(Component.translatable("config.nourished.enableActivityLogHud.desc"))
+                        .build()
+        );
+        category.addEntry(
+                eb.startKeyCodeField(
+                                Component.translatable("config.nourished.activityLogHudEditHotkey"),
+                                NourishedKeys.EDIT_ACTIVITY_LOG_HUD.getKey()
+                        )
+                        .setDefaultValue(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_K))
+                        .setKeySaveConsumer(key -> {
+                            NourishedKeys.EDIT_ACTIVITY_LOG_HUD.setKey(key);
+                            KeyMapping.resetMapping();
+                            Minecraft.getInstance().options.save();
+                        })
+                        .build()
+        );
+        category.addEntry(
+                buildFloatSlider(
+                        eb,
+                        Component.translatable("config.nourished.activityLogHudBackgroundOpacity"),
+                        (float) client.activityLogHudBackgroundOpacity(),
+                        0.0f,
+                        1.0f,
+                        204f / 255f,
+                        client::setActivityLogHudBackgroundOpacity
+                )
+        );
+        for (ColorHexRowWidget row : ColorPairRowGroup.buildRows(
+                ActivityLogHudPanel.COLORS,
+                Component.translatable("config.nourished.activityLogHudBackgroundColor"),
+                Component.translatable("config.nourished.activityLogHudTextColor"))) {
+            category.addEntry(row);
+        }
         category.addEntry(new HudNutrientColorsSectionHeaderEntry());
-        List<NutrientHudHexColorRowEntry> hudNutrientColorRows = new ArrayList<>();
+        List<ColorHexRowWidget> nutrientColorRows = new ArrayList<>();
+        for (String valueKey : NutrientRegistry.getKeys()) {
+            ColorHexRowWidget row = new ColorHexRowWidget(
+                    nutrientColorKey(valueKey),
+                    NutrientRegistry.getLabelComponent(valueKey),
+                    Component.translatable("config.nourished.hudColors.row.tooltip"));
+            nutrientColorRows.add(row);
+        }
         category.addEntry(new HudNutrientColorsResetAllEntry(() -> {
             for (String valueKey : NutrientRegistry.getKeys()) {
-                ColorRegistry.remove(valueKey);
+                ColorRegistry.remove(nutrientColorKey(valueKey).id().toString());
             }
-            for (NutrientHudHexColorRowEntry row : hudNutrientColorRows) {
-                row.syncAfterBulkReset();
+            for (ColorHexRowWidget row : nutrientColorRows) {
+                row.syncFromEffectiveColor();
             }
         }));
-        for (String valueKey : NutrientRegistry.getKeys()) {
-            NutrientHudHexColorRowEntry row = new NutrientHudHexColorRowEntry(valueKey);
-            hudNutrientColorRows.add(row);
+        for (ColorHexRowWidget row : nutrientColorRows) {
             category.addEntry(row);
         }
 
         addReloadButton(category, eb, false);
     }
+
+    private static ColorKey nutrientColorKey(String valueKey) {
+        return ColorKey.of(ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "nutrient." + valueKey));
+    }
+
     static final class HudQuickActionsListEntry extends TooltipListEntry<Object> {
         private static final int BUTTON_HEIGHT = 20;
         private static final int GAP = 6;

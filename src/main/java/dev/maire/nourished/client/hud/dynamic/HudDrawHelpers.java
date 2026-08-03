@@ -1,7 +1,8 @@
 package dev.maire.nourished.client.hud.dynamic;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.marie.framework.client.config.render.MarieValueColors;
+import dev.marie.framework.color.ColorKey;
+import dev.marie.framework.color.MarieColors;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -53,8 +54,20 @@ public final class HudDrawHelpers {
         return (alpha << 24) | PANEL_RGB;
     }
 
+    /** Composes a panel background from a resolved RGB color and a separate opacity value. */
+    public static int panelColorWithOpacity(int rgb, double opacity) {
+        int alpha = Mth.clamp((int) Math.round(opacity * 255.0d), 0, 255);
+        return (alpha << 24) | (rgb & 0x00FFFFFF);
+    }
+
     public static String nutrientLabel(String key) {
         return NutrientRegistry.getLabel(key);
+    }
+
+    /** Resolves a nutrient's effective color (user/datapack override, or its registered default). */
+    public static int nutrientColorArgb(String key) {
+        return MarieColors.resolveColor(ColorKey.of(
+                ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "nutrient." + key)));
     }
 
     public static void drawRoundedBar(GuiGraphics g, int x, int y, int w, int h, float pct, int bgColor, int fillColor) {
@@ -182,7 +195,7 @@ public final class HudDrawHelpers {
             if (v < cfg.lowThreshold()) {
                 return COL_GOLD;
             }
-            return MarieValueColors.baseColorArgb(key);
+            return nutrientColorArgb(key);
         }
         if (v > cfg.excessThreshold()) {
             return COL_RED;
@@ -190,7 +203,7 @@ public final class HudDrawHelpers {
         if (v > cfg.lowThreshold()) {
             return COL_GOLD;
         }
-        return MarieValueColors.baseColorArgb(key);
+        return nutrientColorArgb(key);
     }
 
     public static int pctColor(String key, float v) {

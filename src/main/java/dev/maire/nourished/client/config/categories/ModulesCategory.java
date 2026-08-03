@@ -59,7 +59,7 @@ public final class ModulesCategory {
             } else {
                 editableModuleKeys.add(key);
             }
-            if (!"enableDebugLogging".equals(key)) {
+            if (!"enableDebugLogging".equals(key) && !"enableCalorieHistory".equals(key)) {
                 groupedEntries.getOrDefault(meta.group, groupedEntries.get("other")).add(entry);
             }
         }

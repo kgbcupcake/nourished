@@ -52,3 +52,5 @@ patchouli_books.md
 RoadMap.md
 "Git- Enhancement's"/
 CLAUDE.md
+/.claude/settings.local.json
+/.claude/settings.json

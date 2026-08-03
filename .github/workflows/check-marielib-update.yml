@@ -3,7 +3,7 @@ name: Check MarieLib Update
 on:
     workflow_dispatch:
     schedule:
-        - cron: "0 12 * * 1"
+        - cron: '0 12 * * 1'
 
 jobs:
     check-update:
@@ -16,18 +16,26 @@ jobs:
               with:
                   ref: dev
 
-            # Requires a Personal Access Token with the `read:packages` scope, stored in the
-            # MARIELIB_PACKAGES_TOKEN repo secret. The default GITHUB_TOKEN cannot read GitHub
-            # Packages from a different repository (kgbcupcake/MarieLib), so this secret must be
-            # created manually in repo settings before this workflow will succeed.
             - name: Fetch latest MarieLib version from GitHub Packages
               id: latest
               env:
-                  MARIELIB_PACKAGES_TOKEN: ${{ secrets.MARIELIB_PACKAGES_TOKEN }}
+                  MARIELIB_PACKAGES_TOKEN: ${{ secrets.MARIELIB_PACKAGES_READ }}
               run: |
-                  METADATA_URL="https://maven.pkg.github.com/kgbcupcake/MarieLib/dev/marie/MariesLib/marieslib/maven-metadata.xml"
+                  METADATA_URL="https://maven.pkg.github.com/kgbcupcake/MariesLib/dev/marie/MariesLib/marieslib/maven-metadata.xml"
 
-                  METADATA=$(curl -sSL -f -u "kgbcupcake:${MARIELIB_PACKAGES_TOKEN}" "$METADATA_URL")
+                  echo "Token length: ${#MARIELIB_PACKAGES_TOKEN}"
+
+                  set +e
+                  METADATA=$(curl -v -sSL -u "kgbcupcake:${MARIELIB_PACKAGES_TOKEN}" -w "\nHTTP_STATUS:%{http_code}\n" "$METADATA_URL")
+                  CURL_EXIT=$?
+                  set -e
+                  echo "curl exit code: $CURL_EXIT"
+                  echo "$METADATA"
+
+                  if [ "$CURL_EXIT" -ne 0 ]; then
+                    echo "curl failed with exit code $CURL_EXIT" >&2
+                    exit 1
+                  fi
 
                   LATEST_VERSION=$(echo "$METADATA" | grep -oPm1 '(?<=<release>)[^<]+')
                   if [ -z "$LATEST_VERSION" ]; then
@@ -61,8 +69,8 @@ jobs:
                   token: ${{ secrets.GITHUB_TOKEN }}
                   branch: chore/bump-marielib-${{ steps.latest.outputs.version }}
                   base: dev
-                  title: "chore: bump MarieLib to ${{ steps.latest.outputs.version }}"
-                  commit-message: "chore: bump MarieLib to ${{ steps.latest.outputs.version }}"
+                  title: 'chore: bump MarieLib to ${{ steps.latest.outputs.version }}'
+                  commit-message: 'chore: bump MarieLib to ${{ steps.latest.outputs.version }}'
                   body: |
                       Automated update: MarieLib ${{ steps.current.outputs.version }} -> ${{ steps.latest.outputs.version }}
 

@@ -14,6 +14,7 @@ import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurveRegistry;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
+import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientRegistry;
 
 /**
  * Registers all config-backed registries with {@link RegistryLifecycleManager} in dependency
@@ -58,6 +59,9 @@ public final class NourishedLifecycle {
         RegistryLifecycleManager.registerRegistry(
                 "NourishedPresetRegistry", NourishedPresetRegistry::ensureBuiltInFilesOnDisk,
                 NourishedPresetRegistry::reload);
+        RegistryLifecycleManager.registerRegistry(
+                "ActivityDrivenNutrientRegistry", ActivityDrivenNutrientRegistry::load,
+                ActivityDrivenNutrientRegistry::reload, ActivityDrivenNutrientRegistry::loadFromDatapack);
 
         // NutrientRegistry.loadDefinitions() already ran in the mod constructor, so real
         // nutrient colors are available here for seeding tooltip_colors.json's defaults.

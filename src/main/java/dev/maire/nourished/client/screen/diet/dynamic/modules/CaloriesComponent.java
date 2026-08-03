@@ -3,18 +3,22 @@ package dev.maire.nourished.client.screen.diet.dynamic.modules;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
+import dev.marie.framework.tracking.tracker.definition.TrackerHistoryEntry;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.component.SelfPositioningModule;
 import dev.marie.framework.ui.RenderContext;
+import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+
+import java.util.List;
 
 import static dev.maire.nourished.client.screen.diet.dynamic.layout.DietSubBoxConstraints.SUMMARY_BOX_LOCAL_WIDTH;
 
@@ -24,7 +28,9 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
     public static final String ID = "nourished.diet.calories";
     private static final int HEADER_LOCAL_HEIGHT = 20;
     private static final int BODY_LOCAL_HEIGHT = 20;
-    private static final int BOX_LOCAL_HEIGHT = HEADER_LOCAL_HEIGHT + BODY_LOCAL_HEIGHT;
+    private static final int BASE_BOX_LOCAL_HEIGHT = HEADER_LOCAL_HEIGHT + BODY_LOCAL_HEIGHT;
+    /** Extra local-unit height reserved for the "yesterday: X" line when it is shown. */
+    private static final int YESTERDAY_LINE_LOCAL_HEIGHT = 11;
 
     private final DietLayout.Layout layout;
     private final int startLocalY;
@@ -32,6 +38,8 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
     private final boolean visible;
     private final int renderedContentHeight;
     private final int localHeight;
+    private final int boxLocalHeight;
+    private final Float yesterdayCalories;
     private final Bounds resolvedBounds;
     private final SummaryBoxRenderSupport support;
     private double contentScale = 1.0d;
@@ -44,19 +52,30 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         NourishedClientConfig cc = NourishedClientConfig.get();
         Minecraft mc = Minecraft.getInstance();
         this.data = mc.player != null ? MarieClientCache.get() : null;
+        this.yesterdayCalories = cc.showYesterdayCalories() ? latestYesterdayCalories(data) : null;
+        this.boxLocalHeight = BASE_BOX_LOCAL_HEIGHT + (yesterdayCalories != null ? YESTERDAY_LINE_LOCAL_HEIGHT : 0);
 
         // Continuous fade instead of an all-or-nothing header floor: header and bar scale down
-        // together as room tightens (see render()'s heightScale, divided by the fixed BOX_LOCAL_HEIGHT
+        // together as room tightens (see render()'s heightScale, divided by the fixed boxLocalHeight
         // rather than this frame's shrunk room) — the box only actually disappears once there's less
         // than MIN_VISIBLE_ROOM_LOCAL of room left, instead of vanishing the instant its full natural
         // height stops fitting.
         boolean enabled = FeatureFlagCache.enableTotalTracking() && cc.showCaloriesBox() && data != null;
-        int room = enabled ? DietLayout.roomInPanel(layout, startLocalY, BOX_LOCAL_HEIGHT) : 0;
+        int room = enabled ? DietLayout.roomInPanel(layout, startLocalY, boxLocalHeight) : 0;
         this.visible = room >= DietScreenModules.MIN_VISIBLE_ROOM_LOCAL;
         this.renderedContentHeight = visible ? room : 0;
         this.localHeight = visible ? renderedContentHeight + DietScreenModules.MODULE_GAP_LOCAL : 0;
 
         this.resolvedBounds = DietScreenPersistence.resolveRelativeToPanel(ID, layout, startLocalY, SUMMARY_BOX_LOCAL_WIDTH, localHeight);
+    }
+
+    /** Most recent completed day's calorie total, or {@code null} if history is disabled/empty. */
+    private static Float latestYesterdayCalories(TrackingData data) {
+        if (data == null) {
+            return null;
+        }
+        List<TrackerHistoryEntry> history = data.trackingHistory.get(NourishedAPI.CALORIES_TRACKER_ID);
+        return history == null || history.isEmpty() ? null : history.get(0).value();
     }
 
     /** Local (pre-scale) pixel height this box occupies this frame; 0 when hidden or not fitting. */
@@ -67,7 +86,7 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
 
     /** The box's content-driven height in local units, regardless of {@code visible} — see {@link RecentMealsComponent#naturalLocalHeight()}. */
     public int naturalLocalHeight() {
-        return BOX_LOCAL_HEIGHT + DietScreenModules.MODULE_GAP_LOCAL;
+        return boxLocalHeight + DietScreenModules.MODULE_GAP_LOCAL;
     }
 
     @Override
@@ -102,11 +121,11 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         NourishedClientConfig cc = NourishedClientConfig.get();
 
         // min() of both ratios so a single-axis resize can't hide content. Divides by the fixed
-        // BOX_LOCAL_HEIGHT (the full natural header+bar extent), not this frame's shrunk
+        // boxLocalHeight (the full natural header+bar[+yesterday] extent), not this frame's shrunk
         // renderedContentHeight — so header and bar scale down together continuously as room
         // tightens, instead of the header staying full-size right up until it's clipped off.
         double widthScale = bounds.width() / (double) SUMMARY_BOX_LOCAL_WIDTH;
-        double heightScale = bounds.height() / (double) BOX_LOCAL_HEIGHT;
+        double heightScale = bounds.height() / (double) boxLocalHeight;
         this.contentScale = Math.min(widthScale, heightScale);
         // contentScale (fitScale) still drives sx/sy/sd/outer-box sizing unchanged; the persisted
         // per-box zoom multiplier only affects the size passed to text/icon draw calls below, and is
@@ -129,6 +148,11 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
             int barLocalWidth = SUMMARY_BOX_LOCAL_WIDTH - 4;
             float calPct = data.maxTotal > 0 ? Mth.clamp(data.total / data.maxTotal, 0f, 1f) : 0f;
             context.drawBar(support.sx(2), support.sy(startLocalY + 33), support.sd(barLocalWidth), support.sd(4), calPct, SummaryBoxRenderSupport.COL_SEG_EMPTY, SummaryBoxRenderSupport.COL_GREEN);
+
+            if (yesterdayCalories != null) {
+                String yesterdayStr = Component.translatable("nourished.screen.diet.calories_yesterday", (int) (float) yesterdayCalories).getString();
+                support.drawText(context, yesterdayStr, 24, 41, SummaryBoxRenderSupport.COL_WHITE, scale);
+            }
         } finally {
             context.popClip();
         }

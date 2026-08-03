@@ -1,11 +1,14 @@
 package dev.maire.nourished.core.nutrition;
 
 import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.runtime.RuntimeResolver;
 import dev.marie.framework.runtime.SourceRegistry;
 import dev.marie.framework.scanner.ExcludedItemsRegistry;
 import dev.marie.framework.scanner.ScannerSpecRegistry;
 import dev.marie.framework.util.MarieRegistryUtils;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -80,7 +83,14 @@ public final class NutrientClassificationLookup {
             }
         }
 
-        Map<String, Float> resolved = RuntimeFoodResolver.getInstance().resolve(stack, recipeManager);
+        // Intentional stricter gate for the live gameplay path (gate reconciliation decision —
+        // see migration notes): RuntimeResolver natively gates on sourceItemFilter(), which is
+        // broader than this. This check preserves the old RuntimeFoodResolver behavior so live
+        // player-facing values don't change. Do not remove as "leftover duplication."
+        FoodProperties food = stack.getItem().components().get(DataComponents.FOOD);
+        Map<String, Float> resolved = (food == null || food.nutrition() <= 0)
+                ? Map.of()
+                : RuntimeResolver.getInstance().resolve(stack, recipeManager);
 
         Map<String, Float> classification;
         if (tagMatches.isEmpty()) {

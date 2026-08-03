@@ -39,6 +39,11 @@ public final class ColorsValidator implements ConfigValidator {
         return "nourished_colors";
     }
 
+    private static final String NUTRIENT_PREFIX = Nourished.MODID + ":nutrient.";
+    private static final String ACTIVITY_PREFIX = Nourished.MODID + ":activity.";
+    private static final String PANEL_PREFIX = Nourished.MODID + ":panel.";
+    private static final String TEXT_PREFIX = Nourished.MODID + ":text.";
+
     @Override
     public ValidationResult validate() {
         Set<String> validKeys = Set.copyOf(NutrientRegistry.getKeys());
@@ -67,7 +72,7 @@ public final class ColorsValidator implements ConfigValidator {
                 if (!seen.add(key)) {
                     continue;
                 }
-                if (!validKeys.contains(key)) {
+                if (!isKnownColorKey(key, validKeys)) {
                     findings.add(new Finding(
                             ValidationResult.Status.WARN,
                             FILE,
@@ -86,5 +91,22 @@ public final class ColorsValidator implements ConfigValidator {
         }
 
         return ValidationResults.fromFindings(validatorId(), findings);
+    }
+
+    /**
+     * Accepts both the legacy raw nutrient key (e.g. {@code "protein"}) and the new namespaced
+     * {@code ColorKey} strings ({@code nourished:nutrient.<key>}, {@code nourished:activity.<id>},
+     * {@code nourished:panel.<id>}, {@code nourished:text.<id>}) that {@code ColorHexRowWidget}/
+     * {@code MarieAPI.resolveColor} now read/write — activity, panel, and text colors were never
+     * nutrient keys to begin with.
+     */
+    private static boolean isKnownColorKey(String key, Set<String> validNutrientKeys) {
+        if (validNutrientKeys.contains(key)) {
+            return true;
+        }
+        if (key.startsWith(NUTRIENT_PREFIX)) {
+            return validNutrientKeys.contains(key.substring(NUTRIENT_PREFIX.length()));
+        }
+        return key.startsWith(ACTIVITY_PREFIX) || key.startsWith(PANEL_PREFIX) || key.startsWith(TEXT_PREFIX);
     }
 }
