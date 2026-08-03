@@ -36,6 +36,7 @@ import dev.maire.nourished.modules.activity_driven_nutrient.handler.StarvationMo
 import dev.maire.nourished.modules.activity_driven_nutrient.modules.SwimDecayModule;
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.marie.framework.tracking.TrackingData;
+import dev.marie.framework.tracking.tracker.MarieTracking;
 import dev.maire.nourished.client.ClientEventRegistrar;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.NourishedTrackingData;
@@ -155,11 +156,7 @@ public class Nourished {
                 NourishedConfigValidation.runAfterInitialLoad();
                 NutrientRegistry.syncAndFreeze();
                 ModCompat.discoverUnknownMods();
-                if (NourishedConfig.get().enableCalorieHistory()) {
-                    MarieAPI.registerTracker(dev.marie.framework.tracking.tracker.definition.TrackerDefinition.daily(
-                            dev.maire.nourished.api.NourishedAPI.CALORIES_TRACKER_ID,
-                            NourishedConfig.get().calorieHistoryRetentionDays()));
-                }
+                registerCalorieTracker();
                 LOGGER.info("[Nourished] Starting AutoCompatDiscovery...");
                 try (var scope = MarieAPIState.openForDatapackReload()) {
                     AutoCompatDiscovery.discover();
@@ -179,6 +176,30 @@ public class Nourished {
                 EffectRegistry.getAll().size(),
                 ModCompat.getAllEntries().size());
         LOGGER.info("Nourished loaded.");
+    }
+
+    /**
+     * Re-runs the mod-init registrations MarieLib's {@code TrackerRegistry}/
+     * {@code ColorDefinitionRegistry} wipe on every {@code /reload}, so calorie history and custom
+     * colors survive it. Called from {@code MarieContext.reloadBroadcastHook()} via
+     * {@link dev.maire.nourished.core.reload.NourishedReloadHelper#reloadAndBroadcast}.
+     */
+    public static void reregisterReloadableDefinitions() {
+        registerColorDefinitions();
+        registerCalorieTracker();
+    }
+
+    /**
+     * Registers the calorie history {@link dev.marie.framework.tracking.tracker.definition.TrackerDefinition}
+     * with MarieLib's tracker system. Called at mod init and again from
+     * {@link #reregisterReloadableDefinitions()} on every reload.
+     */
+    private static void registerCalorieTracker() {
+        if (NourishedConfig.get().enableCalorieHistory()) {
+            MarieTracking.registerTracker(dev.marie.framework.tracking.tracker.definition.TrackerDefinition.daily(
+                    dev.maire.nourished.api.NourishedAPI.CALORIES_TRACKER_ID,
+                    NourishedConfig.get().calorieHistoryRetentionDays()));
+        }
     }
 
     /**

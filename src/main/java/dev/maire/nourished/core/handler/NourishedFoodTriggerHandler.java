@@ -5,6 +5,7 @@ import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.api.marieapi.MarieAPI;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingAttachment;
+import dev.marie.framework.tracking.tracker.MarieTracking;
 import dev.marie.framework.util.MarieRegistryUtils;
 import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.config.NourishedConfig;
@@ -134,7 +135,7 @@ public final class NourishedFoodTriggerHandler {
         if (NourishedConfig.get().enableCalorieHistory()) {
             float totalDelta = NourishedAPI.getTotal(player) - totalBefore;
             if (totalDelta != 0f) {
-                MarieAPI.incrementTracker(player, NourishedAPI.CALORIES_TRACKER_ID, totalDelta);
+                MarieTracking.incrementTracker(player, NourishedAPI.CALORIES_TRACKER_ID, totalDelta);
             }
         }
     }
