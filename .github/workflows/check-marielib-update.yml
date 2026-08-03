@@ -21,7 +21,7 @@ jobs:
               env:
                   MARIELIB_PACKAGES_TOKEN: ${{ secrets.MARIELIB_PACKAGES_READ }}
               run: |
-                  METADATA_URL="https://maven.pkg.github.com/kgbcupcake/MarieLib/dev/marie/MariesLib/marieslib/maven-metadata.xml"
+                  METADATA_URL="https://maven.pkg.github.com/kgbcupcake/MariesLib/dev/marie/MariesLib/marieslib/maven-metadata.xml"
 
                   METADATA=$(curl -sSL -f -u "kgbcupcake:${MARIELIB_PACKAGES_TOKEN}" "$METADATA_URL")
 
