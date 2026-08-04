@@ -129,24 +129,19 @@ public final class CalorieHudScreen implements MarieComponent {
      * Live "Today" row (if any) followed by completed-period history, newest first, already
      * retention-capped server-side.
      *
-     * <p>The "Today" row reads {@link TrackingData#trackingAccumulators} off {@link
-     * MarieClientCache#get()}, not {@code NourishedAPI#getTotal} ({@code CaloriesComponent}'s
-     * "current" value, a decaying calorie gauge — a different quantity than the tracker's per-day
-     * accumulation shown in every other row of this panel) and not {@code
-     * MarieAPI#getCurrentTrackerValue} against {@code mc.player} directly (the client-side player
-     * entity's own attachment is only ever written on a full tracking sync — login/respawn/
-     * dimension change — never on the lightweight delta sync that fires per food-eaten, so that
-     * read showed a permanently stale, usually-zero value). {@code MarieClientCache} is the
-     * snapshot Nourished's delta-sync pipeline actually keeps current, and matches the units of
-     * the history rows below it.
+     * <p>The "Today" row reads {@code NourishedAPI#getTotal}'s value off {@link
+     * MarieClientCache#get()} — the same current-calories figure shown on the diet screen's
+     * Calories box — not {@link TrackingData#trackingAccumulators} (the tracker's own per-day sum,
+     * which lags behind on its throttled sync and isn't the number players expect "Today" to
+     * match). {@code MarieClientCache} is the snapshot Nourished's delta-sync pipeline actually
+     * keeps current, and matches the units of the history rows below it.
      */
     private static List<Row> currentRows() {
         List<Row> rows = new ArrayList<>();
         Minecraft mc = Minecraft.getInstance();
         TrackingData data = MarieClientCache.get();
         if (mc.player != null) {
-            float today = data.trackingAccumulators.getOrDefault(NourishedAPI.CALORIES_TRACKER_ID, 0f);
-            rows.add(new Row(Component.translatable("nourished.hud.calorieHistory.today", (int) today).getString(), true));
+            rows.add(new Row(Component.translatable("nourished.hud.calorieHistory.today", (int) data.total).getString(), true));
         }
         List<TrackerHistoryEntry> history = data.trackingHistory.get(NourishedAPI.CALORIES_TRACKER_ID);
         if (history != null) {

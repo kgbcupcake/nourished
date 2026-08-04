@@ -208,6 +208,22 @@ public class Nourished {
     }
 
     /**
+     * Reconciles the calorie tracker's registration with the current config, so toggling
+     * {@code enableCalorieHistory} from the config screen takes effect without a {@code /reload}.
+     * Called from {@link NourishedConfig#syncModuleCache()}. MarieLib's registration window is
+     * normally closed outside mod init/reload, so this briefly reopens it for the call.
+     */
+    public static void ensureCalorieTrackerRegistered() {
+        if (MarieAPIState.isRegistrationAllowed()) {
+            registerCalorieTracker();
+            return;
+        }
+        try (var scope = MarieAPIState.openForDatapackReload()) {
+            registerCalorieTracker();
+        }
+    }
+
+    /**
      * Registers this mod's {@link ColorDefinition}s with MarieLib's color system: one per nutrient
      * (namespaced {@code nutrient.<key>}), one per activity module (via {@link
      * ActivityDrivenNutrientRegistry#registerColors()}), and one per HUD panel that composes its

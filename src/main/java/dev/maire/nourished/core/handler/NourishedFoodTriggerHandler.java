@@ -10,6 +10,8 @@ import dev.marie.framework.util.MarieRegistryUtils;
 import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.NourishedKubeIntegration;
+import dev.maire.nourished.core.diet.DietAttachment;
+import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.resources.ResourceLocation;
@@ -132,10 +134,19 @@ public final class NourishedFoodTriggerHandler {
         Map<String, Float> deltas = computeNutrientDeltas(before, snapshotNutrientLevels(player));
         NourishedKubeIntegration.fireFoodEaten(player, itemId.toString(), deltas);
 
-        if (NourishedConfig.get().enableCalorieHistory()) {
-            float totalDelta = NourishedAPI.getTotal(player) - totalBefore;
-            if (totalDelta != 0f) {
-                MarieTracking.incrementTracker(player, NourishedAPI.CALORIES_TRACKER_ID, totalDelta);
+        float totalDelta = NourishedAPI.getTotal(player) - totalBefore;
+        if (NourishedConfig.get().enableCalorieHistory() && totalDelta != 0f) {
+            MarieTracking.incrementTracker(player, NourishedAPI.CALORIES_TRACKER_ID, totalDelta);
+        }
+
+        boolean hadRealEffect = totalDelta != 0f || deltas.values().stream().anyMatch(v -> v != 0f);
+        if (hadRealEffect) {
+            DietAttachment.recordRecentMeal(player, itemId.toString());
+            // fireSourceTrigger already sent a diet delta sync from inside SourceApplicationPipeline,
+            // before recordRecentMeal above ran — that sync's snapshot predates this meal, so push
+            // one more sync now or the client won't show it until (if ever) the next meal is eaten.
+            if (TrackingAttachment.getData(player) instanceof dev.maire.nourished.core.diet.NourishedTrackingData trackingData) {
+                ModNetworking.syncDietDelta(player, trackingData);
             }
         }
     }

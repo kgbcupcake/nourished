@@ -74,11 +74,15 @@ public class ModNetworking {
 
     /** Send lightweight client sync. Call on every food eat and decay tick. */
     public static void syncDietDelta(ServerPlayer player, TrackingData diet) {
-        PacketDistributor.sendToPlayer(player, (SyncDietDeltaPayload) diet.toDeltaPayload());
+        List<String> recentMeals = dev.maire.nourished.core.diet.DietAttachment.getRecentMeals(player);
+        SyncDietDeltaPayload payload = ((dev.maire.nourished.core.diet.NourishedTrackingData) diet)
+                .toDeltaPayload(recentMeals);
+        PacketDistributor.sendToPlayer(player, payload);
     }
 
     /** Send full TrackingData. Call on login, respawn, dimension change, command only. */
     public static void syncDiet(ServerPlayer player, TrackingData diet) {
+        diet.setRecentIds(dev.maire.nourished.core.diet.DietAttachment.getRecentMeals(player));
         PacketDistributor.sendToPlayer(player, new SyncDietPayload(diet));
     }
 

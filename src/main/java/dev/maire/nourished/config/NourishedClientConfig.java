@@ -61,7 +61,6 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue showEatMoreOf;
     private final ModConfigSpec.BooleanValue showActiveEffects;
     private final ModConfigSpec.BooleanValue showCaloriesBox;
-    private final ModConfigSpec.BooleanValue showYesterdayCalories;
     private final ModConfigSpec.BooleanValue showBalanceBox;
     private final ModConfigSpec.BooleanValue showDietScreenButton;
     private final ModConfigSpec.BooleanValue recentMealsEatMoreOffsetMigrationDone;
@@ -186,7 +185,6 @@ public final class NourishedClientConfig {
         showEatMoreOf = builder.define("showEatMoreOf", ConfigDefaultsLoader.getBoolean(defaults, "showEatMoreOf", true));
         showActiveEffects = builder.define("showActiveEffects", ConfigDefaultsLoader.getBoolean(defaults, "showActiveEffects", true));
         showCaloriesBox = builder.define("showCaloriesBox", ConfigDefaultsLoader.getBoolean(defaults, "showCaloriesBox", true));
-        showYesterdayCalories = builder.define("showYesterdayCalories", ConfigDefaultsLoader.getBoolean(defaults, "showYesterdayCalories", true));
         showBalanceBox = builder.define("showBalanceBox", ConfigDefaultsLoader.getBoolean(defaults, "showBalanceBox", true));
         showDietScreenButton = builder.define("showDietScreenButton", ConfigDefaultsLoader.getBoolean(defaults, "showDietScreenButton", true));
         // Internal one-time migration flag — not user-facing, no Cloth Config entry. Guards the
@@ -613,14 +611,6 @@ public final class NourishedClientConfig {
 
     public void setShowCaloriesBox(boolean value) {
         showCaloriesBox.set(value);
-    }
-
-    public boolean showYesterdayCalories() {
-        return showYesterdayCalories.get();
-    }
-
-    public void setShowYesterdayCalories(boolean value) {
-        showYesterdayCalories.set(value);
     }
 
     public boolean showBalanceBox() {

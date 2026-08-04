@@ -411,6 +411,7 @@ public final class NourishedConfig {
         }
         NourishedConfig c = INSTANCE;
         NourishedModuleCache.refresh(c);
+        Nourished.ensureCalorieTrackerRegistered();
         FeatureFlagCache.sync(new MarieModFeatureFlags(
                 c.enableDecay(),
                 c.isModuleEnabled("enableSourceApplication"),
