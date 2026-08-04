@@ -227,8 +227,8 @@ public class Nourished {
         // Matches ThemeKey.TEXT_PRIMARY (0xFFE0E0E0) — the flat text color both panels drew before
         // this feature existed.
         int defaultTextArgb = 0xFFE0E0E0;
-        CalorieHudScreen.COLORS = MarieColors.registerColorPair(MODID, "calorieHud", defaultPanelArgb, defaultTextArgb);
-        ActivityLogHudPanel.COLORS = MarieColors.registerColorPair(MODID, "activityLogHud", defaultPanelArgb, defaultTextArgb);
+        CalorieHudScreen.COLORS = MarieColors.registerColorPair(MODID, "calorie_hud", defaultPanelArgb, defaultTextArgb);
+        ActivityLogHudPanel.COLORS = MarieColors.registerColorPair(MODID, "activity_log_hud", defaultPanelArgb, defaultTextArgb);
     }
 
     /**
