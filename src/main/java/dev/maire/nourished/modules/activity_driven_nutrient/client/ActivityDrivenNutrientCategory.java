@@ -1,16 +1,23 @@
 package dev.maire.nourished.modules.activity_driven_nutrient.client;
 
+import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.config.categories.widgets.StyledChipTextEntry;
+import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientConfig;
 import dev.marie.framework.client.config.cloth.ColorHexRowWidget;
+import dev.marie.framework.client.config.cloth.ColorPairRowGroup;
 import dev.marie.framework.color.ColorKey;
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +26,7 @@ import java.util.function.DoubleConsumer;
 
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.addReloadButton;
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.buildDoubleSlider;
+import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.buildFloatSlider;
 
 public final class ActivityDrivenNutrientCategory {
     private ActivityDrivenNutrientCategory() {}
@@ -34,9 +42,49 @@ public final class ActivityDrivenNutrientCategory {
     private static final double SWIM_BOOST_DEFAULT = 0.0004d;
     private static final double STARVATION_PENALTY_DEFAULT = 0.02d;
 
-    public static void addActivityDrivenNutrientCategory(ConfigBuilder builder, ConfigEntryBuilder eb) {
+    public static void addActivityDrivenNutrientCategory(NourishedClientConfig client, ConfigBuilder builder, ConfigEntryBuilder eb) {
         ConfigCategory category = builder.getOrCreateCategory(
                 Component.translatable("config.nourished.category.activityDrivenNutrient"));
+
+        List<AbstractConfigListEntry> hudEntries = new ArrayList<>();
+        hudEntries.add(
+                eb.startBooleanToggle(Component.translatable("config.nourished.enableActivityLogHud"), client.enableActivityLogHud())
+                        .setDefaultValue(true)
+                        .setSaveConsumer(client::setEnableActivityLogHud)
+                        .setTooltip(Component.translatable("config.nourished.enableActivityLogHud.desc"))
+                        .build()
+        );
+        hudEntries.add(
+                eb.startKeyCodeField(
+                                Component.translatable("config.nourished.activityLogHudEditHotkey"),
+                                NourishedKeys.EDIT_ACTIVITY_LOG_HUD.getKey()
+                        )
+                        .setDefaultValue(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_K))
+                        .setKeySaveConsumer(key -> {
+                            NourishedKeys.EDIT_ACTIVITY_LOG_HUD.setKey(key);
+                            KeyMapping.resetMapping();
+                            Minecraft.getInstance().options.save();
+                        })
+                        .build()
+        );
+        hudEntries.add(
+                buildFloatSlider(
+                        eb,
+                        Component.translatable("config.nourished.activityLogHudBackgroundOpacity"),
+                        (float) client.activityLogHudBackgroundOpacity(),
+                        0.0f,
+                        1.0f,
+                        204f / 255f,
+                        client::setActivityLogHudBackgroundOpacity
+                )
+        );
+        for (ColorHexRowWidget row : ColorPairRowGroup.buildRows(
+                ActivityLogHudPanel.COLORS,
+                Component.translatable("config.nourished.activityLogHudBackgroundColor"),
+                Component.translatable("config.nourished.activityLogHudTextColor"))) {
+            hudEntries.add(row);
+        }
+        category.addEntry(eb.startSubCategory(Component.literal("HUD"), hudEntries).setExpanded(false).build());
 
         boolean synced = ActivityDrivenNutrientConfig.isSynced();
         if (!synced) {

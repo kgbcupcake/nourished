@@ -182,9 +182,14 @@ public class Nourished {
      * Re-runs the mod-init registrations MarieLib's {@code TrackerRegistry}/
      * {@code ColorDefinitionRegistry} wipe on every {@code /reload}, so calorie history and custom
      * colors survive it. Called from {@code MarieContext.reloadBroadcastHook()} via
-     * {@link dev.maire.nourished.core.reload.NourishedReloadHelper#reloadAndBroadcast}.
+     * {@link dev.maire.nourished.core.reload.NourishedReloadHelper#reregisterAndBroadcast}.
      */
     public static void reregisterReloadableDefinitions() {
+        if (!MarieAPIState.isRegistrationAllowed()) {
+            LOGGER.warn("[Nourished] reregisterReloadableDefinitions() called while the registration "
+                    + "window is closed; skipping instead of crashing. This indicates a call-site bug.");
+            return;
+        }
         registerColorDefinitions();
         registerCalorieTracker();
     }

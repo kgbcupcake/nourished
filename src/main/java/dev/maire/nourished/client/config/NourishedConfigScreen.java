@@ -69,7 +69,7 @@ public final class NourishedConfigScreen {
         ScannerCategory.addScannerCategory(config, builder, entryBuilder);
         AdvancedCategory.addAdvancedCategory(config, builder, entryBuilder, modulePending);
         CompatibilityCategory.addCompatibilityCategory(config, builder, entryBuilder, compatPending);
-        ActivityDrivenNutrientCategory.addActivityDrivenNutrientCategory(builder, entryBuilder);
+        ActivityDrivenNutrientCategory.addActivityDrivenNutrientCategory(client, builder, entryBuilder);
         CalorieHistoryCategory.addCalorieHistoryCategory(config, client, builder, entryBuilder, modulePending);
 
         builder.setSavingRunnable(() -> {

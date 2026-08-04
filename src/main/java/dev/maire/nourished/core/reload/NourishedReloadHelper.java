@@ -27,12 +27,22 @@ public final class NourishedReloadHelper {
     }
 
     public static void reloadAndBroadcast(MinecraftServer server) {
-        Nourished.reregisterReloadableDefinitions();
         invalidateClassificationCaches();
         NourishedSyncHandler.setConfigSnapshot(
                 SyncNourishedConfigSnapshot.fromConfig(NourishedConfig.get()));
         NourishedSyncHandler.broadcastConfigReload(server);
         MarieResourcesAPI.broadcastConfigSyncReload(server, ActivityDrivenNutrientRegistry.SYNC_ID);
+    }
+
+    /**
+     * Same as {@link #reloadAndBroadcast} but also re-runs mod-init registrations wiped by a
+     * genuine datapack reload. Only valid where MarieLib has reopened the registration window
+     * (the {@code MarieContext.onReloadBroadcast} hook) — never on ordinary server startup or
+     * config-screen saves, where the window is closed.
+     */
+    public static void reregisterAndBroadcast(MinecraftServer server) {
+        Nourished.reregisterReloadableDefinitions();
+        reloadAndBroadcast(server);
     }
 
     private static void invalidateClassificationCaches() {
