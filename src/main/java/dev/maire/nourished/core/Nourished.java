@@ -37,6 +37,7 @@ import dev.maire.nourished.modules.activity_driven_nutrient.modules.SwimDecayMod
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.tracking.tracker.MarieTracking;
+import dev.marie.framework.tracking.tracker.registry.TrackerRegistry;
 import dev.maire.nourished.client.ClientEventRegistrar;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.NourishedTrackingData;
@@ -218,8 +219,17 @@ public class Nourished {
             registerCalorieTracker();
             return;
         }
+        // TrackerRegistry is frozen outside mod init/reload, same as the API phase — reopening the phase alone isn't enough.
+        boolean wasFrozen = TrackerRegistry.isFrozen();
+        if (wasFrozen) {
+            TrackerRegistry.unfreezeInternal();
+        }
         try (var scope = MarieAPIState.openForDatapackReload()) {
             registerCalorieTracker();
+        } finally {
+            if (wasFrozen) {
+                TrackerRegistry.freezeInternal();
+            }
         }
     }
 

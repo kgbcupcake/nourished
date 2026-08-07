@@ -34,3 +34,10 @@ side = "BOTH"
     versionRange = "${maries_framework_version_range}"
     ordering = "AFTER"
     side = "BOTH"
+
+[[dependencies.${mod_id}]]
+    modId = "cloth_config"
+    type = "required"
+    versionRange = "[15.0.0,)"
+    ordering = "NONE"
+    side = "CLIENT"
