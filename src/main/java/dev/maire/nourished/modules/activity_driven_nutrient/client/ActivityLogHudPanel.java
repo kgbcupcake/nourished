@@ -8,6 +8,7 @@ import dev.marie.framework.ui.ThemeKey;
 import dev.marie.framework.ui.component.ComponentState;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.MarieComponent;
+import dev.marie.framework.ui.edit.ContentScaleController;
 import dev.marie.framework.ui.edit.DraggableResizable;
 import dev.marie.framework.ui.edit.EditModeController;
 import dev.marie.framework.ui.geometry.Anchor;
@@ -57,15 +58,21 @@ public final class ActivityLogHudPanel implements MarieComponent {
     /** How much bigger than content's natural size the box may be dragged, on either axis. */
     private static final double MAX_MARGIN_MULTIPLIER = 5.0d;
 
+    /** How much smaller than content's natural size the box may be dragged, on either axis. */
+    private static final double MIN_SHRINK_SCALE = 0.5d;
+
     private static ActivityLogHudPanel instance;
     private static EditModeController editModeController;
+    private static ContentScaleController scaleController;
 
     private final DraggableResizable drag;
 
     private ActivityLogHudPanel() {
         Size natural = naturalSize(currentRows().size());
+        Size minSize = new Size(
+                (int) (natural.width() * MIN_SHRINK_SCALE), (int) (natural.height() * MIN_SHRINK_SCALE));
         Constraint constraint = new Constraint(
-                natural, natural,
+                natural, minSize,
                 new Size((int) (natural.width() * MAX_MARGIN_MULTIPLIER), (int) (natural.height() * MAX_MARGIN_MULTIPLIER)),
                 false, false, true, true,
                 Anchor.TOP_LEFT, Insets.NONE, Insets.NONE
@@ -78,6 +85,14 @@ public final class ActivityLogHudPanel implements MarieComponent {
             instance = new ActivityLogHudPanel();
         }
         return instance;
+    }
+
+    /** This panel's own {@link ContentScaleController} — independent of every other component's, so zooming/padding-adjusting this panel never affects another's active mode. */
+    private static ContentScaleController scaleController() {
+        if (scaleController == null) {
+            scaleController = new ContentScaleController(UiStatePersistence.get());
+        }
+        return scaleController;
     }
 
     private static EditModeController editModeController() {
@@ -93,6 +108,9 @@ public final class ActivityLogHudPanel implements MarieComponent {
     }
 
     public static void onRenderGuiPost(RenderGuiEvent.Post event) {
+        if (Minecraft.getInstance().options.hideGui) {
+            return;
+        }
         if (!NourishedClientConfig.get().enableActivityLogHud()) {
             return;
         }
@@ -159,45 +177,64 @@ public final class ActivityLogHudPanel implements MarieComponent {
     public static ColorKeyPair COLORS;
 
     private static void drawPanel(RenderContext context, Bounds bounds, List<ActivityLogClientBuffer.Row> rows) {
+        Size natural = naturalSize(rows.size());
+        double widthScale = bounds.width() / (double) natural.width();
+        double heightScale = bounds.height() / (double) natural.height();
+        double fitScale = Math.max(MIN_SHRINK_SCALE, Math.min(1.0d, Math.min(widthScale, heightScale)));
+        // fitScale is the existing box-driven proportional scale; ContentScaleController layers the
+        // user's persisted text/padding adjustment on top of it, clamped back toward fitScale itself.
+        double contentScale = ContentScaleController.resolveContentScale(fitScale, persistedContentScale());
+        int basePadding = (int) Math.round(PADDING * fitScale);
+        int padding = Math.round(ContentScaleController.resolvePadding(basePadding, persistedPaddingScale()));
+        int lineHeight = Math.max(1, (int) Math.round(LINE_HEIGHT * contentScale));
+
+        NourishedClientConfig cc = NourishedClientConfig.get();
         int panelRgb = MarieColors.resolveColor(COLORS.background());
-        int panelColor = HudDrawHelpers.panelColorWithOpacity(
-                panelRgb, NourishedClientConfig.get().activityLogHudBackgroundOpacity());
+        int panelColor = MarieColors.withOpacity(
+                MarieColors.shade(panelRgb, cc.activityLogHudBackgroundShade()), cc.activityLogHudBackgroundOpacity());
         context.fillRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), panelColor);
-        context.drawBorder(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1,
-                context.theme().color(ThemeKey.BORDER));
+        int borderColor = MarieColors.withOpacity(
+                MarieColors.shade(context.theme().color(ThemeKey.BORDER), cc.activityLogHudBorderShade()), cc.activityLogHudBorderOpacity());
+        context.drawBorder(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, borderColor);
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             int defaultTextColor = MarieColors.resolveColor(COLORS.text());
-            int maxRows = Math.max(0, (bounds.height() - PADDING * 2) / LINE_HEIGHT);
+            int maxRows = Math.max(0, (bounds.height() - padding * 2) / lineHeight);
             int visible = Math.min(rows.size(), maxRows);
-            int y = bounds.y() + PADDING;
+            int y = bounds.y() + padding;
             for (int i = 0; i < visible; i++) {
                 ActivityLogClientBuffer.Row row = rows.get(i);
                 String line = row.description() + " x" + row.count();
                 int color = ActivityDrivenNutrientRegistry.getColor(row.moduleId())
                         .orElse(defaultTextColor);
-                context.drawText(line, bounds.x() + PADDING, y, color, 1f);
-                y += LINE_HEIGHT;
+                context.drawText(line, bounds.x() + padding, y, color, (float) contentScale);
+                y += lineHeight;
             }
         } finally {
             context.popClip();
         }
     }
 
+    /** Carries forward the existing persisted contentScale/paddingScale so a drag/resize commit never resets the user's text-scale or padding adjustment. */
     private void commit(Bounds bounds) {
-        boolean widthManual = existingWidthManual() || drag.lastCommitAffectedWidth();
-        boolean heightManual = existingHeightManual() || drag.lastCommitAffectedHeight();
+        var base = UiStatePersistence.get().load(PANEL_ID);
+        boolean widthManual = base.map(ComponentState::widthManual).orElse(false) || drag.lastCommitAffectedWidth();
+        boolean heightManual = base.map(ComponentState::heightManual).orElse(false) || drag.lastCommitAffectedHeight();
+        double contentScale = base.map(ComponentState::contentScale).orElse(ComponentState.DEFAULT_CONTENT_SCALE);
+        double paddingScale = base.map(ComponentState::paddingScale).orElse(ComponentState.DEFAULT_PADDING_SCALE);
         UiStatePersistence.get().save(PANEL_ID, new ComponentState(
                 bounds.x(), bounds.y(), bounds.width(), bounds.height(), false,
-                widthManual, heightManual, 0));
+                widthManual, heightManual, 0, contentScale, paddingScale));
     }
 
-    private static boolean existingWidthManual() {
-        return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::widthManual).orElse(false);
+    /** This panel's persisted text-scale multiplier — see {@link ContentScaleController#contentScaleAdjustment}. */
+    private static double persistedContentScale() {
+        return scaleController().contentScaleAdjustment(PANEL_ID);
     }
 
-    private static boolean existingHeightManual() {
-        return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::heightManual).orElse(false);
+    /** This panel's persisted padding multiplier — see {@link ContentScaleController#paddingScaleAdjustment}. */
+    private static double persistedPaddingScale() {
+        return scaleController().paddingScaleAdjustment(PANEL_ID);
     }
 
     @Override
@@ -215,7 +252,15 @@ public final class ActivityLogHudPanel implements MarieComponent {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         Bounds bounds = resolvedBounds(currentRows().size());
+        if (scaleController().onClick(PANEL_ID, button, mouseX, mouseY, bounds)) {
+            return true;
+        }
         return drag.mouseClicked((int) mouseX, (int) mouseY, bounds);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        return scaleController().handleScroll(PANEL_ID, scrollY);
     }
 
     @Override
@@ -252,6 +297,24 @@ public final class ActivityLogHudPanel implements MarieComponent {
             context.drawEdgeHandle(strip.x(), strip.y(), strip.width(), strip.height(), mouse[0], mouse[1],
                     drag.isEdgeHovered(mouse[0], mouse[1], bounds, edge), drag.isEdgeActive(edge));
         }
+        drawScaleOverlay(context, bounds);
+    }
+
+    /** While the panel's {@link ContentScaleController} has an active mode, shows the current text-scale or padding percentage below the box so scroll-wheel adjustments are visible — same look as {@code DietScreenEditTarget#drawZoomLabel}. */
+    private void drawScaleOverlay(RenderContext context, Bounds bounds) {
+        ContentScaleController.Mode mode = scaleController().activeMode(PANEL_ID);
+        String label = switch (mode) {
+            case TEXT_SCALE -> "TEXT SCALE " + Math.round(persistedContentScale() * 100) + "%";
+            case PADDING -> "PADDING " + Math.round(persistedPaddingScale() * 100) + "%";
+            case NONE -> null;
+        };
+        if (label == null) {
+            return;
+        }
+        int lx = bounds.x() + 4;
+        int ly = bounds.y() + bounds.height() + 6;
+        context.drawText(label, lx + 1, ly + 1, 0xFF000000, 0.75f);
+        context.drawText(label, lx, ly, 0xFFFFFFFF, 0.75f);
     }
 
     private Bounds liveOrDefault(int mx, int my, Bounds fallback) {

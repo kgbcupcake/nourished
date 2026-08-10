@@ -48,7 +48,13 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue enableActivityLogHud;
     private final ModConfigSpec.BooleanValue enableCalorieHistoryHud;
     private final ModConfigSpec.DoubleValue calorieHudBackgroundOpacity;
+    private final ModConfigSpec.DoubleValue calorieHudBorderOpacity;
+    private final ModConfigSpec.DoubleValue calorieHudBackgroundShade;
+    private final ModConfigSpec.DoubleValue calorieHudBorderShade;
     private final ModConfigSpec.DoubleValue activityLogHudBackgroundOpacity;
+    private final ModConfigSpec.DoubleValue activityLogHudBorderOpacity;
+    private final ModConfigSpec.DoubleValue activityLogHudBackgroundShade;
+    private final ModConfigSpec.DoubleValue activityLogHudBorderShade;
     private final ModConfigSpec.ConfigValue<List<? extends String>> dietBarOrder;
     private final ModConfigSpec.DoubleValue dietScale;
     private final ModConfigSpec.IntValue dietOffsetX;
@@ -134,10 +140,46 @@ public final class NourishedClientConfig {
                 0.0d,
                 1.0d
         );
+        calorieHudBorderOpacity = builder.defineInRange(
+                "calorieHudBorderOpacity",
+                ConfigDefaultsLoader.getDouble(defaults, "calorieHudBorderOpacity", 1.0d),
+                0.0d,
+                1.0d
+        );
+        calorieHudBackgroundShade = builder.defineInRange(
+                "calorieHudBackgroundShade",
+                ConfigDefaultsLoader.getDouble(defaults, "calorieHudBackgroundShade", 0.0d),
+                -1.0d,
+                1.0d
+        );
+        calorieHudBorderShade = builder.defineInRange(
+                "calorieHudBorderShade",
+                ConfigDefaultsLoader.getDouble(defaults, "calorieHudBorderShade", 0.0d),
+                -1.0d,
+                1.0d
+        );
         activityLogHudBackgroundOpacity = builder.defineInRange(
                 "activityLogHudBackgroundOpacity",
                 ConfigDefaultsLoader.getDouble(defaults, "activityLogHudBackgroundOpacity", DEFAULT_HUD_BACKGROUND_OPACITY),
                 0.0d,
+                1.0d
+        );
+        activityLogHudBorderOpacity = builder.defineInRange(
+                "activityLogHudBorderOpacity",
+                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudBorderOpacity", 1.0d),
+                0.0d,
+                1.0d
+        );
+        activityLogHudBackgroundShade = builder.defineInRange(
+                "activityLogHudBackgroundShade",
+                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudBackgroundShade", 0.0d),
+                -1.0d,
+                1.0d
+        );
+        activityLogHudBorderShade = builder.defineInRange(
+                "activityLogHudBorderShade",
+                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudBorderShade", 0.0d),
+                -1.0d,
                 1.0d
         );
         dietBarOrder = builder.defineListAllowEmpty(
@@ -476,12 +518,60 @@ public final class NourishedClientConfig {
         calorieHudBackgroundOpacity.set(value);
     }
 
+    public double calorieHudBorderOpacity() {
+        return calorieHudBorderOpacity.get();
+    }
+
+    public void setCalorieHudBorderOpacity(double value) {
+        calorieHudBorderOpacity.set(value);
+    }
+
+    public double calorieHudBackgroundShade() {
+        return calorieHudBackgroundShade.get();
+    }
+
+    public void setCalorieHudBackgroundShade(double value) {
+        calorieHudBackgroundShade.set(value);
+    }
+
+    public double calorieHudBorderShade() {
+        return calorieHudBorderShade.get();
+    }
+
+    public void setCalorieHudBorderShade(double value) {
+        calorieHudBorderShade.set(value);
+    }
+
     public double activityLogHudBackgroundOpacity() {
         return activityLogHudBackgroundOpacity.get();
     }
 
     public void setActivityLogHudBackgroundOpacity(double value) {
         activityLogHudBackgroundOpacity.set(value);
+    }
+
+    public double activityLogHudBorderOpacity() {
+        return activityLogHudBorderOpacity.get();
+    }
+
+    public void setActivityLogHudBorderOpacity(double value) {
+        activityLogHudBorderOpacity.set(value);
+    }
+
+    public double activityLogHudBackgroundShade() {
+        return activityLogHudBackgroundShade.get();
+    }
+
+    public void setActivityLogHudBackgroundShade(double value) {
+        activityLogHudBackgroundShade.set(value);
+    }
+
+    public double activityLogHudBorderShade() {
+        return activityLogHudBorderShade.get();
+    }
+
+    public void setActivityLogHudBorderShade(double value) {
+        activityLogHudBorderShade.set(value);
     }
 
     /**

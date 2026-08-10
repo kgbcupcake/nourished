@@ -38,6 +38,9 @@ public final class NourishedHUD {
     private NourishedHUD() {}
 
     public static void onRenderGuiPost(RenderGuiEvent.Post event) {
+        if (Minecraft.getInstance().options.hideGui) {
+            return;
+        }
         if (!FeatureFlagCache.enableHUD()) {
             return;
         }

@@ -78,6 +78,39 @@ public final class ActivityDrivenNutrientCategory {
                         client::setActivityLogHudBackgroundOpacity
                 )
         );
+        hudEntries.add(
+                buildFloatSlider(
+                        eb,
+                        Component.translatable("config.nourished.activityLogHudBorderOpacity"),
+                        (float) client.activityLogHudBorderOpacity(),
+                        0.0f,
+                        1.0f,
+                        1.0f,
+                        client::setActivityLogHudBorderOpacity
+                )
+        );
+        hudEntries.add(
+                buildDoubleSlider(
+                        eb,
+                        Component.translatable("config.nourished.activityLogHudBackgroundShade"),
+                        client.activityLogHudBackgroundShade(),
+                        -1.0d,
+                        1.0d,
+                        0.0d,
+                        client::setActivityLogHudBackgroundShade
+                )
+        );
+        hudEntries.add(
+                buildDoubleSlider(
+                        eb,
+                        Component.translatable("config.nourished.activityLogHudBorderShade"),
+                        client.activityLogHudBorderShade(),
+                        -1.0d,
+                        1.0d,
+                        0.0d,
+                        client::setActivityLogHudBorderShade
+                )
+        );
         for (ColorHexRowWidget row : ColorPairRowGroup.buildRows(
                 ActivityLogHudPanel.COLORS,
                 Component.translatable("config.nourished.activityLogHudBackgroundColor"),

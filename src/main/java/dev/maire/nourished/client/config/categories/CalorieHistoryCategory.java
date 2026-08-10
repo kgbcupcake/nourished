@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.addReloadButton;
+import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.buildDoubleSlider;
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.buildFloatSlider;
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.isMultiplayer;
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.moduleToggleDescription;
@@ -93,6 +94,39 @@ public final class CalorieHistoryCategory {
                         1.0f,
                         204f / 255f,
                         client::setCalorieHudBackgroundOpacity
+                )
+        );
+        category.addEntry(
+                buildFloatSlider(
+                        eb,
+                        Component.translatable("config.nourished.calorieHudBorderOpacity"),
+                        (float) client.calorieHudBorderOpacity(),
+                        0.0f,
+                        1.0f,
+                        1.0f,
+                        client::setCalorieHudBorderOpacity
+                )
+        );
+        category.addEntry(
+                buildDoubleSlider(
+                        eb,
+                        Component.translatable("config.nourished.calorieHudBackgroundShade"),
+                        client.calorieHudBackgroundShade(),
+                        -1.0d,
+                        1.0d,
+                        0.0d,
+                        client::setCalorieHudBackgroundShade
+                )
+        );
+        category.addEntry(
+                buildDoubleSlider(
+                        eb,
+                        Component.translatable("config.nourished.calorieHudBorderShade"),
+                        client.calorieHudBorderShade(),
+                        -1.0d,
+                        1.0d,
+                        0.0d,
+                        client::setCalorieHudBorderShade
                 )
         );
         for (ColorHexRowWidget row : ColorPairRowGroup.buildRows(

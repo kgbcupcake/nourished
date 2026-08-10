@@ -8,6 +8,7 @@ import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.component.SelfPositioningModule;
+import dev.marie.framework.ui.edit.ContentScaleController;
 import dev.marie.framework.ui.RenderContext;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
@@ -25,6 +26,9 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
     private static final int HEADER_LOCAL_HEIGHT = 20;
     private static final int BODY_LOCAL_HEIGHT = 20;
     private static final int BASE_BOX_LOCAL_HEIGHT = HEADER_LOCAL_HEIGHT + BODY_LOCAL_HEIGHT;
+
+    /** Reference local-unit padding used to derive the user's padding-adjustment range — see {@link ContentScaleController#resolvePadding}. */
+    private static final double BASE_PADDING_LOCAL = 2.0d;
 
     private final DietLayout.Layout layout;
     private final int startLocalY;
@@ -115,8 +119,9 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         // clamped to a flat [fitScale*0.5, fitScale*3.0] range (see zoomedTextIconScale's javadoc) —
         // real containment against the box's own edges comes from this box's own pushClip, not from
         // this range.
-        float scale = DietScreenModules.zoomedTextIconScale(contentScale, widthScale, heightScale, DietScreenPersistence.contentScale(ID));
-        support.begin(bounds, contentScale);
+        float scale = ContentScaleController.resolveContentScale(contentScale, DietScreenPersistence.contentScale(ID));
+        double paddingLocal = ContentScaleController.resolvePadding(BASE_PADDING_LOCAL, DietScreenPersistence.paddingScale(ID)) - BASE_PADDING_LOCAL;
+        support.begin(bounds, contentScale, paddingLocal);
 
         support.drawOuterBox(context, bounds.width(), bounds.height(), cc);
 

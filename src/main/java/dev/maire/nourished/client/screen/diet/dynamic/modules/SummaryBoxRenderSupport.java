@@ -27,23 +27,31 @@ final class SummaryBoxRenderSupport {
     private final int startLocalY;
     private Bounds anchorBounds;
     private double contentScale = 1.0d;
+    private double paddingLocal = 0.0d;
 
     SummaryBoxRenderSupport(int startLocalY) {
         this.startLocalY = startLocalY;
     }
 
-    /** Call once at the top of render(), before any sx/sy/sd/drawText/drawItem/drawOuterBox use this frame. */
-    void begin(Bounds anchorBounds, double contentScale) {
+    /**
+     * Call once at the top of render(), before any sx/sy/sd/drawText/drawItem/drawOuterBox use this
+     * frame. {@code paddingLocal} is the user's padding adjustment, in local units, added to every
+     * content position (not to {@link #sd}, which sizes rather than positions) before scaling — see
+     * {@code ContentScaleController#resolvePadding}. It never shifts {@link #drawOuterBox}, which
+     * draws from {@code anchorBounds} directly.
+     */
+    void begin(Bounds anchorBounds, double contentScale, double paddingLocal) {
         this.anchorBounds = anchorBounds;
         this.contentScale = contentScale;
+        this.paddingLocal = paddingLocal;
     }
 
     int sx(int localX) {
-        return anchorBounds.x() + (int) Math.round(localX * contentScale);
+        return anchorBounds.x() + (int) Math.round((localX + paddingLocal) * contentScale);
     }
 
     int sy(int localY) {
-        return anchorBounds.y() + (int) Math.round((localY - startLocalY) * contentScale);
+        return anchorBounds.y() + (int) Math.round((localY - startLocalY + paddingLocal) * contentScale);
     }
 
     int sd(int localDim) {

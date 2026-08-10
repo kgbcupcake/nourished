@@ -8,7 +8,6 @@ import dev.marie.framework.ui.component.SelfPositioningModule;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLeftColumnComponent;
 import dev.maire.nourished.core.Nourished;
-import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,46 +60,7 @@ public final class DietScreenModules {
      */
     static final int HEADER_TOP_PADDING_LOCAL = 2;
 
-    /**
-     * Flat ceiling multiplier of {@code fitScale} for {@link #zoomedTextIconScale}. Containment of
-     * oversized zoomed content is now the job of each sub-box's own {@code context.pushClip(bounds.x(),
-     * bounds.y(), bounds.width(), bounds.height())} around its full render — see {@code
-     * RecentMealsComponent#render}/{@code EatMoreComponent#render} — so this ceiling no longer has to
-     * be provably safe per-axis the way {@code max(widthScale, heightScale)} tried (and failed) to be.
-     * A flat multiplier instead gives every box a real, resize-independent zoom range: at a box's
-     * natural (never manually resized) aspect ratio, {@code widthScale} and {@code heightScale} sit
-     * within a few percent of each other, so an axis-derived ceiling collapses to barely above {@code
-     * fitScale} and zoom-in is effectively dead (this was the actual cause of Eat More's "scroll does
-     * nothing" — its default box shape gave it almost no headroom under the old formula). 3.0x pairs
-     * with the {@code fitScale * 0.5} floor below for a 6x total dynamic range, usable on any box
-     * regardless of whether it's ever been resized.
-     */
-    private static final double ZOOM_CEILING_MULTIPLIER = 3.0d;
-
     private DietScreenModules() {}
-
-    /**
-     * Combines a box's structural fit-scale (the {@code Math.min(widthScale, heightScale)} already
-     * computed by every left-column sub-box's {@code render()}) with its persisted per-box zoom
-     * multiplier, for text/icon draw calls only — never for outer-box sizing or {@code sx/sy/sd}
-     * coordinate mapping, which stay driven by {@code fitScale} alone so zoom can't grow the box
-     * itself. Live-clamped every render to {@code [fitScale * 0.5, fitScale * ZOOM_CEILING_MULTIPLIER]}
-     * — a fixed range around each box's own current fit, not derived from {@code widthScale}/{@code
-     * heightScale} at all. Actual on-screen containment comes from each caller's {@code pushClip}
-     * around its full bounds, not from this range; truncation of drawn text is a cosmetic nicety on
-     * top (an ellipsis instead of a mid-glyph scissor cut), not what keeps content inside the box.
-     */
-    public static float zoomedTextIconScale(double fitScale, double widthScale, double heightScale, double zoomMultiplier) {
-        // The floor is deliberately NOT min(widthScale, heightScale) — that expression is exactly how
-        // fitScale itself is defined (see every sub-box's own `contentScale = Math.min(widthScale,
-        // heightScale)`), so using it here pinned the floor to fitScale's own value and made scrolling
-        // the multiplier below 1.0 a permanent no-op. Shrinking below fitScale is always safe (it only
-        // makes content smaller than the box, never clips it), so the floor is a real fraction of
-        // fitScale instead, giving scroll-down an actual effect.
-        double min = fitScale * 0.5d;
-        double max = fitScale * ZOOM_CEILING_MULTIPLIER;
-        return (float) Mth.clamp(fitScale * zoomMultiplier, min, max);
-    }
 
     public static void registerAll() {
         // Calories/Balance registered before RecentMeals/EatMore/ActiveEffects to preserve the
