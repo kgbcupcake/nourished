@@ -150,12 +150,13 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         double widthScale = bounds.width() / (double) bw;
         double heightScale = bounds.height() / (double) effectsBoxH;
         this.contentScale = Math.min(widthScale, heightScale);
-        // contentScale (fitScale) still drives sx/sy unchanged below; the persisted zoom multiplier
-        // only affects the size passed to the header/line text draw calls. Clamped to a flat
-        // [fitScale*0.5, fitScale*3.0] range (see zoomedTextIconScale's javadoc) — real containment
-        // against the box's own edges comes from the pushClip(bounds...) below, not from this range.
-        float scale = ContentScaleController.resolveContentScale(contentScale, DietScreenPersistence.contentScale(ID));
-        this.paddingLocal = ContentScaleController.resolvePadding(BASE_PADDING_LOCAL, DietScreenPersistence.paddingScale(ID)) - BASE_PADDING_LOCAL;
+        // contentScale (fitScale) still drives sx/sy unchanged below; header/line render scale is the
+        // user's persisted per-box adjustment alone now, sanity-clamped only — no longer capped by
+        // contentScale. Real containment against the box's own edges comes from the
+        // pushClip(bounds...) below.
+        float scale = ContentScaleController.resolveContentScale(DietScreenPersistence.contentScale(ID));
+        double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
+        this.paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         // Header-to-first-line and line-to-line advance must grow by the same ratio zoom grows text
         // draw size by — otherwise bigger zoomed lines visually collide into the next line's still-
         // unzoomed vertical slot, same bug just fixed in RecentMealsComponent (see its render() for

@@ -108,6 +108,19 @@ public final class NourishedHUD {
         return marieEditModeController;
     }
 
+    /**
+     * Public so {@code ClientEventRegistrar} can register this same singleton as this HUD's
+     * {@code EditModeCoordinator} group-capable target — mirrors how {@code CalorieHudScreen}/
+     * {@code ActivityLogHudPanel} expose their own {@code instance()}. Delegates to {@link
+     * #marieEditModeController()}'s existing lazy-init instead of building a second {@link
+     * HudEditTarget} independently, so both entry points (the H keybind and the coordinator's
+     * group) always share the exact same target instance.
+     */
+    public static HudEditTarget editTarget() {
+        marieEditModeController();
+        return marieEditTarget;
+    }
+
     /** Accessor for {@link HudEditTarget}'s render path, which reuses the same lerped values as the normal HUD render. */
     public static Map<String, Float> currentDisplayValues() {
         return displayValues;

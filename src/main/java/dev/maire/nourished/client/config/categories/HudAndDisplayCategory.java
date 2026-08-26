@@ -167,6 +167,32 @@ public final class HudAndDisplayCategory {
                         })
                         .build()
         );
+        category.addEntry(
+                eb.startKeyCodeField(
+                                Component.translatable("config.nourished.editAllHudsHotkey"),
+                                NourishedKeys.EDIT_ALL_HUDS.getKey()
+                        )
+                        .setDefaultValue(InputConstants.UNKNOWN)
+                        .setKeySaveConsumer(key -> {
+                            NourishedKeys.EDIT_ALL_HUDS.setKey(key);
+                            KeyMapping.resetMapping();
+                            Minecraft.getInstance().options.save();
+                        })
+                        .build()
+        );
+        category.addEntry(
+                eb.startKeyCodeField(
+                                Component.translatable("config.nourished.commandCenterHotkey"),
+                                NourishedKeys.OPEN_COMMAND_CENTER.getKey()
+                        )
+                        .setDefaultValue(InputConstants.UNKNOWN)
+                        .setKeySaveConsumer(key -> {
+                            NourishedKeys.OPEN_COMMAND_CENTER.setKey(key);
+                            KeyMapping.resetMapping();
+                            Minecraft.getInstance().options.save();
+                        })
+                        .build()
+        );
         category.addEntry(new HudNutrientColorsSectionHeaderEntry());
         List<ColorHexRowWidget> nutrientColorRows = new ArrayList<>();
         for (String valueKey : NutrientRegistry.getKeys()) {

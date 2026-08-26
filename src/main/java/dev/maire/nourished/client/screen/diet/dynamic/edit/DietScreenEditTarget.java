@@ -10,6 +10,7 @@ import dev.marie.framework.ui.edit.ContentScaleController;
 import dev.marie.framework.ui.edit.DraggableResizable;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
+import dev.marie.framework.ui.scaleconfig.ScaleConfigPanel;
 import dev.maire.nourished.client.screen.diet.DietScreen;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietPanelLayoutResolver;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import static dev.maire.nourished.client.screen.diet.dynamic.layout.DietSubBoxConstraints.SUMMARY_BOX_LOCAL_WIDTH;
 import static dev.maire.nourished.client.screen.diet.dynamic.layout.DietSubBoxConstraints.liveSubBoxConstraint;
@@ -46,6 +48,15 @@ public final class DietScreenEditTarget implements MarieComponent {
 
     private final Minecraft mc;
     private final Runnable exitEditMode;
+    /**
+     * Same {@link ScaleConfigPanel} instance and live visibility state {@link DietScreen} owns —
+     * not a second panel — so the sliders shown here while edit mode has swapped {@code mc.screen}
+     * to {@link dev.marie.framework.ui.edit.EditOverlayScreen} stay in sync with the persisted
+     * state the player is actually editing, and with what {@link DietScreen#render} shows again
+     * once edit mode exits.
+     */
+    private final ScaleConfigPanel scaleConfigPanel;
+    private final BooleanSupplier scaleConfigVisible;
     private final DraggableResizable panelDrag;
     private final DraggableResizable caloriesDrag;
     private final DraggableResizable balanceDrag;
@@ -68,9 +79,11 @@ public final class DietScreenEditTarget implements MarieComponent {
     private Bounds lastEatMoreResolvedBounds;
     private Bounds lastActiveEffectsResolvedBounds;
 
-    public DietScreenEditTarget(Minecraft mc, Runnable exitEditMode) {
+    public DietScreenEditTarget(Minecraft mc, Runnable exitEditMode, ScaleConfigPanel scaleConfigPanel, BooleanSupplier scaleConfigVisible) {
         this.mc = mc;
         this.exitEditMode = exitEditMode;
+        this.scaleConfigPanel = scaleConfigPanel;
+        this.scaleConfigVisible = scaleConfigVisible;
 
         DietLayout.Layout baseLayout = DietLayout.compute(mc);
         List<MarieComponent> baseModules = DietScreenModules.build(baseLayout, DietLeftColumnComponent.computeHeaderEndLocalY());
@@ -166,6 +179,9 @@ public final class DietScreenEditTarget implements MarieComponent {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (scaleConfigVisible.getAsBoolean() && scaleConfigPanel.mouseClicked(mouseX, mouseY, button)) {
+            return true;
+        }
         int mx = (int) mouseX;
         int my = (int) mouseY;
         DietLayout.Layout layout = resolvedPanelLayout(mc);
@@ -230,6 +246,9 @@ public final class DietScreenEditTarget implements MarieComponent {
      */
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (scaleConfigVisible.getAsBoolean() && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+            return true;
+        }
         if (scrollY == 0) {
             return false;
         }
@@ -404,6 +423,10 @@ public final class DietScreenEditTarget implements MarieComponent {
 
         boolean toggleHovered = DietScreen.isMouseOverEditModeToggle(matchedPanelLayout, mx, my);
         DietScreen.drawEditModeToggle(context, matchedPanelLayout, true, toggleHovered);
+
+        if (scaleConfigVisible.getAsBoolean()) {
+            scaleConfigPanel.render(context, new Bounds(0, 0, context.screenWidth(), context.screenHeight()));
+        }
     }
 
     private static void drawHandle(RenderContext context, DraggableResizable drag, Bounds bounds, int mx, int my, boolean withBottomLeftCorner) {

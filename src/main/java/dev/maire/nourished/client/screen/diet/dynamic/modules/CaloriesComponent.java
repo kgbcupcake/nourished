@@ -114,13 +114,13 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         double widthScale = bounds.width() / (double) SUMMARY_BOX_LOCAL_WIDTH;
         double heightScale = bounds.height() / (double) boxLocalHeight;
         this.contentScale = Math.min(widthScale, heightScale);
-        // contentScale (fitScale) still drives sx/sy/sd/outer-box sizing unchanged; the persisted
-        // per-box zoom multiplier only affects the size passed to text/icon draw calls below, and is
-        // clamped to a flat [fitScale*0.5, fitScale*3.0] range (see zoomedTextIconScale's javadoc) —
-        // real containment against the box's own edges comes from this box's own pushClip, not from
-        // this range.
-        float scale = ContentScaleController.resolveContentScale(contentScale, DietScreenPersistence.contentScale(ID));
-        double paddingLocal = ContentScaleController.resolvePadding(BASE_PADDING_LOCAL, DietScreenPersistence.paddingScale(ID)) - BASE_PADDING_LOCAL;
+        // contentScale (fitScale) still drives sx/sy/sd/outer-box sizing unchanged; text/icon render
+        // scale is the user's persisted per-box adjustment alone now, sanity-clamped only — no longer
+        // capped by contentScale. Real containment against the box's own edges comes from this box's
+        // own pushClip below.
+        float scale = ContentScaleController.resolveContentScale(DietScreenPersistence.contentScale(ID));
+        double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
+        double paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         support.begin(bounds, contentScale, paddingLocal);
 
         support.drawOuterBox(context, bounds.width(), bounds.height(), cc);

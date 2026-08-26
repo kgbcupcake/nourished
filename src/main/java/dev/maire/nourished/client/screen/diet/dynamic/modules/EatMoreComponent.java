@@ -149,15 +149,13 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         double widthScale = bounds.width() / (double) bw;
         double heightScale = bounds.height() / (double) Math.max(1, naturalTotalHeight);
         this.contentScale = Math.min(widthScale, heightScale);
-        // contentScale (fitScale) still drives sx/sy unchanged below; the persisted zoom multiplier
-        // is applied here, at draw time, only to the size passed to the header/icon draw calls —
-        // there's no construction-time scale to fold it into, unlike eatBoxH's use of
-        // layout.eatMoreScale() above, which governs the box's structural height instead. Clamped to
-        // a flat [fitScale*0.5, fitScale*3.0] range (see zoomedTextIconScale's javadoc) — real
-        // containment against the box's own edges comes from the pushClip(bounds...) below, not from
-        // this range, so it no longer needs to be derived from widthScale/heightScale.
-        float scale = ContentScaleController.resolveContentScale(contentScale, DietScreenPersistence.contentScale(ID));
-        this.paddingLocal = ContentScaleController.resolvePadding(BASE_PADDING_LOCAL, DietScreenPersistence.paddingScale(ID)) - BASE_PADDING_LOCAL;
+        // contentScale (fitScale) still drives sx/sy unchanged below; header/icon render scale is the
+        // user's persisted per-box adjustment alone now, sanity-clamped only — no longer capped by
+        // contentScale. Real containment against the box's own edges comes from the
+        // pushClip(bounds...) below.
+        float scale = ContentScaleController.resolveContentScale(DietScreenPersistence.contentScale(ID));
+        double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
+        this.paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
 
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
         int y = startLocalY;

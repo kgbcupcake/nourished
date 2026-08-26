@@ -20,7 +20,10 @@ public final class NourishedTrackingData extends TrackingData {
      * dev.maire.nourished.core.handler.NourishedFoodTriggerHandler} when a meal actually changed
      * something, never on a no-op eat.
      */
-    public SyncDietDeltaPayload toDeltaPayload(List<String> recentFoodIds) {
+    public SyncDietDeltaPayload toDeltaPayload(
+            List<String> recentFoodIds,
+            SyncDietDeltaPayload.FoodEatenDelta foodEatenDelta
+    ) {
         List<String> neglectedCategories = getMostNeglectedCategories(2);
         List<String> fatiguedFamilies = getMostFatiguedFamilies(2, lastTickTime);
         return new SyncDietDeltaPayload(
@@ -36,7 +39,8 @@ public final class NourishedTrackingData extends TrackingData {
                 Map.copyOf(sourceMemory),
                 Map.copyOf(categoryMemory),
                 Map.copyOf(familyMemory),
-                lastTickTime
+                lastTickTime,
+                foodEatenDelta
         );
     }
 }

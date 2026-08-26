@@ -1,0 +1,8 @@
+{
+  "tracker_id": "nourished:activity/swim_distance",
+  "goal": 500.0,
+  "scope": "LIFETIME",
+  "reward_effect_id": "minecraft:water_breathing",
+  "amplifier": 0,
+  "reward_duration": 400
+}

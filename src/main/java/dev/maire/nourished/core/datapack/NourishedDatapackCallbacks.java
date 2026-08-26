@@ -4,6 +4,8 @@ import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.marie.framework.api.marieapi.MarieAPI;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.api.progression.MilestoneDefinition;
+import dev.marie.framework.api.progression.TrackerMilestoneDefinition;
+import dev.marie.framework.api.registry.TrackerMilestoneRegistry;
 import dev.marie.framework.api.source.SourcePairSynergy;
 import dev.marie.framework.api.effects.ThresholdEffect;
 import dev.marie.framework.api.value.ValueDefinition;
@@ -41,6 +43,11 @@ public final class NourishedDatapackCallbacks implements MarieDataLoader.Callbac
     @Override
     public void registerMilestone(MilestoneDefinition def) {
         MarieAPI.registerMilestone(def);
+    }
+
+    @Override
+    public void registerTrackerMilestone(TrackerMilestoneDefinition def) {
+        TrackerMilestoneRegistry.register(def);
     }
 
     @Override

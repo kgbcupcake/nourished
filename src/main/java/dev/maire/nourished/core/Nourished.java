@@ -27,6 +27,8 @@ import dev.maire.nourished.client.config.NourishedConfigScreen;
 import dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen;
 import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientRegistry;
+import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityTrackerIds;
+import dev.maire.nourished.modules.activity_driven_nutrient.handler.ActivityDistanceTickListener;
 import dev.maire.nourished.modules.activity_driven_nutrient.handler.ActivityModuleDispatcher;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityModuleRegistry;
 import dev.maire.nourished.modules.activity_driven_nutrient.modules.CombatModule;
@@ -148,6 +150,7 @@ public class Nourished {
         ActivityModuleRegistry.register(new CombatModule());
         NeoForge.EVENT_BUS.register(new ActivityModuleDispatcher());
         NeoForge.EVENT_BUS.register(new StarvationModule());
+        NeoForge.EVENT_BUS.register(new ActivityDistanceTickListener());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
             event.enqueueWork(() -> {
                 // Runs after MarieBootstrap.onCommonSetup → RegistryLifecycleManager.loadAll(), so
@@ -158,6 +161,7 @@ public class Nourished {
                 NutrientRegistry.syncAndFreeze();
                 ModCompat.discoverUnknownMods();
                 registerCalorieTracker();
+                ActivityTrackerIds.registerAll();
                 LOGGER.info("[Nourished] Starting AutoCompatDiscovery...");
                 try (var scope = MarieAPIState.openForDatapackReload()) {
                     AutoCompatDiscovery.discover();
@@ -193,6 +197,7 @@ public class Nourished {
         }
         registerColorDefinitions();
         registerCalorieTracker();
+        ActivityTrackerIds.registerAll();
     }
 
     /**

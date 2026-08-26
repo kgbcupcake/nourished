@@ -8,6 +8,7 @@ import dev.marie.framework.ui.component.AutoGrowPanelContainer;
 import dev.marie.framework.ui.component.ComponentState;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.edit.DraggableResizable;
+import dev.marie.framework.ui.api.SnapRegistry;
 import dev.marie.framework.ui.geometry.Insets;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
@@ -77,6 +78,14 @@ public final class HudEditTarget implements MarieComponent {
                 Anchor.TOP_LEFT, Insets.NONE, Insets.NONE
         );
         panelDrag = new DraggableResizable(this, constraint, (target, bounds) -> commit(bounds));
+        panelDrag.setSnapRegistryId(PANEL_ID);
+        SnapRegistry.register(PANEL_ID, () -> resolvedBounds(this.mc, currentVisibleKeysOrFallback()));
+    }
+
+    /** Same "empty visible keys -> fall back to every registered nutrient" reasoning the constructor uses above, so the {@link SnapRegistry} bounds supplier never resolves an empty-key layout while other components still expect this panel's real on-screen box. */
+    private static List<String> currentVisibleKeysOrFallback() {
+        List<String> keys = currentVisibleKeys();
+        return keys.isEmpty() ? NutrientRegistry.getKeys() : keys;
     }
 
     /**

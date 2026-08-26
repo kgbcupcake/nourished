@@ -180,14 +180,13 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         double widthScale = bounds.width() / (double) bw;
         double heightScale = bounds.height() / (double) recentHeight;
         this.contentScale = Math.min(widthScale, heightScale);
-        // contentScale (fitScale) still drives sx/sy/availableLocalWidth unchanged below; the
-        // persisted zoom multiplier only affects the size passed to text/icon draw calls (header,
-        // icon, row name). zoomedTextIconScale now clamps to a flat [fitScale*0.5, fitScale*3.0]
-        // range rather than deriving from widthScale/heightScale — see its javadoc. Whatever `scale`
-        // comes back, the pushClip(bounds...) below is what actually keeps drawn content from
-        // escaping the box; this clamp just keeps zoom in a usable range, not a containment guarantee.
-        float scale = ContentScaleController.resolveContentScale(contentScale, DietScreenPersistence.contentScale(ID));
-        this.paddingLocal = ContentScaleController.resolvePadding(BASE_PADDING_LOCAL, DietScreenPersistence.paddingScale(ID)) - BASE_PADDING_LOCAL;
+        // contentScale (fitScale) still drives sx/sy/availableLocalWidth unchanged below; text/icon
+        // render scale (header, icon, row name) is the user's persisted per-box adjustment alone now,
+        // sanity-clamped only — no longer capped by contentScale. Whatever `scale` comes back, the
+        // pushClip(bounds...) below is what actually keeps drawn content from escaping the box.
+        float scale = ContentScaleController.resolveContentScale(DietScreenPersistence.contentScale(ID));
+        double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
+        this.paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         // Row spacing (and the header's own gap before the first row) must grow by the same ratio
         // zoom grows text/icon draw size by — otherwise the bigger zoomed glyphs visually collide
         // into the next row's still-unzoomed vertical slot. zoomRatio is exactly 1.0 whenever zoom

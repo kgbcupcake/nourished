@@ -146,7 +146,9 @@ public final class NourishedFoodTriggerHandler {
             // before recordRecentMeal above ran — that sync's snapshot predates this meal, so push
             // one more sync now or the client won't show it until (if ever) the next meal is eaten.
             if (TrackingAttachment.getData(player) instanceof dev.maire.nourished.core.diet.NourishedTrackingData trackingData) {
-                ModNetworking.syncDietDelta(player, trackingData);
+                ModNetworking.SyncDietDeltaPayload.FoodEatenDelta foodEatenDelta =
+                        new ModNetworking.SyncDietDeltaPayload.FoodEatenDelta(itemId, totalDelta, deltas);
+                ModNetworking.syncDietDelta(player, trackingData, foodEatenDelta);
             }
         }
     }

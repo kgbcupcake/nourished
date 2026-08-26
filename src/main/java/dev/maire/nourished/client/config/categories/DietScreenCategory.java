@@ -144,6 +144,19 @@ public final class DietScreenCategory {
                         })
                         .build()
         );
+        category.addEntry(
+                eb.startKeyCodeField(
+                                Component.translatable("config.nourished.dietScaleConfigHotkey"),
+                                NourishedKeys.OPEN_SCALE_CONFIG.getKey()
+                        )
+                        .setDefaultValue(InputConstants.UNKNOWN)
+                        .setKeySaveConsumer(key -> {
+                            NourishedKeys.OPEN_SCALE_CONFIG.setKey(key);
+                            KeyMapping.resetMapping();
+                            Minecraft.getInstance().options.save();
+                        })
+                        .build()
+        );
 
         addReloadButton(category, eb, false);
     }

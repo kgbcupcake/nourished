@@ -2,10 +2,13 @@ package dev.maire.nourished.modules.activity_driven_nutrient.handler;
 
 import dev.marie.framework.api.marie.MarieEvents;
 import dev.marie.framework.config.FeatureFlagCache;
+import dev.marie.framework.tracking.TrackerMilestoneTracker;
+import dev.marie.framework.tracking.tracker.MarieTracking;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientConfig;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityEffectModule;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityModuleRegistry;
+import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityTrackerIds;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -43,6 +46,8 @@ public final class StarvationModule {
                     event.getValueKey(), serverPlayer.getName().getString());
         }
         ActivityNutrientEffects.applyUniformDelta(serverPlayer, -config.starvationPenalty());
+        MarieTracking.incrementTracker(serverPlayer, ActivityTrackerIds.STARVATION_CROSSINGS_ID, 1f);
+        TrackerMilestoneTracker.onTrackerIncremented(serverPlayer, ActivityTrackerIds.STARVATION_CROSSINGS_ID, 1f);
         ActivityEffectLog.record("starvation", serverPlayer.getName().getString(),
                 ActivityEffectLog.formatDelta("Starvation", -config.starvationPenalty()));
     }

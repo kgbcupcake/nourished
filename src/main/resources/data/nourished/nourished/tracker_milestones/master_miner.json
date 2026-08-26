@@ -1,0 +1,9 @@
+{
+  "tracker_id": "nourished:activity/mining_blocks",
+  "goal": 10000.0,
+  "scope": "LIFETIME",
+  "reward_effect_id": "minecraft:haste",
+  "amplifier": 1,
+  "reward_duration": 600,
+  "advancement_id": "nourished:mining/master_miner"
+}

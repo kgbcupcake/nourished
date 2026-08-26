@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.api.marieapi.MarieAPI;
+import dev.marie.framework.api.progression.TrackerMilestoneDefinition;
+import dev.marie.framework.api.registry.TrackerMilestoneRegistry;
 import dev.marie.framework.api.value.ValueDefinition;
 import dev.marie.framework.core.IMarieConfig;
 import dev.marie.framework.curve.math.CurveGrid;
@@ -14,6 +16,7 @@ import dev.maire.nourished.core.nutrition.curve.NutrientCurvePreset;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurveRegistry;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
@@ -112,6 +115,37 @@ public final class NourishedKubeBindings {
         }
 
         NutrientCurveRegistry.registerExternal(nutrientKey, def);
+    }
+
+    public static void registerTrackerMilestone(Map<String, Object> spec) {
+        String id = requireString(spec, "id");
+        TrackerMilestoneDefinition.Builder builder = TrackerMilestoneDefinition.builder(id);
+        builder.trackerId(ResourceLocation.parse(requireString(spec, "trackerId")));
+        builder.goal(asFloat(spec.get("goal")));
+        builder.scope(parseScope(requireString(spec, "scope")));
+        if (spec.containsKey("rewardEffectId")) {
+            builder.rewardEffect(ResourceLocation.parse(String.valueOf(spec.get("rewardEffectId"))));
+        }
+        if (spec.containsKey("rewardAmplifier")) {
+            builder.rewardAmplifier(asInt(spec.get("rewardAmplifier")));
+        }
+        if (spec.containsKey("rewardDuration")) {
+            builder.rewardDuration(asInt(spec.get("rewardDuration")));
+        }
+        if (spec.containsKey("advancementId")) {
+            builder.advancement(ResourceLocation.parse(String.valueOf(spec.get("advancementId"))));
+        }
+        TrackerMilestoneRegistry.register(builder.build());
+    }
+
+    private static TrackerMilestoneDefinition.MilestoneScope parseScope(String scope) {
+        return switch (scope) {
+            case "lifetime" -> TrackerMilestoneDefinition.MilestoneScope.LIFETIME;
+            case "current_period" -> TrackerMilestoneDefinition.MilestoneScope.CURRENT_PERIOD;
+            default -> throw new IllegalArgumentException(
+                    "NourishedAPI.registerTrackerMilestone: unknown scope '" + scope
+                            + "'. Valid scopes: lifetime, current_period.");
+        };
     }
 
     public static float getNutrientLevel(Player player, String nutrientKey) {

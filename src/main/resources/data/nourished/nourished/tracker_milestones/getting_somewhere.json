@@ -1,0 +1,8 @@
+{
+  "tracker_id": "nourished:activity/sprint_distance",
+  "goal": 1000.0,
+  "scope": "LIFETIME",
+  "reward_effect_id": "minecraft:speed",
+  "amplifier": 0,
+  "reward_duration": 200
+}

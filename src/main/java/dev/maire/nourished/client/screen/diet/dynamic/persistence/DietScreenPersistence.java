@@ -50,11 +50,12 @@ public final class DietScreenPersistence {
     }
 
     /**
-     * Storage range for the five Diet Screen sub-boxes' persisted content zoom/padding multipliers —
-     * intentionally much wider than any box's effective on-screen range, since the real ceiling is
-     * the live per-render clamp in {@link ContentScaleController#resolveContentScale}/{@link
-     * ContentScaleController#resolvePadding} against that frame's own single-axis fit scale, not this
-     * bound.
+     * Storage range for the five Diet Screen sub-boxes' persisted content zoom/padding multipliers.
+     * This is the only clamp that applies to them: {@link ContentScaleController#resolveContentScale}/
+     * {@link ContentScaleController#resolvePadding} now just pass the persisted value through
+     * (sanity-clamped against degenerate values, not against box fit), so a box too small for the
+     * player's chosen zoom has its content cut off by that box's own clip region instead of being
+     * capped down.
      */
     private static final double CONTENT_SCALE_MIN = 0.1d;
     private static final double CONTENT_SCALE_MAX = 5.0d;
