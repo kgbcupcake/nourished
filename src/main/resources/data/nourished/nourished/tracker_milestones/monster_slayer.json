@@ -1,0 +1,9 @@
+{
+  "tracker_id": "nourished:activity/combat_kills",
+  "goal": 1000.0,
+  "scope": "LIFETIME",
+  "reward_effect_id": "minecraft:strength",
+  "amplifier": 1,
+  "reward_duration": 600,
+  "advancement_id": "nourished:combat/monster_slayer"
+}

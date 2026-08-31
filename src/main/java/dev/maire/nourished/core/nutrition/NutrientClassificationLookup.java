@@ -74,31 +74,32 @@ public final class NutrientClassificationLookup {
             return override.isPresent() ? Map.copyOf(override.get().nutrients()) : Map.of();
         }
 
-        Map<String, Float> tagMatches = FoodNutritionRegistry.getNutrientTagScores(stack.getItem());
-
-        if (itemId != null) {
-            Map<String, Float> external = SourceRegistry.getExternalClassification(itemId);
-            if (external != null && !external.isEmpty()) {
-                tagMatches = external;
-            }
-        }
-
-        // Intentional stricter gate for the live gameplay path (gate reconciliation decision —
-        // see migration notes): RuntimeResolver natively gates on sourceItemFilter(), which is
-        // broader than this. This check preserves the old RuntimeFoodResolver behavior so live
-        // player-facing values don't change. Do not remove as "leftover duplication."
-        FoodProperties food = stack.getItem().components().get(DataComponents.FOOD);
-        Map<String, Float> resolved = (food == null || food.nutrition() <= 0)
-                ? Map.of()
-                : RuntimeResolver.getInstance().resolve(stack, recipeManager);
+        Map<String, Float> external = itemId != null ? SourceRegistry.getExternalClassification(itemId) : null;
 
         Map<String, Float> classification;
-        if (tagMatches.isEmpty()) {
-            classification = resolved.isEmpty() ? Map.of() : resolved;
-        } else if (resolved.isEmpty()) {
-            classification = tagMatches;
+        if (external != null && !external.isEmpty()) {
+            // External classification is authoritative — skip the resolved/blend step entirely
+            // rather than diluting it with a lower-confidence RuntimeResolver guess.
+            classification = external;
         } else {
-            classification = TagRuntimeBlend.blend(tagMatches, resolved).result();
+            Map<String, Float> tagMatches = FoodNutritionRegistry.getNutrientTagScores(stack.getItem());
+
+            // Intentional stricter gate for the live gameplay path (gate reconciliation decision —
+            // see migration notes): RuntimeResolver natively gates on sourceItemFilter(), which is
+            // broader than this. This check preserves the old RuntimeFoodResolver behavior so live
+            // player-facing values don't change. Do not remove as "leftover duplication."
+            FoodProperties food = stack.getItem().components().get(DataComponents.FOOD);
+            Map<String, Float> resolved = (food == null || food.nutrition() <= 0)
+                    ? Map.of()
+                    : RuntimeResolver.getInstance().resolve(stack, recipeManager);
+
+            if (tagMatches.isEmpty()) {
+                classification = resolved.isEmpty() ? Map.of() : resolved;
+            } else if (resolved.isEmpty()) {
+                classification = tagMatches;
+            } else {
+                classification = TagRuntimeBlend.blend(tagMatches, resolved).result();
+            }
         }
 
         if (override.isEmpty()) {

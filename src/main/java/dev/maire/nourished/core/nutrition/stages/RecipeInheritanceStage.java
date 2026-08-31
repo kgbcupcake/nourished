@@ -115,49 +115,29 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
         }
 
         try {
-            List<ResourceLocation> ingredients = recipeResolver.getIngredients(itemId);
+            List<ResourceLocation> directIngredients = recipeResolver.getIngredients(itemId);
 
-            if (ingredients.isEmpty()) {
+            if (directIngredients.isEmpty()) {
                 ctx.setRecipeFailureReason("NO_RECIPE_FOUND");
                 return null;
             }
 
+            // Walk the whole depth-bounded ingredient graph, not just the direct ingredients: a
+            // weak keyword-fallback match on an intermediate must not hide a strong tag match one
+            // hop further down. collectContributions visits every node in range with no
+            // short-circuit; each surviving node is one confirmed contribution, merged the same
+            // flat way multiple direct ingredients always were.
             Map<String, Float> totalContribs = new HashMap<>();
             int confirmed = 0;
 
-            for (ResourceLocation ingredientId : ingredients) {
-                if (shouldSkipRecipeIngredient(ingredientId)) {
-                    if (Nourished.LOGGER.isDebugEnabled()) {
-                        Nourished.LOGGER.debug("[RecipeInheritance]   ingredient {} → SKIPPED", ingredientId);
-                    }
-                    emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.SKIPPED,
-                            "INGREDIENT_SKIPPED", null, false, "tool/non-food ingredient");
-                    continue;
-                }
+            List<RecipeInheritanceResolver.NodeContribution<Map<String, Float>>> nodes =
+                    recipeResolver.collectContributions(itemId, nodeId -> classifyRecipeNode(nodeId, ctx));
 
-                Item ingredientItem = BuiltInRegistries.ITEM.get(ingredientId);
-                if (ingredientItem == null) {
-                    emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.FAILURE,
-                            "NONE", null, false, "item not found");
-                    continue;
+            for (RecipeInheritanceResolver.NodeContribution<Map<String, Float>> node : nodes) {
+                for (Map.Entry<String, Float> e : node.value().entrySet()) {
+                    totalContribs.merge(e.getKey(), e.getValue(), Float::sum);
                 }
-
-                Map<String, Float> tagMatches = collectConfirmedNutrientTags(ingredientItem, ingredientId, ctx);
-                if (Nourished.LOGGER.isDebugEnabled()) {
-                    Nourished.LOGGER.debug("[RecipeInheritance]   ingredient {} → tags: {} (confirmed: {})",
-                            ingredientId, tagMatches, confirmed);
-                }
-                if (!tagMatches.isEmpty()) {
-                    for (Map.Entry<String, Float> e : tagMatches.entrySet()) {
-                        totalContribs.merge(e.getKey(), e.getValue(), Float::sum);
-                    }
-                    confirmed++;
-                    emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.SUCCESS,
-                            "TAG", tagMatches, false, null);
-                } else {
-                    emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.FAILURE,
-                            "NONE", null, false, "INGREDIENT_UNCLASSIFIED");
-                }
+                confirmed++;
             }
 
             if (Nourished.LOGGER.isDebugEnabled()) {
@@ -165,12 +145,12 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
                         itemId, confirmed, totalContribs);
             }
 
-            if (confirmed < 2 && !(confirmed == 1 && ingredients.size() == 1)) {
+            if (confirmed < 2 && !(confirmed == 1 && directIngredients.size() == 1)) {
                 if (Nourished.LOGGER.isDebugEnabled()) {
                     Nourished.LOGGER.debug("[RecipeInheritance] {} — FAILED: only {} confirmed ingredient(s), need 2",
                             itemId, confirmed);
                 }
-                ctx.setRecipeFailureReason("CONFIRMED_THRESHOLD_FAILED:confirmed=" + confirmed + "/total=" + ingredients.size());
+                ctx.setRecipeFailureReason("CONFIRMED_THRESHOLD_FAILED:confirmed=" + confirmed + "/total=" + directIngredients.size());
                 return null;
             }
 
@@ -239,6 +219,44 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             }
         }
         return false;
+    }
+
+    /**
+     * Per-node classifier handed to {@link RecipeInheritanceResolver#collectContributions}: same
+     * skip / lookup / confirmed-tag logic and trace step the direct-ingredient loop used. Returns
+     * the confirmed nutrient map, or {@code null} when the node contributes nothing — the resolver
+     * still walks through a null node to reach deeper ones.
+     */
+    @Nullable
+    private Map<String, Float> classifyRecipeNode(ResourceLocation ingredientId, StageContext ctx) {
+        if (shouldSkipRecipeIngredient(ingredientId)) {
+            if (Nourished.LOGGER.isDebugEnabled()) {
+                Nourished.LOGGER.debug("[RecipeInheritance]   ingredient {} → SKIPPED", ingredientId);
+            }
+            emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.SKIPPED,
+                    "INGREDIENT_SKIPPED", null, false, "tool/non-food ingredient");
+            return null;
+        }
+
+        Item ingredientItem = BuiltInRegistries.ITEM.get(ingredientId);
+        if (ingredientItem == null) {
+            emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.FAILURE,
+                    "NONE", null, false, "item not found");
+            return null;
+        }
+
+        Map<String, Float> tagMatches = collectConfirmedNutrientTags(ingredientItem, ingredientId, ctx);
+        if (Nourished.LOGGER.isDebugEnabled()) {
+            Nourished.LOGGER.debug("[RecipeInheritance]   ingredient {} → tags: {}", ingredientId, tagMatches);
+        }
+        if (tagMatches.isEmpty()) {
+            emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.FAILURE,
+                    "NONE", null, false, "INGREDIENT_UNCLASSIFIED");
+            return null;
+        }
+        emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.SUCCESS,
+                "TAG", tagMatches, false, null);
+        return tagMatches;
     }
 
     /**

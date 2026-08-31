@@ -4,8 +4,12 @@ import dev.maire.nourished.core.Nourished;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.client.config.state.MarieClientState;
 import dev.marie.framework.client.config.toast.MarieToastManager;
+import dev.marie.framework.ui.api.MarieNotifications;
+import dev.marie.framework.notification.NotificationRequest;
+import dev.marie.framework.notification.TextSegment;
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.marie.framework.tracking.TrackingData;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
@@ -14,12 +18,17 @@ import dev.maire.nourished.modules.RawFood.Gut.GutHealthSyncPayload;
 import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogClientBuffer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @EventBusSubscriber(modid = Nourished.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class ClientNetworkCallbacks {
@@ -115,7 +124,38 @@ public final class ClientNetworkCallbacks {
                     payload.neglectedCategories(),
                     payload.fatiguedFamilies());
             MarieToastManager.onTrackingDelta(payload.nutrients());
+
+            ModNetworking.SyncDietDeltaPayload.FoodEatenDelta foodEatenDelta = payload.foodEatenDelta();
+            if (foodEatenDelta != null) {
+                MarieNotifications.show(buildFoodEatenNotification(foodEatenDelta));
+            }
         });
+    }
+
+    private static final Object FOOD_EATEN_MERGE_KEY = "nourished.food_eaten";
+    private static final int FOOD_EATEN_DURATION_TICKS = 60;
+    private static final int FOOD_EATEN_MERGE_WINDOW_TICKS = 60;
+    private static final int COL_WHITE = 0xFFFFFFFF;
+
+    private static NotificationRequest buildFoodEatenNotification(
+            ModNetworking.SyncDietDeltaPayload.FoodEatenDelta foodEatenDelta
+    ) {
+        List<List<TextSegment>> lines = new ArrayList<>();
+
+        String itemName = BuiltInRegistries.ITEM.getOptional(foodEatenDelta.itemId())
+                .orElse(Items.APPLE)
+                .getDescription()
+                .getString();
+        String calorieText = String.format("%+d Calories", Math.round(foodEatenDelta.calorieDelta()));
+        lines.add(List.of(
+                new TextSegment(itemName + " ", COL_WHITE),
+                new TextSegment(calorieText, HudDrawHelpers.CALORIE_COLOR)));
+
+        return NotificationRequest.builder(lines, FOOD_EATEN_DURATION_TICKS)
+                .mergeKey(FOOD_EATEN_MERGE_KEY)
+                .mergeWindowTicks(FOOD_EATEN_MERGE_WINDOW_TICKS)
+                .mergeFunction((oldContent, newContent) -> newContent)
+                .build();
     }
 
     public static void onGutHealth(GutHealthSyncPayload payload, IPayloadContext context) {

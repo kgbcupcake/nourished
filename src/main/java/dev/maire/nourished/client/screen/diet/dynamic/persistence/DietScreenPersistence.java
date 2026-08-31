@@ -8,7 +8,6 @@ import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.config.NourishedClientConfig;
-import net.minecraft.util.Mth;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,55 +47,14 @@ public final class DietScreenPersistence {
         liveOverrides.clear();
     }
 
-    /**
-     * Storage range for the five Diet Screen sub-boxes' persisted content zoom multipliers —
-     * intentionally much wider than any box's effective on-screen range, since the real ceiling is
-     * the live per-render clamp in {@code DietScreenModules#zoomedTextIconScale} against that
-     * frame's own single-axis fit scale, not this bound.
-     */
-    private static final double CONTENT_SCALE_MIN = 0.1d;
-    private static final double CONTENT_SCALE_MAX = 5.0d;
-
     /** A box's persisted content zoom multiplier — see {@link ComponentState#contentScale()}. Defaults to {@code 1.0} (no zoom) if never set. */
     public static double contentScale(String componentId) {
         return get().load(componentId).map(ComponentState::contentScale).orElse(ComponentState.DEFAULT_CONTENT_SCALE);
     }
 
-    /**
-     * Adjusts {@code componentId}'s persisted content zoom multiplier by {@code delta}, clamped to
-     * {@code [CONTENT_SCALE_MIN, CONTENT_SCALE_MAX]} — the storage ceiling, not the effective
-     * on-screen range (see {@link #CONTENT_SCALE_MIN}). Leaves the box's own position/size fields
-     * untouched: if nothing is persisted yet for this box, one is derived from {@code currentBounds}
-     * (today's natural stacked position) rather than defaulted to zero, since {@link
-     * #resolveRelativeToPanel} reads a saved state's x/y unconditionally regardless of the manual
-     * size flags — a zeroed x/y would silently relocate the box to the panel's top-left corner.
-     */
-    public static void adjustContentScale(String componentId, DietLayout.Layout panelLayout, Bounds currentBounds, double delta) {
-        ComponentState base = existingOrDerived(componentId, panelLayout, currentBounds);
-        double newScale = Mth.clamp(base.contentScale() + delta, CONTENT_SCALE_MIN, CONTENT_SCALE_MAX);
-        get().save(componentId, withContentScale(base, newScale));
-    }
-
-    private static ComponentState existingOrDerived(String componentId, DietLayout.Layout panelLayout, Bounds currentBounds) {
-        return get().load(componentId).orElseGet(() -> relativeState(panelLayout, currentBounds));
-    }
-
-    /** Converts an absolute-pixel {@code bounds} into a not-manually-sized {@link ComponentState}, normalized the same way {@code DietScreenEditTarget#toRelativeState} normalizes a committed drag/resize. */
-    private static ComponentState relativeState(DietLayout.Layout panelLayout, Bounds bounds) {
-        double scale = panelLayout.scale();
-        int contentX = panelLayout.panelX() + panelLayout.leftMargin();
-        return new ComponentState(
-                (int) Math.round((bounds.x() - contentX) / scale),
-                (int) Math.round((bounds.y() - panelLayout.panelY()) / scale),
-                (int) Math.round(bounds.width() / scale),
-                (int) Math.round(bounds.height() / scale),
-                false, false, false, 0
-        );
-    }
-
-    private static ComponentState withContentScale(ComponentState base, double contentScale) {
-        return new ComponentState(base.x(), base.y(), base.width(), base.height(), base.collapsed(),
-                base.widthManual(), base.heightManual(), base.leftMargin(), contentScale);
+    /** A box's persisted padding multiplier — see {@link ComponentState#paddingScale()}. Defaults to {@code 1.0} (no adjustment) if never set. */
+    public static double paddingScale(String componentId) {
+        return get().load(componentId).map(ComponentState::paddingScale).orElse(ComponentState.DEFAULT_PADDING_SCALE);
     }
 
     /** Resolves a sub-box's screen bounds relative to the panel: a live drag/resize preview if one is active this frame, else persisted local-unit offset/size if manually moved/resized, otherwise the natural stacked position. */

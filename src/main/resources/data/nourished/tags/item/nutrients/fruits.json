@@ -498,10 +498,6 @@
       "required": false
     },
     {
-      "id": "createfood:chocolate_donut_base",
-      "required": false
-    },
-    {
       "id": "createfood:chocolate_donut_hole",
       "required": false
     },

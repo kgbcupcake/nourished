@@ -56,19 +56,23 @@ Questions, suggestions, and development discussion are welcome.
 | 🥛 Dairy | — | ✓ |
 
 Sugars and Dairy have no penalty effect by default: both are tracked and affect your balance score, but only Dairy counts toward the balance buff. Configurable.
+<details>
+<summary>🍽️ Eating at full hunger</summary>
 
-## 🍽️ Eating at full hunger
+> Vanilla blocks eating at full hunger; Nourished still counts nutrition when your hunger bar is full. 
+> Light foods (berries, fruits, snacks) can be eaten for nutrients without restoring hunger. 
+> Heavy meals follow vanilla rules by default. Both configurable: `blockHeavyMeals` and `blockLightFood`.
+  Diminishing returns apply:  eating the same food repeatedly gives less credit each time, encouraging real variety.
+</details>
 
-Vanilla blocks eating at full hunger; Nourished still counts nutrition when your hunger bar is full. Light foods (berries, fruits, snacks) can be eaten for nutrients without restoring hunger. Heavy meals follow vanilla rules by default. Both configurable: `blockHeavyMeals` and `blockLightFood`.
 
-Diminishing returns apply:  eating the same food repeatedly gives less credit each time, encouraging real variety.
-
----
 
 <details>
 <summary>🥩 Raw Food & Gut Health</summary>
 
-Eating raw or undercooked food has consequences. Nourished tracks a **gut health** value per player that degrades when you eat raw food and recovers over time from cooked food and dietary variety.
+> Eating raw or undercooked food has consequences. 
+Nourished tracks a **gut health** value per player that degrades 
+when you eat raw food and recovers over time from cooked food and dietary variety.
 
 Raw foods classify into four tiers:
 
@@ -79,9 +83,13 @@ Raw foods classify into four tiers:
 | Medium | Moderate debuff, longer duration |
 | Severe | Strong debuff, extended duration |
 
-Eating the same raw food repeatedly within a memory window increases sensitivity, the more you do it, the worse the penalty gets. Gut health recovers passively, faster with cooked food and dietary diversity. Resistance builds up over time, reducing penalty scale.
+> Eating the same raw food repeatedly within a memory window increases sensitivity, 
+the more you do it, the worse the penalty gets. Gut health recovers passively, 
+faster with cooked food and dietary diversity. Resistance builds up over time, reducing penalty scale.
 
-Everything — tiers, durations, nutrient penalties, recovery rates:  is configurable via `config/nourished/raw_food.json` and server module toggles. This is currently the only true gameplay module beyond core nutrition tracking (Stamina, mentioned in older docs, is a compat integration with the separate Peak Stamina mod, not a native Nourished module).
+> Everything — tiers, durations, nutrient penalties, recovery rates:  is configurable via `config/nourished/raw_food.json` 
+and server module toggles. This is currently the only true gameplay module beyond core nutrition tracking 
+(Stamina, mentioned in older docs, is a compat integration with the separate Peak Stamina mod, not a native Nourished module).
 
 </details>
 

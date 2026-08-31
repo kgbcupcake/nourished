@@ -1062,6 +1062,14 @@
       "required": false
     },
     {
+      "id": "createfood:butter_dough",
+      "required": false
+    },
+    {
+      "id": "createfood:butter_dough_small",
+      "required": false
+    },
+    {
       "id": "createfood:buttered_toast",
       "required": false
     },
@@ -1079,6 +1087,10 @@
     },
     {
       "id": "createfood:butterscotch_chip_muffin",
+      "required": false
+    },
+    {
+      "id": "createfood:butterscotch_chips",
       "required": false
     },
     {
@@ -1122,6 +1134,26 @@
       "required": false
     },
     {
+      "id": "createfood:cacao_butter",
+      "required": false
+    },
+    {
+      "id": "createfood:cacao_mass_bucket",
+      "required": false
+    },
+    {
+      "id": "createfood:cacao_nibs",
+      "required": false
+    },
+    {
+      "id": "createfood:cake_base",
+      "required": false
+    },
+    {
+      "id": "createfood:cake_batter_bucket",
+      "required": false
+    },
+    {
       "id": "createfood:cane_syrup_bottle",
       "required": false
     },
@@ -1143,6 +1175,10 @@
     },
     {
       "id": "createfood:caramel_chip_muffin",
+      "required": false
+    },
+    {
+      "id": "createfood:caramel_chips",
       "required": false
     },
     {
@@ -1238,6 +1274,14 @@
       "required": false
     },
     {
+      "id": "createfood:chocolate_cake_base",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_cake_batter_bucket",
+      "required": false
+    },
+    {
       "id": "createfood:chocolate_chip_chocolate_cookie",
       "required": false
     },
@@ -1250,6 +1294,10 @@
       "required": false
     },
     {
+      "id": "createfood:chocolate_chips",
+      "required": false
+    },
+    {
       "id": "createfood:chocolate_chocolate_pastry",
       "required": false
     },
@@ -1259,6 +1307,10 @@
     },
     {
       "id": "createfood:chocolate_cupcake_base",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_donut_base",
       "required": false
     },
     {
@@ -1322,6 +1374,14 @@
       "required": false
     },
     {
+      "id": "createfood:chocolate_sugar_dough",
+      "required": false
+    },
+    {
+      "id": "createfood:chocolate_sugar_dough_small",
+      "required": false
+    },
+    {
       "id": "createfood:chocolate_sweet_roll_base",
       "required": false
     },
@@ -1339,6 +1399,10 @@
     },
     {
       "id": "createfood:cinnamon_sweet_roll_base",
+      "required": false
+    },
+    {
+      "id": "createfood:cocoa_powder",
       "required": false
     },
     {
@@ -1402,6 +1466,10 @@
       "required": false
     },
     {
+      "id": "createfood:dark_chocolate_chips",
+      "required": false
+    },
+    {
       "id": "createfood:dark_chocolate_chocolate_pastry",
       "required": false
     },
@@ -1451,6 +1519,10 @@
     },
     {
       "id": "createfood:dragon_bun_warped_fungus",
+      "required": false
+    },
+    {
+      "id": "createfood:dumpling_wrappers",
       "required": false
     },
     {
@@ -1906,6 +1978,18 @@
       "required": false
     },
     {
+      "id": "createfood:pita_dough",
+      "required": false
+    },
+    {
+      "id": "createfood:pizza_dough",
+      "required": false
+    },
+    {
+      "id": "createfood:pizza_dough_tomato_sauce",
+      "required": false
+    },
+    {
       "id": "createfood:pork_burrito_rice",
       "required": false
     },
@@ -1918,7 +2002,15 @@
       "required": false
     },
     {
+      "id": "createfood:pressed_cocoa",
+      "required": false
+    },
+    {
       "id": "createfood:pretzel_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:pumpernickel_dough",
       "required": false
     },
     {
@@ -1934,11 +2026,55 @@
       "required": false
     },
     {
+      "id": "createfood:raw_calzone",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_cheese_calzone",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_cheese_pizza",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_chocolate_pastry_base",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_chocolate_sweet_roll_base",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_cinnamon_sweet_roll_base",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_macaroni",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_pastry_base",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_sweet_roll_base",
+      "required": false
+    },
+    {
       "id": "createfood:red_gelatin_dessert_slice",
       "required": false
     },
     {
       "id": "createfood:rice_pudding_bowl",
+      "required": false
+    },
+    {
+      "id": "createfood:salt_dough",
+      "required": false
+    },
+    {
+      "id": "createfood:salt_dough_small",
       "required": false
     },
     {
@@ -2006,6 +2142,10 @@
       "required": false
     },
     {
+      "id": "createfood:sugar_dough_small",
+      "required": false
+    },
+    {
       "id": "createfood:sweet_roll_base",
       "required": false
     },
@@ -2034,6 +2174,10 @@
       "required": false
     },
     {
+      "id": "createfood:toffee_chips",
+      "required": false
+    },
+    {
       "id": "createfood:toffee_chocolate",
       "required": false
     },
@@ -2058,11 +2202,27 @@
       "required": false
     },
     {
+      "id": "createfood:ube_cake_batter_bucket",
+      "required": false
+    },
+    {
       "id": "createfood:ube_cupcake_base",
       "required": false
     },
     {
+      "id": "createfood:ube_sugar_dough",
+      "required": false
+    },
+    {
+      "id": "createfood:waffle_batter_bucket",
+      "required": false
+    },
+    {
       "id": "createfood:waffle_cone",
+      "required": false
+    },
+    {
+      "id": "createfood:wheat_dough_small",
       "required": false
     },
     {
@@ -2075,6 +2235,10 @@
     },
     {
       "id": "createfood:white_chocolate_chip_cookie",
+      "required": false
+    },
+    {
+      "id": "createfood:white_chocolate_chips",
       "required": false
     },
     {

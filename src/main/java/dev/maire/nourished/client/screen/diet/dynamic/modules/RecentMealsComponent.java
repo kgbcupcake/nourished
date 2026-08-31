@@ -6,6 +6,7 @@ import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.component.SelfPositioningModule;
+import dev.marie.framework.ui.edit.ContentScaleController;
 import dev.marie.framework.ui.RenderContext;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
@@ -59,6 +60,9 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
      */
     private static final int MAX_NAME_CHARS = 12;
 
+    /** Reference local-unit padding used to derive the user's padding-adjustment range — see {@link ContentScaleController#resolvePadding}. */
+    private static final double BASE_PADDING_LOCAL = 2.0d;
+
     private final DietLayout.Layout layout;
     private final int startLocalY;
     private final List<String> recentIds;
@@ -70,6 +74,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
     private final Bounds resolvedBounds;
     private Bounds anchorBounds;
     private double contentScale = 1.0d;
+    private double paddingLocal = 0.0d;
 
     RecentMealsComponent(DietLayout.Layout layout, int startLocalY) {
         this.layout = layout;
@@ -175,13 +180,13 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         double widthScale = bounds.width() / (double) bw;
         double heightScale = bounds.height() / (double) recentHeight;
         this.contentScale = Math.min(widthScale, heightScale);
-        // contentScale (fitScale) still drives sx/sy/availableLocalWidth unchanged below; the
-        // persisted zoom multiplier only affects the size passed to text/icon draw calls (header,
-        // icon, row name). zoomedTextIconScale now clamps to a flat [fitScale*0.5, fitScale*3.0]
-        // range rather than deriving from widthScale/heightScale — see its javadoc. Whatever `scale`
-        // comes back, the pushClip(bounds...) below is what actually keeps drawn content from
-        // escaping the box; this clamp just keeps zoom in a usable range, not a containment guarantee.
-        float scale = DietScreenModules.zoomedTextIconScale(contentScale, widthScale, heightScale, DietScreenPersistence.contentScale(ID));
+        // contentScale (fitScale) still drives sx/sy/availableLocalWidth unchanged below; text/icon
+        // render scale (header, icon, row name) is the user's persisted per-box adjustment alone now,
+        // sanity-clamped only — no longer capped by contentScale. Whatever `scale` comes back, the
+        // pushClip(bounds...) below is what actually keeps drawn content from escaping the box.
+        float scale = ContentScaleController.resolveContentScale(DietScreenPersistence.contentScale(ID));
+        double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
+        this.paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         // Row spacing (and the header's own gap before the first row) must grow by the same ratio
         // zoom grows text/icon draw size by — otherwise the bigger zoomed glyphs visually collide
         // into the next row's still-unzoomed vertical slot. zoomRatio is exactly 1.0 whenever zoom
@@ -292,11 +297,11 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
     // directly rather than through DietLayout.toScreenDim.
 
     private int sx(int localX) {
-        return anchorBounds.x() + (int) Math.round(localX * contentScale);
+        return anchorBounds.x() + (int) Math.round((localX + paddingLocal) * contentScale);
     }
 
     private int sy(int localY) {
-        return anchorBounds.y() + (int) Math.round((localY - startLocalY) * contentScale);
+        return anchorBounds.y() + (int) Math.round((localY - startLocalY + paddingLocal) * contentScale);
     }
 
     private int sd(int localDim) {

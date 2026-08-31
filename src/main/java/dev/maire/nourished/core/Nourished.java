@@ -27,6 +27,8 @@ import dev.maire.nourished.client.config.NourishedConfigScreen;
 import dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen;
 import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientRegistry;
+import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityTrackerIds;
+import dev.maire.nourished.modules.activity_driven_nutrient.handler.ActivityDistanceTickListener;
 import dev.maire.nourished.modules.activity_driven_nutrient.handler.ActivityModuleDispatcher;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityModuleRegistry;
 import dev.maire.nourished.modules.activity_driven_nutrient.modules.CombatModule;
@@ -36,6 +38,8 @@ import dev.maire.nourished.modules.activity_driven_nutrient.handler.StarvationMo
 import dev.maire.nourished.modules.activity_driven_nutrient.modules.SwimDecayModule;
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.marie.framework.tracking.TrackingData;
+import dev.marie.framework.tracking.tracker.MarieTracking;
+import dev.marie.framework.tracking.tracker.registry.TrackerRegistry;
 import dev.maire.nourished.client.ClientEventRegistrar;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.diet.NourishedTrackingData;
@@ -146,6 +150,7 @@ public class Nourished {
         ActivityModuleRegistry.register(new CombatModule());
         NeoForge.EVENT_BUS.register(new ActivityModuleDispatcher());
         NeoForge.EVENT_BUS.register(new StarvationModule());
+        NeoForge.EVENT_BUS.register(new ActivityDistanceTickListener());
         modEventBus.addListener(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent.class, event -> {
             event.enqueueWork(() -> {
                 // Runs after MarieBootstrap.onCommonSetup → RegistryLifecycleManager.loadAll(), so
@@ -155,11 +160,8 @@ public class Nourished {
                 NourishedConfigValidation.runAfterInitialLoad();
                 NutrientRegistry.syncAndFreeze();
                 ModCompat.discoverUnknownMods();
-                if (NourishedConfig.get().enableCalorieHistory()) {
-                    MarieAPI.registerTracker(dev.marie.framework.tracking.tracker.definition.TrackerDefinition.daily(
-                            dev.maire.nourished.api.NourishedAPI.CALORIES_TRACKER_ID,
-                            NourishedConfig.get().calorieHistoryRetentionDays()));
-                }
+                registerCalorieTracker();
+                ActivityTrackerIds.registerAll();
                 LOGGER.info("[Nourished] Starting AutoCompatDiscovery...");
                 try (var scope = MarieAPIState.openForDatapackReload()) {
                     AutoCompatDiscovery.discover();
@@ -182,6 +184,61 @@ public class Nourished {
     }
 
     /**
+     * Re-runs the mod-init registrations MarieLib's {@code TrackerRegistry}/
+     * {@code ColorDefinitionRegistry} wipe on every {@code /reload}, so calorie history and custom
+     * colors survive it. Called from {@code MarieContext.reloadBroadcastHook()} via
+     * {@link dev.maire.nourished.core.reload.NourishedReloadHelper#reregisterAndBroadcast}.
+     */
+    public static void reregisterReloadableDefinitions() {
+        if (!MarieAPIState.isRegistrationAllowed()) {
+            LOGGER.warn("[Nourished] reregisterReloadableDefinitions() called while the registration "
+                    + "window is closed; skipping instead of crashing. This indicates a call-site bug.");
+            return;
+        }
+        registerColorDefinitions();
+        registerCalorieTracker();
+        ActivityTrackerIds.registerAll();
+    }
+
+    /**
+     * Registers the calorie history {@link dev.marie.framework.tracking.tracker.definition.TrackerDefinition}
+     * with MarieLib's tracker system. Called at mod init and again from
+     * {@link #reregisterReloadableDefinitions()} on every reload.
+     */
+    private static void registerCalorieTracker() {
+        if (NourishedConfig.get().enableCalorieHistory()) {
+            MarieTracking.registerTracker(dev.marie.framework.tracking.tracker.definition.TrackerDefinition.daily(
+                    dev.maire.nourished.api.NourishedAPI.CALORIES_TRACKER_ID,
+                    NourishedConfig.get().calorieHistoryRetentionDays()));
+        }
+    }
+
+    /**
+     * Reconciles the calorie tracker's registration with the current config, so toggling
+     * {@code enableCalorieHistory} from the config screen takes effect without a {@code /reload}.
+     * Called from {@link NourishedConfig#syncModuleCache()}. MarieLib's registration window is
+     * normally closed outside mod init/reload, so this briefly reopens it for the call.
+     */
+    public static void ensureCalorieTrackerRegistered() {
+        if (MarieAPIState.isRegistrationAllowed()) {
+            registerCalorieTracker();
+            return;
+        }
+        // TrackerRegistry is frozen outside mod init/reload, same as the API phase — reopening the phase alone isn't enough.
+        boolean wasFrozen = TrackerRegistry.isFrozen();
+        if (wasFrozen) {
+            TrackerRegistry.unfreezeInternal();
+        }
+        try (var scope = MarieAPIState.openForDatapackReload()) {
+            registerCalorieTracker();
+        } finally {
+            if (wasFrozen) {
+                TrackerRegistry.freezeInternal();
+            }
+        }
+    }
+
+    /**
      * Registers this mod's {@link ColorDefinition}s with MarieLib's color system: one per nutrient
      * (namespaced {@code nutrient.<key>}), one per activity module (via {@link
      * ActivityDrivenNutrientRegistry#registerColors()}), and one per HUD panel that composes its
@@ -201,8 +258,8 @@ public class Nourished {
         // Matches ThemeKey.TEXT_PRIMARY (0xFFE0E0E0) — the flat text color both panels drew before
         // this feature existed.
         int defaultTextArgb = 0xFFE0E0E0;
-        CalorieHudScreen.COLORS = MarieColors.registerColorPair(MODID, "calorieHud", defaultPanelArgb, defaultTextArgb);
-        ActivityLogHudPanel.COLORS = MarieColors.registerColorPair(MODID, "activityLogHud", defaultPanelArgb, defaultTextArgb);
+        CalorieHudScreen.COLORS = MarieColors.registerColorPair(MODID, "calorie_hud", defaultPanelArgb, defaultTextArgb);
+        ActivityLogHudPanel.COLORS = MarieColors.registerColorPair(MODID, "activity_log_hud", defaultPanelArgb, defaultTextArgb);
     }
 
     /**
@@ -210,7 +267,8 @@ public class Nourished {
      * raw nutrient key, e.g. {@code "protein"}) to the new namespaced {@link ColorKey} string (e.g.
      * {@code "nourished:nutrient.protein"}) that {@code ColorHexRowWidget}/{@code MarieAPI.resolveColor}
      * now read/write. Safe to call on every load: skips any nutrient whose new key already has an
-     * override, and never deletes the old entry, so this can't lose data even if re-run.
+     * override, and removes the legacy entry after copying it so this only ever migrates a given
+     * key once, letting a player's reset of the new key stick on subsequent launches.
      */
     private static void migrateNutrientColorKeys() {
         boolean migratedAny = false;
@@ -225,6 +283,7 @@ public class Nourished {
                 continue;
             }
             ColorRegistry.setArgb(newKey, legacy.get());
+            ColorRegistry.remove(key);
             migratedAny = true;
             LOGGER.info("[Nourished] Migrated custom nutrient color '{}' ({}) to new key '{}'",
                     key, String.format("0x%08X", legacy.get()), newKey);

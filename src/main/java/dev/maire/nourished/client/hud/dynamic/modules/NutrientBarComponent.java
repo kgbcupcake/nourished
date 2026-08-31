@@ -36,11 +36,22 @@ final class NutrientBarComponent implements MarieComponent {
     private final HudLayout.Layout hudLayout;
     private final Map<String, Float> displayValues;
 
-    NutrientBarComponent(String nutrientKey, boolean verticalMode, HudLayout.Layout hudLayout, Map<String, Float> displayValues) {
+    /**
+     * Text/icon render scale — the user's persisted per-panel adjustment alone (via {@link
+     * dev.marie.framework.ui.edit.ContentScaleController#resolveContentScale}, resolved once by
+     * {@code NutrientPanelContainer}), never {@code hudLayout}'s own scale. {@code hudLayout} still
+     * drives every position/spacing value below (row height, icon/bar/label offsets, this row's own
+     * {@link #bounds() slot}) — same separation the other 7 {@code ContentScaleController}-managed
+     * modules maintain.
+     */
+    private final float contentScale;
+
+    NutrientBarComponent(String nutrientKey, boolean verticalMode, HudLayout.Layout hudLayout, Map<String, Float> displayValues, float contentScale) {
         this.nutrientKey = nutrientKey;
         this.verticalMode = verticalMode;
         this.hudLayout = hudLayout;
         this.displayValues = displayValues;
+        this.contentScale = contentScale;
     }
 
     @Override
@@ -118,6 +129,19 @@ final class NutrientBarComponent implements MarieComponent {
 
     @Override
     public void render(RenderContext context, Bounds bounds) {
+        // Real containment: this row's slot (bounds) is sized/positioned entirely from hudLayout,
+        // unaffected by contentScale, so a persisted zoom above hudLayout's own proportions is
+        // clipped at this row's own edges instead of overlapping neighboring rows — same pattern as
+        // the other 7 ContentScaleController-managed modules' pushClip.
+        context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
+        try {
+            renderContent(context, bounds);
+        } finally {
+            context.popClip();
+        }
+    }
+
+    private void renderContent(RenderContext context, Bounds bounds) {
         float value = displayValues.getOrDefault(nutrientKey, 0f);
         String label = HudDrawHelpers.nutrientLabel(nutrientKey);
         int fillColor = HudDrawHelpers.barFillColor(nutrientKey, value);
@@ -125,35 +149,34 @@ final class NutrientBarComponent implements MarieComponent {
         int bgColor = HudDrawHelpers.barBackgroundColor();
         int labelColor = HudDrawHelpers.labelColor();
         String pctText = Math.round(value * 100f) + "%";
-        float labelScale = hudLayout.labelScale();
         var font = Minecraft.getInstance().font;
 
         if (verticalMode) {
-            int textH = (int) Math.ceil(9 * labelScale);
+            int textH = (int) Math.ceil(9 * contentScale);
             int barW = hudLayout.verticalBarW();
             int barH = hudLayout.verticalBarH();
             int barX = bounds.x() + (bounds.width() - barW) / 2;
             int barY = bounds.y() + textH + 2;
 
-            int pctSw = (int) Math.ceil(font.width(pctText) * labelScale);
+            int pctSw = (int) Math.ceil(font.width(pctText) * contentScale);
             int pctX = bounds.x() + (bounds.width() - pctSw) / 2;
-            context.drawText(pctText, pctX, bounds.y(), pctColor, labelScale);
+            context.drawText(pctText, pctX, bounds.y(), pctColor, contentScale);
 
             context.drawVerticalBar(barX, barY, barW, barH, value, bgColor, fillColor);
             drawFlashOverlay(context, barX, barY, barW, barH);
 
-            int labelSw = (int) Math.ceil(font.width(label) * labelScale);
+            int labelSw = (int) Math.ceil(font.width(label) * contentScale);
             int labelX = bounds.x() + (bounds.width() - labelSw) / 2;
-            context.drawText(label, labelX, barY + barH + 2, labelColor, labelScale);
+            context.drawText(label, labelX, barY + barH + 2, labelColor, contentScale);
         } else {
             int rowCenterY = bounds.y() + bounds.height() / 2;
-            int textY = rowCenterY - (int) Math.ceil(9 * labelScale) / 2;
+            int textY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
             int iconSize = hudLayout.iconSize();
 
-            context.drawItem(resolveIconStack(nutrientKey), bounds.x(), rowCenterY - iconSize / 2, iconSize / 16f);
+            context.drawItem(resolveIconStack(nutrientKey), bounds.x(), rowCenterY - iconSize / 2, contentScale);
 
             int labelX = bounds.x() + iconSize + HudDrawHelpers.ICON_LABEL_GAP;
-            context.drawText(label, labelX, textY, labelColor, labelScale);
+            context.drawText(label, labelX, textY, labelColor, contentScale);
 
             int barX = labelX + hudLayout.maxLabelSw() + HudDrawHelpers.LABEL_BAR_GAP;
             int barY = rowCenterY - HudDrawHelpers.BAR_H / 2;
@@ -161,7 +184,7 @@ final class NutrientBarComponent implements MarieComponent {
             drawFlashOverlay(context, barX, barY, hudLayout.barW(), HudDrawHelpers.BAR_H);
 
             int pctX = barX + hudLayout.barW() + HudDrawHelpers.BAR_PCT_GAP;
-            context.drawText(pctText, pctX, textY, pctColor, labelScale);
+            context.drawText(pctText, pctX, textY, pctColor, contentScale);
         }
     }
 }

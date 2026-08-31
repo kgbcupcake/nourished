@@ -9,6 +9,7 @@ import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.edit.DraggableResizable;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
+import dev.marie.framework.ui.scaleconfig.ScaleConfigPanel;
 import dev.maire.nourished.client.screen.diet.DietScreen;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietPanelLayoutResolver;
@@ -25,9 +26,9 @@ import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import static dev.maire.nourished.client.screen.diet.dynamic.layout.DietSubBoxConstraints.SUMMARY_BOX_LOCAL_WIDTH;
 import static dev.maire.nourished.client.screen.diet.dynamic.layout.DietSubBoxConstraints.liveSubBoxConstraint;
@@ -45,13 +46,21 @@ public final class DietScreenEditTarget implements MarieComponent {
 
     private final Minecraft mc;
     private final Runnable exitEditMode;
+    /**
+     * Same {@link ScaleConfigPanel} instance and live visibility state {@link DietScreen} owns —
+     * not a second panel — so the sliders shown here while edit mode has swapped {@code mc.screen}
+     * to {@link dev.marie.framework.ui.edit.EditOverlayScreen} stay in sync with the persisted
+     * state the player is actually editing, and with what {@link DietScreen#render} shows again
+     * once edit mode exits.
+     */
+    private final ScaleConfigPanel scaleConfigPanel;
+    private final BooleanSupplier scaleConfigVisible;
     private final DraggableResizable panelDrag;
     private final DraggableResizable caloriesDrag;
     private final DraggableResizable balanceDrag;
     private final DraggableResizable recentMealsDrag;
     private final DraggableResizable eatMoreDrag;
     private final DraggableResizable activeEffectsDrag;
-    private final DietZoomController zoom = new DietZoomController();
 
     private Bounds lastCaloriesResolvedBounds;
     private Bounds lastBalanceResolvedBounds;
@@ -59,9 +68,11 @@ public final class DietScreenEditTarget implements MarieComponent {
     private Bounds lastEatMoreResolvedBounds;
     private Bounds lastActiveEffectsResolvedBounds;
 
-    public DietScreenEditTarget(Minecraft mc, Runnable exitEditMode) {
+    public DietScreenEditTarget(Minecraft mc, Runnable exitEditMode, ScaleConfigPanel scaleConfigPanel, BooleanSupplier scaleConfigVisible) {
         this.mc = mc;
         this.exitEditMode = exitEditMode;
+        this.scaleConfigPanel = scaleConfigPanel;
+        this.scaleConfigVisible = scaleConfigVisible;
 
         DietLayout.Layout baseLayout = DietLayout.compute(mc);
         List<MarieComponent> baseModules = DietScreenModules.build(baseLayout, DietLeftColumnComponent.computeHeaderEndLocalY());
@@ -157,6 +168,9 @@ public final class DietScreenEditTarget implements MarieComponent {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (scaleConfigVisible.getAsBoolean() && scaleConfigPanel.mouseClicked(mouseX, mouseY, button)) {
+            return true;
+        }
         int mx = (int) mouseX;
         int my = (int) mouseY;
         DietLayout.Layout layout = resolvedPanelLayout(mc);
@@ -167,41 +181,26 @@ public final class DietScreenEditTarget implements MarieComponent {
         }
 
         if (lastCaloriesResolvedBounds != null) {
-            if (zoomClickConsumed(DietZoomController.Box.CALORIES, lastCaloriesResolvedBounds, button, mx, my)) {
-                return true;
-            }
             if (caloriesDrag.mouseClicked(mx, my, lastCaloriesResolvedBounds)) {
                 return true;
             }
         }
         if (lastBalanceResolvedBounds != null) {
-            if (zoomClickConsumed(DietZoomController.Box.BALANCE, lastBalanceResolvedBounds, button, mx, my)) {
-                return true;
-            }
             if (balanceDrag.mouseClicked(mx, my, lastBalanceResolvedBounds)) {
                 return true;
             }
         }
         if (lastRecentResolvedBounds != null) {
-            if (zoomClickConsumed(DietZoomController.Box.RECENT_MEALS, lastRecentResolvedBounds, button, mx, my)) {
-                return true;
-            }
             if (recentMealsDrag.mouseClicked(mx, my, lastRecentResolvedBounds)) {
                 return true;
             }
         }
         if (lastEatMoreResolvedBounds != null) {
-            if (zoomClickConsumed(DietZoomController.Box.EAT_MORE, lastEatMoreResolvedBounds, button, mx, my)) {
-                return true;
-            }
             if (eatMoreDrag.mouseClicked(mx, my, lastEatMoreResolvedBounds)) {
                 return true;
             }
         }
         if (lastActiveEffectsResolvedBounds != null) {
-            if (zoomClickConsumed(DietZoomController.Box.ACTIVE_EFFECTS, lastActiveEffectsResolvedBounds, button, mx, my)) {
-                return true;
-            }
             if (activeEffectsDrag.mouseClicked(mx, my, lastActiveEffectsResolvedBounds)) {
                 return true;
             }
@@ -210,20 +209,9 @@ public final class DietScreenEditTarget implements MarieComponent {
         return panelDrag.mouseClicked(mx, my, panelBounds);
     }
 
-    /** Feeds a click to {@code box}'s double-click recognizer, hit-tested per {@link DietZoomController#onClick}. */
-    private boolean zoomClickConsumed(DietZoomController.Box box, Bounds bounds, int button, int mx, int my) {
-        return zoom.onClick(box, button, mx, my, bounds);
-    }
-
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        Map<DietZoomController.Box, Bounds> bounds = new EnumMap<>(DietZoomController.Box.class);
-        if (lastCaloriesResolvedBounds != null) bounds.put(DietZoomController.Box.CALORIES, lastCaloriesResolvedBounds);
-        if (lastBalanceResolvedBounds != null) bounds.put(DietZoomController.Box.BALANCE, lastBalanceResolvedBounds);
-        if (lastRecentResolvedBounds != null) bounds.put(DietZoomController.Box.RECENT_MEALS, lastRecentResolvedBounds);
-        if (lastEatMoreResolvedBounds != null) bounds.put(DietZoomController.Box.EAT_MORE, lastEatMoreResolvedBounds);
-        if (lastActiveEffectsResolvedBounds != null) bounds.put(DietZoomController.Box.ACTIVE_EFFECTS, lastActiveEffectsResolvedBounds);
-        return zoom.handleScroll(scrollY, resolvedPanelLayout(mc), bounds);
+        return scaleConfigVisible.getAsBoolean() && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
@@ -352,31 +340,30 @@ public final class DietScreenEditTarget implements MarieComponent {
         if (calories.isVisible()) {
             drawHandle(context, caloriesDrag, caloriesBounds, mx, my, false);
             drawSizeLabel(context, caloriesDrag, caloriesBounds);
-            drawZoomLabel(context, DietZoomController.Box.CALORIES, caloriesBounds, DietScreenPersistence.contentScale(CaloriesComponent.ID));
         }
         if (balance.isVisible()) {
             drawHandle(context, balanceDrag, balanceBounds, mx, my, false);
             drawSizeLabel(context, balanceDrag, balanceBounds);
-            drawZoomLabel(context, DietZoomController.Box.BALANCE, balanceBounds, DietScreenPersistence.contentScale(BalanceComponent.ID));
         }
         if (recent.isVisible()) {
             drawHandle(context, recentMealsDrag, recentBounds, mx, my, false);
             drawSizeLabel(context, recentMealsDrag, recentBounds);
-            drawZoomLabel(context, DietZoomController.Box.RECENT_MEALS, recentBounds, DietScreenPersistence.contentScale(RecentMealsComponent.ID));
         }
         if (eatMore.isVisible()) {
             drawHandle(context, eatMoreDrag, eatMoreBounds, mx, my, false);
             drawSizeLabel(context, eatMoreDrag, eatMoreBounds);
-            drawZoomLabel(context, DietZoomController.Box.EAT_MORE, eatMoreBounds, DietScreenPersistence.contentScale(EatMoreComponent.ID));
         }
         if (activeEffects.isVisible()) {
             drawHandle(context, activeEffectsDrag, activeEffectsBounds, mx, my, false);
             drawSizeLabel(context, activeEffectsDrag, activeEffectsBounds);
-            drawZoomLabel(context, DietZoomController.Box.ACTIVE_EFFECTS, activeEffectsBounds, DietScreenPersistence.contentScale(ActiveEffectsComponent.ID));
         }
 
         boolean toggleHovered = DietScreen.isMouseOverEditModeToggle(matchedPanelLayout, mx, my);
         DietScreen.drawEditModeToggle(context, matchedPanelLayout, true, toggleHovered);
+
+        if (scaleConfigVisible.getAsBoolean()) {
+            scaleConfigPanel.render(context, new Bounds(0, 0, context.screenWidth(), context.screenHeight()));
+        }
     }
 
     private static void drawHandle(RenderContext context, DraggableResizable drag, Bounds bounds, int mx, int my, boolean withBottomLeftCorner) {
@@ -447,15 +434,6 @@ public final class DietScreenEditTarget implements MarieComponent {
             }
         }
         drawShadowedText(context, label, lx, ly);
-    }
-
-    /** While {@code box} is in double-click zoom mode (see {@link DietZoomController}), shows its current contentScale multiplier below the box so scroll-wheel adjustments are visible. */
-    private void drawZoomLabel(RenderContext context, DietZoomController.Box box, Bounds bounds, double contentScale) {
-        if (!zoom.isZoomed(box)) {
-            return;
-        }
-        String label = "zoom x" + String.format("%.2f", contentScale);
-        drawShadowedText(context, label, bounds.x() + 4, bounds.y() + bounds.height() + 6);
     }
 
     /** Light text over a dark 1px drop-shadow, for legibility against any background. */
@@ -566,7 +544,7 @@ public final class DietScreenEditTarget implements MarieComponent {
                 (int) Math.round((clamped.y() - panelLayout.panelY()) / scale),
                 (int) Math.round(clamped.width() / scale),
                 (int) Math.round(clamped.height() / scale),
-                false, override.widthManual(), override.heightManual(), base.leftMargin(), base.contentScale()
+                false, override.widthManual(), override.heightManual(), base.leftMargin(), base.contentScale(), base.paddingScale()
         );
     }
 

@@ -152,7 +152,7 @@ public final class NourishedAPI {
         if (player == null || !NourishedConfig.get().enableCalorieHistory()) {
             return List.of();
         }
-        return dev.marie.framework.api.marieapi.MarieAPI.getTrackerHistory(player, CALORIES_TRACKER_ID);
+        return dev.marie.framework.tracking.tracker.MarieTracking.getTrackerHistory(player, CALORIES_TRACKER_ID);
     }
 
     /**

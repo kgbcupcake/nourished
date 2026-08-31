@@ -14,6 +14,9 @@ public final class NourishedSourceRules {
         if (trigger.type() != ValueSourceTrigger.TriggerType.ITEM_CONSUMED) {
             return false;
         }
+        if (player.canEat(false)) {
+            return false;
+        }
         return (int) trigger.payload() >= NourishedModuleCache.heavySourcePropertyThreshold;
     }
 }

@@ -7,6 +7,7 @@ import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.component.SelfPositioningModule;
+import dev.marie.framework.ui.edit.ContentScaleController;
 import dev.marie.framework.ui.RenderContext;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
@@ -28,6 +29,9 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
 
     private static final int COL_ORANGE = 0xFFFFAA00;
     private static final int COL_RED = 0xFFFF5555;
+
+    /** Reference local-unit padding used to derive the user's padding-adjustment range — see {@link ContentScaleController#resolvePadding}. */
+    private static final double BASE_PADDING_LOCAL = 2.0d;
 
     private final DietLayout.Layout layout;
     private final int startLocalY;
@@ -107,13 +111,17 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         double widthScale = bounds.width() / (double) SUMMARY_BOX_LOCAL_WIDTH;
         double heightScale = bounds.height() / (double) BOX_LOCAL_HEIGHT;
         this.contentScale = Math.min(widthScale, heightScale);
-        // contentScale (fitScale) still drives sx/sy/sd/outer-box sizing unchanged; the persisted
-        // per-box zoom multiplier only affects the size passed to text/icon draw calls below, and is
-        // clamped to a flat [fitScale*0.5, fitScale*3.0] range (see zoomedTextIconScale's javadoc) —
-        // real containment against the box's own edges comes from this box's own pushClip, not from
-        // this range.
-        float scale = DietScreenModules.zoomedTextIconScale(contentScale, widthScale, heightScale, DietScreenPersistence.contentScale(ID));
-        support.begin(bounds, contentScale);
+        // contentScale (fitScale) still drives sx/sy/sd/outer-box sizing unchanged; text/icon render
+        // scale is the user's persisted per-box adjustment alone now, sanity-clamped only — no longer
+        // capped by contentScale. Real containment against the box's own edges comes from this box's
+        // own pushClip below.
+        float scale = ContentScaleController.resolveContentScale(DietScreenPersistence.contentScale(ID));
+        // Extra local-unit inset delta from the user's padding adjustment — zero at the default
+        // (unadjusted) paddingScale, so existing layouts render identically until the player scrolls
+        // in padding mode. Never applied to sd()/outer-box sizing, only to sx()/sy() positions.
+        double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
+        double paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
+        support.begin(bounds, contentScale, paddingLocal);
 
         support.drawOuterBox(context, bounds.width(), bounds.height(), cc);
 

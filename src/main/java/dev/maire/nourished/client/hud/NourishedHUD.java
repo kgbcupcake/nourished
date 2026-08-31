@@ -38,6 +38,9 @@ public final class NourishedHUD {
     private NourishedHUD() {}
 
     public static void onRenderGuiPost(RenderGuiEvent.Post event) {
+        if (Minecraft.getInstance().options.hideGui) {
+            return;
+        }
         if (!FeatureFlagCache.enableHUD()) {
             return;
         }
@@ -82,8 +85,30 @@ public final class NourishedHUD {
             return;
         }
         while (NourishedKeys.EDIT_HUD.consumeClick()) {
-            marieEditModeController().enter();
+            enterEditModeWithScaleConfig();
         }
+    }
+
+    /**
+     * H ({@link NourishedKeys#EDIT_HUD}) enters edit mode through here so {@link HudEditTarget}'s
+     * own {@code ScaleConfigPanel} always appears alongside it — same pattern as {@code
+     * CalorieHudScreen#enterEditModeWithScaleConfig}/{@code ActivityLogHudPanel}'s equivalent.
+     */
+    private static void enterEditModeWithScaleConfig() {
+        editTarget().setScaleConfigVisible(true);
+        marieEditModeController().enter();
+    }
+
+    /**
+     * Group-entry counterpart to {@link #enterEditModeWithScaleConfig()} — sets the scale config
+     * panel visible without itself entering edit mode, since the group path (unlike the H keybind's
+     * individual path above) already opens the shared overlay via {@code
+     * EditModeCoordinator.enterAll()}. Passed as the {@code onGroupEnter} callback to {@code
+     * EditModeCoordinator.registerGroupCapable} in {@code ClientEventRegistrar}, matching {@code
+     * CalorieHudScreen}/{@code ActivityLogHudPanel}'s own {@code showScaleConfigOnGroupEntry}.
+     */
+    public static void showScaleConfigOnGroupEntry() {
+        editTarget().setScaleConfigVisible(true);
     }
 
     /**
@@ -103,6 +128,19 @@ public final class NourishedHUD {
             );
         }
         return marieEditModeController;
+    }
+
+    /**
+     * Public so {@code ClientEventRegistrar} can register this same singleton as this HUD's
+     * {@code EditModeCoordinator} group-capable target — mirrors how {@code CalorieHudScreen}/
+     * {@code ActivityLogHudPanel} expose their own {@code instance()}. Delegates to {@link
+     * #marieEditModeController()}'s existing lazy-init instead of building a second {@link
+     * HudEditTarget} independently, so both entry points (the H keybind and the coordinator's
+     * group) always share the exact same target instance.
+     */
+    public static HudEditTarget editTarget() {
+        marieEditModeController();
+        return marieEditTarget;
     }
 
     /** Accessor for {@link HudEditTarget}'s render path, which reuses the same lerped values as the normal HUD render. */

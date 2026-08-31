@@ -7,9 +7,7 @@ import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
-import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel;
 import dev.marie.framework.client.config.cloth.ColorHexRowWidget;
-import dev.marie.framework.client.config.cloth.ColorPairRowGroup;
 import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.color.ColorRegistry;
 import dev.marie.framework.config.HudAnchor;
@@ -170,42 +168,31 @@ public final class HudAndDisplayCategory {
                         .build()
         );
         category.addEntry(
-                eb.startBooleanToggle(Component.translatable("config.nourished.enableActivityLogHud"), client.enableActivityLogHud())
-                        .setDefaultValue(true)
-                        .setSaveConsumer(client::setEnableActivityLogHud)
-                        .setTooltip(Component.translatable("config.nourished.enableActivityLogHud.desc"))
-                        .build()
-        );
-        category.addEntry(
                 eb.startKeyCodeField(
-                                Component.translatable("config.nourished.activityLogHudEditHotkey"),
-                                NourishedKeys.EDIT_ACTIVITY_LOG_HUD.getKey()
+                                Component.translatable("config.nourished.editAllHudsHotkey"),
+                                NourishedKeys.EDIT_ALL_HUDS.getKey()
                         )
-                        .setDefaultValue(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_K))
+                        .setDefaultValue(InputConstants.UNKNOWN)
                         .setKeySaveConsumer(key -> {
-                            NourishedKeys.EDIT_ACTIVITY_LOG_HUD.setKey(key);
+                            NourishedKeys.EDIT_ALL_HUDS.setKey(key);
                             KeyMapping.resetMapping();
                             Minecraft.getInstance().options.save();
                         })
                         .build()
         );
         category.addEntry(
-                buildFloatSlider(
-                        eb,
-                        Component.translatable("config.nourished.activityLogHudBackgroundOpacity"),
-                        (float) client.activityLogHudBackgroundOpacity(),
-                        0.0f,
-                        1.0f,
-                        204f / 255f,
-                        client::setActivityLogHudBackgroundOpacity
-                )
+                eb.startKeyCodeField(
+                                Component.translatable("config.nourished.commandCenterHotkey"),
+                                NourishedKeys.OPEN_COMMAND_CENTER.getKey()
+                        )
+                        .setDefaultValue(InputConstants.UNKNOWN)
+                        .setKeySaveConsumer(key -> {
+                            NourishedKeys.OPEN_COMMAND_CENTER.setKey(key);
+                            KeyMapping.resetMapping();
+                            Minecraft.getInstance().options.save();
+                        })
+                        .build()
         );
-        for (ColorHexRowWidget row : ColorPairRowGroup.buildRows(
-                ActivityLogHudPanel.COLORS,
-                Component.translatable("config.nourished.activityLogHudBackgroundColor"),
-                Component.translatable("config.nourished.activityLogHudTextColor"))) {
-            category.addEntry(row);
-        }
         category.addEntry(new HudNutrientColorsSectionHeaderEntry());
         List<ColorHexRowWidget> nutrientColorRows = new ArrayList<>();
         for (String valueKey : NutrientRegistry.getKeys()) {

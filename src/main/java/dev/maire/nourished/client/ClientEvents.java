@@ -5,6 +5,8 @@ import dev.maire.nourished.client.screen.diet.classic.ClassicDietScreen;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.marie.framework.tooltips.MarieTooltipHelper;
 import dev.marie.framework.config.FeatureFlagCache;
+import dev.marie.framework.ui.api.MarieCommandCenter;
+import dev.marie.framework.ui.api.EditModeCoordinator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -80,9 +82,45 @@ public final class ClientEvents {
             }
             mc.setScreen(openDietScreen());
         }
+        while (NourishedKeys.OPEN_SCALE_CONFIG.consumeClick()) {
+            if (!FeatureFlagCache.enableTrackingScreen()) {
+                continue;
+            }
+            openOrToggleScaleConfig();
+        }
+        while (NourishedKeys.OPEN_COMMAND_CENTER.consumeClick()) {
+            MarieCommandCenter.openScreen();
+        }
+        while (NourishedKeys.EDIT_ALL_HUDS.consumeClick()) {
+            EditModeCoordinator.toggleAll();
+        }
     }
 
     private static Screen openDietScreen() {
         return NourishedClientConfig.get().dietScreenClassicMode() ? new ClassicDietScreen() : new DietScreen();
+    }
+
+    /**
+     * Ensures the dynamic Diet Screen is open (opening a fresh one, regardless of the
+     * classic-renderer preference, if it isn't already the active screen), toggles its
+     * scale-config sliders' visibility, and enters edit mode — same as if the player had pressed
+     * J themselves — so the panel is immediately draggable without a separate manual step.
+     * {@link dev.marie.framework.ui.edit.EditModeController#enter()} is a no-op if edit mode is
+     * already active (e.g. the player pressed J before opening the panel), so this never
+     * double-enters or re-toggles it off. Shared by OPEN_SCALE_CONFIG's own keybind handler above
+     * and the Command Center's "Text Scale & Padding" card — the two are the same action from
+     * different entry points, so both call this instead of duplicating it.
+     */
+    public static void openOrToggleScaleConfig() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen instanceof DietScreen dietScreen) {
+            dietScreen.toggleScaleConfigVisible();
+            dietScreen.marieEditModeController().enter();
+            return;
+        }
+        DietScreen screen = new DietScreen();
+        mc.setScreen(screen);
+        screen.toggleScaleConfigVisible();
+        screen.marieEditModeController().enter();
     }
 }

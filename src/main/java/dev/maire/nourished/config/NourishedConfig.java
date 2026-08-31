@@ -411,6 +411,7 @@ public final class NourishedConfig {
         }
         NourishedConfig c = INSTANCE;
         NourishedModuleCache.refresh(c);
+        Nourished.ensureCalorieTrackerRegistered();
         FeatureFlagCache.sync(new MarieModFeatureFlags(
                 c.enableDecay(),
                 c.isModuleEnabled("enableSourceApplication"),
@@ -428,7 +429,8 @@ public final class NourishedConfig {
                 c.isModuleEnabled("enableMilestones"),
                 c.isModuleEnabled("enableSeasonHooks"),
                 c.isModuleEnabled("enableAbsorptionModifiers"),
-                c.isModuleEnabled("enableDebugLogging")
+                c.isModuleEnabled("enableDebugLogging"),
+                c.isModuleEnabled("enableCalorieHistory")
         ));
     }
 

@@ -69,7 +69,7 @@ public final class NourishedConfigScreen {
         ScannerCategory.addScannerCategory(config, builder, entryBuilder);
         AdvancedCategory.addAdvancedCategory(config, builder, entryBuilder, modulePending);
         CompatibilityCategory.addCompatibilityCategory(config, builder, entryBuilder, compatPending);
-        ActivityDrivenNutrientCategory.addActivityDrivenNutrientCategory(builder, entryBuilder);
+        ActivityDrivenNutrientCategory.addActivityDrivenNutrientCategory(client, builder, entryBuilder);
         CalorieHistoryCategory.addCalorieHistoryCategory(config, client, builder, entryBuilder, modulePending);
 
         builder.setSavingRunnable(() -> {
@@ -121,10 +121,16 @@ public final class NourishedConfigScreen {
             RawFoodConfig.save();
             NourishedClientConfig.saveNow();
             NourishedConfig.saveNow();
-            ActivityDrivenNutrientConfig.saveNow();
             NourishedConfig.syncModuleCache();
+            // Only persist this registry locally when we're the authoritative copy (singleplayer/
+            // LAN host). On a remote server isSynced() is also true, but the in-memory values are
+            // the server's, not the player's own - saving them locally would silently overwrite the
+            // player's real settings with whatever the connected server happens to be running.
             MinecraftServer integratedServer = Minecraft.getInstance().getSingleplayerServer();
             if (integratedServer != null) {
+                if (ActivityDrivenNutrientConfig.isSynced()) {
+                    ActivityDrivenNutrientConfig.saveNow();
+                }
                 NourishedReloadHelper.reloadAndBroadcast(integratedServer);
             }
         });

@@ -20,6 +20,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -60,9 +61,29 @@ public class FoodOverrideRegistry {
     private static final Core INSTANCE = new Core();
 
     /**
-     * Returns the override for an item, if one exists and is enabled.
+     * Datapack override layer, discovered from {@code data/<namespace>/nourished/food_overrides/*.json}
+     * by {@link dev.marie.framework.data.MarieDataLoader}'s directory scan (the same mechanism
+     * {@code source_classifications} uses). This layer sits <b>above</b> the config-folder
+     * {@link #INSTANCE}: when an item has a datapack entry, that entry decides the outcome.
+     *
+     * <p>Published as one immutable snapshot by {@link #endDatapackReplace()} at the end of each
+     * datapack apply, so readers never see a partially-scanned state and a {@code /reload} that
+     * removes every {@code food_overrides/*.json} file leaves an empty layer (no stale entries).</p>
+     */
+    private static volatile Map<String, FoodOverride> datapackOverrides = Map.of();
+
+    /** Accumulator live only between {@link #beginDatapackReplace()} and {@link #endDatapackReplace()}, on the datapack apply thread. */
+    private static Map<String, FoodOverride> datapackAccumulator;
+
+    /**
+     * Returns the override for an item, if one exists and is enabled. The datapack layer wins:
+     * a datapack entry (enabled or not) shadows any config-folder entry for the same item.
      */
     public static Optional<FoodOverride> getOverride(String itemId) {
+        FoodOverride datapack = datapackOverrides.get(itemId);
+        if (datapack != null) {
+            return datapack.enabled() ? Optional.of(datapack) : Optional.empty();
+        }
         FoodOverride override = INSTANCE.get(itemId);
         if (override != null && override.enabled()) {
             return Optional.of(override);
@@ -71,15 +92,59 @@ public class FoodOverrideRegistry {
     }
 
     /**
-     * Returns the override for an item (whether enabled or not), or null if none.
+     * Returns the override for an item (whether enabled or not), or null if none. Datapack layer
+     * takes precedence over the config-folder layer.
      */
     public static FoodOverride get(String itemId) {
-        return INSTANCE.get(itemId);
+        FoodOverride datapack = datapackOverrides.get(itemId);
+        return datapack != null ? datapack : INSTANCE.get(itemId);
     }
 
-    /** Returns all registered overrides. */
+    /** Returns all registered overrides — config-folder entries overlaid by datapack entries. */
     public static Map<String, FoodOverride> getAll() {
-        return INSTANCE.entries();
+        if (datapackOverrides.isEmpty()) {
+            return INSTANCE.entries();
+        }
+        LinkedHashMap<String, FoodOverride> merged = new LinkedHashMap<>(INSTANCE.entries());
+        merged.putAll(datapackOverrides);
+        return Collections.unmodifiableMap(merged);
+    }
+
+    /**
+     * Starts a datapack apply: opens a fresh accumulator. Called from the datapack reload callback's
+     * {@code onApplyBegin}. Does not touch the config-folder {@link #INSTANCE}.
+     */
+    public static void beginDatapackReplace() {
+        datapackAccumulator = new LinkedHashMap<>();
+    }
+
+    /**
+     * Accepts one {@code food_overrides/*.json} entry discovered during the current datapack apply.
+     * Multiple files are accumulated (not reset per file); last file wins for a repeated item id,
+     * matching {@code source_classifications}' last-write-wins directory behavior.
+     */
+    public static void acceptDatapackOverride(String item, Map<String, Float> nutrients, int calories, boolean enabled) {
+        Objects.requireNonNull(item, "item");
+        Map<String, FoodOverride> acc = datapackAccumulator;
+        if (acc == null) {
+            // Defensive: entry arrived outside a begin/end window — open one so nothing is lost.
+            acc = datapackAccumulator = new LinkedHashMap<>();
+        }
+        acc.put(item, new FoodOverride(item, new HashMap<>(nutrients), calories, enabled));
+    }
+
+    /**
+     * Ends a datapack apply: publishes the accumulated entries as the new datapack layer. An apply
+     * that discovered no files publishes an empty layer, clearing any previous datapack overrides.
+     */
+    public static void endDatapackReplace() {
+        Map<String, FoodOverride> acc = datapackAccumulator;
+        datapackOverrides = acc == null || acc.isEmpty()
+                ? Map.of()
+                : Collections.unmodifiableMap(new LinkedHashMap<>(acc));
+        datapackAccumulator = null;
+        Nourished.LOGGER.info("[FoodOverrideRegistry] Datapack food override layer: {} entr{} from food_overrides/*.json",
+                datapackOverrides.size(), datapackOverrides.size() == 1 ? "y" : "ies");
     }
 
     public static void load() {
@@ -141,24 +206,41 @@ public class FoodOverrideRegistry {
     }
 
     private static void parseFromReader(Reader reader) {
+        // Parse the whole document before mutating INSTANCE. Gson rejects trailing commas and other
+        // syntax errors with a RuntimeException; failing here leaves the last good state intact
+        // instead of half-clearing the registry and silently dropping every override.
+        JsonArray arr;
+        try {
+            arr = GSON.fromJson(reader, JsonArray.class);
+        } catch (RuntimeException e) {
+            Nourished.LOGGER.error("[FoodOverrideRegistry] food_overrides.json failed to parse "
+                    + "(check for trailing commas / invalid JSON); keeping previously loaded overrides", e);
+            throw e;
+        }
         INSTANCE.reset();
-        JsonArray arr = GSON.fromJson(reader, JsonArray.class);
         if (arr != null) {
+            int index = 0;
             for (JsonElement el : arr) {
-                JsonObject obj = el.getAsJsonObject();
-                String item = obj.get("item").getAsString();
-                int calories = obj.has("calories") ? obj.get("calories").getAsInt() : 0;
-                boolean enabled = !obj.has("enabled") || obj.get("enabled").getAsBoolean();
+                try {
+                    JsonObject obj = el.getAsJsonObject();
+                    String item = obj.get("item").getAsString();
+                    int calories = obj.has("calories") ? obj.get("calories").getAsInt() : 0;
+                    boolean enabled = !obj.has("enabled") || obj.get("enabled").getAsBoolean();
 
-                Map<String, Float> nutrients = new HashMap<>();
-                if (obj.has("nutrients") && obj.get("nutrients").isJsonObject()) {
-                    JsonObject nutrientsObj = obj.getAsJsonObject("nutrients");
-                    for (Map.Entry<String, JsonElement> entry : nutrientsObj.entrySet()) {
-                        nutrients.put(entry.getKey(), entry.getValue().getAsFloat());
+                    Map<String, Float> nutrients = new HashMap<>();
+                    if (obj.has("nutrients") && obj.get("nutrients").isJsonObject()) {
+                        JsonObject nutrientsObj = obj.getAsJsonObject("nutrients");
+                        for (Map.Entry<String, JsonElement> entry : nutrientsObj.entrySet()) {
+                            nutrients.put(entry.getKey(), entry.getValue().getAsFloat());
+                        }
                     }
-                }
 
-                INSTANCE.register(item, new FoodOverride(item, nutrients, calories, enabled));
+                    INSTANCE.register(item, new FoodOverride(item, nutrients, calories, enabled));
+                } catch (RuntimeException e) {
+                    Nourished.LOGGER.warn("[FoodOverrideRegistry] Skipping malformed override at index {}: {}",
+                            index, e.getMessage());
+                }
+                index++;
             }
         }
         INSTANCE.freeze();

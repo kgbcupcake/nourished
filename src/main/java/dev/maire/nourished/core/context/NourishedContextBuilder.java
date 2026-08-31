@@ -115,7 +115,7 @@ public final class NourishedContextBuilder {
                             stack, level, (int) payload, realSaturation, bars);
                     return new MarieContext.SourceDelta(d.calories(), d.nutrients());
                 })
-                .onReloadBroadcast(NourishedReloadHelper::reloadAndBroadcast)
+                .onReloadBroadcast(NourishedReloadHelper::reregisterAndBroadcast)
                 .postValueModifierHook(NourishedKubeIntegration::fireNutrientModifier)
                 .onCacheInvalidated(() -> {
                     FoodFamilyResolver.clearCache();

@@ -74,11 +74,28 @@ public class ModNetworking {
 
     /** Send lightweight client sync. Call on every food eat and decay tick. */
     public static void syncDietDelta(ServerPlayer player, TrackingData diet) {
-        PacketDistributor.sendToPlayer(player, (SyncDietDeltaPayload) diet.toDeltaPayload());
+        syncDietDelta(player, diet, null);
+    }
+
+    /**
+     * Send lightweight client sync, optionally carrying the food-eaten delta that triggered it.
+     * {@code foodEatenDelta} must be null for any sync not directly caused by an eat event (state
+     * refresh, decay tick, login), so the client only fires an eat notification on an actual meal.
+     */
+    public static void syncDietDelta(
+            ServerPlayer player,
+            TrackingData diet,
+            SyncDietDeltaPayload.FoodEatenDelta foodEatenDelta
+    ) {
+        List<String> recentMeals = dev.maire.nourished.core.diet.DietAttachment.getRecentMeals(player);
+        SyncDietDeltaPayload payload = ((dev.maire.nourished.core.diet.NourishedTrackingData) diet)
+                .toDeltaPayload(recentMeals, foodEatenDelta);
+        PacketDistributor.sendToPlayer(player, payload);
     }
 
     /** Send full TrackingData. Call on login, respawn, dimension change, command only. */
     public static void syncDiet(ServerPlayer player, TrackingData diet) {
+        diet.setRecentIds(dev.maire.nourished.core.diet.DietAttachment.getRecentMeals(player));
         PacketDistributor.sendToPlayer(player, new SyncDietPayload(diet));
     }
 
@@ -158,8 +175,12 @@ public class ModNetworking {
             Map<String, SourceMemoryEntry> foodMemory,
             Map<String, SourceMemoryEntry> categoryMemory,
             Map<String, SourceMemoryEntry> familyMemory,
-            long lastTickTime
+            long lastTickTime,
+            FoodEatenDelta foodEatenDelta
     ) implements CustomPacketPayload {
+
+        /** Present only when this sync was triggered by an actual eat event; null otherwise. */
+        public record FoodEatenDelta(ResourceLocation itemId, float calorieDelta, Map<String, Float> nutrientDeltas) {}
 
         public static final CustomPacketPayload.Type<SyncDietDeltaPayload> TYPE =
                 new CustomPacketPayload.Type<>(
@@ -208,6 +229,13 @@ public class ModNetworking {
                             ModNetworking.encodeFoodMemoryMap(buf, payload.categoryMemory());
                             ModNetworking.encodeFoodMemoryMap(buf, payload.familyMemory());
                             buf.writeLong(payload.lastTickTime());
+                            FoodEatenDelta eaten = payload.foodEatenDelta();
+                            buf.writeBoolean(eaten != null);
+                            if (eaten != null) {
+                                buf.writeResourceLocation(eaten.itemId());
+                                buf.writeFloat(eaten.calorieDelta());
+                                NUTRIENT_MAP_CODEC.encode(buf, eaten.nutrientDeltas());
+                            }
                         },
                         buf -> new SyncDietDeltaPayload(
                                 NUTRIENT_MAP_CODEC.decode(buf),
@@ -222,7 +250,10 @@ public class ModNetworking {
                                 ModNetworking.decodeLinkedFoodMemoryMap(buf),
                                 ModNetworking.decodeHashFoodMemoryMap(buf),
                                 ModNetworking.decodeHashFoodMemoryMap(buf),
-                                buf.readLong()
+                                buf.readLong(),
+                                buf.readBoolean()
+                                        ? new FoodEatenDelta(buf.readResourceLocation(), buf.readFloat(), NUTRIENT_MAP_CODEC.decode(buf))
+                                        : null
                         )
                 );
 

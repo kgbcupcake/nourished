@@ -12,13 +12,18 @@ import java.util.Map;
  */
 public final class NourishedTrackingData extends TrackingData {
 
-    @Override
-    public SyncDietDeltaPayload toDeltaPayload() {
-        List<String> recentFoodIds = sourceMemory.entrySet().stream()
-                .sorted((a, b) -> Long.compare(b.getValue().lastAppliedTick(), a.getValue().lastAppliedTick()))
-                .limit(3)
-                .map(Map.Entry::getKey)
-                .toList();
+    /**
+     * {@code recentFoodIds} comes from {@link DietAttachment#RECENT_MEALS} rather than being
+     * tracked on this class, since that attachment has its own persisted codec (this class's
+     * extra fields would not survive relogin — {@code TrackingData}'s codec only knows about its
+     * own declared fields) and is only ever updated by {@link
+     * dev.maire.nourished.core.handler.NourishedFoodTriggerHandler} when a meal actually changed
+     * something, never on a no-op eat.
+     */
+    public SyncDietDeltaPayload toDeltaPayload(
+            List<String> recentFoodIds,
+            SyncDietDeltaPayload.FoodEatenDelta foodEatenDelta
+    ) {
         List<String> neglectedCategories = getMostNeglectedCategories(2);
         List<String> fatiguedFamilies = getMostFatiguedFamilies(2, lastTickTime);
         return new SyncDietDeltaPayload(
@@ -34,7 +39,8 @@ public final class NourishedTrackingData extends TrackingData {
                 Map.copyOf(sourceMemory),
                 Map.copyOf(categoryMemory),
                 Map.copyOf(familyMemory),
-                lastTickTime
+                lastTickTime,
+                foodEatenDelta
         );
     }
 }

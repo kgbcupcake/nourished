@@ -10,6 +10,7 @@ import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.component.SelfPositioningModule;
+import dev.marie.framework.ui.edit.ContentScaleController;
 import dev.marie.framework.ui.geometry.Bounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -36,6 +37,9 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
     private static final int COL_GREEN = 0xFF55FF55;
     private static final int COL_RED = 0xFFFF5555;
 
+    /** Reference local-unit padding used to derive the user's padding-adjustment range — see {@link ContentScaleController#resolvePadding}. */
+    private static final double BASE_PADDING_LOCAL = 2.0d;
+
     private final DietLayout.Layout layout;
     private final int startLocalY;
     private final boolean visible;
@@ -46,6 +50,7 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
     private final Bounds resolvedBounds;
     private Bounds anchorBounds;
     private double contentScale = 1.0d;
+    private double paddingLocal = 0.0d;
 
     ActiveEffectsComponent(DietLayout.Layout layout, int startLocalY) {
         this.layout = layout;
@@ -145,11 +150,13 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         double widthScale = bounds.width() / (double) bw;
         double heightScale = bounds.height() / (double) effectsBoxH;
         this.contentScale = Math.min(widthScale, heightScale);
-        // contentScale (fitScale) still drives sx/sy unchanged below; the persisted zoom multiplier
-        // only affects the size passed to the header/line text draw calls. Clamped to a flat
-        // [fitScale*0.5, fitScale*3.0] range (see zoomedTextIconScale's javadoc) — real containment
-        // against the box's own edges comes from the pushClip(bounds...) below, not from this range.
-        float scale = DietScreenModules.zoomedTextIconScale(contentScale, widthScale, heightScale, DietScreenPersistence.contentScale(ID));
+        // contentScale (fitScale) still drives sx/sy unchanged below; header/line render scale is the
+        // user's persisted per-box adjustment alone now, sanity-clamped only — no longer capped by
+        // contentScale. Real containment against the box's own edges comes from the
+        // pushClip(bounds...) below.
+        float scale = ContentScaleController.resolveContentScale(DietScreenPersistence.contentScale(ID));
+        double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
+        this.paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         // Header-to-first-line and line-to-line advance must grow by the same ratio zoom grows text
         // draw size by — otherwise bigger zoomed lines visually collide into the next line's still-
         // unzoomed vertical slot, same bug just fixed in RecentMealsComponent (see its render() for
@@ -203,11 +210,11 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
     // rectangle exactly matches the Bounds DraggableResizable's resize handle/hit-testing use.
 
     private int sx(int localX) {
-        return anchorBounds.x() + (int) Math.round(localX * contentScale);
+        return anchorBounds.x() + (int) Math.round((localX + paddingLocal) * contentScale);
     }
 
     private int sy(int localY) {
-        return anchorBounds.y() + (int) Math.round((localY - startLocalY) * contentScale);
+        return anchorBounds.y() + (int) Math.round((localY - startLocalY + paddingLocal) * contentScale);
     }
 
     private void drawText(RenderContext context, String text, int localX, int localY, int color, float scale) {

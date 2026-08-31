@@ -12,14 +12,24 @@ import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.client.screen.diet.dynamic.edit.DietScreenEditTarget;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietPanelContainer;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.ActiveEffectsComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.BalanceComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.marie.framework.api.ApiStatus;
+import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.edit.EditModeController;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.Theme;
 import dev.marie.framework.ui.ThemeKey;
 import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
+import dev.marie.framework.ui.api.MarieScaleConfig;
+import dev.marie.framework.ui.scaleconfig.ScaleConfigEntry;
+import dev.marie.framework.ui.scaleconfig.ScaleConfigPanel;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
@@ -60,6 +70,15 @@ public class DietScreen extends Screen {
     private DietScreenEditTarget marieEditTarget;
     private EditModeController marieEditModeController;
 
+    /**
+     * Editor for the five sub-boxes' persisted contentScale/paddingScale — owned here (not by
+     * {@link DietScreenEditTarget}) so it's visible and interactive on the base Diet Screen itself,
+     * independent of full edit mode (which replaces this screen with a transparent {@code
+     * EditOverlayScreen} that forwards all input to the edit target instead of this class).
+     */
+    private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(scaleConfigEntries(), DietScreenPersistence.get(), Anchor.TOP_RIGHT);
+    private boolean scaleConfigVisible;
+
     /** 0..1 fade-in over {@link #FADE_DURATION_SEC}; updated each render from frame delta. */
     private float fadeAlpha;
     private long fadeLastFrameNanos;
@@ -69,6 +88,22 @@ public class DietScreen extends Screen {
         super(Component.translatable("nourished.screen.diet"));
         fadeAlpha = 0f;
         fadeClockStarted = false;
+    }
+
+    /** Slider-panel rows for the five Diet Screen sub-boxes. */
+    private static List<ScaleConfigEntry> scaleConfigEntries() {
+        return List.of(
+                new ScaleConfigEntry(CaloriesComponent.ID, Component.translatable("nourished.screen.diet.calories_label")),
+                new ScaleConfigEntry(BalanceComponent.ID, Component.translatable("nourished.screen.diet.balance_label")),
+                new ScaleConfigEntry(RecentMealsComponent.ID, Component.translatable("nourished.screen.diet.recent_label")),
+                new ScaleConfigEntry(EatMoreComponent.ID, Component.translatable("nourished.screen.diet.suggestion_label")),
+                new ScaleConfigEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label"))
+        );
+    }
+
+    /** Toggles the scale-config sliders' visibility — used by {@link NourishedKeys#OPEN_SCALE_CONFIG}. */
+    public void toggleScaleConfigVisible() {
+        scaleConfigVisible = !scaleConfigVisible;
     }
 
     @Override
@@ -100,11 +135,14 @@ public class DietScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (scaleConfigVisible && scaleConfigPanel.mouseClicked(mouseX, mouseY, button)) {
+            return true;
+        }
         if (button == 0 && isMouseOverEditModeToggle(DietScreenEditTarget.resolvedPanelLayout(minecraft), mouseX, mouseY)) {
             if (marieEditModeController != null && marieEditModeController.isActive()) {
                 marieEditModeController.exit();
             } else {
-                marieEditModeController().enter();
+                enterEditModeWithScaleConfig();
             }
             return true;
         }
@@ -148,9 +186,24 @@ public class DietScreen extends Screen {
     }
 
     @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (scaleConfigVisible && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (NourishedKeys.EDIT_DIET_SCREEN.matches(keyCode, scanCode)) {
-            marieEditModeController().enter();
+            enterEditModeWithScaleConfig();
+            return true;
+        }
+        if (NourishedKeys.OPEN_SCALE_CONFIG.matches(keyCode, scanCode)) {
+            toggleScaleConfigVisible();
+            while (NourishedKeys.OPEN_SCALE_CONFIG.consumeClick()) {
+                // drain the queued click so ClientEvents.onClientTick doesn't also toggle it next tick
+            }
             return true;
         }
         if (NourishedKeys.OPEN_DIET_SCREEN.matches(keyCode, scanCode)) {
@@ -166,14 +219,17 @@ public class DietScreen extends Screen {
     /**
      * Lazily builds the MarieUI edit-mode wrapper + controller on first entry (see field javadoc
      * for why this can't happen in {@link #init()} or per-frame), then reuses the same instances
-     * for the rest of this screen's lifetime.
+     * for the rest of this screen's lifetime. Public so callers outside this screen (e.g.
+     * {@code ClientEvents#openOrToggleScaleConfig}) can drive edit mode the same way the J
+     * keybind does, without duplicating this lazy-construction logic.
      */
-    private EditModeController marieEditModeController() {
+    public EditModeController marieEditModeController() {
         if (marieEditModeController == null) {
             // marieEditModeController is assigned below, before the exit callback can ever
             // actually run (it's only reachable via a click inside an already-active edit
             // overlay) — safe despite referencing the not-yet-assigned field here.
-            marieEditTarget = new DietScreenEditTarget(minecraft, () -> marieEditModeController.exit());
+            marieEditTarget = new DietScreenEditTarget(minecraft, () -> marieEditModeController.exit(),
+                    scaleConfigPanel, () -> scaleConfigVisible);
             marieEditModeController = new EditModeController(
                     marieEditTarget,
                     "Drag boxes to reposition, drag corner handles to resize. J or Esc to exit.",
@@ -182,6 +238,23 @@ public class DietScreen extends Screen {
             );
         }
         return marieEditModeController;
+    }
+
+    /**
+     * J ({@link NourishedKeys#EDIT_DIET_SCREEN}) and the edit-mode toggle button both enter edit
+     * mode directly through here, so the scale panel always appears alongside edit mode regardless
+     * of which of the two triggered it. Deliberately not folded into {@link
+     * #marieEditModeController()} itself — {@code ClientEvents#openOrToggleScaleConfig} also calls
+     * {@code marieEditModeController().enter()} directly, after already managing {@link
+     * #scaleConfigVisible} itself via {@link #toggleScaleConfigVisible()} (including toggling it
+     * back off); forcing it {@code true} inside {@code marieEditModeController()} would stomp that
+     * toggle-off every time. Only sets it {@code true} on entry — exiting edit mode (J/Esc from
+     * within the edit overlay, or the toggle button's own exit branch) is untouched and keeps
+     * hiding/showing the scale panel exactly as it already does.
+     */
+    private void enterEditModeWithScaleConfig() {
+        scaleConfigVisible = true;
+        marieEditModeController().enter();
     }
 
     @Override
@@ -233,6 +306,10 @@ public class DietScreen extends Screen {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         if (showIconTooltips && data != null) {
             drawDietIconTooltips(g, layout, mx, my);
+        }
+        if (scaleConfigVisible) {
+            RenderContext scaleContext = new GuiGraphicsRenderContext(g, minecraft, Theme.DARK, pt);
+            scaleConfigPanel.render(scaleContext, new Bounds(0, 0, this.width, this.height));
         }
         super.render(g, mx, my, pt);
     }

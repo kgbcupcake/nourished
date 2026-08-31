@@ -47,6 +47,9 @@ public final class HudDrawHelpers {
     private static final int COL_RED = 0xFFFF5555;
     private static final int COL_GOLD = 0xFFFFD65C;
 
+    /** Calorie-accent color used wherever a calorie value is drawn (matches {@code COL_PCT_GOOD}/{@code CaloriesComponent}'s calorie text). */
+    public static final int CALORIE_COLOR = 0xFF55FF55;
+
     private HudDrawHelpers() {}
 
     public static int panelColor(double opacity) {
