@@ -201,6 +201,7 @@ public class DietScreen extends Screen {
         }
         if (NourishedKeys.OPEN_SCALE_CONFIG.matches(keyCode, scanCode)) {
             toggleScaleConfigVisible();
+            marieEditModeController().enter();
             while (NourishedKeys.OPEN_SCALE_CONFIG.consumeClick()) {
                 // drain the queued click so ClientEvents.onClientTick doesn't also toggle it next tick
             }
