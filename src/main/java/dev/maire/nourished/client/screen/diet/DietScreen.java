@@ -71,11 +71,10 @@ public class DietScreen extends Screen {
     private EditModeController marieEditModeController;
 
     /**
-     * Slider-based alternative to double-click+scroll for the five sub-boxes' persisted
-     * contentScale/paddingScale — owned here (not by {@link DietScreenEditTarget}) so it's visible
-     * and interactive on the base Diet Screen itself, independent of full edit mode (which replaces
-     * this screen with a transparent {@code EditOverlayScreen} that forwards all input to the edit
-     * target instead of this class).
+     * Editor for the five sub-boxes' persisted contentScale/paddingScale — owned here (not by
+     * {@link DietScreenEditTarget}) so it's visible and interactive on the base Diet Screen itself,
+     * independent of full edit mode (which replaces this screen with a transparent {@code
+     * EditOverlayScreen} that forwards all input to the edit target instead of this class).
      */
     private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(scaleConfigEntries(), DietScreenPersistence.get(), Anchor.TOP_RIGHT);
     private boolean scaleConfigVisible;

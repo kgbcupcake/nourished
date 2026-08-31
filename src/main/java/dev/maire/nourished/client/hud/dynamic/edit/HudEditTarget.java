@@ -7,13 +7,17 @@ import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.AutoGrowPanelContainer;
 import dev.marie.framework.ui.component.ComponentState;
 import dev.marie.framework.ui.component.Constraint;
+import dev.marie.framework.ui.edit.ContentScaleController;
 import dev.marie.framework.ui.edit.DraggableResizable;
+import dev.marie.framework.ui.api.MarieScaleConfig;
 import dev.marie.framework.ui.api.SnapRegistry;
 import dev.marie.framework.ui.geometry.Insets;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.geometry.Size;
 import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
+import dev.marie.framework.ui.scaleconfig.ScaleConfigEntry;
+import dev.marie.framework.ui.scaleconfig.ScaleConfigPanel;
 import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.client.hud.classic.ClassicHudPanelRenderer;
@@ -23,6 +27,7 @@ import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -61,6 +66,17 @@ public final class HudEditTarget implements MarieComponent {
     private final Minecraft mc;
     private final DraggableResizable panelDrag;
 
+    /**
+     * Editor for this panel's persisted contentScale/paddingScale — same pattern as {@code
+     * CalorieHudScreen}/{@code ActivityLogHudPanel}'s own single-entry {@code ScaleConfigPanel}, just
+     * owned here instead since this class (not {@code NourishedHUD}) is the actual edit-mode {@link
+     * MarieComponent}. Editing happens only through this card.
+     */
+    private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(
+            List.of(new ScaleConfigEntry(PANEL_ID, Component.translatable("nourished.hud.nutrientPanel.label"))),
+            UiStatePersistence.get(), Anchor.TOP_RIGHT);
+    private boolean scaleConfigVisible;
+
     public HudEditTarget(Minecraft mc) {
         this.mc = mc;
 
@@ -80,6 +96,26 @@ public final class HudEditTarget implements MarieComponent {
         panelDrag = new DraggableResizable(this, constraint, (target, bounds) -> commit(bounds));
         panelDrag.setSnapRegistryId(PANEL_ID);
         SnapRegistry.register(PANEL_ID, () -> resolvedBounds(this.mc, currentVisibleKeysOrFallback()));
+    }
+
+    /** Shows this panel's {@link ScaleConfigPanel} alongside edit mode — called from both the H-keybind path ({@code NourishedHUD#enterEditModeWithScaleConfig}) and the "edit all HUDs" group entry ({@code NourishedHUD#showScaleConfigOnGroupEntry}). Never reset back to false on exit, same as {@code CalorieHudScreen}/{@code ActivityLogHudPanel}. */
+    public void setScaleConfigVisible(boolean visible) {
+        this.scaleConfigVisible = visible;
+    }
+
+    /**
+     * This panel's persisted text-scale multiplier, read directly off the same {@link
+     * UiStatePersistence} record {@link #commit} writes position/size into — no {@link
+     * ContentScaleController} instance is needed here, only {@link
+     * ContentScaleController#resolveContentScale}'s static pass-through at render time.
+     */
+    public static double persistedContentScale() {
+        return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::contentScale).orElse(ComponentState.DEFAULT_CONTENT_SCALE);
+    }
+
+    /** This panel's persisted padding multiplier — see {@link #persistedContentScale()}. */
+    public static double persistedPaddingScale() {
+        return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::paddingScale).orElse(ComponentState.DEFAULT_PADDING_SCALE);
     }
 
     /** Same "empty visible keys -> fall back to every registered nutrient" reasoning the constructor uses above, so the {@link SnapRegistry} bounds supplier never resolves an empty-key layout while other components still expect this panel's real on-screen box. */
@@ -157,9 +193,14 @@ public final class HudEditTarget implements MarieComponent {
                 : persistedLeftMargin();
         AutoGrowPanelContainer.ManualOverride existing = existingManualOverride();
         AutoGrowPanelContainer.ManualOverride override = AutoGrowPanelContainer.withCommit(existing, panelDrag);
+        // Carries forward the existing persisted contentScale/paddingScale so a drag/resize commit
+        // never resets the user's text-scale or padding adjustment — same fix CalorieHudScreen/
+        // ActivityLogHudPanel's own commit() already applies.
+        double contentScale = persistedContentScale();
+        double paddingScale = persistedPaddingScale();
         UiStatePersistence.get().save(PANEL_ID, new ComponentState(
                 bounds.x(), bounds.y(), bounds.width(), bounds.height(), false,
-                override.widthManual(), override.heightManual(), leftMargin));
+                override.widthManual(), override.heightManual(), leftMargin, contentScale, paddingScale));
     }
 
     @Override
@@ -176,12 +217,20 @@ public final class HudEditTarget implements MarieComponent {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (scaleConfigVisible && scaleConfigPanel.mouseClicked(mouseX, mouseY, button)) {
+            return true;
+        }
         List<String> keys = currentVisibleKeys();
         if (keys.isEmpty()) {
             return false;
         }
         Bounds bounds = resolvedBounds(mc, keys);
         return panelDrag.mouseClicked((int) mouseX, (int) mouseY, bounds);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        return scaleConfigVisible && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
@@ -231,6 +280,10 @@ public final class HudEditTarget implements MarieComponent {
             Bounds strip = DraggableResizable.edgeHandleBounds(bounds, edge);
             context.drawEdgeHandle(strip.x(), strip.y(), strip.width(), strip.height(), mouse[0], mouse[1],
                     panelDrag.isEdgeHovered(mouse[0], mouse[1], bounds, edge), panelDrag.isEdgeActive(edge));
+        }
+
+        if (scaleConfigVisible) {
+            scaleConfigPanel.render(context, new Bounds(0, 0, context.screenWidth(), context.screenHeight()));
         }
     }
 

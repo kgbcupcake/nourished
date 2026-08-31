@@ -35,7 +35,8 @@ public final class ClientEventRegistrar {
                 "nourished.hud",
                 NourishedHUD::editTarget,
                 "Drag the HUD panel to reposition, drag the corner handle to resize. H or Esc to exit.",
-                NourishedKeys.EDIT_HUD.getKey().getValue()
+                NourishedKeys.EDIT_HUD.getKey().getValue(),
+                NourishedHUD::showScaleConfigOnGroupEntry
         );
         EditModeCoordinator.registerGroupCapable(
                 "nourished.calorieHud",

@@ -1670,6 +1670,10 @@
       "required": false
     },
     {
+      "id": "createfood:egg_bucket",
+      "required": false
+    },
+    {
       "id": "createfood:egg_burrito",
       "required": false
     },
@@ -1695,6 +1699,18 @@
     },
     {
       "id": "createfood:egg_dumplings",
+      "required": false
+    },
+    {
+      "id": "createfood:egg_powder",
+      "required": false
+    },
+    {
+      "id": "createfood:egg_whites_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:egg_whites_bucket",
       "required": false
     },
     {
@@ -1786,6 +1802,38 @@
       "required": false
     },
     {
+      "id": "createfood:ground_beef",
+      "required": false
+    },
+    {
+      "id": "createfood:ground_chicken",
+      "required": false
+    },
+    {
+      "id": "createfood:ground_endermite",
+      "required": false
+    },
+    {
+      "id": "createfood:ground_mutton",
+      "required": false
+    },
+    {
+      "id": "createfood:ground_pork",
+      "required": false
+    },
+    {
+      "id": "createfood:ground_rabbit",
+      "required": false
+    },
+    {
+      "id": "createfood:ground_sausage",
+      "required": false
+    },
+    {
+      "id": "createfood:gyro_meat_block",
+      "required": false
+    },
+    {
       "id": "createfood:gyro_meat_slice",
       "required": false
     },
@@ -1871,6 +1919,10 @@
     },
     {
       "id": "createfood:macaroni_bowl_sausage",
+      "required": false
+    },
+    {
+      "id": "createfood:minced_dragon",
       "required": false
     },
     {
@@ -2006,6 +2058,58 @@
       "required": false
     },
     {
+      "id": "createfood:rabbit_cuts",
+      "required": false
+    },
+    {
+      "id": "createfood:rabbit_jerky",
+      "required": false
+    },
+    {
+      "id": "createfood:rabbit_meatball",
+      "required": false
+    },
+    {
+      "id": "createfood:rabbit_meatball_stick_1",
+      "required": false
+    },
+    {
+      "id": "createfood:rabbit_meatball_stick_2",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_beef_meatball",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_chicken_patty",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_endermite_meatball",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_gyro_meat_block",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_pork_meatball",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_rabbit_meatball",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_sausage_patty",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_strider_meatball",
+      "required": false
+    },
+    {
       "id": "createfood:sausage_biscuit_cheese",
       "required": false
     },
@@ -2059,6 +2163,18 @@
     },
     {
       "id": "createfood:spicy_sausages",
+      "required": false
+    },
+    {
+      "id": "createfood:strider_meatball",
+      "required": false
+    },
+    {
+      "id": "createfood:strider_meatball_stick_1",
+      "required": false
+    },
+    {
+      "id": "createfood:strider_meatball_stick_2",
       "required": false
     },
     {

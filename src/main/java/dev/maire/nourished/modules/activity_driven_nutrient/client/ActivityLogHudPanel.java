@@ -118,14 +118,13 @@ public final class ActivityLogHudPanel implements MarieComponent {
 
     private static ActivityLogHudPanel instance;
     private static EditModeController editModeController;
-    private static ContentScaleController scaleController;
 
     private final DraggableResizable drag;
 
     /**
-     * Slider-based alternative to double-click+scroll for this panel's persisted
-     * contentScale/paddingScale, auto-shown alongside edit mode — same pattern as {@code
-     * DietScreen#scaleConfigPanel}, just with a single entry since this panel has no sub-boxes.
+     * Editor for this panel's persisted contentScale/paddingScale, auto-shown alongside edit mode —
+     * same pattern as {@code DietScreen#scaleConfigPanel}, just with a single entry since this panel
+     * has no sub-boxes.
      */
     private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(
             List.of(new ScaleConfigEntry(PANEL_ID, Component.translatable("nourished.hud.activityLog.label"))),
@@ -153,14 +152,6 @@ public final class ActivityLogHudPanel implements MarieComponent {
             instance = new ActivityLogHudPanel();
         }
         return instance;
-    }
-
-    /** This panel's own {@link ContentScaleController} — independent of every other component's, so zooming/padding-adjusting this panel never affects another's active mode. */
-    private static ContentScaleController scaleController() {
-        if (scaleController == null) {
-            scaleController = new ContentScaleController(UiStatePersistence.get());
-        }
-        return scaleController;
     }
 
     private static EditModeController editModeController() {
@@ -374,14 +365,14 @@ public final class ActivityLogHudPanel implements MarieComponent {
                 widthManual, heightManual, 0, contentScale, paddingScale));
     }
 
-    /** This panel's persisted text-scale multiplier — see {@link ContentScaleController#contentScaleAdjustment}. */
+    /** This panel's persisted text-scale multiplier — defaults to {@link ComponentState#DEFAULT_CONTENT_SCALE} if never set. */
     private static double persistedContentScale() {
-        return scaleController().contentScaleAdjustment(PANEL_ID);
+        return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::contentScale).orElse(ComponentState.DEFAULT_CONTENT_SCALE);
     }
 
-    /** This panel's persisted padding multiplier — see {@link ContentScaleController#paddingScaleAdjustment}. */
+    /** This panel's persisted padding multiplier — defaults to {@link ComponentState#DEFAULT_PADDING_SCALE} if never set. */
     private static double persistedPaddingScale() {
-        return scaleController().paddingScaleAdjustment(PANEL_ID);
+        return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::paddingScale).orElse(ComponentState.DEFAULT_PADDING_SCALE);
     }
 
     @Override
@@ -402,18 +393,12 @@ public final class ActivityLogHudPanel implements MarieComponent {
             return true;
         }
         Bounds bounds = resolvedBounds(currentRows().size());
-        if (scaleController().onClick(PANEL_ID, button, mouseX, mouseY, bounds)) {
-            return true;
-        }
         return drag.mouseClicked((int) mouseX, (int) mouseY, bounds);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (scaleConfigVisible && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
-            return true;
-        }
-        return scaleController().handleScroll(PANEL_ID, scrollY);
+        return scaleConfigVisible && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
@@ -450,28 +435,10 @@ public final class ActivityLogHudPanel implements MarieComponent {
             context.drawEdgeHandle(strip.x(), strip.y(), strip.width(), strip.height(), mouse[0], mouse[1],
                     drag.isEdgeHovered(mouse[0], mouse[1], bounds, edge), drag.isEdgeActive(edge));
         }
-        drawScaleOverlay(context, bounds);
 
         if (scaleConfigVisible) {
             scaleConfigPanel.render(context, new Bounds(0, 0, context.screenWidth(), context.screenHeight()));
         }
-    }
-
-    /** While the panel's {@link ContentScaleController} has an active mode, shows the current text-scale or padding percentage below the box so scroll-wheel adjustments are visible — same look as {@code DietScreenEditTarget#drawZoomLabel}. */
-    private void drawScaleOverlay(RenderContext context, Bounds bounds) {
-        ContentScaleController.Mode mode = scaleController().activeMode(PANEL_ID);
-        String label = switch (mode) {
-            case TEXT_SCALE -> "TEXT SCALE " + Math.round(persistedContentScale() * 100) + "%";
-            case PADDING -> "PADDING " + Math.round(persistedPaddingScale() * 100) + "%";
-            case NONE -> null;
-        };
-        if (label == null) {
-            return;
-        }
-        int lx = bounds.x() + 4;
-        int ly = bounds.y() + bounds.height() + 6;
-        context.drawText(label, lx + 1, ly + 1, 0xFF000000, 0.75f);
-        context.drawText(label, lx, ly, 0xFFFFFFFF, 0.75f);
     }
 
     private Bounds liveOrDefault(int mx, int my, Bounds fallback) {

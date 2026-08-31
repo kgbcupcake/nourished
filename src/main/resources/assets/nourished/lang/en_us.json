@@ -9,6 +9,7 @@
   "nourished.hud.calorieHistory.daysAgo": "%1$s days ago",
   "nourished.hud.calorieHistory.label": "Calorie History",
   "nourished.hud.activityLog.label": "Activity Log",
+  "nourished.hud.nutrientPanel.label": "Nutrient HUD",
   "nourished.screen.diet.balance_label": "Balance",
   "nourished.screen.diet.balance_state.balanced": "Balanced",
   "nourished.screen.diet.balance_state.low": "Low",

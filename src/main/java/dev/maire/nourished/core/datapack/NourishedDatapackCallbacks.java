@@ -14,7 +14,10 @@ import dev.marie.framework.compat.ModCompat;
 import dev.marie.framework.data.MarieDataLoader;
 import dev.marie.framework.registry.MarieApiRegistries;
 import dev.marie.framework.runtime.SourceRegistry;
+import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Map;
 
 @ApiStatus.Internal
 public final class NourishedDatapackCallbacks implements MarieDataLoader.Callbacks {
@@ -22,12 +25,19 @@ public final class NourishedDatapackCallbacks implements MarieDataLoader.Callbac
     @Override
     public void onApplyBegin() {
         SourceRegistry.clearExternalClassifications();
+        FoodOverrideRegistry.beginDatapackReplace();
         MarieApiRegistries.onDatapackApplyBegin();
     }
 
     @Override
     public void onApplyEnd() {
         MarieApiRegistries.onDatapackApplyEnd();
+        FoodOverrideRegistry.endDatapackReplace();
+    }
+
+    @Override
+    public void registerFoodOverride(ResourceLocation itemId, Map<String, Float> nutrients, int calories, boolean enabled) {
+        FoodOverrideRegistry.acceptDatapackOverride(itemId.toString(), nutrients, calories, enabled);
     }
 
     @Override

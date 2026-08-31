@@ -470,6 +470,14 @@
       "required": false
     },
     {
+      "id": "createfood:diced_onion",
+      "required": false
+    },
+    {
+      "id": "createfood:diced_tomato",
+      "required": false
+    },
+    {
       "id": "createfood:dragon_burger_crimson_fungus",
       "required": false
     },
@@ -694,7 +702,15 @@
       "required": false
     },
     {
+      "id": "createfood:pizza_dough_tomato_sauce",
+      "required": false
+    },
+    {
       "id": "createfood:pork_wrap_onion_lettuce",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_cheese_pizza",
       "required": false
     },
     {
@@ -706,7 +722,27 @@
       "required": false
     },
     {
+      "id": "createfood:shredded_beetroot",
+      "required": false
+    },
+    {
+      "id": "createfood:shredded_carrot",
+      "required": false
+    },
+    {
+      "id": "createfood:sliced_beetroot",
+      "required": false
+    },
+    {
+      "id": "createfood:sliced_carrot",
+      "required": false
+    },
+    {
       "id": "createfood:sliced_crimson_fungus",
+      "required": false
+    },
+    {
+      "id": "createfood:sliced_onion",
       "required": false
     },
     {
@@ -714,7 +750,19 @@
       "required": false
     },
     {
+      "id": "createfood:sliced_tomato",
+      "required": false
+    },
+    {
       "id": "createfood:sliced_warped_fungus",
+      "required": false
+    },
+    {
+      "id": "createfood:taco_sauce_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:taco_sauce_bucket",
       "required": false
     },
     {

@@ -1,7 +1,6 @@
 package dev.maire.nourished.client.screen.diet.dynamic.persistence;
 
 import dev.marie.framework.ui.component.ComponentState;
-import dev.marie.framework.ui.edit.ContentScaleController;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.PersistenceProvider;
 import dev.maire.nourished.client.UiStatePersistence;
@@ -9,7 +8,6 @@ import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.config.NourishedClientConfig;
-import net.minecraft.util.Mth;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,17 +47,6 @@ public final class DietScreenPersistence {
         liveOverrides.clear();
     }
 
-    /**
-     * Storage range for the five Diet Screen sub-boxes' persisted content zoom/padding multipliers.
-     * This is the only clamp that applies to them: {@link ContentScaleController#resolveContentScale}/
-     * {@link ContentScaleController#resolvePadding} now just pass the persisted value through
-     * (sanity-clamped against degenerate values, not against box fit), so a box too small for the
-     * player's chosen zoom has its content cut off by that box's own clip region instead of being
-     * capped down.
-     */
-    private static final double CONTENT_SCALE_MIN = 0.1d;
-    private static final double CONTENT_SCALE_MAX = 5.0d;
-
     /** A box's persisted content zoom multiplier — see {@link ComponentState#contentScale()}. Defaults to {@code 1.0} (no zoom) if never set. */
     public static double contentScale(String componentId) {
         return get().load(componentId).map(ComponentState::contentScale).orElse(ComponentState.DEFAULT_CONTENT_SCALE);
@@ -68,59 +55,6 @@ public final class DietScreenPersistence {
     /** A box's persisted padding multiplier — see {@link ComponentState#paddingScale()}. Defaults to {@code 1.0} (no adjustment) if never set. */
     public static double paddingScale(String componentId) {
         return get().load(componentId).map(ComponentState::paddingScale).orElse(ComponentState.DEFAULT_PADDING_SCALE);
-    }
-
-    /**
-     * Adjusts {@code componentId}'s persisted content-scale (in {@link ContentScaleController.Mode#TEXT_SCALE})
-     * or padding ({@link ContentScaleController.Mode#PADDING}) multiplier by {@code delta}, clamped to
-     * {@code [CONTENT_SCALE_MIN, CONTENT_SCALE_MAX]} — the storage ceiling, not the effective
-     * on-screen range (see {@link #CONTENT_SCALE_MIN}). Leaves the box's own position/size fields
-     * untouched: if nothing is persisted yet for this box, one is derived from {@code currentBounds}
-     * (today's natural stacked position) rather than defaulted to zero, since {@link
-     * #resolveRelativeToPanel} reads a saved state's x/y unconditionally regardless of the manual
-     * size flags — a zeroed x/y would silently relocate the box to the panel's top-left corner. This
-     * is why {@link ContentScaleController#handleScroll} itself is not used here: its own fallback
-     * defaults x/y to 0 rather than deriving from a live position.
-     */
-    public static void adjustScale(String componentId, ContentScaleController.Mode mode, DietLayout.Layout panelLayout, Bounds currentBounds, double delta) {
-        if (mode == ContentScaleController.Mode.NONE) {
-            return;
-        }
-        ComponentState base = existingOrDerived(componentId, panelLayout, currentBounds);
-        if (mode == ContentScaleController.Mode.TEXT_SCALE) {
-            double newScale = Mth.clamp(base.contentScale() + delta, CONTENT_SCALE_MIN, CONTENT_SCALE_MAX);
-            get().save(componentId, withContentScale(base, newScale));
-        } else {
-            double newPadding = Mth.clamp(base.paddingScale() + delta, CONTENT_SCALE_MIN, CONTENT_SCALE_MAX);
-            get().save(componentId, withPaddingScale(base, newPadding));
-        }
-    }
-
-    private static ComponentState existingOrDerived(String componentId, DietLayout.Layout panelLayout, Bounds currentBounds) {
-        return get().load(componentId).orElseGet(() -> relativeState(panelLayout, currentBounds));
-    }
-
-    /** Converts an absolute-pixel {@code bounds} into a not-manually-sized {@link ComponentState}, normalized the same way {@code DietScreenEditTarget#toRelativeState} normalizes a committed drag/resize. */
-    private static ComponentState relativeState(DietLayout.Layout panelLayout, Bounds bounds) {
-        double scale = panelLayout.scale();
-        int contentX = panelLayout.panelX() + panelLayout.leftMargin();
-        return new ComponentState(
-                (int) Math.round((bounds.x() - contentX) / scale),
-                (int) Math.round((bounds.y() - panelLayout.panelY()) / scale),
-                (int) Math.round(bounds.width() / scale),
-                (int) Math.round(bounds.height() / scale),
-                false, false, false, 0
-        );
-    }
-
-    private static ComponentState withContentScale(ComponentState base, double contentScale) {
-        return new ComponentState(base.x(), base.y(), base.width(), base.height(), base.collapsed(),
-                base.widthManual(), base.heightManual(), base.leftMargin(), contentScale, base.paddingScale());
-    }
-
-    private static ComponentState withPaddingScale(ComponentState base, double paddingScale) {
-        return new ComponentState(base.x(), base.y(), base.width(), base.height(), base.collapsed(),
-                base.widthManual(), base.heightManual(), base.leftMargin(), base.contentScale(), paddingScale);
     }
 
     /** Resolves a sub-box's screen bounds relative to the panel: a live drag/resize preview if one is active this frame, else persisted local-unit offset/size if manually moved/resized, otherwise the natural stacked position. */

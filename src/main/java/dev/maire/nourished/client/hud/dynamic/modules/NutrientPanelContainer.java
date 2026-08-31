@@ -7,9 +7,11 @@ import dev.marie.framework.ui.component.Container;
 import dev.marie.framework.ui.Layout;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
+import dev.marie.framework.ui.edit.ContentScaleController;
 import dev.marie.framework.ui.layout.HorizontalLayout;
 import dev.marie.framework.ui.layout.VerticalLayout;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
+import dev.maire.nourished.client.hud.dynamic.edit.HudEditTarget;
 import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
 import dev.maire.nourished.config.NourishedClientConfig;
 
@@ -26,6 +28,9 @@ import java.util.Map;
  */
 public final class NutrientPanelContainer implements Container {
 
+    /** Reference local padding value the user's persisted paddingScale multiplies, analogous to {@code CalorieHudScreen}'s own {@code PADDING} constant — reuses {@link HudDrawHelpers#PANEL_PAD}, the same base value {@link HudLayout#compute} derives its own (box-geometry-only) {@code scaledPad} from. */
+    private static final int BASE_PAD = HudDrawHelpers.PANEL_PAD;
+
     private final List<MarieComponent> children = new ArrayList<>();
     private final Layout layout;
     private final HudLayout.Layout hudLayout;
@@ -33,8 +38,13 @@ public final class NutrientPanelContainer implements Container {
     public NutrientPanelContainer(List<String> keys, HudLayout.Layout hudLayout, Map<String, Float> displayValues) {
         this.hudLayout = hudLayout;
         boolean verticalMode = hudLayout.verticalLayout();
+        // Text/icon render scale is the user's persisted per-panel adjustment alone — hudLayout's own
+        // scale (cc.hudScale()) stays in use for row/column geometry (rowH, iconSize positions, barW,
+        // panel natural size) below and in HudLayout itself, same separation the other 7
+        // ContentScaleController-managed modules maintain.
+        float contentScale = (float) ContentScaleController.resolveContentScale(HudEditTarget.persistedContentScale());
         for (String key : keys) {
-            children.add(new NutrientBarComponent(key, verticalMode, hudLayout, displayValues));
+            children.add(new NutrientBarComponent(key, verticalMode, hudLayout, displayValues, contentScale));
         }
         if (verticalMode) {
             int columnGap = Math.max(2, (int) Math.round(HudDrawHelpers.VERTICAL_COLUMN_GAP * hudLayout.scale()));
@@ -90,7 +100,10 @@ public final class NutrientPanelContainer implements Container {
             int panelColor = HudDrawHelpers.panelColor(bgOpacity);
             context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 2, panelColor, panelColor);
         }
-        int pad = hudLayout.scaledPad();
+        // Content position offset is the user's persisted padding adjustment alone — hudLayout's own
+        // scaledPad (box geometry, used for this panel's natural size in HudLayout#compute) plays no
+        // part in it, same separation as contentScale above.
+        int pad = Math.round(ContentScaleController.resolvePadding(BASE_PAD * HudEditTarget.persistedPaddingScale()));
         int leftMargin = hudLayout.leftMargin();
         int availableW = Math.max(0, bounds.width() - 2 * pad - leftMargin);
         int availableH = Math.max(0, bounds.height() - 2 * pad);

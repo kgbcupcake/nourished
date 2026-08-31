@@ -85,8 +85,30 @@ public final class NourishedHUD {
             return;
         }
         while (NourishedKeys.EDIT_HUD.consumeClick()) {
-            marieEditModeController().enter();
+            enterEditModeWithScaleConfig();
         }
+    }
+
+    /**
+     * H ({@link NourishedKeys#EDIT_HUD}) enters edit mode through here so {@link HudEditTarget}'s
+     * own {@code ScaleConfigPanel} always appears alongside it — same pattern as {@code
+     * CalorieHudScreen#enterEditModeWithScaleConfig}/{@code ActivityLogHudPanel}'s equivalent.
+     */
+    private static void enterEditModeWithScaleConfig() {
+        editTarget().setScaleConfigVisible(true);
+        marieEditModeController().enter();
+    }
+
+    /**
+     * Group-entry counterpart to {@link #enterEditModeWithScaleConfig()} — sets the scale config
+     * panel visible without itself entering edit mode, since the group path (unlike the H keybind's
+     * individual path above) already opens the shared overlay via {@code
+     * EditModeCoordinator.enterAll()}. Passed as the {@code onGroupEnter} callback to {@code
+     * EditModeCoordinator.registerGroupCapable} in {@code ClientEventRegistrar}, matching {@code
+     * CalorieHudScreen}/{@code ActivityLogHudPanel}'s own {@code showScaleConfigOnGroupEntry}.
+     */
+    public static void showScaleConfigOnGroupEntry() {
+        editTarget().setScaleConfigVisible(true);
     }
 
     /**

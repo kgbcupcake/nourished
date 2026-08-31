@@ -254,6 +254,10 @@
       "required": false
     },
     {
+      "id": "createfood:butter",
+      "required": false
+    },
+    {
       "id": "createfood:butterscotch",
       "required": false
     },
@@ -314,6 +318,10 @@
       "required": false
     },
     {
+      "id": "createfood:cheese_block",
+      "required": false
+    },
+    {
       "id": "createfood:cheese_calzone",
       "required": false
     },
@@ -359,6 +367,10 @@
     },
     {
       "id": "createfood:cheeseburger_tomato",
+      "required": false
+    },
+    {
+      "id": "createfood:cheesecake_filling_bucket",
       "required": false
     },
     {
@@ -598,6 +610,10 @@
       "required": false
     },
     {
+      "id": "createfood:condensed_milk_bucket",
+      "required": false
+    },
+    {
       "id": "createfood:cream_cake_slice",
       "required": false
     },
@@ -607,6 +623,14 @@
     },
     {
       "id": "createfood:cream_cake_slice_glow_berry",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_cheese",
+      "required": false
+    },
+    {
+      "id": "createfood:cream_cheese_bucket",
       "required": false
     },
     {
@@ -699,6 +723,10 @@
     },
     {
       "id": "createfood:custard_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:custard_bucket",
       "required": false
     },
     {
@@ -846,6 +874,14 @@
       "required": false
     },
     {
+      "id": "createfood:heavy_cream_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:heavy_cream_bucket",
+      "required": false
+    },
+    {
       "id": "createfood:hollow_white_chocolate",
       "required": false
     },
@@ -863,6 +899,10 @@
     },
     {
       "id": "createfood:ice_cream_stick",
+      "required": false
+    },
+    {
+      "id": "createfood:liquid_cheese_bucket",
       "required": false
     },
     {
@@ -978,6 +1018,10 @@
       "required": false
     },
     {
+      "id": "createfood:milk_powder",
+      "required": false
+    },
+    {
       "id": "createfood:milkshake_bottle",
       "required": false
     },
@@ -1026,6 +1070,14 @@
       "required": false
     },
     {
+      "id": "createfood:raw_cheese_calzone",
+      "required": false
+    },
+    {
+      "id": "createfood:raw_cheese_pizza",
+      "required": false
+    },
+    {
       "id": "createfood:rice_pudding_bowl",
       "required": false
     },
@@ -1035,6 +1087,10 @@
     },
     {
       "id": "createfood:white_chocolate_bottle",
+      "required": false
+    },
+    {
+      "id": "createfood:white_chocolate_chips",
       "required": false
     },
     {
