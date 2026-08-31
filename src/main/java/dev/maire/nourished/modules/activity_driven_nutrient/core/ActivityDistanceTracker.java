@@ -36,6 +36,10 @@ public final class ActivityDistanceTracker {
 
     /** Call once per server player tick to update the cache and accumulate sprint/swim distance. */
     public static void onPlayerTick(ServerPlayer player) {
+        if (!ActivityDrivenNutrientConfig.get().enabled()) {
+            return;
+        }
+
         UUID id = player.getUUID();
         Vec3 currentPos = player.position();
         ResourceKey<Level> currentDim = player.level().dimension();
@@ -54,11 +58,11 @@ public final class ActivityDistanceTracker {
 
         if (distSq > 0) {
             double delta = Math.sqrt(distSq);
-            if (player.isSprinting()) {
+            if (player.isSprinting() && ActivityDrivenNutrientConfig.get().sprintEnabled()) {
                 MarieTracking.incrementTracker(player, ActivityTrackerIds.SPRINT_DISTANCE_ID, (float) delta);
                 TrackerMilestoneTracker.onTrackerIncremented(player, ActivityTrackerIds.SPRINT_DISTANCE_ID, (float) delta);
             }
-            if (player.isSwimming() && player.isInWater()) {
+            if (player.isSwimming() && player.isInWater() && ActivityDrivenNutrientConfig.get().swimEnabled()) {
                 MarieTracking.incrementTracker(player, ActivityTrackerIds.SWIM_DISTANCE_ID, (float) delta);
                 TrackerMilestoneTracker.onTrackerIncremented(player, ActivityTrackerIds.SWIM_DISTANCE_ID, (float) delta);
             }
