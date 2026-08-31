@@ -37,6 +37,9 @@ public final class ActivityDistanceTracker {
     /** Call once per server player tick to update the cache and accumulate sprint/swim distance. */
     public static void onPlayerTick(ServerPlayer player) {
         if (!ActivityDrivenNutrientConfig.get().enabled()) {
+            // Drop the cache so re-enabling starts from a fresh cache-and-return
+            // instead of computing a delta against a stale pre-disable position.
+            LAST_POSITION.remove(player.getUUID());
             return;
         }
 
