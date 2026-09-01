@@ -251,6 +251,18 @@ public class Nourished {
                     def.color()));
         }
         ActivityDrivenNutrientRegistry.registerColors();
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            registerClientPanelColorDefinitions();
+        }
+    }
+
+    /**
+     * Client-only HUD panel color pairs, split out from {@link #registerColorDefinitions()}.
+     * Referencing {@link CalorieHudScreen}/{@link ActivityLogHudPanel}'s static fields loads those
+     * classes, and both are client-only (they import {@code net.minecraft.client.player.LocalPlayer}
+     * etc.), which trips NeoForge's RuntimeDistCleaner on a dedicated server.
+     */
+    private static void registerClientPanelColorDefinitions() {
         // Matches ThemeKey.PANEL_BACKGROUND's RGB (0x101010) — the flat color both panels drew
         // before this feature existed; alpha here is nominal since draw time composes the real
         // alpha from each panel's own opacity config value.
