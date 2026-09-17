@@ -27,8 +27,7 @@ public final class ThresholdCategory {
                     0.0d,
                     1.0d,
                     0.25d,
-                    config::setCriticalThreshold,
-                    Component.translatable("config.nourished.criticalThreshold.desc")
+                    config::setCriticalThreshold
             );
             category.addEntry(entry);
         }
@@ -41,8 +40,7 @@ public final class ThresholdCategory {
                     0.0d,
                     1.0d,
                     0.40d,
-                    config::setLowThreshold,
-                    Component.translatable("config.nourished.lowThreshold.desc")
+                    config::setLowThreshold
             );
             category.addEntry(entry);
         }
@@ -55,8 +53,7 @@ public final class ThresholdCategory {
                     0.0d,
                     1.0d,
                     0.90d,
-                    config::setExcessThreshold,
-                    Component.translatable("config.nourished.excessThreshold.desc")
+                    config::setExcessThreshold
             );
             category.addEntry(entry);
         }
@@ -70,8 +67,7 @@ public final class ThresholdCategory {
                             0.0d,
                             1.0d,
                             0.75d,
-                            config::setBonusEffectThreshold,
-                            Component.translatable("config.nourished.bonusEffectThreshold.desc")
+                            config::setBonusEffectThreshold
                     )
             );
         }
@@ -85,8 +81,7 @@ public final class ThresholdCategory {
                             0.0d,
                             1.0d,
                             0.25d,
-                            config::setPenaltyEffectThreshold,
-                            Component.translatable("config.nourished.penaltyEffectThreshold.desc")
+                            config::setPenaltyEffectThreshold
                     )
             );
         }

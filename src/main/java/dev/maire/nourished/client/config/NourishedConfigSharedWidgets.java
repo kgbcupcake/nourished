@@ -90,6 +90,11 @@ public final class NourishedConfigSharedWidgets {
         );
         category.addEntry(new ReloadConfigsListEntry(includeOpenDatapackFolder));
     }
+
+    public static void addReloadButtonEntries(List<AbstractConfigListEntry> entries, ConfigEntryBuilder eb, boolean includeOpenDatapackFolder) {
+        entries.add(eb.startTextDescription(Component.empty()).build());
+        entries.add(new ReloadConfigsListEntry(includeOpenDatapackFolder));
+    }
     public static void openCompatDatapackFolder() {
         Path targetFolder;
         Minecraft mc = Minecraft.getInstance();
@@ -296,7 +301,7 @@ public final class NourishedConfigSharedWidgets {
         ReloadConfigsListEntry(boolean includeOpenDatapackFolder) {
             super(
                     Component.translatable("config.nourished.reloadConfigs"),
-                    () -> Optional.of(new Component[]{Component.translatable("config.nourished.reloadConfigs.desc")}),
+                    () -> Optional.empty(),
                     false);
             this.includeOpenDatapackFolder = includeOpenDatapackFolder;
             if (includeOpenDatapackFolder) {

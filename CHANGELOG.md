@@ -4,6 +4,18 @@
 
 ## [ Unreleased ]
 
+[ nourished 0.2.7-beta.2]
+
+### Fixed
+
+- The config screen's left-sidebar category nav (`NourishedConfigLeftCardsLayout`) only adapted to narrow screen widths and never accounted for screen height, so at high GUI Scale (where Minecraft's scaled screen dimensions shrink) the sidebar's fixed-height category list — 14 categories at a fixed row height/gap — could require more vertical space than the scaled screen actually had, running items off the bottom with no way to reach them. `computeMetrics` now also takes screen height and tab count: nav row height/gap continuously scale down (floored so text never clips) based on available vertical space instead of a hard width-only breakpoint, and nav width now interpolates smoothly between its full and minimum sizes instead of snapping at a single 500px cutoff. `SidebarNavWidget` also gained its own independent scroll (mouse wheel, scissor-clipped rendering, a scrollbar indicator, viewport-bounded hit-testing) for the case where even the scaled-down list still can't fit, matching the scrolling the content pane already had via `cloth.listWidget`.
+
+[ nourished 0.2.7-beta.1-Hotfix]
+
+### Fixed
+
+- `HudEditTarget`'s drag/resize tracker (`panelDrag`) set its `Constraint` (the min/preferred/max size `DraggableResizable` clamps against) once, in the constructor, and never refreshed it. Since `HudEditTarget` is a session-lifetime singleton (built once by `NourishedHUD`, unlike `DietScreenEditTarget` which rebuilds fresh each time the Diet Screen reopens), that `Constraint` stayed frozen at whatever `hudScale`/`hudBarWidth`/`hudVerticalLayout`/visible-nutrient-count produced the first time HUD edit mode was entered — any later change to those in the HUD & Display config category (Cloth Config) left the drag tracker clamping against a stale size while every other layout computation (`resolvedLayout`, `matchedLayoutFor`) correctly recomputed live, so dragging/resizing the HUD panel after touching that config category desynced from what was actually rendered (overlapping bars, unresponsive/misbehaving handles). New private `HudEditTarget#constraintFor(HudLayout.Layout)` rebuilds the `Constraint` fresh from a given natural layout, called once in the constructor and again every frame in `render()` via `panelDrag.setConstraint(...)` — the same per-frame refresh pattern `DietScreenEditTarget` already used for all six of its own drag trackers, and the exact usage `DraggableResizable#setConstraint`'s own javadoc calls for.
+
 [ nourished 0.2.7-beta.1]
 
 ### Added

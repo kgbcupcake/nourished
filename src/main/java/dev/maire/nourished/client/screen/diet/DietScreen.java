@@ -166,6 +166,9 @@ public class DietScreen extends Screen {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (scaleConfigVisible && scaleConfigPanel.mouseReleased(mouseX, mouseY, button)) {
+            return true;
+        }
         if (dragBarFromIndex != null && button == 0 && NourishedClientConfig.get().dietBarDragEnabled()) {
             DietLayout.Layout layout = currentLayout();
             double s = layout.scale();
@@ -260,6 +263,9 @@ public class DietScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (scaleConfigVisible && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
+            return true;
+        }
         if (dragBarFromIndex != null && button == 0) {
             return true;
         }

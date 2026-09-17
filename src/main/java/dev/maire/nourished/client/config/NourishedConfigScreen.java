@@ -7,6 +7,7 @@ import dev.maire.nourished.client.config.categories.DietScreenCategory;
 import dev.maire.nourished.client.config.categories.EffectsCategory;
 import dev.maire.nourished.client.config.categories.FoodValuesCategory;
 import dev.maire.nourished.client.config.categories.GeneralCategory;
+import dev.maire.nourished.client.config.categories.HotkeysCategory;
 import dev.maire.nourished.client.config.categories.HudAndDisplayCategory;
 import dev.maire.nourished.client.config.categories.ModulesCategory;
 import dev.maire.nourished.client.config.categories.NutrientsCategory;
@@ -60,6 +61,7 @@ public final class NourishedConfigScreen {
         PresetsCategory.addPresetsCategory(builder, entryBuilder, parent);
         ModulesCategory.addModulesCategory(config, builder, entryBuilder, modulePending);
         GeneralCategory.addGeneralCategory(config, builder, entryBuilder);
+        HotkeysCategory.addHotkeysCategory(builder, entryBuilder);
         ThresholdCategory.addThresholdCategory(config, builder, entryBuilder);
         EffectsCategory.addEffectsCategory(config, builder, entryBuilder);
         HudAndDisplayCategory.addHudAndDisplayCategory(config, client, builder, entryBuilder, parent);

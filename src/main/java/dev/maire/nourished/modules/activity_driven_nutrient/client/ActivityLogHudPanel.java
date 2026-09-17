@@ -403,6 +403,9 @@ public final class ActivityLogHudPanel implements MarieComponent {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (scaleConfigVisible && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
+            return true;
+        }
         if (drag.isDragging() || drag.isResizing()) {
             drag.mouseDragged((int) mouseX, (int) mouseY);
             return true;
@@ -412,6 +415,9 @@ public final class ActivityLogHudPanel implements MarieComponent {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (scaleConfigVisible && scaleConfigPanel.mouseReleased(mouseX, mouseY, button)) {
+            return true;
+        }
         boolean any = drag.isDragging() || drag.isResizing();
         drag.mouseReleased((int) mouseX, (int) mouseY);
         return any;

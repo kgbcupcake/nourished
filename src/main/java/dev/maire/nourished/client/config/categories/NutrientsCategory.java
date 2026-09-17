@@ -87,7 +87,6 @@ public final class NutrientsCategory {
                             )
                             .setSelections(curvePresetDropdownOptions())
                             .setDefaultValue("")
-                            .setTooltip(Component.translatable("config.nourished.nutrient.curvePreset.desc"))
                             .setSaveConsumer(curvePending.presetId::set)
                             .build()
             );

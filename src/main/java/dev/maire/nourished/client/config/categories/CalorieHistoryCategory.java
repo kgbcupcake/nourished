@@ -1,6 +1,5 @@
 package dev.maire.nourished.client.config.categories;
 
-import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.config.categories.widgets.ModuleToggleListEntry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
@@ -8,19 +7,18 @@ import dev.maire.nourished.config.NourishedLockRegistry;
 import dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen;
 import dev.marie.framework.client.config.cloth.ColorHexRowWidget;
 import dev.marie.framework.client.config.cloth.ColorPairRowGroup;
-import com.mojang.blaze3d.platform.InputConstants;
+import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.addReloadButton;
+import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.addReloadButtonEntries;
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.buildDoubleSlider;
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.buildFloatSlider;
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.isMultiplayer;
@@ -36,7 +34,8 @@ public final class CalorieHistoryCategory {
             ConfigEntryBuilder eb,
             Map<String, AtomicBoolean> modulePending
     ) {
-        ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.calorieHistory"));
+        ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.modules"));
+        List<AbstractConfigListEntry> entries = new ArrayList<>();
 
         AtomicBoolean calorieHistoryPending = modulePending.get("enableCalorieHistory");
         if (calorieHistoryPending != null && !NourishedLockRegistry.isLocked("enableCalorieHistory")) {
@@ -51,41 +50,27 @@ public final class CalorieHistoryCategory {
             if (!editable) {
                 calorieHistoryEntry.setEditable(false);
             }
-            category.addEntry(calorieHistoryEntry);
+            entries.add(calorieHistoryEntry);
         }
 
         if (!NourishedLockRegistry.isLocked("calorieHistoryRetentionDays")) {
-            category.addEntry(
+            entries.add(
                     eb.startIntSlider(Component.translatable("config.nourished.calorieHistoryRetentionDays"), config.calorieHistoryRetentionDays(), 1, 90)
                             .setDefaultValue(7)
                             .setTextGetter(v -> Component.literal(String.valueOf(v)))
-                            .setTooltip(Component.translatable("config.nourished.calorieHistoryRetentionDays.desc"))
                             .setSaveConsumer(config::setCalorieHistoryRetentionDays)
                             .build()
             );
         }
 
-        category.addEntry(
+        List<AbstractConfigListEntry> hudEntries = new ArrayList<>();
+        hudEntries.add(
                 eb.startBooleanToggle(Component.translatable("config.nourished.enableCalorieHistoryHud"), client.enableCalorieHistoryHud())
                         .setDefaultValue(true)
                         .setSaveConsumer(client::setEnableCalorieHistoryHud)
-                        .setTooltip(Component.translatable("config.nourished.enableCalorieHistoryHud.desc"))
                         .build()
         );
-        category.addEntry(
-                eb.startKeyCodeField(
-                                Component.translatable("config.nourished.calorieHudEditHotkey"),
-                                NourishedKeys.EDIT_CALORIE_HUD.getKey()
-                        )
-                        .setDefaultValue(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_C))
-                        .setKeySaveConsumer(key -> {
-                            NourishedKeys.EDIT_CALORIE_HUD.setKey(key);
-                            KeyMapping.resetMapping();
-                            Minecraft.getInstance().options.save();
-                        })
-                        .build()
-        );
-        category.addEntry(
+        hudEntries.add(
                 buildFloatSlider(
                         eb,
                         Component.translatable("config.nourished.calorieHudBackgroundOpacity"),
@@ -96,7 +81,7 @@ public final class CalorieHistoryCategory {
                         client::setCalorieHudBackgroundOpacity
                 )
         );
-        category.addEntry(
+        hudEntries.add(
                 buildFloatSlider(
                         eb,
                         Component.translatable("config.nourished.calorieHudBorderOpacity"),
@@ -107,7 +92,7 @@ public final class CalorieHistoryCategory {
                         client::setCalorieHudBorderOpacity
                 )
         );
-        category.addEntry(
+        hudEntries.add(
                 buildDoubleSlider(
                         eb,
                         Component.translatable("config.nourished.calorieHudBackgroundShade"),
@@ -118,7 +103,7 @@ public final class CalorieHistoryCategory {
                         client::setCalorieHudBackgroundShade
                 )
         );
-        category.addEntry(
+        hudEntries.add(
                 buildDoubleSlider(
                         eb,
                         Component.translatable("config.nourished.calorieHudBorderShade"),
@@ -133,9 +118,16 @@ public final class CalorieHistoryCategory {
                 CalorieHudScreen.COLORS,
                 Component.translatable("config.nourished.calorieHudBackgroundColor"),
                 Component.translatable("config.nourished.calorieHudTextColor"))) {
-            category.addEntry(row);
+            hudEntries.add(row);
         }
+        entries.add(eb.startSubCategory(Component.literal("HUD"), hudEntries).setExpanded(false).build());
 
-        addReloadButton(category, eb, false);
+        addReloadButtonEntries(entries, eb, false);
+
+        category.addEntry(
+                eb.startSubCategory(Component.translatable("config.nourished.category.calorieHistory"), entries)
+                        .setExpanded(false)
+                        .build()
+        );
     }
 }

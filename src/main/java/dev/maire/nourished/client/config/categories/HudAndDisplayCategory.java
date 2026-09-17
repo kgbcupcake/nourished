@@ -1,6 +1,5 @@
 package dev.maire.nourished.client.config.categories;
 
-import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.config.HudNutrientColorsResetAllEntry;
 import dev.maire.nourished.client.config.HudNutrientColorsSectionHeaderEntry;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -11,20 +10,17 @@ import dev.marie.framework.client.config.cloth.ColorHexRowWidget;
 import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.color.ColorRegistry;
 import dev.marie.framework.config.HudAnchor;
-import com.mojang.blaze3d.platform.InputConstants;
+import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.gui.entries.IntegerSliderEntry;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,31 +34,32 @@ public final class HudAndDisplayCategory {
         ConfigCategory category = builder.getOrCreateCategory(Component.translatable("config.nourished.category.hud_display"));
         category.addEntry(new HudQuickActionsListEntry(client));
 
-        category.addEntry(
+        List<AbstractConfigListEntry> layoutEntries = new ArrayList<>();
+        layoutEntries.add(
                 eb.startEnumSelector(Component.translatable("config.nourished.hudAnchor"), HudAnchor.class, client.hudAnchor())
                         .setDefaultValue(HudAnchor.BOTTOM_LEFT)
                         .setSaveConsumer(client::setHudAnchor)
                         .build()
         );
-        category.addEntry(
+        layoutEntries.add(
                 eb.startIntSlider(Component.translatable("config.nourished.hudOffsetX"), client.hudOffsetX(), -2000, 2000)
                         .setDefaultValue(0)
                         .setSaveConsumer(client::setHudOffsetX)
                         .build()
         );
-        category.addEntry(
+        layoutEntries.add(
                 eb.startIntSlider(Component.translatable("config.nourished.hudOffsetY"), client.hudOffsetY(), -2000, 2000)
                         .setDefaultValue(0)
                         .setSaveConsumer(client::setHudOffsetY)
                         .build()
         );
-        category.addEntry(
+        layoutEntries.add(
                 eb.startIntSlider(Component.translatable("config.nourished.hudBarWidth"), client.hudBarWidth(), 40, 120)
                         .setDefaultValue(60)
                         .setSaveConsumer(client::setHudBarWidth)
                         .build()
         );
-        category.addEntry(
+        layoutEntries.add(
                 buildDoubleSlider(
                         eb,
                         Component.translatable("config.nourished.hudScale"),
@@ -73,37 +70,45 @@ public final class HudAndDisplayCategory {
                         client::setHudScale
                 )
         );
-        category.addEntry(
+        layoutEntries.add(
                 eb.startIntSlider(Component.translatable("config.nourished.hudReservedBottom"), client.hudReservedBottom(), 30, 100)
                         .setDefaultValue(52)
                         .setSaveConsumer(client::setHudReservedBottom)
                         .build()
         );
-        category.addEntry(
+        layoutEntries.add(
+                eb.startBooleanToggle(Component.translatable("config.nourished.hudVerticalLayout"), client.hudVerticalLayout())
+                        .setDefaultValue(false)
+                        .setSaveConsumer(client::setHudVerticalLayout)
+                        .build()
+        );
+        category.addEntry(eb.startSubCategory(Component.translatable("config.nourished.hudAndDisplay.group.layout"), layoutEntries).setExpanded(true).build());
+
+        List<AbstractConfigListEntry> behaviorEntries = new ArrayList<>();
+        behaviorEntries.add(
                 eb.startBooleanToggle(Component.translatable("config.nourished.hudDraggable"), client.hudDraggable())
                         .setDefaultValue(true)
                         .setSaveConsumer(client::setHudDraggable)
                         .build()
         );
-        category.addEntry(
+        behaviorEntries.add(
                 eb.startBooleanToggle(Component.translatable("config.nourished.dietBarDragEnabled"), client.dietBarDragEnabled())
                         .setDefaultValue(true)
                         .setSaveConsumer(client::setDietBarDragEnabled)
                         .build()
         );
-        category.addEntry(
+        behaviorEntries.add(
                 eb.startBooleanToggle(Component.translatable("config.nourished.hudShowZeroBars"), client.hudShowZeroBars())
                         .setDefaultValue(false)
                         .setSaveConsumer(client::setHudShowZeroBars)
                         .build()
         );
-        category.addEntry(
+        behaviorEntries.add(
                 eb.startBooleanToggle(
                                 Component.translatable("nourished.config.hud.reveal_on_gain"),
                                 client.hudRevealOnNutrientGain())
                         .setDefaultValue(true)
                         .setSaveConsumer(client::setHudRevealOnNutrientGain)
-                        .setTooltip(Component.translatable("nourished.config.hud.reveal_on_gain.desc"))
                         .build()
         );
         IntegerSliderEntry hideAboveEntry = (IntegerSliderEntry) buildDoubleSlider(
@@ -113,11 +118,10 @@ public final class HudAndDisplayCategory {
                 0.0d,
                 1.0d,
                 1.0d,
-                client::setHudHideAboveThreshold,
-                Component.translatable("config.nourished.hudHideAboveThreshold.desc")
+                client::setHudHideAboveThreshold
         );
-        category.addEntry(hideAboveEntry);
-        category.addEntry(
+        behaviorEntries.add(hideAboveEntry);
+        behaviorEntries.add(
                 buildDoubleSlider(
                         eb,
                         Component.translatable("config.nourished.hudShowAboveThreshold"),
@@ -126,11 +130,13 @@ public final class HudAndDisplayCategory {
                         1.0d,
                         1.0d,
                         client::setHudShowAboveThreshold,
-                        () -> hideAboveEntry.getValue() < 1000,
-                        Component.translatable("config.nourished.hudShowAboveThreshold.desc")
+                        () -> hideAboveEntry.getValue() < 1000
                 )
         );
-        category.addEntry(
+        category.addEntry(eb.startSubCategory(Component.translatable("config.nourished.hudAndDisplay.group.behavior"), behaviorEntries).setExpanded(false).build());
+
+        List<AbstractConfigListEntry> appearanceEntries = new ArrayList<>();
+        appearanceEntries.add(
                 buildFloatSlider(
                         eb,
                         Component.translatable("config.nourished.hudBackgroundOpacity"),
@@ -141,68 +147,24 @@ public final class HudAndDisplayCategory {
                         v -> client.setHudBackgroundOpacity(v)
                 )
         );
-        category.addEntry(
-                eb.startBooleanToggle(Component.translatable("config.nourished.hudVerticalLayout"), client.hudVerticalLayout())
-                        .setDefaultValue(false)
-                        .setSaveConsumer(client::setHudVerticalLayout)
-                        .build()
-        );
-        category.addEntry(
+        appearanceEntries.add(
                 eb.startBooleanToggle(Component.translatable("config.nourished.hudClassicMode"), client.hudClassicMode())
                         .setDefaultValue(false)
                         .setSaveConsumer(client::setHudClassicMode)
-                        .setTooltip(Component.translatable("config.nourished.hudClassicMode.desc"))
                         .build()
         );
-        category.addEntry(
-                eb.startKeyCodeField(
-                                Component.translatable("config.nourished.hudEditHotkey"),
-                                NourishedKeys.EDIT_HUD.getKey()
-                        )
-                        .setDefaultValue(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_H))
-                        .setKeySaveConsumer(key -> {
-                            NourishedKeys.EDIT_HUD.setKey(key);
-                            KeyMapping.resetMapping();
-                            Minecraft.getInstance().options.save();
-                        })
-                        .build()
-        );
-        category.addEntry(
-                eb.startKeyCodeField(
-                                Component.translatable("config.nourished.editAllHudsHotkey"),
-                                NourishedKeys.EDIT_ALL_HUDS.getKey()
-                        )
-                        .setDefaultValue(InputConstants.UNKNOWN)
-                        .setKeySaveConsumer(key -> {
-                            NourishedKeys.EDIT_ALL_HUDS.setKey(key);
-                            KeyMapping.resetMapping();
-                            Minecraft.getInstance().options.save();
-                        })
-                        .build()
-        );
-        category.addEntry(
-                eb.startKeyCodeField(
-                                Component.translatable("config.nourished.commandCenterHotkey"),
-                                NourishedKeys.OPEN_COMMAND_CENTER.getKey()
-                        )
-                        .setDefaultValue(InputConstants.UNKNOWN)
-                        .setKeySaveConsumer(key -> {
-                            NourishedKeys.OPEN_COMMAND_CENTER.setKey(key);
-                            KeyMapping.resetMapping();
-                            Minecraft.getInstance().options.save();
-                        })
-                        .build()
-        );
-        category.addEntry(new HudNutrientColorsSectionHeaderEntry());
+        category.addEntry(eb.startSubCategory(Component.translatable("config.nourished.hudAndDisplay.group.appearance"), appearanceEntries).setExpanded(false).build());
+
+        List<AbstractConfigListEntry> nutrientColorEntries = new ArrayList<>();
+        nutrientColorEntries.add(new HudNutrientColorsSectionHeaderEntry());
         List<ColorHexRowWidget> nutrientColorRows = new ArrayList<>();
         for (String valueKey : NutrientRegistry.getKeys()) {
             ColorHexRowWidget row = new ColorHexRowWidget(
                     nutrientColorKey(valueKey),
-                    NutrientRegistry.getLabelComponent(valueKey),
-                    Component.translatable("config.nourished.hudColors.row.tooltip"));
+                    NutrientRegistry.getLabelComponent(valueKey));
             nutrientColorRows.add(row);
         }
-        category.addEntry(new HudNutrientColorsResetAllEntry(() -> {
+        nutrientColorEntries.add(new HudNutrientColorsResetAllEntry(() -> {
             for (String valueKey : NutrientRegistry.getKeys()) {
                 ColorRegistry.remove(nutrientColorKey(valueKey).id().toString());
             }
@@ -211,8 +173,9 @@ public final class HudAndDisplayCategory {
             }
         }));
         for (ColorHexRowWidget row : nutrientColorRows) {
-            category.addEntry(row);
+            nutrientColorEntries.add(row);
         }
+        category.addEntry(eb.startSubCategory(Component.translatable("config.nourished.hudAndDisplay.group.nutrientColors"), nutrientColorEntries).setExpanded(false).build());
 
         addReloadButton(category, eb, false);
     }
@@ -237,7 +200,7 @@ public final class HudAndDisplayCategory {
         HudQuickActionsListEntry(NourishedClientConfig client) {
             super(
                     Component.translatable("config.nourished.hud.quickActions"),
-                    () -> Optional.of(new Component[]{Component.translatable("config.nourished.hud.quickActions.desc")}),
+                    () -> Optional.empty(),
                     false);
             this.client = client;
             this.resetHudPositionButton = Button.builder(

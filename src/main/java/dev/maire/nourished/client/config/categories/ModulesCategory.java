@@ -84,7 +84,6 @@ public final class ModulesCategory {
                                     1,
                                     20)
                             .setDefaultValue(6)
-                            .setTooltip(Component.translatable("nourished.config.heavySourcePropertyThreshold.desc"))
                             .setSaveConsumer(config::setHeavySourcePropertyThreshold)
                             .build()
             );

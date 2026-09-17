@@ -20,7 +20,6 @@ public final class EffectsCategory {
                     eb.startIntSlider(Component.translatable("config.nourished.defaultEffectDurationTicks"), config.defaultEffectDurationTicks(), 20, 72000)
                             .setDefaultValue(140)
                             .setTextGetter(v -> Component.literal(v + " ticks"))
-                            .setTooltip(Component.translatable("config.nourished.defaultEffectDurationTicks.desc"))
                             .setSaveConsumer(config::setDefaultEffectDurationTicks)
                             .build()
             );

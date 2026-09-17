@@ -39,7 +39,7 @@ public final class NourishedPresetsWidget extends TooltipListEntry<Object> {
     public NourishedPresetsWidget(Screen reopenParent) {
         super(
                 Component.translatable(configKey("presets.listLabel")),
-                () -> Optional.of(new Component[]{Component.translatable(configKey("presets.listLabel.desc"))}),
+                Optional::empty,
                 false);
         this.reopenParent = reopenParent;
         this.presets = new ArrayList<>(NourishedPresetRegistry.listPresets());

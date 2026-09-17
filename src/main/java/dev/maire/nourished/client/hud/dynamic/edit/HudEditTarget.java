@@ -86,16 +86,29 @@ public final class HudEditTarget implements MarieComponent {
         }
         HudLayout.Layout natural = HudLayout.compute(mc, keys);
 
-        Constraint constraint = new Constraint(
+        panelDrag = new DraggableResizable(this, constraintFor(natural), (target, bounds) -> commit(bounds));
+        panelDrag.setSnapRegistryId(PANEL_ID);
+        SnapRegistry.register(PANEL_ID, () -> resolvedBounds(this.mc, currentVisibleKeysOrFallback()));
+    }
+
+    /**
+     * {@code panelDrag}'s min/preferred/max clamp, rebuilt from {@code natural} — never cached past
+     * a single call. {@code natural} depends on {@code cc.hudScale()}/{@code cc.hudBarWidth()}/
+     * {@code cc.hudVerticalLayout()}/visible-nutrient count, any of which the player can change via
+     * the config screen while this edit target (a session-lifetime singleton, unlike {@code
+     * DietScreenEditTarget} which is rebuilt each time the Diet Screen reopens) is still alive.
+     * {@link #render} calls this every frame — same as {@code DietScreenEditTarget}'s own drag
+     * trackers — so {@code panelDrag}'s clamp never goes stale the way {@link DraggableResizable
+     * #setConstraint}'s own javadoc warns against.
+     */
+    private static Constraint constraintFor(HudLayout.Layout natural) {
+        return new Constraint(
                 new Size(natural.panelW(), natural.panelH()),
                 new Size(natural.panelW(), natural.panelH()),
                 new Size((int) (natural.panelW() * MAX_MARGIN_MULTIPLIER), (int) (natural.panelH() * MAX_MARGIN_MULTIPLIER)),
                 false, false, true, true,
                 Anchor.TOP_LEFT, Insets.NONE, Insets.NONE
         );
-        panelDrag = new DraggableResizable(this, constraint, (target, bounds) -> commit(bounds));
-        panelDrag.setSnapRegistryId(PANEL_ID);
-        SnapRegistry.register(PANEL_ID, () -> resolvedBounds(this.mc, currentVisibleKeysOrFallback()));
     }
 
     /** Shows this panel's {@link ScaleConfigPanel} alongside edit mode — called from both the H-keybind path ({@code NourishedHUD#enterEditModeWithScaleConfig}) and the "edit all HUDs" group entry ({@code NourishedHUD#showScaleConfigOnGroupEntry}). Never reset back to false on exit, same as {@code CalorieHudScreen}/{@code ActivityLogHudPanel}. */
@@ -235,6 +248,9 @@ public final class HudEditTarget implements MarieComponent {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (scaleConfigVisible && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
+            return true;
+        }
         if (panelDrag.isDragging() || panelDrag.isResizing()) {
             panelDrag.mouseDragged((int) mouseX, (int) mouseY);
             return true;
@@ -244,6 +260,9 @@ public final class HudEditTarget implements MarieComponent {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (scaleConfigVisible && scaleConfigPanel.mouseReleased(mouseX, mouseY, button)) {
+            return true;
+        }
         boolean any = panelDrag.isDragging() || panelDrag.isResizing();
         panelDrag.mouseReleased((int) mouseX, (int) mouseY);
         return any;
@@ -255,6 +274,8 @@ public final class HudEditTarget implements MarieComponent {
         if (keys.isEmpty()) {
             return;
         }
+
+        panelDrag.setConstraint(constraintFor(HudLayout.compute(mc, keys)));
 
         int[] mouse = scaledMouse(mc);
         Bounds defaultBounds = resolvedBounds(mc, keys);

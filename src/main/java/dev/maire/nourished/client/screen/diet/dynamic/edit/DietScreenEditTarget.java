@@ -216,6 +216,9 @@ public final class DietScreenEditTarget implements MarieComponent {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (scaleConfigVisible.getAsBoolean() && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
+            return true;
+        }
         int mx = (int) mouseX;
         int my = (int) mouseY;
         boolean any = false;
@@ -248,6 +251,9 @@ public final class DietScreenEditTarget implements MarieComponent {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (scaleConfigVisible.getAsBoolean() && scaleConfigPanel.mouseReleased(mouseX, mouseY, button)) {
+            return true;
+        }
         boolean any = caloriesDrag.isDragging() || caloriesDrag.isResizing()
                 || balanceDrag.isDragging() || balanceDrag.isResizing()
                 || recentMealsDrag.isDragging() || recentMealsDrag.isResizing()
