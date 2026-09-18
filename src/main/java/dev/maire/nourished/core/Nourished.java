@@ -249,6 +249,9 @@ public class Nourished {
             MarieColors.registerColor(ColorDefinition.of(
                     ColorKey.of(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "nutrient." + def.key())),
                     def.color()));
+            MarieColors.registerColor(ColorDefinition.of(
+                    ColorKey.of(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "tooltip." + def.key())),
+                    def.tooltipColor()));
         }
         ActivityDrivenNutrientRegistry.registerColors();
         if (FMLEnvironment.dist == Dist.CLIENT) {

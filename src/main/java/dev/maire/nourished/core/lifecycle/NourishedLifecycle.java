@@ -32,7 +32,8 @@ public final class NourishedLifecycle {
 
     public static void register() {
         RegistryLifecycleManager.registerRegistry(
-                "NutrientRegistry", NutrientRegistry::load, NutrientRegistry::reload);
+                "NutrientRegistry", NutrientRegistry::load, NutrientRegistry::reload,
+                NutrientRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
                 "NutrientCurveRegistry", NutrientCurveRegistry::load, NutrientCurveRegistry::reload,
                 NutrientCurveRegistry::loadFromDatapack);

@@ -66,6 +66,7 @@ public final class CalorieHudScreen implements MarieComponent {
 
     private static final String ID = "nourished.calorieHud.panel";
     private static final String PANEL_ID = "nourished.calorieHud.panel";
+    private static final String CONTENT_OFFSET_ID = "nourished.calorieHud.contentOffset";
 
     private static final int PANEL_WIDTH = 190;
     private static final int LINE_HEIGHT = 12;
@@ -100,7 +101,26 @@ public final class CalorieHudScreen implements MarieComponent {
     private static CalorieHudScreen instance;
     private static EditModeController editModeController;
 
+    /** Row scroll position (in rows, not pixels) into {@link #currentRows()} — only movable while edit mode has this panel's mouse input wired up; see {@link #mouseScrolled}. Clamped every {@link #drawPanel} pass against however many rows currently fit, so it self-corrects if the row count or box size changes out from under it. */
+    private static int scrollOffset;
+
     private final DraggableResizable drag;
+
+    /** Whether a content-move drag (see {@link #moveContentEnabled}) is currently in progress. */
+    private boolean draggingContent;
+    private int contentGrabOffsetX;
+    private int contentGrabOffsetY;
+
+    /**
+     * The row content's offset from where it would otherwise sit (just below the header, inset by
+     * padding) — a plain persisted translation, not a separately hit-testable box: there's nothing
+     * else in this panel besides the rows, so a separately draggable/glowing sub-region for them
+     * competed with the panel's own drag for every click inside the panel body. {@link
+     * #moveContentEnabled} disambiguates instead: while it's off, panel-body clicks move the panel;
+     * while it's on, they move the content.
+     */
+    private int contentOffsetX;
+    private int contentOffsetY;
 
     /**
      * Editor for this panel's persisted contentScale/paddingScale, auto-shown alongside edit mode —
@@ -113,18 +133,36 @@ public final class CalorieHudScreen implements MarieComponent {
     private boolean scaleConfigVisible;
 
     private CalorieHudScreen() {
-        Size natural = naturalSize(currentRows().size());
+        drag = new DraggableResizable(this, panelConstraintFor(naturalSize(currentRows().size())), (target, bounds) -> commit(bounds));
+        drag.setSnapRegistryId(PANEL_ID);
+        SnapRegistry.register(PANEL_ID, () -> resolvedBounds(currentRows().size()));
+
+        UiStatePersistence.get().load(CONTENT_OFFSET_ID).ifPresent(state -> {
+            contentOffsetX = state.x();
+            contentOffsetY = state.y();
+        });
+    }
+
+    /** {@code drag}'s min/preferred/max clamp, rebuilt fresh from {@code natural} — never cached past a single call, same reasoning as {@code HudEditTarget#constraintFor}. */
+    private static Constraint panelConstraintFor(Size natural) {
         Size minSize = new Size(
                 (int) (natural.width() * MIN_SHRINK_SCALE), (int) (natural.height() * MIN_SHRINK_SCALE));
-        Constraint constraint = new Constraint(
+        return new Constraint(
                 natural, minSize,
                 new Size((int) (natural.width() * MAX_MARGIN_MULTIPLIER), (int) (natural.height() * MAX_MARGIN_MULTIPLIER)),
                 false, false, true, true,
                 Anchor.TOP_LEFT, Insets.NONE, Insets.NONE
         );
-        drag = new DraggableResizable(this, constraint, (target, bounds) -> commit(bounds));
-        drag.setSnapRegistryId(PANEL_ID);
-        SnapRegistry.register(PANEL_ID, () -> resolvedBounds(currentRows().size()));
+    }
+
+    /** Persists {@link #contentOffsetX}/{@link #contentOffsetY} — {@code width}/{@code height}/the manual-size and scale fields are unused for this key. */
+    private void persistContentOffset() {
+        UiStatePersistence.get().save(CONTENT_OFFSET_ID, new ComponentState(contentOffsetX, contentOffsetY, 0, 0, false, false, false, 0));
+    }
+
+    /** The "Move Text and Icons" toggle's live state, owned by {@link #scaleConfigPanel} (its own editor window, under Padding) rather than a button on this panel itself. */
+    private boolean moveContentEnabled() {
+        return scaleConfigPanel.isMoveContentEnabled(PANEL_ID);
     }
 
     /** Public so {@code ClientEventRegistrar} can pass this same singleton to {@code EditModeCoordinator.registerGroupCapable} as its {@code MarieComponent} target — the exact instance this panel's own {@link #editModeController()} already wraps. */
@@ -190,9 +228,23 @@ public final class CalorieHudScreen implements MarieComponent {
             return;
         }
         Bounds bounds = resolvedBounds(rows.size());
-        RenderContext context = new GuiGraphicsRenderContext(
+        CalorieHudScreen self = instance();
+        // Re-clamped defensively at draw time too (not just on drag) — the panel/row count this
+        // offset is valid against can change independently of dragging (a row added/removed, or the
+        // panel resized), and a stale offset should self-correct visually rather than let content
+        // drift outside the panel until the user happens to drag it again.
+        int offsetX = clampContentOffsetX(self.contentOffsetX, bounds);
+        int offsetY = clampContentOffsetY(self.contentOffsetY, bounds);
+        GuiGraphicsRenderContext context = new GuiGraphicsRenderContext(
                 event.getGuiGraphics(), mc, Theme.DARK, event.getPartialTick().getGameTimeDeltaPartialTick(false));
-        drawPanel(context, bounds, rows);
+        // Defense-in-depth: resetClip() forces the scissor stack/GL state back to empty even if
+        // drawPanel throws partway through its pushClip/popClip pair — see
+        // GuiGraphicsRenderContext#resetClip.
+        try {
+            drawPanel(context, bounds, offsetX, offsetY, rows, false, false);
+        } finally {
+            context.resetClip();
+        }
     }
 
     /**
@@ -244,6 +296,30 @@ public final class CalorieHudScreen implements MarieComponent {
         return new Size(PANEL_WIDTH, PADDING * 2 + HEADER_HEIGHT + HEADER_GAP + rows * LINE_HEIGHT);
     }
 
+    /**
+     * How much of the content's own origin (its icon corner) must stay inside the panel on the far
+     * edge — not the content's whole footprint. {@link #clampContentOffsetX}/{@link
+     * #clampContentOffsetY} clamp only the origin into the panel's interior, using the box's own
+     * live size (so a bigger box gives more room to drag, all the way to its far edge); anything
+     * past the panel's own edge is invisible via {@link #drawPanel}'s existing {@code pushClip}, not
+     * blocked from being dragged there in the first place.
+     */
+    private static final int MIN_VISIBLE_CONTENT = 14;
+
+    /** Clamps a candidate {@link #contentOffsetX} so the content's own origin can't be dragged past the panel's edges — see {@link #MIN_VISIBLE_CONTENT}. */
+    private static int clampContentOffsetX(int offsetX, Bounds panelBounds) {
+        int minOffset = -PADDING;
+        int maxOffset = Math.max(minOffset, panelBounds.width() - PADDING - MIN_VISIBLE_CONTENT);
+        return Math.min(maxOffset, Math.max(minOffset, offsetX));
+    }
+
+    /** Clamps a candidate {@link #contentOffsetY} the same way {@link #clampContentOffsetX} does for X. */
+    private static int clampContentOffsetY(int offsetY, Bounds panelBounds) {
+        int minOffset = -(PADDING + HEADER_HEIGHT + HEADER_GAP);
+        int maxOffset = Math.max(minOffset, panelBounds.height() - PADDING - HEADER_HEIGHT - HEADER_GAP - LINE_HEIGHT);
+        return Math.min(maxOffset, Math.max(minOffset, offsetY));
+    }
+
     private static Bounds resolvedBounds(int rowCount) {
         Size natural = naturalSize(rowCount);
         return UiStatePersistence.get().load(PANEL_ID)
@@ -255,18 +331,35 @@ public final class CalorieHudScreen implements MarieComponent {
                 .orElseGet(() -> new Bounds(DEFAULT_X, DEFAULT_Y, natural.width(), natural.height()));
     }
 
+    /** How many rows fit vertically in {@code bounds} at the current content scale — shared by {@link #drawPanel} (what to draw) and {@link #mouseScrolled} (how far scrolling can go). */
+    private static int visibleRowCapacity(Bounds bounds) {
+        double contentScale = ContentScaleController.resolveContentScale(persistedContentScale());
+        int lineHeight = Math.max(1, (int) Math.round(LINE_HEIGHT * contentScale));
+        double userPadding = PADDING * persistedPaddingScale();
+        int padding = Math.round(ContentScaleController.resolvePadding(userPadding));
+        return Math.max(1, (bounds.height() - padding * 2 - HEADER_HEIGHT - HEADER_GAP) / lineHeight);
+    }
+
     /** Set by {@link Nourished#registerColorDefinitions()} at mod init. */
     public static ColorKeyPair COLORS;
 
-    private static void drawPanel(RenderContext context, Bounds bounds, List<Row> rows) {
-        // Text/padding render scale is the user's persisted adjustment alone — box size (bounds) plays
-        // no part in it. MIN_SHRINK_SCALE still gates how small the box itself can be dragged (see the
-        // Constraint built in the constructor); that's unrelated and untouched by this.
+    private static void drawPanel(RenderContext context, Bounds bounds, int contentOffsetX, int contentOffsetY, List<Row> rows, boolean editMode, boolean moveContentMode) {
+        // Text/padding render scale is the user's persisted adjustment alone — box size (bounds)
+        // plays no part in it, matching HudEditTarget's Nutrient HUD panel exactly: content never
+        // shrinks to fit a smaller box, a resize only changes the box itself, and whatever doesn't
+        // fit is handled by scrolling (see visibleRowCapacity/mouseScrolled), not shrinking.
+        // MIN_SHRINK_SCALE still gates how small the box itself can be dragged (see the Constraint
+        // built in the constructor); that's unrelated and untouched by this.
         double contentScale = ContentScaleController.resolveContentScale(persistedContentScale());
         double userPadding = PADDING * persistedPaddingScale();
         int padding = Math.round(ContentScaleController.resolvePadding(userPadding));
         int lineHeight = Math.max(1, (int) Math.round(LINE_HEIGHT * contentScale));
-        int iconSize = Math.max(8, Math.round(ICON_SIZE * (float) contentScale));
+        // Capped at lineHeight, not just floored at a fixed minimum: at a low Text Scale, lineHeight
+        // shrinks with no floor of its own, but the old fixed 8px icon floor didn't shrink with it —
+        // once lineHeight dropped below 8, the icon overflowed into the rows above/below and every
+        // row visually collided into unreadable mush. Icon still shrinks proportionally with
+        // contentScale above that point, same as everything else in the row.
+        int iconSize = Math.min(lineHeight, Math.max(1, Math.round(ICON_SIZE * (float) contentScale)));
 
         NourishedClientConfig cc = NourishedClientConfig.get();
         int panelRgb = MarieColors.resolveColor(COLORS.background());
@@ -280,6 +373,9 @@ public final class CalorieHudScreen implements MarieComponent {
             context.drawText(Component.translatable("nourished.hud.calorieHistory.label").getString(),
                     bounds.x() + padding, bounds.y() + padding, TITLE_ACCENT_COLOR, TITLE_SCALE);
 
+            int rowsX = bounds.x() + padding + contentOffsetX;
+            int rowsTop = bounds.y() + padding + HEADER_HEIGHT + HEADER_GAP + contentOffsetY;
+
             int labelColor = MarieColors.resolveColor(COLORS.text());
             int barBg = HudDrawHelpers.barBackgroundColor();
             float maxTotal = MarieClientCache.get().maxTotal;
@@ -287,25 +383,42 @@ public final class CalorieHudScreen implements MarieComponent {
             // Aligns every row's bar to the same x regardless of that row's own label width ("Today"
             // vs. "5 days ago"), same reasoning as HudLayout#maxLabelSw for the dynamic nutrient HUD.
             int maxLabelW = 0;
+            int maxLabelWNatural = 0;
             for (Row row : rows) {
                 maxLabelW = Math.max(maxLabelW, context.textWidth(row.label(), (float) contentScale));
+                maxLabelWNatural = Math.max(maxLabelWNatural, context.textWidth(row.label(), 1f));
             }
-            int barX = bounds.x() + padding + iconSize + HudDrawHelpers.ICON_LABEL_GAP + maxLabelW + HudDrawHelpers.LABEL_BAR_GAP;
+            int barX = rowsX + iconSize + HudDrawHelpers.ICON_LABEL_GAP + maxLabelW + HudDrawHelpers.LABEL_BAR_GAP;
             int pctReserve = Math.round(PCT_RESERVE * (float) contentScale);
-            int barW = Math.max(0, bounds.x() + bounds.width() - padding - pctReserve - HudDrawHelpers.BAR_PCT_GAP - barX);
+            // barW is itself part of the content that scales with contentScale (Text Scale), same as
+            // icon/label/value — it is NOT pinned to a fixed unscaled right edge, which previously
+            // meant a high Text Scale grew every other element (icon, label, pct reserve) while the
+            // bar's target right edge stayed fixed, shrinking it toward (and eventually to) zero
+            // width. Instead, the reference "how much room is left for the bar" is computed once at
+            // scale 1.0 (naturalBarW, unaffected by the live box size — a box dragged wider/narrower
+            // still only changes surrounding margin, per the class-level contract above), then that
+            // reference width itself scales by contentScale like everything else in the row.
+            int naturalReserved = PADDING * 2 + ICON_SIZE + HudDrawHelpers.ICON_LABEL_GAP + maxLabelWNatural
+                    + HudDrawHelpers.LABEL_BAR_GAP + PCT_RESERVE + HudDrawHelpers.BAR_PCT_GAP;
+            int naturalBarW = Math.max(1, naturalSize(rows.size()).width() - naturalReserved);
+            int barW = Math.max(1, Math.round(naturalBarW * (float) contentScale));
             int barH = Math.max(1, Math.round(HudDrawHelpers.BAR_H * (float) contentScale));
 
-            int rowsTop = bounds.y() + padding + HEADER_HEIGHT + HEADER_GAP;
-            int maxRows = Math.max(0, (bounds.height() - padding * 2 - HEADER_HEIGHT - HEADER_GAP) / lineHeight);
-            int visible = Math.min(rows.size(), maxRows);
+            // Whatever doesn't fit is handled by scrolling, not shrinking or a silent hard clip: only the rows in
+            // [scrollOffset, scrollOffset + capacity) are drawn, and drawScrollIndicator marks that
+            // there's more above/below when capacity < rows.size().
+            int capacity = visibleRowCapacity(bounds);
+            int maxScroll = Math.max(0, rows.size() - capacity);
+            scrollOffset = Math.max(0, Math.min(scrollOffset, maxScroll));
+            int lastVisible = Math.min(rows.size(), scrollOffset + capacity);
             int y = rowsTop;
-            for (int i = 0; i < visible; i++) {
+            for (int i = scrollOffset; i < lastVisible; i++) {
                 Row row = rows.get(i);
                 int rowCenterY = y + lineHeight / 2;
                 int textY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
 
-                context.drawItem(CALORIE_ICON, bounds.x() + padding, rowCenterY - iconSize / 2, iconSize / 16f);
-                context.drawText(row.label(), bounds.x() + padding + iconSize + HudDrawHelpers.ICON_LABEL_GAP, textY, labelColor, (float) contentScale);
+                context.drawItem(CALORIE_ICON, rowsX, rowCenterY - iconSize / 2, iconSize / 16f);
+                context.drawText(row.label(), rowsX + iconSize + HudDrawHelpers.ICON_LABEL_GAP, textY, labelColor, (float) contentScale);
 
                 float pct = maxTotal > 0 ? row.value() / maxTotal : 0f;
                 boolean overGoal = pct > 1f;
@@ -325,9 +438,33 @@ public final class CalorieHudScreen implements MarieComponent {
 
                 y += lineHeight;
             }
+
+            if (editMode && moveContentMode) {
+                // Dashed rather than a solid glow outline — a live drag affordance shown only while
+                // the toggle is active, not a persistent separately-hit-tested box; wraps the actual
+                // drawn content's own bounding box (icon through the pct-reserve column, top through
+                // the last visible row), a few pixels further out so it doesn't overlap it.
+                int contentRight = barX + barW + HudDrawHelpers.BAR_PCT_GAP + pctReserve;
+                context.drawDashedBorder(rowsX - 3, rowsTop - 3, contentRight - rowsX + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+            }
+
+            if (maxScroll > 0) {
+                drawScrollIndicator(context, bounds, rowsTop, capacity, lineHeight, rows.size(), scrollOffset);
+            }
         } finally {
             context.popClip();
         }
+    }
+
+    /** Thin track+thumb on the box's right inner edge, only drawn when {@link #scrollOffset} can't show every row at once — a plain manual scrollbar since {@link RenderContext} has no dedicated primitive for one (its {@code drawVerticalBar} fills a percentage from an edge, not a repositionable thumb). */
+    private static void drawScrollIndicator(RenderContext context, Bounds bounds, int rowsTop, int capacity, int lineHeight, int rowCount, int scrollOffset) {
+        int trackX = bounds.x() + bounds.width() - 3;
+        int trackH = capacity * lineHeight;
+        int thumbH = Math.max(4, trackH * capacity / rowCount);
+        int maxScroll = rowCount - capacity;
+        int thumbY = rowsTop + (maxScroll > 0 ? (trackH - thumbH) * scrollOffset / maxScroll : 0);
+        context.fillRect(trackX, rowsTop, 2, trackH, context.theme().color(ThemeKey.BAR_BACKGROUND));
+        context.fillRect(trackX, thumbY, 2, thumbH, TITLE_ACCENT_COLOR);
     }
 
     /** Carries forward the existing persisted contentScale/paddingScale so a drag/resize commit never resets the user's text-scale or padding adjustment. */
@@ -370,17 +507,43 @@ public final class CalorieHudScreen implements MarieComponent {
             return true;
         }
         Bounds bounds = resolvedBounds(currentRows().size());
+        if (moveContentEnabled() && bounds.contains((int) mouseX, (int) mouseY)) {
+            draggingContent = true;
+            contentGrabOffsetX = (int) mouseX - contentOffsetX;
+            contentGrabOffsetY = (int) mouseY - contentOffsetY;
+            return true;
+        }
         return drag.mouseClicked((int) mouseX, (int) mouseY, bounds);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        return scaleConfigVisible && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        if (scaleConfigVisible && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+            return true;
+        }
+        List<Row> rows = currentRows();
+        Bounds bounds = resolvedBounds(rows.size());
+        if (scrollY == 0 || !bounds.contains((int) mouseX, (int) mouseY)) {
+            return false;
+        }
+        int maxScroll = Math.max(0, rows.size() - visibleRowCapacity(bounds));
+        if (maxScroll <= 0) {
+            return false;
+        }
+        scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (int) Math.signum(scrollY)));
+        return true;
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (scaleConfigVisible && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
+            return true;
+        }
+        if (draggingContent) {
+            List<Row> rows = currentRows();
+            Bounds bounds = resolvedBounds(rows.size());
+            contentOffsetX = clampContentOffsetX((int) mouseX - contentGrabOffsetX, bounds);
+            contentOffsetY = clampContentOffsetY((int) mouseY - contentGrabOffsetY, bounds);
             return true;
         }
         if (drag.isDragging() || drag.isResizing()) {
@@ -395,6 +558,11 @@ public final class CalorieHudScreen implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseReleased(mouseX, mouseY, button)) {
             return true;
         }
+        if (draggingContent) {
+            draggingContent = false;
+            persistContentOffset();
+            return true;
+        }
         boolean any = drag.isDragging() || drag.isResizing();
         drag.mouseReleased((int) mouseX, (int) mouseY);
         return any;
@@ -403,20 +571,31 @@ public final class CalorieHudScreen implements MarieComponent {
     @Override
     public void render(RenderContext context, Bounds ignoredBounds) {
         List<Row> rows = currentRows();
+        drag.setConstraint(panelConstraintFor(naturalSize(rows.size())));
+
         int[] mouse = scaledMouse(Minecraft.getInstance());
         Bounds defaultBounds = resolvedBounds(rows.size());
-        Bounds bounds = liveOrDefault(mouse[0], mouse[1], defaultBounds);
+        Bounds bounds = liveOrDefault(drag, mouse[0], mouse[1], defaultBounds);
 
-        drawPanel(context, bounds, rows);
+        boolean moveContentMode = moveContentEnabled();
+        // Re-clamped defensively here too — see the same comment on the onRenderGuiPost call site.
+        int offsetX = clampContentOffsetX(contentOffsetX, bounds);
+        int offsetY = clampContentOffsetY(contentOffsetY, bounds);
+        drawPanel(context, bounds, offsetX, offsetY, rows, true, moveContentMode);
 
-        Bounds handle = DraggableResizable.handleBounds(bounds);
-        context.drawResizeHandle(handle.x(), handle.y(), drag.isHandleHovered(mouse[0], mouse[1], bounds), drag.isHandleActive());
-        Bounds handleBL = DraggableResizable.handleBoundsBottomLeft(bounds);
-        context.drawResizeHandle(handleBL.x(), handleBL.y(), drag.isHandleBottomLeftHovered(mouse[0], mouse[1], bounds), drag.isBottomLeftCornerActive());
-        for (DraggableResizable.Edge edge : DraggableResizable.Edge.values()) {
-            Bounds strip = DraggableResizable.edgeHandleBounds(bounds, edge);
-            context.drawEdgeHandle(strip.x(), strip.y(), strip.width(), strip.height(), mouse[0], mouse[1],
-                    drag.isEdgeHovered(mouse[0], mouse[1], bounds, edge), drag.isEdgeActive(edge));
+        // While move-content mode is active, dragging is exclusively routed to the content offset
+        // (see mouseClicked/mouseDragged) — the panel's own resize handles would be inert, so they
+        // aren't drawn, to avoid implying they still work.
+        if (!moveContentMode) {
+            Bounds handle = DraggableResizable.handleBounds(bounds);
+            context.drawResizeHandle(handle.x(), handle.y(), drag.isHandleHovered(mouse[0], mouse[1], bounds), drag.isHandleActive());
+            Bounds handleBL = DraggableResizable.handleBoundsBottomLeft(bounds);
+            context.drawResizeHandle(handleBL.x(), handleBL.y(), drag.isHandleBottomLeftHovered(mouse[0], mouse[1], bounds), drag.isBottomLeftCornerActive());
+            for (DraggableResizable.Edge edge : DraggableResizable.Edge.values()) {
+                Bounds strip = DraggableResizable.edgeHandleBounds(bounds, edge);
+                context.drawEdgeHandle(strip.x(), strip.y(), strip.width(), strip.height(), mouse[0], mouse[1],
+                        drag.isEdgeHovered(mouse[0], mouse[1], bounds, edge), drag.isEdgeActive(edge));
+            }
         }
 
         if (scaleConfigVisible) {
@@ -424,9 +603,9 @@ public final class CalorieHudScreen implements MarieComponent {
         }
     }
 
-    private Bounds liveOrDefault(int mx, int my, Bounds fallback) {
-        if (drag.isDragging() || drag.isResizing()) {
-            Bounds preview = drag.mouseDragged(mx, my);
+    private static Bounds liveOrDefault(DraggableResizable d, int mx, int my, Bounds fallback) {
+        if (d.isDragging() || d.isResizing()) {
+            Bounds preview = d.mouseDragged(mx, my);
             if (preview != null) {
                 return preview;
             }

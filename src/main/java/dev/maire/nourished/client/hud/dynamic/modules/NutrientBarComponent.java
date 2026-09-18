@@ -21,7 +21,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 import java.util.Map;
 
@@ -118,13 +117,15 @@ final class NutrientBarComponent implements MarieComponent {
         }
     }
 
+    /**
+     * {@link NutrientRegistry#getIconItem(String)} resolves/validates the icon id string once per
+     * distinct id and caches the {@link net.minecraft.world.item.Item} forever — this only wraps
+     * that cached, already-validated item in a fresh {@link ItemStack} per call, instead of
+     * re-running {@link ResourceLocation#tryParse} and a {@link BuiltInRegistries#ITEM} lookup on
+     * every HUD frame for every visible bar.
+     */
     private static ItemStack resolveIconStack(String key) {
-        String iconId = NutrientRegistry.getIcon(key);
-        ResourceLocation iconLoc = ResourceLocation.tryParse(iconId);
-        var item = iconLoc == null
-                ? Items.APPLE
-                : BuiltInRegistries.ITEM.getOptional(iconLoc).orElse(Items.APPLE);
-        return new ItemStack(item);
+        return new ItemStack(NutrientRegistry.getIconItem(key));
     }
 
     @Override

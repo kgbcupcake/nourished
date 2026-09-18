@@ -2,7 +2,9 @@ package dev.maire.nourished.client.hud.classic;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.marie.framework.client.config.state.MarieClientCache;
+import dev.marie.framework.ui.edit.ContentScaleController;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
+import dev.maire.nourished.client.hud.dynamic.edit.HudEditTarget;
 import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
 import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -17,7 +19,10 @@ import java.util.Map;
  * Pre-MarieUI HUD renderer, restored verbatim from before the MarieUI-only collapse (see
  * {@code git show 57dc304:.../hud/HudPanelRenderer.java}) with only the package/imports adjusted
  * to compile against today's {@code HudLayout}/{@code HudDrawHelpers}/{@code HudVisibility}, which
- * are otherwise unchanged since then.
+ * are otherwise unchanged since then, plus {@code contentScale}/{@code pad} below so this renderer
+ * also honors the Nutrient HUD's edit-mode Text Scale/Padding sliders ({@link HudEditTarget}) the
+ * same way {@code NutrientPanelContainer}/{@code NutrientBarComponent} do for non-classic mode —
+ * previously those sliders silently had no effect here.
  */
 public final class ClassicHudPanelRenderer {
 
@@ -46,10 +51,26 @@ public final class ClassicHudPanelRenderer {
                     HudDrawHelpers.panelColor(bgOpacity)
             );
         }
-        if (layout.verticalLayout()) {
-            drawVerticalColumns(g, mc, data, keys, layout, panelX, panelY, displayValues, cc);
-        } else {
-            drawHorizontalRows(g, mc, data, keys, layout, panelX, panelY, displayValues, cc);
+        // Same "user's persisted per-panel adjustment alone, box geometry untouched" split
+        // NutrientPanelContainer/NutrientBarComponent apply for non-classic mode: layout's own
+        // scale/scaledPad (cc.hudScale()-derived) still drives row/bar/panel geometry below, but
+        // actual text/icon render size and content padding come from these instead.
+        float contentScale = ContentScaleController.resolveContentScale(HudEditTarget.persistedContentScale());
+        int pad = Math.round(ContentScaleController.resolvePadding(HudDrawHelpers.PANEL_PAD * HudEditTarget.persistedPaddingScale()));
+        // Clipped to the panel's own bounds — a defensive backstop against contentOffsetX/Y (the
+        // "Move Text and Icons" toggle) pushing content outside the panel: HudEditTarget clamps that
+        // offset already, but without this, any drift would render content fully detached from the
+        // panel background rather than simply getting cut off at its edge, same as
+        // CalorieHudScreen/ActivityLogHudPanel's own pushClip/popClip around their row drawing.
+        g.enableScissor(panelX, panelY, panelX + layout.panelW(), panelY + layout.panelH());
+        try {
+            if (layout.verticalLayout()) {
+                drawVerticalColumns(g, mc, data, keys, layout, panelX, panelY, displayValues, cc, contentScale, pad);
+            } else {
+                drawHorizontalRows(g, mc, data, keys, layout, panelX, panelY, displayValues, cc, contentScale, pad);
+            }
+        } finally {
+            g.disableScissor();
         }
     }
 
@@ -62,14 +83,16 @@ public final class ClassicHudPanelRenderer {
             int panelX,
             int panelY,
             Map<String, Float> displayValues,
-            NourishedClientConfig cc
+            NourishedClientConfig cc,
+            float contentScale,
+            int pad
     ) {
         int columnGap = Math.max(2, (int) Math.round(HudDrawHelpers.VERTICAL_COLUMN_GAP * layout.scale()));
-        int contentX = panelX + layout.scaledPad() + layout.leftMargin();
-        int pctH = (int) Math.ceil(9 * layout.labelScale());
-        int barTop = panelY + layout.scaledPad() + pctH + 2;
+        int contentX = panelX + pad + layout.leftMargin() + layout.contentOffsetX();
+        int pctH = (int) Math.ceil(9 * contentScale);
+        int barTop = panelY + pad + layout.contentOffsetY() + pctH + 2;
         int labelY = barTop + layout.verticalBarH() + 2;
-        int pctY = panelY + layout.scaledPad();
+        int pctY = panelY + pad + layout.contentOffsetY();
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);
             float displayPct = displayValues.getOrDefault(key, 0f);
@@ -83,11 +106,11 @@ public final class ClassicHudPanelRenderer {
             int columnX = contentX + i * (layout.verticalColumnW() + columnGap);
             int barX = columnX + (layout.verticalColumnW() - layout.verticalBarW()) / 2;
             String label = HudDrawHelpers.nutrientLabel(key);
-            int labelSw = (int) Math.ceil(mc.font.width(label) * layout.labelScale());
+            int labelSw = (int) Math.ceil(mc.font.width(label) * contentScale);
             int labelX = columnX + (layout.verticalColumnW() - labelSw) / 2;
             int pct = Math.round(truePct * 100f);
             String pctText = pct + "%";
-            int pctSw = (int) Math.ceil(mc.font.width(pctText) * layout.labelScale());
+            int pctSw = (int) Math.ceil(mc.font.width(pctText) * contentScale);
             int pctX = columnX + (layout.verticalColumnW() - pctSw) / 2;
             HudDrawHelpers.drawScaledLabel(
                     g,
@@ -96,7 +119,7 @@ public final class ClassicHudPanelRenderer {
                     pctX,
                     pctY,
                     HudDrawHelpers.pctColor(key, truePct),
-                    layout.labelScale()
+                    contentScale
             );
             HudDrawHelpers.drawRoundedVerticalBar(
                     g,
@@ -127,7 +150,7 @@ public final class ClassicHudPanelRenderer {
                     labelX,
                     labelY,
                     HudDrawHelpers.labelColor(),
-                    layout.labelScale()
+                    contentScale
             );
             if (dimRow) {
                 RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
@@ -144,10 +167,16 @@ public final class ClassicHudPanelRenderer {
             int panelX,
             int panelY,
             Map<String, Float> displayValues,
-            NourishedClientConfig cc
+            NourishedClientConfig cc,
+            float contentScale,
+            int pad
     ) {
-        int contentX = panelX + layout.scaledPad() + layout.leftMargin();
-        int y = panelY + layout.scaledPad();
+        int contentX = panelX + pad + layout.leftMargin() + layout.contentOffsetX();
+        int y = panelY + pad + layout.contentOffsetY();
+        // Native item size (16px) times the user's persisted content-scale adjustment alone — same
+        // "box geometry (layout.iconSize(), rowH) plays no part in it" split NutrientBarComponent
+        // uses for its own icon (see that class's own contentScale field javadoc).
+        int iconSize = Math.round(16 * contentScale);
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);
             float displayPct = displayValues.getOrDefault(key, 0f);
@@ -160,15 +189,14 @@ public final class ClassicHudPanelRenderer {
             }
             int rowH = layout.rowH();
             int rowCenterY = y + rowH / 2;
-            int iconSize = layout.iconSize();
             String label = HudDrawHelpers.nutrientLabel(key);
-            int labelY = rowCenterY - (int) Math.ceil(9 * layout.labelScale()) / 2;
-            int labelSw = (int) Math.ceil(mc.font.width(label) * layout.labelScale());
+            int labelY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
+            int labelSw = (int) Math.ceil(mc.font.width(label) * contentScale);
             int iconX = contentX;
             int labelX = contentX + iconSize + HudDrawHelpers.ICON_LABEL_GAP;
             int barX = labelX + layout.maxLabelSw() + HudDrawHelpers.LABEL_BAR_GAP;
             HudDrawHelpers.renderIcon(g, key, iconX, rowCenterY - iconSize / 2, iconSize);
-            HudDrawHelpers.drawScaledLabel(g, mc, label, labelX, labelY, HudDrawHelpers.labelColor(), layout.labelScale());
+            HudDrawHelpers.drawScaledLabel(g, mc, label, labelX, labelY, HudDrawHelpers.labelColor(), contentScale);
             int barY = rowCenterY - HudDrawHelpers.BAR_H / 2;
             HudDrawHelpers.drawRoundedBar(
                     g,
@@ -195,7 +223,7 @@ public final class ClassicHudPanelRenderer {
                     pctX,
                     labelY,
                     HudDrawHelpers.pctColor(key, truePct),
-                    layout.labelScale()
+                    contentScale
             );
             if (dimRow) {
                 RenderSystem.setShaderColor(1f, 1f, 1f, 1f);

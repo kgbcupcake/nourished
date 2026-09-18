@@ -108,7 +108,7 @@ public final class NutrientPanelContainer implements Container {
         int availableW = Math.max(0, bounds.width() - 2 * pad - leftMargin);
         int availableH = Math.max(0, bounds.height() - 2 * pad);
 
-        int contentY = bounds.y() + pad;
+        int contentY = bounds.y() + pad + hudLayout.contentOffsetY();
         if (!hudLayout.verticalLayout()) {
             // VerticalLayout (row-stacking mode) has no built-in "center the whole stack" concept —
             // it only positions each row's own horizontal offset via Anchor (see
@@ -119,8 +119,19 @@ public final class NutrientPanelContainer implements Container {
             contentY += Math.max(0, (availableH - naturalContentH) / 2);
         }
 
-        Bounds content = new Bounds(bounds.x() + pad + leftMargin, contentY, availableW, availableH);
-        Container.super.render(context, content);
+        Bounds content = new Bounds(bounds.x() + pad + leftMargin + hudLayout.contentOffsetX(), contentY, availableW, availableH);
+        // Clipped to the panel's own bounds — a defensive backstop against contentOffsetX/Y (the
+        // "Move Text and Icons" toggle) pushing content outside the panel: HudEditTarget clamps that
+        // offset already, but without this, any drift (e.g. from a stale offset the clamp hasn't
+        // re-run against yet) would render content fully detached from the panel background rather
+        // than simply getting cut off at its edge, same as CalorieHudScreen/ActivityLogHudPanel's
+        // own pushClip/popClip around their row drawing.
+        context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
+        try {
+            Container.super.render(context, content);
+        } finally {
+            context.popClip();
+        }
     }
 
     private static Anchor mapAnchor(dev.marie.framework.config.HudAnchor hudAnchor) {

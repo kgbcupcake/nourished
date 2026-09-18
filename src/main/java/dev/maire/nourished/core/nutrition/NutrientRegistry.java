@@ -9,15 +9,22 @@ import com.google.gson.JsonObject;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.api.value.ValueDefinition;
 import dev.marie.framework.api.registry.ValueRegistry;
+import dev.marie.framework.color.ColorKey;
+import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.framework.registry.AbstractRegistry;
 import dev.marie.framework.runtime.SourceRegistry;
+import dev.marie.framework.tooltips.TooltipMessageRegistry;
+import dev.marie.framework.util.MarieResourceLoader;
 import dev.marie.framework.util.MarieValidation;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
@@ -34,6 +41,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -41,6 +49,17 @@ import java.util.Set;
  * Writes a default file on first run. Call {@link #loadDefinitions()} before config spec
  * construction; call {@link #syncAndFreeze()} during common setup to publish into
  * {@link ValueRegistry}. {@link #load()} runs both phases for lifecycle/reload callers.
+ * <p>
+ * <b>Priority / Override Stack (lowest to highest):</b>
+ * <ol>
+ *   <li>Bundled built-in defaults (the five built-in nutrient resources)</li>
+ *   <li>config/nourished/nutrients.json (hand-editable; written on first run)</li>
+ *   <li>data/nourished/config/nutrients.json (datapack override, see {@link #loadFromDatapack})</li>
+ *   <li>KubeJS runtime registration (highest — see {@link #registerExternal})</li>
+ * </ol>
+ * Externally-registered (KubeJS) entries are tracked separately in
+ * {@code EXTERNALLY_REGISTERED} so they survive reload() cycles that
+ * repopulate from disk, matching the pattern established in NutrientCurveRegistry.
  */
 @ApiStatus.Internal
 public class NutrientRegistry {
@@ -49,6 +68,7 @@ public class NutrientRegistry {
             String key,
             String displayName,
             int color,
+            int tooltipColor,
             float defaultDecayRate,
             float criticalThreshold,
             float lowThreshold,
@@ -59,12 +79,15 @@ public class NutrientRegistry {
     ) {
         public static NutrientDef fromDefinition(ValueDefinition definition) {
             String key = Objects.requireNonNull(definition.getId(), "definition id");
-            String icon = resolveIcon(key);
-            List<String> tags = List.of(Nourished.MODID + ":nutrients/" + key);
+            String icon = definition.getIcon() != null ? definition.getIcon() : resolveIcon(key);
+            List<String> tags = !definition.getTags().isEmpty()
+                    ? definition.getTags()
+                    : List.of(Nourished.MODID + ":nutrients/" + key);
             return new NutrientDef(
                     key,
                     definition.getDisplayName(),
                     definition.getColor(),
+                    definition.getTooltipColor(),
                     definition.getDefaultDecayRate(),
                     definition.getCriticalThreshold(),
                     definition.getLowThreshold(),
@@ -80,6 +103,7 @@ public class NutrientRegistry {
                     key,
                     key,
                     DEFAULT_COLOR,
+                    DEFAULT_COLOR,
                     DEFAULT_DECAY_RATE,
                     DEFAULT_CRITICAL_THRESHOLD,
                     DEFAULT_LOW_THRESHOLD,
@@ -94,11 +118,14 @@ public class NutrientRegistry {
             return ValueDefinition.builder(key)
                     .displayName(displayName)
                     .color(color)
+                    .tooltipColor(tooltipColor)
                     .defaultDecayRate(defaultDecayRate)
                     .criticalThreshold(criticalThreshold)
                     .lowThreshold(lowThreshold)
                     .excessThreshold(excessThreshold)
                     .beneficial(beneficial)
+                    .icon(icon)
+                    .tags(tags)
                     .build();
         }
     }
@@ -121,6 +148,8 @@ public class NutrientRegistry {
             "dairy"
     );
     private static volatile Map<String, Integer> bundledBuiltinColorCache;
+    /** See {@link #getIconItem(String)}. Keyed by icon id string (e.g. {@code "minecraft:apple"}), not nutrient key. */
+    private static final Map<String, Item> ICON_ITEM_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
     private static final float DEFAULT_DECAY_RATE = 0f;
     private static final float DEFAULT_CRITICAL_THRESHOLD = 0f;
     private static final float DEFAULT_LOW_THRESHOLD = 0f;
@@ -174,6 +203,26 @@ public class NutrientRegistry {
         return fallbackIconForKey(key);
     }
 
+    /**
+     * Resolves the {@link Item} backing a nutrient's icon, e.g. {@code minecraft:carrot} -&gt;
+     * {@link net.minecraft.world.item.Items#CARROT}. Parses/looks up {@link #getIcon(String)}'s
+     * result exactly once per distinct icon id string and caches the result forever, rather than
+     * re-parsing a {@link ResourceLocation} and querying {@link BuiltInRegistries#ITEM} on every HUD
+     * frame for every visible bar (the previous behavior of {@code NutrientBarComponent}/{@code
+     * HudDrawHelpers#renderIcon}). The cache is keyed by icon id string, not nutrient key, so a
+     * config/datapack reload that changes a nutrient's icon id is picked up immediately (the new id
+     * simply misses the cache once) while an unchanged id never re-parses.
+     * Falls back to {@link Items#APPLE} for a null, malformed, or unregistered id — same fallback
+     * {@link #getIcon(String)}'s callers already applied per-call before this cache existed.
+     */
+    public static Item getIconItem(String key) {
+        String iconId = getIcon(key);
+        return ICON_ITEM_CACHE.computeIfAbsent(iconId, id -> {
+            ResourceLocation loc = ResourceLocation.tryParse(id);
+            return loc == null ? Items.APPLE : BuiltInRegistries.ITEM.getOptional(loc).orElse(Items.APPLE);
+        });
+    }
+
     /** Food tags that map to this nutrient. */
     public static List<String> getTags(String key) {
         NutrientDef def = INSTANCE.get(key);
@@ -209,6 +258,53 @@ public class NutrientRegistry {
             return Component.translatable(translationKey);
         }
         return Component.literal(getDisplayName(key));
+    }
+
+    /**
+     * Localized diet-screen tooltip when a lang entry exists; otherwise a MarieLib
+     * {@link TooltipMessageRegistry} override for {@code key}; otherwise a fallback message.
+     */
+    public static String getTooltip(String key) {
+        String translationKey = Nourished.MODID + ".screen.diet.tooltip." + key;
+        String translated = Component.translatable(translationKey).getString();
+        if (!translated.equals(translationKey)) {
+            return translated;
+        }
+        Optional<String> override = TooltipMessageRegistry.get(Nourished.MODID, key);
+        if (override.isPresent()) {
+            return override.get();
+        }
+        return missingTooltipMessage(key, translationKey);
+    }
+
+    /**
+     * Same resolution as {@link #getTooltip(String)}, as a chat component. Content resolved from
+     * the lang entry or {@link TooltipMessageRegistry} is styled with the "tooltip.&lt;key&gt;"
+     * {@link ColorKey}; the missing-tooltip fallback message stays unstyled.
+     */
+    public static Component getTooltipComponent(String key) {
+        String translationKey = Nourished.MODID + ".screen.diet.tooltip." + key;
+        String translated = Component.translatable(translationKey).getString();
+        if (!translated.equals(translationKey)) {
+            return styleTooltip(Component.translatable(translationKey), key);
+        }
+        Optional<String> override = TooltipMessageRegistry.get(Nourished.MODID, key);
+        if (override.isPresent()) {
+            return styleTooltip(Component.literal(override.get()), key);
+        }
+        return Component.literal(missingTooltipMessage(key, translationKey));
+    }
+
+    private static String missingTooltipMessage(String key, String translationKey) {
+        return "No tooltip set for '" + key + "' — add a '" + translationKey
+                + "' lang entry, or a \"" + key + "\" entry under \"byKey\" in config/"
+                + Nourished.MODID + "/tooltips/tooltip_messages.json.";
+    }
+
+    private static Component styleTooltip(Component base, String key) {
+        int argb = MarieColors.resolveColor(ColorKey.of(
+                ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "tooltip." + key)));
+        return base.copy().withStyle(style -> style.withColor(TextColor.fromRgb(argb & 0xFFFFFF)));
     }
 
     /** All registered nutrient definitions in order. */
@@ -363,6 +459,20 @@ public class NutrientRegistry {
         Nourished.LOGGER.info("[NutrientRegistry] Reloading nutrients.json");
         doLoadDefinitions();
         syncAndFreeze();
+    }
+
+    public static void loadFromDatapack(ResourceManager resourceManager) {
+        MarieResourceLoader.loadFromModConfig(
+                resourceManager,
+                "config/nutrients.json",
+                NutrientRegistry::parseFromReader,
+                NutrientRegistry::load,
+                "[NutrientRegistry] Loaded from datapack override",
+                "[NutrientRegistry] Failed to load from datapack, falling back to config folder",
+                "[NutrientRegistry] Loaded from config folder"
+        );
+        syncAndFreeze();
+        reapplyExternals();
     }
 
     /** Persists the in-memory registry to config/nourished/nutrients.json. */
@@ -520,6 +630,7 @@ public class NutrientRegistry {
                     legacyBuiltinColorsRepaired[0] = true;
                     color = repairedColor;
                 }
+                int tooltipColor = obj.has("tooltip_color") ? obj.get("tooltip_color").getAsInt() : DEFAULT_COLOR;
                 float defaultDecayRate = obj.has("default_decay_rate") ? obj.get("default_decay_rate").getAsFloat() : DEFAULT_DECAY_RATE;
                 float criticalThreshold = obj.has("critical_threshold") ? obj.get("critical_threshold").getAsFloat() : DEFAULT_CRITICAL_THRESHOLD;
                 float lowThreshold = obj.has("low_threshold") ? obj.get("low_threshold").getAsFloat() : DEFAULT_LOW_THRESHOLD;
@@ -535,6 +646,7 @@ public class NutrientRegistry {
                         key,
                         displayName,
                         color,
+                        tooltipColor,
                         defaultDecayRate,
                         criticalThreshold,
                         lowThreshold,
@@ -603,6 +715,97 @@ public class NutrientRegistry {
         }
     }
 
+    /**
+     * Re-applies EXTERNALLY_REGISTERED (KubeJS) entries if a prior reload dropped
+     * any of them — same fallback safety net as NutrientCurveRegistry.reapplyExternals().
+     */
+    private static void reapplyExternals() {
+        if (EXTERNALLY_REGISTERED.isEmpty()) {
+            return;
+        }
+        boolean anyMissing = false;
+        for (Map.Entry<String, NutrientDef> entry : EXTERNALLY_REGISTERED.entrySet()) {
+            NutrientDef current = INSTANCE.get(entry.getKey());
+            if (current == null || !current.equals(entry.getValue())) {
+                anyMissing = true;
+                break;
+            }
+        }
+        if (!anyMissing) {
+            return;
+        }
+        INSTANCE.runWrite(() -> {
+            List<NutrientDef> prior = new ArrayList<>(INSTANCE.valuesUnlocked());
+            INSTANCE.resetUnlocked();
+            for (NutrientDef d : prior) {
+                INSTANCE.registerUnlocked(d.key(), d);
+            }
+            reapplyExternallyRegisteredUnlocked();
+            INSTANCE.freezeUnlocked();
+        });
+        syncToValueRegistry();
+    }
+
+    private static void parseFromReader(Reader reader) {
+        JsonArray arr = GSON.fromJson(reader, JsonArray.class);
+        INSTANCE.runWrite(() -> {
+            INSTANCE.resetUnlocked();
+            if (arr == null || arr.isEmpty()) {
+                Nourished.LOGGER.warn("[NutrientRegistry] Datapack nutrients.json was empty, using preset defaults");
+                loadDefaultsUnlocked();
+                return;
+            }
+            for (int i = 0; i < arr.size(); i++) {
+                registerNutrientRow(arr.get(i).getAsJsonObject(), i);
+            }
+            if (INSTANCE.valuesUnlocked().isEmpty()) {
+                Nourished.LOGGER.warn("[NutrientRegistry] Datapack nutrients.json had no valid entries, using preset defaults");
+                loadDefaultsUnlocked();
+                return;
+            }
+            reapplyExternallyRegisteredUnlocked();
+            INSTANCE.freezeUnlocked();
+        });
+        FoodNutritionRegistry.clearTagKeyCache();
+    }
+
+    private static void registerNutrientRow(JsonObject obj, int index) {
+        JsonElement keyEl = obj.get("key");
+        if (keyEl == null || !keyEl.isJsonPrimitive() || !keyEl.getAsJsonPrimitive().isString()) {
+            Nourished.LOGGER.warn("[NutrientRegistry] Skipping datapack entry at index {} missing or invalid 'key'", index);
+            return;
+        }
+        String key = keyEl.getAsString();
+        String icon = obj.has("icon") ? obj.get("icon").getAsString() : fallbackIconForKey(key);
+        String displayName = obj.has("display_name") ? obj.get("display_name").getAsString() : key;
+        int color = obj.has("color") ? obj.get("color").getAsInt() : DEFAULT_COLOR;
+        int tooltipColor = obj.has("tooltip_color") ? obj.get("tooltip_color").getAsInt() : DEFAULT_COLOR;
+        float defaultDecayRate = obj.has("default_decay_rate") ? obj.get("default_decay_rate").getAsFloat() : DEFAULT_DECAY_RATE;
+        float criticalThreshold = obj.has("critical_threshold") ? obj.get("critical_threshold").getAsFloat() : DEFAULT_CRITICAL_THRESHOLD;
+        float lowThreshold = obj.has("low_threshold") ? obj.get("low_threshold").getAsFloat() : DEFAULT_LOW_THRESHOLD;
+        float excessThreshold = obj.has("excess_threshold") ? obj.get("excess_threshold").getAsFloat() : DEFAULT_EXCESS_THRESHOLD;
+        boolean beneficial = !obj.has("beneficial") || obj.get("beneficial").getAsBoolean();
+        List<String> tags = new ArrayList<>();
+        if (obj.has("tags")) {
+            for (JsonElement t : obj.getAsJsonArray("tags")) {
+                tags.add(t.getAsString());
+            }
+        }
+        INSTANCE.registerUnlocked(key, new NutrientDef(
+                key,
+                displayName,
+                color,
+                tooltipColor,
+                defaultDecayRate,
+                criticalThreshold,
+                lowThreshold,
+                excessThreshold,
+                icon,
+                Collections.unmodifiableList(tags),
+                beneficial
+        ));
+    }
+
     private static void loadDefaults() {
         INSTANCE.runWrite(NutrientRegistry::loadDefaultsUnlocked);
     }
@@ -628,6 +831,7 @@ public class NutrientRegistry {
             obj.addProperty("key", def.key());
             obj.addProperty("display_name", def.displayName());
             obj.addProperty("color", def.color());
+            obj.addProperty("tooltip_color", def.tooltipColor());
             obj.addProperty("default_decay_rate", def.defaultDecayRate());
             obj.addProperty("critical_threshold", def.criticalThreshold());
             obj.addProperty("low_threshold", def.lowThreshold());
@@ -706,6 +910,7 @@ public class NutrientRegistry {
                     String key = path;
                     String displayName = obj.has("display_name") ? obj.get("display_name").getAsString() : key;
                     int color = obj.has("color") ? obj.get("color").getAsInt() : DEFAULT_COLOR;
+                    int tooltipColor = obj.has("tooltip_color") ? obj.get("tooltip_color").getAsInt() : DEFAULT_COLOR;
                     float defaultDecayRate = obj.has("default_decay_rate") ? obj.get("default_decay_rate").getAsFloat() : DEFAULT_DECAY_RATE;
                     float criticalThreshold = obj.has("critical_threshold") ? obj.get("critical_threshold").getAsFloat() : DEFAULT_CRITICAL_THRESHOLD;
                     float lowThreshold = obj.has("low_threshold") ? obj.get("low_threshold").getAsFloat() : DEFAULT_LOW_THRESHOLD;
@@ -713,7 +918,7 @@ public class NutrientRegistry {
                     boolean beneficial = !obj.has("beneficial") || obj.get("beneficial").getAsBoolean();
                     String icon = obj.has("icon") ? obj.get("icon").getAsString() : resolveIcon(key);
                     List<String> tags = List.of(Nourished.MODID + ":nutrients/" + key);
-                    defaults.add(new NutrientDef(key, displayName, color, defaultDecayRate, criticalThreshold, lowThreshold, excessThreshold, icon, tags, beneficial));
+                    defaults.add(new NutrientDef(key, displayName, color, tooltipColor, defaultDecayRate, criticalThreshold, lowThreshold, excessThreshold, icon, tags, beneficial));
                 }
             } catch (IOException e) {
                 Nourished.LOGGER.warn("[NutrientRegistry] Failed to load bundled nutrient {}: {}", path, e.getMessage());

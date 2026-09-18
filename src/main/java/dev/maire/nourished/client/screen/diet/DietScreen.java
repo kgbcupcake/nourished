@@ -19,6 +19,7 @@ import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
@@ -315,8 +316,13 @@ public class DietScreen extends Screen {
             drawDietIconTooltips(g, layout, mx, my);
         }
         if (scaleConfigVisible) {
-            RenderContext scaleContext = new GuiGraphicsRenderContext(g, minecraft, Theme.DARK, pt);
-            scaleConfigPanel.render(scaleContext, new Bounds(0, 0, this.width, this.height));
+            GuiGraphicsRenderContext scaleContext = new GuiGraphicsRenderContext(g, minecraft, Theme.DARK, pt);
+            // Defense-in-depth: see resetClip() rationale in drawPanelViaMarieUI above.
+            try {
+                scaleConfigPanel.render(scaleContext, new Bounds(0, 0, this.width, this.height));
+            } finally {
+                scaleContext.resetClip();
+            }
         }
         super.render(g, mx, my, pt);
     }
@@ -333,13 +339,20 @@ public class DietScreen extends Screen {
     private void drawPanelViaMarieUI(GuiGraphics g, Minecraft mc, float partialTick, TrackingData data, List<String> bars, int mx, int my) {
         DietLayout.Layout resolvedLayout = DietScreenEditTarget.resolvedPanelLayout(mc);
         DietPanelContainer panel = new DietPanelContainer(data, bars, java.util.Collections.unmodifiableMap(display), resolvedLayout);
-        RenderContext context = new GuiGraphicsRenderContext(g, mc, Theme.DARK, partialTick);
+        GuiGraphicsRenderContext context = new GuiGraphicsRenderContext(g, mc, Theme.DARK, partialTick);
         Bounds bounds = new Bounds(resolvedLayout.panelX(), resolvedLayout.panelY(), resolvedLayout.panelW(), resolvedLayout.panelH());
-        panel.render(context, bounds);
+        // Defense-in-depth: resetClip() forces the scissor stack/GL state back to empty even if
+        // panel.render (or the edit-mode toggle drawn right after it) throws partway through a
+        // pushClip/popClip pair — see GuiGraphicsRenderContext#resetClip.
+        try {
+            panel.render(context, bounds);
 
-        boolean editModeActive = marieEditModeController != null && marieEditModeController.isActive();
-        boolean toggleHovered = isMouseOverEditModeToggle(resolvedLayout, mx, my);
-        drawEditModeToggle(context, resolvedLayout, editModeActive, toggleHovered);
+            boolean editModeActive = marieEditModeController != null && marieEditModeController.isActive();
+            boolean toggleHovered = isMouseOverEditModeToggle(resolvedLayout, mx, my);
+            drawEditModeToggle(context, resolvedLayout, editModeActive, toggleHovered);
+        } finally {
+            context.resetClip();
+        }
     }
 
     // ── Edit-mode toggle (top-right corner) ─────────────────────────────────
@@ -422,7 +435,7 @@ public class DietScreen extends Screen {
         for (String key : visibleBars) {
             if (mx >= rx && mx <= rx + iconSize && my >= y && my <= y + iconSize) {
                 g.renderTooltip(font,
-                        Component.translatable("nourished.screen.diet.tooltip." + key),
+                        NutrientRegistry.getTooltipComponent(key),
                         mx, my);
                 return;
             }

@@ -118,7 +118,7 @@ final class ClassicDietRightPanel {
         for (String key : visibleBars) {
             if (mx >= rx && mx <= rx + iconSize && my >= y && my <= y + iconSize) {
                 g.renderTooltip(mc.font,
-                        Component.translatable("nourished.screen.diet.tooltip." + key),
+                        NutrientRegistry.getTooltipComponent(key),
                         mx, my);
                 return;
             }

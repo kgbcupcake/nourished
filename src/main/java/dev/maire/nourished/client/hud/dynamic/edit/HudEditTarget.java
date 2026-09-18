@@ -21,6 +21,7 @@ import dev.marie.framework.ui.scaleconfig.ScaleConfigPanel;
 import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.client.hud.classic.ClassicHudPanelRenderer;
+import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
 import dev.maire.nourished.client.hud.dynamic.modules.NutrientPanelContainer;
 import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;
@@ -59,12 +60,32 @@ public final class HudEditTarget implements MarieComponent {
 
     private static final String ID = "nourished.hud.editwrapper";
     private static final String PANEL_ID = "nourished.hud.panel";
+    private static final String CONTENT_OFFSET_ID = "nourished.hud.contentOffset";
+
+    /** Accent used for the "Move Text and Icons" live drag affordance — this panel draws no title text of its own to already have an established accent color, unlike {@code CalorieHudScreen}/{@code ActivityLogHudPanel}. */
+    private static final int CONTENT_ACCENT_COLOR = 0xFF5DA9E9;
 
     /** How much bigger than content's natural size the box may be dragged, on either axis. */
     private static final double MAX_MARGIN_MULTIPLIER = 5.0d;
 
     private final Minecraft mc;
     private final DraggableResizable panelDrag;
+
+    /** Whether a content-move drag (see {@link #moveContentEnabled}) is currently in progress. */
+    private boolean draggingContent;
+    private int contentGrabOffsetX;
+    private int contentGrabOffsetY;
+
+    /**
+     * The content's offset from where it would otherwise sit — a plain persisted translation, not
+     * a separately hit-testable box, same {@code contentOffsetX}/{@code contentOffsetY} pattern
+     * {@code CalorieHudScreen}/{@code ActivityLogHudPanel} use and for the same reason: this panel
+     * has nothing else in it besides its own content, so a separately draggable sub-region would
+     * compete with the panel's own drag for every click inside it. {@link #moveContentEnabled}
+     * disambiguates instead.
+     */
+    private int contentOffsetX;
+    private int contentOffsetY;
 
     /**
      * Editor for this panel's persisted contentScale/paddingScale — same pattern as {@code
@@ -89,6 +110,21 @@ public final class HudEditTarget implements MarieComponent {
         panelDrag = new DraggableResizable(this, constraintFor(natural), (target, bounds) -> commit(bounds));
         panelDrag.setSnapRegistryId(PANEL_ID);
         SnapRegistry.register(PANEL_ID, () -> resolvedBounds(this.mc, currentVisibleKeysOrFallback()));
+
+        UiStatePersistence.get().load(CONTENT_OFFSET_ID).ifPresent(state -> {
+            contentOffsetX = state.x();
+            contentOffsetY = state.y();
+        });
+    }
+
+    /** Persists {@link #contentOffsetX}/{@link #contentOffsetY} — {@code width}/{@code height}/the manual-size and scale fields are unused for this key. */
+    private void persistContentOffset() {
+        UiStatePersistence.get().save(CONTENT_OFFSET_ID, new ComponentState(contentOffsetX, contentOffsetY, 0, 0, false, false, false, 0));
+    }
+
+    /** The "Move Text and Icons" toggle's live state, owned by {@link #scaleConfigPanel} (its own editor window, under Padding) rather than a button on this panel itself. */
+    private boolean moveContentEnabled() {
+        return scaleConfigPanel.isMoveContentEnabled(PANEL_ID);
     }
 
     /**
@@ -168,7 +204,8 @@ public final class HudEditTarget implements MarieComponent {
                             natural.barW(), natural.rowH(), natural.iconSize(), natural.maxLabelSw(),
                             natural.scaledPad(), natural.labelScale(), natural.scale(), natural.verticalLayout(),
                             natural.verticalBarW(), natural.verticalBarH(), natural.verticalColumnW(),
-                            natural.panelW(), natural.panelH(), state.leftMargin()
+                            natural.panelW(), natural.panelH(), state.leftMargin(),
+                            persistedContentOffsetX(), persistedContentOffsetY()
                     );
                 })
                 .orElse(natural);
@@ -179,6 +216,43 @@ public final class HudEditTarget implements MarieComponent {
         return UiStatePersistence.get().load(PANEL_ID)
                 .map(ComponentState::leftMargin)
                 .orElse(0);
+    }
+
+    /** Committed "Move Text and Icons" offset — see {@link #contentOffsetX}. */
+    private static int persistedContentOffsetX() {
+        return UiStatePersistence.get().load(CONTENT_OFFSET_ID).map(ComponentState::x).orElse(0);
+    }
+
+    /** Committed "Move Text and Icons" offset — see {@link #contentOffsetY}. */
+    private static int persistedContentOffsetY() {
+        return UiStatePersistence.get().load(CONTENT_OFFSET_ID).map(ComponentState::y).orElse(0);
+    }
+
+    /**
+     * How much of the content's own origin (its icon corner) must stay inside the panel on the far
+     * edge — not the content's whole footprint. {@link #clampContentOffsetX}/{@link
+     * #clampContentOffsetY} clamp only the origin into the panel's interior, using the box's own
+     * live size (so a bigger box gives more room to drag, all the way to its far edge); anything
+     * past the panel's own edge is invisible via {@code NutrientPanelContainer}/{@code
+     * ClassicHudPanelRenderer}'s clip/scissor, not blocked from being dragged there in the first
+     * place.
+     */
+    private static final int MIN_VISIBLE_CONTENT = 14;
+
+    /** Clamps a candidate {@link #contentOffsetX} so the content's own origin can't be dragged past the panel's edges — see {@link #MIN_VISIBLE_CONTENT}. */
+    private static int clampContentOffsetX(int offsetX, Bounds panelBounds, int leftMargin) {
+        int pad = Math.round(ContentScaleController.resolvePadding(HudDrawHelpers.PANEL_PAD * persistedPaddingScale()));
+        int minOffset = -(pad + leftMargin);
+        int maxOffset = Math.max(minOffset, panelBounds.width() - pad - leftMargin - MIN_VISIBLE_CONTENT);
+        return Math.min(maxOffset, Math.max(minOffset, offsetX));
+    }
+
+    /** Clamps a candidate {@link #contentOffsetY} the same way {@link #clampContentOffsetX} does for X. */
+    private static int clampContentOffsetY(int offsetY, Bounds panelBounds) {
+        int pad = Math.round(ContentScaleController.resolvePadding(HudDrawHelpers.PANEL_PAD * persistedPaddingScale()));
+        int minOffset = -pad;
+        int maxOffset = Math.max(minOffset, panelBounds.height() - pad - MIN_VISIBLE_CONTENT);
+        return Math.min(maxOffset, Math.max(minOffset, offsetY));
     }
 
     /** Resolves the HUD panel's current on-screen bounds — see {@link #resolvedLayout}. */
@@ -238,6 +312,12 @@ public final class HudEditTarget implements MarieComponent {
             return false;
         }
         Bounds bounds = resolvedBounds(mc, keys);
+        if (moveContentEnabled() && bounds.contains((int) mouseX, (int) mouseY)) {
+            draggingContent = true;
+            contentGrabOffsetX = (int) mouseX - contentOffsetX;
+            contentGrabOffsetY = (int) mouseY - contentOffsetY;
+            return true;
+        }
         return panelDrag.mouseClicked((int) mouseX, (int) mouseY, bounds);
     }
 
@@ -251,6 +331,15 @@ public final class HudEditTarget implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
             return true;
         }
+        if (draggingContent) {
+            List<String> keys = currentVisibleKeys();
+            if (!keys.isEmpty()) {
+                Bounds bounds = resolvedBounds(mc, keys);
+                contentOffsetX = clampContentOffsetX((int) mouseX - contentGrabOffsetX, bounds, persistedLeftMargin());
+                contentOffsetY = clampContentOffsetY((int) mouseY - contentGrabOffsetY, bounds);
+            }
+            return true;
+        }
         if (panelDrag.isDragging() || panelDrag.isResizing()) {
             panelDrag.mouseDragged((int) mouseX, (int) mouseY);
             return true;
@@ -261,6 +350,11 @@ public final class HudEditTarget implements MarieComponent {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (scaleConfigVisible && scaleConfigPanel.mouseReleased(mouseX, mouseY, button)) {
+            return true;
+        }
+        if (draggingContent) {
+            draggingContent = false;
+            persistContentOffset();
             return true;
         }
         boolean any = panelDrag.isDragging() || panelDrag.isResizing();
@@ -281,6 +375,12 @@ public final class HudEditTarget implements MarieComponent {
         Bounds defaultBounds = resolvedBounds(mc, keys);
         Bounds bounds = liveOrDefault(mouse[0], mouse[1], defaultBounds);
 
+        // Re-clamped defensively at draw time too — see the same reasoning on CalorieHudScreen's
+        // equivalent call site: the panel this offset is valid against can change independently of
+        // dragging (e.g. a manual resize), and a stale offset should self-correct visually.
+        contentOffsetX = clampContentOffsetX(contentOffsetX, bounds, persistedLeftMargin());
+        contentOffsetY = clampContentOffsetY(contentOffsetY, bounds);
+
         Map<String, Float> displayValues = NourishedHUD.currentDisplayValues();
         HudLayout.Layout matchedLayout = matchedLayoutFor(keys, bounds);
         if (NourishedClientConfig.get().hudClassicMode() && context instanceof GuiGraphicsRenderContext guiContext) {
@@ -293,14 +393,27 @@ public final class HudEditTarget implements MarieComponent {
             panel.render(context, bounds);
         }
 
-        Bounds handle = DraggableResizable.handleBounds(bounds);
-        context.drawResizeHandle(handle.x(), handle.y(), panelDrag.isHandleHovered(mouse[0], mouse[1], bounds), panelDrag.isHandleActive());
-        Bounds handleBL = DraggableResizable.handleBoundsBottomLeft(bounds);
-        context.drawResizeHandle(handleBL.x(), handleBL.y(), panelDrag.isHandleBottomLeftHovered(mouse[0], mouse[1], bounds), panelDrag.isBottomLeftCornerActive());
-        for (DraggableResizable.Edge edge : DraggableResizable.Edge.values()) {
-            Bounds strip = DraggableResizable.edgeHandleBounds(bounds, edge);
-            context.drawEdgeHandle(strip.x(), strip.y(), strip.width(), strip.height(), mouse[0], mouse[1],
-                    panelDrag.isEdgeHovered(mouse[0], mouse[1], bounds, edge), panelDrag.isEdgeActive(edge));
+        boolean moveContentMode = moveContentEnabled();
+        if (moveContentMode) {
+            // Dashed rather than a solid glow outline — a live drag affordance shown only while the
+            // toggle is active, not a persistent separately-hit-tested box; wraps content's own
+            // natural (scale-only) bounding box, a few pixels further out so it doesn't overlap it.
+            int pad = Math.round(ContentScaleController.resolvePadding(HudDrawHelpers.PANEL_PAD * persistedPaddingScale()));
+            int contentX = bounds.x() + pad + matchedLayout.leftMargin() + matchedLayout.contentOffsetX();
+            int contentY = bounds.y() + pad + matchedLayout.contentOffsetY();
+            int contentW = Math.max(0, matchedLayout.naturalPanelW() - 2 * pad);
+            int contentH = Math.max(0, matchedLayout.naturalPanelH() - 2 * pad);
+            context.drawDashedBorder(contentX - 3, contentY - 3, contentW + 6, contentH + 6, CONTENT_ACCENT_COLOR);
+        } else {
+            Bounds handle = DraggableResizable.handleBounds(bounds);
+            context.drawResizeHandle(handle.x(), handle.y(), panelDrag.isHandleHovered(mouse[0], mouse[1], bounds), panelDrag.isHandleActive());
+            Bounds handleBL = DraggableResizable.handleBoundsBottomLeft(bounds);
+            context.drawResizeHandle(handleBL.x(), handleBL.y(), panelDrag.isHandleBottomLeftHovered(mouse[0], mouse[1], bounds), panelDrag.isBottomLeftCornerActive());
+            for (DraggableResizable.Edge edge : DraggableResizable.Edge.values()) {
+                Bounds strip = DraggableResizable.edgeHandleBounds(bounds, edge);
+                context.drawEdgeHandle(strip.x(), strip.y(), strip.width(), strip.height(), mouse[0], mouse[1],
+                        panelDrag.isEdgeHovered(mouse[0], mouse[1], bounds, edge), panelDrag.isEdgeActive(edge));
+            }
         }
 
         if (scaleConfigVisible) {
@@ -341,7 +454,8 @@ public final class HudEditTarget implements MarieComponent {
                 natural.barW(), natural.rowH(), natural.iconSize(), natural.maxLabelSw(),
                 natural.scaledPad(), natural.labelScale(), natural.scale(), natural.verticalLayout(),
                 natural.verticalBarW(), natural.verticalBarH(), natural.verticalColumnW(),
-                natural.panelW(), natural.panelH(), leftMargin
+                natural.panelW(), natural.panelH(), leftMargin,
+                contentOffsetX, contentOffsetY
         );
     }
 

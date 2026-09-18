@@ -155,9 +155,16 @@ public final class NourishedHUD {
      */
     private static void drawHudPanelViaMarieUI(GuiGraphics g, Minecraft mc, float partialTick, List<String> keys, HudLayout.Layout layout) {
         NutrientPanelContainer panel = new NutrientPanelContainer(keys, layout, java.util.Collections.unmodifiableMap(displayValues));
-        RenderContext context = new GuiGraphicsRenderContext(g, mc, Theme.DARK, partialTick);
+        GuiGraphicsRenderContext context = new GuiGraphicsRenderContext(g, mc, Theme.DARK, partialTick);
         Bounds bounds = new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
-        panel.render(context, bounds);
+        // Defense-in-depth: resetClip() forces the scissor stack/GL state back to empty even if
+        // panel.render throws partway through a pushClip/popClip pair (e.g. backing nutrient data
+        // mutated mid-render by a food-eaten event) — see GuiGraphicsRenderContext#resetClip.
+        try {
+            panel.render(context, bounds);
+        } finally {
+            context.resetClip();
+        }
     }
 
     private static void advanceLerp(TrackingData data, List<String> keys) {

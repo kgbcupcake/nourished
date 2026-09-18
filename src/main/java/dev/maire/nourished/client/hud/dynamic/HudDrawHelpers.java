@@ -8,12 +8,10 @@ import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 public final class HudDrawHelpers {
 
@@ -164,28 +162,44 @@ public final class HudDrawHelpers {
     }
 
     public static void renderIcon(GuiGraphics g, String key, int x, int y, int iconSize) {
-        String iconId = NutrientRegistry.getIcon(key);
-        ResourceLocation iconLoc = ResourceLocation.tryParse(iconId);
-        var item = iconLoc == null
-                ? Items.APPLE
-                : BuiltInRegistries.ITEM.getOptional(iconLoc).orElse(Items.APPLE);
-        ItemStack stack = new ItemStack(item);
+        // NutrientRegistry.getIconItem resolves/validates the icon id string once per distinct id and
+        // caches the Item forever, instead of re-running ResourceLocation.tryParse and a
+        // BuiltInRegistries.ITEM lookup on every HUD frame for every visible bar (this classic
+        // renderer draws every row every frame, same as the MarieUI NutrientBarComponent path).
+        ItemStack stack = new ItemStack(NutrientRegistry.getIconItem(key));
+        // pushPose/popPose must be paired even if renderItem throws (e.g. a transiently-unbaked
+        // item id resolved mid-sync while nutrient values are updating rapidly, as happens while
+        // eating) — g's PoseStack is shared across every RenderGuiEvent.Post subscriber this frame.
+        // An unmatched pushPose here leaves this translate+scale applied to every later
+        // g.fill()/drawString()/renderItem() call for the rest of the frame (fill() draws its quad
+        // through the current pose transform), which is how a small bar/icon fill elsewhere can end
+        // up stretched into a full-screen quad — self-healing on the next successful call and
+        // re-corrupting on the next throw, producing rapid full-screen flashing while the underlying
+        // condition keeps retriggering.
         PoseStack pose = g.pose();
         pose.pushPose();
-        pose.translate(x, y, 0);
-        float s = iconSize / 16f;
-        pose.scale(s, s, 1f);
-        g.renderItem(stack, 0, 0);
-        pose.popPose();
+        try {
+            pose.translate(x, y, 0);
+            float s = iconSize / 16f;
+            pose.scale(s, s, 1f);
+            g.renderItem(stack, 0, 0);
+        } finally {
+            pose.popPose();
+        }
     }
 
     public static void drawScaledLabel(GuiGraphics g, Minecraft mc, String text, int x, int y, int color, float scale) {
+        // See renderIcon's comment above — same pairing requirement, same shared-PoseStack corruption
+        // risk if drawString throws partway through.
         PoseStack pose = g.pose();
         pose.pushPose();
-        pose.translate(x, y, 0);
-        pose.scale(scale, scale, 1f);
-        g.drawString(mc.font, text, 0, 0, color, false);
-        pose.popPose();
+        try {
+            pose.translate(x, y, 0);
+            pose.scale(scale, scale, 1f);
+            g.drawString(mc.font, text, 0, 0, color, false);
+        } finally {
+            pose.popPose();
+        }
     }
 
     public static int barFillColor(String key, float v) {

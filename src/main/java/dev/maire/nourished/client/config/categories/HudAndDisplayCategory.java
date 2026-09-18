@@ -163,10 +163,15 @@ public final class HudAndDisplayCategory {
                     nutrientColorKey(valueKey),
                     NutrientRegistry.getLabelComponent(valueKey));
             nutrientColorRows.add(row);
+            ColorHexRowWidget tooltipRow = new ColorHexRowWidget(
+                    nutrientTooltipColorKey(valueKey),
+                    NutrientRegistry.getLabelComponent(valueKey).copy().append(" Tooltip"));
+            nutrientColorRows.add(tooltipRow);
         }
         nutrientColorEntries.add(new HudNutrientColorsResetAllEntry(() -> {
             for (String valueKey : NutrientRegistry.getKeys()) {
                 ColorRegistry.remove(nutrientColorKey(valueKey).id().toString());
+                ColorRegistry.remove(nutrientTooltipColorKey(valueKey).id().toString());
             }
             for (ColorHexRowWidget row : nutrientColorRows) {
                 row.syncFromEffectiveColor();
@@ -182,6 +187,10 @@ public final class HudAndDisplayCategory {
 
     private static ColorKey nutrientColorKey(String valueKey) {
         return ColorKey.of(ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "nutrient." + valueKey));
+    }
+
+    private static ColorKey nutrientTooltipColorKey(String valueKey) {
+        return ColorKey.of(ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "tooltip." + valueKey));
     }
 
     static final class HudQuickActionsListEntry extends TooltipListEntry<Object> {
