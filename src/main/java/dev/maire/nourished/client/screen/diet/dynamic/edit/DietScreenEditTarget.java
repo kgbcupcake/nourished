@@ -9,6 +9,7 @@ import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.edit.DraggableResizable;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
+import dev.maire.nourished.client.render.BrightnessRenderContext;
 import dev.marie.framework.ui.scaleconfig.ScaleConfigPanel;
 import dev.maire.nourished.client.screen.diet.DietScreen;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
@@ -339,7 +340,7 @@ public final class DietScreenEditTarget implements MarieComponent {
         lastEatMoreResolvedBounds = eatMore.resolvedBounds();
         lastActiveEffectsResolvedBounds = activeEffects.resolvedBounds();
 
-        panel.render(context, panelBounds);
+        panel.render(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().dietContentBrightness()), panelBounds);
 
         drawHandle(context, panelDrag, panelBounds, mx, my, true);
         drawSizeLabel(context, panelDrag, panelBounds);

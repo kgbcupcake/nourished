@@ -23,6 +23,7 @@ import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.client.hud.classic.ClassicHudPanelRenderer;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
+import dev.maire.nourished.client.hud.dynamic.options.HudOptionsPanel;
 import dev.maire.nourished.client.hud.dynamic.modules.NutrientPanelContainer;
 import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -94,7 +95,8 @@ public final class HudEditTarget implements MarieComponent {
      * MarieComponent}. Editing happens only through this card.
      */
     private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(
-            List.of(new ScaleConfigEntry(PANEL_ID, Component.translatable("nourished.hud.nutrientPanel.label"))),
+            List.of(new ScaleConfigEntry(PANEL_ID, Component.translatable("nourished.hud.nutrientPanel.label"))
+                    .withContent(HudOptionsPanel.build(PANEL_ID))),
             UiStatePersistence.get(), Anchor.TOP_RIGHT);
     private boolean scaleConfigVisible;
 

@@ -98,7 +98,7 @@ public final class NutrientPanelContainer implements Container {
             // and border matching) — this just swaps the square fillRect for RenderContext's built-in
             // rounded-rect primitive so the panel gets its notched corners back.
             int panelColor = HudDrawHelpers.panelColor(bgOpacity);
-            context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 2, panelColor, panelColor);
+            context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor, panelColor);
         }
         // Content position offset is the user's persisted padding adjustment alone — hudLayout's own
         // scaledPad (box geometry, used for this panel's natural size in HudLayout#compute) plays no

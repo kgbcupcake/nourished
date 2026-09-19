@@ -7,6 +7,8 @@ import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.tracking.tracker.definition.TrackerHistoryEntry;
 import dev.marie.framework.ui.RenderContext;
+import dev.maire.nourished.client.hud.dynamic.options.ModuleOptionsPanel;
+import dev.maire.nourished.client.render.BrightnessRenderContext;
 import dev.marie.framework.ui.Theme;
 import dev.marie.framework.ui.ThemeKey;
 import dev.marie.framework.ui.component.ComponentState;
@@ -128,7 +130,12 @@ public final class CalorieHudScreen implements MarieComponent {
      * has no sub-boxes.
      */
     private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(
-            List.of(new ScaleConfigEntry(PANEL_ID, Component.translatable("nourished.hud.calorieHistory.label"))),
+            List.of(new ScaleConfigEntry(PANEL_ID, Component.translatable("nourished.hud.calorieHistory.label"))
+                    .withContent(ModuleOptionsPanel.build(Component.translatable("nourished.hud.calorieHistory.label").getString(), PANEL_ID,
+                            () -> NourishedClientConfig.get().calorieHudBackgroundOpacity(),
+                            v -> NourishedClientConfig.get().setCalorieHudBackgroundOpacity(v),
+                            () -> NourishedClientConfig.get().calorieHudContentBrightness(),
+                            v -> NourishedClientConfig.get().setCalorieHudContentBrightness(v)))),
             UiStatePersistence.get(), Anchor.TOP_RIGHT);
     private boolean scaleConfigVisible;
 
@@ -241,7 +248,8 @@ public final class CalorieHudScreen implements MarieComponent {
         // drawPanel throws partway through its pushClip/popClip pair — see
         // GuiGraphicsRenderContext#resetClip.
         try {
-            drawPanel(context, bounds, offsetX, offsetY, rows, false, false);
+            drawPanel(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().calorieHudContentBrightness()),
+                    bounds, offsetX, offsetY, rows, false, false);
         } finally {
             context.resetClip();
         }
@@ -367,7 +375,7 @@ public final class CalorieHudScreen implements MarieComponent {
                 MarieColors.shade(panelRgb, cc.calorieHudBackgroundShade()), cc.calorieHudBackgroundOpacity());
         int borderColor = MarieColors.withOpacity(
                 MarieColors.shade(context.theme().color(ThemeKey.BORDER), cc.calorieHudBorderShade()), cc.calorieHudBorderOpacity());
-        context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, panelColor, borderColor);
+        context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor, borderColor);
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             context.drawText(Component.translatable("nourished.hud.calorieHistory.label").getString(),
@@ -581,7 +589,8 @@ public final class CalorieHudScreen implements MarieComponent {
         // Re-clamped defensively here too — see the same comment on the onRenderGuiPost call site.
         int offsetX = clampContentOffsetX(contentOffsetX, bounds);
         int offsetY = clampContentOffsetY(contentOffsetY, bounds);
-        drawPanel(context, bounds, offsetX, offsetY, rows, true, moveContentMode);
+        drawPanel(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().calorieHudContentBrightness()),
+                bounds, offsetX, offsetY, rows, true, moveContentMode);
 
         // While move-content mode is active, dragging is exclusively routed to the content offset
         // (see mouseClicked/mouseDragged) — the panel's own resize handles would be inert, so they

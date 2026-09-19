@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.hud.dynamic.modules;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
@@ -146,9 +147,10 @@ final class NutrientBarComponent implements MarieComponent {
         float value = displayValues.getOrDefault(nutrientKey, 0f);
         String label = HudDrawHelpers.nutrientLabel(nutrientKey);
         int fillColor = HudDrawHelpers.barFillColor(nutrientKey, value);
-        int pctColor = HudDrawHelpers.pctColor(nutrientKey, value);
+        double brightness = NourishedClientConfig.get().hudContentBrightness();
+        int pctColor = HudDrawHelpers.scaleBrightness(HudDrawHelpers.pctColor(nutrientKey, value), brightness);
         int bgColor = HudDrawHelpers.barBackgroundColor();
-        int labelColor = HudDrawHelpers.labelColor();
+        int labelColor = HudDrawHelpers.scaleBrightness(HudDrawHelpers.labelColor(), brightness);
         String pctText = Math.round(value * 100f) + "%";
         var font = Minecraft.getInstance().font;
 
@@ -174,7 +176,13 @@ final class NutrientBarComponent implements MarieComponent {
             int textY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
             int iconSize = hudLayout.iconSize();
 
-            context.drawItem(resolveIconStack(nutrientKey), bounds.x(), rowCenterY - iconSize / 2, contentScale);
+            float tint = (float) brightness;
+            RenderSystem.setShaderColor(tint, tint, tint, 1f);
+            try {
+                context.drawItem(resolveIconStack(nutrientKey), bounds.x(), rowCenterY - iconSize / 2, contentScale);
+            } finally {
+                RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+            }
 
             int labelX = bounds.x() + iconSize + HudDrawHelpers.ICON_LABEL_GAP;
             context.drawText(label, labelX, textY, labelColor, contentScale);

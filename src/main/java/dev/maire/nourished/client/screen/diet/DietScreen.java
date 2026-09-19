@@ -10,6 +10,7 @@ import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.client.screen.diet.dynamic.edit.DietScreenEditTarget;
+import dev.maire.nourished.client.screen.diet.dynamic.options.DietOptionsPanel;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietPanelContainer;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.ActiveEffectsComponent;
@@ -25,6 +26,7 @@ import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.edit.EditModeController;
 import dev.marie.framework.ui.RenderContext;
+import dev.maire.nourished.client.render.BrightnessRenderContext;
 import dev.marie.framework.ui.Theme;
 import dev.marie.framework.ui.ThemeKey;
 import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
@@ -91,14 +93,16 @@ public class DietScreen extends Screen {
         fadeClockStarted = false;
     }
 
-    /** Slider-panel rows for the five Diet Screen sub-boxes. */
+    /** Slider-panel rows for the five Diet Screen sub-boxes, plus the screen-wide options panel. */
     private static List<ScaleConfigEntry> scaleConfigEntries() {
         return List.of(
                 new ScaleConfigEntry(CaloriesComponent.ID, Component.translatable("nourished.screen.diet.calories_label")),
                 new ScaleConfigEntry(BalanceComponent.ID, Component.translatable("nourished.screen.diet.balance_label")),
                 new ScaleConfigEntry(RecentMealsComponent.ID, Component.translatable("nourished.screen.diet.recent_label")),
                 new ScaleConfigEntry(EatMoreComponent.ID, Component.translatable("nourished.screen.diet.suggestion_label")),
-                new ScaleConfigEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label"))
+                new ScaleConfigEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label")),
+                new ScaleConfigEntry(DietScreenEditTarget.PANEL_ID, Component.translatable("nourished.screen.diet.options_label"))
+                        .withContent(DietOptionsPanel.build())
         );
     }
 
@@ -345,7 +349,7 @@ public class DietScreen extends Screen {
         // panel.render (or the edit-mode toggle drawn right after it) throws partway through a
         // pushClip/popClip pair — see GuiGraphicsRenderContext#resetClip.
         try {
-            panel.render(context, bounds);
+            panel.render(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().dietContentBrightness()), bounds);
 
             boolean editModeActive = marieEditModeController != null && marieEditModeController.isActive();
             boolean toggleHovered = isMouseOverEditModeToggle(resolvedLayout, mx, my);

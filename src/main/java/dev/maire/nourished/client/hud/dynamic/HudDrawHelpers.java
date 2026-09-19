@@ -1,5 +1,7 @@
 package dev.maire.nourished.client.hud.dynamic;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import dev.maire.nourished.config.NourishedClientConfig;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.color.MarieColors;
@@ -15,6 +17,8 @@ import net.minecraft.world.item.ItemStack;
 
 public final class HudDrawHelpers {
 
+    /** Corner radius (pixels) of the dynamic HUD panels' rounded background. */
+    public static final int PANEL_CORNER_RADIUS = 4;
     public static final int BAR_H = 5;
     public static final int VERTICAL_BAR_W = 6;
     public static final int VERTICAL_BAR_H = 36;
@@ -182,7 +186,13 @@ public final class HudDrawHelpers {
             pose.translate(x, y, 0);
             float s = iconSize / 16f;
             pose.scale(s, s, 1f);
-            g.renderItem(stack, 0, 0);
+            float tint = (float) NourishedClientConfig.get().hudContentBrightness();
+            RenderSystem.setShaderColor(tint, tint, tint, 1f);
+            try {
+                g.renderItem(stack, 0, 0);
+            } finally {
+                RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+            }
         } finally {
             pose.popPose();
         }
@@ -196,7 +206,7 @@ public final class HudDrawHelpers {
         try {
             pose.translate(x, y, 0);
             pose.scale(scale, scale, 1f);
-            g.drawString(mc.font, text, 0, 0, color, false);
+            g.drawString(mc.font, text, 0, 0, scaleBrightness(color, NourishedClientConfig.get().hudContentBrightness()), false);
         } finally {
             pose.popPose();
         }
@@ -258,6 +268,17 @@ public final class HudDrawHelpers {
 
     public static int handleActiveColor() {
         return COL_HANDLE_ACTIVE;
+    }
+
+    /** {@code argb} with its RGB scaled by {@code brightness} (alpha untouched); 1.0 returns it unchanged. */
+    public static int scaleBrightness(int argb, double brightness) {
+        if (brightness >= 1.0d) {
+            return argb;
+        }
+        int r = (int) Math.round(((argb >> 16) & 0xFF) * brightness);
+        int g = (int) Math.round(((argb >> 8) & 0xFF) * brightness);
+        int b = (int) Math.round((argb & 0xFF) * brightness);
+        return (argb & 0xFF000000) | (r << 16) | (g << 8) | b;
     }
 
     public static int labelColor() {
