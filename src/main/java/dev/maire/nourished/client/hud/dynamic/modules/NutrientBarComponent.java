@@ -45,13 +45,16 @@ final class NutrientBarComponent implements MarieComponent {
      * modules maintain.
      */
     private final float contentScale;
+    /** Icon size multiplier — independent of {@link #contentScale}, which sizes the text (see {@code PanelScales}). */
+    private final float iconScale;
 
-    NutrientBarComponent(String nutrientKey, boolean verticalMode, HudLayout.Layout hudLayout, Map<String, Float> displayValues, float contentScale) {
+    NutrientBarComponent(String nutrientKey, boolean verticalMode, HudLayout.Layout hudLayout, Map<String, Float> displayValues, float contentScale, float iconScale) {
         this.nutrientKey = nutrientKey;
         this.verticalMode = verticalMode;
         this.hudLayout = hudLayout;
         this.displayValues = displayValues;
         this.contentScale = contentScale;
+        this.iconScale = iconScale;
     }
 
     @Override
@@ -147,10 +150,10 @@ final class NutrientBarComponent implements MarieComponent {
         float value = displayValues.getOrDefault(nutrientKey, 0f);
         String label = HudDrawHelpers.nutrientLabel(nutrientKey);
         int fillColor = HudDrawHelpers.barFillColor(nutrientKey, value);
-        double brightness = NourishedClientConfig.get().hudContentBrightness();
-        int pctColor = HudDrawHelpers.scaleBrightness(HudDrawHelpers.pctColor(nutrientKey, value), brightness);
+        double textBrightness = NourishedClientConfig.get().hudTextBrightness();
+        int pctColor = HudDrawHelpers.scaleBrightness(HudDrawHelpers.pctColor(nutrientKey, value), textBrightness);
         int bgColor = HudDrawHelpers.barBackgroundColor();
-        int labelColor = HudDrawHelpers.scaleBrightness(HudDrawHelpers.labelColor(), brightness);
+        int labelColor = HudDrawHelpers.scaleBrightness(HudDrawHelpers.labelColor(), textBrightness);
         String pctText = Math.round(value * 100f) + "%";
         var font = Minecraft.getInstance().font;
 
@@ -176,10 +179,10 @@ final class NutrientBarComponent implements MarieComponent {
             int textY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
             int iconSize = hudLayout.iconSize();
 
-            float tint = (float) brightness;
+            float tint = (float) NourishedClientConfig.get().hudIconBrightness();
             RenderSystem.setShaderColor(tint, tint, tint, 1f);
             try {
-                context.drawItem(resolveIconStack(nutrientKey), bounds.x(), rowCenterY - iconSize / 2, contentScale);
+                context.drawItem(resolveIconStack(nutrientKey), bounds.x(), rowCenterY - iconSize / 2, iconScale);
             } finally {
                 RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             }

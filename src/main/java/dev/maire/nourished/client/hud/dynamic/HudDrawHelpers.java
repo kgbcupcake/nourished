@@ -65,8 +65,15 @@ public final class HudDrawHelpers {
         return (alpha << 24) | (rgb & 0x00FFFFFF);
     }
 
+    /**
+     * The HUD's row label for a nutrient: a short HUD-only {@code nourished.hud.label.<key>} entry if
+     * the language file has one (e.g. "Veggies" so the row isn't cut off), otherwise the same full
+     * label the Diet screen uses.
+     */
     public static String nutrientLabel(String key) {
-        return NutrientRegistry.getLabel(key);
+        String shortKey = Nourished.MODID + ".hud.label." + key;
+        String shortLabel = Component.translatable(shortKey).getString();
+        return shortLabel.equals(shortKey) ? NutrientRegistry.getLabel(key) : shortLabel;
     }
 
     /** Resolves a nutrient's effective color (user/datapack override, or its registered default). */
@@ -186,7 +193,7 @@ public final class HudDrawHelpers {
             pose.translate(x, y, 0);
             float s = iconSize / 16f;
             pose.scale(s, s, 1f);
-            float tint = (float) NourishedClientConfig.get().hudContentBrightness();
+            float tint = (float) NourishedClientConfig.get().hudIconBrightness();
             RenderSystem.setShaderColor(tint, tint, tint, 1f);
             try {
                 g.renderItem(stack, 0, 0);
@@ -206,7 +213,7 @@ public final class HudDrawHelpers {
         try {
             pose.translate(x, y, 0);
             pose.scale(scale, scale, 1f);
-            g.drawString(mc.font, text, 0, 0, scaleBrightness(color, NourishedClientConfig.get().hudContentBrightness()), false);
+            g.drawString(mc.font, text, 0, 0, scaleBrightness(color, NourishedClientConfig.get().hudTextBrightness()), false);
         } finally {
             pose.popPose();
         }

@@ -7,13 +7,14 @@ import dev.maire.nourished.client.UiStatePersistence;
 import net.minecraft.network.chat.Component;
 
 /**
- * The two UI-state options every HUD module box carries — Text Scale and Padding — as toolbox rows over the module's own persisted {@link ComponentState}, exactly the
- * store {@code ScaleConfigPanel}'s built-in rows use. UI-state setters save through
- * {@link UiStatePersistence} immediately, so there is nothing left to do on commit.
+ * Toolbox rows every HUD module box shares, over the module's own UI-state store ({@link
+ * UiStatePersistence}, the same store {@code ScaleConfigPanel}'s built-in rows use): Padding, Move Text and
+ * Icons, and the independent Text size / Icon size pair (see {@link PanelScales}). UI-state setters save through the
+ * persistence provider immediately, so there is nothing left to do on commit.
  */
-final class LayoutOptionRows {
+final class PanelOptionRows {
 
-    /** Same suffix {@code ScaleConfigPanel} keys its "Move Text and Icons" flag with — a copy of that class's private {@code moveContentKey}, only used to switch a stale flag off. */
+    /** Same suffix {@code ScaleConfigPanel} keys its "Move Text and Icons" flag with — a copy of that class's private {@code moveContentKey}/{@code toggleMoveContent}, since MariesLib exposes only the getter ({@code isMoveContentEnabled}), no setter. Follow-up: expose a public accessor there and delete this copy. */
     private static final String MOVE_CONTENT_SUFFIX = "#moveContent";
 
     private static final ComponentState BLANK = new ComponentState(0, 0, 0, 0, false, false, false, 0);
@@ -22,33 +23,40 @@ final class LayoutOptionRows {
     /** Same step {@code ScaleConfigPanel} uses per scroll notch for its scale sliders. */
     private static final double SCALE_STEP = 0.05d;
 
-    private LayoutOptionRows() {}
+    private PanelOptionRows() {}
 
-    /**
-     * Appends Text Scale and Padding for {@code panelId} to the current tab. The old "Move Text and
-     * Icons" option is intentionally gone from every module box, so this also switches off a flag a
-     * previous session may have left on — with no toggle to clear it, content-move mode would
-     * otherwise stay stuck on and hijack dragging the box.
-     */
-    static PanelBuilder addTo(PanelBuilder tab, String panelId) {
-        clearMoveContent(panelId);
+    /** Appends Padding for {@code panelId} to the current tab. */
+    static PanelBuilder addPadding(PanelBuilder tab, String panelId) {
+        return tab.slider(text("config.marieslib.scaleconfig.padding"),
+                () -> state(panelId).paddingScale(),
+                v -> UiStatePersistence.get().save(panelId, withPaddingScale(state(panelId), v)),
+                ContentScaleController.SCALE_STORAGE_MIN, ContentScaleController.SCALE_STORAGE_MAX, SCALE_STEP,
+                ALREADY_SAVED);
+    }
+
+    /** Appends the independent Text size and Icon size sliders for {@code panelId} to the current tab. */
+    static PanelBuilder addSizes(PanelBuilder tab, String panelId) {
         return tab
-                .slider(text("config.marieslib.scaleconfig.textScale"),
-                        () -> state(panelId).contentScale(),
-                        v -> UiStatePersistence.get().save(panelId, withContentScale(state(panelId), v)),
+                .slider(text("nourished.options.text_size"),
+                        () -> PanelScales.textScale(panelId), v -> PanelScales.setTextScale(panelId, v),
                         ContentScaleController.SCALE_STORAGE_MIN, ContentScaleController.SCALE_STORAGE_MAX, SCALE_STEP,
                         ALREADY_SAVED)
-                .slider(text("config.marieslib.scaleconfig.padding"),
-                        () -> state(panelId).paddingScale(),
-                        v -> UiStatePersistence.get().save(panelId, withPaddingScale(state(panelId), v)),
+                .slider(text("nourished.options.icon_size"),
+                        () -> PanelScales.iconScale(panelId), v -> PanelScales.setIconScale(panelId, v),
                         ContentScaleController.SCALE_STORAGE_MIN, ContentScaleController.SCALE_STORAGE_MAX, SCALE_STEP,
                         ALREADY_SAVED);
     }
 
-    private static void clearMoveContent(String panelId) {
-        if (moveContent(panelId)) {
-            UiStatePersistence.get().save(panelId + MOVE_CONTENT_SUFFIX, new ComponentState(0, 0, 0, 0, false, false, false, 0));
-        }
+    /**
+     * Appends the "Move Text and Icons" toggle for {@code panelId} to the current tab — the same
+     * {@code #moveContent} UI-state flag {@code ScaleConfigPanel}'s built-in row uses (and its
+     * {@code isMoveContentEnabled} getter reads back), so a host box polling that getter keeps working.
+     */
+    static PanelBuilder addMoveContent(PanelBuilder tab, String panelId) {
+        return tab.toggle(text("config.marieslib.scaleconfig.moveContent"),
+                () -> UiStatePersistence.get().load(panelId + MOVE_CONTENT_SUFFIX).map(ComponentState::collapsed).orElse(false),
+                v -> UiStatePersistence.get().save(panelId + MOVE_CONTENT_SUFFIX, new ComponentState(0, 0, 0, 0, v, false, false, 0)),
+                ALREADY_SAVED);
     }
 
     private static String text(String key) {
@@ -57,17 +65,6 @@ final class LayoutOptionRows {
 
     private static ComponentState state(String panelId) {
         return UiStatePersistence.get().load(panelId).orElse(BLANK);
-    }
-
-    private static boolean moveContent(String panelId) {
-        return UiStatePersistence.get().load(panelId + MOVE_CONTENT_SUFFIX).map(ComponentState::collapsed).orElse(false);
-    }
-
-    // Read fresh at write time and touch only one field, exactly as ScaleConfigPanel does, so the
-    // panel's position/size and the other scale are never clobbered.
-    private static ComponentState withContentScale(ComponentState base, double contentScale) {
-        return new ComponentState(base.x(), base.y(), base.width(), base.height(), base.collapsed(),
-                base.widthManual(), base.heightManual(), base.leftMargin(), contentScale, base.paddingScale());
     }
 
     private static ComponentState withPaddingScale(ComponentState base, double paddingScale) {

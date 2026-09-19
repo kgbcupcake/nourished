@@ -6,6 +6,7 @@ import dev.marie.framework.tracking.tracker.MarieTracking;
 import dev.marie.framework.tracking.tracker.definition.TrackerHistoryEntry;
 import dev.marie.framework.ui.RenderContext;
 import dev.maire.nourished.client.hud.dynamic.options.ModuleOptionsPanel;
+import dev.maire.nourished.client.hud.dynamic.options.PanelScales;
 import dev.maire.nourished.client.render.BrightnessRenderContext;
 import dev.marie.framework.ui.Theme;
 import dev.marie.framework.ui.ThemeKey;
@@ -155,8 +156,10 @@ public final class ActivityLogHudPanel implements MarieComponent {
                     .withContent(ModuleOptionsPanel.build(Component.translatable("nourished.hud.activityLog.label").getString(), PANEL_ID,
                             () -> NourishedClientConfig.get().activityLogHudBackgroundOpacity(),
                             v -> NourishedClientConfig.get().setActivityLogHudBackgroundOpacity(v),
-                            () -> NourishedClientConfig.get().activityLogHudContentBrightness(),
-                            v -> NourishedClientConfig.get().setActivityLogHudContentBrightness(v)))),
+                            () -> NourishedClientConfig.get().activityLogHudTextBrightness(),
+                            v -> NourishedClientConfig.get().setActivityLogHudTextBrightness(v),
+                            () -> NourishedClientConfig.get().activityLogHudIconBrightness(),
+                            v -> NourishedClientConfig.get().setActivityLogHudIconBrightness(v)))),
             UiStatePersistence.get(), Anchor.TOP_RIGHT);
     private boolean scaleConfigVisible;
 
@@ -269,7 +272,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
         // drawPanel throws partway through its pushClip/popClip pair — see
         // GuiGraphicsRenderContext#resetClip.
         try {
-            drawPanel(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().activityLogHudContentBrightness()),
+            drawPanel(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().activityLogHudTextBrightness(), NourishedClientConfig.get().activityLogHudIconBrightness()),
                     bounds, offsetX, offsetY, rows, false, false);
         } finally {
             context.resetClip();
@@ -367,10 +370,15 @@ public final class ActivityLogHudPanel implements MarieComponent {
     /** How many rows fit vertically in {@code bounds} at the current content scale — shared by {@link #drawPanel} (what to draw) and {@link #mouseScrolled} (how far scrolling can go). */
     private static int visibleRowCapacity(Bounds bounds) {
         double contentScale = ContentScaleController.resolveContentScale(persistedContentScale());
-        int lineHeight = Math.max(1, (int) Math.round(LINE_HEIGHT * contentScale));
+        int lineHeight = rowHeight(contentScale, ContentScaleController.resolveContentScale(PanelScales.iconScale(PANEL_ID)));
         double userPadding = PADDING * persistedPaddingScale();
         int padding = Math.round(ContentScaleController.resolvePadding(userPadding));
         return Math.max(1, (bounds.height() - padding * 2 - HEADER_HEIGHT - HEADER_GAP) / lineHeight);
+    }
+
+    /** Row height: the text line or the icon, whichever is taller — text size and icon size are independent, so a big icon makes its row taller instead of overlapping its neighbours. */
+    private static int rowHeight(double textScale, double iconScale) {
+        return Math.max(Math.max(1, (int) Math.round(LINE_HEIGHT * textScale)), Math.max(1, Math.round(ICON_SIZE * (float) iconScale)));
     }
 
     /** Set by {@code Nourished#registerColorDefinitions()} at mod init. */
@@ -386,13 +394,11 @@ public final class ActivityLogHudPanel implements MarieComponent {
         double contentScale = ContentScaleController.resolveContentScale(persistedContentScale());
         double userPadding = PADDING * persistedPaddingScale();
         int padding = Math.round(ContentScaleController.resolvePadding(userPadding));
-        int lineHeight = Math.max(1, (int) Math.round(LINE_HEIGHT * contentScale));
-        // Capped at lineHeight, not just floored at a fixed minimum: at a low Text Scale, lineHeight
-        // shrinks with no floor of its own, but the old fixed 8px icon floor didn't shrink with it —
-        // once lineHeight dropped below 8, the icon overflowed into the rows above/below and every
-        // row visually collided into unreadable mush. Icon still shrinks proportionally with
-        // contentScale above that point, same as everything else in the row.
-        int iconSize = Math.min(lineHeight, Math.max(1, Math.round(ICON_SIZE * (float) contentScale)));
+        // Text and icons have independent sizes (see PanelScales): the icon is sized by its own
+        // multiplier and the row grows to the taller of the two.
+        double iconScale = ContentScaleController.resolveContentScale(PanelScales.iconScale(PANEL_ID));
+        int iconSize = Math.max(1, Math.round(ICON_SIZE * (float) iconScale));
+        int lineHeight = rowHeight(contentScale, iconScale);
 
         NourishedClientConfig cc = NourishedClientConfig.get();
         int panelRgb = MarieColors.resolveColor(COLORS.background());
@@ -613,7 +619,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
         // Re-clamped defensively here too — see the same comment on the onRenderGuiPost call site.
         int offsetX = clampContentOffsetX(contentOffsetX, bounds);
         int offsetY = clampContentOffsetY(contentOffsetY, bounds);
-        drawPanel(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().activityLogHudContentBrightness()),
+        drawPanel(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().activityLogHudTextBrightness(), NourishedClientConfig.get().activityLogHudIconBrightness()),
                 bounds, offsetX, offsetY, rows, true, moveContentMode);
 
         // While move-content mode is active, dragging is exclusively routed to the content offset

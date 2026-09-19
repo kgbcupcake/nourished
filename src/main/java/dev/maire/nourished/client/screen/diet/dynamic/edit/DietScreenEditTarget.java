@@ -340,7 +340,7 @@ public final class DietScreenEditTarget implements MarieComponent {
         lastEatMoreResolvedBounds = eatMore.resolvedBounds();
         lastActiveEffectsResolvedBounds = activeEffects.resolvedBounds();
 
-        panel.render(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().dietContentBrightness()), panelBounds);
+        panel.render(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().dietTextBrightness(), NourishedClientConfig.get().dietIconBrightness()), panelBounds);
 
         drawHandle(context, panelDrag, panelBounds, mx, my, true);
         drawSizeLabel(context, panelDrag, panelBounds);

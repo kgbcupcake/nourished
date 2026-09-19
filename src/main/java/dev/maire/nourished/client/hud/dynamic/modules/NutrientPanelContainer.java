@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.hud.dynamic.modules;
 
+import dev.maire.nourished.client.hud.dynamic.options.PanelScales;
 import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
@@ -31,6 +32,9 @@ public final class NutrientPanelContainer implements Container {
     /** Reference local padding value the user's persisted paddingScale multiplies, analogous to {@code CalorieHudScreen}'s own {@code PADDING} constant — reuses {@link HudDrawHelpers#PANEL_PAD}, the same base value {@link HudLayout#compute} derives its own (box-geometry-only) {@code scaledPad} from. */
     private static final int BASE_PAD = HudDrawHelpers.PANEL_PAD;
 
+    /** The HUD panel's persisted UI-state key (same string {@code HudEditTarget} keys its scale/position under). */
+    private static final String PANEL_ID = "nourished.hud.panel";
+
     private final List<MarieComponent> children = new ArrayList<>();
     private final Layout layout;
     private final HudLayout.Layout hudLayout;
@@ -43,8 +47,9 @@ public final class NutrientPanelContainer implements Container {
         // panel natural size) below and in HudLayout itself, same separation the other 7
         // ContentScaleController-managed modules maintain.
         float contentScale = (float) ContentScaleController.resolveContentScale(HudEditTarget.persistedContentScale());
+        float iconScale = (float) ContentScaleController.resolveContentScale(PanelScales.iconScale(PANEL_ID));
         for (String key : keys) {
-            children.add(new NutrientBarComponent(key, verticalMode, hudLayout, displayValues, contentScale));
+            children.add(new NutrientBarComponent(key, verticalMode, hudLayout, displayValues, contentScale, iconScale));
         }
         if (verticalMode) {
             int columnGap = Math.max(2, (int) Math.round(HudDrawHelpers.VERTICAL_COLUMN_GAP * hudLayout.scale()));
@@ -56,7 +61,7 @@ public final class NutrientPanelContainer implements Container {
 
     @Override
     public String id() {
-        return "nourished.hud.panel";
+        return PANEL_ID;
     }
 
     @Override

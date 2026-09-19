@@ -7,34 +7,38 @@ import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Wraps a {@link RenderContext} so everything drawn through it as text or an item icon comes out
- * dimmed by {@code brightness} (RGB scaled, alpha untouched; icons tinted via the GUI shader color).
+ * Wraps a {@link RenderContext} so text and item icons drawn through it come out at independent
+ * brightness multipliers (text: RGB scaled, alpha untouched; icons: tinted via the GUI shader color).
  * Fills, bars, borders and clips pass straight through, so a panel can dim just its icons and text
  * by drawing through this wrapper. Only used by the dynamic UI; {@link #wrap} returns the original
- * context untouched at full brightness, so the default costs nothing.
+ * context untouched when both are 1.0, so the default costs nothing.
  */
 public final class BrightnessRenderContext implements RenderContext {
 
     private final RenderContext delegate;
-    private final double brightness;
+    private final double textBrightness;
+    private final double iconBrightness;
 
-    private BrightnessRenderContext(RenderContext delegate, double brightness) {
+    private BrightnessRenderContext(RenderContext delegate, double textBrightness, double iconBrightness) {
         this.delegate = delegate;
-        this.brightness = brightness;
+        this.textBrightness = textBrightness;
+        this.iconBrightness = iconBrightness;
     }
 
-    public static RenderContext wrap(RenderContext delegate, double brightness) {
-        return brightness == 1.0d ? delegate : new BrightnessRenderContext(delegate, brightness);
+    public static RenderContext wrap(RenderContext delegate, double textBrightness, double iconBrightness) {
+        return textBrightness == 1.0d && iconBrightness == 1.0d
+                ? delegate
+                : new BrightnessRenderContext(delegate, textBrightness, iconBrightness);
     }
 
     @Override
     public void drawText(String text, int x, int y, int argbColor, float scale) {
-        delegate.drawText(text, x, y, HudDrawHelpers.scaleBrightness(argbColor, brightness), scale);
+        delegate.drawText(text, x, y, HudDrawHelpers.scaleBrightness(argbColor, textBrightness), scale);
     }
 
     @Override
     public void drawItem(ItemStack stack, int x, int y, float scale) {
-        float tint = (float) brightness;
+        float tint = (float) iconBrightness;
         RenderSystem.setShaderColor(tint, tint, tint, 1f);
         try {
             delegate.drawItem(stack, x, y, scale);

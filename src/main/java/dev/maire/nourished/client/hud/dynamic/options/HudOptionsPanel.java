@@ -23,7 +23,7 @@ public final class HudOptionsPanel {
         Runnable save = NourishedClientConfig::saveNow;
         MarieToolbox.PanelBuilder layout = MarieToolbox.panel(text("nourished.hud.nutrientPanel.label"))
                 .tab(text("nourished.options.tab.layout"));
-        return LayoutOptionRows.addTo(layout, panelId)
+        MarieToolbox.PanelBuilder panel = PanelOptionRows.addPadding(layout, panelId)
                     .toggle(text("nourished.options.hud.vertical_layout"),
                             () -> cc().hudVerticalLayout(), v -> cc().setHudVerticalLayout(v), save)
                 .tab(text("nourished.options.tab.behavior"))
@@ -34,12 +34,16 @@ public final class HudOptionsPanel {
                     .slider(text("nourished.options.hud.show_above"),
                             () -> cc().hudShowAboveThreshold(), v -> cc().setHudShowAboveThreshold(v), 0.0d, 1.0d, PERCENT_STEP, save)
                         // "Show above" only re-reveals bars the hide rule hid, so it does nothing while hide is off (1.0).
-                        .enabledWhen(() -> cc().hudHideAboveThreshold() < 1.0d)
-                .tab(text("nourished.options.tab.appearance"))
+                        .enabledWhen(() -> cc().hudHideAboveThreshold() < 1.0d);
+        panel = PanelOptionRows.addMoveContent(panel, panelId)
+                .tab(text("nourished.options.tab.appearance"));
+        return PanelOptionRows.addSizes(panel, panelId)
+                    .slider(text("nourished.options.text_brightness"),
+                            () -> cc().hudTextBrightness(), v -> cc().setHudTextBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
+                    .slider(text("nourished.options.icon_brightness"),
+                            () -> cc().hudIconBrightness(), v -> cc().setHudIconBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
                     .slider(text("nourished.options.hud.background_opacity"),
                             () -> cc().hudBackgroundOpacity(), v -> cc().setHudBackgroundOpacity(v), 0.0d, 1.0d, PERCENT_STEP, save)
-                    .slider(text("nourished.options.hud.content_brightness"),
-                            () -> cc().hudContentBrightness(), v -> cc().setHudContentBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
                     // Room left here for the in-game color picker (not built yet).
                 .build();
     }

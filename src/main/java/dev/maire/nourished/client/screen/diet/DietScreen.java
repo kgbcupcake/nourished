@@ -349,7 +349,7 @@ public class DietScreen extends Screen {
         // panel.render (or the edit-mode toggle drawn right after it) throws partway through a
         // pushClip/popClip pair — see GuiGraphicsRenderContext#resetClip.
         try {
-            panel.render(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().dietContentBrightness()), bounds);
+            panel.render(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().dietTextBrightness(), NourishedClientConfig.get().dietIconBrightness()), bounds);
 
             boolean editModeActive = marieEditModeController != null && marieEditModeController.isActive();
             boolean toggleHovered = isMouseOverEditModeToggle(resolvedLayout, mx, my);
