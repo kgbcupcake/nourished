@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.hud.caloriehistory;
 
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.color.ColorKeyPair;
 import dev.marie.framework.color.MarieColors;
@@ -7,9 +8,6 @@ import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.tracking.tracker.definition.TrackerHistoryEntry;
 import dev.marie.framework.ui.RenderContext;
-import dev.maire.nourished.client.hud.dynamic.options.ModuleOptionsPanel;
-import dev.maire.nourished.client.hud.dynamic.options.PanelScales;
-import dev.maire.nourished.client.render.BrightnessRenderContext;
 import dev.marie.framework.ui.Theme;
 import dev.marie.framework.ui.ThemeKey;
 import dev.marie.framework.ui.component.ComponentState;
@@ -110,9 +108,8 @@ public final class CalorieHudScreen implements MarieComponent {
     private final DraggableResizable drag;
 
     /** Whether a content-move drag (see {@link #moveContentEnabled}) is currently in progress. */
-    private boolean draggingContent;
-    private int contentGrabOffsetX;
-    private int contentGrabOffsetY;
+    /** Grab state for a "Move Text and Icons" or "Move Bars" drag (see {@link MarieModuleSettings.MoveDrag}). */
+    private final MarieModuleSettings.MoveDrag moveDrag = new MarieModuleSettings.MoveDrag();
 
     /**
      * The row content's offset from where it would otherwise sit (just below the header, inset by
@@ -132,13 +129,12 @@ public final class CalorieHudScreen implements MarieComponent {
      */
     private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(
             List.of(new ScaleConfigEntry(PANEL_ID, Component.translatable("nourished.hud.calorieHistory.label"))
-                    .withContent(ModuleOptionsPanel.build(Component.translatable("nourished.hud.calorieHistory.label").getString(), PANEL_ID,
-                            () -> NourishedClientConfig.get().calorieHudBackgroundOpacity(),
-                            v -> NourishedClientConfig.get().setCalorieHudBackgroundOpacity(v),
-                            () -> NourishedClientConfig.get().calorieHudTextBrightness(),
-                            v -> NourishedClientConfig.get().setCalorieHudTextBrightness(v),
-                            () -> NourishedClientConfig.get().calorieHudIconBrightness(),
-                            v -> NourishedClientConfig.get().setCalorieHudIconBrightness(v)))),
+                    .withContent(MarieModuleSettings.standardPanel(Component.translatable("nourished.hud.calorieHistory.label").getString(), UiStatePersistence.get(), PANEL_ID)
+                            .opacity(() -> NourishedClientConfig.get().calorieHudBackgroundOpacity(), v -> NourishedClientConfig.get().setCalorieHudBackgroundOpacity(v))
+                            .textBrightness(() -> NourishedClientConfig.get().calorieHudTextBrightness(), v -> NourishedClientConfig.get().setCalorieHudTextBrightness(v))
+                            .iconBrightness(() -> NourishedClientConfig.get().calorieHudIconBrightness(), v -> NourishedClientConfig.get().setCalorieHudIconBrightness(v))
+                            .onCommit(NourishedClientConfig::saveNow)
+                            .build())),
             UiStatePersistence.get(), Anchor.TOP_RIGHT);
     private boolean scaleConfigVisible;
 
@@ -173,6 +169,11 @@ public final class CalorieHudScreen implements MarieComponent {
     /** The "Move Text and Icons" toggle's live state, owned by {@link #scaleConfigPanel} (its own editor window, under Padding) rather than a button on this panel itself. */
     private boolean moveContentEnabled() {
         return scaleConfigPanel.isMoveContentEnabled(PANEL_ID);
+    }
+
+    /** The "Move Bars" toggle's live state — see {@link MarieModuleSettings#isMoveBarsEnabled}. */
+    private boolean moveBarsEnabled() {
+        return MarieModuleSettings.isMoveBarsEnabled(UiStatePersistence.get(), PANEL_ID);
     }
 
     /** Public so {@code ClientEventRegistrar} can pass this same singleton to {@code EditModeCoordinator.registerGroupCapable} as its {@code MarieComponent} target — the exact instance this panel's own {@link #editModeController()} already wraps. */
@@ -251,8 +252,8 @@ public final class CalorieHudScreen implements MarieComponent {
         // drawPanel throws partway through its pushClip/popClip pair — see
         // GuiGraphicsRenderContext#resetClip.
         try {
-            drawPanel(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().calorieHudTextBrightness(), NourishedClientConfig.get().calorieHudIconBrightness()),
-                    bounds, offsetX, offsetY, rows, false, false);
+            drawPanel(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().calorieHudTextBrightness(), NourishedClientConfig.get().calorieHudIconBrightness()),
+                    bounds, offsetX, offsetY, rows, false, false, false, false);
         } finally {
             context.resetClip();
         }
@@ -345,21 +346,16 @@ public final class CalorieHudScreen implements MarieComponent {
     /** How many rows fit vertically in {@code bounds} at the current content scale — shared by {@link #drawPanel} (what to draw) and {@link #mouseScrolled} (how far scrolling can go). */
     private static int visibleRowCapacity(Bounds bounds) {
         double contentScale = ContentScaleController.resolveContentScale(persistedContentScale());
-        int lineHeight = rowHeight(contentScale, ContentScaleController.resolveContentScale(PanelScales.iconScale(PANEL_ID)));
+        int lineHeight = LINE_HEIGHT;
         double userPadding = PADDING * persistedPaddingScale();
         int padding = Math.round(ContentScaleController.resolvePadding(userPadding));
         return Math.max(1, (bounds.height() - padding * 2 - HEADER_HEIGHT - HEADER_GAP) / lineHeight);
     }
 
-    /** Row height: the text line or the icon, whichever is taller — text size and icon size are independent, so a big icon makes its row taller instead of overlapping its neighbours. */
-    private static int rowHeight(double textScale, double iconScale) {
-        return Math.max(Math.max(1, (int) Math.round(LINE_HEIGHT * textScale)), Math.max(1, Math.round(ICON_SIZE * (float) iconScale)));
-    }
-
     /** Set by {@link Nourished#registerColorDefinitions()} at mod init. */
     public static ColorKeyPair COLORS;
 
-    private static void drawPanel(RenderContext context, Bounds bounds, int contentOffsetX, int contentOffsetY, List<Row> rows, boolean editMode, boolean moveContentMode) {
+    private static void drawPanel(RenderContext context, Bounds bounds, int contentOffsetX, int contentOffsetY, List<Row> rows, boolean editMode, boolean moveTextMode, boolean moveIconsMode, boolean moveBarsMode) {
         // Text/padding render scale is the user's persisted adjustment alone — box size (bounds)
         // plays no part in it, matching HudEditTarget's Nutrient HUD panel exactly: content never
         // shrinks to fit a smaller box, a resize only changes the box itself, and whatever doesn't
@@ -369,11 +365,14 @@ public final class CalorieHudScreen implements MarieComponent {
         double contentScale = ContentScaleController.resolveContentScale(persistedContentScale());
         double userPadding = PADDING * persistedPaddingScale();
         int padding = Math.round(ContentScaleController.resolvePadding(userPadding));
-        // Text and icons have independent sizes (see PanelScales): the icon is sized by its own
+        // Text and icons have independent sizes (see MarieModuleSettings#iconScale): the icon is sized by its own
         // multiplier and the row grows to the taller of the two.
-        double iconScale = ContentScaleController.resolveContentScale(PanelScales.iconScale(PANEL_ID));
-        int iconSize = Math.max(1, Math.round(ICON_SIZE * (float) iconScale));
-        int lineHeight = rowHeight(contentScale, iconScale);
+        double iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(UiStatePersistence.get(), PANEL_ID));
+        // Row geometry (row height, icon slot, label column, bar size) stays at its natural, unscaled
+        // size, exactly like the Nutrient HUD: Text size and Icon size only change the drawn glyphs,
+        // which are clipped to their row; Move Text and Icons / Move Bars re-place them.
+        int iconSize = ICON_SIZE;
+        int lineHeight = LINE_HEIGHT;
 
         NourishedClientConfig cc = NourishedClientConfig.get();
         int panelRgb = MarieColors.resolveColor(COLORS.background());
@@ -388,6 +387,14 @@ public final class CalorieHudScreen implements MarieComponent {
                     bounds.x() + padding, bounds.y() + padding, TITLE_ACCENT_COLOR, TITLE_SCALE);
 
             int rowsX = bounds.x() + padding + contentOffsetX;
+            // "Move Bars" offset: bars and their value text sit at the unshifted content origin plus this,
+            // independent of the icon/name offset above.
+            int barDx = clampContentOffsetX(MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID), bounds);
+            int barDy = clampContentOffsetY(MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID), bounds);
+            // "Move Icons" offset, and the Bar size multiplier (bar length/thickness and the value text at its end).
+            int iconDx = clampContentOffsetX(MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID), bounds);
+            int iconDy = clampContentOffsetY(MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID), bounds);
+            float barScale = ContentScaleController.resolveContentScale(MarieModuleSettings.barScale(UiStatePersistence.get(), PANEL_ID));
             int rowsTop = bounds.y() + padding + HEADER_HEIGHT + HEADER_GAP + contentOffsetY;
 
             int labelColor = MarieColors.resolveColor(COLORS.text());
@@ -399,24 +406,18 @@ public final class CalorieHudScreen implements MarieComponent {
             int maxLabelW = 0;
             int maxLabelWNatural = 0;
             for (Row row : rows) {
-                maxLabelW = Math.max(maxLabelW, context.textWidth(row.label(), (float) contentScale));
+                maxLabelW = Math.max(maxLabelW, context.textWidth(row.label(), 1f));
                 maxLabelWNatural = Math.max(maxLabelWNatural, context.textWidth(row.label(), 1f));
             }
-            int barX = rowsX + iconSize + HudDrawHelpers.ICON_LABEL_GAP + maxLabelW + HudDrawHelpers.LABEL_BAR_GAP;
-            int pctReserve = Math.round(PCT_RESERVE * (float) contentScale);
-            // barW is itself part of the content that scales with contentScale (Text Scale), same as
-            // icon/label/value — it is NOT pinned to a fixed unscaled right edge, which previously
-            // meant a high Text Scale grew every other element (icon, label, pct reserve) while the
-            // bar's target right edge stayed fixed, shrinking it toward (and eventually to) zero
-            // width. Instead, the reference "how much room is left for the bar" is computed once at
-            // scale 1.0 (naturalBarW, unaffected by the live box size — a box dragged wider/narrower
-            // still only changes surrounding margin, per the class-level contract above), then that
-            // reference width itself scales by contentScale like everything else in the row.
+            int barX = bounds.x() + padding + iconSize + HudDrawHelpers.ICON_LABEL_GAP + maxLabelW + HudDrawHelpers.LABEL_BAR_GAP + barDx;
+            int pctReserve = Math.round(PCT_RESERVE * barScale);
+            // Bar size is fixed at the natural room left at scale 1.0 (unaffected by the live box size or by
+            // Text/Icon size), like the Nutrient HUD's bars.
             int naturalReserved = PADDING * 2 + ICON_SIZE + HudDrawHelpers.ICON_LABEL_GAP + maxLabelWNatural
                     + HudDrawHelpers.LABEL_BAR_GAP + PCT_RESERVE + HudDrawHelpers.BAR_PCT_GAP;
             int naturalBarW = Math.max(1, naturalSize(rows.size()).width() - naturalReserved);
-            int barW = Math.max(1, Math.round(naturalBarW * (float) contentScale));
-            int barH = Math.max(1, Math.round(HudDrawHelpers.BAR_H * (float) contentScale));
+            int barW = Math.max(1, Math.round(naturalBarW * barScale));
+            int barH = Math.max(1, Math.round(HudDrawHelpers.BAR_H * barScale));
 
             // Whatever doesn't fit is handled by scrolling, not shrinking or a silent hard clip: only the rows in
             // [scrollOffset, scrollOffset + capacity) are drawn, and drawScrollIndicator marks that
@@ -426,40 +427,59 @@ public final class CalorieHudScreen implements MarieComponent {
             scrollOffset = Math.max(0, Math.min(scrollOffset, maxScroll));
             int lastVisible = Math.min(rows.size(), scrollOffset + capacity);
             int y = rowsTop;
+            // Enlarged text/icons are clipped at their own row, as in the Nutrient HUD — unless a move
+            // offset is set, which deliberately places content outside its slot.
+            boolean clipRows = contentOffsetX == 0 && contentOffsetY == 0 && iconDx == 0 && iconDy == 0 && barDx == 0 && barDy == 0;
             for (int i = scrollOffset; i < lastVisible; i++) {
-                Row row = rows.get(i);
-                int rowCenterY = y + lineHeight / 2;
-                int textY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
+                if (clipRows) {
+                    context.pushClip(bounds.x(), y, bounds.width(), lineHeight);
+                }
+                try {
+                    Row row = rows.get(i);
+                    int rowCenterY = y + lineHeight / 2;
+                    int textY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
 
-                context.drawItem(CALORIE_ICON, rowsX, rowCenterY - iconSize / 2, iconSize / 16f);
-                context.drawText(row.label(), rowsX + iconSize + HudDrawHelpers.ICON_LABEL_GAP, textY, labelColor, (float) contentScale);
+                    context.drawItem(CALORIE_ICON, bounds.x() + padding + iconDx, rowCenterY + (iconDy - contentOffsetY) - iconSize / 2, iconSize / 16f * (float) iconScale);
+                    context.drawText(row.label(), rowsX + iconSize + HudDrawHelpers.ICON_LABEL_GAP, textY, labelColor, (float) contentScale);
 
-                float pct = maxTotal > 0 ? row.value() / maxTotal : 0f;
-                boolean overGoal = pct > 1f;
-                float cappedPct = Mth.clamp(pct, 0f, 1f);
-                // Calories have no established graduated color rule (unlike nutrient bars) — the
-                // codebase always draws calorie values in HudDrawHelpers.CALORIE_COLOR, so that's
-                // reused as-is; over-goal is the only shift, to the same red used everywhere else in
-                // this codebase for "over threshold". The bar itself stays capped at 100% width
-                // regardless, per the "don't draw past the bar's bounds" requirement.
-                int fillColor = overGoal ? COL_OVER_GOAL : HudDrawHelpers.CALORIE_COLOR;
-                int barY = rowCenterY - barH / 2;
-                context.drawBar(barX, barY, barW, barH, cappedPct, barBg, fillColor);
+                    float pct = maxTotal > 0 ? row.value() / maxTotal : 0f;
+                    boolean overGoal = pct > 1f;
+                    float cappedPct = Mth.clamp(pct, 0f, 1f);
+                    // Calories have no established graduated color rule (unlike nutrient bars) — the
+                    // codebase always draws calorie values in HudDrawHelpers.CALORIE_COLOR, so that's
+                    // reused as-is; over-goal is the only shift, to the same red used everywhere else in
+                    // this codebase for "over threshold". The bar itself stays capped at 100% width
+                    // regardless, per the "don't draw past the bar's bounds" requirement.
+                    int fillColor = overGoal ? COL_OVER_GOAL : HudDrawHelpers.CALORIE_COLOR;
+                    int barShiftY = barDy - contentOffsetY;
+                    int barY = rowCenterY + barShiftY - barH / 2;
+                    context.drawBar(barX, barY, barW, barH, cappedPct, barBg, fillColor);
 
-                String pctText = Math.round(pct * 100) + "%";
-                int pctX = barX + barW + HudDrawHelpers.BAR_PCT_GAP;
-                context.drawText(pctText, pctX, textY, fillColor, (float) contentScale);
+                    String pctText = Math.round(pct * 100) + "%";
+                    int pctX = barX + barW + HudDrawHelpers.BAR_PCT_GAP;
+                    context.drawText(pctText, pctX, rowCenterY + barShiftY - (int) Math.ceil(9 * barScale) / 2, fillColor, barScale);
 
+                } finally {
+                    if (clipRows) {
+                        context.popClip();
+                    }
+                }
                 y += lineHeight;
             }
 
-            if (editMode && moveContentMode) {
-                // Dashed rather than a solid glow outline — a live drag affordance shown only while
-                // the toggle is active, not a persistent separately-hit-tested box; wraps the actual
-                // drawn content's own bounding box (icon through the pct-reserve column, top through
-                // the last visible row), a few pixels further out so it doesn't overlap it.
-                int contentRight = barX + barW + HudDrawHelpers.BAR_PCT_GAP + pctReserve;
-                context.drawDashedBorder(rowsX - 3, rowsTop - 3, contentRight - rowsX + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+            if (editMode && (moveTextMode || moveIconsMode || moveBarsMode)) {
+                // Dashed rather than a solid glow outline — a live drag affordance shown only while a
+                // move toggle is active, not a persistent separately-hit-tested box. Text mode wraps the
+                // name column, icons mode the icon column, bars mode the bar+value column, top through the
+                // last visible row, a few pixels further out so it doesn't overlap them.
+                int contentRight = barX + barW + HudDrawHelpers.BAR_PCT_GAP + PCT_RESERVE;
+                if (moveTextMode) {
+                    context.drawDashedBorder(rowsX + iconSize + HudDrawHelpers.ICON_LABEL_GAP - 3, rowsTop - 3, maxLabelW + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+                } else if (moveIconsMode) {
+                    context.drawDashedBorder(bounds.x() + padding + iconDx - 3, rowsTop - contentOffsetY + iconDy - 3, Math.round(iconSize * (float) iconScale) + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+                } else {
+                    context.drawDashedBorder(barX - 3, rowsTop - contentOffsetY + barDy - 3, contentRight - barX + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+                }
             }
 
             if (maxScroll > 0) {
@@ -521,10 +541,15 @@ public final class CalorieHudScreen implements MarieComponent {
             return true;
         }
         Bounds bounds = resolvedBounds(currentRows().size());
-        if (moveContentEnabled() && bounds.contains((int) mouseX, (int) mouseY)) {
-            draggingContent = true;
-            contentGrabOffsetX = (int) mouseX - contentOffsetX;
-            contentGrabOffsetY = (int) mouseY - contentOffsetY;
+        MarieModuleSettings.MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(UiStatePersistence.get(), PANEL_ID);
+        if (mode != null && bounds.contains((int) mouseX, (int) mouseY)) {
+            switch (mode) {
+                case TEXT -> moveDrag.start(mode, mouseX, mouseY, contentOffsetX, contentOffsetY);
+                case ICONS -> moveDrag.start(mode, mouseX, mouseY,
+                        MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID));
+                case BARS -> moveDrag.start(mode, mouseX, mouseY,
+                        MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID));
+            }
             return true;
         }
         return drag.mouseClicked((int) mouseX, (int) mouseY, bounds);
@@ -553,11 +578,18 @@ public final class CalorieHudScreen implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
             return true;
         }
-        if (draggingContent) {
-            List<Row> rows = currentRows();
-            Bounds bounds = resolvedBounds(rows.size());
-            contentOffsetX = clampContentOffsetX((int) mouseX - contentGrabOffsetX, bounds);
-            contentOffsetY = clampContentOffsetY((int) mouseY - contentGrabOffsetY, bounds);
+        if (moveDrag.isActive()) {
+            Bounds bounds = resolvedBounds(currentRows().size());
+            int x = clampContentOffsetX(moveDrag.offsetX(mouseX), bounds);
+            int y = clampContentOffsetY(moveDrag.offsetY(mouseY), bounds);
+            switch (moveDrag.mode()) {
+                    case TEXT -> {
+                        contentOffsetX = x;
+                        contentOffsetY = y;
+                    }
+                    case ICONS -> MarieModuleSettings.setIconOffset(UiStatePersistence.get(), PANEL_ID, x, y);
+                    case BARS -> MarieModuleSettings.setBarOffset(UiStatePersistence.get(), PANEL_ID, x, y);
+                }
             return true;
         }
         if (drag.isDragging() || drag.isResizing()) {
@@ -572,9 +604,14 @@ public final class CalorieHudScreen implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseReleased(mouseX, mouseY, button)) {
             return true;
         }
-        if (draggingContent) {
-            draggingContent = false;
-            persistContentOffset();
+        if (moveDrag.isActive()) {
+            MarieModuleSettings.MoveDrag.Mode mode = moveDrag.mode();
+            moveDrag.stop();
+            switch (mode) {
+                case TEXT -> persistContentOffset();
+                case ICONS -> MarieModuleSettings.commitIconOffset(UiStatePersistence.get(), PANEL_ID);
+                case BARS -> MarieModuleSettings.commitBarOffset(UiStatePersistence.get(), PANEL_ID);
+            }
             return true;
         }
         boolean any = drag.isDragging() || drag.isResizing();
@@ -591,17 +628,19 @@ public final class CalorieHudScreen implements MarieComponent {
         Bounds defaultBounds = resolvedBounds(rows.size());
         Bounds bounds = liveOrDefault(drag, mouse[0], mouse[1], defaultBounds);
 
-        boolean moveContentMode = moveContentEnabled();
+        boolean moveTextMode = moveContentEnabled();
+        boolean moveBarsMode = moveBarsEnabled();
+        boolean moveIconsMode = MarieModuleSettings.isMoveIconsEnabled(UiStatePersistence.get(), PANEL_ID);
         // Re-clamped defensively here too — see the same comment on the onRenderGuiPost call site.
         int offsetX = clampContentOffsetX(contentOffsetX, bounds);
         int offsetY = clampContentOffsetY(contentOffsetY, bounds);
-        drawPanel(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().calorieHudTextBrightness(), NourishedClientConfig.get().calorieHudIconBrightness()),
-                bounds, offsetX, offsetY, rows, true, moveContentMode);
+        drawPanel(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().calorieHudTextBrightness(), NourishedClientConfig.get().calorieHudIconBrightness()),
+                bounds, offsetX, offsetY, rows, true, moveTextMode, moveIconsMode, moveBarsMode);
 
         // While move-content mode is active, dragging is exclusively routed to the content offset
         // (see mouseClicked/mouseDragged) — the panel's own resize handles would be inert, so they
         // aren't drawn, to avoid implying they still work.
-        if (!moveContentMode) {
+        if (!moveTextMode && !moveIconsMode && !moveBarsMode) {
             Bounds handle = DraggableResizable.handleBounds(bounds);
             context.drawResizeHandle(handle.x(), handle.y(), drag.isHandleHovered(mouse[0], mouse[1], bounds), drag.isHandleActive());
             Bounds handleBL = DraggableResizable.handleBoundsBottomLeft(bounds);

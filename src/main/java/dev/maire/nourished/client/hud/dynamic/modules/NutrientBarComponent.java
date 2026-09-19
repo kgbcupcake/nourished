@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.hud.dynamic.modules;
 
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.ui.geometry.Anchor;
@@ -45,16 +46,35 @@ final class NutrientBarComponent implements MarieComponent {
      * modules maintain.
      */
     private final float contentScale;
-    /** Icon size multiplier — independent of {@link #contentScale}, which sizes the text (see {@code PanelScales}). */
+    /** Icon size multiplier — independent of {@link #contentScale}, which sizes the text (see {@code MarieModuleSettings#iconScale}). */
     private final float iconScale;
+    /** "Move Text and Icons" offset — moves the icon and the name label. */
+    private final int textDx;
+    private final int textDy;
+    /** "Move Icons" offset — moves the icon. */
+    private final int iconDx;
+    private final int iconDy;
+    /** "Move Bars" offset — moves the bar and its percentage text. */
+    private final int barDx;
+    private final int barDy;
+    /** Bar size multiplier — scales the bar and, with it, the percentage text at its end (the text size does not touch that number). */
+    private final float barScale;
 
-    NutrientBarComponent(String nutrientKey, boolean verticalMode, HudLayout.Layout hudLayout, Map<String, Float> displayValues, float contentScale, float iconScale) {
+    NutrientBarComponent(String nutrientKey, boolean verticalMode, HudLayout.Layout hudLayout, Map<String, Float> displayValues, float contentScale, float iconScale,
+                          int textDx, int textDy, int iconDx, int iconDy, int barDx, int barDy, float barScale) {
         this.nutrientKey = nutrientKey;
         this.verticalMode = verticalMode;
         this.hudLayout = hudLayout;
         this.displayValues = displayValues;
         this.contentScale = contentScale;
         this.iconScale = iconScale;
+        this.textDx = textDx;
+        this.textDy = textDy;
+        this.iconDx = iconDx;
+        this.iconDy = iconDy;
+        this.barDx = barDx;
+        this.barDy = barDy;
+        this.barScale = barScale;
     }
 
     @Override
@@ -138,6 +158,12 @@ final class NutrientBarComponent implements MarieComponent {
         // unaffected by contentScale, so a persisted zoom above hudLayout's own proportions is
         // clipped at this row's own edges instead of overlapping neighboring rows — same pattern as
         // the other 7 ContentScaleController-managed modules' pushClip.
+        // The per-row clip would cut off content moved out of its own row slot by the move offsets
+        // (the panel-wide clip in NutrientPanelContainer still applies), so it only applies unshifted.
+        if (textDx != 0 || textDy != 0 || iconDx != 0 || iconDy != 0 || barDx != 0 || barDy != 0) {
+            renderContent(context, bounds);
+            return;
+        }
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             renderContent(context, bounds);
@@ -151,29 +177,29 @@ final class NutrientBarComponent implements MarieComponent {
         String label = HudDrawHelpers.nutrientLabel(nutrientKey);
         int fillColor = HudDrawHelpers.barFillColor(nutrientKey, value);
         double textBrightness = NourishedClientConfig.get().hudTextBrightness();
-        int pctColor = HudDrawHelpers.scaleBrightness(HudDrawHelpers.pctColor(nutrientKey, value), textBrightness);
+        int pctColor = MarieModuleSettings.scaleBrightness(HudDrawHelpers.pctColor(nutrientKey, value), textBrightness);
         int bgColor = HudDrawHelpers.barBackgroundColor();
-        int labelColor = HudDrawHelpers.scaleBrightness(HudDrawHelpers.labelColor(), textBrightness);
+        int labelColor = MarieModuleSettings.scaleBrightness(HudDrawHelpers.labelColor(), textBrightness);
         String pctText = Math.round(value * 100f) + "%";
         var font = Minecraft.getInstance().font;
 
         if (verticalMode) {
-            int textH = (int) Math.ceil(9 * contentScale);
-            int barW = hudLayout.verticalBarW();
-            int barH = hudLayout.verticalBarH();
+            int textH = (int) Math.ceil(9 * barScale);
+            int barW = Math.max(1, Math.round(hudLayout.verticalBarW() * barScale));
+            int barH = Math.max(1, Math.round(hudLayout.verticalBarH() * barScale));
             int barX = bounds.x() + (bounds.width() - barW) / 2;
             int barY = bounds.y() + textH + 2;
 
-            int pctSw = (int) Math.ceil(font.width(pctText) * contentScale);
+            int pctSw = (int) Math.ceil(font.width(pctText) * barScale);
             int pctX = bounds.x() + (bounds.width() - pctSw) / 2;
-            context.drawText(pctText, pctX, bounds.y(), pctColor, contentScale);
+            context.drawText(pctText, pctX + barDx, bounds.y() + barDy, pctColor, barScale);
 
-            context.drawVerticalBar(barX, barY, barW, barH, value, bgColor, fillColor);
-            drawFlashOverlay(context, barX, barY, barW, barH);
+            context.drawVerticalBar(barX + barDx, barY + barDy, barW, barH, value, bgColor, fillColor);
+            drawFlashOverlay(context, barX + barDx, barY + barDy, barW, barH);
 
             int labelSw = (int) Math.ceil(font.width(label) * contentScale);
             int labelX = bounds.x() + (bounds.width() - labelSw) / 2;
-            context.drawText(label, labelX, barY + barH + 2, labelColor, contentScale);
+            context.drawText(label, labelX + textDx, barY + barH + 2 + textDy, labelColor, contentScale);
         } else {
             int rowCenterY = bounds.y() + bounds.height() / 2;
             int textY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
@@ -182,21 +208,25 @@ final class NutrientBarComponent implements MarieComponent {
             float tint = (float) NourishedClientConfig.get().hudIconBrightness();
             RenderSystem.setShaderColor(tint, tint, tint, 1f);
             try {
-                context.drawItem(resolveIconStack(nutrientKey), bounds.x(), rowCenterY - iconSize / 2, iconScale);
+                context.drawItem(resolveIconStack(nutrientKey), bounds.x() + iconDx, rowCenterY - iconSize / 2 + iconDy, iconScale);
             } finally {
                 RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             }
 
             int labelX = bounds.x() + iconSize + HudDrawHelpers.ICON_LABEL_GAP;
-            context.drawText(label, labelX, textY, labelColor, contentScale);
+            context.drawText(label, labelX + textDx, textY + textDy, labelColor, contentScale);
 
             int barX = labelX + hudLayout.maxLabelSw() + HudDrawHelpers.LABEL_BAR_GAP;
-            int barY = rowCenterY - HudDrawHelpers.BAR_H / 2;
-            context.drawBar(barX, barY, hudLayout.barW(), HudDrawHelpers.BAR_H, value, bgColor, fillColor);
-            drawFlashOverlay(context, barX, barY, hudLayout.barW(), HudDrawHelpers.BAR_H);
+            int barW = Math.max(1, Math.round(hudLayout.barW() * barScale));
+            int barH = Math.max(1, Math.round(HudDrawHelpers.BAR_H * barScale));
+            int barY = rowCenterY - barH / 2;
+            context.drawBar(barX + barDx, barY + barDy, barW, barH, value, bgColor, fillColor);
+            drawFlashOverlay(context, barX + barDx, barY + barDy, barW, barH);
 
-            int pctX = barX + hudLayout.barW() + HudDrawHelpers.BAR_PCT_GAP;
-            context.drawText(pctText, pctX, textY, pctColor, contentScale);
+            // The number at the bar's end sizes and moves with the bar, not with the text.
+            int pctX = barX + barW + HudDrawHelpers.BAR_PCT_GAP;
+            int pctY = rowCenterY - (int) Math.ceil(9 * barScale) / 2;
+            context.drawText(pctText, pctX + barDx, pctY + barDy, pctColor, barScale);
         }
     }
 }

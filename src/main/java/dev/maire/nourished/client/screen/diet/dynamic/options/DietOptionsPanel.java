@@ -20,12 +20,12 @@ public final class DietOptionsPanel {
     public static MarieComponent build() {
         Runnable save = NourishedClientConfig::saveNow;
         return MarieToolbox.panel(text("nourished.options.diet.title"))
-                .tab(text("nourished.options.tab.appearance"))
-                    .slider(text("nourished.options.diet.background_opacity"),
+                .tab(text("config.marieslib.moduleoptions.tab.appearance"))
+                    .slider(text("config.marieslib.moduleoptions.backgroundOpacity"),
                             () -> cc().dietBackgroundOpacity(), v -> cc().setDietBackgroundOpacity(v), 0.0d, 1.0d, PERCENT_STEP, save)
-                    .slider(text("nourished.options.text_brightness"),
+                    .slider(text("config.marieslib.moduleoptions.textBrightness"),
                             () -> cc().dietTextBrightness(), v -> cc().setDietTextBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
-                    .slider(text("nourished.options.icon_brightness"),
+                    .slider(text("config.marieslib.moduleoptions.iconBrightness"),
                             () -> cc().dietIconBrightness(), v -> cc().setDietIconBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
                     // Room left here for the in-game color picker (not built yet).
                 .tab(text("nourished.options.tab.visibility"))

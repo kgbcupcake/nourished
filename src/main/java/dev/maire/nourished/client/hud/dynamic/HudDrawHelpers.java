@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.hud.dynamic;
 
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.maire.nourished.config.NourishedClientConfig;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -213,7 +214,7 @@ public final class HudDrawHelpers {
         try {
             pose.translate(x, y, 0);
             pose.scale(scale, scale, 1f);
-            g.drawString(mc.font, text, 0, 0, scaleBrightness(color, NourishedClientConfig.get().hudTextBrightness()), false);
+            g.drawString(mc.font, text, 0, 0, MarieModuleSettings.scaleBrightness(color, NourishedClientConfig.get().hudTextBrightness()), false);
         } finally {
             pose.popPose();
         }
@@ -275,17 +276,6 @@ public final class HudDrawHelpers {
 
     public static int handleActiveColor() {
         return COL_HANDLE_ACTIVE;
-    }
-
-    /** {@code argb} with its RGB scaled by {@code brightness} (alpha untouched, each channel capped at 255, so values above 1.0 wash colors toward white); 1.0 returns it unchanged. */
-    public static int scaleBrightness(int argb, double brightness) {
-        if (brightness == 1.0d) {
-            return argb;
-        }
-        int r = Math.min(255, (int) Math.round(((argb >> 16) & 0xFF) * brightness));
-        int g = Math.min(255, (int) Math.round(((argb >> 8) & 0xFF) * brightness));
-        int b = Math.min(255, (int) Math.round((argb & 0xFF) * brightness));
-        return (argb & 0xFF000000) | (r << 16) | (g << 8) | b;
     }
 
     public static int labelColor() {

@@ -1,6 +1,7 @@
 package dev.maire.nourished.client.hud.dynamic.modules;
 
-import dev.maire.nourished.client.hud.dynamic.options.PanelScales;
+import dev.maire.nourished.client.UiStatePersistence;
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
@@ -47,9 +48,14 @@ public final class NutrientPanelContainer implements Container {
         // panel natural size) below and in HudLayout itself, same separation the other 7
         // ContentScaleController-managed modules maintain.
         float contentScale = (float) ContentScaleController.resolveContentScale(HudEditTarget.persistedContentScale());
-        float iconScale = (float) ContentScaleController.resolveContentScale(PanelScales.iconScale(PANEL_ID));
+        float iconScale = (float) ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(UiStatePersistence.get(), PANEL_ID));
+        float barScale = (float) ContentScaleController.resolveContentScale(MarieModuleSettings.barScale(UiStatePersistence.get(), PANEL_ID));
         for (String key : keys) {
-            children.add(new NutrientBarComponent(key, verticalMode, hudLayout, displayValues, contentScale, iconScale));
+            children.add(new NutrientBarComponent(key, verticalMode, hudLayout, displayValues, contentScale, iconScale,
+                    hudLayout.contentOffsetX(), hudLayout.contentOffsetY(),
+                    MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID),
+                    MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID),
+                    barScale));
         }
         if (verticalMode) {
             int columnGap = Math.max(2, (int) Math.round(HudDrawHelpers.VERTICAL_COLUMN_GAP * hudLayout.scale()));
@@ -113,7 +119,7 @@ public final class NutrientPanelContainer implements Container {
         int availableW = Math.max(0, bounds.width() - 2 * pad - leftMargin);
         int availableH = Math.max(0, bounds.height() - 2 * pad);
 
-        int contentY = bounds.y() + pad + hudLayout.contentOffsetY();
+        int contentY = bounds.y() + pad;
         if (!hudLayout.verticalLayout()) {
             // VerticalLayout (row-stacking mode) has no built-in "center the whole stack" concept —
             // it only positions each row's own horizontal offset via Anchor (see
@@ -124,7 +130,7 @@ public final class NutrientPanelContainer implements Container {
             contentY += Math.max(0, (availableH - naturalContentH) / 2);
         }
 
-        Bounds content = new Bounds(bounds.x() + pad + leftMargin + hudLayout.contentOffsetX(), contentY, availableW, availableH);
+        Bounds content = new Bounds(bounds.x() + pad + leftMargin, contentY, availableW, availableH);
         // Clipped to the panel's own bounds — a defensive backstop against contentOffsetX/Y (the
         // "Move Text and Icons" toggle) pushing content outside the panel: HudEditTarget clamps that
         // offset already, but without this, any drift (e.g. from a stale offset the clamp hasn't

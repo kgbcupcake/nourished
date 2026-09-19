@@ -1,5 +1,7 @@
 package dev.maire.nourished.client.hud.classic;
 
+import dev.marie.framework.ui.api.MarieModuleSettings;
+import dev.maire.nourished.client.UiStatePersistence;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.ui.edit.ContentScaleController;
@@ -27,6 +29,9 @@ import java.util.Map;
 public final class ClassicHudPanelRenderer {
 
     private ClassicHudPanelRenderer() {}
+
+    /** The Nutrient HUD panel's persisted UI-state key (same string {@code HudEditTarget} keys its scale/position under). */
+    private static final String PANEL_ID = "nourished.hud.panel";
 
     public static void drawPanel(
             GuiGraphics g,
@@ -88,11 +93,21 @@ public final class ClassicHudPanelRenderer {
             int pad
     ) {
         int columnGap = Math.max(2, (int) Math.round(HudDrawHelpers.VERTICAL_COLUMN_GAP * layout.scale()));
-        int contentX = panelX + pad + layout.leftMargin() + layout.contentOffsetX();
-        int pctH = (int) Math.ceil(9 * contentScale);
-        int barTop = panelY + pad + layout.contentOffsetY() + pctH + 2;
-        int labelY = barTop + layout.verticalBarH() + 2;
-        int pctY = panelY + pad + layout.contentOffsetY();
+        // Two independent offsets, same split as the dynamic renderer: "Move Text and Icons" moves the
+        // name labels, "Move Bars" moves the bars together with their percentage text.
+        int textDx = layout.contentOffsetX();
+        int textDy = layout.contentOffsetY();
+        int barDx = MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID);
+        int barDy = MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID);
+        // Bar size scales the bar and the percentage text at its end; the text size doesn't touch that number.
+        float barScale = ContentScaleController.resolveContentScale(MarieModuleSettings.barScale(UiStatePersistence.get(), PANEL_ID));
+        int vBarW = Math.max(1, Math.round(layout.verticalBarW() * barScale));
+        int vBarH = Math.max(1, Math.round(layout.verticalBarH() * barScale));
+        int contentX = panelX + pad + layout.leftMargin();
+        int pctH = (int) Math.ceil(9 * barScale);
+        int barTop = panelY + pad + pctH + 2;
+        int labelY = barTop + vBarH + 2;
+        int pctY = panelY + pad;
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);
             float displayPct = displayValues.getOrDefault(key, 0f);
@@ -104,29 +119,29 @@ public final class ClassicHudPanelRenderer {
                 RenderSystem.setShaderColor(1f, 1f, 1f, 0.4f);
             }
             int columnX = contentX + i * (layout.verticalColumnW() + columnGap);
-            int barX = columnX + (layout.verticalColumnW() - layout.verticalBarW()) / 2;
+            int barX = columnX + (layout.verticalColumnW() - vBarW) / 2;
             String label = HudDrawHelpers.nutrientLabel(key);
             int labelSw = (int) Math.ceil(mc.font.width(label) * contentScale);
             int labelX = columnX + (layout.verticalColumnW() - labelSw) / 2;
             int pct = Math.round(truePct * 100f);
             String pctText = pct + "%";
-            int pctSw = (int) Math.ceil(mc.font.width(pctText) * contentScale);
+            int pctSw = (int) Math.ceil(mc.font.width(pctText) * barScale);
             int pctX = columnX + (layout.verticalColumnW() - pctSw) / 2;
             HudDrawHelpers.drawScaledLabel(
                     g,
                     mc,
                     pctText,
-                    pctX,
-                    pctY,
+                    pctX + barDx,
+                    pctY + barDy,
                     HudDrawHelpers.pctColor(key, truePct),
-                    contentScale
+                    barScale
             );
             HudDrawHelpers.drawRoundedVerticalBar(
                     g,
-                    barX,
-                    barTop,
-                    layout.verticalBarW(),
-                    layout.verticalBarH(),
+                    barX + barDx,
+                    barTop + barDy,
+                    vBarW,
+                    vBarH,
                     displayPct,
                     HudDrawHelpers.barBackgroundColor(),
                     HudDrawHelpers.barFillColor(key, truePct)
@@ -136,10 +151,10 @@ public final class ClassicHudPanelRenderer {
                 int a = (int) (flash * 80);
                 int flashColor = (a << 24) | 0xFFFFFF;
                 g.fill(
-                        barX,
-                        barTop,
-                        barX + layout.verticalBarW(),
-                        barTop + layout.verticalBarH(),
+                        barX + barDx,
+                        barTop + barDy,
+                        barX + barDx + vBarW,
+                        barTop + barDy + vBarH,
                         flashColor
                 );
             }
@@ -147,8 +162,8 @@ public final class ClassicHudPanelRenderer {
                     g,
                     mc,
                     label,
-                    labelX,
-                    labelY,
+                    labelX + textDx,
+                    labelY + textDy,
                     HudDrawHelpers.labelColor(),
                     contentScale
             );
@@ -171,12 +186,25 @@ public final class ClassicHudPanelRenderer {
             float contentScale,
             int pad
     ) {
-        int contentX = panelX + pad + layout.leftMargin() + layout.contentOffsetX();
-        int y = panelY + pad + layout.contentOffsetY();
-        // Native item size (16px) times the user's persisted content-scale adjustment alone — same
-        // "box geometry (layout.iconSize(), rowH) plays no part in it" split NutrientBarComponent
-        // uses for its own icon (see that class's own contentScale field javadoc).
-        int iconSize = Math.round(16 * contentScale);
+        // Two independent offsets, same split as the dynamic renderer: "Move Text and Icons" moves the
+        // icon and name label, "Move Bars" moves the bar together with its percentage text.
+        int textDx = layout.contentOffsetX();
+        int textDy = layout.contentOffsetY();
+        int barDx = MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID);
+        int barDy = MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID);
+        int iconDx = MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID);
+        int iconDy = MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID);
+        // Bar size scales the bar and the percentage text at its end; the text size doesn't touch that number.
+        float barScale = ContentScaleController.resolveContentScale(MarieModuleSettings.barScale(UiStatePersistence.get(), PANEL_ID));
+        int barW = Math.max(1, Math.round(layout.barW() * barScale));
+        int barH = Math.max(1, Math.round(HudDrawHelpers.BAR_H * barScale));
+        int contentX = panelX + pad + layout.leftMargin();
+        int y = panelY + pad;
+        // Native item size (16px) times the user's persisted icon-size adjustment (independent of the
+        // text size, and equal to it until first set) — same "box geometry (layout.iconSize(), rowH)
+        // plays no part in it" split NutrientBarComponent uses for its own icon.
+        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(UiStatePersistence.get(), PANEL_ID));
+        int iconSize = Math.round(16 * iconScale);
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);
             float displayPct = displayValues.getOrDefault(key, 0f);
@@ -192,18 +220,18 @@ public final class ClassicHudPanelRenderer {
             String label = HudDrawHelpers.nutrientLabel(key);
             int labelY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
             int labelSw = (int) Math.ceil(mc.font.width(label) * contentScale);
-            int iconX = contentX;
+            int iconX = contentX + iconDx;
             int labelX = contentX + iconSize + HudDrawHelpers.ICON_LABEL_GAP;
             int barX = labelX + layout.maxLabelSw() + HudDrawHelpers.LABEL_BAR_GAP;
-            HudDrawHelpers.renderIcon(g, key, iconX, rowCenterY - iconSize / 2, iconSize);
-            HudDrawHelpers.drawScaledLabel(g, mc, label, labelX, labelY, HudDrawHelpers.labelColor(), contentScale);
-            int barY = rowCenterY - HudDrawHelpers.BAR_H / 2;
+            HudDrawHelpers.renderIcon(g, key, iconX, rowCenterY - iconSize / 2 + iconDy, iconSize);
+            HudDrawHelpers.drawScaledLabel(g, mc, label, labelX + textDx, labelY + textDy, HudDrawHelpers.labelColor(), contentScale);
+            int barY = rowCenterY - barH / 2 + barDy;
             HudDrawHelpers.drawRoundedBar(
                     g,
-                    barX,
+                    barX + barDx,
                     barY,
-                    layout.barW(),
-                    HudDrawHelpers.BAR_H,
+                    barW,
+                    barH,
                     displayPct,
                     HudDrawHelpers.barBackgroundColor(),
                     HudDrawHelpers.barFillColor(key, truePct)
@@ -212,18 +240,19 @@ public final class ClassicHudPanelRenderer {
             if (flash > 0f) {
                 int a = (int) (flash * 80);
                 int flashColor = (a << 24) | 0xFFFFFF;
-                g.fill(barX, barY, barX + layout.barW(), barY + HudDrawHelpers.BAR_H, flashColor);
+                g.fill(barX + barDx, barY, barX + barDx + barW, barY + barH, flashColor);
             }
             int pct = Math.round(truePct * 100f);
-            int pctX = barX + layout.barW() + HudDrawHelpers.BAR_PCT_GAP;
+            int pctX = barX + barDx + barW + HudDrawHelpers.BAR_PCT_GAP;
+            int pctY = rowCenterY - (int) Math.ceil(9 * barScale) / 2 + barDy;
             HudDrawHelpers.drawScaledLabel(
                     g,
                     mc,
                     pct + "%",
                     pctX,
-                    labelY,
+                    pctY,
                     HudDrawHelpers.pctColor(key, truePct),
-                    contentScale
+                    barScale
             );
             if (dimRow) {
                 RenderSystem.setShaderColor(1f, 1f, 1f, 1f);

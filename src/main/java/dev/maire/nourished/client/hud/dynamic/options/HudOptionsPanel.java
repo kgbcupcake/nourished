@@ -2,15 +2,16 @@ package dev.maire.nourished.client.hud.dynamic.options;
 
 import dev.marie.framework.ui.api.MarieToolbox;
 import dev.marie.framework.ui.component.MarieComponent;
+import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.network.chat.Component;
 
 /**
  * The Nutrient HUD's tabbed options panel, built only through {@link MarieToolbox}. Every option is
  * a getter/setter over a value that already exists — a {@link NourishedClientConfig} field, or the
- * HUD panel's own UI-state record (see {@link LayoutOptionRows}) — so nothing is stored here and the
- * config file keeps working. Config-backed options write in memory on every change and persist with
- * {@link NourishedClientConfig#saveNow}.
+ * HUD panel's own UI-state record via MariesLib's shared module rows — so nothing is stored here and
+ * the config file keeps working. Config-backed options write in memory on every change and persist
+ * with {@link NourishedClientConfig#saveNow}.
  */
 public final class HudOptionsPanel {
 
@@ -21,12 +22,13 @@ public final class HudOptionsPanel {
     /** @param panelId the HUD panel's persisted UI-state key (the one its scale/padding/position live under) */
     public static MarieComponent build(String panelId) {
         Runnable save = NourishedClientConfig::saveNow;
-        MarieToolbox.PanelBuilder layout = MarieToolbox.panel(text("nourished.hud.nutrientPanel.label"))
-                .tab(text("nourished.options.tab.layout"));
-        MarieToolbox.PanelBuilder panel = PanelOptionRows.addPadding(layout, panelId)
+        var ui = UiStatePersistence.get();
+        return MarieToolbox.panel(text("nourished.hud.nutrientPanel.label"))
+                .tab(text("config.marieslib.moduleoptions.tab.layout"))
+                    .padding(ui, panelId)
                     .toggle(text("nourished.options.hud.vertical_layout"),
                             () -> cc().hudVerticalLayout(), v -> cc().setHudVerticalLayout(v), save)
-                .tab(text("nourished.options.tab.behavior"))
+                .tab(text("config.marieslib.moduleoptions.tab.behavior"))
                     .toggle(text("nourished.options.hud.reveal_on_gain"),
                             () -> cc().hudRevealOnNutrientGain(), v -> cc().setHudRevealOnNutrientGain(v), save)
                     .slider(text("nourished.options.hud.hide_above"),
@@ -34,15 +36,16 @@ public final class HudOptionsPanel {
                     .slider(text("nourished.options.hud.show_above"),
                             () -> cc().hudShowAboveThreshold(), v -> cc().setHudShowAboveThreshold(v), 0.0d, 1.0d, PERCENT_STEP, save)
                         // "Show above" only re-reveals bars the hide rule hid, so it does nothing while hide is off (1.0).
-                        .enabledWhen(() -> cc().hudHideAboveThreshold() < 1.0d);
-        panel = PanelOptionRows.addMoveContent(panel, panelId)
-                .tab(text("nourished.options.tab.appearance"));
-        return PanelOptionRows.addSizes(panel, panelId)
-                    .slider(text("nourished.options.text_brightness"),
+                        .enabledWhen(() -> cc().hudHideAboveThreshold() < 1.0d)
+                    .moveToggles(ui, panelId)
+                .tab(text("config.marieslib.moduleoptions.tab.appearance"))
+                    .textAndIconSizes(ui, panelId)
+                    .barSize(ui, panelId)
+                    .slider(text("config.marieslib.moduleoptions.textBrightness"),
                             () -> cc().hudTextBrightness(), v -> cc().setHudTextBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
-                    .slider(text("nourished.options.icon_brightness"),
+                    .slider(text("config.marieslib.moduleoptions.iconBrightness"),
                             () -> cc().hudIconBrightness(), v -> cc().setHudIconBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
-                    .slider(text("nourished.options.hud.background_opacity"),
+                    .slider(text("config.marieslib.moduleoptions.backgroundOpacity"),
                             () -> cc().hudBackgroundOpacity(), v -> cc().setHudBackgroundOpacity(v), 0.0d, 1.0d, PERCENT_STEP, save)
                     // Room left here for the in-game color picker (not built yet).
                 .build();

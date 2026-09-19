@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.screen.diet.dynamic.edit;
 
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Bounds;
@@ -9,7 +10,6 @@ import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.edit.DraggableResizable;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
-import dev.maire.nourished.client.render.BrightnessRenderContext;
 import dev.marie.framework.ui.scaleconfig.ScaleConfigPanel;
 import dev.maire.nourished.client.screen.diet.DietScreen;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
@@ -340,7 +340,7 @@ public final class DietScreenEditTarget implements MarieComponent {
         lastEatMoreResolvedBounds = eatMore.resolvedBounds();
         lastActiveEffectsResolvedBounds = activeEffects.resolvedBounds();
 
-        panel.render(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().dietTextBrightness(), NourishedClientConfig.get().dietIconBrightness()), panelBounds);
+        panel.render(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().dietTextBrightness(), NourishedClientConfig.get().dietIconBrightness()), panelBounds);
 
         drawHandle(context, panelDrag, panelBounds, mx, my, true);
         drawSizeLabel(context, panelDrag, panelBounds);

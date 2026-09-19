@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.screen.diet;
 
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,7 +27,6 @@ import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.edit.EditModeController;
 import dev.marie.framework.ui.RenderContext;
-import dev.maire.nourished.client.render.BrightnessRenderContext;
 import dev.marie.framework.ui.Theme;
 import dev.marie.framework.ui.ThemeKey;
 import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
@@ -349,7 +349,7 @@ public class DietScreen extends Screen {
         // panel.render (or the edit-mode toggle drawn right after it) throws partway through a
         // pushClip/popClip pair — see GuiGraphicsRenderContext#resetClip.
         try {
-            panel.render(BrightnessRenderContext.wrap(context, NourishedClientConfig.get().dietTextBrightness(), NourishedClientConfig.get().dietIconBrightness()), bounds);
+            panel.render(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().dietTextBrightness(), NourishedClientConfig.get().dietIconBrightness()), bounds);
 
             boolean editModeActive = marieEditModeController != null && marieEditModeController.isActive();
             boolean toggleHovered = isMouseOverEditModeToggle(resolvedLayout, mx, my);

@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.hud.dynamic.edit;
 
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Anchor;
@@ -73,9 +74,8 @@ public final class HudEditTarget implements MarieComponent {
     private final DraggableResizable panelDrag;
 
     /** Whether a content-move drag (see {@link #moveContentEnabled}) is currently in progress. */
-    private boolean draggingContent;
-    private int contentGrabOffsetX;
-    private int contentGrabOffsetY;
+    /** Grab state for a "Move Text and Icons" or "Move Bars" drag (see {@link MarieModuleSettings.MoveDrag}). */
+    private final MarieModuleSettings.MoveDrag moveDrag = new MarieModuleSettings.MoveDrag();
 
     /**
      * The content's offset from where it would otherwise sit — a plain persisted translation, not
@@ -129,6 +129,11 @@ public final class HudEditTarget implements MarieComponent {
     /** The "Move Text and Icons" toggle's live state, owned by {@link #scaleConfigPanel} (its own editor window, under Padding) rather than a button on this panel itself. */
     private boolean moveContentEnabled() {
         return scaleConfigPanel.isMoveContentEnabled(PANEL_ID);
+    }
+
+    /** The "Move Bars" toggle's live state — see {@link MarieModuleSettings#isMoveBarsEnabled}. */
+    private boolean moveBarsEnabled() {
+        return MarieModuleSettings.isMoveBarsEnabled(UiStatePersistence.get(), PANEL_ID);
     }
 
     /**
@@ -333,10 +338,15 @@ public final class HudEditTarget implements MarieComponent {
             return false;
         }
         Bounds bounds = resolvedBounds(mc, keys);
-        if (moveContentEnabled() && bounds.contains((int) mouseX, (int) mouseY)) {
-            draggingContent = true;
-            contentGrabOffsetX = (int) mouseX - contentOffsetX;
-            contentGrabOffsetY = (int) mouseY - contentOffsetY;
+        MarieModuleSettings.MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(UiStatePersistence.get(), PANEL_ID);
+        if (mode != null && bounds.contains((int) mouseX, (int) mouseY)) {
+            switch (mode) {
+                case TEXT -> moveDrag.start(mode, mouseX, mouseY, contentOffsetX, contentOffsetY);
+                case ICONS -> moveDrag.start(mode, mouseX, mouseY,
+                        MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID));
+                case BARS -> moveDrag.start(mode, mouseX, mouseY,
+                        MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID));
+            }
             return true;
         }
         return panelDrag.mouseClicked((int) mouseX, (int) mouseY, bounds);
@@ -352,12 +362,20 @@ public final class HudEditTarget implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
             return true;
         }
-        if (draggingContent) {
+        if (moveDrag.isActive()) {
             List<String> keys = currentVisibleKeysOrFallback();
             if (!keys.isEmpty()) {
                 Bounds bounds = resolvedBounds(mc, keys);
-                contentOffsetX = clampContentOffsetX((int) mouseX - contentGrabOffsetX, bounds, persistedLeftMargin());
-                contentOffsetY = clampContentOffsetY((int) mouseY - contentGrabOffsetY, bounds);
+                int x = clampContentOffsetX(moveDrag.offsetX(mouseX), bounds, persistedLeftMargin());
+                int y = clampContentOffsetY(moveDrag.offsetY(mouseY), bounds);
+                switch (moveDrag.mode()) {
+                    case TEXT -> {
+                        contentOffsetX = x;
+                        contentOffsetY = y;
+                    }
+                    case ICONS -> MarieModuleSettings.setIconOffset(UiStatePersistence.get(), PANEL_ID, x, y);
+                    case BARS -> MarieModuleSettings.setBarOffset(UiStatePersistence.get(), PANEL_ID, x, y);
+                }
             }
             return true;
         }
@@ -373,9 +391,14 @@ public final class HudEditTarget implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseReleased(mouseX, mouseY, button)) {
             return true;
         }
-        if (draggingContent) {
-            draggingContent = false;
-            persistContentOffset();
+        if (moveDrag.isActive()) {
+            MarieModuleSettings.MoveDrag.Mode mode = moveDrag.mode();
+            moveDrag.stop();
+            switch (mode) {
+                case TEXT -> persistContentOffset();
+                case ICONS -> MarieModuleSettings.commitIconOffset(UiStatePersistence.get(), PANEL_ID);
+                case BARS -> MarieModuleSettings.commitBarOffset(UiStatePersistence.get(), PANEL_ID);
+            }
             return true;
         }
         boolean any = panelDrag.isDragging() || panelDrag.isResizing();
@@ -401,6 +424,10 @@ public final class HudEditTarget implements MarieComponent {
         // dragging (e.g. a manual resize), and a stale offset should self-correct visually.
         contentOffsetX = clampContentOffsetX(contentOffsetX, bounds, persistedLeftMargin());
         contentOffsetY = clampContentOffsetY(contentOffsetY, bounds);
+        MarieModuleSettings.setIconOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID), bounds, persistedLeftMargin()),
+                clampContentOffsetY(MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID), bounds));
+        MarieModuleSettings.setBarOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID), bounds, persistedLeftMargin()),
+                clampContentOffsetY(MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID), bounds));
 
         Map<String, Float> displayValues = NourishedHUD.currentDisplayValues();
         HudLayout.Layout matchedLayout = matchedLayoutFor(keys, bounds);
@@ -414,17 +441,35 @@ public final class HudEditTarget implements MarieComponent {
             panel.render(context, bounds);
         }
 
-        boolean moveContentMode = moveContentEnabled();
-        if (moveContentMode) {
-            // Dashed rather than a solid glow outline — a live drag affordance shown only while the
-            // toggle is active, not a persistent separately-hit-tested box; wraps content's own
-            // natural (scale-only) bounding box, a few pixels further out so it doesn't overlap it.
+        boolean moveTextMode = moveContentEnabled();
+        boolean moveBarsMode = moveBarsEnabled();
+        boolean moveIconsMode = MarieModuleSettings.isMoveIconsEnabled(UiStatePersistence.get(), PANEL_ID);
+        if (moveTextMode || moveBarsMode || moveIconsMode) {
+            // Dashed rather than a solid glow outline — a live drag affordance shown only while a
+            // move toggle is active, not a persistent separately-hit-tested box. Text mode wraps the
+            // name column, icons mode the icon column, bars mode the bar+percentage part, each a few
+            // pixels further out so it doesn't overlap them (the vertical layout has no such split, so
+            // it wraps the whole content).
             int pad = Math.round(ContentScaleController.resolvePadding(HudDrawHelpers.PANEL_PAD * persistedPaddingScale()));
-            int contentX = bounds.x() + pad + matchedLayout.leftMargin() + matchedLayout.contentOffsetX();
-            int contentY = bounds.y() + pad + matchedLayout.contentOffsetY();
             int contentW = Math.max(0, matchedLayout.naturalPanelW() - 2 * pad);
             int contentH = Math.max(0, matchedLayout.naturalPanelH() - 2 * pad);
-            context.drawDashedBorder(contentX - 3, contentY - 3, contentW + 6, contentH + 6, CONTENT_ACCENT_COLOR);
+            boolean vertical = matchedLayout.verticalLayout();
+            int iconW = matchedLayout.iconSize();
+            int labelsW = matchedLayout.maxLabelSw();
+            int contentX = bounds.x() + pad + matchedLayout.leftMargin();
+            int contentY = bounds.y() + pad;
+            if (moveTextMode) {
+                int start = vertical ? 0 : iconW + HudDrawHelpers.ICON_LABEL_GAP;
+                context.drawDashedBorder(contentX + start + matchedLayout.contentOffsetX() - 3, contentY + matchedLayout.contentOffsetY() - 3,
+                        (vertical ? contentW : labelsW) + 6, contentH + 6, CONTENT_ACCENT_COLOR);
+            } else if (moveIconsMode) {
+                context.drawDashedBorder(contentX + MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID) - 3, contentY + MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID) - 3,
+                        (vertical ? contentW : iconW) + 6, contentH + 6, CONTENT_ACCENT_COLOR);
+            } else {
+                int barsStart = vertical ? 0 : iconW + HudDrawHelpers.ICON_LABEL_GAP + labelsW + HudDrawHelpers.LABEL_BAR_GAP;
+                context.drawDashedBorder(contentX + barsStart + MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID) - 3, contentY + MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID) - 3,
+                        Math.max(0, contentW - barsStart) + 6, contentH + 6, CONTENT_ACCENT_COLOR);
+            }
         } else {
             Bounds handle = DraggableResizable.handleBounds(bounds);
             context.drawResizeHandle(handle.x(), handle.y(), panelDrag.isHandleHovered(mouse[0], mouse[1], bounds), panelDrag.isHandleActive());
