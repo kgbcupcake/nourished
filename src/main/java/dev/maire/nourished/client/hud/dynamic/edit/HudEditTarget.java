@@ -96,7 +96,7 @@ public final class HudEditTarget implements MarieComponent {
      */
     private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(
             List.of(new ScaleConfigEntry(PANEL_ID, Component.translatable("nourished.hud.nutrientPanel.label"))
-                    .withContent(HudOptionsPanel.build(PANEL_ID))),
+                    .withContent(HudOptionsPanel.build(PANEL_ID, this::resetContentOffset))),
             UiStatePersistence.get(), Anchor.TOP_RIGHT);
     private boolean scaleConfigVisible;
 
@@ -117,6 +117,13 @@ public final class HudEditTarget implements MarieComponent {
             contentOffsetX = state.x();
             contentOffsetY = state.y();
         });
+    }
+
+    /** "Reset Positions" callback: puts this panel's text offset back to zero and saves it (the icon and bar offsets are reset by MariesLib). */
+    private void resetContentOffset() {
+        contentOffsetX = 0;
+        contentOffsetY = 0;
+        persistContentOffset();
     }
 
     /** Persists {@link #contentOffsetX}/{@link #contentOffsetY} — {@code width}/{@code height}/the manual-size and scale fields are unused for this key. */
@@ -346,6 +353,9 @@ public final class HudEditTarget implements MarieComponent {
                         MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID));
                 case BARS -> moveDrag.start(mode, mouseX, mouseY,
                         MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID));
+                case ALL -> moveDrag.startAll(mouseX, mouseY, contentOffsetX, contentOffsetY,
+                        MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID),
+                        MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID));
             }
             return true;
         }
@@ -375,6 +385,15 @@ public final class HudEditTarget implements MarieComponent {
                     }
                     case ICONS -> MarieModuleSettings.setIconOffset(UiStatePersistence.get(), PANEL_ID, x, y);
                     case BARS -> MarieModuleSettings.setBarOffset(UiStatePersistence.get(), PANEL_ID, x, y);
+                    case ALL -> {
+                        // One drag shifts all three offsets by the same amount from where each started.
+                        int dx = moveDrag.offsetX(mouseX);
+                        int dy = moveDrag.offsetY(mouseY);
+                        contentOffsetX = clampContentOffsetX(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.TEXT) + dx, bounds, persistedLeftMargin());
+                        contentOffsetY = clampContentOffsetY(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.TEXT) + dy, bounds);
+                        MarieModuleSettings.setIconOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.ICONS) + dx, bounds, persistedLeftMargin()), clampContentOffsetY(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.ICONS) + dy, bounds));
+                        MarieModuleSettings.setBarOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.BARS) + dx, bounds, persistedLeftMargin()), clampContentOffsetY(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.BARS) + dy, bounds));
+                    }
                 }
             }
             return true;
@@ -398,6 +417,11 @@ public final class HudEditTarget implements MarieComponent {
                 case TEXT -> persistContentOffset();
                 case ICONS -> MarieModuleSettings.commitIconOffset(UiStatePersistence.get(), PANEL_ID);
                 case BARS -> MarieModuleSettings.commitBarOffset(UiStatePersistence.get(), PANEL_ID);
+                case ALL -> {
+                    persistContentOffset();
+                    MarieModuleSettings.commitIconOffset(UiStatePersistence.get(), PANEL_ID);
+                    MarieModuleSettings.commitBarOffset(UiStatePersistence.get(), PANEL_ID);
+                }
             }
             return true;
         }
@@ -444,7 +468,8 @@ public final class HudEditTarget implements MarieComponent {
         boolean moveTextMode = moveContentEnabled();
         boolean moveBarsMode = moveBarsEnabled();
         boolean moveIconsMode = MarieModuleSettings.isMoveIconsEnabled(UiStatePersistence.get(), PANEL_ID);
-        if (moveTextMode || moveBarsMode || moveIconsMode) {
+        boolean moveAllMode = MarieModuleSettings.isMoveAllEnabled(UiStatePersistence.get(), PANEL_ID);
+        if (moveTextMode || moveBarsMode || moveIconsMode || moveAllMode) {
             // Dashed rather than a solid glow outline — a live drag affordance shown only while a
             // move toggle is active, not a persistent separately-hit-tested box. Text mode wraps the
             // name column, icons mode the icon column, bars mode the bar+percentage part, each a few
@@ -458,7 +483,10 @@ public final class HudEditTarget implements MarieComponent {
             int labelsW = matchedLayout.maxLabelSw();
             int contentX = bounds.x() + pad + matchedLayout.leftMargin();
             int contentY = bounds.y() + pad;
-            if (moveTextMode) {
+            if (moveAllMode) {
+                context.drawDashedBorder(contentX + matchedLayout.contentOffsetX() - 3, contentY + matchedLayout.contentOffsetY() - 3,
+                        contentW + 6, contentH + 6, CONTENT_ACCENT_COLOR);
+            } else if (moveTextMode) {
                 int start = vertical ? 0 : iconW + HudDrawHelpers.ICON_LABEL_GAP;
                 context.drawDashedBorder(contentX + start + matchedLayout.contentOffsetX() - 3, contentY + matchedLayout.contentOffsetY() - 3,
                         (vertical ? contentW : labelsW) + 6, contentH + 6, CONTENT_ACCENT_COLOR);

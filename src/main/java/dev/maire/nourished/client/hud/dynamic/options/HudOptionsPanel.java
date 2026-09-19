@@ -19,8 +19,11 @@ public final class HudOptionsPanel {
 
     private HudOptionsPanel() {}
 
-    /** @param panelId the HUD panel's persisted UI-state key (the one its scale/padding/position live under) */
-    public static MarieComponent build(String panelId) {
+    /**
+     * @param panelId         the HUD panel's persisted UI-state key (the one its scale/padding/position live under)
+     * @param resetTextOffset puts the panel's own text offset back to zero for "Reset Positions"
+     */
+    public static MarieComponent build(String panelId, Runnable resetTextOffset) {
         Runnable save = NourishedClientConfig::saveNow;
         var ui = UiStatePersistence.get();
         return MarieToolbox.panel(text("nourished.hud.nutrientPanel.label"))
@@ -38,6 +41,7 @@ public final class HudOptionsPanel {
                         // "Show above" only re-reveals bars the hide rule hid, so it does nothing while hide is off (1.0).
                         .enabledWhen(() -> cc().hudHideAboveThreshold() < 1.0d)
                     .moveToggles(ui, panelId)
+                    .resetPositions(ui, panelId, resetTextOffset)
                 .tab(text("config.marieslib.moduleoptions.tab.appearance"))
                     .textAndIconSizes(ui, panelId)
                     .barSize(ui, panelId)
