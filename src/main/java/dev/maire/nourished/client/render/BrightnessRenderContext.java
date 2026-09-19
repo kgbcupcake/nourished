@@ -24,7 +24,7 @@ public final class BrightnessRenderContext implements RenderContext {
     }
 
     public static RenderContext wrap(RenderContext delegate, double brightness) {
-        return brightness >= 1.0d ? delegate : new BrightnessRenderContext(delegate, brightness);
+        return brightness == 1.0d ? delegate : new BrightnessRenderContext(delegate, brightness);
     }
 
     @Override

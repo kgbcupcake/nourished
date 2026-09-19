@@ -270,14 +270,14 @@ public final class HudDrawHelpers {
         return COL_HANDLE_ACTIVE;
     }
 
-    /** {@code argb} with its RGB scaled by {@code brightness} (alpha untouched); 1.0 returns it unchanged. */
+    /** {@code argb} with its RGB scaled by {@code brightness} (alpha untouched, each channel capped at 255, so values above 1.0 wash colors toward white); 1.0 returns it unchanged. */
     public static int scaleBrightness(int argb, double brightness) {
-        if (brightness >= 1.0d) {
+        if (brightness == 1.0d) {
             return argb;
         }
-        int r = (int) Math.round(((argb >> 16) & 0xFF) * brightness);
-        int g = (int) Math.round(((argb >> 8) & 0xFF) * brightness);
-        int b = (int) Math.round((argb & 0xFF) * brightness);
+        int r = Math.min(255, (int) Math.round(((argb >> 16) & 0xFF) * brightness));
+        int g = Math.min(255, (int) Math.round(((argb >> 8) & 0xFF) * brightness));
+        int b = Math.min(255, (int) Math.round((argb & 0xFF) * brightness));
         return (argb & 0xFF000000) | (r << 16) | (g << 8) | b;
     }
 

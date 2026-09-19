@@ -127,25 +127,25 @@ public final class NourishedClientConfig {
                 "hudContentBrightness",
                 ConfigDefaultsLoader.getDouble(defaults, "hudContentBrightness", 1.0d),
                 0.2d,
-                1.0d
+                2.0d
         );
         calorieHudContentBrightness = builder.defineInRange(
                 "calorieHudContentBrightness",
                 ConfigDefaultsLoader.getDouble(defaults, "calorieHudContentBrightness", 1.0d),
                 0.2d,
-                1.0d
+                2.0d
         );
         activityLogHudContentBrightness = builder.defineInRange(
                 "activityLogHudContentBrightness",
                 ConfigDefaultsLoader.getDouble(defaults, "activityLogHudContentBrightness", 1.0d),
                 0.2d,
-                1.0d
+                2.0d
         );
         dietContentBrightness = builder.defineInRange(
                 "dietContentBrightness",
                 ConfigDefaultsLoader.getDouble(defaults, "dietContentBrightness", 1.0d),
                 0.2d,
-                1.0d
+                2.0d
         );
         hudVerticalLayout = builder.define(
                 "hudVerticalLayout",
@@ -499,13 +499,13 @@ public final class NourishedClientConfig {
         hudBackgroundOpacity.set(value);
     }
 
-    /** Brightness multiplier (0.2-1.0, 1.0 = unchanged) applied to the Nutrient HUD's icons and text. */
+    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) applied to the Nutrient HUD's icons and text. */
     public double hudContentBrightness() {
         return hudContentBrightness.get();
     }
 
     public void setHudContentBrightness(double value) {
-        hudContentBrightness.set(Math.max(0.2d, Math.min(1.0d, value)));
+        hudContentBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
     }
 
     /** Same as {@link #hudContentBrightness()}, for the Calorie History HUD. */
@@ -514,7 +514,7 @@ public final class NourishedClientConfig {
     }
 
     public void setCalorieHudContentBrightness(double value) {
-        calorieHudContentBrightness.set(Math.max(0.2d, Math.min(1.0d, value)));
+        calorieHudContentBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
     }
 
     /** Same as {@link #hudContentBrightness()}, for the Activity Log HUD. */
@@ -523,7 +523,7 @@ public final class NourishedClientConfig {
     }
 
     public void setActivityLogHudContentBrightness(double value) {
-        activityLogHudContentBrightness.set(Math.max(0.2d, Math.min(1.0d, value)));
+        activityLogHudContentBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
     }
 
     /** Same as {@link #hudContentBrightness()}, for every icon and text on the Diet screen's dynamic panel. */
@@ -532,7 +532,7 @@ public final class NourishedClientConfig {
     }
 
     public void setDietContentBrightness(double value) {
-        dietContentBrightness.set(Math.max(0.2d, Math.min(1.0d, value)));
+        dietContentBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
     }
 
     public boolean hudVerticalLayout() {

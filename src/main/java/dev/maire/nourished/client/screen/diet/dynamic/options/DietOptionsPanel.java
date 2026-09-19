@@ -24,7 +24,7 @@ public final class DietOptionsPanel {
                     .slider(text("nourished.options.diet.background_opacity"),
                             () -> cc().dietBackgroundOpacity(), v -> cc().setDietBackgroundOpacity(v), 0.0d, 1.0d, PERCENT_STEP, save)
                     .slider(text("nourished.options.hud.content_brightness"),
-                            () -> cc().dietContentBrightness(), v -> cc().setDietContentBrightness(v), 0.2d, 1.0d, PERCENT_STEP, save)
+                            () -> cc().dietContentBrightness(), v -> cc().setDietContentBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
                     // Room left here for the in-game color picker (not built yet).
                 .tab(text("nourished.options.tab.visibility"))
                     .toggle(text("nourished.options.diet.show_recent_meals"),

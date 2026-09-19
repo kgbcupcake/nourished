@@ -39,7 +39,7 @@ public final class HudOptionsPanel {
                     .slider(text("nourished.options.hud.background_opacity"),
                             () -> cc().hudBackgroundOpacity(), v -> cc().setHudBackgroundOpacity(v), 0.0d, 1.0d, PERCENT_STEP, save)
                     .slider(text("nourished.options.hud.content_brightness"),
-                            () -> cc().hudContentBrightness(), v -> cc().setHudContentBrightness(v), 0.2d, 1.0d, PERCENT_STEP, save)
+                            () -> cc().hudContentBrightness(), v -> cc().setHudContentBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
                     // Room left here for the in-game color picker (not built yet).
                 .build();
     }
