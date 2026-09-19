@@ -120,6 +120,8 @@ public final class HudEditTarget implements MarieComponent {
     /** Persists {@link #contentOffsetX}/{@link #contentOffsetY} — {@code width}/{@code height}/the manual-size and scale fields are unused for this key. */
     private void persistContentOffset() {
         UiStatePersistence.get().save(CONTENT_OFFSET_ID, new ComponentState(contentOffsetX, contentOffsetY, 0, 0, false, false, false, 0));
+        cachedContentOffsetX = contentOffsetX;
+        cachedContentOffsetY = contentOffsetY;
     }
 
     /** The "Move Text and Icons" toggle's live state, owned by {@link #scaleConfigPanel} (its own editor window, under Padding) rather than a button on this panel itself. */
@@ -220,13 +222,30 @@ public final class HudEditTarget implements MarieComponent {
 
     /** Committed "Move Text and Icons" offset — see {@link #contentOffsetX}. */
     private static int persistedContentOffsetX() {
-        return UiStatePersistence.get().load(CONTENT_OFFSET_ID).map(ComponentState::x).orElse(0);
+        ensureContentOffsetCacheLoaded();
+        return cachedContentOffsetX;
     }
 
     /** Committed "Move Text and Icons" offset — see {@link #contentOffsetY}. */
     private static int persistedContentOffsetY() {
-        return UiStatePersistence.get().load(CONTENT_OFFSET_ID).map(ComponentState::y).orElse(0);
+        ensureContentOffsetCacheLoaded();
+        return cachedContentOffsetY;
     }
+
+    private static void ensureContentOffsetCacheLoaded() {
+        if (contentOffsetCacheLoaded) {
+            return;
+        }
+        contentOffsetCacheLoaded = true;
+        UiStatePersistence.get().load(CONTENT_OFFSET_ID).ifPresent(state -> {
+            cachedContentOffsetX = state.x();
+            cachedContentOffsetY = state.y();
+        });
+    }
+
+    private static int cachedContentOffsetX;
+    private static int cachedContentOffsetY;
+    private static boolean contentOffsetCacheLoaded;
 
     /**
      * How much of the content's own origin (its icon corner) must stay inside the panel on the far
@@ -268,7 +287,7 @@ public final class HudEditTarget implements MarieComponent {
     }
 
     private void commit(Bounds bounds) {
-        List<String> keys = currentVisibleKeys();
+        List<String> keys = currentVisibleKeysOrFallback();
         if (keys.isEmpty()) {
             return;
         }
@@ -307,7 +326,7 @@ public final class HudEditTarget implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
-        List<String> keys = currentVisibleKeys();
+        List<String> keys = currentVisibleKeysOrFallback();
         if (keys.isEmpty()) {
             return false;
         }
@@ -332,7 +351,7 @@ public final class HudEditTarget implements MarieComponent {
             return true;
         }
         if (draggingContent) {
-            List<String> keys = currentVisibleKeys();
+            List<String> keys = currentVisibleKeysOrFallback();
             if (!keys.isEmpty()) {
                 Bounds bounds = resolvedBounds(mc, keys);
                 contentOffsetX = clampContentOffsetX((int) mouseX - contentGrabOffsetX, bounds, persistedLeftMargin());
@@ -364,7 +383,7 @@ public final class HudEditTarget implements MarieComponent {
 
     @Override
     public void render(RenderContext context, Bounds ignoredBounds) {
-        List<String> keys = currentVisibleKeys();
+        List<String> keys = currentVisibleKeysOrFallback();
         if (keys.isEmpty()) {
             return;
         }
