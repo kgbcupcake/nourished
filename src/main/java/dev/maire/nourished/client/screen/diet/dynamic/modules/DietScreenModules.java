@@ -38,8 +38,7 @@ public final class DietScreenModules {
      * after its own content before the next module's stacked start-Y — consolidates what used to be
      * five independently-hardcoded values (5, 5, 4, 8, 8 across Calories/Balance/EatMore/RecentMeals/
      * ActiveEffects) into one constant, so no module sits visually closer to its neighbor than
-     * another regardless of size. Public so {@link dev.maire.nourished.client.screen.diet.dynamic.layout.DietRightColumnComponent}
-     * (a different package) can anchor the intake legend by the same gap after the last row.
+     * another regardless of size.
      */
     public static final int MODULE_GAP_LOCAL = 8;
 

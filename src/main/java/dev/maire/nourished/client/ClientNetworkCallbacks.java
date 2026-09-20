@@ -1,5 +1,7 @@
 package dev.maire.nourished.client;
 
+import dev.marie.framework.color.MarieColors;
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.client.config.state.MarieClientState;
@@ -135,7 +137,9 @@ public final class ClientNetworkCallbacks {
     private static final Object FOOD_EATEN_MERGE_KEY = "nourished.food_eaten";
     private static final int FOOD_EATEN_DURATION_TICKS = 60;
     private static final int FOOD_EATEN_MERGE_WINDOW_TICKS = 60;
-    private static final int COL_WHITE = 0xFFFFFFFF;
+    private static int itemNameColor() {
+        return MarieColors.resolveColor(NourishedColors.TEXT);
+    }
 
     private static NotificationRequest buildFoodEatenNotification(
             ModNetworking.SyncDietDeltaPayload.FoodEatenDelta foodEatenDelta
@@ -148,8 +152,8 @@ public final class ClientNetworkCallbacks {
                 .getString();
         String calorieText = String.format("%+d Calories", Math.round(foodEatenDelta.calorieDelta()));
         lines.add(List.of(
-                new TextSegment(itemName + " ", COL_WHITE),
-                new TextSegment(calorieText, HudDrawHelpers.CALORIE_COLOR)));
+                new TextSegment(itemName + " ", itemNameColor()),
+                new TextSegment(calorieText, HudDrawHelpers.calorieColor())));
 
         return NotificationRequest.builder(lines, FOOD_EATEN_DURATION_TICKS)
                 .mergeKey(FOOD_EATEN_MERGE_KEY)

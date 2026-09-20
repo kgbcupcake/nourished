@@ -1,5 +1,7 @@
 package dev.maire.nourished.client.screen.diet.dynamic.layout;
 
+import dev.marie.framework.color.MarieColors;
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
@@ -36,11 +38,21 @@ import java.util.Map;
  */
 public final class DietPanelContainer implements Container {
 
-    private static final int COL_BG_RGB = 0x00141414;
-    private static final int COL_BORDER = 0xFF3A3A3A;
-    private static final int COL_DIVIDER = 0xFF2E2E2E;
-    private static final int COL_TITLE = 0xFF9BD36A;
-    private static final int COL_GRAY = 0xFF666666;
+    private static int colBgRgb() {
+        return NourishedColors.rgb(NourishedColors.DIET_PANEL);
+    }
+    private static int borderColor() {
+        return MarieColors.resolveColor(NourishedColors.BORDER);
+    }
+    private static int dividerColor() {
+        return MarieColors.resolveColor(NourishedColors.DIVIDER);
+    }
+    private static int colTitle() {
+        return MarieColors.resolveColor(NourishedColors.DIET_TITLE);
+    }
+    private static int mutedTextColor() {
+        return MarieColors.resolveColor(NourishedColors.TEXT_MUTED);
+    }
 
     private final DietLayout.Layout layout;
     private final TrackingData data;
@@ -136,15 +148,15 @@ public final class DietPanelContainer implements Container {
     public void render(RenderContext context, Bounds bounds) {
         double opacity = NourishedClientConfig.get().dietBackgroundOpacity();
         int alpha = Math.max(0, Math.min(255, (int) Math.round(opacity * 255.0d)));
-        int fill = (alpha << 24) | (COL_BG_RGB & 0x00FFFFFF);
-        context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, fill, COL_BORDER);
+        int fill = (alpha << 24) | (colBgRgb() & 0x00FFFFFF);
+        context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, fill, borderColor());
 
         float scale = (float) layout.scale();
         Font font = Minecraft.getInstance().font;
         String title = "☘ Diet ☘";
         int titleW = (int) Math.ceil(font.width(title) * scale);
         int titleX = bounds.x() + (bounds.width() - titleW) / 2;
-        context.drawText(title, titleX, DietLayout.toScreenY(layout, 9), COL_TITLE, scale);
+        context.drawText(title, titleX, DietLayout.toScreenY(layout, 9), colTitle(), scale);
 
         // Panel-level minimize: below this threshold, the panel shows title-bar only — divider, both
         // columns (and everything under them, including every sub-box's own collapse behavior), and
@@ -172,14 +184,14 @@ public final class DietPanelContainer implements Container {
         int dividerX = DietLayout.columnGeometry(layout, bounds).dividerX();
         int dividerTop = DietLayout.toScreenY(layout, 26);
         int dividerBottom = bounds.y() + bounds.height() - DietLayout.toScreenDim(layout, DietLayout.PANEL_BOTTOM_MARGIN_LOCAL);
-        context.fillRect(dividerX, dividerTop, DietLayout.toScreenDim(layout, 1), Math.max(0, dividerBottom - dividerTop), COL_DIVIDER);
+        context.fillRect(dividerX, dividerTop, DietLayout.toScreenDim(layout, 1), Math.max(0, dividerBottom - dividerTop), dividerColor());
 
         if (data == null) {
             String noPlayer = Component.translatable("nourished.screen.diet.no_player").getString();
             int textW = (int) Math.ceil(font.width(noPlayer) * scale);
             int textX = bounds.x() + (bounds.width() - textW) / 2;
             int textY = bounds.y() + bounds.height() / 2;
-            context.drawText(noPlayer, textX, textY, COL_GRAY, scale);
+            context.drawText(noPlayer, textX, textY, mutedTextColor(), scale);
             return;
         }
 

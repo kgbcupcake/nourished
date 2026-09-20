@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.hud.dynamic.modules;
 
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.marie.framework.client.config.state.MarieClientCache;
@@ -136,7 +137,7 @@ final class NutrientBarComponent implements MarieComponent {
         float flash = MarieClientCache.flashAlpha(nutrientKey);
         if (flash > 0f) {
             int a = (int) (flash * 80);
-            int flashColor = (a << 24) | 0xFFFFFF;
+            int flashColor = (a << 24) | NourishedColors.nutrientRgb(nutrientKey);
             context.fillRect(barX, barY, barW, barH, flashColor);
         }
     }

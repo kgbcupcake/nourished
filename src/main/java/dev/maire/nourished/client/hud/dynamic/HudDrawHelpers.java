@@ -1,12 +1,12 @@
 package dev.maire.nourished.client.hud.dynamic;
 
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.maire.nourished.config.NourishedClientConfig;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.color.MarieColors;
-import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
@@ -33,31 +33,22 @@ public final class HudDrawHelpers {
     public static final int MARGIN = 6;
     static final int RESIZE_HANDLE_SIZE = 8;
 
-    private static final int PANEL_RGB = 0x00101010;
-    private static final int COL_BAR_BG = 0x99111111;
-    private static final int COL_LABEL = 0xFFAAAAAA;
-    private static final int COL_PCT_GOOD = 0xFF55FF55;
-    private static final int COL_PCT_LOW = 0xFFFFAA00;
-    private static final int COL_PCT_CRIT = 0xFFFF5555;
-    private static final int COL_EDIT_OVERLAY = 0x99000000;
-    private static final int COL_HOVER_BORDER = 0xFFFFFFAA;
-    private static final int COL_EDIT_BANNER = 0xFFFFFFFF;
-    private static final int COL_EDIT_BANNER_BG = 0xCC000000;
-    private static final int COL_HANDLE_BG = 0xCC2A2A2A;
-    private static final int COL_HANDLE_HOVER = 0xFFEFEF7A;
-    private static final int COL_HANDLE_ACTIVE = 0xFF55FF55;
-    private static final int COL_DASHED_PREVIEW = 0xFF6CFFD0;
-    private static final int COL_RED = 0xFFFF5555;
-    private static final int COL_GOLD = 0xFFFFD65C;
+    private static int panelRgb() {
+        return NourishedColors.rgb(NourishedColors.HUD_PANEL);
+    }
+    /** The bar track is translucent: only its RGB is a registered color, the alpha is fixed here. */
+    private static final int BAR_BACKGROUND_ALPHA = 0x99;
 
-    /** Calorie-accent color used wherever a calorie value is drawn (matches {@code COL_PCT_GOOD}/{@code CaloriesComponent}'s calorie text). */
-    public static final int CALORIE_COLOR = 0xFF55FF55;
+    /** Calorie-accent color used wherever a calorie value is drawn (the Diet calories box draws the same color). */
+    public static int calorieColor() {
+        return MarieColors.resolveColor(NourishedColors.CALORIE_VALUE);
+    }
 
     private HudDrawHelpers() {}
 
     public static int panelColor(double opacity) {
         int alpha = Mth.clamp((int) Math.round(opacity * 255.0d), 0, 255);
-        return (alpha << 24) | PANEL_RGB;
+        return (alpha << 24) | panelRgb();
     }
 
     /** Composes a panel background from a resolved RGB color and a separate opacity value. */
@@ -79,8 +70,7 @@ public final class HudDrawHelpers {
 
     /** Resolves a nutrient's effective color (user/datapack override, or its registered default). */
     public static int nutrientColorArgb(String key) {
-        return MarieColors.resolveColor(ColorKey.of(
-                ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "nutrient." + key)));
+        return NourishedColors.nutrient(key);
     }
 
     public static void drawRoundedBar(GuiGraphics g, int x, int y, int w, int h, float pct, int bgColor, int fillColor) {
@@ -152,27 +142,6 @@ public final class HudDrawHelpers {
         return mx >= hx && my >= hy && mx < hx + RESIZE_HANDLE_SIZE && my < hy + RESIZE_HANDLE_SIZE;
     }
 
-    public static void drawResizeHandle(GuiGraphics g, Minecraft mc, int panelX, int panelY, int panelW, int panelH,
-                                 boolean hovered, boolean active, int mx, int my) {
-        int hx = panelX + panelW - RESIZE_HANDLE_SIZE;
-        int hy = panelY + panelH - RESIZE_HANDLE_SIZE;
-        int handleColor = active ? COL_HANDLE_ACTIVE : (hovered ? COL_HANDLE_HOVER : COL_HANDLE_BG);
-        g.fill(hx, hy, hx + RESIZE_HANDLE_SIZE, hy + RESIZE_HANDLE_SIZE, handleColor);
-        g.drawString(mc.font, "◢", hx + 1, hy, 0xFF101010, false);
-        if (hovered && !active) {
-            g.renderTooltip(mc.font, Component.literal("Drag to resize"), mx, my);
-        }
-    }
-
-    static void drawEditBanner(GuiGraphics g, Minecraft mc) {
-        String msg = "HUD Edit Mode — drag elements, press H to save";
-        int sw = mc.getWindow().getGuiScaledWidth();
-        int textW = mc.font.width(msg);
-        int bx = (sw - textW) / 2 - 4;
-        g.fill(bx, 4, bx + textW + 8, 17, COL_EDIT_BANNER_BG);
-        g.drawString(mc.font, msg, bx + 4, 8, COL_EDIT_BANNER, false);
-    }
-
     public static void renderIcon(GuiGraphics g, String key, int x, int y, int iconSize) {
         // NutrientRegistry.getIconItem resolves/validates the icon id string once per distinct id and
         // caches the Item forever, instead of re-running ResourceLocation.tryParse and a
@@ -220,69 +189,25 @@ public final class HudDrawHelpers {
         }
     }
 
+    /**
+     * A nutrient's bar fill: always the nutrient's own registered color, whatever its value — there is no
+     * per-threshold tinting. The value is kept in the signature for the callers that still pass it.
+     */
     public static int barFillColor(String key, float v) {
-        NourishedConfig cfg = NourishedConfig.get();
-        boolean beneficial = NutrientRegistry.isBeneficial(key);
-        if (beneficial) {
-            if (v < cfg.criticalThresholdFor(key)) {
-                return COL_RED;
-            }
-            if (v < cfg.lowThreshold()) {
-                return COL_GOLD;
-            }
-            return nutrientColorArgb(key);
-        }
-        if (v > cfg.excessThreshold()) {
-            return COL_RED;
-        }
-        if (v > cfg.lowThreshold()) {
-            return COL_GOLD;
-        }
         return nutrientColorArgb(key);
     }
 
+    /** A nutrient's percent text: its own color, same as the bar fill. */
     public static int pctColor(String key, float v) {
-        NourishedConfig cfg = NourishedConfig.get();
-        boolean beneficial = NutrientRegistry.isBeneficial(key);
-        if (beneficial) {
-            if (v < cfg.criticalThresholdFor(key)) {
-                return COL_PCT_CRIT;
-            }
-            if (v < cfg.lowThreshold()) {
-                return COL_PCT_LOW;
-            }
-            return COL_PCT_GOOD;
-        }
-        if (v > cfg.excessThreshold()) {
-            return COL_PCT_CRIT;
-        }
-        if (v > cfg.lowThreshold()) {
-            return COL_PCT_LOW;
-        }
-        return COL_PCT_GOOD;
-    }
-
-    public static int editOverlayColor() {
-        return COL_EDIT_OVERLAY;
-    }
-
-    public static int hoverBorderColor() {
-        return COL_HOVER_BORDER;
-    }
-
-    public static int dashedPreviewColor() {
-        return COL_DASHED_PREVIEW;
-    }
-
-    public static int handleActiveColor() {
-        return COL_HANDLE_ACTIVE;
+        return nutrientColorArgb(key);
     }
 
     public static int labelColor() {
-        return COL_LABEL;
+        return MarieColors.resolveColor(NourishedColors.NUTRIENT_HUD_TEXT);
     }
 
+    /** The empty track of every bar (nutrient, calorie, activity): the bar.track color at the fixed track alpha. */
     public static int barBackgroundColor() {
-        return COL_BAR_BG;
+        return (BAR_BACKGROUND_ALPHA << 24) | NourishedColors.rgb(NourishedColors.BAR_TRACK);
     }
 }

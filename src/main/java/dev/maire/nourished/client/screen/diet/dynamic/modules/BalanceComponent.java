@@ -1,5 +1,8 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.marie.framework.color.MarieColors;
+import dev.maire.nourished.client.colors.NourishedColors;
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Bounds;
@@ -27,8 +30,16 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
     private static final int BODY_LOCAL_HEIGHT = 20;
     private static final int BOX_LOCAL_HEIGHT = HEADER_LOCAL_HEIGHT + BODY_LOCAL_HEIGHT;
 
-    private static final int COL_ORANGE = 0xFFFFAA00;
-    private static final int COL_RED = 0xFFFF5555;
+    private static int balanceBalancedColor() {
+        return MarieColors.resolveColor(NourishedColors.BALANCE_BALANCED);
+    }
+
+    private static int balanceLowColor() {
+        return MarieColors.resolveColor(NourishedColors.BALANCE_LOW);
+    }
+    private static int balanceExcessColor() {
+        return MarieColors.resolveColor(NourishedColors.BALANCE_EXCESS);
+    }
 
     /** Reference local-unit padding used to derive the user's padding-adjustment range — see {@link ContentScaleController#resolvePadding}. */
     private static final double BASE_PADDING_LOCAL = 2.0d;
@@ -97,7 +108,9 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
     }
 
     @Override
-    public void render(RenderContext context, Bounds bounds) {
+    public void render(RenderContext baseContext, Bounds bounds) {
+        // The module's own text/icon offsets, icon size and brightness (see MarieModuleSettings) apply to everything it draws.
+        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID);
         if (!visible) {
             return;
         }
@@ -110,7 +123,10 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         // tightens, instead of the header staying full-size right up until it's clipped off.
         double widthScale = bounds.width() / (double) SUMMARY_BOX_LOCAL_WIDTH;
         double heightScale = bounds.height() / (double) BOX_LOCAL_HEIGHT;
-        this.contentScale = Math.min(widthScale, heightScale);
+                // Content geometry is fixed, like the Activity Log's: it follows the panel's own scale, never this
+        // box's size, so resizing the box only changes the box (extra room stays empty, less room is
+        // clipped by the box's own clip). Text/icon sizes come from their sliders alone.
+        this.contentScale = layout.scale();
         // contentScale (fitScale) still drives sx/sy/sd/outer-box sizing unchanged; text/icon render
         // scale is the user's persisted per-box adjustment alone now, sanity-clamped only — no longer
         // capped by contentScale. Real containment against the box's own edges comes from this box's
@@ -128,18 +144,12 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             support.drawItem(context, "minecraft:comparator", 2, 5, scale);
-            support.drawText(context, Component.translatable("nourished.screen.diet.balance_label").getString(), 24, 6, SummaryBoxRenderSupport.COL_WHITE, scale);
 
             String balKey = getBalanceKey(data);
             int balColor = balanceColor(balKey);
             String balText = Component.translatable("nourished.screen.diet.balance_state." + balKey).getString();
 
-            Font font = mc.font;
             float balanceScale = 1.2f * (10f / 9f);
-            float balTextW = font.width(balText) * balanceScale;
-            int bgAlpha = 51;
-            int bgColor = (bgAlpha << 24) | (balColor & 0x00FFFFFF);
-            context.fillRect(support.sx(22), support.sy(startLocalY + 16), support.sd((int) balTextW + 5), support.sd(11), bgColor);
             support.drawText(context, balText, 24, 17, balColor, scale * balanceScale);
 
             int barLocalWidth = SUMMARY_BOX_LOCAL_WIDTH - 4;
@@ -147,9 +157,16 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
             int filledPips = Math.round(balScore * 5);
             int pipTotalW = 5 * 10 + 4 * 3;
             int pipStartX = (barLocalWidth - pipTotalW) / 2 + 2;
+            // The pips are this box's "bar": Bar size scales them (from the row's start) and Move Bars offsets them.
+            var store = DietScreenPersistence.get();
+            float barScale = ContentScaleController.resolveContentScale(MarieModuleSettings.barScale(store, ID));
+            int barDx = MarieModuleSettings.barOffsetX(store, ID);
+            int barDy = MarieModuleSettings.barOffsetY(store, ID);
+            int pipW = Math.max(1, Math.round(support.sd(10) * barScale));
+            int pipH = Math.max(1, Math.round(support.sd(6) * barScale));
             for (int i = 0; i < 5; i++) {
-                int px = pipStartX + i * 13;
-                context.fillRect(support.sx(px), support.sy(startLocalY + 40), support.sd(10), support.sd(6), i < filledPips ? balColor : SummaryBoxRenderSupport.COL_SEG_EMPTY);
+                int px = support.sx(pipStartX) + Math.round(i * support.sd(13) * barScale) + barDx;
+                context.fillRect(px, support.sy(startLocalY + 40) + barDy, pipW, pipH, i < filledPips ? balColor : SummaryBoxRenderSupport.barTrackColor());
             }
         } finally {
             context.popClip();
@@ -169,10 +186,10 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
 
     private static int balanceColor(String key) {
         return switch (key) {
-            case "balanced" -> SummaryBoxRenderSupport.COL_GREEN;
-            case "low" -> COL_ORANGE;
-            case "excess" -> COL_RED;
-            default -> SummaryBoxRenderSupport.COL_WHITE;
+            case "balanced" -> balanceBalancedColor();
+            case "low" -> balanceLowColor();
+            case "excess" -> balanceExcessColor();
+            default -> SummaryBoxRenderSupport.textColor();
         };
     }
 }

@@ -1,5 +1,8 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.marie.framework.color.MarieColors;
+import dev.maire.nourished.client.colors.NourishedColors;
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
@@ -40,10 +43,18 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
 
     public static final String ID = "nourished.diet.recentmeals";
 
-    private static final int COL_ROW_BG_RGB = 0x001E1E1E;
-    private static final int COL_BORDER_LT = 0xFF555555;
-    private static final int COL_HEADER = 0xFF888888;
-    private static final int COL_WHITE = 0xFFFFFFFF;
+    private static int surfaceRgb() {
+        return NourishedColors.surfaceRgb();
+    }
+    private static int borderColor() {
+        return MarieColors.resolveColor(NourishedColors.BORDER);
+    }
+    private static int headerTextColor() {
+        return MarieColors.resolveColor(NourishedColors.TEXT_HEADER);
+    }
+    private static int textColor() {
+        return MarieColors.resolveColor(NourishedColors.TEXT);
+    }
 
     /**
      * Hard character-count ceiling for a meal name, applied on top of the pixel-width truncation
@@ -160,7 +171,9 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
     }
 
     @Override
-    public void render(RenderContext context, Bounds bounds) {
+    public void render(RenderContext baseContext, Bounds bounds) {
+        // The module's own text/icon offsets, icon size and brightness (see MarieModuleSettings) apply to everything it draws.
+        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID);
         this.anchorBounds = bounds;
         if (!visible) {
             return;
@@ -179,7 +192,10 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         // room tightens, instead of the header staying full-size right up until it's clipped off.
         double widthScale = bounds.width() / (double) bw;
         double heightScale = bounds.height() / (double) recentHeight;
-        this.contentScale = Math.min(widthScale, heightScale);
+                // Content geometry is fixed, like the Activity Log's: it follows the panel's own scale, never this
+        // box's size, so resizing the box only changes the box (extra room stays empty, less room is
+        // clipped by the box's own clip). Text/icon sizes come from their sliders alone.
+        this.contentScale = layout.scale();
         // contentScale (fitScale) still drives sx/sy/availableLocalWidth unchanged below; text/icon
         // render scale (header, icon, row name) is the user's persisted per-box adjustment alone now,
         // sanity-clamped only — no longer capped by contentScale. Whatever `scale` comes back, the
@@ -227,6 +243,13 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         // continuously-shrinking box can also be shorter than even the header's own natural height,
         // and without this the header text would render past the box's actual (shrunk) bottom edge
         // instead of fading out with it.
+        // The meal rows are this box's "bars": Bar size scales them and Move Bars offsets them, apart from the header's text offset.
+        var store = DietScreenPersistence.get();
+        RenderContext rowContext = MarieModuleSettings.withBrightness(baseContext,
+                MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+        float barScale = ContentScaleController.resolveContentScale(MarieModuleSettings.barScale(store, ID));
+        int barDx = MarieModuleSettings.barOffsetX(store, ID);
+        int barDy = MarieModuleSettings.barOffsetY(store, ID);
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             // Header gets the same width-aware truncation as row names below, for the same cosmetic
@@ -241,7 +264,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                 int headerBudget = Math.max(0, maxHeaderFontPx - headerEllipsisW);
                 header = font.plainSubstrByWidth(header, headerBudget) + "...";
             }
-            drawText(context, header, x, y, COL_HEADER, scale);
+            drawText(context, header, x, y, headerTextColor(), scale);
             y += zoomedHeaderAdvance;
             int count = 0;
             for (String id : recentIds) {
@@ -263,7 +286,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                     int budget = Math.max(0, maxNameFontPx - ellipsisW);
                     name = font.plainSubstrByWidth(name, budget) + "...";
                 }
-                context.drawItem(recent, sx(x), sy(y), scale * iconScale);
+                rowContext.drawItem(recent, sx(x) + barDx, sy(y) + barDy, scale * iconScale * barScale);
 
                 Map<String, Float> nutrientBars = NutrientClassificationLookup.resolveBars(recent.getItem());
                 String nutrientKey = nutrientBars.entrySet().stream()
@@ -272,8 +295,8 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                         .orElse(null);
                 int nameColor = nutrientKey != null
                         ? HudDrawHelpers.nutrientColorArgb(nutrientKey)
-                        : COL_WHITE;
-                drawText(context, name, x + nameOffset, y, nameColor, rowScale);
+                        : textColor();
+                rowContext.drawText(name, sx(x + nameOffset) + barDx, sy(y) + barDy, nameColor, rowScale * barScale);
                 y += zoomedRowH;
             }
         } finally {
@@ -313,8 +336,8 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
     }
 
     private void drawRoundedBox(RenderContext context, int localX, int localY, int localW, int localH, NourishedClientConfig cc) {
-        int fill = panelColorWithOpacity(COL_ROW_BG_RGB, cc.dietBackgroundOpacity());
-        context.drawRoundedRect(sx(localX), sy(localY), sd(localW), sd(localH), 1, fill, COL_BORDER_LT);
+        int fill = panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity());
+        context.drawRoundedRect(sx(localX), sy(localY), sd(localW), sd(localH), 1, fill, borderColor());
     }
 
     /**
@@ -327,8 +350,8 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
      * handle and hit-testing are computed against.
      */
     private void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc) {
-        int fill = panelColorWithOpacity(COL_ROW_BG_RGB, cc.dietBackgroundOpacity());
-        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, COL_BORDER_LT);
+        int fill = panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity());
+        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, borderColor());
     }
 
     private static int panelColorWithOpacity(int rgb, double opacity) {

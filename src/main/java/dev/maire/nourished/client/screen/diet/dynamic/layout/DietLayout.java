@@ -83,8 +83,7 @@ public final class DietLayout {
      * Whether a block starting at {@code startLocalY} and {@code blockLocalHeight} tall still fits
      * within the panel's live vertical space, leaving {@link #PAD} clearance above the bottom edge —
      * the single fit-check every stacked left-column sub-box (Calories/Balance/RecentMeals/EatMore/
-     * ActiveEffects) and the right column's intake legend share, replacing what used to be five
-     * near-identical hand-rolled copies (plus a sixth, differently-anchored one for the legend) that
+     * ActiveEffects) share, replacing what used to be five near-identical hand-rolled copies that
      * could each drift out of sync with each other.
      */
     public static boolean fitsInPanel(Layout layout, int startLocalY, int blockLocalHeight) {

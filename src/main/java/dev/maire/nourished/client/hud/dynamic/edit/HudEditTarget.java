@@ -1,5 +1,7 @@
 package dev.maire.nourished.client.hud.dynamic.edit;
 
+import dev.marie.framework.color.MarieColors;
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
@@ -65,7 +67,9 @@ public final class HudEditTarget implements MarieComponent {
     private static final String CONTENT_OFFSET_ID = "nourished.hud.contentOffset";
 
     /** Accent used for the "Move Text and Icons" live drag affordance — this panel draws no title text of its own to already have an established accent color, unlike {@code CalorieHudScreen}/{@code ActivityLogHudPanel}. */
-    private static final int CONTENT_ACCENT_COLOR = 0xFF5DA9E9;
+    private static int contentOutlineColor() {
+        return MarieColors.resolveColor(NourishedColors.EDIT_OUTLINE);
+    }
 
     /** How much bigger than content's natural size the box may be dragged, on either axis. */
     private static final double MAX_MARGIN_MULTIPLIER = 5.0d;
@@ -485,18 +489,18 @@ public final class HudEditTarget implements MarieComponent {
             int contentY = bounds.y() + pad;
             if (moveAllMode) {
                 context.drawDashedBorder(contentX + matchedLayout.contentOffsetX() - 3, contentY + matchedLayout.contentOffsetY() - 3,
-                        contentW + 6, contentH + 6, CONTENT_ACCENT_COLOR);
+                        contentW + 6, contentH + 6, contentOutlineColor());
             } else if (moveTextMode) {
                 int start = vertical ? 0 : iconW + HudDrawHelpers.ICON_LABEL_GAP;
                 context.drawDashedBorder(contentX + start + matchedLayout.contentOffsetX() - 3, contentY + matchedLayout.contentOffsetY() - 3,
-                        (vertical ? contentW : labelsW) + 6, contentH + 6, CONTENT_ACCENT_COLOR);
+                        (vertical ? contentW : labelsW) + 6, contentH + 6, contentOutlineColor());
             } else if (moveIconsMode) {
                 context.drawDashedBorder(contentX + MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID) - 3, contentY + MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID) - 3,
-                        (vertical ? contentW : iconW) + 6, contentH + 6, CONTENT_ACCENT_COLOR);
+                        (vertical ? contentW : iconW) + 6, contentH + 6, contentOutlineColor());
             } else {
                 int barsStart = vertical ? 0 : iconW + HudDrawHelpers.ICON_LABEL_GAP + labelsW + HudDrawHelpers.LABEL_BAR_GAP;
                 context.drawDashedBorder(contentX + barsStart + MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID) - 3, contentY + MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID) - 3,
-                        Math.max(0, contentW - barsStart) + 6, contentH + 6, CONTENT_ACCENT_COLOR);
+                        Math.max(0, contentW - barsStart) + 6, contentH + 6, contentOutlineColor());
             }
         } else {
             Bounds handle = DraggableResizable.handleBounds(bounds);

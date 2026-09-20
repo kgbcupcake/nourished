@@ -1,5 +1,7 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.marie.framework.color.MarieColors;
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -18,11 +20,21 @@ import net.minecraft.world.item.Items;
  */
 final class SummaryBoxRenderSupport {
 
-    static final int COL_ROW_BG_RGB = 0x001E1E1E;
-    static final int COL_BORDER_LT = 0xFF555555;
-    static final int COL_WHITE = 0xFFFFFFFF;
-    static final int COL_GREEN = 0xFF55FF55;
-    static final int COL_SEG_EMPTY = 0xFF2A2A2A;
+    static int surfaceRgb() {
+        return NourishedColors.surfaceRgb();
+    }
+    static int borderColor() {
+        return MarieColors.resolveColor(NourishedColors.BORDER);
+    }
+    static int textColor() {
+        return MarieColors.resolveColor(NourishedColors.TEXT);
+    }
+    static int calorieColor() {
+        return MarieColors.resolveColor(NourishedColors.CALORIE_VALUE);
+    }
+    static int barTrackColor() {
+        return MarieColors.resolveColor(NourishedColors.DIET_BAR_TRACK);
+    }
 
     private final int startLocalY;
     private Bounds anchorBounds;
@@ -68,8 +80,8 @@ final class SummaryBoxRenderSupport {
     }
 
     void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc) {
-        int fill = panelColorWithOpacity(COL_ROW_BG_RGB, cc.dietBackgroundOpacity());
-        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, COL_BORDER_LT);
+        int fill = panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity());
+        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, borderColor());
     }
 
     static int panelColorWithOpacity(int rgb, double opacity) {

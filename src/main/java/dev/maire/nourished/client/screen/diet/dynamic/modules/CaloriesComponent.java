@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
@@ -101,7 +102,9 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
     }
 
     @Override
-    public void render(RenderContext context, Bounds bounds) {
+    public void render(RenderContext baseContext, Bounds bounds) {
+        // The module's own text/icon offsets, icon size and brightness (see MarieModuleSettings) apply to everything it draws.
+        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID);
         if (!visible) {
             return;
         }
@@ -113,7 +116,10 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         // tightens, instead of the header staying full-size right up until it's clipped off.
         double widthScale = bounds.width() / (double) SUMMARY_BOX_LOCAL_WIDTH;
         double heightScale = bounds.height() / (double) boxLocalHeight;
-        this.contentScale = Math.min(widthScale, heightScale);
+                // Content geometry is fixed, like the Activity Log's: it follows the panel's own scale, never this
+        // box's size, so resizing the box only changes the box (extra room stays empty, less room is
+        // clipped by the box's own clip). Text/icon sizes come from their sliders alone.
+        this.contentScale = layout.scale();
         // contentScale (fitScale) still drives sx/sy/sd/outer-box sizing unchanged; text/icon render
         // scale is the user's persisted per-box adjustment alone now, sanity-clamped only — no longer
         // capped by contentScale. Real containment against the box's own edges comes from this box's
@@ -128,14 +134,14 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             support.drawItem(context, "minecraft:fire_charge", 2, 5, scale);
-            support.drawText(context, Component.translatable("nourished.screen.diet.calories_label").getString(), 24, 6, SummaryBoxRenderSupport.COL_WHITE, scale);
+            support.drawText(context, Component.translatable("nourished.screen.diet.calories_label").getString(), 24, 6, SummaryBoxRenderSupport.textColor(), scale);
 
             String calStr = (int) data.total + " / " + (int) data.maxTotal;
-            support.drawText(context, calStr, 24, 17, SummaryBoxRenderSupport.COL_GREEN, scale);
+            support.drawText(context, calStr, 24, 17, SummaryBoxRenderSupport.calorieColor(), scale);
 
             int barLocalWidth = SUMMARY_BOX_LOCAL_WIDTH - 4;
             float calPct = data.maxTotal > 0 ? Mth.clamp(data.total / data.maxTotal, 0f, 1f) : 0f;
-            context.drawBar(support.sx(2), support.sy(startLocalY + 33), support.sd(barLocalWidth), support.sd(4), calPct, SummaryBoxRenderSupport.COL_SEG_EMPTY, SummaryBoxRenderSupport.COL_GREEN);
+            context.drawBar(support.sx(2), support.sy(startLocalY + 33), support.sd(barLocalWidth), support.sd(4), calPct, SummaryBoxRenderSupport.barTrackColor(), SummaryBoxRenderSupport.calorieColor());
         } finally {
             context.popClip();
         }

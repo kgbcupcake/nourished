@@ -156,6 +156,7 @@ public class Nourished {
                 // Runs after MarieBootstrap.onCommonSetup → RegistryLifecycleManager.loadAll(), so
                 // ColorRegistry and ActivityDrivenNutrientRegistry have both loaded from disk here.
                 migrateNutrientColorKeys();
+                dev.maire.nourished.client.colors.RetiredColorKeys.migrate();
                 ActivityDrivenNutrientRegistry.migrateLegacyColorsToColorRegistry();
                 NourishedConfigValidation.runAfterInitialLoad();
                 NutrientRegistry.syncAndFreeze();
@@ -275,6 +276,7 @@ public class Nourished {
         int defaultTextArgb = 0xFFE0E0E0;
         CalorieHudScreen.COLORS = MarieColors.registerColorPair(MODID, "calorie_hud", defaultPanelArgb, defaultTextArgb);
         ActivityLogHudPanel.COLORS = MarieColors.registerColorPair(MODID, "activity_log_hud", defaultPanelArgb, defaultTextArgb);
+        dev.maire.nourished.client.colors.NourishedColors.register();
     }
 
     /**

@@ -1,5 +1,7 @@
 package dev.maire.nourished.client.screen.diet.dynamic.edit;
 
+import dev.marie.framework.color.MarieColors;
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
@@ -62,6 +64,13 @@ public final class DietScreenEditTarget implements MarieComponent {
     private final DraggableResizable recentMealsDrag;
     private final DraggableResizable eatMoreDrag;
     private final DraggableResizable activeEffectsDrag;
+
+    /** Grab state for a sub-box "Move Text"/"Move Icons"/"Move All" drag, and which box it is repositioning content in. */
+    private final MarieModuleSettings.MoveDrag moveDrag = new MarieModuleSettings.MoveDrag();
+    private String movingBoxId;
+    private Bounds movingBoxBounds;
+    /** Per box being resized from its left/top edge: which axes, the box's start x/y, and its four content offsets at the press. */
+    private final java.util.Map<String, int[]> contentAnchors = new java.util.HashMap<>();
 
     private Bounds lastCaloriesResolvedBounds;
     private Bounds lastBalanceResolvedBounds;
@@ -181,33 +190,71 @@ public final class DietScreenEditTarget implements MarieComponent {
             return true;
         }
 
-        if (lastCaloriesResolvedBounds != null) {
-            if (caloriesDrag.mouseClicked(mx, my, lastCaloriesResolvedBounds)) {
-                return true;
-            }
+        if (button == 0 && startMoveDrag(mouseX, mouseY)) {
+            return true;
         }
-        if (lastBalanceResolvedBounds != null) {
-            if (balanceDrag.mouseClicked(mx, my, lastBalanceResolvedBounds)) {
-                return true;
-            }
+
+        if (lastCaloriesResolvedBounds != null && clickBox(CaloriesComponent.ID, caloriesDrag, lastCaloriesResolvedBounds, mx, my)) {
+            return true;
         }
-        if (lastRecentResolvedBounds != null) {
-            if (recentMealsDrag.mouseClicked(mx, my, lastRecentResolvedBounds)) {
-                return true;
-            }
+        if (lastBalanceResolvedBounds != null && clickBox(BalanceComponent.ID, balanceDrag, lastBalanceResolvedBounds, mx, my)) {
+            return true;
         }
-        if (lastEatMoreResolvedBounds != null) {
-            if (eatMoreDrag.mouseClicked(mx, my, lastEatMoreResolvedBounds)) {
-                return true;
-            }
+        if (lastRecentResolvedBounds != null && clickBox(RecentMealsComponent.ID, recentMealsDrag, lastRecentResolvedBounds, mx, my)) {
+            return true;
         }
-        if (lastActiveEffectsResolvedBounds != null) {
-            if (activeEffectsDrag.mouseClicked(mx, my, lastActiveEffectsResolvedBounds)) {
-                return true;
-            }
+        if (lastEatMoreResolvedBounds != null && clickBox(EatMoreComponent.ID, eatMoreDrag, lastEatMoreResolvedBounds, mx, my)) {
+            return true;
+        }
+        if (lastActiveEffectsResolvedBounds != null && clickBox(ActiveEffectsComponent.ID, activeEffectsDrag, lastActiveEffectsResolvedBounds, mx, my)) {
+            return true;
         }
         Bounds panelBounds = new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
         return panelDrag.mouseClicked(mx, my, panelBounds);
+    }
+
+    /** Starts a box's drag/resize gesture, remembering (for a left/top-edge resize) where its content started so it can stay put on screen. */
+    private boolean clickBox(String id, DraggableResizable drag, Bounds bounds, int mx, int my) {
+        if (!drag.mouseClicked(mx, my, bounds)) {
+            return false;
+        }
+        boolean left = drag.isEdgeActive(DraggableResizable.Edge.LEFT) || drag.isBottomLeftCornerActive();
+        boolean top = drag.isEdgeActive(DraggableResizable.Edge.TOP);
+        if (drag.isResizing() && (left || top)) {
+            var st = DietScreenPersistence.get();
+            contentAnchors.put(id, new int[]{left ? 1 : 0, top ? 1 : 0, bounds.x(), bounds.y(),
+                    MarieModuleSettings.textOffsetX(st, id), MarieModuleSettings.textOffsetY(st, id),
+                    MarieModuleSettings.iconOffsetX(st, id), MarieModuleSettings.iconOffsetY(st, id),
+                    MarieModuleSettings.barOffsetX(st, id), MarieModuleSettings.barOffsetY(st, id),
+                    MarieModuleSettings.headerOffsetX(st, id), MarieModuleSettings.headerOffsetY(st, id)});
+        }
+        return true;
+    }
+
+    /** While a left/top edge is dragged, shifts the box's content offsets by the edge's movement so the content stays where it was on screen. */
+    private void keepContentInPlace(String id, Bounds live) {
+        int[] a = contentAnchors.get(id);
+        if (a == null) {
+            return;
+        }
+        int dx = a[0] == 1 ? a[2] - live.x() : 0;
+        int dy = a[1] == 1 ? a[3] - live.y() : 0;
+        var st = DietScreenPersistence.get();
+        MarieModuleSettings.setTextOffset(st, id, a[4] + dx, a[5] + dy);
+        MarieModuleSettings.setIconOffset(st, id, a[6] + dx, a[7] + dy);
+        MarieModuleSettings.setBarOffset(st, id, a[8] + dx, a[9] + dy);
+        MarieModuleSettings.setHeaderOffset(st, id, a[10] + dx, a[11] + dy);
+    }
+
+    private void commitContentAnchors() {
+        var st = DietScreenPersistence.get();
+        for (String id : contentAnchors.keySet()) {
+            MarieModuleSettings.commitTextOffset(st, id);
+            MarieModuleSettings.commitIconOffset(st, id);
+            MarieModuleSettings.commitBarOffset(st, id);
+            MarieModuleSettings.commitHeaderOffset(st, id);
+        }
+        contentAnchors.clear();
     }
 
     @Override
@@ -218,6 +265,10 @@ public final class DietScreenEditTarget implements MarieComponent {
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (scaleConfigVisible.getAsBoolean() && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
+            return true;
+        }
+        if (moveDrag.isActive()) {
+            applyMoveDrag(mouseX, mouseY);
             return true;
         }
         int mx = (int) mouseX;
@@ -255,6 +306,10 @@ public final class DietScreenEditTarget implements MarieComponent {
         if (scaleConfigVisible.getAsBoolean() && scaleConfigPanel.mouseReleased(mouseX, mouseY, button)) {
             return true;
         }
+        if (moveDrag.isActive()) {
+            finishMoveDrag();
+            return true;
+        }
         boolean any = caloriesDrag.isDragging() || caloriesDrag.isResizing()
                 || balanceDrag.isDragging() || balanceDrag.isResizing()
                 || recentMealsDrag.isDragging() || recentMealsDrag.isResizing()
@@ -269,6 +324,7 @@ public final class DietScreenEditTarget implements MarieComponent {
         eatMoreDrag.mouseReleased(mx, my);
         activeEffectsDrag.mouseReleased(mx, my);
         panelDrag.mouseReleased(mx, my);
+        commitContentAnchors();
         return any;
     }
 
@@ -283,7 +339,9 @@ public final class DietScreenEditTarget implements MarieComponent {
                 ? new DietLayout.Layout(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH(),
                         layout.baseX(), layout.baseY(), layout.scale(), layout.recentMealsScale(), layout.eatMoreScale(), 0)
                 : layout;
-        panelDrag.setConstraint(DietPanelLayoutResolver.panelConstraint(constraintLayout));
+        panelDrag.setConstraint(shrinkingLeftEdge
+                ? DietPanelLayoutResolver.leftEdgeConstraint(constraintLayout)
+                : DietPanelLayoutResolver.panelConstraint(constraintLayout));
 
         int[] mouse = scaledMouse(mc);
         int mx = mouse[0];
@@ -332,6 +390,11 @@ public final class DietScreenEditTarget implements MarieComponent {
         Bounds recentBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(recentMealsDrag, mx, my, recent.resolvedBounds()), matchedPanelLayout);
         Bounds eatMoreBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(eatMoreDrag, mx, my, eatMore.resolvedBounds()), matchedPanelLayout);
         Bounds activeEffectsBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(activeEffectsDrag, mx, my, activeEffects.resolvedBounds()), matchedPanelLayout);
+        keepContentInPlace(CaloriesComponent.ID, caloriesBounds);
+        keepContentInPlace(BalanceComponent.ID, balanceBounds);
+        keepContentInPlace(RecentMealsComponent.ID, recentBounds);
+        keepContentInPlace(EatMoreComponent.ID, eatMoreBounds);
+        keepContentInPlace(ActiveEffectsComponent.ID, activeEffectsBounds);
         panel.setSubBoxRenderBounds(caloriesBounds, balanceBounds, recentBounds, eatMoreBounds, activeEffectsBounds);
 
         lastCaloriesResolvedBounds = calories.resolvedBounds();
@@ -345,23 +408,23 @@ public final class DietScreenEditTarget implements MarieComponent {
         drawHandle(context, panelDrag, panelBounds, mx, my, true);
         drawSizeLabel(context, panelDrag, panelBounds);
         if (calories.isVisible()) {
-            drawHandle(context, caloriesDrag, caloriesBounds, mx, my, false);
+            drawBoxHandles(context, CaloriesComponent.ID, caloriesDrag, caloriesBounds, mx, my);
             drawSizeLabel(context, caloriesDrag, caloriesBounds);
         }
         if (balance.isVisible()) {
-            drawHandle(context, balanceDrag, balanceBounds, mx, my, false);
+            drawBoxHandles(context, BalanceComponent.ID, balanceDrag, balanceBounds, mx, my);
             drawSizeLabel(context, balanceDrag, balanceBounds);
         }
         if (recent.isVisible()) {
-            drawHandle(context, recentMealsDrag, recentBounds, mx, my, false);
+            drawBoxHandles(context, RecentMealsComponent.ID, recentMealsDrag, recentBounds, mx, my);
             drawSizeLabel(context, recentMealsDrag, recentBounds);
         }
         if (eatMore.isVisible()) {
-            drawHandle(context, eatMoreDrag, eatMoreBounds, mx, my, false);
+            drawBoxHandles(context, EatMoreComponent.ID, eatMoreDrag, eatMoreBounds, mx, my);
             drawSizeLabel(context, eatMoreDrag, eatMoreBounds);
         }
         if (activeEffects.isVisible()) {
-            drawHandle(context, activeEffectsDrag, activeEffectsBounds, mx, my, false);
+            drawBoxHandles(context, ActiveEffectsComponent.ID, activeEffectsDrag, activeEffectsBounds, mx, my);
             drawSizeLabel(context, activeEffectsDrag, activeEffectsBounds);
         }
 
@@ -370,6 +433,107 @@ public final class DietScreenEditTarget implements MarieComponent {
 
         if (scaleConfigVisible.getAsBoolean()) {
             scaleConfigPanel.render(context, new Bounds(0, 0, context.screenWidth(), context.screenHeight()));
+        }
+    }
+
+    /** Starts a move drag in whichever sub-box the pointer is over, if that box has a move mode switched on. */
+    private boolean startMoveDrag(double mouseX, double mouseY) {
+        String[] ids = {CaloriesComponent.ID, BalanceComponent.ID, RecentMealsComponent.ID, EatMoreComponent.ID, ActiveEffectsComponent.ID};
+        Bounds[] boxes = {lastCaloriesResolvedBounds, lastBalanceResolvedBounds, lastRecentResolvedBounds,
+                lastEatMoreResolvedBounds, lastActiveEffectsResolvedBounds};
+        for (int i = 0; i < ids.length; i++) {
+            if (boxes[i] == null || !boxes[i].contains((int) mouseX, (int) mouseY)) {
+                continue;
+            }
+            MarieModuleSettings.MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(DietScreenPersistence.get(), ids[i]);
+            if (mode == null) {
+                continue;
+            }
+            movingBoxId = ids[i];
+            movingBoxBounds = boxes[i];
+            switch (mode) {
+                case TEXT -> moveDrag.start(mode, mouseX, mouseY,
+                        MarieModuleSettings.textOffsetX(DietScreenPersistence.get(), ids[i]), MarieModuleSettings.textOffsetY(DietScreenPersistence.get(), ids[i]));
+                case ICONS -> moveDrag.start(mode, mouseX, mouseY,
+                        MarieModuleSettings.iconOffsetX(DietScreenPersistence.get(), ids[i]), MarieModuleSettings.iconOffsetY(DietScreenPersistence.get(), ids[i]));
+                case BARS -> moveDrag.start(mode, mouseX, mouseY,
+                        MarieModuleSettings.barOffsetX(DietScreenPersistence.get(), ids[i]), MarieModuleSettings.barOffsetY(DietScreenPersistence.get(), ids[i]));
+                case HEADER -> moveDrag.start(mode, mouseX, mouseY,
+                        MarieModuleSettings.headerOffsetX(DietScreenPersistence.get(), ids[i]), MarieModuleSettings.headerOffsetY(DietScreenPersistence.get(), ids[i]));
+                default -> moveDrag.startAll(mouseX, mouseY,
+                        MarieModuleSettings.textOffsetX(DietScreenPersistence.get(), ids[i]), MarieModuleSettings.textOffsetY(DietScreenPersistence.get(), ids[i]),
+                        MarieModuleSettings.iconOffsetX(DietScreenPersistence.get(), ids[i]), MarieModuleSettings.iconOffsetY(DietScreenPersistence.get(), ids[i]),
+                        MarieModuleSettings.barOffsetX(DietScreenPersistence.get(), ids[i]), MarieModuleSettings.barOffsetY(DietScreenPersistence.get(), ids[i]),
+                        MarieModuleSettings.headerOffsetX(DietScreenPersistence.get(), ids[i]), MarieModuleSettings.headerOffsetY(DietScreenPersistence.get(), ids[i]));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /** Applies the active move drag, keeping each offset within the box's own size. */
+    private void applyMoveDrag(double mouseX, double mouseY) {
+        int maxX = movingBoxBounds.width();
+        int maxY = movingBoxBounds.height();
+        switch (moveDrag.mode()) {
+            case TEXT -> MarieModuleSettings.setTextOffset(DietScreenPersistence.get(), movingBoxId,
+                    clamp(moveDrag.offsetX(mouseX), maxX), clamp(moveDrag.offsetY(mouseY), maxY));
+            case ICONS -> MarieModuleSettings.setIconOffset(DietScreenPersistence.get(), movingBoxId,
+                    clamp(moveDrag.offsetX(mouseX), maxX), clamp(moveDrag.offsetY(mouseY), maxY));
+            case BARS -> MarieModuleSettings.setBarOffset(DietScreenPersistence.get(), movingBoxId,
+                    clamp(moveDrag.offsetX(mouseX), maxX), clamp(moveDrag.offsetY(mouseY), maxY));
+            case HEADER -> MarieModuleSettings.setHeaderOffset(DietScreenPersistence.get(), movingBoxId,
+                    clamp(moveDrag.offsetX(mouseX), maxX), clamp(moveDrag.offsetY(mouseY), maxY));
+            default -> {
+                // Move All: text and icons shift together by the pointer's movement since the press.
+                int dx = moveDrag.offsetX(mouseX);
+                int dy = moveDrag.offsetY(mouseY);
+                MarieModuleSettings.setTextOffset(DietScreenPersistence.get(), movingBoxId,
+                        clamp(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.TEXT) + dx, maxX),
+                        clamp(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.TEXT) + dy, maxY));
+                MarieModuleSettings.setIconOffset(DietScreenPersistence.get(), movingBoxId,
+                        clamp(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.ICONS) + dx, maxX),
+                        clamp(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.ICONS) + dy, maxY));
+                MarieModuleSettings.setBarOffset(DietScreenPersistence.get(), movingBoxId,
+                        clamp(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.BARS) + dx, maxX),
+                        clamp(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.BARS) + dy, maxY));
+                MarieModuleSettings.setHeaderOffset(DietScreenPersistence.get(), movingBoxId,
+                        clamp(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.HEADER) + dx, maxX),
+                        clamp(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.HEADER) + dy, maxY));
+            }
+        }
+    }
+
+    private void finishMoveDrag() {
+        MarieModuleSettings.MoveDrag.Mode mode = moveDrag.mode();
+        moveDrag.stop();
+        boolean all = mode == MarieModuleSettings.MoveDrag.Mode.ALL;
+        if (all || mode == MarieModuleSettings.MoveDrag.Mode.TEXT) {
+            MarieModuleSettings.commitTextOffset(DietScreenPersistence.get(), movingBoxId);
+        }
+        if (all || mode == MarieModuleSettings.MoveDrag.Mode.ICONS) {
+            MarieModuleSettings.commitIconOffset(DietScreenPersistence.get(), movingBoxId);
+        }
+        if (all || mode == MarieModuleSettings.MoveDrag.Mode.BARS) {
+            MarieModuleSettings.commitBarOffset(DietScreenPersistence.get(), movingBoxId);
+        }
+        if (all || mode == MarieModuleSettings.MoveDrag.Mode.HEADER) {
+            MarieModuleSettings.commitHeaderOffset(DietScreenPersistence.get(), movingBoxId);
+        }
+        movingBoxId = null;
+        movingBoxBounds = null;
+    }
+
+    private static int clamp(int value, int limit) {
+        return Math.max(-limit, Math.min(limit, value));
+    }
+
+    /** A sub-box's edit handles, or — while it has a move mode on — a dashed outline instead (dragging inside then moves its content, not the box). */
+    private static void drawBoxHandles(RenderContext context, String boxId, DraggableResizable drag, Bounds bounds, int mx, int my) {
+        if (MarieModuleSettings.activeMoveMode(DietScreenPersistence.get(), boxId) != null) {
+            context.drawDashedBorder(bounds.x() + 2, bounds.y() + 2, bounds.width() - 4, bounds.height() - 4, MarieColors.resolveColor(NourishedColors.EDIT_OUTLINE));
+        } else {
+            drawHandle(context, drag, bounds, mx, my, true);
         }
     }
 
@@ -445,8 +609,8 @@ public final class DietScreenEditTarget implements MarieComponent {
 
     /** Light text over a dark 1px drop-shadow, for legibility against any background. */
     private static void drawShadowedText(RenderContext context, String text, int x, int y) {
-        context.drawText(text, x + 1, y + 1, 0xFF000000, 0.75f);
-        context.drawText(text, x, y, 0xFFFFFFFF, 0.75f);
+        context.drawText(text, x + 1, y + 1, MarieColors.resolveColor(NourishedColors.EDIT_LABEL_SHADOW), 0.75f);
+        context.drawText(text, x, y, MarieColors.resolveColor(NourishedColors.EDIT_LABEL_TEXT), 0.75f);
     }
 
     private static List<Integer> xEdges(Bounds... boxes) {

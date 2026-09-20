@@ -107,6 +107,11 @@ public final class ColorsValidator implements ConfigValidator {
         if (key.startsWith(NUTRIENT_PREFIX)) {
             return validNutrientKeys.contains(key.substring(NUTRIENT_PREFIX.length()));
         }
-        return key.startsWith(ACTIVITY_PREFIX) || key.startsWith(PANEL_PREFIX) || key.startsWith(TEXT_PREFIX);
+        if (key.startsWith(ACTIVITY_PREFIX) || key.startsWith(PANEL_PREFIX) || key.startsWith(TEXT_PREFIX)) {
+            return true;
+        }
+        // Any other color this mod registered (hud.*, diet.*, calorie_hud.* ... ) is known by its registered definition.
+        net.minecraft.resources.ResourceLocation id = net.minecraft.resources.ResourceLocation.tryParse(key);
+        return id != null && dev.marie.framework.color.ColorDefinitionRegistry.get(dev.marie.framework.color.ColorKey.of(id)) != null;
     }
 }

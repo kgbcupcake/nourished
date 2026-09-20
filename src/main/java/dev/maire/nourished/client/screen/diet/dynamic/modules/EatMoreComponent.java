@@ -1,5 +1,8 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.marie.framework.color.MarieColors;
+import dev.maire.nourished.client.colors.NourishedColors;
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
@@ -41,9 +44,15 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
     /** Local height of the one row of suggestion icons — standard 16x16 item icon size. */
     private static final int ICON_ROW_LOCAL_HEIGHT = 16;
 
-    private static final int COL_ROW_BG_RGB = 0x001E1E1E;
-    private static final int COL_BORDER_LT = 0xFF555555;
-    private static final int COL_HEADER = 0xFF888888;
+    private static int surfaceRgb() {
+        return NourishedColors.surfaceRgb();
+    }
+    private static int borderColor() {
+        return MarieColors.resolveColor(NourishedColors.BORDER);
+    }
+    private static int headerTextColor() {
+        return MarieColors.resolveColor(NourishedColors.TEXT_HEADER);
+    }
 
     /** Reference local-unit padding used to derive the user's padding-adjustment range — see {@link ContentScaleController#resolvePadding}. */
     private static final double BASE_PADDING_LOCAL = 2.0d;
@@ -131,7 +140,9 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
     }
 
     @Override
-    public void render(RenderContext context, Bounds bounds) {
+    public void render(RenderContext baseContext, Bounds bounds) {
+        // The module's own text/icon offsets, icon size and brightness (see MarieModuleSettings) apply to everything it draws.
+        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID);
         this.anchorBounds = bounds;
         if (!visible) {
             return;
@@ -148,7 +159,10 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         // while an now-empty "Eat more of..." header lingers with nothing under it.
         double widthScale = bounds.width() / (double) bw;
         double heightScale = bounds.height() / (double) Math.max(1, naturalTotalHeight);
-        this.contentScale = Math.min(widthScale, heightScale);
+                // Content geometry is fixed, like the Activity Log's: it follows the panel's own scale, never this
+        // box's size, so resizing the box only changes the box (extra room stays empty, less room is
+        // clipped by the box's own clip). Text/icon sizes come from their sliders alone.
+        this.contentScale = layout.scale();
         // contentScale (fitScale) still drives sx/sy unchanged below; header/icon render scale is the
         // user's persisted per-box adjustment alone now, sanity-clamped only — no longer capped by
         // contentScale. Real containment against the box's own edges comes from the
@@ -166,7 +180,7 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             String suggestionHeader = Component.translatable("nourished.screen.diet.suggestion_label").getString();
-            drawText(context, font.plainSubstrByWidth(suggestionHeader, bw), x, y + DietScreenModules.HEADER_TOP_PADDING_LOCAL, COL_HEADER, scale);
+            drawText(context, font.plainSubstrByWidth(suggestionHeader, bw), x, y + DietScreenModules.HEADER_TOP_PADDING_LOCAL, headerTextColor(), scale);
             y += HEADER_LOCAL_HEIGHT;
 
             for (int col = 0; col < Math.min(2, neglected.size()); col++) {
@@ -223,8 +237,8 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
     }
 
     private void drawRoundedBox(RenderContext context, int localX, int localY, int localW, int localH, NourishedClientConfig cc) {
-        int fill = panelColorWithOpacity(COL_ROW_BG_RGB, cc.dietBackgroundOpacity());
-        context.drawRoundedRect(sx(localX), sy(localY), sd(localW), sd(localH), 1, fill, COL_BORDER_LT);
+        int fill = panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity());
+        context.drawRoundedRect(sx(localX), sy(localY), sd(localW), sd(localH), 1, fill, borderColor());
     }
 
     /**
@@ -237,8 +251,8 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
      * handle and hit-testing are computed against.
      */
     private void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc) {
-        int fill = panelColorWithOpacity(COL_ROW_BG_RGB, cc.dietBackgroundOpacity());
-        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, COL_BORDER_LT);
+        int fill = panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity());
+        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, borderColor());
     }
 
     private static int panelColorWithOpacity(int rgb, double opacity) {

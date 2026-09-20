@@ -1,5 +1,7 @@
 package dev.maire.nourished.modules.activity_driven_nutrient.client;
 
+import dev.maire.nourished.client.colors.NourishedColors;
+import dev.maire.nourished.client.colors.NourishedColorSlots;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.color.ColorKeyPair;
 import dev.marie.framework.color.MarieColors;
@@ -84,7 +86,9 @@ public final class ActivityLogHudPanel implements MarieComponent {
     /** Slightly larger than 1.0 stands in for "bold" — same trick {@code ScaleConfigPanel#drawCard} uses for its own header. */
     private static final float TITLE_SCALE = 1.05f;
     /** Green accent — one of {@code ScaleConfigPanel.ACCENT_PALETTE}'s colors, reused here since this card now follows that same visual language. */
-    private static final int TITLE_ACCENT_COLOR = 0xFF7ED9A6;
+    private static int titleAccentColor() {
+        return MarieColors.resolveColor(NourishedColors.ACTIVITY_ACCENT);
+    }
 
     /**
      * One row per tracker, in fixed display order. {@code moduleId} keys {@link
@@ -151,11 +155,18 @@ public final class ActivityLogHudPanel implements MarieComponent {
     private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(
             List.of(new ScaleConfigEntry(PANEL_ID, Component.translatable("nourished.hud.activityLog.label"))
                     .withContent(MarieModuleSettings.standardPanel(Component.translatable("nourished.hud.activityLog.label").getString(), UiStatePersistence.get(), PANEL_ID)
-                            .opacity(() -> NourishedClientConfig.get().activityLogHudBackgroundOpacity(), v -> NourishedClientConfig.get().setActivityLogHudBackgroundOpacity(v))
+                            .opacity(() -> NourishedClientConfig.get().activityLogHudBackgroundOpacity(), v -> NourishedClientConfig.get().setActivityLogHudBackgroundOpacity(v), 204.0d / 255.0d)
                             .textBrightness(() -> NourishedClientConfig.get().activityLogHudTextBrightness(), v -> NourishedClientConfig.get().setActivityLogHudTextBrightness(v))
                             .iconBrightness(() -> NourishedClientConfig.get().activityLogHudIconBrightness(), v -> NourishedClientConfig.get().setActivityLogHudIconBrightness(v))
                             .onCommit(NourishedClientConfig::saveNow)
                             .onReset(this::resetContentOffset)
+                            .extraTabs(panel -> {
+                                panel.colorTab(Component.translatable("config.marieslib.moduleoptions.tab.colors").getString());
+                                NourishedColorSlots.addPair(panel, COLORS);
+                                NourishedColorSlots.addFixed(panel, NourishedColors.BAR_TRACK, "nourished.options.color.bar_track");
+                                NourishedColorSlots.addFixed(panel, NourishedColors.ACTIVITY_ACCENT, "nourished.options.color.accent");
+                                NourishedColorSlots.addActivities(panel);
+                            })
                             .build())),
             UiStatePersistence.get(), Anchor.TOP_RIGHT);
     private boolean scaleConfigVisible;
@@ -417,7 +428,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             context.drawText(Component.translatable("nourished.hud.activityLog.label").getString(),
-                    bounds.x() + padding, bounds.y() + padding, TITLE_ACCENT_COLOR, TITLE_SCALE);
+                    bounds.x() + padding, bounds.y() + padding, titleAccentColor(), TITLE_SCALE);
 
             int defaultTextColor = MarieColors.resolveColor(COLORS.text());
             int barBg = HudDrawHelpers.barBackgroundColor();
@@ -506,13 +517,13 @@ public final class ActivityLogHudPanel implements MarieComponent {
                 // last visible row, a few pixels further out so it doesn't overlap them.
                 int contentRight = barX + barW + HudDrawHelpers.BAR_PCT_GAP + VALUE_RESERVE;
                 if (moveAllMode) {
-                    context.drawDashedBorder(rowsX - 3, rowsTop - 3, contentRight - rowsX + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+                    context.drawDashedBorder(rowsX - 3, rowsTop - 3, contentRight - rowsX + 6, y - rowsTop + 6, titleAccentColor());
                 } else if (moveTextMode) {
-                    context.drawDashedBorder(rowsX + iconSize + HudDrawHelpers.ICON_LABEL_GAP - 3, rowsTop - 3, maxLabelW + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+                    context.drawDashedBorder(rowsX + iconSize + HudDrawHelpers.ICON_LABEL_GAP - 3, rowsTop - 3, maxLabelW + 6, y - rowsTop + 6, titleAccentColor());
                 } else if (moveIconsMode) {
-                    context.drawDashedBorder(bounds.x() + padding + iconDx - 3, rowsTop - contentOffsetY + iconDy - 3, Math.round(iconSize * (float) iconScale) + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+                    context.drawDashedBorder(bounds.x() + padding + iconDx - 3, rowsTop - contentOffsetY + iconDy - 3, Math.round(iconSize * (float) iconScale) + 6, y - rowsTop + 6, titleAccentColor());
                 } else {
-                    context.drawDashedBorder(barX - 3, rowsTop - contentOffsetY + barDy - 3, contentRight - barX + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+                    context.drawDashedBorder(barX - 3, rowsTop - contentOffsetY + barDy - 3, contentRight - barX + 6, y - rowsTop + 6, titleAccentColor());
                 }
             }
 
@@ -532,7 +543,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
         int maxScroll = rowCount - capacity;
         int thumbY = rowsTop + (maxScroll > 0 ? (trackH - thumbH) * scrollOffset / maxScroll : 0);
         context.fillRect(trackX, rowsTop, 2, trackH, context.theme().color(ThemeKey.BAR_BACKGROUND));
-        context.fillRect(trackX, thumbY, 2, thumbH, TITLE_ACCENT_COLOR);
+        context.fillRect(trackX, thumbY, 2, thumbH, titleAccentColor());
     }
 
     /** Carries forward the existing persisted contentScale/paddingScale so a drag/resize commit never resets the user's text-scale or padding adjustment. */

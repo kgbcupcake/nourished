@@ -17,8 +17,6 @@
   "nourished.screen.diet.intake": "摄入明细",
   "nourished.screen.diet.intake_decorated": "◇————◇  摄入明细  ◇————◇",
   "nourished.screen.diet.legend": "图例",
-  "nourished.screen.diet.legend_good": "良好 40 - 80%",
-  "nourished.screen.diet.legend_low": "偏低 25 - 40%",
   "nourished.screen.diet.legend_bad": "危急",
   "nourished.screen.diet.legend_bad_range": "0 - 25%",
   "nourished.screen.diet.bar.fruits": "水果",

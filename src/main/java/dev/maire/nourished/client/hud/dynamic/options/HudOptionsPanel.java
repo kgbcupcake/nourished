@@ -1,5 +1,7 @@
 package dev.maire.nourished.client.hud.dynamic.options;
 
+import dev.maire.nourished.client.colors.NourishedColorSlots;
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieToolbox;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.maire.nourished.client.UiStatePersistence;
@@ -16,6 +18,8 @@ import net.minecraft.network.chat.Component;
 public final class HudOptionsPanel {
 
     private static final double PERCENT_STEP = 0.01d;
+    /** The config default of {@code hudBackgroundOpacity} (204/255), which "Reset This Tab" restores. */
+    private static final double DEFAULT_OPACITY = 204.0d / 255.0d;
 
     private HudOptionsPanel() {}
 
@@ -26,18 +30,23 @@ public final class HudOptionsPanel {
     public static MarieComponent build(String panelId, Runnable resetTextOffset) {
         Runnable save = NourishedClientConfig::saveNow;
         var ui = UiStatePersistence.get();
-        return MarieToolbox.panel(text("nourished.hud.nutrientPanel.label"))
+        MarieToolbox.PanelBuilder panel = MarieToolbox.panel(text("nourished.hud.nutrientPanel.label"))
                 .tab(text("config.marieslib.moduleoptions.tab.layout"))
                     .padding(ui, panelId)
                     .toggle(text("nourished.options.hud.vertical_layout"),
                             () -> cc().hudVerticalLayout(), v -> cc().setHudVerticalLayout(v), save)
+                        .defaultValue(false)
+                    .resetTab()
                 .tab(text("config.marieslib.moduleoptions.tab.behavior"))
                     .toggle(text("nourished.options.hud.reveal_on_gain"),
                             () -> cc().hudRevealOnNutrientGain(), v -> cc().setHudRevealOnNutrientGain(v), save)
+                        .defaultValue(true)
                     .slider(text("nourished.options.hud.hide_above"),
                             () -> cc().hudHideAboveThreshold(), v -> cc().setHudHideAboveThreshold(v), 0.0d, 1.0d, PERCENT_STEP, save)
+                        .defaultValue(1.0d)
                     .slider(text("nourished.options.hud.show_above"),
                             () -> cc().hudShowAboveThreshold(), v -> cc().setHudShowAboveThreshold(v), 0.0d, 1.0d, PERCENT_STEP, save)
+                        .defaultValue(1.0d)
                         // "Show above" only re-reveals bars the hide rule hid, so it does nothing while hide is off (1.0).
                         .enabledWhen(() -> cc().hudHideAboveThreshold() < 1.0d)
                     .moveToggles(ui, panelId)
@@ -47,12 +56,19 @@ public final class HudOptionsPanel {
                     .barSize(ui, panelId)
                     .slider(text("config.marieslib.moduleoptions.textBrightness"),
                             () -> cc().hudTextBrightness(), v -> cc().setHudTextBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
+                        .defaultValue(1.0d)
                     .slider(text("config.marieslib.moduleoptions.iconBrightness"),
                             () -> cc().hudIconBrightness(), v -> cc().setHudIconBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
+                        .defaultValue(1.0d)
                     .slider(text("config.marieslib.moduleoptions.backgroundOpacity"),
                             () -> cc().hudBackgroundOpacity(), v -> cc().setHudBackgroundOpacity(v), 0.0d, 1.0d, PERCENT_STEP, save)
-                    // Room left here for the in-game color picker (not built yet).
-                .build();
+                        .defaultValue(DEFAULT_OPACITY)
+                    .resetTab();
+        panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
+        NourishedColorSlots.addNutrients(panel);
+        NourishedColorSlots.addFixed(panel, NourishedColors.HUD_PANEL, "nourished.options.color.background");
+        NourishedColorSlots.addFixed(panel, NourishedColors.NUTRIENT_HUD_TEXT, "nourished.options.color.label_text");
+        return panel.build();
     }
 
     private static NourishedClientConfig cc() {

@@ -1,5 +1,7 @@
 package dev.maire.nourished.client.hud.caloriehistory;
 
+import dev.maire.nourished.client.colors.NourishedColors;
+import dev.maire.nourished.client.colors.NourishedColorSlots;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.color.ColorKeyPair;
@@ -79,8 +81,10 @@ public final class CalorieHudScreen implements MarieComponent {
     private static final int ICON_SIZE = 10;
     /** Fixed-width reserve for the trailing percentage-of-goal text, so bars stay aligned even as the number of digits varies. */
     private static final int PCT_RESERVE = 30;
-    /** Same "over-threshold" red used throughout the codebase (see {@code HudDrawHelpers#barFillColor}/{@code ClassicDietColorLogic}) — calories have no other established graduated color rule, so over-goal is a flat color shift from the established calorie color to this. */
-    private static final int COL_OVER_GOAL = 0xFFFF5555;
+    /** Color of a bar that has gone over its goal: calories have no other established graduated color rule, so over-goal is a flat shift from the calorie value color to this (see {@code NourishedColors.CALORIE_OVER_GOAL}). */
+    private static int colOverGoal() {
+        return MarieColors.resolveColor(NourishedColors.CALORIE_OVER_GOAL);
+    }
 
     /** Every row shows a calorie value, so every row shares the same icon — the same item {@code CaloriesComponent} already uses for its own calorie icon. */
     private static final ItemStack CALORIE_ICON = new ItemStack(Items.FIRE_CHARGE);
@@ -91,7 +95,9 @@ public final class CalorieHudScreen implements MarieComponent {
     /** Slightly larger than 1.0 stands in for "bold" — same trick {@code ScaleConfigPanel#drawCard} uses for its own header. */
     private static final float TITLE_SCALE = 1.05f;
     /** Orange-red accent — one of {@code ScaleConfigPanel.ACCENT_PALETTE}'s colors, reused here since this card now follows that same visual language. */
-    private static final int TITLE_ACCENT_COLOR = 0xFFE98F5D;
+    private static int titleAccentColor() {
+        return MarieColors.resolveColor(NourishedColors.CALORIE_ACCENT);
+    }
 
     /** How much bigger than content's natural size the box may be dragged, on either axis. */
     private static final double MAX_MARGIN_MULTIPLIER = 5.0d;
@@ -130,11 +136,19 @@ public final class CalorieHudScreen implements MarieComponent {
     private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(
             List.of(new ScaleConfigEntry(PANEL_ID, Component.translatable("nourished.hud.calorieHistory.label"))
                     .withContent(MarieModuleSettings.standardPanel(Component.translatable("nourished.hud.calorieHistory.label").getString(), UiStatePersistence.get(), PANEL_ID)
-                            .opacity(() -> NourishedClientConfig.get().calorieHudBackgroundOpacity(), v -> NourishedClientConfig.get().setCalorieHudBackgroundOpacity(v))
+                            .opacity(() -> NourishedClientConfig.get().calorieHudBackgroundOpacity(), v -> NourishedClientConfig.get().setCalorieHudBackgroundOpacity(v), 204.0d / 255.0d)
                             .textBrightness(() -> NourishedClientConfig.get().calorieHudTextBrightness(), v -> NourishedClientConfig.get().setCalorieHudTextBrightness(v))
                             .iconBrightness(() -> NourishedClientConfig.get().calorieHudIconBrightness(), v -> NourishedClientConfig.get().setCalorieHudIconBrightness(v))
                             .onCommit(NourishedClientConfig::saveNow)
                             .onReset(this::resetContentOffset)
+                            .extraTabs(panel -> {
+                                panel.colorTab(Component.translatable("config.marieslib.moduleoptions.tab.colors").getString());
+                                NourishedColorSlots.addPair(panel, COLORS);
+                                NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_VALUE, "nourished.options.color.calorie");
+                                NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_OVER_GOAL, "nourished.options.color.over_goal");
+                                NourishedColorSlots.addFixed(panel, NourishedColors.BAR_TRACK, "nourished.options.color.bar_track");
+                                NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_ACCENT, "nourished.options.color.accent");
+                            })
                             .build())),
             UiStatePersistence.get(), Anchor.TOP_RIGHT);
     private boolean scaleConfigVisible;
@@ -392,7 +406,7 @@ public final class CalorieHudScreen implements MarieComponent {
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             context.drawText(Component.translatable("nourished.hud.calorieHistory.label").getString(),
-                    bounds.x() + padding, bounds.y() + padding, TITLE_ACCENT_COLOR, TITLE_SCALE);
+                    bounds.x() + padding, bounds.y() + padding, titleAccentColor(), TITLE_SCALE);
 
             int rowsX = bounds.x() + padding + contentOffsetX;
             // "Move Bars" offset: bars and their value text sit at the unshifted content origin plus this,
@@ -454,11 +468,11 @@ public final class CalorieHudScreen implements MarieComponent {
                     boolean overGoal = pct > 1f;
                     float cappedPct = Mth.clamp(pct, 0f, 1f);
                     // Calories have no established graduated color rule (unlike nutrient bars) — the
-                    // codebase always draws calorie values in HudDrawHelpers.CALORIE_COLOR, so that's
+                    // codebase always draws calorie values in HudDrawHelpers.calorieColor(), so that's
                     // reused as-is; over-goal is the only shift, to the same red used everywhere else in
                     // this codebase for "over threshold". The bar itself stays capped at 100% width
                     // regardless, per the "don't draw past the bar's bounds" requirement.
-                    int fillColor = overGoal ? COL_OVER_GOAL : HudDrawHelpers.CALORIE_COLOR;
+                    int fillColor = overGoal ? colOverGoal() : HudDrawHelpers.calorieColor();
                     int barShiftY = barDy - contentOffsetY;
                     int barY = rowCenterY + barShiftY - barH / 2;
                     context.drawBar(barX, barY, barW, barH, cappedPct, barBg, fillColor);
@@ -482,13 +496,13 @@ public final class CalorieHudScreen implements MarieComponent {
                 // last visible row, a few pixels further out so it doesn't overlap them.
                 int contentRight = barX + barW + HudDrawHelpers.BAR_PCT_GAP + PCT_RESERVE;
                 if (moveAllMode) {
-                    context.drawDashedBorder(rowsX - 3, rowsTop - 3, contentRight - rowsX + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+                    context.drawDashedBorder(rowsX - 3, rowsTop - 3, contentRight - rowsX + 6, y - rowsTop + 6, titleAccentColor());
                 } else if (moveTextMode) {
-                    context.drawDashedBorder(rowsX + iconSize + HudDrawHelpers.ICON_LABEL_GAP - 3, rowsTop - 3, maxLabelW + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+                    context.drawDashedBorder(rowsX + iconSize + HudDrawHelpers.ICON_LABEL_GAP - 3, rowsTop - 3, maxLabelW + 6, y - rowsTop + 6, titleAccentColor());
                 } else if (moveIconsMode) {
-                    context.drawDashedBorder(bounds.x() + padding + iconDx - 3, rowsTop - contentOffsetY + iconDy - 3, Math.round(iconSize * (float) iconScale) + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+                    context.drawDashedBorder(bounds.x() + padding + iconDx - 3, rowsTop - contentOffsetY + iconDy - 3, Math.round(iconSize * (float) iconScale) + 6, y - rowsTop + 6, titleAccentColor());
                 } else {
-                    context.drawDashedBorder(barX - 3, rowsTop - contentOffsetY + barDy - 3, contentRight - barX + 6, y - rowsTop + 6, TITLE_ACCENT_COLOR);
+                    context.drawDashedBorder(barX - 3, rowsTop - contentOffsetY + barDy - 3, contentRight - barX + 6, y - rowsTop + 6, titleAccentColor());
                 }
             }
 
@@ -508,7 +522,7 @@ public final class CalorieHudScreen implements MarieComponent {
         int maxScroll = rowCount - capacity;
         int thumbY = rowsTop + (maxScroll > 0 ? (trackH - thumbH) * scrollOffset / maxScroll : 0);
         context.fillRect(trackX, rowsTop, 2, trackH, context.theme().color(ThemeKey.BAR_BACKGROUND));
-        context.fillRect(trackX, thumbY, 2, thumbH, TITLE_ACCENT_COLOR);
+        context.fillRect(trackX, thumbY, 2, thumbH, titleAccentColor());
     }
 
     /** Carries forward the existing persisted contentScale/paddingScale so a drag/resize commit never resets the user's text-scale or padding adjustment. */

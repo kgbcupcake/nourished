@@ -7,6 +7,7 @@ import dev.marie.framework.ui.commandcenter.CommandCenterCard;
 import dev.marie.framework.ui.commandcenter.CommandCenterCategory;
 import dev.marie.framework.ui.commandcenter.CommandCenterRegistry;
 import dev.marie.framework.ui.api.EditModeCoordinator;
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen;
 import dev.maire.nourished.client.NourishedClientMemoryConfig;
@@ -73,6 +74,11 @@ public final class ClientEventRegistrar {
      * takes) instead of driving client-side UI/settings shortcuts directly. The old "Diet Screen"
      * category (scale-panel toggle) was removed: the scale panel is reached only via edit mode now.
      */
+    /** A card accent that resolves the (editable) color each time the card is drawn. */
+    private static java.util.function.IntSupplier accent(dev.marie.framework.color.ColorKey key) {
+        return () -> dev.marie.framework.color.MarieColors.resolveColor(key);
+    }
+
     private static void registerCommandCenter() {
         CommandCenterRegistry.registerCategory(new CommandCenterCategory(
                 COMMAND_CENTER_TOOLS_CATEGORY,
@@ -84,7 +90,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_TOOLS_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.exportAll"),
                 null,
-                0xFF5DA9E9,
+                accent(NourishedColors.CC_TOOLS_EXPORT_ALL),
                 () -> dispatchCommand("nourished export_all")
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
@@ -92,7 +98,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_TOOLS_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.auditTags"),
                 null,
-                0xFF5DA9E9,
+                accent(NourishedColors.CC_TOOLS_AUDIT_TAGS),
                 () -> dispatchCommand("nourished audit_tags")
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
@@ -100,7 +106,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_TOOLS_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.debugActivityLog"),
                 null,
-                0xFF5DA9E9,
+                accent(NourishedColors.CC_TOOLS_DEBUG_ACTIVITYLOG),
                 () -> dispatchCommand("nourished debug activitylog")
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
@@ -108,7 +114,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_TOOLS_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.reload"),
                 null,
-                0xFF5DA9E9,
+                accent(NourishedColors.CC_TOOLS_RELOAD),
                 () -> dispatchCommand("nourished reload")
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
@@ -116,7 +122,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_TOOLS_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.invalidateCache"),
                 null,
-                0xFF5DA9E9,
+                accent(NourishedColors.CC_TOOLS_INVALIDATE_CACHE),
                 () -> dispatchCommand("nourished invalidatecache")
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
@@ -124,7 +130,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_TOOLS_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.unassignedSources"),
                 null,
-                0xFF5DA9E9,
+                accent(NourishedColors.CC_TOOLS_UNASSIGNED_SOURCES),
                 () -> dispatchCommand("nourished get_unassigned")
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
@@ -132,7 +138,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_TOOLS_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.nbtPaths"),
                 null,
-                0xFF5DA9E9,
+                accent(NourishedColors.CC_TOOLS_NBT_PATHS),
                 () -> dispatchCommand("nourished nbt")
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
@@ -140,7 +146,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_TOOLS_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.listProfiles"),
                 null,
-                0xFF5DA9E9,
+                accent(NourishedColors.CC_TOOLS_PROFILE_LIST),
                 () -> dispatchCommand("nourished profile list")
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
@@ -148,7 +154,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_TOOLS_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.myProfile"),
                 null,
-                0xFF5DA9E9,
+                accent(NourishedColors.CC_TOOLS_MY_PROFILE),
                 () -> dispatchCommand("nourished profile get")
         ));
 
@@ -162,7 +168,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_FRAMEWORK_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.frameworkStatus"),
                 null,
-                0xFF7ED9A6,
+                accent(NourishedColors.CC_FRAMEWORK_STATUS),
                 () -> dispatchCommand("marie status")
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
@@ -170,7 +176,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_FRAMEWORK_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.frameworkMods"),
                 null,
-                0xFF7ED9A6,
+                accent(NourishedColors.CC_FRAMEWORK_MODS),
                 () -> dispatchCommand("marie mods")
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
@@ -178,7 +184,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_FRAMEWORK_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.frameworkApi"),
                 null,
-                0xFF7ED9A6,
+                accent(NourishedColors.CC_FRAMEWORK_API),
                 () -> dispatchCommand("marie api")
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
@@ -186,7 +192,7 @@ public final class ClientEventRegistrar {
                 COMMAND_CENTER_FRAMEWORK_CATEGORY,
                 Component.translatable("config.nourished.commandCenter.frameworkRegistries"),
                 null,
-                0xFF7ED9A6,
+                accent(NourishedColors.CC_FRAMEWORK_REGISTRIES),
                 () -> dispatchCommand("marie registries")
         ));
     }

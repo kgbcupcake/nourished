@@ -1,5 +1,8 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.marie.framework.color.MarieColors;
+import dev.maire.nourished.client.colors.NourishedColors;
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import java.util.Collection;
 
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
@@ -31,11 +34,21 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
     public static final String ID = "nourished.diet.activeeffects";
     private static final int HEADER_LOCAL_HEIGHT = 10;
 
-    private static final int COL_ROW_BG_RGB = 0x001E1E1E;
-    private static final int COL_BORDER_LT = 0xFF555555;
-    private static final int COL_HEADER = 0xFF888888;
-    private static final int COL_GREEN = 0xFF55FF55;
-    private static final int COL_RED = 0xFFFF5555;
+    private static int surfaceRgb() {
+        return NourishedColors.surfaceRgb();
+    }
+    private static int borderColor() {
+        return MarieColors.resolveColor(NourishedColors.BORDER);
+    }
+    private static int headerTextColor() {
+        return MarieColors.resolveColor(NourishedColors.TEXT_HEADER);
+    }
+    private static int beneficialColor() {
+        return MarieColors.resolveColor(NourishedColors.EFFECT_BENEFICIAL);
+    }
+    private static int harmfulColor() {
+        return MarieColors.resolveColor(NourishedColors.EFFECT_HARMFUL);
+    }
 
     /** Reference local-unit padding used to derive the user's padding-adjustment range — see {@link ContentScaleController#resolvePadding}. */
     private static final double BASE_PADDING_LOCAL = 2.0d;
@@ -125,7 +138,9 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
     }
 
     @Override
-    public void render(RenderContext context, Bounds bounds) {
+    public void render(RenderContext baseContext, Bounds bounds) {
+        // The module's own text/icon offsets, icon size and brightness (see MarieModuleSettings) apply to everything it draws.
+        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID);
         this.anchorBounds = bounds;
         if (!visible) {
             return;
@@ -149,7 +164,10 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         // it's clipped off.
         double widthScale = bounds.width() / (double) bw;
         double heightScale = bounds.height() / (double) effectsBoxH;
-        this.contentScale = Math.min(widthScale, heightScale);
+                // Content geometry is fixed, like the Activity Log's: it follows the panel's own scale, never this
+        // box's size, so resizing the box only changes the box (extra room stays empty, less room is
+        // clipped by the box's own clip). Text/icon sizes come from their sliders alone.
+        this.contentScale = layout.scale();
         // contentScale (fitScale) still drives sx/sy unchanged below; header/line render scale is the
         // user's persisted per-box adjustment alone now, sanity-clamped only — no longer capped by
         // contentScale. Real containment against the box's own edges comes from the
@@ -176,7 +194,14 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             // Slightly smaller than body text, purely a visual tweak — HEADER_LOCAL_HEIGHT (the layout reservation below) is untouched.
-            drawText(context, Component.translatable("nourished.screen.diet.effects_label").getString(), x, y + DietScreenModules.HEADER_TOP_PADDING_LOCAL, COL_HEADER, scale * 0.9f);
+            // The header has its own offset (Move Header); Move Text moves only the effect lines below it.
+            var store = DietScreenPersistence.get();
+            RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                    MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+            headerContext.drawText(Component.translatable("nourished.screen.diet.effects_label").getString(),
+                    sx(x) + MarieModuleSettings.headerOffsetX(store, ID),
+                    sy(y + DietScreenModules.HEADER_TOP_PADDING_LOCAL) + MarieModuleSettings.headerOffsetY(store, ID),
+                    headerTextColor(), scale * 0.9f);
             y += zoomedHeaderAdvance;
 
             if (effects.isEmpty()) {
@@ -190,7 +215,7 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
                 String name = Component.translatable(type.getDescriptionId()).getString();
                 int amplifier = effect.getAmplifier();
                 String label = (amplifier > 0 ? name + " " + (amplifier + 1) : name);
-                int color = type.isBeneficial() ? COL_GREEN : COL_RED;
+                int color = type.isBeneficial() ? beneficialColor() : harmfulColor();
                 String prefix = type.isBeneficial() ? "+ " : "- ";
                 drawText(context, prefix + label, x, y, color, scale);
                 y += zoomedLineAdvance;
@@ -222,8 +247,8 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
     }
 
     private void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc) {
-        int fill = panelColorWithOpacity(COL_ROW_BG_RGB, cc.dietBackgroundOpacity());
-        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, COL_BORDER_LT);
+        int fill = panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity());
+        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, borderColor());
     }
 
     private static int panelColorWithOpacity(int rgb, double opacity) {

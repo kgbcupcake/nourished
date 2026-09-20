@@ -74,7 +74,22 @@ public final class DietPanelLayoutResolver {
         return DietSubBoxConstraints.bounded(
                 baseLayout.panelW(), baseLayout.panelH(),
                 naturalWidth, DietLayout.scaledDim(DietLayout.PANEL_MIN_LOCAL_HEIGHT, 1.0d),
-                DietLayout.scaledDim(DietLayout.WIDTH, 1.5d) + baseLayout.leftMargin(), maxHeight
+                Math.max(DietLayout.scaledDim(DietLayout.WIDTH, 1.5d) + baseLayout.leftMargin(),
+                        Minecraft.getInstance().getWindow().getGuiScaledWidth() - baseLayout.panelX()), maxHeight
+        );
+    }
+
+    /**
+     * The constraint for a left-edge gesture: identical to {@link #panelConstraint} except width may keep growing
+     * leftward until the panel reaches the screen's left edge, so the left side stretches as freely as the right.
+     */
+    public static Constraint leftEdgeConstraint(DietLayout.Layout baseLayout) {
+        Constraint c = panelConstraint(baseLayout);
+        int maxWidth = Math.max(c.maxSize().width(), baseLayout.panelX() + baseLayout.panelW());
+        return DietSubBoxConstraints.bounded(
+                baseLayout.panelW(), baseLayout.panelH(),
+                c.minSize().width(), c.minSize().height(),
+                maxWidth, c.maxSize().height()
         );
     }
 

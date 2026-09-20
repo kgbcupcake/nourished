@@ -1,5 +1,7 @@
 package dev.maire.nourished.client.screen.diet;
 
+import dev.marie.framework.color.MarieColors;
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -96,14 +98,23 @@ public class DietScreen extends Screen {
     /** Slider-panel rows for the five Diet Screen sub-boxes, plus the screen-wide options panel. */
     private static List<ScaleConfigEntry> scaleConfigEntries() {
         return List.of(
-                new ScaleConfigEntry(CaloriesComponent.ID, Component.translatable("nourished.screen.diet.calories_label")),
-                new ScaleConfigEntry(BalanceComponent.ID, Component.translatable("nourished.screen.diet.balance_label")),
-                new ScaleConfigEntry(RecentMealsComponent.ID, Component.translatable("nourished.screen.diet.recent_label")),
-                new ScaleConfigEntry(EatMoreComponent.ID, Component.translatable("nourished.screen.diet.suggestion_label")),
-                new ScaleConfigEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label")),
+                moduleEntry(CaloriesComponent.ID, "nourished.screen.diet.calories_label", true, DietOptionsPanel::caloriesColors),
+                moduleEntry(BalanceComponent.ID, "nourished.screen.diet.balance_label", true, DietOptionsPanel::balanceColors),
+                moduleEntry(RecentMealsComponent.ID, "nourished.screen.diet.recent_label", true, null),
+                moduleEntry(EatMoreComponent.ID, "nourished.screen.diet.suggestion_label", false, null),
+                new ScaleConfigEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label"))
+                        .withContent(DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.effects_label").getString(),
+                                ActiveEffectsComponent.ID, false, false, true, DietOptionsPanel::effectsColors)),
                 new ScaleConfigEntry(DietScreenEditTarget.PANEL_ID, Component.translatable("nourished.screen.diet.options_label"))
                         .withContent(DietOptionsPanel.build())
         );
+    }
+
+    /** One sub-box's entry: its label, hosting its own options panel (text/icon size and brightness, move modes, reset; plus bar options when the box has a bar). */
+    private static ScaleConfigEntry moduleEntry(String moduleId, String labelKey, boolean hasBars,
+                                                java.util.function.Consumer<dev.marie.framework.ui.api.MarieToolbox.PanelBuilder> colors) {
+        return new ScaleConfigEntry(moduleId, Component.translatable(labelKey))
+                .withContent(DietOptionsPanel.forModule(Component.translatable(labelKey).getString(), moduleId, hasBars, true, false, colors));
     }
 
     /** Toggles the scale-config sliders' visibility — used by {@link NourishedKeys#OPEN_SCALE_CONFIG}. */
@@ -373,11 +384,21 @@ public class DietScreen extends Screen {
     private static final int TOGGLE_LEVER_INSET = 2;
     private static final int TOGGLE_LEVER_H = 6;
 
-    private static final int COL_TOGGLE_LIGHT_ON = 0xFF2ECC71;
-    private static final int COL_TOGGLE_LIGHT_OFF = 0xFFE74C3C;
-    private static final int COL_TOGGLE_LIGHT_BORDER = 0xFF101010;
-    private static final int COL_TOGGLE_HOUSING_BG = 0xFF1E1E1E;
-    private static final int COL_TOGGLE_LEVER = 0xFFB0B0B0;
+    private static int toggleOnColor() {
+        return MarieColors.resolveColor(NourishedColors.TOGGLE_ON);
+    }
+    private static int toggleOffColor() {
+        return MarieColors.resolveColor(NourishedColors.TOGGLE_OFF);
+    }
+    private static int toggleBorderColor() {
+        return MarieColors.resolveColor(NourishedColors.TOGGLE_BORDER);
+    }
+    private static int toggleHousingColor() {
+        return MarieColors.resolveColor(NourishedColors.TOGGLE_HOUSING);
+    }
+    private static int toggleLeverColor() {
+        return MarieColors.resolveColor(NourishedColors.TOGGLE_LEVER);
+    }
 
     static Bounds editModeToggleHousingBounds(DietLayout.Layout layout) {
         int x2 = layout.panelX() + layout.panelW() - DietLayout.toScreenDim(layout, TOGGLE_RIGHT_MARGIN);
@@ -410,11 +431,11 @@ public class DietScreen extends Screen {
         Bounds housing = editModeToggleHousingBounds(layout);
         Bounds light = editModeToggleLightBounds(layout, housing);
 
-        int lightColor = active ? COL_TOGGLE_LIGHT_ON : COL_TOGGLE_LIGHT_OFF;
-        context.fillRect(light.x(), light.y(), light.width(), light.height(), COL_TOGGLE_LIGHT_BORDER);
+        int lightColor = active ? toggleOnColor() : toggleOffColor();
+        context.fillRect(light.x(), light.y(), light.width(), light.height(), toggleBorderColor());
         context.fillRect(light.x() + 1, light.y() + 1, Math.max(0, light.width() - 2), Math.max(0, light.height() - 2), lightColor);
 
-        context.fillRect(housing.x(), housing.y(), housing.width(), housing.height(), COL_TOGGLE_HOUSING_BG);
+        context.fillRect(housing.x(), housing.y(), housing.width(), housing.height(), toggleHousingColor());
         int borderColor = hovered
                 ? context.theme().color(ThemeKey.BORDER_HOVER)
                 : context.theme().color(ThemeKey.BORDER);
@@ -427,7 +448,7 @@ public class DietScreen extends Screen {
         int upperY = housing.y() + leverInset;
         int lowerY = housing.y() + housing.height() - leverInset - leverH;
         int leverY = active ? upperY : lowerY;
-        context.fillRect(leverX, leverY, leverW, leverH, COL_TOGGLE_LEVER);
+        context.fillRect(leverX, leverY, leverW, leverH, toggleLeverColor());
     }
 
     private void drawDietIconTooltips(GuiGraphics g, DietLayout.Layout layout, int mx, int my) {
