@@ -238,7 +238,7 @@ final class ClassicDietEditTarget implements MarieComponent {
     /** Local Y just past the Today header + whichever of Calories/Balance boxes are shown, matching {@code DietScreen}'s left-column stack. */
     private static int stackStartLocalY(NourishedClientConfig cc) {
         int y = 20 + 10;
-        if (FeatureFlagCache.enableTotalTracking() && cc.showCaloriesBox()) {
+        if (FeatureFlagCache.enableTotalTracking() && FeatureFlagCache.enableCalorieHistory() && cc.showCaloriesBox()) {
             y += 45;
         }
         if (cc.showBalanceBox()) {

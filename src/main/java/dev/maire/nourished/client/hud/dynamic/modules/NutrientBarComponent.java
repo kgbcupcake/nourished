@@ -11,13 +11,9 @@ import dev.marie.framework.ui.geometry.Insets;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.geometry.Size;
-import dev.marie.framework.ui.VisibilityRule;
-import dev.marie.framework.ui.visibility.AnyOf;
-import dev.marie.framework.ui.visibility.ConfigToggleVisibility;
-import dev.marie.framework.ui.visibility.ThresholdVisibility;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
-import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibilityRules;
+import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
@@ -88,48 +84,18 @@ final class NutrientBarComponent implements MarieComponent {
         if (verticalMode) {
             int textH = (int) Math.ceil(9 * hudLayout.labelScale());
             int contentH = textH + 2 + hudLayout.verticalBarH() + 2 + textH;
-            // CENTER so HorizontalLayout vertically centers each column when the box is taller than
-            // content needs, same reasoning as the horizontal-mode CENTER below.
-            return Constraint.fixed(hudLayout.verticalColumnW(), contentH).withAnchor(Anchor.CENTER);
+            return Constraint.fixed(hudLayout.verticalColumnW(), contentH);
         }
         // naturalPanelW, not panelW: the on-screen box can be freely resized wider than content
         // needs (see HudEditTarget) without rescaling content, so content must size itself from its
-        // own natural (scale-only) width, not whatever the box currently measures. CENTER anchor lets
-        // VerticalLayout's existing horizontal-centering offset place each row in the middle of
-        // whatever width is actually available, instead of pinning it flush to the left.
+        // own natural (scale-only) width, not whatever the box currently measures. Pinned to the
+        // top-left, so a resize moves the content with the box.
         int contentW = hudLayout.naturalPanelW() - hudLayout.scaledPad() * 2;
         Size preferred = new Size(contentW, hudLayout.rowH());
         Size minSize = new Size(0, hudLayout.rowH());
         Size maxSize = new Size(Integer.MAX_VALUE, hudLayout.rowH());
         return new Constraint(preferred, minSize, maxSize, false, false, true, false,
-                Anchor.CENTER, Insets.NONE, Insets.NONE);
-    }
-
-    /**
-     * Wraps HudVisibility/HudVisibilityRules' hide/show-above thresholds, OR'd with the nutrient-gain
-     * flash window (via {@link MarieClientCache#flashAlpha}) so a bar temporarily reveals itself when
-     * its value just increased, even while otherwise threshold-hidden.
-     */
-    @Override
-    public VisibilityRule visibilityRule() {
-        NourishedClientConfig cc = NourishedClientConfig.get();
-        Float hideAtOrAbove = activeThreshold((float) cc.hudHideAboveThreshold());
-        Float showAtOrAbove = activeThreshold((float) cc.hudShowAboveThreshold());
-        VisibilityRule threshold = new ThresholdVisibility<>(
-                () -> MarieClientCache.get().values.getOrDefault(nutrientKey, 0f),
-                hideAtOrAbove,
-                showAtOrAbove
-        );
-        if (!cc.hudRevealOnNutrientGain()) {
-            return threshold;
-        }
-        VisibilityRule flashing = new ConfigToggleVisibility(() -> MarieClientCache.flashAlpha(nutrientKey) > 0f);
-        return new AnyOf(threshold, flashing);
-    }
-
-    private static Float activeThreshold(float raw) {
-        float clamped = Math.max(0f, Math.min(1f, raw));
-        return clamped < 1f - HudVisibilityRules.ZERO_EPSILON ? clamped : null;
+                Anchor.TOP_LEFT, Insets.NONE, Insets.NONE);
     }
 
     /** Translucent white highlight over the bar while {@link MarieClientCache#flashAlpha} is decaying, matching the pre-MarieUI legacy renderer's treatment. */
@@ -173,7 +139,25 @@ final class NutrientBarComponent implements MarieComponent {
         }
     }
 
+    /** Same "show empty bars" dimming as the classic renderer: an empty row is drawn at 40% alpha. */
     private void renderContent(RenderContext context, Bounds bounds) {
+        float truePct = MarieClientCache.get().values.getOrDefault(nutrientKey, 0f);
+        float alpha = HudVisibility.dimZeroRow(truePct, NourishedClientConfig.get()) ? 0.4f : 1f;
+        if (alpha >= 1f) {
+            drawContent(context, bounds, alpha);
+            return;
+        }
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
+        try {
+            drawContent(context, bounds, alpha);
+        } finally {
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        }
+    }
+
+    private void drawContent(RenderContext context, Bounds bounds, float alpha) {
         float value = displayValues.getOrDefault(nutrientKey, 0f);
         String label = HudDrawHelpers.nutrientLabel(nutrientKey);
         int fillColor = HudDrawHelpers.barFillColor(nutrientKey, value);
@@ -207,11 +191,11 @@ final class NutrientBarComponent implements MarieComponent {
             int iconSize = hudLayout.iconSize();
 
             float tint = (float) NourishedClientConfig.get().hudIconBrightness();
-            RenderSystem.setShaderColor(tint, tint, tint, 1f);
+            RenderSystem.setShaderColor(tint, tint, tint, alpha);
             try {
                 context.drawItem(resolveIconStack(nutrientKey), bounds.x() + iconDx, rowCenterY - iconSize / 2 + iconDy, iconScale);
             } finally {
-                RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+                RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
             }
 
             int labelX = bounds.x() + iconSize + HudDrawHelpers.ICON_LABEL_GAP;

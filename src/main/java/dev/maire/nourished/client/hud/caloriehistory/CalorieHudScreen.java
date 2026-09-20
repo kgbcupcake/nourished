@@ -2,12 +2,14 @@ package dev.maire.nourished.client.hud.caloriehistory;
 
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.maire.nourished.client.colors.NourishedColorSlots;
+import dev.maire.nourished.client.hud.dynamic.options.HudStyleRows;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.color.ColorKeyPair;
 import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
+import dev.marie.framework.tracking.tracker.MarieTracking;
 import dev.marie.framework.tracking.tracker.definition.TrackerHistoryEntry;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.Theme;
@@ -139,6 +141,7 @@ public final class CalorieHudScreen implements MarieComponent {
                             .opacity(() -> NourishedClientConfig.get().calorieHudBackgroundOpacity(), v -> NourishedClientConfig.get().setCalorieHudBackgroundOpacity(v), 204.0d / 255.0d)
                             .textBrightness(() -> NourishedClientConfig.get().calorieHudTextBrightness(), v -> NourishedClientConfig.get().setCalorieHudTextBrightness(v))
                             .iconBrightness(() -> NourishedClientConfig.get().calorieHudIconBrightness(), v -> NourishedClientConfig.get().setCalorieHudIconBrightness(v))
+                            .styleRows(HudStyleRows::calorieHistory)
                             .onCommit(NourishedClientConfig::saveNow)
                             .onReset(this::resetContentOffset)
                             .extraTabs(panel -> {
@@ -146,7 +149,6 @@ public final class CalorieHudScreen implements MarieComponent {
                                 NourishedColorSlots.addPair(panel, COLORS);
                                 NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_VALUE, "nourished.options.color.calorie");
                                 NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_OVER_GOAL, "nourished.options.color.over_goal");
-                                NourishedColorSlots.addFixed(panel, NourishedColors.BAR_TRACK, "nourished.options.color.bar_track");
                                 NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_ACCENT, "nourished.options.color.accent");
                             })
                             .build())),
@@ -285,19 +287,17 @@ public final class CalorieHudScreen implements MarieComponent {
      * Live "Today" row (if any) followed by completed-period history, newest first, already
      * retention-capped server-side.
      *
-     * <p>The "Today" row reads {@code NourishedAPI#getTotal}'s value off {@link
-     * MarieClientCache#get()} — the same current-calories figure shown on the diet screen's
-     * Calories box — not {@link TrackingData#trackingAccumulators} (the tracker's own per-day sum,
-     * which lags behind on its throttled sync and isn't the number players expect "Today" to
-     * match). {@code MarieClientCache} is the snapshot Nourished's delta-sync pipeline actually
-     * keeps current, and matches the units of the history rows below it.
+     * <p>The "Today" row reads the calorie tracker's live per-day accumulator via {@link
+     * MarieTracking#getCurrentTrackerValue}, the same figure as the diet screen's Calories box.
+     * It resets at each game-day rollover, and matches the units of the history rows below it.
+     * {@code TrackingData#total} is the lifetime figure and is never shown as "Today".
      */
     private static List<Row> currentRows() {
         List<Row> rows = new ArrayList<>();
         Minecraft mc = Minecraft.getInstance();
         TrackingData data = MarieClientCache.get();
         if (mc.player != null) {
-            rows.add(new Row(Component.translatable("nourished.hud.calorieHistory.today").getString(), data.total, true));
+            rows.add(new Row(Component.translatable("nourished.hud.calorieHistory.today").getString(), MarieTracking.getCurrentTrackerValue(mc.player, NourishedAPI.CALORIES_TRACKER_ID), true));
         }
         List<TrackerHistoryEntry> history = data.trackingHistory.get(NourishedAPI.CALORIES_TRACKER_ID);
         if (history != null) {

@@ -11,6 +11,7 @@ import dev.marie.framework.notification.NotificationRequest;
 import dev.marie.framework.notification.TextSegment;
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.marie.framework.tracking.TrackingData;
+import dev.marie.framework.tracking.tracker.ClientTrackerCache;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
@@ -110,6 +111,9 @@ public final class ClientNetworkCallbacks {
             nextDiet.total = payload.calories();
             nextDiet.maxTotal = payload.maxCalories();
             nextDiet.trackingAccumulators.put(
+                    dev.maire.nourished.api.NourishedAPI.CALORIES_TRACKER_ID,
+                    payload.todayCalorieTrackerValue());
+            ClientTrackerCache.setCurrentValue(
                     dev.maire.nourished.api.NourishedAPI.CALORIES_TRACKER_ID,
                     payload.todayCalorieTrackerValue());
             nextDiet.sourceMemory.clear();

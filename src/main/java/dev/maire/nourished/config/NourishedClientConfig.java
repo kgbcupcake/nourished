@@ -43,6 +43,9 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue hudShowZeroBars;
     private final ModConfigSpec.BooleanValue hudRevealOnNutrientGain;
     private final ModConfigSpec.DoubleValue hudBackgroundOpacity;
+    private final ModConfigSpec.DoubleValue hudBorderOpacity;
+    private final ModConfigSpec.DoubleValue hudBackgroundShade;
+    private final ModConfigSpec.DoubleValue hudBorderShade;
     private final ModConfigSpec.DoubleValue hudTextBrightness;
     private final ModConfigSpec.DoubleValue hudIconBrightness;
     private final ModConfigSpec.DoubleValue calorieHudTextBrightness;
@@ -124,6 +127,24 @@ public final class NourishedClientConfig {
                 "hudBackgroundOpacity",
                 ConfigDefaultsLoader.getDouble(defaults, "hudBackgroundOpacity", DEFAULT_HUD_BACKGROUND_OPACITY),
                 0.0d,
+                1.0d
+        );
+        hudBorderOpacity = builder.defineInRange(
+                "hudBorderOpacity",
+                ConfigDefaultsLoader.getDouble(defaults, "hudBorderOpacity", 1.0d),
+                0.0d,
+                1.0d
+        );
+        hudBackgroundShade = builder.defineInRange(
+                "hudBackgroundShade",
+                ConfigDefaultsLoader.getDouble(defaults, "hudBackgroundShade", 0.0d),
+                -1.0d,
+                1.0d
+        );
+        hudBorderShade = builder.defineInRange(
+                "hudBorderShade",
+                ConfigDefaultsLoader.getDouble(defaults, "hudBorderShade", 0.0d),
+                -1.0d,
                 1.0d
         );
         // Dynamic-UI only (no Cloth entry): brightness multiplier for the Nutrient HUD's icons and text.
@@ -530,6 +551,30 @@ public final class NourishedClientConfig {
 
     public void setHudBackgroundOpacity(double value) {
         hudBackgroundOpacity.set(value);
+    }
+
+    public double hudBorderOpacity() {
+        return hudBorderOpacity.get();
+    }
+
+    public void setHudBorderOpacity(double value) {
+        hudBorderOpacity.set(value);
+    }
+
+    public double hudBackgroundShade() {
+        return hudBackgroundShade.get();
+    }
+
+    public void setHudBackgroundShade(double value) {
+        hudBackgroundShade.set(value);
+    }
+
+    public double hudBorderShade() {
+        return hudBorderShade.get();
+    }
+
+    public void setHudBorderShade(double value) {
+        hudBorderShade.set(value);
     }
 
     /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Nutrient HUD's text. */

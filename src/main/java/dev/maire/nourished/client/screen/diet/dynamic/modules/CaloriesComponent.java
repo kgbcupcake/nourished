@@ -4,6 +4,8 @@ import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
+import dev.marie.framework.tracking.tracker.MarieTracking;
+import dev.maire.nourished.api.NourishedAPI;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
@@ -57,7 +59,7 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         // rather than this frame's shrunk room) — the box only actually disappears once there's less
         // than MIN_VISIBLE_ROOM_LOCAL of room left, instead of vanishing the instant its full natural
         // height stops fitting.
-        boolean enabled = FeatureFlagCache.enableTotalTracking() && cc.showCaloriesBox() && data != null;
+        boolean enabled = FeatureFlagCache.enableTotalTracking() && FeatureFlagCache.enableCalorieHistory() && cc.showCaloriesBox() && data != null;
         int room = enabled ? DietLayout.roomInPanel(layout, startLocalY, boxLocalHeight) : 0;
         this.visible = room >= DietScreenModules.MIN_VISIBLE_ROOM_LOCAL;
         this.renderedContentHeight = visible ? room : 0;
@@ -136,11 +138,12 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
             support.drawItem(context, "minecraft:fire_charge", 2, 5, scale);
             support.drawText(context, Component.translatable("nourished.screen.diet.calories_label").getString(), 24, 6, SummaryBoxRenderSupport.textColor(), scale);
 
-            String calStr = (int) data.total + " / " + (int) data.maxTotal;
+            float today = MarieTracking.getCurrentTrackerValue(Minecraft.getInstance().player, NourishedAPI.CALORIES_TRACKER_ID);
+            String calStr = (int) today + " / " + (int) data.maxTotal;
             support.drawText(context, calStr, 24, 17, SummaryBoxRenderSupport.calorieColor(), scale);
 
             int barLocalWidth = SUMMARY_BOX_LOCAL_WIDTH - 4;
-            float calPct = data.maxTotal > 0 ? Mth.clamp(data.total / data.maxTotal, 0f, 1f) : 0f;
+            float calPct = data.maxTotal > 0 ? Mth.clamp(today / data.maxTotal, 0f, 1f) : 0f;
             context.drawBar(support.sx(2), support.sy(startLocalY + 33), support.sd(barLocalWidth), support.sd(4), calPct, SummaryBoxRenderSupport.barTrackColor(), SummaryBoxRenderSupport.calorieColor());
         } finally {
             context.popClip();

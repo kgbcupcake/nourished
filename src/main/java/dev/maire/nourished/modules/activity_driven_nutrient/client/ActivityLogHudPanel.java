@@ -2,6 +2,7 @@ package dev.maire.nourished.modules.activity_driven_nutrient.client;
 
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.maire.nourished.client.colors.NourishedColorSlots;
+import dev.maire.nourished.client.hud.dynamic.options.HudStyleRows;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.color.ColorKeyPair;
 import dev.marie.framework.color.MarieColors;
@@ -158,12 +159,12 @@ public final class ActivityLogHudPanel implements MarieComponent {
                             .opacity(() -> NourishedClientConfig.get().activityLogHudBackgroundOpacity(), v -> NourishedClientConfig.get().setActivityLogHudBackgroundOpacity(v), 204.0d / 255.0d)
                             .textBrightness(() -> NourishedClientConfig.get().activityLogHudTextBrightness(), v -> NourishedClientConfig.get().setActivityLogHudTextBrightness(v))
                             .iconBrightness(() -> NourishedClientConfig.get().activityLogHudIconBrightness(), v -> NourishedClientConfig.get().setActivityLogHudIconBrightness(v))
+                            .styleRows(HudStyleRows::activityLog)
                             .onCommit(NourishedClientConfig::saveNow)
                             .onReset(this::resetContentOffset)
                             .extraTabs(panel -> {
                                 panel.colorTab(Component.translatable("config.marieslib.moduleoptions.tab.colors").getString());
                                 NourishedColorSlots.addPair(panel, COLORS);
-                                NourishedColorSlots.addFixed(panel, NourishedColors.BAR_TRACK, "nourished.options.color.bar_track");
                                 NourishedColorSlots.addFixed(panel, NourishedColors.ACTIVITY_ACCENT, "nourished.options.color.accent");
                                 NourishedColorSlots.addActivities(panel);
                             })

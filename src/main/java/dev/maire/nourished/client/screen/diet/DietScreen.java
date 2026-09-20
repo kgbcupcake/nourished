@@ -100,8 +100,8 @@ public class DietScreen extends Screen {
         return List.of(
                 moduleEntry(CaloriesComponent.ID, "nourished.screen.diet.calories_label", true, DietOptionsPanel::caloriesColors),
                 moduleEntry(BalanceComponent.ID, "nourished.screen.diet.balance_label", true, DietOptionsPanel::balanceColors),
-                moduleEntry(RecentMealsComponent.ID, "nourished.screen.diet.recent_label", true, null),
-                moduleEntry(EatMoreComponent.ID, "nourished.screen.diet.suggestion_label", false, null),
+                moduleEntry(RecentMealsComponent.ID, "nourished.screen.diet.recent_label", true, DietOptionsPanel::recentMealsColors),
+                moduleEntry(EatMoreComponent.ID, "nourished.screen.diet.suggestion_label", false, DietOptionsPanel::eatMoreColors),
                 new ScaleConfigEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label"))
                         .withContent(DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.effects_label").getString(),
                                 ActiveEffectsComponent.ID, false, false, true, DietOptionsPanel::effectsColors)),

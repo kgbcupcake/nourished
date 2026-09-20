@@ -224,18 +224,16 @@ public final class HudEditTarget implements MarieComponent {
                             natural.barW(), natural.rowH(), natural.iconSize(), natural.maxLabelSw(),
                             natural.scaledPad(), natural.labelScale(), natural.scale(), natural.verticalLayout(),
                             natural.verticalBarW(), natural.verticalBarH(), natural.verticalColumnW(),
-                            natural.panelW(), natural.panelH(), state.leftMargin(),
+                            natural.panelW(), natural.panelH(), 0,
                             persistedContentOffsetX(), persistedContentOffsetY()
                     );
                 })
                 .orElse(natural);
     }
 
-    /** Only grown/shrunk by a left-edge (or bottom-left-corner) gesture — any other resize/reposition leaves it untouched. */
+    /** Always 0: content sits at the box's top-left plus padding, so it moves with the box on resize, like the Calorie History and Activity Log boxes. */
     private static int persistedLeftMargin() {
-        return UiStatePersistence.get().load(PANEL_ID)
-                .map(ComponentState::leftMargin)
-                .orElse(0);
+        return 0;
     }
 
     /** Committed "Move Text and Icons" offset — see {@link #contentOffsetX}. */
@@ -309,12 +307,7 @@ public final class HudEditTarget implements MarieComponent {
         if (keys.isEmpty()) {
             return;
         }
-        // Read before this commit's own save below overwrites it — same "pre-gesture" width the
-        // margin delta needs, mirroring DietScreenEditTarget's panelDrag onCommit.
-        int widthBeforeGesture = resolvedBounds(mc, keys).width();
-        int leftMargin = panelDrag.lastCommitWasLeftEdge()
-                ? Math.max(0, persistedLeftMargin() + (bounds.width() - widthBeforeGesture))
-                : persistedLeftMargin();
+        int leftMargin = persistedLeftMargin();
         AutoGrowPanelContainer.ManualOverride existing = existingManualOverride();
         AutoGrowPanelContainer.ManualOverride override = AutoGrowPanelContainer.withCommit(existing, panelDrag);
         // Carries forward the existing persisted contentScale/paddingScale so a drag/resize commit
@@ -538,13 +531,7 @@ public final class HudEditTarget implements MarieComponent {
      * only {@link #resolvedLayout}'s doc explains why width/height are still independently tracked.
      */
     private HudLayout.Layout matchedLayoutFor(List<String> keys, Bounds bounds) {
-        // Live left-edge (or bottom-left-corner) drag -> grows the margin by this gesture's width
-        // delta; any other gesture leaves it exactly as last persisted. Mirrors
-        // DietScreenEditTarget#matchedLayoutFor's leftMargin handling.
-        int widthBeforeGesture = resolvedBounds(mc, keys).width();
-        int leftMargin = (panelDrag.isEdgeActive(DraggableResizable.Edge.LEFT) || panelDrag.isBottomLeftCornerActive())
-                ? Math.max(0, persistedLeftMargin() + (bounds.width() - widthBeforeGesture))
-                : persistedLeftMargin();
+        int leftMargin = persistedLeftMargin();
         HudLayout.Layout natural = HudLayout.compute(mc, keys);
         return new HudLayout.Layout(
                 bounds.x(), bounds.y(), bounds.width(), bounds.height(),

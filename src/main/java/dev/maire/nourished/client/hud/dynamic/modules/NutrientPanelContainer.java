@@ -1,6 +1,8 @@
 package dev.maire.nourished.client.hud.dynamic.modules;
 
 import dev.maire.nourished.client.UiStatePersistence;
+import dev.maire.nourished.client.colors.NourishedColors;
+import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
@@ -107,9 +109,14 @@ public final class NutrientPanelContainer implements Container {
         if (bgOpacity > 0d) {
             // Same single-color look as the classic renderer's HudDrawHelpers#drawRoundedRect (fill
             // and border matching) — this just swaps the square fillRect for RenderContext's built-in
-            // rounded-rect primitive so the panel gets its notched corners back.
-            int panelColor = HudDrawHelpers.panelColor(bgOpacity);
-            context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor, panelColor);
+            // rounded-rect primitive so the panel gets its notched corners back. At the default shade
+            // (0) and border opacity (1.0) the border is the panel's own color, so the panel looks as
+            // it always did; the Style sliders tint the fill and border from there.
+            int panelRgb = MarieColors.shade(NourishedColors.rgb(NourishedColors.HUD_PANEL), cc.hudBackgroundShade());
+            int panelColor = HudDrawHelpers.panelColorWithOpacity(panelRgb, bgOpacity);
+            int borderRgb = MarieColors.shade(panelRgb, cc.hudBorderShade());
+            int borderColor = HudDrawHelpers.panelColorWithOpacity(borderRgb, bgOpacity * cc.hudBorderOpacity());
+            context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor, borderColor);
         }
         // Content position offset is the user's persisted padding adjustment alone — hudLayout's own
         // scaledPad (box geometry, used for this panel's natural size in HudLayout#compute) plays no
@@ -119,18 +126,9 @@ public final class NutrientPanelContainer implements Container {
         int availableW = Math.max(0, bounds.width() - 2 * pad - leftMargin);
         int availableH = Math.max(0, bounds.height() - 2 * pad);
 
-        int contentY = bounds.y() + pad;
-        if (!hudLayout.verticalLayout()) {
-            // VerticalLayout (row-stacking mode) has no built-in "center the whole stack" concept —
-            // it only positions each row's own horizontal offset via Anchor (see
-            // NutrientBarComponent's CENTER anchor). Column mode uses HorizontalLayout instead, which
-            // already centers each column vertically per-child via that same Anchor mechanism, so it
-            // needs no help here — only row-stacking mode needs the block itself nudged down.
-            int naturalContentH = Math.max(0, hudLayout.naturalPanelH() - 2 * pad);
-            contentY += Math.max(0, (availableH - naturalContentH) / 2);
-        }
-
-        Bounds content = new Bounds(bounds.x() + pad + leftMargin, contentY, availableW, availableH);
+        // Content is pinned to the box's top-left plus padding, so it moves with the box on resize,
+        // like the Calorie History and Activity Log boxes.
+        Bounds content = new Bounds(bounds.x() + pad + leftMargin, bounds.y() + pad, availableW, availableH);
         // Clipped to the panel's own bounds — a defensive backstop against contentOffsetX/Y (the
         // "Move Text and Icons" toggle) pushing content outside the panel: HudEditTarget clamps that
         // offset already, but without this, any drift (e.g. from a stale offset the clamp hasn't

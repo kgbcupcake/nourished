@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
 public final class DietOptionsPanel {
 
     private static final double PERCENT_STEP = 0.01d;
+    private static final double SCALE_STEP = 0.05d;
     /** The config default of {@code dietBackgroundOpacity} (204/255), which "Reset This Tab" restores. */
     private static final double DEFAULT_OPACITY = 204.0d / 255.0d;
 
@@ -37,12 +38,32 @@ public final class DietOptionsPanel {
                             () -> cc().dietIconBrightness(), v -> cc().setDietIconBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
                         .defaultValue(1.0d)
                     .resetTab()
+                .tab(text("config.marieslib.moduleoptions.tab.layout"))
+                    // Sizes of the panel and its two sub-boxes as laid out; separate from each box's own Text size.
+                    .slider(text("nourished.options.diet.panel_size"),
+                            () -> cc().dietScale(), v -> cc().setDietScale(v), 0.5d, 1.5d, SCALE_STEP, save)
+                        .defaultValue(1.0d)
+                    .slider(text("nourished.options.diet.recent_meals_box_size"),
+                            () -> cc().recentMealsBoxScale(), v -> cc().setRecentMealsBoxScale(v), 0.5d, 1.5d, SCALE_STEP, save)
+                        .defaultValue(1.0d)
+                    .slider(text("nourished.options.diet.eat_more_box_size"),
+                            () -> cc().eatMoreBoxScale(), v -> cc().setEatMoreBoxScale(v), 0.5d, 1.5d, SCALE_STEP, save)
+                        .defaultValue(1.0d)
+                    .toggle(text("nourished.options.diet.drag_bars"),
+                            () -> cc().dietBarDragEnabled(), v -> cc().setDietBarDragEnabled(v), save)
+                        .defaultValue(true)
+                    .button(text("nourished.options.diet.reset_bar_order"), text("nourished.options.diet.reset_caption"),
+                            () -> cc().resetDietBarOrder(), save)
+                    .resetTab()
                 .tab(text("nourished.options.tab.visibility"))
                     .toggle(text("nourished.options.diet.show_recent_meals"),
                             () -> cc().showRecentMeals(), v -> cc().setShowRecentMeals(v), save)
                         .defaultValue(true)
                     .toggle(text("nourished.options.diet.show_eat_more"),
                             () -> cc().showEatMoreOf(), v -> cc().setShowEatMoreOf(v), save)
+                        .defaultValue(true)
+                    .toggle(text("nourished.options.diet.show_active_effects"),
+                            () -> cc().showActiveEffects(), v -> cc().setShowActiveEffects(v), save)
                         .defaultValue(true)
                     // Only takes visible effect while FeatureFlagCache.enableTotalTracking() is on; bound as-is, not gated here.
                     .toggle(text("nourished.options.diet.show_calories_box"),
@@ -69,7 +90,6 @@ public final class DietOptionsPanel {
         NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_MUTED, "nourished.options.color.muted_text");
         NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
         NourishedColorSlots.addFixed(panel, NourishedColors.DIVIDER, "nourished.options.color.divider");
-        NourishedColorSlots.addFixed(panel, NourishedColors.DIET_BAR_TRACK, "nourished.options.color.bar_track");
         NourishedColorSlots.addFixed(panel, NourishedColors.TOGGLE_ON, "nourished.options.color.toggle_on");
         NourishedColorSlots.addFixed(panel, NourishedColors.TOGGLE_OFF, "nourished.options.color.toggle_off");
         return panel.build();
@@ -113,9 +133,27 @@ public final class DietOptionsPanel {
         return panel.build();
     }
 
-    /** The Calories box's colors: the calorie value (its text and bar fill). */
+    /**
+     * The Calories box's colors: the calorie value (its text and bar fill), its label text and its border.
+     * Text and border are shared roles, so editing one here changes it everywhere it is drawn (see the Shared tab).
+     */
     public static void caloriesColors(MarieToolbox.PanelBuilder panel) {
         NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_VALUE, "nourished.options.color.calorie");
+        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT, "nourished.options.color.text");
+        NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
+    }
+
+    /** The Recent Meals box's colors: header, meal text and border (shared roles, as for {@link #caloriesColors}). */
+    public static void recentMealsColors(MarieToolbox.PanelBuilder panel) {
+        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.header_text");
+        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT, "nourished.options.color.text");
+        NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
+    }
+
+    /** The Eat More box's colors: header and border (shared roles, as for {@link #caloriesColors}). */
+    public static void eatMoreColors(MarieToolbox.PanelBuilder panel) {
+        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.header_text");
+        NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
     }
 
     /** The Balance box's colors: one per balance state. */

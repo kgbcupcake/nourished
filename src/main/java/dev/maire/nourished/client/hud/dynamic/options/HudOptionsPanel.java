@@ -49,6 +49,9 @@ public final class HudOptionsPanel {
                         .defaultValue(1.0d)
                         // "Show above" only re-reveals bars the hide rule hid, so it does nothing while hide is off (1.0).
                         .enabledWhen(() -> cc().hudHideAboveThreshold() < 1.0d)
+                    .toggle(text("nourished.options.hud.show_empty_bars"),
+                            () -> cc().hudShowZeroBars(), v -> cc().setHudShowZeroBars(v), save)
+                        .defaultValue(false)
                     .moveToggles(ui, panelId)
                     .resetPositions(ui, panelId, resetTextOffset)
                 .tab(text("config.marieslib.moduleoptions.tab.appearance"))
@@ -62,8 +65,10 @@ public final class HudOptionsPanel {
                         .defaultValue(1.0d)
                     .slider(text("config.marieslib.moduleoptions.backgroundOpacity"),
                             () -> cc().hudBackgroundOpacity(), v -> cc().setHudBackgroundOpacity(v), 0.0d, 1.0d, PERCENT_STEP, save)
-                        .defaultValue(DEFAULT_OPACITY)
-                    .resetTab();
+                        .defaultValue(DEFAULT_OPACITY);
+        // Added before the reset button so "Reset This Tab" covers them, as in the other HUD boxes.
+        HudStyleRows.nutrientHud(panel);
+        panel.resetTab();
         panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
         NourishedColorSlots.addNutrients(panel);
         NourishedColorSlots.addFixed(panel, NourishedColors.HUD_PANEL, "nourished.options.color.background");
