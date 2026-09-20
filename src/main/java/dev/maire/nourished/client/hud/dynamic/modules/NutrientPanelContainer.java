@@ -138,6 +138,7 @@ public final class NutrientPanelContainer implements Container {
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             Container.super.render(context, content);
+            HudEditTarget.drawScrollIndicator(context, bounds);
         } finally {
             context.popClip();
         }

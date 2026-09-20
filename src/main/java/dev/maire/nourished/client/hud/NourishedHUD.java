@@ -67,6 +67,8 @@ public final class NourishedHUD {
             return;
         }
         HudLayout.Layout layout = HudEditTarget.resolvedLayout(mc, visibleKeys);
+        // Only the rows that fit the box (all of them unless it was shrunk) — see HudEditTarget#scrolledKeys.
+        visibleKeys = HudEditTarget.scrolledKeys(visibleKeys, layout);
         if (cc.hudClassicMode()) {
             ClassicHudPanelRenderer.drawPanel(
                     event.getGuiGraphics(), mc, data, visibleKeys, layout, layout.panelX(), layout.panelY(), displayValues

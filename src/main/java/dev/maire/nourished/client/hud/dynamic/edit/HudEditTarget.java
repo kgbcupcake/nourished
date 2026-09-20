@@ -160,7 +160,7 @@ public final class HudEditTarget implements MarieComponent {
     private static Constraint constraintFor(HudLayout.Layout natural) {
         return new Constraint(
                 new Size(natural.panelW(), natural.panelH()),
-                new Size(natural.panelW(), natural.panelH()),
+                new Size(AutoGrowPanelContainer.MIN_COLLAPSED_SIZE, AutoGrowPanelContainer.MIN_COLLAPSED_SIZE),
                 new Size((int) (natural.panelW() * MAX_MARGIN_MULTIPLIER), (int) (natural.panelH() * MAX_MARGIN_MULTIPLIER)),
                 false, false, true, true,
                 Anchor.TOP_LEFT, Insets.NONE, Insets.NONE
@@ -217,23 +217,25 @@ public final class HudEditTarget implements MarieComponent {
                     AutoGrowPanelContainer.ManualOverride override =
                             new AutoGrowPanelContainer.ManualOverride(state.widthManual(), state.heightManual());
                     int width = AutoGrowPanelContainer.resolveWidth(override, state.width(), natural.panelW());
-                    int height = AutoGrowPanelContainer.resolveHeight(override, state.height(), natural.panelH());
+                    int height = natural.panelH(); // always fits the visible bars, never a saved manual height
                     return new HudLayout.Layout(
                             state.x(), state.y(), width, height,
                             natural.baseX(), natural.baseY(),
                             natural.barW(), natural.rowH(), natural.iconSize(), natural.maxLabelSw(),
                             natural.scaledPad(), natural.labelScale(), natural.scale(), natural.verticalLayout(),
                             natural.verticalBarW(), natural.verticalBarH(), natural.verticalColumnW(),
-                            natural.panelW(), natural.panelH(), 0,
+                            natural.panelW(), natural.panelH(), state.leftMargin(),
                             persistedContentOffsetX(), persistedContentOffsetY()
                     );
                 })
                 .orElse(natural);
     }
 
-    /** Always 0: content sits at the box's top-left plus padding, so it moves with the box on resize, like the Calorie History and Activity Log boxes. */
+    /** Only grown/shrunk by a left-edge (or bottom-left-corner) gesture, so content stays put on screen — same rule as the Calorie History and Activity Log boxes, via {@link AutoGrowPanelContainer#leftMarginAfterResize}. */
     private static int persistedLeftMargin() {
-        return 0;
+        return UiStatePersistence.get().load(PANEL_ID)
+                .map(ComponentState::leftMargin)
+                .orElse(0);
     }
 
     /** Committed "Move Text and Icons" offset — see {@link #contentOffsetX}. */
@@ -307,7 +309,9 @@ public final class HudEditTarget implements MarieComponent {
         if (keys.isEmpty()) {
             return;
         }
-        int leftMargin = persistedLeftMargin();
+        // Read before this commit's own save below overwrites it.
+        int leftMargin = AutoGrowPanelContainer.leftMarginAfterResize(persistedLeftMargin(),
+                resolvedBounds(mc, keys).width(), bounds.width(), panelDrag.lastCommitWasLeftEdge());
         AutoGrowPanelContainer.ManualOverride existing = existingManualOverride();
         AutoGrowPanelContainer.ManualOverride override = AutoGrowPanelContainer.withCommit(existing, panelDrag);
         // Carries forward the existing persisted contentScale/paddingScale so a drag/resize commit
@@ -361,7 +365,66 @@ public final class HudEditTarget implements MarieComponent {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        return scaleConfigVisible && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        if (scaleConfigVisible && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+            return true;
+        }
+        List<String> keys = currentVisibleKeysOrFallback();
+        if (scrollY == 0 || keys.isEmpty()) {
+            return false;
+        }
+        HudLayout.Layout layout = resolvedLayout(mc, keys);
+        if (!new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH()).contains((int) mouseX, (int) mouseY)) {
+            return false;
+        }
+        int maxScroll = maxScroll(keys.size(), layout);
+        if (maxScroll <= 0) {
+            return false;
+        }
+        scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (int) Math.signum(scrollY)));
+        return true;
+    }
+
+    /** First nutrient row shown while the box is too short for all of them — set by the mouse wheel in edit mode, like {@code CalorieHudScreen}'s row scroll, and honored by the in-game HUD too. */
+    private static int scrollOffset;
+    /** Row count behind the last {@link #scrolledKeys} call, for {@link #drawScrollIndicator}. */
+    private static int lastTotalRows;
+    private static int lastCapacity;
+
+    /** How many rows fit in the box (at least one); a row counts once half of it is visible, since the panel clip cuts the rest. */
+    private static int rowCapacity(HudLayout.Layout layout) {
+        int pad = Math.round(ContentScaleController.resolvePadding(HudDrawHelpers.PANEL_PAD * persistedPaddingScale()));
+        int availableH = layout.panelH() - 2 * pad;
+        return Math.max(1, (availableH + HudDrawHelpers.ROW_GAP + layout.rowH() / 2) / (layout.rowH() + HudDrawHelpers.ROW_GAP));
+    }
+
+    private static int maxScroll(int rowCount, HudLayout.Layout layout) {
+        return layout.verticalLayout() ? 0 : Math.max(0, rowCount - rowCapacity(layout));
+    }
+
+    /** The rows that fit in {@code layout}'s box from {@link #scrollOffset} on — every row when they all fit (and always in the vertical layout, whose columns are not scrolled). Used by every path that draws this panel so they agree. */
+    public static List<String> scrolledKeys(List<String> keys, HudLayout.Layout layout) {
+        int maxScroll = maxScroll(keys.size(), layout);
+        scrollOffset = Math.min(scrollOffset, maxScroll);
+        lastTotalRows = keys.size();
+        lastCapacity = maxScroll == 0 ? keys.size() : rowCapacity(layout);
+        if (maxScroll == 0) {
+            return keys;
+        }
+        return keys.subList(scrollOffset, Math.min(keys.size(), scrollOffset + lastCapacity));
+    }
+
+    /** Thin track and thumb on the box's right inner edge, only while some rows are scrolled out of view — same look as the Calorie History box. */
+    public static void drawScrollIndicator(RenderContext context, Bounds bounds) {
+        if (lastTotalRows <= lastCapacity) {
+            return;
+        }
+        int trackH = Math.max(1, bounds.height() - 4);
+        int thumbH = Math.max(4, trackH * lastCapacity / lastTotalRows);
+        int maxScroll = lastTotalRows - lastCapacity;
+        int thumbY = bounds.y() + 2 + (trackH - thumbH) * scrollOffset / maxScroll;
+        int trackX = bounds.x() + bounds.width() - 3;
+        context.fillRect(trackX, bounds.y() + 2, 2, trackH, context.theme().color(dev.marie.framework.ui.ThemeKey.BAR_BACKGROUND));
+        context.fillRect(trackX, thumbY, 2, thumbH, contentOutlineColor());
     }
 
     @Override
@@ -440,25 +503,20 @@ public final class HudEditTarget implements MarieComponent {
         Bounds defaultBounds = resolvedBounds(mc, keys);
         Bounds bounds = liveOrDefault(mouse[0], mouse[1], defaultBounds);
 
-        // Re-clamped defensively at draw time too — see the same reasoning on CalorieHudScreen's
-        // equivalent call site: the panel this offset is valid against can change independently of
-        // dragging (e.g. a manual resize), and a stale offset should self-correct visually.
-        contentOffsetX = clampContentOffsetX(contentOffsetX, bounds, persistedLeftMargin());
-        contentOffsetY = clampContentOffsetY(contentOffsetY, bounds);
-        MarieModuleSettings.setIconOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID), bounds, persistedLeftMargin()),
-                clampContentOffsetY(MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID), bounds));
-        MarieModuleSettings.setBarOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID), bounds, persistedLeftMargin()),
-                clampContentOffsetY(MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID), bounds));
+        // Offsets are clamped only while dragging (see mouseDragged), never here: clamping at draw time
+        // rewrote the shared offsets against whatever the box measured this frame, so the edit preview
+        // and the in-game HUD (which never re-clamped) drew the same content in different places, and a
+        // box collapsed to a sliver would permanently squash them. The panel clip hides any overflow.
 
         Map<String, Float> displayValues = NourishedHUD.currentDisplayValues();
         HudLayout.Layout matchedLayout = matchedLayoutFor(keys, bounds);
         if (NourishedClientConfig.get().hudClassicMode() && context instanceof GuiGraphicsRenderContext guiContext) {
             TrackingData data = MarieClientCache.get();
             ClassicHudPanelRenderer.drawPanel(
-                    guiContext.graphics(), mc, data, keys, matchedLayout, bounds.x(), bounds.y(), displayValues
+                    guiContext.graphics(), mc, data, scrolledKeys(keys, matchedLayout), matchedLayout, bounds.x(), bounds.y(), displayValues
             );
         } else {
-            NutrientPanelContainer panel = new NutrientPanelContainer(keys, matchedLayout, displayValues);
+            NutrientPanelContainer panel = new NutrientPanelContainer(scrolledKeys(keys, matchedLayout), matchedLayout, displayValues);
             panel.render(context, bounds);
         }
 
@@ -531,7 +589,8 @@ public final class HudEditTarget implements MarieComponent {
      * only {@link #resolvedLayout}'s doc explains why width/height are still independently tracked.
      */
     private HudLayout.Layout matchedLayoutFor(List<String> keys, Bounds bounds) {
-        int leftMargin = persistedLeftMargin();
+        int leftMargin = AutoGrowPanelContainer.leftMarginAfterResize(persistedLeftMargin(),
+                resolvedBounds(mc, keys).width(), bounds.width(), panelDrag.isLeftEdgeGestureActive());
         HudLayout.Layout natural = HudLayout.compute(mc, keys);
         return new HudLayout.Layout(
                 bounds.x(), bounds.y(), bounds.width(), bounds.height(),
