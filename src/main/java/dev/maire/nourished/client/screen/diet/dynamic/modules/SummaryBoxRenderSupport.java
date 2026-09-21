@@ -79,9 +79,9 @@ final class SummaryBoxRenderSupport {
         context.drawItem(new ItemStack(item), sx(localX), sy(startLocalY + localY), scale);
     }
 
-    void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc) {
+    void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc, int borderColor) {
         int fill = panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity());
-        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, borderColor());
+        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, borderColor);
     }
 
     static int panelColorWithOpacity(int rgb, double opacity) {

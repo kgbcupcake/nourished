@@ -80,6 +80,7 @@
   "nourished.options.color.beneficial": "Beneficial",
   "nourished.options.color.harmful": "Harmful",
   "nourished.options.color.text": "Text",
+  "nourished.options.show_icons": "Show icons",
   "nourished.options.color.label_text": "Label text",
   "nourished.options.color.calorie": "Calorie value",
   "nourished.options.color.over_goal": "Over-goal bar",

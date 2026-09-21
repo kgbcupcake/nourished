@@ -142,7 +142,7 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         double paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         support.begin(bounds, contentScale, paddingLocal);
 
-        support.drawOuterBox(context, bounds.width(), bounds.height(), cc);
+        support.drawOuterBox(context, bounds.width(), bounds.height(), cc, SummaryBoxRenderSupport.borderColor());
 
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {

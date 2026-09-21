@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietModuleIcons;
 import dev.marie.framework.color.MarieColors;
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
@@ -47,13 +48,13 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         return NourishedColors.surfaceRgb();
     }
     private static int borderColor() {
-        return MarieColors.resolveColor(NourishedColors.BORDER);
+        return MarieColors.resolveColor(NourishedColors.RECENT_MEALS_BORDER);
     }
     private static int headerTextColor() {
         return MarieColors.resolveColor(NourishedColors.RECENT_MEALS_HEADER);
     }
     private static int textColor() {
-        return MarieColors.resolveColor(NourishedColors.TEXT);
+        return MarieColors.resolveColor(NourishedColors.RECENT_MEALS_TEXT);
     }
 
     /**
@@ -286,7 +287,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                     int budget = Math.max(0, maxNameFontPx - ellipsisW);
                     name = font.plainSubstrByWidth(name, budget) + "...";
                 }
-                rowContext.drawItem(recent, sx(x) + barDx, sy(y) + barDy, scale * iconScale * barScale);
+                if (DietModuleIcons.isShown(ID)) rowContext.drawItem(recent, sx(x) + barDx, sy(y) + barDy, scale * iconScale * barScale);
 
                 Map<String, Float> nutrientBars = NutrientClassificationLookup.resolveBars(recent.getItem());
                 String nutrientKey = nutrientBars.entrySet().stream()

@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietModuleIcons;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.color.MarieColors;
@@ -133,11 +134,13 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         double paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         support.begin(bounds, contentScale, paddingLocal);
 
-        support.drawOuterBox(context, bounds.width(), bounds.height(), cc);
+        support.drawOuterBox(context, bounds.width(), bounds.height(), cc, MarieColors.resolveColor(NourishedColors.CALORIES_BORDER));
 
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
-            support.drawItem(context, "minecraft:fire_charge", 2, 5, scale);
+            if (DietModuleIcons.isShown(ID)) {
+                support.drawItem(context, "minecraft:fire_charge", 2, 5, scale);
+            }
             support.drawText(context, Component.translatable("nourished.screen.diet.calories_label").getString(), 24, 6, MarieColors.resolveColor(NourishedColors.CALORIES_HEADER), scale);
 
             float today = MarieTracking.getCurrentTrackerValue(Minecraft.getInstance().player, NourishedAPI.CALORIES_TRACKER_ID);

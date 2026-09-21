@@ -62,6 +62,10 @@ public final class NourishedColors {
     public static final ColorKey RECENT_MEALS_HEADER = themed("diet.recent_meals.header", ThemeKey.TEXT_SECONDARY);
     public static final ColorKey EAT_MORE_HEADER = themed("diet.eat_more.header", ThemeKey.TEXT_SECONDARY);
     public static final ColorKey ACTIVE_EFFECTS_HEADER = themed("diet.active_effects.header", ThemeKey.TEXT_SECONDARY);
+    public static final ColorKey RECENT_MEALS_TEXT = themed("diet.recent_meals.text", ThemeKey.TEXT_PRIMARY);
+    public static final ColorKey CALORIES_BORDER = themed("diet.calories.border", ThemeKey.BORDER);
+    public static final ColorKey RECENT_MEALS_BORDER = themed("diet.recent_meals.border", ThemeKey.BORDER);
+    public static final ColorKey EAT_MORE_BORDER = themed("diet.eat_more.border", ThemeKey.BORDER);
     public static final ColorKey BORDER = themed("border", ThemeKey.BORDER);
     public static final ColorKey DIVIDER = themed("divider", ThemeKey.BORDER);
     public static final ColorKey BAR_TRACK = themed("bar.track", ThemeKey.BAR_BACKGROUND);

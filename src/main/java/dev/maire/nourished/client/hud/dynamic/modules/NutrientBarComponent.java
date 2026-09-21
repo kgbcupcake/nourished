@@ -131,7 +131,10 @@ final class NutrientBarComponent implements MarieComponent {
             renderContent(context, bounds);
             return;
         }
-        context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
+        // Horizontally the row slot is only the natural width, so a bigger box or bar size would be cut
+        // off there; the panel-wide clip already bounds the width, so this one only guards rows.
+        int clipW = verticalMode ? bounds.width() : Math.max(bounds.width(), 4096);
+        context.pushClip(bounds.x(), bounds.y(), clipW, bounds.height());
         try {
             renderContent(context, bounds);
         } finally {

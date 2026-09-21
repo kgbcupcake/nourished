@@ -1,6 +1,9 @@
 package dev.maire.nourished.client.screen.diet.dynamic.options;
 
 import dev.marie.framework.ui.api.MarieModuleSettings;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietModuleIcons;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.client.colors.NourishedColorSlots;
 import dev.maire.nourished.client.colors.NourishedColors;
@@ -124,6 +127,10 @@ public final class DietOptionsPanel {
         if (hasHeader) {
             panel.withHeader();
         }
+        if (moduleId.equals(CaloriesComponent.ID) || moduleId.equals(RecentMealsComponent.ID)) {
+            panel.styleRows(p -> p.toggle(text("nourished.options.show_icons"),
+                    () -> DietModuleIcons.isShown(moduleId), v -> DietModuleIcons.setShown(moduleId, v), () -> {}));
+        }
         if (colors != null) {
             panel.extraTabs(p -> {
                 p.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
@@ -140,21 +147,20 @@ public final class DietOptionsPanel {
     public static void caloriesColors(MarieToolbox.PanelBuilder panel) {
         NourishedColorSlots.addFixed(panel, NourishedColors.CALORIES_HEADER, "nourished.options.color.header_text");
         NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_VALUE, "nourished.options.color.calorie");
-        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT, "nourished.options.color.text");
-        NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
+        NourishedColorSlots.addFixed(panel, NourishedColors.CALORIES_BORDER, "nourished.options.color.border");
     }
 
     /** The Recent Meals box's colors: header, meal text and border (shared roles, as for {@link #caloriesColors}). */
     public static void recentMealsColors(MarieToolbox.PanelBuilder panel) {
         NourishedColorSlots.addFixed(panel, NourishedColors.RECENT_MEALS_HEADER, "nourished.options.color.header_text");
-        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT, "nourished.options.color.text");
-        NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
+        NourishedColorSlots.addFixed(panel, NourishedColors.RECENT_MEALS_TEXT, "nourished.options.color.text");
+        NourishedColorSlots.addFixed(panel, NourishedColors.RECENT_MEALS_BORDER, "nourished.options.color.border");
     }
 
     /** The Eat More box's colors: header and border (shared roles, as for {@link #caloriesColors}). */
     public static void eatMoreColors(MarieToolbox.PanelBuilder panel) {
         NourishedColorSlots.addFixed(panel, NourishedColors.EAT_MORE_HEADER, "nourished.options.color.header_text");
-        NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
+        NourishedColorSlots.addFixed(panel, NourishedColors.EAT_MORE_BORDER, "nourished.options.color.border");
     }
 
     /** The Balance box's colors: its header (a shared role, as for {@link #recentMealsColors}) and one per balance state. */

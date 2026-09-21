@@ -48,7 +48,7 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         return NourishedColors.surfaceRgb();
     }
     private static int borderColor() {
-        return MarieColors.resolveColor(NourishedColors.BORDER);
+        return MarieColors.resolveColor(NourishedColors.EAT_MORE_BORDER);
     }
     private static int headerTextColor() {
         return MarieColors.resolveColor(NourishedColors.EAT_MORE_HEADER);
