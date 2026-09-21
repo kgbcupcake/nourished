@@ -1,9 +1,10 @@
 package dev.maire.nourished.client.screen.diet.dynamic.options;
 
 import dev.marie.framework.ui.api.MarieModuleSettings;
+import dev.marie.framework.ui.api.StandardPanelBuilder;
+import dev.maire.nourished.client.screen.diet.dynamic.edit.DietScreenEditTarget;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
-import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietModuleIcons;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.client.colors.NourishedColorSlots;
 import dev.maire.nourished.client.colors.NourishedColors;
@@ -29,76 +30,73 @@ public final class DietOptionsPanel {
 
     public static MarieComponent build() {
         Runnable save = NourishedClientConfig::saveNow;
-        MarieToolbox.PanelBuilder panel = MarieToolbox.panel(text("nourished.options.diet.title"))
-                .tab(text("config.marieslib.moduleoptions.tab.layout"))
-                    // Sizes of the panel and its two sub-boxes as laid out; separate from each box's own Text size.
-                    .slider(text("nourished.options.diet.panel_size"),
-                            () -> cc().dietScale(), v -> cc().setDietScale(v), 0.5d, 1.5d, SCALE_STEP, save)
-                        .defaultValue(1.0d)
-                    .slider(text("nourished.options.diet.recent_meals_box_size"),
-                            () -> cc().recentMealsBoxScale(), v -> cc().setRecentMealsBoxScale(v), 0.5d, 1.5d, SCALE_STEP, save)
-                        .defaultValue(1.0d)
-                    .slider(text("nourished.options.diet.eat_more_box_size"),
-                            () -> cc().eatMoreBoxScale(), v -> cc().setEatMoreBoxScale(v), 0.5d, 1.5d, SCALE_STEP, save)
-                        .defaultValue(1.0d)
-                    .toggle(text("nourished.options.diet.drag_bars"),
-                            () -> cc().dietBarDragEnabled(), v -> cc().setDietBarDragEnabled(v), save)
-                        .defaultValue(true)
-                    .button(text("nourished.options.diet.reset_bar_order"), text("nourished.options.diet.reset_caption"),
-                            () -> cc().resetDietBarOrder(), save)
-                    .resetTab()
-                .tab(text("nourished.options.tab.visibility"))
-                    .toggle(text("nourished.options.diet.show_recent_meals"),
-                            () -> cc().showRecentMeals(), v -> cc().setShowRecentMeals(v), save)
-                        .defaultValue(true)
-                    .toggle(text("nourished.options.diet.show_eat_more"),
-                            () -> cc().showEatMoreOf(), v -> cc().setShowEatMoreOf(v), save)
-                        .defaultValue(true)
-                    .toggle(text("nourished.options.diet.show_active_effects"),
-                            () -> cc().showActiveEffects(), v -> cc().setShowActiveEffects(v), save)
-                        .defaultValue(true)
-                    // Only takes visible effect while FeatureFlagCache.enableTotalTracking() is on; bound as-is, not gated here.
-                    .toggle(text("nourished.options.diet.show_calories_box"),
-                            () -> cc().showCaloriesBox(), v -> cc().setShowCaloriesBox(v), save)
-                        .defaultValue(true)
-                    .toggle(text("nourished.options.diet.show_balance_box"),
-                            () -> cc().showBalanceBox(), v -> cc().setShowBalanceBox(v), save)
-                        .defaultValue(true)
-                    // Read only when the inventory screen opens (ClientEvents#onScreenInit), so a change applies on the next open.
-                    .toggle(text("nourished.options.diet.show_inventory_button"),
-                            () -> cc().showDietScreenButton(), v -> cc().setShowDietScreenButton(v), save)
-                        .defaultValue(true)
-                    .resetTab()
-                .tab(text("config.marieslib.moduleoptions.tab.appearance"))
-                    .section(text("config.marieslib.moduleoptions.section.background"))
-                    .slider(text("config.marieslib.moduleoptions.backgroundOpacity"),
-                            () -> cc().dietBackgroundOpacity(), v -> cc().setDietBackgroundOpacity(v), 0.0d, 1.0d, PERCENT_STEP, save)
-                        .defaultValue(DEFAULT_OPACITY)
-                    .section(text("config.marieslib.moduleoptions.section.brightness"))
-                    .slider(text("config.marieslib.moduleoptions.textBrightness"),
-                            () -> cc().dietTextBrightness(), v -> cc().setDietTextBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
-                        .defaultValue(1.0d)
-                    .slider(text("config.marieslib.moduleoptions.iconBrightness"),
-                            () -> cc().dietIconBrightness(), v -> cc().setDietIconBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
-                        .defaultValue(1.0d)
-                    .endSection()
-                    .resetTab();
-        panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
-        NourishedColorSlots.addNutrients(panel);
-        NourishedColorSlots.addFixed(panel, NourishedColors.DIET_PANEL, "nourished.options.color.panel");
-        NourishedColorSlots.addFixed(panel, NourishedColors.DIET_TITLE, "nourished.options.color.title");
-        NourishedColorSlots.addFixed(panel, NourishedColors.DIET_TODAY, "nourished.options.color.today_text");
-        // Roles several Diet boxes draw live here once, so a shared key is never repeated across tabs. The
-        // toggle's housing, border and lever colors (toggle.housing/border/lever) are deliberately left to colors.json.
-        panel.colorTab(text("nourished.options.tab.shared"));
-        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT, "nourished.options.color.text");
-        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.intake_header_text");
-        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_MUTED, "nourished.options.color.muted_text");
-        NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
-        NourishedColorSlots.addFixed(panel, NourishedColors.DIVIDER, "nourished.options.color.divider");
-        NourishedColorSlots.addFixed(panel, NourishedColors.TOGGLE_ON, "nourished.options.color.toggle_on");
-        NourishedColorSlots.addFixed(panel, NourishedColors.TOGGLE_OFF, "nourished.options.color.toggle_off");
-        return panel.build();
+        return MarieModuleSettings.standardPanel(text("nourished.options.diet.title"), DietScreenPersistence.get(), DietScreenEditTarget.PANEL_ID)
+                // The whole screen has no text, icons or padding of its own to size or move; those live on its five boxes.
+                .withoutPadding()
+                .withoutMoveAndHide()
+                .withoutSizes()
+                .opacity(() -> cc().dietBackgroundOpacity(), v -> cc().setDietBackgroundOpacity(v), DEFAULT_OPACITY)
+                .textBrightness(() -> cc().dietTextBrightness(), v -> cc().setDietTextBrightness(v))
+                .iconBrightness(() -> cc().dietIconBrightness(), v -> cc().setDietIconBrightness(v))
+                .onCommit(save)
+                .layoutRows(p -> p
+                        // Sizes of the panel and its two sub-boxes as laid out; separate from each box's own Text size.
+                        .slider(text("nourished.options.diet.panel_size"),
+                                () -> cc().dietScale(), v -> cc().setDietScale(v), 0.5d, 1.5d, SCALE_STEP, save)
+                            .defaultValue(1.0d)
+                        .slider(text("nourished.options.diet.recent_meals_box_size"),
+                                () -> cc().recentMealsBoxScale(), v -> cc().setRecentMealsBoxScale(v), 0.5d, 1.5d, SCALE_STEP, save)
+                            .defaultValue(1.0d)
+                        .slider(text("nourished.options.diet.eat_more_box_size"),
+                                () -> cc().eatMoreBoxScale(), v -> cc().setEatMoreBoxScale(v), 0.5d, 1.5d, SCALE_STEP, save)
+                            .defaultValue(1.0d))
+                .behaviorRows(p -> p
+                        .toggle(text("nourished.options.diet.drag_bars"),
+                                () -> cc().dietBarDragEnabled(), v -> cc().setDietBarDragEnabled(v), save)
+                            .defaultValue(true)
+                        .button(text("nourished.options.diet.reset_bar_order"), text("nourished.options.diet.reset_caption"),
+                                () -> cc().resetDietBarOrder(), save)
+                        .section(text("nourished.options.hud.section.visibility"))
+                        .toggle(text("nourished.options.diet.show_recent_meals"),
+                                () -> cc().showRecentMeals(), v -> cc().setShowRecentMeals(v), save)
+                            .defaultValue(true)
+                        .toggle(text("nourished.options.diet.show_eat_more"),
+                                () -> cc().showEatMoreOf(), v -> cc().setShowEatMoreOf(v), save)
+                            .defaultValue(true)
+                        .toggle(text("nourished.options.diet.show_active_effects"),
+                                () -> cc().showActiveEffects(), v -> cc().setShowActiveEffects(v), save)
+                            .defaultValue(true)
+                        // Only takes visible effect while FeatureFlagCache.enableTotalTracking() is on; bound as-is, not gated here.
+                        .toggle(text("nourished.options.diet.show_calories_box"),
+                                () -> cc().showCaloriesBox(), v -> cc().setShowCaloriesBox(v), save)
+                            .defaultValue(true)
+                        .toggle(text("nourished.options.diet.show_balance_box"),
+                                () -> cc().showBalanceBox(), v -> cc().setShowBalanceBox(v), save)
+                            .defaultValue(true)
+                        // Read only when the inventory screen opens (ClientEvents#onScreenInit), so a change applies on the next open.
+                        .toggle(text("nourished.options.diet.show_inventory_button"),
+                                () -> cc().showDietScreenButton(), v -> cc().setShowDietScreenButton(v), save)
+                            .defaultValue(true)
+                        .endSection()
+                        .resetTab())
+                .extraTabs(panel -> {
+                    panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
+                    NourishedColorSlots.addNutrients(panel);
+                    NourishedColorSlots.addFixed(panel, NourishedColors.DIET_PANEL, "nourished.options.color.panel");
+                    NourishedColorSlots.addFixed(panel, NourishedColors.DIET_TITLE, "nourished.options.color.title");
+                    NourishedColorSlots.addFixed(panel, NourishedColors.DIET_TODAY, "nourished.options.color.today_text");
+                    // Roles several Diet boxes draw live here once, so a shared key is never repeated across tabs. The
+                    // toggle's housing, border and lever colors (toggle.housing/border/lever) are deliberately left to colors.json.
+                    panel.colorTab(text("nourished.options.tab.shared"));
+                    NourishedColorSlots.addFixed(panel, NourishedColors.TEXT, "nourished.options.color.text");
+                    NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.intake_header_text");
+                    NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_MUTED, "nourished.options.color.muted_text");
+                    NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
+                    NourishedColorSlots.addFixed(panel, NourishedColors.DIVIDER, "nourished.options.color.divider");
+                    NourishedColorSlots.addFixed(panel, NourishedColors.TOGGLE_ON, "nourished.options.color.toggle_on");
+                    NourishedColorSlots.addFixed(panel, NourishedColors.TOGGLE_OFF, "nourished.options.color.toggle_off");
+                })
+                .build();
     }
 
     /**
@@ -119,7 +117,7 @@ public final class DietOptionsPanel {
     /** Same, with a Colors tab whose slots {@code colors} adds (null: no Colors tab). */
     public static MarieComponent forModule(String title, String moduleId, boolean hasBars, boolean hasIcons, boolean hasHeader,
                                            java.util.function.Consumer<MarieToolbox.PanelBuilder> colors) {
-        MarieModuleSettings.StandardPanelBuilder panel = MarieModuleSettings.standardPanel(title, DietScreenPersistence.get(), moduleId)
+        StandardPanelBuilder panel = MarieModuleSettings.standardPanel(title, DietScreenPersistence.get(), moduleId)
                 .storedBrightness();
         if (!hasBars) {
             panel.withoutBars();
@@ -129,10 +127,6 @@ public final class DietOptionsPanel {
         }
         if (hasHeader) {
             panel.withHeader();
-        }
-        if (moduleId.equals(CaloriesComponent.ID) || moduleId.equals(RecentMealsComponent.ID)) {
-            panel.styleRows(p -> p.toggle(text("nourished.options.show_icons"),
-                    () -> DietModuleIcons.isShown(moduleId), v -> DietModuleIcons.setShown(moduleId, v), () -> {}));
         }
         if (colors != null) {
             panel.extraTabs(p -> {

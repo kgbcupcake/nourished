@@ -3,6 +3,7 @@ package dev.maire.nourished.modules.activity_driven_nutrient.client;
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.maire.nourished.client.colors.NourishedColorSlots;
 import dev.marie.framework.ui.api.MarieModuleSettings;
+import dev.marie.framework.ui.api.MoveDrag;
 import dev.marie.framework.color.ColorKeyPair;
 import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.tracking.tracker.MarieTracking;
@@ -131,8 +132,8 @@ public final class ActivityLogHudPanel implements MarieComponent {
     private final DraggableResizable drag;
 
     /** Whether a content-move drag (see {@link #moveContentEnabled}) is currently in progress. */
-    /** Grab state for a "Move Text and Icons" or "Move Bars" drag (see {@link MarieModuleSettings.MoveDrag}). */
-    private final MarieModuleSettings.MoveDrag moveDrag = new MarieModuleSettings.MoveDrag();
+    /** Grab state for a "Move Text and Icons" or "Move Bars" drag (see {@link MoveDrag}). */
+    private final MoveDrag moveDrag = new MoveDrag();
 
     /**
      * The row content's offset from where it would otherwise sit (just below the header, inset by
@@ -600,7 +601,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
             return true;
         }
         Bounds bounds = resolvedBounds(currentRows().size());
-        MarieModuleSettings.MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(UiStatePersistence.get(), PANEL_ID);
+        MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(UiStatePersistence.get(), PANEL_ID);
         if (mode != null && bounds.contains((int) mouseX, (int) mouseY)) {
             switch (mode) {
                 case TEXT -> moveDrag.start(mode, mouseX, mouseY, contentOffsetX, contentOffsetY);
@@ -655,10 +656,10 @@ public final class ActivityLogHudPanel implements MarieComponent {
                         // One drag shifts all three offsets by the same amount from where each started.
                         int dx = moveDrag.offsetX(mouseX);
                         int dy = moveDrag.offsetY(mouseY);
-                        contentOffsetX = clampContentOffsetX(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.TEXT) + dx, bounds);
-                        contentOffsetY = clampContentOffsetY(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.TEXT) + dy, bounds);
-                        MarieModuleSettings.setIconOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.ICONS) + dx, bounds), clampContentOffsetY(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.ICONS) + dy, bounds));
-                        MarieModuleSettings.setBarOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.BARS) + dx, bounds), clampContentOffsetY(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.BARS) + dy, bounds));
+                        contentOffsetX = clampContentOffsetX(moveDrag.baseX(MoveDrag.Mode.TEXT) + dx, bounds);
+                        contentOffsetY = clampContentOffsetY(moveDrag.baseY(MoveDrag.Mode.TEXT) + dy, bounds);
+                        MarieModuleSettings.setIconOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(moveDrag.baseX(MoveDrag.Mode.ICONS) + dx, bounds), clampContentOffsetY(moveDrag.baseY(MoveDrag.Mode.ICONS) + dy, bounds));
+                        MarieModuleSettings.setBarOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(moveDrag.baseX(MoveDrag.Mode.BARS) + dx, bounds), clampContentOffsetY(moveDrag.baseY(MoveDrag.Mode.BARS) + dy, bounds));
                     }
                 }
             return true;
@@ -676,7 +677,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
             return true;
         }
         if (moveDrag.isActive()) {
-            MarieModuleSettings.MoveDrag.Mode mode = moveDrag.mode();
+            MoveDrag.Mode mode = moveDrag.mode();
             moveDrag.stop();
             switch (mode) {
                 case TEXT -> persistContentOffset();

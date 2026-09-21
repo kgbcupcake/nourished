@@ -1,6 +1,5 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
-import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietModuleIcons;
 import dev.marie.framework.color.MarieColors;
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
@@ -287,7 +286,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                     int budget = Math.max(0, maxNameFontPx - ellipsisW);
                     name = font.plainSubstrByWidth(name, budget) + "...";
                 }
-                if (DietModuleIcons.isShown(ID)) rowContext.drawItem(recent, sx(x) + barDx, sy(y) + barDy, scale * iconScale * barScale);
+                if (!MarieModuleSettings.isIconsHidden(store, ID)) rowContext.drawItem(recent, sx(x) + barDx, sy(y) + barDy, scale * iconScale * barScale);
 
                 Map<String, Float> nutrientBars = NutrientClassificationLookup.resolveBars(recent.getItem());
                 String nutrientKey = nutrientBars.entrySet().stream()

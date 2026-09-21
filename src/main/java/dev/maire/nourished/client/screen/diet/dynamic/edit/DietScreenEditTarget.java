@@ -3,6 +3,7 @@ package dev.maire.nourished.client.screen.diet.dynamic.edit;
 import dev.marie.framework.color.MarieColors;
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
+import dev.marie.framework.ui.api.MoveDrag;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Bounds;
@@ -66,7 +67,7 @@ public final class DietScreenEditTarget implements MarieComponent {
     private final DraggableResizable activeEffectsDrag;
 
     /** Grab state for a sub-box "Move Text"/"Move Icons"/"Move All" drag, and which box it is repositioning content in. */
-    private final MarieModuleSettings.MoveDrag moveDrag = new MarieModuleSettings.MoveDrag();
+    private final MoveDrag moveDrag = new MoveDrag();
     private String movingBoxId;
     private Bounds movingBoxBounds;
     /** Per box being resized from its left/top edge: which axes, the box's start x/y, and its four content offsets at the press. */
@@ -445,7 +446,7 @@ public final class DietScreenEditTarget implements MarieComponent {
             if (boxes[i] == null || !boxes[i].contains((int) mouseX, (int) mouseY)) {
                 continue;
             }
-            MarieModuleSettings.MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(DietScreenPersistence.get(), ids[i]);
+            MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(DietScreenPersistence.get(), ids[i]);
             if (mode == null) {
                 continue;
             }
@@ -489,35 +490,35 @@ public final class DietScreenEditTarget implements MarieComponent {
                 int dx = moveDrag.offsetX(mouseX);
                 int dy = moveDrag.offsetY(mouseY);
                 MarieModuleSettings.setTextOffset(DietScreenPersistence.get(), movingBoxId,
-                        clamp(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.TEXT) + dx, maxX),
-                        clamp(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.TEXT) + dy, maxY));
+                        clamp(moveDrag.baseX(MoveDrag.Mode.TEXT) + dx, maxX),
+                        clamp(moveDrag.baseY(MoveDrag.Mode.TEXT) + dy, maxY));
                 MarieModuleSettings.setIconOffset(DietScreenPersistence.get(), movingBoxId,
-                        clamp(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.ICONS) + dx, maxX),
-                        clamp(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.ICONS) + dy, maxY));
+                        clamp(moveDrag.baseX(MoveDrag.Mode.ICONS) + dx, maxX),
+                        clamp(moveDrag.baseY(MoveDrag.Mode.ICONS) + dy, maxY));
                 MarieModuleSettings.setBarOffset(DietScreenPersistence.get(), movingBoxId,
-                        clamp(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.BARS) + dx, maxX),
-                        clamp(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.BARS) + dy, maxY));
+                        clamp(moveDrag.baseX(MoveDrag.Mode.BARS) + dx, maxX),
+                        clamp(moveDrag.baseY(MoveDrag.Mode.BARS) + dy, maxY));
                 MarieModuleSettings.setHeaderOffset(DietScreenPersistence.get(), movingBoxId,
-                        clamp(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.HEADER) + dx, maxX),
-                        clamp(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.HEADER) + dy, maxY));
+                        clamp(moveDrag.baseX(MoveDrag.Mode.HEADER) + dx, maxX),
+                        clamp(moveDrag.baseY(MoveDrag.Mode.HEADER) + dy, maxY));
             }
         }
     }
 
     private void finishMoveDrag() {
-        MarieModuleSettings.MoveDrag.Mode mode = moveDrag.mode();
+        MoveDrag.Mode mode = moveDrag.mode();
         moveDrag.stop();
-        boolean all = mode == MarieModuleSettings.MoveDrag.Mode.ALL;
-        if (all || mode == MarieModuleSettings.MoveDrag.Mode.TEXT) {
+        boolean all = mode == MoveDrag.Mode.ALL;
+        if (all || mode == MoveDrag.Mode.TEXT) {
             MarieModuleSettings.commitTextOffset(DietScreenPersistence.get(), movingBoxId);
         }
-        if (all || mode == MarieModuleSettings.MoveDrag.Mode.ICONS) {
+        if (all || mode == MoveDrag.Mode.ICONS) {
             MarieModuleSettings.commitIconOffset(DietScreenPersistence.get(), movingBoxId);
         }
-        if (all || mode == MarieModuleSettings.MoveDrag.Mode.BARS) {
+        if (all || mode == MoveDrag.Mode.BARS) {
             MarieModuleSettings.commitBarOffset(DietScreenPersistence.get(), movingBoxId);
         }
-        if (all || mode == MarieModuleSettings.MoveDrag.Mode.HEADER) {
+        if (all || mode == MoveDrag.Mode.HEADER) {
             MarieModuleSettings.commitHeaderOffset(DietScreenPersistence.get(), movingBoxId);
         }
         movingBoxId = null;

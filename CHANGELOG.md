@@ -6,6 +6,8 @@
 
 ### Changed
 
+- Removed the Calories and Recent Meals boxes' own "Show icons" toggle (and the `DietModuleIcons` store behind it): the generic "Hide Icons" toggle in each box's Behavior tab replaces it, and now hides Recent Meals' per-row icons as well. Any earlier "Show icons" setting is not carried over.
+- The Diet Screen window is now built through MariesLib's `standardPanel` like every other module window, so its tabs match: Layout (panel and box sizes), Behavior (drag bars, reset bar order, a collapsible "Visibility" group for the show/hide-box toggles, Reset This Tab), Style (collapsible Background and Brightness groups), Colors and Shared. It uses the new `withoutPadding`/`withoutMoveAndHide`/`withoutSizes` options, so no Move, Hide or Size rows appear that would do nothing for a whole screen. The tab formerly called Visibility is now part of Behavior; every setting, config key and default is unchanged.
 - All Nourished module windows now use MariesLib's one generic options layout: the Nutrient HUD window is built through `MarieModuleSettings.standardPanel` like Calorie History and Activity Log, so its Style tab has the same collapsible groups — Sizes, Brightness, Background (opacity, shade) and Border (opacity, shade) — instead of loose border/shade sliders below them (its reveal/hide/threshold options sit under a collapsible "Visibility" group on Behavior), and Calorie History and Activity Log show their border/shade sliders in those same groups. The Diet Screen window's tabs are ordered Layout, Visibility, Style, Colors with Style grouped into Background and Brightness. Values, config keys and defaults are unchanged; the hand-written `HudStyleRows` is gone.
 
 ### Fixed

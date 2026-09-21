@@ -3,6 +3,7 @@ package dev.maire.nourished.client.hud.dynamic.edit;
 import dev.marie.framework.color.MarieColors;
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
+import dev.marie.framework.ui.api.MoveDrag;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Anchor;
@@ -78,8 +79,8 @@ public final class HudEditTarget implements MarieComponent {
     private final DraggableResizable panelDrag;
 
     /** Whether a content-move drag (see {@link #moveContentEnabled}) is currently in progress. */
-    /** Grab state for a "Move Text and Icons" or "Move Bars" drag (see {@link MarieModuleSettings.MoveDrag}). */
-    private final MarieModuleSettings.MoveDrag moveDrag = new MarieModuleSettings.MoveDrag();
+    /** Grab state for a "Move Text and Icons" or "Move Bars" drag (see {@link MoveDrag}). */
+    private final MoveDrag moveDrag = new MoveDrag();
 
     /**
      * The content's offset from where it would otherwise sit — a plain persisted translation, not
@@ -352,7 +353,7 @@ public final class HudEditTarget implements MarieComponent {
             return false;
         }
         Bounds bounds = resolvedBounds(mc, keys);
-        MarieModuleSettings.MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(UiStatePersistence.get(), PANEL_ID);
+        MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(UiStatePersistence.get(), PANEL_ID);
         if (mode != null && bounds.contains((int) mouseX, (int) mouseY)) {
             switch (mode) {
                 case TEXT -> moveDrag.start(mode, mouseX, mouseY, contentOffsetX, contentOffsetY);
@@ -455,10 +456,10 @@ public final class HudEditTarget implements MarieComponent {
                         // One drag shifts all three offsets by the same amount from where each started.
                         int dx = moveDrag.offsetX(mouseX);
                         int dy = moveDrag.offsetY(mouseY);
-                        contentOffsetX = clampContentOffsetX(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.TEXT) + dx, bounds, persistedLeftMargin());
-                        contentOffsetY = clampContentOffsetY(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.TEXT) + dy, bounds);
-                        MarieModuleSettings.setIconOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.ICONS) + dx, bounds, persistedLeftMargin()), clampContentOffsetY(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.ICONS) + dy, bounds));
-                        MarieModuleSettings.setBarOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(moveDrag.baseX(MarieModuleSettings.MoveDrag.Mode.BARS) + dx, bounds, persistedLeftMargin()), clampContentOffsetY(moveDrag.baseY(MarieModuleSettings.MoveDrag.Mode.BARS) + dy, bounds));
+                        contentOffsetX = clampContentOffsetX(moveDrag.baseX(MoveDrag.Mode.TEXT) + dx, bounds, persistedLeftMargin());
+                        contentOffsetY = clampContentOffsetY(moveDrag.baseY(MoveDrag.Mode.TEXT) + dy, bounds);
+                        MarieModuleSettings.setIconOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(moveDrag.baseX(MoveDrag.Mode.ICONS) + dx, bounds, persistedLeftMargin()), clampContentOffsetY(moveDrag.baseY(MoveDrag.Mode.ICONS) + dy, bounds));
+                        MarieModuleSettings.setBarOffset(UiStatePersistence.get(), PANEL_ID, clampContentOffsetX(moveDrag.baseX(MoveDrag.Mode.BARS) + dx, bounds, persistedLeftMargin()), clampContentOffsetY(moveDrag.baseY(MoveDrag.Mode.BARS) + dy, bounds));
                     }
                 }
             }
@@ -477,7 +478,7 @@ public final class HudEditTarget implements MarieComponent {
             return true;
         }
         if (moveDrag.isActive()) {
-            MarieModuleSettings.MoveDrag.Mode mode = moveDrag.mode();
+            MoveDrag.Mode mode = moveDrag.mode();
             moveDrag.stop();
             switch (mode) {
                 case TEXT -> persistContentOffset();
