@@ -529,12 +529,23 @@ public final class DietScreenEditTarget implements MarieComponent {
         return Math.max(-limit, Math.min(limit, value));
     }
 
-    /** A sub-box's edit handles, or — while it has a move mode on — a dashed outline instead (dragging inside then moves its content, not the box). */
+    /**
+     * A sub-box's edit handles, or — while it has a move mode on — a dashed outline around just the part that mode
+     * drags (text, icons, bars or all), where the box last drew it, so it follows the content as it is moved; the whole
+     * box when nothing of that kind has been drawn yet. Dragging inside then moves the content, not the box.
+     */
     private static void drawBoxHandles(RenderContext context, String boxId, DraggableResizable drag, Bounds bounds, int mx, int my) {
-        if (MarieModuleSettings.activeMoveMode(DietScreenPersistence.get(), boxId) != null) {
-            context.drawDashedBorder(bounds.x() + 2, bounds.y() + 2, bounds.width() - 4, bounds.height() - 4, MarieColors.resolveColor(NourishedColors.EDIT_OUTLINE));
-        } else {
+        MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(DietScreenPersistence.get(), boxId);
+        if (mode == null) {
             drawHandle(context, drag, bounds, mx, my, true);
+            return;
+        }
+        Bounds part = MarieModuleSettings.moveOutline(DietScreenPersistence.get(), boxId, mode);
+        int outline = MarieColors.resolveColor(NourishedColors.EDIT_OUTLINE);
+        if (part == null) {
+            context.drawDashedBorder(bounds.x() + 2, bounds.y() + 2, bounds.width() - 4, bounds.height() - 4, outline);
+        } else {
+            context.drawDashedBorder(part.x() - 3, part.y() - 3, part.width() + 6, part.height() + 6, outline);
         }
     }
 
