@@ -57,7 +57,7 @@ public final class NutrientPanelContainer implements Container {
                     hudLayout.contentOffsetX(), hudLayout.contentOffsetY(),
                     MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID),
                     MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID),
-                    barScale));
+                    barScale, MarieModuleSettings.isIconsHidden(UiStatePersistence.get(), PANEL_ID)));
         }
         if (verticalMode) {
             int columnGap = Math.max(2, (int) Math.round(HudDrawHelpers.VERTICAL_COLUMN_GAP * hudLayout.scale()));

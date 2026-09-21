@@ -2,7 +2,6 @@ package dev.maire.nourished.client.hud.caloriehistory;
 
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.maire.nourished.client.colors.NourishedColorSlots;
-import dev.maire.nourished.client.hud.dynamic.options.HudStyleRows;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.color.ColorKeyPair;
@@ -141,7 +140,9 @@ public final class CalorieHudScreen implements MarieComponent {
                             .opacity(() -> NourishedClientConfig.get().calorieHudBackgroundOpacity(), v -> NourishedClientConfig.get().setCalorieHudBackgroundOpacity(v), 204.0d / 255.0d)
                             .textBrightness(() -> NourishedClientConfig.get().calorieHudTextBrightness(), v -> NourishedClientConfig.get().setCalorieHudTextBrightness(v))
                             .iconBrightness(() -> NourishedClientConfig.get().calorieHudIconBrightness(), v -> NourishedClientConfig.get().setCalorieHudIconBrightness(v))
-                            .styleRows(HudStyleRows::calorieHistory)
+                            .backgroundShade(() -> NourishedClientConfig.get().calorieHudBackgroundShade(), v -> NourishedClientConfig.get().setCalorieHudBackgroundShade(v))
+                            .borderOpacity(() -> NourishedClientConfig.get().calorieHudBorderOpacity(), v -> NourishedClientConfig.get().setCalorieHudBorderOpacity(v))
+                            .borderShade(() -> NourishedClientConfig.get().calorieHudBorderShade(), v -> NourishedClientConfig.get().setCalorieHudBorderShade(v))
                             .onCommit(NourishedClientConfig::saveNow)
                             .onReset(this::resetContentOffset)
                             .extraTabs(panel -> {
@@ -460,7 +461,7 @@ public final class CalorieHudScreen implements MarieComponent {
                     int rowCenterY = y + lineHeight / 2;
                     int textY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
 
-                    context.drawItem(CALORIE_ICON, bounds.x() + leftMargin + padding + iconDx, rowCenterY + (iconDy - contentOffsetY) - iconSize / 2, iconSize / 16f * (float) iconScale);
+                    if (!MarieModuleSettings.isIconsHidden(UiStatePersistence.get(), PANEL_ID)) context.drawItem(CALORIE_ICON, bounds.x() + leftMargin + padding + iconDx, rowCenterY + (iconDy - contentOffsetY) - iconSize / 2, iconSize / 16f * (float) iconScale);
                     context.drawText(row.label(), rowsX + iconSize + HudDrawHelpers.ICON_LABEL_GAP, textY, labelColor, (float) contentScale);
 
                     float pct = maxTotal > 0 ? row.value() / maxTotal : 0f;

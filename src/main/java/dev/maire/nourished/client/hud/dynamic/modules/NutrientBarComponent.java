@@ -56,9 +56,11 @@ final class NutrientBarComponent implements MarieComponent {
     private final int barDy;
     /** Bar size multiplier — scales the bar and, with it, the percentage text at its end (the text size does not touch that number). */
     private final float barScale;
+    /** The panel's "Hide Icons" toggle: skips the icon draw (the layout is unchanged). */
+    private final boolean iconsHidden;
 
     NutrientBarComponent(String nutrientKey, boolean verticalMode, HudLayout.Layout hudLayout, Map<String, Float> displayValues, float contentScale, float iconScale,
-                          int textDx, int textDy, int iconDx, int iconDy, int barDx, int barDy, float barScale) {
+                          int textDx, int textDy, int iconDx, int iconDy, int barDx, int barDy, float barScale, boolean iconsHidden) {
         this.nutrientKey = nutrientKey;
         this.verticalMode = verticalMode;
         this.hudLayout = hudLayout;
@@ -72,6 +74,7 @@ final class NutrientBarComponent implements MarieComponent {
         this.barDx = barDx;
         this.barDy = barDy;
         this.barScale = barScale;
+        this.iconsHidden = iconsHidden;
     }
 
     @Override
@@ -196,7 +199,7 @@ final class NutrientBarComponent implements MarieComponent {
             float tint = (float) NourishedClientConfig.get().hudIconBrightness();
             RenderSystem.setShaderColor(tint, tint, tint, alpha);
             try {
-                context.drawItem(resolveIconStack(nutrientKey), bounds.x() + iconDx, rowCenterY - iconSize / 2 + iconDy, iconScale);
+                if (!iconsHidden) context.drawItem(resolveIconStack(nutrientKey), bounds.x() + iconDx, rowCenterY - iconSize / 2 + iconDy, iconScale);
             } finally {
                 RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
             }

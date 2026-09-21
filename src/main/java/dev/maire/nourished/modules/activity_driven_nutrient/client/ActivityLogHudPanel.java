@@ -2,7 +2,6 @@ package dev.maire.nourished.modules.activity_driven_nutrient.client;
 
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.maire.nourished.client.colors.NourishedColorSlots;
-import dev.maire.nourished.client.hud.dynamic.options.HudStyleRows;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.color.ColorKeyPair;
 import dev.marie.framework.color.MarieColors;
@@ -159,7 +158,9 @@ public final class ActivityLogHudPanel implements MarieComponent {
                             .opacity(() -> NourishedClientConfig.get().activityLogHudBackgroundOpacity(), v -> NourishedClientConfig.get().setActivityLogHudBackgroundOpacity(v), 204.0d / 255.0d)
                             .textBrightness(() -> NourishedClientConfig.get().activityLogHudTextBrightness(), v -> NourishedClientConfig.get().setActivityLogHudTextBrightness(v))
                             .iconBrightness(() -> NourishedClientConfig.get().activityLogHudIconBrightness(), v -> NourishedClientConfig.get().setActivityLogHudIconBrightness(v))
-                            .styleRows(HudStyleRows::activityLog)
+                            .backgroundShade(() -> NourishedClientConfig.get().activityLogHudBackgroundShade(), v -> NourishedClientConfig.get().setActivityLogHudBackgroundShade(v))
+                            .borderOpacity(() -> NourishedClientConfig.get().activityLogHudBorderOpacity(), v -> NourishedClientConfig.get().setActivityLogHudBorderOpacity(v))
+                            .borderShade(() -> NourishedClientConfig.get().activityLogHudBorderShade(), v -> NourishedClientConfig.get().setActivityLogHudBorderShade(v))
                             .onCommit(NourishedClientConfig::saveNow)
                             .onReset(this::resetContentOffset)
                             .extraTabs(panel -> {
@@ -484,7 +485,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
                     int rowCenterY = y + lineHeight / 2;
                     int textY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
 
-                    context.drawItem(tracker.icon(), bounds.x() + leftMargin + padding + iconDx, rowCenterY + (iconDy - contentOffsetY) - iconSize / 2, iconSize / 16f * (float) iconScale);
+                    if (!MarieModuleSettings.isIconsHidden(UiStatePersistence.get(), PANEL_ID)) context.drawItem(tracker.icon(), bounds.x() + leftMargin + padding + iconDx, rowCenterY + (iconDy - contentOffsetY) - iconSize / 2, iconSize / 16f * (float) iconScale);
                     context.drawText(row.label(), rowsX + iconSize + HudDrawHelpers.ICON_LABEL_GAP, textY, color, (float) contentScale);
 
                     // Self-relative per tracker, never compared against the other four: mining/combat

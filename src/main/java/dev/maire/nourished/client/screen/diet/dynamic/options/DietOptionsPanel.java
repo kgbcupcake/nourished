@@ -13,7 +13,7 @@ import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.network.chat.Component;
 
 /**
- * The Diet Screen's tabbed options panel, built only through {@link MarieToolbox}. Every option is
+ * The Diet Screen's tabbed options panel, built only through {@link MarieToolbox}, tab order and Style groups matching {@link MarieModuleSettings#standardPanel}. Every option is
  * a getter/setter over an existing {@link NourishedClientConfig} field: it writes in memory on each
  * change and persists with {@link NourishedClientConfig#saveNow} on commit, so the config file stays
  * the single source of truth.
@@ -30,17 +30,6 @@ public final class DietOptionsPanel {
     public static MarieComponent build() {
         Runnable save = NourishedClientConfig::saveNow;
         MarieToolbox.PanelBuilder panel = MarieToolbox.panel(text("nourished.options.diet.title"))
-                .tab(text("config.marieslib.moduleoptions.tab.appearance"))
-                    .slider(text("config.marieslib.moduleoptions.backgroundOpacity"),
-                            () -> cc().dietBackgroundOpacity(), v -> cc().setDietBackgroundOpacity(v), 0.0d, 1.0d, PERCENT_STEP, save)
-                        .defaultValue(DEFAULT_OPACITY)
-                    .slider(text("config.marieslib.moduleoptions.textBrightness"),
-                            () -> cc().dietTextBrightness(), v -> cc().setDietTextBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
-                        .defaultValue(1.0d)
-                    .slider(text("config.marieslib.moduleoptions.iconBrightness"),
-                            () -> cc().dietIconBrightness(), v -> cc().setDietIconBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
-                        .defaultValue(1.0d)
-                    .resetTab()
                 .tab(text("config.marieslib.moduleoptions.tab.layout"))
                     // Sizes of the panel and its two sub-boxes as laid out; separate from each box's own Text size.
                     .slider(text("nourished.options.diet.panel_size"),
@@ -79,6 +68,20 @@ public final class DietOptionsPanel {
                     .toggle(text("nourished.options.diet.show_inventory_button"),
                             () -> cc().showDietScreenButton(), v -> cc().setShowDietScreenButton(v), save)
                         .defaultValue(true)
+                    .resetTab()
+                .tab(text("config.marieslib.moduleoptions.tab.appearance"))
+                    .section(text("config.marieslib.moduleoptions.section.background"))
+                    .slider(text("config.marieslib.moduleoptions.backgroundOpacity"),
+                            () -> cc().dietBackgroundOpacity(), v -> cc().setDietBackgroundOpacity(v), 0.0d, 1.0d, PERCENT_STEP, save)
+                        .defaultValue(DEFAULT_OPACITY)
+                    .section(text("config.marieslib.moduleoptions.section.brightness"))
+                    .slider(text("config.marieslib.moduleoptions.textBrightness"),
+                            () -> cc().dietTextBrightness(), v -> cc().setDietTextBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
+                        .defaultValue(1.0d)
+                    .slider(text("config.marieslib.moduleoptions.iconBrightness"),
+                            () -> cc().dietIconBrightness(), v -> cc().setDietIconBrightness(v), 0.2d, 2.0d, PERCENT_STEP, save)
+                        .defaultValue(1.0d)
+                    .endSection()
                     .resetTab();
         panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
         NourishedColorSlots.addNutrients(panel);

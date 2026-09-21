@@ -30,6 +30,7 @@
   "nourished.options.diet.show_active_effects": "Show active effects",
   "nourished.options.hud.reveal_on_gain": "Reveal HUD on nutrient gain",
   "nourished.options.hud.hide_above": "Hide above threshold",
+  "nourished.options.hud.section.visibility": "Visibility",
   "nourished.options.hud.show_above": "Show above threshold",
   "nourished.screen.diet.balance_label": "Balance",
   "nourished.screen.diet.balance_state.balanced": "Balanced",
