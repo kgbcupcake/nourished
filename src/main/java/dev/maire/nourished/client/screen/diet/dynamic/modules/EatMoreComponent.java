@@ -51,7 +51,7 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         return MarieColors.resolveColor(NourishedColors.BORDER);
     }
     private static int headerTextColor() {
-        return MarieColors.resolveColor(NourishedColors.TEXT_HEADER);
+        return MarieColors.resolveColor(NourishedColors.EAT_MORE_HEADER);
     }
 
     /** Reference local-unit padding used to derive the user's padding-adjustment range — see {@link ContentScaleController#resolvePadding}. */

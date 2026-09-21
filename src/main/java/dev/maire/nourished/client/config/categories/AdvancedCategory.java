@@ -83,10 +83,10 @@ public final class AdvancedCategory {
 
         if (!NourishedLockRegistry.isLocked("diminishingMidpoint")) {
             category.addEntry(
-                    eb.startIntSlider(Component.translatable("config.nourished.diminishingMidpoint"), (int) Math.round(config.diminishingMidpoint() * 1000), 1000, 10000)
-                            .setDefaultValue(2000)
-                            .setTextGetter(v -> Component.literal(String.format("%.3f", v / 1000.0)))
-                            .setSaveConsumer(v -> config.setDiminishingMidpoint(v / 1000.0))
+                    eb.startIntSlider(Component.translatable("config.nourished.diminishingMidpoint"), (int) Math.round(config.diminishingMidpoint()), 0, 10)
+                            .setDefaultValue(2)
+                            .setTextGetter(v -> Component.literal(String.valueOf(v)))
+                            .setSaveConsumer(v -> config.setDiminishingMidpoint(v))
                             .build()
             );
         }

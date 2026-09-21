@@ -86,7 +86,7 @@ public final class DietOptionsPanel {
         // toggle's housing, border and lever colors (toggle.housing/border/lever) are deliberately left to colors.json.
         panel.colorTab(text("nourished.options.tab.shared"));
         NourishedColorSlots.addFixed(panel, NourishedColors.TEXT, "nourished.options.color.text");
-        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.header_text");
+        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.intake_header_text");
         NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_MUTED, "nourished.options.color.muted_text");
         NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
         NourishedColorSlots.addFixed(panel, NourishedColors.DIVIDER, "nourished.options.color.divider");
@@ -138,6 +138,7 @@ public final class DietOptionsPanel {
      * Text and border are shared roles, so editing one here changes it everywhere it is drawn (see the Shared tab).
      */
     public static void caloriesColors(MarieToolbox.PanelBuilder panel) {
+        NourishedColorSlots.addFixed(panel, NourishedColors.CALORIES_HEADER, "nourished.options.color.header_text");
         NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_VALUE, "nourished.options.color.calorie");
         NourishedColorSlots.addFixed(panel, NourishedColors.TEXT, "nourished.options.color.text");
         NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
@@ -145,19 +146,20 @@ public final class DietOptionsPanel {
 
     /** The Recent Meals box's colors: header, meal text and border (shared roles, as for {@link #caloriesColors}). */
     public static void recentMealsColors(MarieToolbox.PanelBuilder panel) {
-        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.header_text");
+        NourishedColorSlots.addFixed(panel, NourishedColors.RECENT_MEALS_HEADER, "nourished.options.color.header_text");
         NourishedColorSlots.addFixed(panel, NourishedColors.TEXT, "nourished.options.color.text");
         NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
     }
 
     /** The Eat More box's colors: header and border (shared roles, as for {@link #caloriesColors}). */
     public static void eatMoreColors(MarieToolbox.PanelBuilder panel) {
-        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.header_text");
+        NourishedColorSlots.addFixed(panel, NourishedColors.EAT_MORE_HEADER, "nourished.options.color.header_text");
         NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
     }
 
-    /** The Balance box's colors: one per balance state. */
+    /** The Balance box's colors: its header (a shared role, as for {@link #recentMealsColors}) and one per balance state. */
     public static void balanceColors(MarieToolbox.PanelBuilder panel) {
+        NourishedColorSlots.addFixed(panel, NourishedColors.BALANCE_HEADER, "nourished.options.color.header_text");
         NourishedColorSlots.addFixed(panel, NourishedColors.BALANCE_BALANCED, "nourished.options.color.balanced");
         NourishedColorSlots.addFixed(panel, NourishedColors.BALANCE_LOW, "nourished.options.color.balance_low");
         NourishedColorSlots.addFixed(panel, NourishedColors.BALANCE_EXCESS, "nourished.options.color.balance_excess");
@@ -165,6 +167,7 @@ public final class DietOptionsPanel {
 
     /** The Active Effects box's colors: helpful and harmful effect lines. */
     public static void effectsColors(MarieToolbox.PanelBuilder panel) {
+        NourishedColorSlots.addFixed(panel, NourishedColors.ACTIVE_EFFECTS_HEADER, "nourished.options.color.header_text");
         NourishedColorSlots.addFixed(panel, NourishedColors.EFFECT_BENEFICIAL, "nourished.options.color.beneficial");
         NourishedColorSlots.addFixed(panel, NourishedColors.EFFECT_HARMFUL, "nourished.options.color.harmful");
     }

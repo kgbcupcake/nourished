@@ -522,7 +522,7 @@
   "config.nourished.diminishingFloor.desc": "重复食用同一食物时营养倍率可降至的最低值（0–1）。防止同一食物最终归零营养。",
   "config.nourished.diminishingSteepness": "递减陡度",
   "config.nourished.diminishingSteepness.desc": "控制营养值随重复食用下降的陡峭程度。数值越高，向下限衰减得越快。",
-  "config.nourished.diminishingMidpoint": "递减中点",
-  "config.nourished.diminishingMidpoint.desc": "营养倍率达到满值与下限中间点时所对应的重复食用份数。"
+  "config.nourished.diminishingMidpoint": "递减前免费份数",
+  "config.nourished.diminishingMidpoint.desc": "同一食物在开始递减前可按满值食用的次数；连续食用加权仅在这些次数之后生效；0 表示从第一次重复起就开始递减。"
 
 }

@@ -41,7 +41,7 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         return MarieColors.resolveColor(NourishedColors.BORDER);
     }
     private static int headerTextColor() {
-        return MarieColors.resolveColor(NourishedColors.TEXT_HEADER);
+        return MarieColors.resolveColor(NourishedColors.ACTIVE_EFFECTS_HEADER);
     }
     private static int beneficialColor() {
         return MarieColors.resolveColor(NourishedColors.EFFECT_BENEFICIAL);

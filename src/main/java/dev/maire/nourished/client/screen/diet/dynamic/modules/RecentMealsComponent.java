@@ -50,7 +50,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         return MarieColors.resolveColor(NourishedColors.BORDER);
     }
     private static int headerTextColor() {
-        return MarieColors.resolveColor(NourishedColors.TEXT_HEADER);
+        return MarieColors.resolveColor(NourishedColors.RECENT_MEALS_HEADER);
     }
     private static int textColor() {
         return MarieColors.resolveColor(NourishedColors.TEXT);

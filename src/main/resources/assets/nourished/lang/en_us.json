@@ -68,6 +68,7 @@
   "nourished.options.color.title": "Title",
   "nourished.options.color.today_text": "Today text",
   "nourished.options.color.header_text": "Header text",
+  "nourished.options.color.intake_header_text": "Intake Breakdown header text",
   "nourished.options.color.muted_text": "Muted text",
   "nourished.options.color.border": "Border",
   "nourished.options.color.divider": "Divider",
@@ -601,7 +602,7 @@
   "config.nourished.diminishingFloor.desc": "Minimum nutrition multiplier that repeated foods can fall to (0–1). Prevents the same food from eventually granting zero nutrition.",
   "config.nourished.diminishingSteepness": "Diminishing Steepness",
   "config.nourished.diminishingSteepness.desc": "Controls how sharply nutrition drops off with repetition. Higher values cause faster decay toward the floor.",
-  "config.nourished.diminishingMidpoint": "Diminishing Midpoint",
-  "config.nourished.diminishingMidpoint.desc": "Number of repeated servings at which the nutrition multiplier reaches the halfway point between full value and the floor."
+  "config.nourished.diminishingMidpoint": "Free Bites Before Diminishing",
+  "config.nourished.diminishingMidpoint.desc": "How many times the same food can be eaten at full value before diminishing returns start reducing it. Streak weighting only begins after these bites; 0 reduces from the first repeat."
 
 }

@@ -40,6 +40,9 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
     private static int balanceExcessColor() {
         return MarieColors.resolveColor(NourishedColors.BALANCE_EXCESS);
     }
+    private static int headerTextColor() {
+        return MarieColors.resolveColor(NourishedColors.BALANCE_HEADER);
+    }
 
     /** Reference local-unit padding used to derive the user's padding-adjustment range — see {@link ContentScaleController#resolvePadding}. */
     private static final double BASE_PADDING_LOCAL = 2.0d;
@@ -144,6 +147,13 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             support.drawItem(context, "minecraft:comparator", 2, 5, scale);
+            // The header is drawn outside the Move Text offset (which moves the state word) and kept inside the box, so it stays readable.
+            var displayStore = DietScreenPersistence.get();
+            RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                    MarieModuleSettings.textBrightness(displayStore, ID), MarieModuleSettings.iconBrightness(displayStore, ID));
+            headerContext.drawText(Component.translatable("nourished.screen.diet.balance_label").getString(),
+                    Math.max(bounds.x(), support.sx(24)), Math.max(bounds.y(), support.sy(startLocalY + 6)),
+                    headerTextColor(), scale);
 
             String balKey = getBalanceKey(data);
             int balColor = balanceColor(balKey);

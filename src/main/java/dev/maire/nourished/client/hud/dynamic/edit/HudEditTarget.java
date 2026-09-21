@@ -217,7 +217,13 @@ public final class HudEditTarget implements MarieComponent {
                     AutoGrowPanelContainer.ManualOverride override =
                             new AutoGrowPanelContainer.ManualOverride(state.widthManual(), state.heightManual());
                     int width = AutoGrowPanelContainer.resolveWidth(override, state.width(), natural.panelW());
-                    int height = natural.panelH(); // always fits the visible bars, never a saved manual height
+                    // A manually shrunk height always applies (the rows past it scroll). A manually
+                    // enlarged one only applies while every bar is showing; with just a subset visible
+                    // (reveal-on-gain after a meal, zero bars hidden) the box is capped at the natural
+                    // height so a full-size box never pops up around one or two bars.
+                    boolean allBarsVisible = keys.size() >= NourishedClientConfig.get().effectiveDietBarOrder().size();
+                    int manualHeight = AutoGrowPanelContainer.resolveHeight(override, state.height(), natural.panelH());
+                    int height = allBarsVisible ? manualHeight : Math.min(manualHeight, natural.panelH());
                     return new HudLayout.Layout(
                             state.x(), state.y(), width, height,
                             natural.baseX(), natural.baseY(),

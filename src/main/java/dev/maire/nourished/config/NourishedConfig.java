@@ -257,8 +257,8 @@ public final class NourishedConfig {
                 .comment("Steepness of the logistic diminishing curve. Higher = sharper transition.")
                 .defineInRange("diminishingSteepness", ConfigDefaultsLoader.getDouble(defaults, "diminishingSteepness", 0.8), 0.1, 3.0);
         diminishingMidpoint = builder
-                .comment("Midpoint of the logistic curve (eat count where multiplier = 0.5).")
-                .defineInRange("diminishingMidpoint", ConfigDefaultsLoader.getDouble(defaults, "diminishingMidpoint", 2.0), 1.0, 10.0);
+                .comment("Free bites: how many times the same food can be eaten at full value before diminishing returns start reducing it (the curve's midpoint, where the multiplier is 1.0). Streak weighting only begins after these bites. 0 = reduce from the first repeat.")
+                .defineInRange("diminishingMidpoint", ConfigDefaultsLoader.getDouble(defaults, "diminishingMidpoint", 2.0), 0.0, 10.0);
 
         // Streak settings
         streakWindowMs = builder

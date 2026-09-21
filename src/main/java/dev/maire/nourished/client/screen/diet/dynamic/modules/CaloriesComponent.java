@@ -2,7 +2,9 @@ package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
+import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.config.FeatureFlagCache;
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.tracking.tracker.MarieTracking;
 import dev.maire.nourished.api.NourishedAPI;
@@ -136,7 +138,7 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             support.drawItem(context, "minecraft:fire_charge", 2, 5, scale);
-            support.drawText(context, Component.translatable("nourished.screen.diet.calories_label").getString(), 24, 6, SummaryBoxRenderSupport.textColor(), scale);
+            support.drawText(context, Component.translatable("nourished.screen.diet.calories_label").getString(), 24, 6, MarieColors.resolveColor(NourishedColors.CALORIES_HEADER), scale);
 
             float today = MarieTracking.getCurrentTrackerValue(Minecraft.getInstance().player, NourishedAPI.CALORIES_TRACKER_ID);
             String calStr = (int) today + " / " + (int) data.maxTotal;
