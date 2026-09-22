@@ -5,7 +5,7 @@ import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
-import dev.marie.framework.ui.edit.DraggableResizable;
+import dev.marie.framework.ui.drag.DraggableResizable;
 import dev.marie.framework.ui.geometry.Insets;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
