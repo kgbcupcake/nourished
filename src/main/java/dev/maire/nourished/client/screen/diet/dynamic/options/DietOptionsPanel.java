@@ -4,7 +4,6 @@ import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.ui.api.StandardPanelBuilder;
 import dev.maire.nourished.client.screen.diet.dynamic.edit.DietScreenEditTarget;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
-import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeHeaderComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeLegendComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
@@ -155,11 +154,6 @@ public final class DietOptionsPanel {
         NourishedColorSlots.addFixed(panel, NourishedColors.ACTIVE_EFFECTS_BORDER, "nourished.options.color.border");
     }
 
-    /** Options panel for the Intake Breakdown header block. Own title/divider colors, no bars/icons of its own. */
-    public static MarieComponent intakeHeaderPanel() {
-        return forModule(text("nourished.screen.diet.intake"), IntakeHeaderComponent.ID, false, false, false, DietOptionsPanel::intakeHeaderColors);
-    }
-
     /**
      * Options panel shared by every Intake Breakdown row — the rows are structurally identical (icon,
      * label, bar, percent, arrow), differing only in which nutrient a given slot currently shows, so
@@ -174,12 +168,6 @@ public final class DietOptionsPanel {
     /** Options panel for the Intake Breakdown legend box. */
     public static MarieComponent intakeLegendPanel() {
         return forModule(text("nourished.screen.diet.legend"), IntakeLegendComponent.ID, false, false, false, DietOptionsPanel::legendColors);
-    }
-
-    /** The Intake Breakdown header's colors: title/divider text and its border (shared roles, as for {@link #caloriesColors}). */
-    public static void intakeHeaderColors(MarieToolbox.PanelBuilder panel) {
-        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.intake_header_text");
-        NourishedColorSlots.addFixed(panel, NourishedColors.DIVIDER, "nourished.options.color.divider");
     }
 
     /** The Intake Breakdown legend's colors: title, entry text, and the Good/Low/Critical swatches (shared roles). */
