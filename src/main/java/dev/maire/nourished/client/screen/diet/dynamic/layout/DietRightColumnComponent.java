@@ -44,9 +44,14 @@ final class DietRightColumnComponent implements MarieComponent, HeaderCollapsibl
     private static final int HEADER_LOCAL_HEIGHT = 14;
     /** The dimmed percentage text is translucent: alpha is fixed here, the RGB is the resolved color. */
     private static final int PERCENT_DIM_ALPHA = 0x99;
-    /** Legend box height and the gap left above it, in local units — matches the classic renderer's fixed {@code 34} box. */
-    private static final int LEGEND_H = 34;
-    private static final int LEGEND_GAP = 6;
+    /**
+     * Legend box height and the gap left above it, in local units. Taller than the classic
+     * renderer's fixed {@code 34} box (which left its bottom row of text sitting right against the
+     * box's own bottom border) — the extra 4px gives the "40 - 80%"/"25 - 40%"/"0 - 25%" line real
+     * clearance above the border instead of crowding it.
+     */
+    private static final int LEGEND_H = 38;
+    private static final int LEGEND_GAP = 8;
 
     private static int barTrackColor() {
         return MarieColors.resolveColor(NourishedColors.DIET_BAR_TRACK);

@@ -179,8 +179,19 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         // would render past the box's actual (shrunk) bottom edge instead of fading out with it.
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
-            String suggestionHeader = Component.translatable("nourished.screen.diet.suggestion_label").getString();
-            drawText(context, font.plainSubstrByWidth(suggestionHeader, bw), x, y + DietScreenModules.HEADER_TOP_PADDING_LOCAL, headerTextColor(), scale);
+            // The header has its own offset (Move Header), independent from Move Text — same split
+            // ActiveEffectsComponent's title/lines already have.
+            var store = DietScreenPersistence.get();
+            RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                    MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+            String suggestionHeader = font.plainSubstrByWidth(Component.translatable("nourished.screen.diet.suggestion_label").getString(), bw);
+            int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
+            int headerY = sy(y + DietScreenModules.HEADER_TOP_PADDING_LOCAL) + MarieModuleSettings.headerOffsetY(store, ID);
+            headerContext.drawText(suggestionHeader, headerX, headerY, headerTextColor(), scale);
+            // The header is drawn through headerContext, not the display-settings-wrapped `context`, so
+            // withDisplaySettings never sees this draw call and can't auto-record its extent; report it
+            // explicitly so "Move Header"'s and "Move All"'s outlines hug the header.
+            MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, headerContext.textWidth(suggestionHeader, scale), Math.round(9 * scale));
             y += HEADER_LOCAL_HEIGHT;
 
             for (int col = 0; col < Math.min(2, neglected.size()); col++) {

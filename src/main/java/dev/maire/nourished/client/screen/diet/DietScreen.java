@@ -110,11 +110,17 @@ public class DietScreen extends Screen {
         );
     }
 
-    /** One sub-box's entry: its label, hosting its own options panel (text/icon size and brightness, move modes, reset; plus bar options when the box has a bar). */
+    /**
+     * One sub-box's entry: its label, hosting its own options panel (text/icon size and brightness,
+     * move modes, reset; plus bar options when the box has a bar). {@code hasHeader = true}: each of
+     * these four boxes draws a title separate from its body text (the value/rows below it), so Move
+     * Header moves just the title and Move Text moves only the body — same split Active Effects
+     * already had.
+     */
     private static ScaleConfigEntry moduleEntry(String moduleId, String labelKey, boolean hasBars,
                                                 java.util.function.Consumer<dev.marie.framework.ui.api.MarieToolbox.PanelBuilder> colors) {
         return new ScaleConfigEntry(moduleId, Component.translatable(labelKey))
-                .withContent(DietOptionsPanel.forModule(Component.translatable(labelKey).getString(), moduleId, hasBars, true, false, colors));
+                .withContent(DietOptionsPanel.forModule(Component.translatable(labelKey).getString(), moduleId, hasBars, true, true, colors));
     }
 
     /** Toggles the scale-config sliders' visibility — used by {@link NourishedKeys#OPEN_SCALE_CONFIG}. */

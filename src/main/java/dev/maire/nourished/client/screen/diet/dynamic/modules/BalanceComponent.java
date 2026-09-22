@@ -148,13 +148,23 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
 
         support.drawOuterBox(context, bounds.width(), bounds.height(), cc, borderColor());
 
+        var store = DietScreenPersistence.get();
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             support.drawItem(context, "minecraft:comparator", 2, 5, scale);
-            // Drawn through the display-settings context, like the Calories and Eat More headers, so Move Text/Move All
-            // moves it together with the state word below instead of leaving it fixed in place.
-            support.drawText(context, Component.translatable("nourished.screen.diet.balance_label").getString(),
-                    24, 6, headerTextColor(), scale);
+
+            // The header has its own offset (Move Header); Move Text moves only the balance state word
+            // below it — same split ActiveEffectsComponent's title/lines already have.
+            RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                    MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+            String header = Component.translatable("nourished.screen.diet.balance_label").getString();
+            int headerX = support.sx(24) + MarieModuleSettings.headerOffsetX(store, ID);
+            int headerY = support.sy(startLocalY + 6) + MarieModuleSettings.headerOffsetY(store, ID);
+            headerContext.drawText(header, headerX, headerY, headerTextColor(), scale);
+            // The header is drawn through headerContext, not the display-settings-wrapped `context`, so
+            // withDisplaySettings never sees this draw call and can't auto-record its extent; report it
+            // explicitly so "Move Header"'s and "Move All"'s outlines hug the header, not the state word below it.
+            MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, headerContext.textWidth(header, scale), Math.round(9 * scale));
 
             String balKey = getBalanceKey(data);
             int balColor = balanceColor(balKey);
@@ -169,7 +179,6 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
             int pipTotalW = 5 * 10 + 4 * 3;
             int pipStartX = (barLocalWidth - pipTotalW) / 2 + 2;
             // The pips are this box's "bar": Bar size scales them (from the row's start) and Move Bars offsets them.
-            var store = DietScreenPersistence.get();
             float barScale = ContentScaleController.resolveContentScale(MarieModuleSettings.barScale(store, ID));
             int barDx = MarieModuleSettings.barOffsetX(store, ID);
             int barDy = MarieModuleSettings.barOffsetY(store, ID);

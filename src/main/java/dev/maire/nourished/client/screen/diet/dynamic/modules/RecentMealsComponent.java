@@ -246,7 +246,8 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         // continuously-shrinking box can also be shorter than even the header's own natural height,
         // and without this the header text would render past the box's actual (shrunk) bottom edge
         // instead of fading out with it.
-        // The meal rows are this box's "bars": Bar size scales them and Move Bars offsets them, apart from the header's text offset.
+        // Each row's name is this box's "bar" (the icon is not): Bar size scales it and Move Bars
+        // offsets it, apart from the header's own text offset and the icon's own Move Icons offset.
         var store = DietScreenPersistence.get();
         RenderContext rowContext = MarieModuleSettings.withBrightness(baseContext,
                 MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
@@ -267,7 +268,15 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                 int headerBudget = Math.max(0, maxHeaderFontPx - headerEllipsisW);
                 header = font.plainSubstrByWidth(header, headerBudget) + "...";
             }
-            drawText(context, header, x, y, headerTextColor(), scale);
+            // The header has its own offset (Move Header); Move Text moves nothing here (the row names
+            // travel with Move Bars instead — see above), same split ActiveEffectsComponent's title/lines have.
+            int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
+            int headerY = sy(y) + MarieModuleSettings.headerOffsetY(store, ID);
+            rowContext.drawText(header, headerX, headerY, headerTextColor(), scale);
+            // The header is drawn through rowContext, not the display-settings-wrapped `context`, so
+            // withDisplaySettings never sees this draw call and can't auto-record its extent; report it
+            // explicitly so "Move Header"'s and "Move All"'s outlines hug the header.
+            MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, rowContext.textWidth(header, scale), Math.round(9 * scale));
             y += zoomedHeaderAdvance;
             int count = 0;
             for (String id : recentIds) {
@@ -293,9 +302,11 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                     int budget = Math.max(0, maxNameFontPx - ellipsisW);
                     name = font.plainSubstrByWidth(name, budget) + "...";
                 }
-                // The left item icon goes through the module context, so Move Icons, Hide Icons and icon brightness apply to it;
-                // the row still travels with Move Bars.
-                context.drawItem(recent, sx(x) + barDx, sy(y) + barDy, scale * iconScale * barScale);
+                // The left item icon goes through the module context alone, so only Move Icons, Hide
+                // Icons and icon brightness apply to it — Move Bars must stay off it, or dragging bars
+                // would drag icons too. Only the name (the "bar"/value part, on the right) travels with
+                // Move Bars, same split as every other HUD-style module's icon-column vs. bar-column.
+                context.drawItem(recent, sx(x), sy(y), scale * iconScale);
 
                 Map<String, Float> nutrientBars = NutrientClassificationLookup.resolveBars(recent.getItem());
                 String nutrientKey = nutrientBars.entrySet().stream()
@@ -306,7 +317,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                         ? HudDrawHelpers.nutrientColorArgb(nutrientKey)
                         : textColor();
                 rowContext.drawText(name, sx(x + nameOffset) + barDx, sy(y) + barDy, nameColor, rowScale * barScale);
-                int rowLeft = sx(x) + barDx;
+                int rowLeft = sx(x + nameOffset) + barDx;
                 int rowTop = sy(y) + barDy;
                 int rowRight = sx(x + nameOffset) + barDx + Math.round(font.width(name) * rowScale * barScale);
                 MarieModuleSettings.recordBarExtent(store, ID, rowLeft, rowTop, Math.max(1, rowRight - rowLeft), Math.max(1, Math.round(9 * rowScale * barScale)));
