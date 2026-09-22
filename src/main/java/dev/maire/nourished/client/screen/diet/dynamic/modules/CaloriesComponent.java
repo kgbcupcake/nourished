@@ -61,7 +61,8 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         // rather than this frame's shrunk room) — the box only actually disappears once there's less
         // than MIN_VISIBLE_ROOM_LOCAL of room left, instead of vanishing the instant its full natural
         // height stops fitting.
-        boolean enabled = FeatureFlagCache.enableTotalTracking() && FeatureFlagCache.enableCalorieHistory() && cc.showCaloriesBox() && data != null;
+        boolean enabled = FeatureFlagCache.enableTotalTracking() && FeatureFlagCache.enableCalorieHistory()
+                && !MarieModuleSettings.isWindowHidden(DietScreenPersistence.get(), ID) && data != null;
         int room = enabled ? DietLayout.roomInPanel(layout, startLocalY, boxLocalHeight) : 0;
         this.visible = room >= DietScreenModules.MIN_VISIBLE_ROOM_LOCAL;
         this.renderedContentHeight = visible ? room : 0;

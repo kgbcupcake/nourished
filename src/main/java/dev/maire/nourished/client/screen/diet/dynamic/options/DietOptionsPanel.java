@@ -49,22 +49,8 @@ public final class DietOptionsPanel {
                         .button(text("nourished.options.diet.reset_bar_order"), text("nourished.options.diet.reset_caption"),
                                 () -> cc().resetDietBarOrder(), save)
                         .section(text("nourished.options.hud.section.visibility"))
-                        .toggle(text("nourished.options.diet.show_recent_meals"),
-                                () -> cc().showRecentMeals(), v -> cc().setShowRecentMeals(v), save)
-                            .defaultValue(true)
-                        .toggle(text("nourished.options.diet.show_eat_more"),
-                                () -> cc().showEatMoreOf(), v -> cc().setShowEatMoreOf(v), save)
-                            .defaultValue(true)
-                        .toggle(text("nourished.options.diet.show_active_effects"),
-                                () -> cc().showActiveEffects(), v -> cc().setShowActiveEffects(v), save)
-                            .defaultValue(true)
-                        // Only takes visible effect while FeatureFlagCache.enableTotalTracking() is on; bound as-is, not gated here.
-                        .toggle(text("nourished.options.diet.show_calories_box"),
-                                () -> cc().showCaloriesBox(), v -> cc().setShowCaloriesBox(v), save)
-                            .defaultValue(true)
-                        .toggle(text("nourished.options.diet.show_balance_box"),
-                                () -> cc().showBalanceBox(), v -> cc().setShowBalanceBox(v), save)
-                            .defaultValue(true)
+                        // Show/hide for Recent Meals, Eat More Of, Active Effects, Calories and Balance now lives on
+                        // each box's own gear-icon panel (its Behavior tab's Hide Window toggle) instead of here.
                         // Read only when the inventory screen opens (ClientEvents#onScreenInit), so a change applies on the next open.
                         .toggle(text("nourished.options.diet.show_inventory_button"),
                                 () -> cc().showDietScreenButton(), v -> cc().setShowDietScreenButton(v), save)

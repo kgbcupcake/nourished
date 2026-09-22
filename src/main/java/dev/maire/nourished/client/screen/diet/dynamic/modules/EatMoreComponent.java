@@ -75,9 +75,8 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         this.startLocalY = startLocalY;
         this.neglected = MarieClientCache.getNeglectedCategories();
 
-        NourishedClientConfig cc = NourishedClientConfig.get();
         this.eatBoxH = Math.max(1, (int) Math.round(46 * layout.eatMoreScale()));
-        boolean showable = cc.showEatMoreOf() && !neglected.isEmpty();
+        boolean showable = !MarieModuleSettings.isWindowHidden(DietScreenPersistence.get(), ID) && !neglected.isEmpty();
         // Continuous fade instead of an all-or-nothing header floor — same pattern as
         // Calories/Balance/RecentMeals now: header and icon row scale down together as room
         // tightens (see render()'s heightScale, already divided by the fixed naturalTotalHeight),

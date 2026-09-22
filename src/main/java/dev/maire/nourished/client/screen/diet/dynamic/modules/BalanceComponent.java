@@ -72,7 +72,7 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
 
         // Continuous fade instead of an all-or-nothing header floor — see CaloriesComponent's
         // constructor comment; same pattern, header+pips scale down together as room tightens.
-        boolean enabled = cc.showBalanceBox() && data != null;
+        boolean enabled = !MarieModuleSettings.isWindowHidden(DietScreenPersistence.get(), ID) && data != null;
         int room = enabled ? DietLayout.roomInPanel(layout, startLocalY, BOX_LOCAL_HEIGHT) : 0;
         this.visible = room >= DietScreenModules.MIN_VISIBLE_ROOM_LOCAL;
         this.renderedContentHeight = visible ? room : 0;

@@ -117,6 +117,7 @@ public final class IntakeBarComponent implements MarieComponent, SelfPositioning
                 resolvedBounds,
                 true,
                 ROW_STEP,
+                layout.scale(),
                 BarRowComponent.DEFAULT_PERCENT_DIM_ALPHA,
                 () -> resolveIcon(nutrientKey),
                 () -> NutrientRegistry.getLabelComponent(nutrientKey).getString(),

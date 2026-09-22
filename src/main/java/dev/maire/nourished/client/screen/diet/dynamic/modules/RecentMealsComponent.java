@@ -92,7 +92,6 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         this.startLocalY = startLocalY;
         this.recentIds = MarieClientCache.getRecentSourceIds();
 
-        NourishedClientConfig cc = NourishedClientConfig.get();
         // Per-item height (9) matches ActiveEffectsComponent's fixed line height exactly — both
         // boxes draw the same shape of content (icon + colored label, one row per item), so they
         // share one collapse-threshold constant rather than each having their own separately-tuned
@@ -106,7 +105,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         // Always showable (header-only when empty) rather than disappearing with no meals eaten yet — a
         // fresh install otherwise reserves no room for this box, so the very first meal eaten makes it pop
         // into existence and shove/overlap whatever the layout had already stacked in its place.
-        boolean showable = cc.showRecentMeals();
+        boolean showable = !MarieModuleSettings.isWindowHidden(DietScreenPersistence.get(), ID);
         // Continuous fade instead of an all-or-nothing header floor, and instead of dropping whole
         // rows one at a time as room tightens (the old stackedBodyUnitsFit behavior): every natural
         // row still draws, just scaled down together with the header (see render()'s heightScale,

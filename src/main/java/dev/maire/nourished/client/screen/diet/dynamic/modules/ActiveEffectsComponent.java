@@ -69,7 +69,6 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         this.layout = layout;
         this.startLocalY = startLocalY;
 
-        NourishedClientConfig cc = NourishedClientConfig.get();
         Minecraft mc = Minecraft.getInstance();
         int effectCount = (mc.player != null) ? mc.player.getActiveEffects().size() : 0;
         int naturalLineCount = Math.max(1, Math.min(3, effectCount));
@@ -79,7 +78,7 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         // natural line still draws, just scaled down together with the header (see render()'s
         // heightScale, divided by the fixed effectsBoxH rather than this frame's shrunk room) — the
         // box only actually disappears once there's less than MIN_VISIBLE_ROOM_LOCAL of room left.
-        boolean enabled = cc.showActiveEffects() && mc.player != null;
+        boolean enabled = !MarieModuleSettings.isWindowHidden(DietScreenPersistence.get(), ID) && mc.player != null;
         int room = enabled ? DietLayout.roomInPanel(layout, startLocalY, effectsBoxH) : 0;
         this.visible = room >= DietScreenModules.MIN_VISIBLE_ROOM_LOCAL;
         this.linesShown = naturalLineCount;

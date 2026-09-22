@@ -85,6 +85,7 @@ public final class IntakeLegendComponent implements MarieComponent, SelfPosition
                 resolvedBounds,
                 visible,
                 LEGEND_LOCAL_HEIGHT,
+                layout.scale(),
                 () -> Component.translatable("nourished.screen.diet.legend").getString(),
                 IntakeLegendComponent::headerTextColor,
                 IntakeLegendComponent::textColor,

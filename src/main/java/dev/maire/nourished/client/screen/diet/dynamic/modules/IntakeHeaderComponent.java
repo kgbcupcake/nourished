@@ -47,6 +47,7 @@ public final class IntakeHeaderComponent implements MarieComponent, SelfPosition
                 resolvedBounds,
                 true,
                 HEADER_LOCAL_HEIGHT,
+                layout.scale(),
                 () -> Component.translatable("nourished.screen.diet.intake").getString(),
                 () -> "✧✧",
                 () -> "✧✧",
