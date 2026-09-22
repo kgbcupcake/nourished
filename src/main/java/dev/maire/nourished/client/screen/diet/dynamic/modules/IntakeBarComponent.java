@@ -116,6 +116,7 @@ public final class IntakeBarComponent implements MarieComponent, SelfPositioning
                 DietScreenPersistence.get(),
                 resolvedBounds,
                 true,
+                LOCAL_WIDTH,
                 ROW_STEP,
                 layout.scale(),
                 BarRowComponent.DEFAULT_PERCENT_DIM_ALPHA,
