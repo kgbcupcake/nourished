@@ -27,6 +27,7 @@
   "nourished.options.diet.drag_bars": "Drag bars to reorder",
   "nourished.options.diet.reset_bar_order": "Reset bar order",
   "nourished.options.diet.reset_caption": "RESET",
+  "nourished.options.diet.section.intake_rows": "Intake Rows",
   "nourished.options.hud.reveal_on_gain": "Reveal HUD on nutrient gain",
   "nourished.options.hud.hide_above": "Hide above threshold",
   "nourished.options.hud.section.visibility": "Visibility",

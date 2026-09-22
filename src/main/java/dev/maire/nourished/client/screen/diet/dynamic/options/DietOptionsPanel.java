@@ -41,21 +41,35 @@ public final class DietOptionsPanel {
                 .onCommit(save)
                 // No Layout-tab size sliders: the panel and its sub-boxes are all directly drag-resizable
                 // in edit mode, which makes a separate percentage slider per box redundant.
-                .behaviorRows(p -> p
-                        .toggle(text("nourished.options.diet.drag_bars"),
-                                () -> cc().dietBarDragEnabled(), v -> cc().setDietBarDragEnabled(v), save)
-                            .defaultValue(true)
-                        .button(text("nourished.options.diet.reset_bar_order"), text("nourished.options.diet.reset_caption"),
-                                () -> cc().resetDietBarOrder(), save)
-                        .section(text("nourished.options.hud.section.visibility"))
-                        // Show/hide for Recent Meals, Eat More Of, Active Effects, Calories and Balance now lives on
-                        // each box's own gear-icon panel (its Behavior tab's Hide Window toggle) instead of here.
-                        // Read only when the inventory screen opens (ClientEvents#onScreenInit), so a change applies on the next open.
-                        .toggle(text("nourished.options.diet.show_inventory_button"),
-                                () -> cc().showDietScreenButton(), v -> cc().setShowDietScreenButton(v), save)
-                            .defaultValue(true)
-                        .endSection()
-                        .resetTab())
+                .behaviorRows(p -> {
+                    p.toggle(text("nourished.options.diet.drag_bars"),
+                                    () -> cc().dietBarDragEnabled(), v -> cc().setDietBarDragEnabled(v), save)
+                            .defaultValue(true);
+                    p.button(text("nourished.options.diet.reset_bar_order"), text("nourished.options.diet.reset_caption"),
+                            () -> cc().resetDietBarOrder(), save);
+                    // One "Reset Position" button per Intake Breakdown row slot, inside the Diet
+                    // Screen's own panel rather than a separate gear-icon entry per row — the rows are
+                    // already freely drag/resizable in edit mode, so this only covers the recovery
+                    // case (a row dragged somewhere awkward, or a leftover bad position from testing).
+                    p.section(text("nourished.options.diet.section.intake_rows"));
+                    int slots = dev.maire.nourished.core.nutrition.NutrientRegistry.getKeys().size();
+                    for (int i = 0; i < slots; i++) {
+                        String slotId = "nourished.diet.intake.slot" + i;
+                        String rowLabel = Component.translatable("nourished.screen.diet.intake_row", i + 1).getString();
+                        p.button(rowLabel, text("nourished.options.diet.reset_caption"),
+                                () -> DietScreenPersistence.get().remove(slotId), save);
+                    }
+                    p.endSection();
+                    p.section(text("nourished.options.hud.section.visibility"));
+                    // Show/hide for Recent Meals, Eat More Of, Active Effects, Calories and Balance now lives on
+                    // each box's own gear-icon panel (its Behavior tab's Hide Window toggle) instead of here.
+                    // Read only when the inventory screen opens (ClientEvents#onScreenInit), so a change applies on the next open.
+                    p.toggle(text("nourished.options.diet.show_inventory_button"),
+                                    () -> cc().showDietScreenButton(), v -> cc().setShowDietScreenButton(v), save)
+                            .defaultValue(true);
+                    p.endSection();
+                    p.resetTab();
+                })
                 .extraTabs(panel -> {
                     panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
                     NourishedColorSlots.addNutrients(panel);
@@ -152,17 +166,6 @@ public final class DietOptionsPanel {
         NourishedColorSlots.addFixed(panel, NourishedColors.EFFECT_BENEFICIAL, "nourished.options.color.beneficial");
         NourishedColorSlots.addFixed(panel, NourishedColors.EFFECT_HARMFUL, "nourished.options.color.harmful");
         NourishedColorSlots.addFixed(panel, NourishedColors.ACTIVE_EFFECTS_BORDER, "nourished.options.color.border");
-    }
-
-    /**
-     * Options panel shared by every Intake Breakdown row — the rows are structurally identical (icon,
-     * label, bar, percent, arrow), differing only in which nutrient a given slot currently shows, so
-     * one panel definition is reused per row id rather than one bespoke panel per nutrient. Per-row
-     * bar-fill color is intentionally NOT exposed here: that stays driven by the existing global
-     * per-nutrient color system (see the "Nutrients" colors tab), same as the HUD's own bars.
-     */
-    public static MarieComponent forIntakeBar(String title, String moduleId) {
-        return forModule(title, moduleId, true, true, false);
     }
 
     /** Options panel for the Intake Breakdown legend box. */

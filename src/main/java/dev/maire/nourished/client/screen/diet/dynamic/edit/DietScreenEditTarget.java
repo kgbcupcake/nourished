@@ -881,7 +881,12 @@ public final class DietScreenEditTarget implements MarieComponent {
      */
     private ComponentState toRelativeState(Bounds bounds, String componentId, DraggableResizable drag, int contentX) {
         DietLayout.Layout panelLayout = resolvedPanelLayout(mc);
-        Bounds clamped = DietPanelLayoutResolver.clampToParent(bounds, panelLayout);
+        // This overload is only ever called for the right ("Intake Breakdown") column's header/rows/
+        // legend (see its three call sites above) — clampToRightColumn, not clampToParent, or the
+        // committed bounds get squeezed back toward the divider the instant the drag releases, even
+        // though the live preview during the drag itself was already correctly clamped to the right
+        // column (clampToParent forces every box's right edge to stay left of the divider).
+        Bounds clamped = DietPanelLayoutResolver.clampToRightColumn(bounds, panelLayout);
         double scale = panelLayout.scale();
         AutoGrowPanelContainer.ManualOverride existing = DietPanelLayoutResolver.existingManualOverride(componentId);
         AutoGrowPanelContainer.ManualOverride override = AutoGrowPanelContainer.withCommit(existing, drag);

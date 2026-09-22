@@ -98,31 +98,19 @@ public class DietScreen extends Screen {
 
     /** Slider-panel rows for the five Diet Screen sub-boxes, plus the screen-wide options panel. */
     private static List<ScaleConfigEntry> scaleConfigEntries() {
-        List<ScaleConfigEntry> entries = new java.util.ArrayList<>(List.of(
+        return List.of(
                 moduleEntry(CaloriesComponent.ID, "nourished.screen.diet.calories_label", true, DietOptionsPanel::caloriesColors),
                 moduleEntry(BalanceComponent.ID, "nourished.screen.diet.balance_label", true, DietOptionsPanel::balanceColors),
                 moduleEntry(RecentMealsComponent.ID, "nourished.screen.diet.recent_label", true, DietOptionsPanel::recentMealsColors),
                 moduleEntry(EatMoreComponent.ID, "nourished.screen.diet.suggestion_label", false, DietOptionsPanel::eatMoreColors),
                 new ScaleConfigEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label"))
                         .withContent(DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.effects_label").getString(),
-                                ActiveEffectsComponent.ID, false, false, true, DietOptionsPanel::effectsColors))
-        ));
-        // One entry per Intake Breakdown row "slot" — the slot's id is stable across a bar-reorder
-        // drag (only which nutrient it currently shows changes), so the label is a plain "Intake Row
-        // N" rather than a live nutrient name. Without these, a bar row's Behavior tab (Move/Hide/
-        // Reset Position) was unreachable in-game — no entry point opened it at all.
-        int slots = dev.maire.nourished.core.nutrition.NutrientRegistry.getKeys().size();
-        for (int i = 0; i < slots; i++) {
-            String slotId = "nourished.diet.intake.slot" + i;
-            Component label = Component.translatable("nourished.screen.diet.intake_row", i + 1);
-            entries.add(new ScaleConfigEntry(slotId, label)
-                    .withContent(DietOptionsPanel.forIntakeBar(label.getString(), slotId)));
-        }
-        entries.add(new ScaleConfigEntry(IntakeLegendComponent.ID, Component.translatable("nourished.screen.diet.legend"))
-                .withContent(DietOptionsPanel.intakeLegendPanel()));
-        entries.add(new ScaleConfigEntry(DietScreenEditTarget.PANEL_ID, Component.translatable("nourished.screen.diet.options_label"))
-                .withContent(DietOptionsPanel.build()));
-        return entries;
+                                ActiveEffectsComponent.ID, false, false, true, DietOptionsPanel::effectsColors)),
+                new ScaleConfigEntry(IntakeLegendComponent.ID, Component.translatable("nourished.screen.diet.legend"))
+                        .withContent(DietOptionsPanel.intakeLegendPanel()),
+                new ScaleConfigEntry(DietScreenEditTarget.PANEL_ID, Component.translatable("nourished.screen.diet.options_label"))
+                        .withContent(DietOptionsPanel.build())
+        );
     }
 
     /**
