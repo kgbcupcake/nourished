@@ -135,6 +135,11 @@ public final class DietLeftColumnComponent implements Container {
         return DietStacking.nextSiblingStartLocalY(currentLocalY, localHeight, resolvedBounds, layout);
     }
 
+    /** Same as above, against an arbitrary expected content X — see {@link DietStacking#nextSiblingStartLocalY(int, int, Bounds, DietLayout.Layout, int)}. */
+    public static int nextSiblingStartLocalY(int currentLocalY, int localHeight, Bounds resolvedBounds, DietLayout.Layout layout, int expectedContentX) {
+        return DietStacking.nextSiblingStartLocalY(currentLocalY, localHeight, resolvedBounds, layout, expectedContentX);
+    }
+
     @Override
     public String id() {
         return "nourished.diet.panel.left";

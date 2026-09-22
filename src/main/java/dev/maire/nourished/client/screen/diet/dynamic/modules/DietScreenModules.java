@@ -59,6 +59,14 @@ public final class DietScreenModules {
      */
     static final int HEADER_TOP_PADDING_LOCAL = 2;
 
+    /**
+     * Registry key for the Intake Breakdown (right) column's module chain — separate from {@link
+     * Nourished#MODID} (the left column's key) so the two columns each get their own independent,
+     * ordered {@code startLocalY} cursor out of the single shared {@link ModuleRegistry}. See {@link
+     * #build(String, DietLayout.Layout, int)}.
+     */
+    public static final String RIGHT_COLUMN_KEY = "nourished.diet.right";
+
     private DietScreenModules() {}
 
     public static void registerAll() {
@@ -71,6 +79,19 @@ public final class DietScreenModules {
         ModuleRegistry.register(Nourished.MODID, (ModuleFactory<DietLayout.Layout>) RecentMealsComponent::new);
         ModuleRegistry.register(Nourished.MODID, (ModuleFactory<DietLayout.Layout>) EatMoreComponent::new);
         ModuleRegistry.register(Nourished.MODID, (ModuleFactory<DietLayout.Layout>) ActiveEffectsComponent::new);
+
+        // Right column: header, one row per nutrient "slot", then the legend. Each row factory
+        // resolves its actual nutrient key from NourishedClientConfig#effectiveDietBarOrder() at
+        // construction time (every frame), not here at registration time, so live bar reordering
+        // still works — see IntakeBarComponent's javadoc. The slot count is fixed at registration
+        // time to the registered nutrient count, which does not change at runtime.
+        ModuleRegistry.register(RIGHT_COLUMN_KEY, (ModuleFactory<DietLayout.Layout>) IntakeHeaderComponent::new);
+        int slots = dev.maire.nourished.core.nutrition.NutrientRegistry.getKeys().size();
+        for (int i = 0; i < slots; i++) {
+            final int slot = i;
+            ModuleRegistry.register(RIGHT_COLUMN_KEY, (ModuleFactory<DietLayout.Layout>) (layout, startY) -> IntakeBarComponent.create(slot, layout, startY));
+        }
+        ModuleRegistry.register(RIGHT_COLUMN_KEY, (ModuleFactory<DietLayout.Layout>) IntakeLegendComponent::new);
     }
 
     /**
@@ -83,11 +104,35 @@ public final class DietScreenModules {
      * the registry itself doesn't require it) simply doesn't advance the cursor for whatever comes
      * after it.
      */
-    @SuppressWarnings("unchecked")
     public static List<MarieComponent> build(DietLayout.Layout layout, int startLocalY) {
+        return build(Nourished.MODID, layout, startLocalY);
+    }
+
+    /**
+     * Same as {@link #build(DietLayout.Layout, int)}, but against an arbitrary {@link ModuleRegistry}
+     * key — lets a second, independently-chained module list (the right/"Intake Breakdown" column,
+     * under {@link #RIGHT_COLUMN_KEY}) share the same build/chaining logic as the left column instead
+     * of a second hand-rolled copy. Assumes the left column's content X for the out-of-flow check
+     * (see the 4-arg overload below) — correct for {@link Nourished#MODID}, wrong for {@link
+     * #RIGHT_COLUMN_KEY} callers, which must use that overload instead.
+     */
+    public static List<MarieComponent> build(String registryKey, DietLayout.Layout layout, int startLocalY) {
+        return build(registryKey, layout, startLocalY, layout.panelX() + layout.leftMargin());
+    }
+
+    /**
+     * Same as {@link #build(String, DietLayout.Layout, int)}, but against an arbitrary expected
+     * content X for the sibling-chaining out-of-flow check — see {@link DietLeftColumnComponent
+     * #nextSiblingStartLocalY(int, int, Bounds, DietLayout.Layout, int)}. The right column must pass
+     * {@link DietLayout#rightColumnContentX} here; otherwise every one of its modules' resolved X
+     * (past the divider) reads as "out of flow" relative to the left column's X, the cursor never
+     * advances, and every module collapses onto the same start-Y.
+     */
+    @SuppressWarnings("unchecked")
+    public static List<MarieComponent> build(String registryKey, DietLayout.Layout layout, int startLocalY, int expectedContentX) {
         List<MarieComponent> built = new ArrayList<>();
         int cursorY = startLocalY;
-        for (ModuleFactory<?> factory : ModuleRegistry.get(Nourished.MODID)) {
+        for (ModuleFactory<?> factory : ModuleRegistry.get(registryKey)) {
             // Safe: every factory registered above is a ModuleFactory<DietLayout.Layout> — the
             // registry itself is type-erased per-entry (marie-ui doesn't know Nourished's layout
             // type), so this cast is the one place that mod-local knowledge is reasserted.
@@ -95,7 +140,7 @@ public final class DietScreenModules {
             MarieComponent module = typed.create(layout, cursorY);
             built.add(module);
             if (module instanceof SelfPositioningModule self) {
-                cursorY = DietLeftColumnComponent.nextSiblingStartLocalY(cursorY, self.localHeight(), self.resolvedBounds(), layout);
+                cursorY = DietLeftColumnComponent.nextSiblingStartLocalY(cursorY, self.localHeight(), self.resolvedBounds(), layout, expectedContentX);
             }
         }
         return built;

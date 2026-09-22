@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.screen.diet.dynamic.persistence;
 
+import dev.marie.framework.ui.api.ComponentPersistence;
 import dev.marie.framework.ui.component.ComponentState;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.PersistenceProvider;
@@ -57,44 +58,40 @@ public final class DietScreenPersistence {
         return get().load(componentId).map(ComponentState::paddingScale).orElse(ComponentState.DEFAULT_PADDING_SCALE);
     }
 
-    /** Resolves a sub-box's screen bounds relative to the panel: a live drag/resize preview if one is active this frame, else persisted local-unit offset/size if manually moved/resized, otherwise the natural stacked position. */
+    /** Resolves a sub-box's screen bounds relative to the panel: a live drag/resize preview if one is active this frame, else persisted local-unit offset/size if manually moved/resized, otherwise the natural stacked position. Confined between the panel's left edge and the column divider. */
     public static Bounds resolveRelativeToPanel(String componentId, DietLayout.Layout panelLayout, int startLocalY, int localWidth, int localHeight) {
         ensureOffsetMigration();
-        Bounds liveOverride = liveOverrides.get(componentId);
-        if (liveOverride != null) {
-            return clampToPanel(liveOverride, panelLayout);
-        }
-        int naturalWidth = DietLayout.toScreenDim(panelLayout, localWidth);
-        int naturalHeight = DietLayout.toScreenDim(panelLayout, localHeight);
-        int contentX = panelLayout.panelX() + panelLayout.leftMargin();
-        Bounds resolved = get().load(componentId)
-                .map(state -> new Bounds(
-                        contentX + (int) Math.round(state.x() * panelLayout.scale()),
-                        panelLayout.panelY() + (int) Math.round(state.y() * panelLayout.scale()),
-                        state.widthManual() ? (int) Math.round(state.width() * panelLayout.scale()) : naturalWidth,
-                        state.heightManual() ? (int) Math.round(state.height() * panelLayout.scale()) : naturalHeight))
-                .orElseGet(() -> new Bounds(
-                        contentX,
-                        panelLayout.panelY() + (int) Math.round(startLocalY * panelLayout.scale()),
-                        naturalWidth,
-                        naturalHeight
-                ));
-        return clampToPanel(resolved, panelLayout);
+        int dividerX = dividerX(panelLayout);
+        return ComponentPersistence.resolveRelative(get(), liveOverrides, componentId,
+                contentX(panelLayout), panelLayout.panelY(), panelLayout.scale(), startLocalY, localWidth, localHeight,
+                panelLayout.panelX(), panelLayout.panelW(), panelLayout.panelH(),
+                panelLayout.panelX(), dividerX);
     }
 
-    /** Confines a sub-box to the panel rectangle and the column divider; left bound is the panel's true edge, not past the margin, since that space is draggable. */
-    private static Bounds clampToPanel(Bounds bounds, DietLayout.Layout panelLayout) {
-        int w = Math.min(bounds.width(), panelLayout.panelW());
-        int h = Math.min(bounds.height(), panelLayout.panelH());
-        int x = Math.max(panelLayout.panelX(), Math.min(bounds.x(), panelLayout.panelX() + panelLayout.panelW() - w));
-        int y = Math.max(panelLayout.panelY(), Math.min(bounds.y(), panelLayout.panelY() + panelLayout.panelH() - h));
+    /**
+     * Same as {@link #resolveRelativeToPanel}, but for the right ("Intake Breakdown") column —
+     * confined between the column divider and the panel's right edge instead. Local X/Y coordinates
+     * are in the same panel-relative coordinate space as the left column (e.g. the header's local X
+     * of {@code DietLayout.SPLIT + DietLayout.PAD}), so a component's default stacked position lands
+     * exactly where the legacy hand-rolled {@code DietRightColumnComponent} used to draw it.
+     */
+    public static Bounds resolveRelativeToRightColumn(String componentId, DietLayout.Layout panelLayout, int startLocalY, int localWidth, int localHeight) {
+        ensureOffsetMigration();
+        int dividerX = dividerX(panelLayout);
+        int rightEdge = panelLayout.panelX() + panelLayout.panelW();
+        return ComponentPersistence.resolveRelative(get(), liveOverrides, componentId,
+                DietLayout.rightColumnContentX(panelLayout), panelLayout.panelY(), panelLayout.scale(), startLocalY, localWidth, localHeight,
+                panelLayout.panelX(), panelLayout.panelW(), panelLayout.panelH(),
+                dividerX, rightEdge);
+    }
 
+    private static int contentX(DietLayout.Layout panelLayout) {
+        return panelLayout.panelX() + panelLayout.leftMargin();
+    }
+
+    private static int dividerX(DietLayout.Layout panelLayout) {
         Bounds panelBounds = new Bounds(panelLayout.panelX(), panelLayout.panelY(), panelLayout.panelW(), panelLayout.panelH());
-        int dividerX = DietLayout.columnGeometry(panelLayout, panelBounds).dividerX();
-        w = Math.min(w, Math.max(1, dividerX - panelLayout.panelX()));
-        x = Math.max(panelLayout.panelX(), Math.min(x, dividerX - w));
-
-        return new Bounds(x, y, w, h);
+        return DietLayout.columnGeometry(panelLayout, panelBounds).dividerX();
     }
 
     /** One-time resets for past persisted-offset schema changes (absolute -> local-unit -> scale-normalized). Each flag guards a distinct meaning change so players on an intermediate scheme aren't misinterpreted. */

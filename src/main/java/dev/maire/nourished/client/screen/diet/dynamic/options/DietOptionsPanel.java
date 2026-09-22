@@ -4,6 +4,8 @@ import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.ui.api.StandardPanelBuilder;
 import dev.maire.nourished.client.screen.diet.dynamic.edit.DietScreenEditTarget;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeHeaderComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeLegendComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.client.colors.NourishedColorSlots;
@@ -165,6 +167,43 @@ public final class DietOptionsPanel {
         NourishedColorSlots.addFixed(panel, NourishedColors.EFFECT_BENEFICIAL, "nourished.options.color.beneficial");
         NourishedColorSlots.addFixed(panel, NourishedColors.EFFECT_HARMFUL, "nourished.options.color.harmful");
         NourishedColorSlots.addFixed(panel, NourishedColors.ACTIVE_EFFECTS_BORDER, "nourished.options.color.border");
+    }
+
+    /** Options panel for the Intake Breakdown header block. Own title/divider colors, no bars/icons of its own. */
+    public static MarieComponent intakeHeaderPanel() {
+        return forModule(text("nourished.screen.diet.intake"), IntakeHeaderComponent.ID, false, false, false, DietOptionsPanel::intakeHeaderColors);
+    }
+
+    /**
+     * Options panel shared by every Intake Breakdown row — the rows are structurally identical (icon,
+     * label, bar, percent, arrow), differing only in which nutrient a given slot currently shows, so
+     * one panel definition is reused per row id rather than one bespoke panel per nutrient. Per-row
+     * bar-fill color is intentionally NOT exposed here: that stays driven by the existing global
+     * per-nutrient color system (see the "Nutrients" colors tab), same as the HUD's own bars.
+     */
+    public static MarieComponent forIntakeBar(String title, String moduleId) {
+        return forModule(title, moduleId, true, true, false);
+    }
+
+    /** Options panel for the Intake Breakdown legend box. */
+    public static MarieComponent intakeLegendPanel() {
+        return forModule(text("nourished.screen.diet.legend"), IntakeLegendComponent.ID, false, false, false, DietOptionsPanel::legendColors);
+    }
+
+    /** The Intake Breakdown header's colors: title/divider text and its border (shared roles, as for {@link #caloriesColors}). */
+    public static void intakeHeaderColors(MarieToolbox.PanelBuilder panel) {
+        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.intake_header_text");
+        NourishedColorSlots.addFixed(panel, NourishedColors.DIVIDER, "nourished.options.color.divider");
+    }
+
+    /** The Intake Breakdown legend's colors: title, entry text, and the Good/Low/Critical swatches (shared roles). */
+    public static void legendColors(MarieToolbox.PanelBuilder panel) {
+        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.intake_header_text");
+        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT, "nourished.options.color.text");
+        NourishedColorSlots.addFixed(panel, NourishedColors.DIET_LEGEND_GOOD, "nourished.options.color.legend_good");
+        NourishedColorSlots.addFixed(panel, NourishedColors.DIET_LEGEND_LOW, "nourished.options.color.legend_low");
+        NourishedColorSlots.addFixed(panel, NourishedColors.DIET_LEGEND_CRITICAL, "nourished.options.color.legend_critical");
+        NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
     }
 
     private static NourishedClientConfig cc() {

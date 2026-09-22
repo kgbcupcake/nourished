@@ -56,8 +56,19 @@ public final class DietStacking {
     private static final int OUT_OF_FLOW_X_TOLERANCE = 6;
 
     public static int nextSiblingStartLocalY(int currentLocalY, int localHeight, Bounds resolvedBounds, DietLayout.Layout layout) {
-        int contentX = layout.panelX() + layout.leftMargin();
-        if (Math.abs(resolvedBounds.x() - contentX) > OUT_OF_FLOW_X_TOLERANCE) {
+        return nextSiblingStartLocalY(currentLocalY, localHeight, resolvedBounds, layout, layout.panelX() + layout.leftMargin());
+    }
+
+    /**
+     * Same as {@link #nextSiblingStartLocalY(int, int, Bounds, DietLayout.Layout)}, but against an
+     * arbitrary expected content X instead of assuming the left column's ({@code panelX +
+     * leftMargin}) — needed for the right ("Intake Breakdown") column, whose modules sit at {@link
+     * DietLayout#rightColumnContentX} instead. Without this, every right-column module's resolved X
+     * is "out of flow" relative to the left column's X, so the cursor never advances and every module
+     * collapses onto the same start-Y.
+     */
+    public static int nextSiblingStartLocalY(int currentLocalY, int localHeight, Bounds resolvedBounds, DietLayout.Layout layout, int expectedContentX) {
+        if (Math.abs(resolvedBounds.x() - expectedContentX) > OUT_OF_FLOW_X_TOLERANCE) {
             return currentLocalY;
         }
         return AutoGrowPanelContainer.nextSiblingStartLocalY(currentLocalY, localHeight, resolvedBounds, layout.scale());

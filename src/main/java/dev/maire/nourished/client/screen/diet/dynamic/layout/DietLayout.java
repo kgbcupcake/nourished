@@ -122,6 +122,16 @@ public final class DietLayout {
         return Math.max(1, (int) Math.round(localDim * layout.scale()));
     }
 
+    /**
+     * Screen X the right ("Intake Breakdown") column's content starts at — local X {@code SPLIT +
+     * PAD}, matching the legacy hand-drawn column's {@code rx = SPLIT + PAD} and every {@code
+     * Intake*Component}'s {@code LOCAL_WIDTH} (each measured from this same X to {@code WIDTH - PAD}).
+     * The left column's equivalent is local X {@code 0} (i.e. plain {@link #toScreenX}).
+     */
+    public static int rightColumnContentX(Layout layout) {
+        return toScreenX(layout, SPLIT + PAD);
+    }
+
     /** Single source of truth for the column split — every caller (render, drag preview, clamps) must go through this. */
     public record ColumnGeometry(int leftX, int leftWidth, int dividerX, int rightX, int rightWidth) {}
 
