@@ -13,7 +13,7 @@ import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.drag.DraggableResizable;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
-import dev.marie.framework.ui.scaleconfig.ScaleConfigPanel;
+import dev.marie.framework.ui.hub.HubPanel;
 import dev.maire.nourished.client.screen.diet.DietScreen;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietPanelLayoutResolver;
@@ -56,13 +56,13 @@ public final class DietScreenEditTarget implements MarieComponent {
     private final Minecraft mc;
     private final Runnable exitEditMode;
     /**
-     * Same {@link ScaleConfigPanel} instance and live visibility state {@link DietScreen} owns —
+     * Same {@link HubPanel} instance and live visibility state {@link DietScreen} owns —
      * not a second panel — so the sliders shown here while edit mode has swapped {@code mc.screen}
      * to {@link dev.marie.framework.ui.edit.EditOverlayScreen} stay in sync with the persisted
      * state the player is actually editing, and with what {@link DietScreen#render} shows again
      * once edit mode exits.
      */
-    private final ScaleConfigPanel scaleConfigPanel;
+    private final HubPanel scaleConfigPanel;
     private final BooleanSupplier scaleConfigVisible;
     private final DraggableResizable panelDrag;
     private final DraggableResizable caloriesDrag;
@@ -91,7 +91,7 @@ public final class DietScreenEditTarget implements MarieComponent {
     private Bounds lastLegendResolvedBounds;
     private final Map<String, Bounds> lastBarResolvedBounds = new HashMap<>();
 
-    public DietScreenEditTarget(Minecraft mc, Runnable exitEditMode, ScaleConfigPanel scaleConfigPanel, BooleanSupplier scaleConfigVisible) {
+    public DietScreenEditTarget(Minecraft mc, Runnable exitEditMode, HubPanel scaleConfigPanel, BooleanSupplier scaleConfigVisible) {
         this.mc = mc;
         this.exitEditMode = exitEditMode;
         this.scaleConfigPanel = scaleConfigPanel;

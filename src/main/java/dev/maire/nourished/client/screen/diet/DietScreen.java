@@ -26,16 +26,17 @@ import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPers
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.framework.api.ApiStatus;
-import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.edit.EditModeController;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.Theme;
 import dev.marie.framework.ui.ThemeKey;
 import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
-import dev.marie.framework.ui.api.MarieScaleConfig;
-import dev.marie.framework.ui.scaleconfig.ScaleConfigEntry;
-import dev.marie.framework.ui.scaleconfig.ScaleConfigPanel;
+import dev.marie.framework.ui.hub.HubChildEntry;
+import dev.marie.framework.ui.hub.HubEntry;
+import dev.marie.framework.ui.hub.HubGroupEntry;
+import dev.marie.framework.ui.hub.HubPanel;
+import dev.marie.framework.ui.hub.HubSidebarEntry;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
@@ -82,7 +83,9 @@ public class DietScreen extends Screen {
      * independent of full edit mode (which replaces this screen with a transparent {@code
      * EditOverlayScreen} that forwards all input to the edit target instead of this class).
      */
-    private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(scaleConfigEntries(), DietScreenPersistence.get(), Anchor.TOP_RIGHT);
+    private final HubPanel scaleConfigPanel = new HubPanel(
+            Component.translatable("nourished.screen.diet.options_label"), "nourished.diet.hub",
+            DietScreenPersistence.get(), scaleConfigEntries());
     private boolean scaleConfigVisible;
 
     /** 0..1 fade-in over {@link #FADE_DURATION_SEC}; updated each render from frame delta. */
@@ -96,20 +99,21 @@ public class DietScreen extends Screen {
         fadeClockStarted = false;
     }
 
-    /** Slider-panel rows for the five Diet Screen sub-boxes, plus the screen-wide options panel. */
-    private static List<ScaleConfigEntry> scaleConfigEntries() {
+    /** Sidebar rows for the hub: the five Diet Screen sub-boxes, the Legend, one "Intake" group for the dynamically-many bar rows, and the screen-wide options panel. */
+    private static List<HubSidebarEntry> scaleConfigEntries() {
         return List.of(
                 moduleEntry(CaloriesComponent.ID, "nourished.screen.diet.calories_label", true, DietOptionsPanel::caloriesColors),
                 moduleEntry(BalanceComponent.ID, "nourished.screen.diet.balance_label", true, DietOptionsPanel::balanceColors),
                 moduleEntry(RecentMealsComponent.ID, "nourished.screen.diet.recent_label", true, DietOptionsPanel::recentMealsColors),
                 moduleEntry(EatMoreComponent.ID, "nourished.screen.diet.suggestion_label", false, DietOptionsPanel::eatMoreColors),
-                new ScaleConfigEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label"))
-                        .withContent(DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.effects_label").getString(),
+                new HubEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label"),
+                        DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.effects_label").getString(),
                                 ActiveEffectsComponent.ID, false, false, true, DietOptionsPanel::effectsColors)),
-                new ScaleConfigEntry(IntakeLegendComponent.ID, Component.translatable("nourished.screen.diet.legend"))
-                        .withContent(DietOptionsPanel.intakeLegendPanel()),
-                new ScaleConfigEntry(DietScreenEditTarget.PANEL_ID, Component.translatable("nourished.screen.diet.options_label"))
-                        .withContent(DietOptionsPanel.build())
+                intakeGroupEntry(),
+                new HubEntry(IntakeLegendComponent.ID, Component.translatable("nourished.screen.diet.legend"),
+                        DietOptionsPanel.intakeLegendPanel()),
+                new HubEntry(DietScreenEditTarget.PANEL_ID, Component.translatable("nourished.screen.diet.options_label"),
+                        DietOptionsPanel.build())
         );
     }
 
@@ -120,10 +124,36 @@ public class DietScreen extends Screen {
      * Header moves just the title and Move Text moves only the body — same split Active Effects
      * already had.
      */
-    private static ScaleConfigEntry moduleEntry(String moduleId, String labelKey, boolean hasBars,
+    private static HubEntry moduleEntry(String moduleId, String labelKey, boolean hasBars,
                                                 java.util.function.Consumer<dev.marie.framework.ui.api.MarieToolbox.PanelBuilder> colors) {
-        return new ScaleConfigEntry(moduleId, Component.translatable(labelKey))
-                .withContent(DietOptionsPanel.forModule(Component.translatable(labelKey).getString(), moduleId, hasBars, true, true, colors));
+        return new HubEntry(moduleId, Component.translatable(labelKey),
+                DietOptionsPanel.forModule(Component.translatable(labelKey).getString(), moduleId, hasBars, true, true, colors));
+    }
+
+    /**
+     * The "Intake" group entry: its child list is rebuilt fresh every time it's selected/rendered
+     * (see {@link dev.marie.framework.ui.hub.HubGroupEntry}), reading the CURRENT slot count from
+     * {@link NutrientRegistry#getKeys()} (so a registry that grows past today's 5 nutrients grows
+     * this list automatically, no hardcoded count) and each slot's CURRENT nutrient label from
+     * {@link NourishedClientConfig#effectiveDietBarOrder()} (so the picker shows the real nutrient
+     * name per slot, not a generic "Row N") — while each child's id stays the stable
+     * {@code nourished.diet.intake.slot<N>} regardless of reordering, matching {@code
+     * IntakeBarComponent}'s own id scheme.
+     */
+    private static HubGroupEntry intakeGroupEntry() {
+        return new HubGroupEntry("nourished.diet.intake", Component.translatable("nourished.screen.diet.intake"), () -> {
+            List<String> order = NourishedClientConfig.get().effectiveDietBarOrder();
+            int slots = NutrientRegistry.getKeys().size();
+            List<HubChildEntry> children = new ArrayList<>(slots);
+            for (int i = 0; i < slots; i++) {
+                String slotId = "nourished.diet.intake.slot" + i;
+                Component label = i < order.size()
+                        ? NutrientRegistry.getLabelComponent(order.get(i))
+                        : Component.translatable("nourished.screen.diet.intake_row", i + 1);
+                children.add(new HubChildEntry(slotId, label, DietOptionsPanel.forIntakeBar(label.getString(), slotId)));
+            }
+            return children;
+        });
     }
 
     /** Toggles the scale-config sliders' visibility — used by {@link NourishedKeys#OPEN_SCALE_CONFIG}. */
