@@ -467,12 +467,22 @@ public final class DietScreenEditTarget implements MarieComponent {
         recentMealsDrag.setSnapTargets(xEdges(panelBounds, caloriesR, balanceR, eatMoreR, activeEffectsR), yEdges(panelBounds, caloriesR, balanceR, eatMoreR, activeEffectsR));
         eatMoreDrag.setSnapTargets(xEdges(panelBounds, caloriesR, balanceR, recentR, activeEffectsR), yEdges(panelBounds, caloriesR, balanceR, recentR, activeEffectsR));
         activeEffectsDrag.setSnapTargets(xEdges(panelBounds, caloriesR, balanceR, recentR, eatMoreR), yEdges(panelBounds, caloriesR, balanceR, recentR, eatMoreR));
-        headerDrag.setSnapTargets(xEdges(panelBounds, headerR, legendR), yEdges(panelBounds, headerR, legendR));
-        legendDrag.setSnapTargets(xEdges(panelBounds, headerR, legendR), yEdges(panelBounds, headerR, legendR));
+        // Every right-column box snaps against every OTHER right-column box (plus the panel edges),
+        // same as the left column's five boxes do against each other — previously each of these only
+        // snapped against the header and legend, never against its own sibling rows.
+        List<Bounds> rightBounds = new ArrayList<>();
+        rightBounds.add(headerR);
+        rightBounds.add(legendR);
+        for (IntakeBarComponent bar : intakeBars) {
+            rightBounds.add(bar.resolvedBounds());
+        }
+        headerDrag.setSnapTargets(xEdges(rightSnapTargets(panelBounds, rightBounds, headerR)), yEdges(rightSnapTargets(panelBounds, rightBounds, headerR)));
+        legendDrag.setSnapTargets(xEdges(rightSnapTargets(panelBounds, rightBounds, legendR)), yEdges(rightSnapTargets(panelBounds, rightBounds, legendR)));
         for (IntakeBarComponent bar : intakeBars) {
             DraggableResizable drag = barRowDrags.get(bar.id());
             if (drag != null) {
-                drag.setSnapTargets(xEdges(panelBounds, headerR, legendR), yEdges(panelBounds, headerR, legendR));
+                Bounds self = bar.resolvedBounds();
+                drag.setSnapTargets(xEdges(rightSnapTargets(panelBounds, rightBounds, self)), yEdges(rightSnapTargets(panelBounds, rightBounds, self)));
             }
         }
 
@@ -772,6 +782,18 @@ public final class DietScreenEditTarget implements MarieComponent {
         context.drawText(text, x, y, MarieColors.resolveColor(NourishedColors.EDIT_LABEL_TEXT), 0.75f);
     }
 
+    /** {@code panelBounds} plus every entry in {@code siblings} except {@code self} (by reference) — the snap-target set for one right-column box against every other one, mirroring the left column's per-box "every sibling but me" lists. */
+    private static Bounds[] rightSnapTargets(Bounds panelBounds, List<Bounds> siblings, Bounds self) {
+        List<Bounds> combined = new ArrayList<>(siblings.size() + 1);
+        combined.add(panelBounds);
+        for (Bounds b : siblings) {
+            if (b != self) {
+                combined.add(b);
+            }
+        }
+        return combined.toArray(new Bounds[0]);
+    }
+
     private static List<Integer> xEdges(Bounds... boxes) {
         List<Integer> lines = new ArrayList<>(boxes.length * 2);
         for (Bounds b : boxes) {
@@ -867,7 +889,7 @@ public final class DietScreenEditTarget implements MarieComponent {
      */
     private ComponentState toRelativeState(Bounds bounds, String componentId, DraggableResizable drag) {
         DietLayout.Layout panelLayout = resolvedPanelLayout(mc);
-        return toRelativeState(bounds, componentId, drag, panelLayout.panelX() + panelLayout.leftMargin());
+        return toRelativeState(bounds, componentId, drag, panelLayout.panelX() + panelLayout.leftMargin(), false);
     }
 
     /**
@@ -875,18 +897,28 @@ public final class DietScreenEditTarget implements MarieComponent {
      * {@code contentX} instead of assuming the left column's — the right ("Intake Breakdown") column's
      * header/rows/legend must pass {@link DietLayout#rightColumnContentX} here, matching what {@link
      * DietScreenPersistence#resolveRelativeToRightColumn} uses to read the value back. Using the left
-     * column's X for both (the previous bug) stored a relative offset hundreds of local units off from
+     * column's X for both (an earlier bug) stored a relative offset hundreds of local units off from
      * what the read-back path expected, so a committed right-column drag/resize would read back at a
      * wildly wrong position afterward, independent of the natural (unpersisted) default position.
      */
     private ComponentState toRelativeState(Bounds bounds, String componentId, DraggableResizable drag, int contentX) {
+        return toRelativeState(bounds, componentId, drag, contentX, true);
+    }
+
+    /**
+     * {@code rightColumn} picks which clamp the committed bounds go through — {@code
+     * clampToRightColumn} for the Intake Breakdown header/rows/legend, {@code clampToParent} (the
+     * left-column clamp) for every other box. An earlier version of this method hardcoded
+     * {@code clampToRightColumn} for BOTH the 3-arg (left column) and 4-arg (right column) overloads
+     * above, since the 3-arg one simply delegated into the 4-arg one — which fixed the right column's
+     * "snaps back to the divider on release" bug but broke the left column identically in the other
+     * direction (every left-column commit got squeezed against the divider from its own side too).
+     */
+    private ComponentState toRelativeState(Bounds bounds, String componentId, DraggableResizable drag, int contentX, boolean rightColumn) {
         DietLayout.Layout panelLayout = resolvedPanelLayout(mc);
-        // This overload is only ever called for the right ("Intake Breakdown") column's header/rows/
-        // legend (see its three call sites above) — clampToRightColumn, not clampToParent, or the
-        // committed bounds get squeezed back toward the divider the instant the drag releases, even
-        // though the live preview during the drag itself was already correctly clamped to the right
-        // column (clampToParent forces every box's right edge to stay left of the divider).
-        Bounds clamped = DietPanelLayoutResolver.clampToRightColumn(bounds, panelLayout);
+        Bounds clamped = rightColumn
+                ? DietPanelLayoutResolver.clampToRightColumn(bounds, panelLayout)
+                : DietPanelLayoutResolver.clampToParent(bounds, panelLayout);
         double scale = panelLayout.scale();
         AutoGrowPanelContainer.ManualOverride existing = DietPanelLayoutResolver.existingManualOverride(componentId);
         AutoGrowPanelContainer.ManualOverride override = AutoGrowPanelContainer.withCommit(existing, drag);
