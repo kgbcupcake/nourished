@@ -57,7 +57,8 @@ public final class NutrientPanelContainer implements Container {
                     hudLayout.contentOffsetX(), hudLayout.contentOffsetY(),
                     MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID),
                     MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID),
-                    barScale, MarieModuleSettings.isIconsHidden(UiStatePersistence.get(), PANEL_ID)));
+                    barScale, MarieModuleSettings.isIconsHidden(UiStatePersistence.get(), PANEL_ID),
+                    MarieModuleSettings.isBarsHidden(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.isTextHidden(UiStatePersistence.get(), PANEL_ID)));
         }
         if (verticalMode) {
             int columnGap = Math.max(2, (int) Math.round(HudDrawHelpers.VERTICAL_COLUMN_GAP * hudLayout.scale()));
@@ -114,7 +115,7 @@ public final class NutrientPanelContainer implements Container {
             // it always did; the Style sliders tint the fill and border from there.
             int panelRgb = MarieColors.shade(NourishedColors.rgb(NourishedColors.HUD_PANEL), cc.hudBackgroundShade());
             int panelColor = HudDrawHelpers.panelColorWithOpacity(panelRgb, bgOpacity);
-            int borderRgb = MarieColors.shade(panelRgb, cc.hudBorderShade());
+            int borderRgb = MarieColors.shade(NourishedColors.rgb(NourishedColors.HUD_BORDER), cc.hudBorderShade());
             int borderColor = HudDrawHelpers.panelColorWithOpacity(borderRgb, bgOpacity * cc.hudBorderOpacity());
             context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor, borderColor);
         }

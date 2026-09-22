@@ -1,10 +1,12 @@
 package dev.maire.nourished.client.hud.classic;
 
+import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.maire.nourished.client.UiStatePersistence;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.ui.edit.ContentScaleController;
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.hud.dynamic.edit.HudEditTarget;
 import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
@@ -55,6 +57,11 @@ public final class ClassicHudPanelRenderer {
                     2,
                     HudDrawHelpers.panelColor(bgOpacity)
             );
+            // Same border color/shade/opacity composition as the non-classic NutrientPanelContainer,
+            // just drawn as a plain stroke (GuiGraphics has no bordered-rounded-rect primitive here).
+            int borderRgb = MarieColors.shade(NourishedColors.rgb(NourishedColors.HUD_BORDER), cc.hudBorderShade());
+            int borderColor = HudDrawHelpers.panelColorWithOpacity(borderRgb, bgOpacity * cc.hudBorderOpacity());
+            HudDrawHelpers.drawBorder(g, panelX, panelY, layout.panelW(), layout.panelH(), 1, borderColor);
         }
         // Same "user's persisted per-panel adjustment alone, box geometry untouched" split
         // NutrientPanelContainer/NutrientBarComponent apply for non-classic mode: layout's own
@@ -62,6 +69,13 @@ public final class ClassicHudPanelRenderer {
         // actual text/icon render size and content padding come from these instead.
         float contentScale = ContentScaleController.resolveContentScale(HudEditTarget.persistedContentScale());
         int pad = Math.round(ContentScaleController.resolvePadding(HudDrawHelpers.PANEL_PAD * HudEditTarget.persistedPaddingScale()));
+        // Read once per panel draw, not per row: the "Hide Icons"/"Hide Bars"/"Hide Text" toggles apply
+        // uniformly to every row, same as the dynamic renderer (NutrientBarComponent). This renderer
+        // predates the toggles (see class javadoc) and, unlike the dynamic renderer, never checked any
+        // of them at all — the icon guard below is a fix, not a new feature, alongside the two new ones.
+        boolean hideIcons = MarieModuleSettings.isIconsHidden(UiStatePersistence.get(), PANEL_ID);
+        boolean hideBars = MarieModuleSettings.isBarsHidden(UiStatePersistence.get(), PANEL_ID);
+        boolean hideText = MarieModuleSettings.isTextHidden(UiStatePersistence.get(), PANEL_ID);
         // Clipped to the panel's own bounds — a defensive backstop against contentOffsetX/Y (the
         // "Move Text and Icons" toggle) pushing content outside the panel: HudEditTarget clamps that
         // offset already, but without this, any drift would render content fully detached from the
@@ -70,9 +84,9 @@ public final class ClassicHudPanelRenderer {
         g.enableScissor(panelX, panelY, panelX + layout.panelW(), panelY + layout.panelH());
         try {
             if (layout.verticalLayout()) {
-                drawVerticalColumns(g, mc, data, keys, layout, panelX, panelY, displayValues, cc, contentScale, pad);
+                drawVerticalColumns(g, mc, data, keys, layout, panelX, panelY, displayValues, cc, contentScale, pad, hideBars, hideText);
             } else {
-                drawHorizontalRows(g, mc, data, keys, layout, panelX, panelY, displayValues, cc, contentScale, pad);
+                drawHorizontalRows(g, mc, data, keys, layout, panelX, panelY, displayValues, cc, contentScale, pad, hideIcons, hideBars, hideText);
             }
         } finally {
             g.disableScissor();
@@ -90,7 +104,9 @@ public final class ClassicHudPanelRenderer {
             Map<String, Float> displayValues,
             NourishedClientConfig cc,
             float contentScale,
-            int pad
+            int pad,
+            boolean hideBars,
+            boolean hideText
     ) {
         int columnGap = Math.max(2, (int) Math.round(HudDrawHelpers.VERTICAL_COLUMN_GAP * layout.scale()));
         // Two independent offsets, same split as the dynamic renderer: "Move Text and Icons" moves the
@@ -127,46 +143,50 @@ public final class ClassicHudPanelRenderer {
             String pctText = pct + "%";
             int pctSw = (int) Math.ceil(mc.font.width(pctText) * barScale);
             int pctX = columnX + (layout.verticalColumnW() - pctSw) / 2;
-            HudDrawHelpers.drawScaledLabel(
-                    g,
-                    mc,
-                    pctText,
-                    pctX + barDx,
-                    pctY + barDy,
-                    HudDrawHelpers.pctColor(key, truePct),
-                    barScale
-            );
-            HudDrawHelpers.drawRoundedVerticalBar(
-                    g,
-                    barX + barDx,
-                    barTop + barDy,
-                    vBarW,
-                    vBarH,
-                    displayPct,
-                    HudDrawHelpers.barBackgroundColor(),
-                    HudDrawHelpers.barFillColor(key, truePct)
-            );
-            float flash = MarieClientCache.flashAlpha(key);
-            if (flash > 0f) {
-                int a = (int) (flash * 80);
-                int flashColor = (a << 24) | 0xFFFFFF;
-                g.fill(
+            if (!hideBars) {
+                HudDrawHelpers.drawScaledLabel(
+                        g,
+                        mc,
+                        pctText,
+                        pctX + barDx,
+                        pctY + barDy,
+                        HudDrawHelpers.pctColor(key, truePct),
+                        barScale
+                );
+                HudDrawHelpers.drawRoundedVerticalBar(
+                        g,
                         barX + barDx,
                         barTop + barDy,
-                        barX + barDx + vBarW,
-                        barTop + barDy + vBarH,
-                        flashColor
+                        vBarW,
+                        vBarH,
+                        displayPct,
+                        HudDrawHelpers.barBackgroundColor(),
+                        HudDrawHelpers.barFillColor(key, truePct)
+                );
+                float flash = MarieClientCache.flashAlpha(key);
+                if (flash > 0f) {
+                    int a = (int) (flash * 80);
+                    int flashColor = (a << 24) | 0xFFFFFF;
+                    g.fill(
+                            barX + barDx,
+                            barTop + barDy,
+                            barX + barDx + vBarW,
+                            barTop + barDy + vBarH,
+                            flashColor
+                    );
+                }
+            }
+            if (!hideText) {
+                HudDrawHelpers.drawScaledLabel(
+                        g,
+                        mc,
+                        label,
+                        labelX + textDx,
+                        labelY + textDy,
+                        HudDrawHelpers.labelColor(),
+                        contentScale
                 );
             }
-            HudDrawHelpers.drawScaledLabel(
-                    g,
-                    mc,
-                    label,
-                    labelX + textDx,
-                    labelY + textDy,
-                    HudDrawHelpers.labelColor(),
-                    contentScale
-            );
             if (dimRow) {
                 RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             }
@@ -184,7 +204,10 @@ public final class ClassicHudPanelRenderer {
             Map<String, Float> displayValues,
             NourishedClientConfig cc,
             float contentScale,
-            int pad
+            int pad,
+            boolean hideIcons,
+            boolean hideBars,
+            boolean hideText
     ) {
         // Two independent offsets, same split as the dynamic renderer: "Move Text and Icons" moves the
         // icon and name label, "Move Bars" moves the bar together with its percentage text.
@@ -223,37 +246,43 @@ public final class ClassicHudPanelRenderer {
             int iconX = contentX + iconDx;
             int labelX = contentX + iconSize + HudDrawHelpers.ICON_LABEL_GAP;
             int barX = labelX + layout.maxLabelSw() + HudDrawHelpers.LABEL_BAR_GAP;
-            HudDrawHelpers.renderIcon(g, key, iconX, rowCenterY - iconSize / 2 + iconDy, iconSize);
-            HudDrawHelpers.drawScaledLabel(g, mc, label, labelX + textDx, labelY + textDy, HudDrawHelpers.labelColor(), contentScale);
-            int barY = rowCenterY - barH / 2 + barDy;
-            HudDrawHelpers.drawRoundedBar(
-                    g,
-                    barX + barDx,
-                    barY,
-                    barW,
-                    barH,
-                    displayPct,
-                    HudDrawHelpers.barBackgroundColor(),
-                    HudDrawHelpers.barFillColor(key, truePct)
-            );
-            float flash = MarieClientCache.flashAlpha(key);
-            if (flash > 0f) {
-                int a = (int) (flash * 80);
-                int flashColor = (a << 24) | 0xFFFFFF;
-                g.fill(barX + barDx, barY, barX + barDx + barW, barY + barH, flashColor);
+            if (!hideIcons) {
+                HudDrawHelpers.renderIcon(g, key, iconX, rowCenterY - iconSize / 2 + iconDy, iconSize);
             }
-            int pct = Math.round(truePct * 100f);
-            int pctX = barX + barDx + barW + HudDrawHelpers.BAR_PCT_GAP;
-            int pctY = rowCenterY - (int) Math.ceil(9 * barScale) / 2 + barDy;
-            HudDrawHelpers.drawScaledLabel(
-                    g,
-                    mc,
-                    pct + "%",
-                    pctX,
-                    pctY,
-                    HudDrawHelpers.pctColor(key, truePct),
-                    barScale
-            );
+            if (!hideText) {
+                HudDrawHelpers.drawScaledLabel(g, mc, label, labelX + textDx, labelY + textDy, HudDrawHelpers.labelColor(), contentScale);
+            }
+            int barY = rowCenterY - barH / 2 + barDy;
+            if (!hideBars) {
+                HudDrawHelpers.drawRoundedBar(
+                        g,
+                        barX + barDx,
+                        barY,
+                        barW,
+                        barH,
+                        displayPct,
+                        HudDrawHelpers.barBackgroundColor(),
+                        HudDrawHelpers.barFillColor(key, truePct)
+                );
+                float flash = MarieClientCache.flashAlpha(key);
+                if (flash > 0f) {
+                    int a = (int) (flash * 80);
+                    int flashColor = (a << 24) | 0xFFFFFF;
+                    g.fill(barX + barDx, barY, barX + barDx + barW, barY + barH, flashColor);
+                }
+                int pct = Math.round(truePct * 100f);
+                int pctX = barX + barDx + barW + HudDrawHelpers.BAR_PCT_GAP;
+                int pctY = rowCenterY - (int) Math.ceil(9 * barScale) / 2 + barDy;
+                HudDrawHelpers.drawScaledLabel(
+                        g,
+                        mc,
+                        pct + "%",
+                        pctX,
+                        pctY,
+                        HudDrawHelpers.pctColor(key, truePct),
+                        barScale
+                );
+            }
             if (dimRow) {
                 RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             }

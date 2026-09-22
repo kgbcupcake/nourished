@@ -42,6 +42,7 @@ public final class NourishedColors {
     // Panels and text
     public static final ColorKey HUD_PANEL = themed("panel.nutrient_hud", ThemeKey.PANEL_BACKGROUND);
     public static final ColorKey NUTRIENT_HUD_TEXT = themed("text.nutrient_hud", ThemeKey.TEXT_SECONDARY);
+    public static final ColorKey HUD_BORDER = themed("hud.border", ThemeKey.BORDER);
     public static final ColorKey DIET_PANEL = shaded("panel.diet", ThemeKey.PANEL_BACKGROUND, DIET_PANEL_SHADE);
     public static final ColorKey DIET_TITLE = themed("diet.title", ThemeKey.TEXT_PRIMARY);
     public static final ColorKey DIET_TODAY = themed("diet.today_text", ThemeKey.TEXT_PRIMARY);
@@ -50,7 +51,9 @@ public final class NourishedColors {
     public static final ColorKey CALORIE_VALUE = themed("calorie.value", ThemeKey.TEXT_PRIMARY);
     public static final ColorKey CALORIE_OVER_GOAL = themed("calorie_hud.over_goal", ThemeKey.TEXT_SECONDARY);
     public static final ColorKey CALORIE_ACCENT = themed("calorie_hud.accent", ThemeKey.TEXT_PRIMARY);
+    public static final ColorKey CALORIE_HUD_BORDER = themed("calorie_hud.border", ThemeKey.BORDER);
     public static final ColorKey ACTIVITY_ACCENT = themed("activity_log_hud.accent", ThemeKey.TEXT_PRIMARY);
+    public static final ColorKey ACTIVITY_LOG_BORDER = themed("activity_log_hud.border", ThemeKey.BORDER);
 
     // Shared roles
     public static final ColorKey TEXT = themed("text", ThemeKey.TEXT_PRIMARY);
@@ -66,6 +69,8 @@ public final class NourishedColors {
     public static final ColorKey CALORIES_BORDER = themed("diet.calories.border", ThemeKey.BORDER);
     public static final ColorKey RECENT_MEALS_BORDER = themed("diet.recent_meals.border", ThemeKey.BORDER);
     public static final ColorKey EAT_MORE_BORDER = themed("diet.eat_more.border", ThemeKey.BORDER);
+    public static final ColorKey BALANCE_BORDER = themed("diet.balance.border", ThemeKey.BORDER);
+    public static final ColorKey ACTIVE_EFFECTS_BORDER = themed("diet.active_effects.border", ThemeKey.BORDER);
     public static final ColorKey BORDER = themed("border", ThemeKey.BORDER);
     public static final ColorKey DIVIDER = themed("divider", ThemeKey.BORDER);
     public static final ColorKey BAR_TRACK = themed("bar.track", ThemeKey.BAR_BACKGROUND);

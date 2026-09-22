@@ -29,7 +29,6 @@ public final class HudDrawHelpers {
     public static final int ICON_LABEL_GAP = 2;
     public static final int LABEL_BAR_GAP = 2;
     public static final int BAR_PCT_GAP = 4;
-    public static final float BASE_LABEL_SCALE = 6f / 9f;
     public static final int MARGIN = 6;
     static final int RESIZE_HANDLE_SIZE = 8;
 

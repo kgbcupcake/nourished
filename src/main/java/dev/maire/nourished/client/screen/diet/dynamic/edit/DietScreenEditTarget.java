@@ -136,12 +136,8 @@ public final class DietScreenEditTarget implements MarieComponent {
         balanceDragRef[0] = balanceDrag;
 
         recentMealsDrag = new DraggableResizable(this, liveSubBoxConstraint(naturalPreferredSize(baseLayout, defaultRecent.naturalLocalHeight())),
-                (target, bounds) -> {
-                    if (MarieClientCache.getRecentSourceIds().isEmpty()) {
-                        return;
-                    }
-                    DietScreenPersistence.get().save(defaultRecent.id(), toRelativeState(bounds, defaultRecent.id(), recentMealsDragRef[0]));
-                });
+                (target, bounds) ->
+                        DietScreenPersistence.get().save(defaultRecent.id(), toRelativeState(bounds, defaultRecent.id(), recentMealsDragRef[0])));
         recentMealsDragRef[0] = recentMealsDrag;
 
         eatMoreDrag = new DraggableResizable(this, liveSubBoxConstraint(naturalPreferredSize(baseLayout, defaultEatMore.naturalLocalHeight())),
@@ -542,10 +538,18 @@ public final class DietScreenEditTarget implements MarieComponent {
         }
         Bounds part = MarieModuleSettings.moveOutline(DietScreenPersistence.get(), boxId, mode);
         int outline = MarieColors.resolveColor(NourishedColors.EDIT_OUTLINE);
-        if (part == null) {
-            context.drawDashedBorder(bounds.x() + 2, bounds.y() + 2, bounds.width() - 4, bounds.height() - 4, outline);
-        } else {
-            context.drawDashedBorder(part.x() - 3, part.y() - 3, part.width() + 6, part.height() + 6, outline);
+        // The recorded extent is the content's own drawn position/size, not clamped to the box's live
+        // bounds — a box dragged smaller than its content must clip the outline at its own edge exactly
+        // like the content itself fades there, or the dashed line sticks out past the panel's border.
+        context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
+        try {
+            if (part == null) {
+                context.drawDashedBorder(bounds.x() + 2, bounds.y() + 2, bounds.width() - 4, bounds.height() - 4, outline);
+            } else {
+                context.drawDashedBorder(part.x() - 3, part.y() - 3, part.width() + 6, part.height() + 6, outline);
+            }
+        } finally {
+            context.popClip();
         }
     }
 

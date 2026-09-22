@@ -61,6 +61,7 @@ public final class HudOptionsPanel {
                     NourishedColorSlots.addNutrients(panel);
                     NourishedColorSlots.addFixed(panel, NourishedColors.HUD_PANEL, "nourished.options.color.background");
                     NourishedColorSlots.addFixed(panel, NourishedColors.NUTRIENT_HUD_TEXT, "nourished.options.color.label_text");
+                    NourishedColorSlots.addFixed(panel, NourishedColors.HUD_BORDER, "nourished.options.color.border");
                 })
                 .build();
     }

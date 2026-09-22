@@ -168,6 +168,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
                                 panel.colorTab(Component.translatable("config.marieslib.moduleoptions.tab.colors").getString());
                                 NourishedColorSlots.addPair(panel, COLORS);
                                 NourishedColorSlots.addFixed(panel, NourishedColors.ACTIVITY_ACCENT, "nourished.options.color.accent");
+                                NourishedColorSlots.addFixed(panel, NourishedColors.ACTIVITY_LOG_BORDER, "nourished.options.color.border");
                                 NourishedColorSlots.addActivities(panel);
                             })
                             .build())),
@@ -389,6 +390,22 @@ public final class ActivityLogHudPanel implements MarieComponent {
                 .orElseGet(() -> new Bounds(DEFAULT_X, DEFAULT_Y, natural.width(), natural.height()));
     }
 
+    /**
+     * This box's current on-screen bounds (persisted, or its own default) — for {@link
+     * dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen}, whose own fixed default sits in the
+     * same top-left corner just below this one, to stack its default underneath this box's actual bottom
+     * edge instead of a fixed gap: a first-time install used to give both boxes fixed defaults only 52px
+     * apart, which this box's natural height (it grows with however many activities are being tracked)
+     * regularly exceeds, so they overlapped before either box had ever been dragged. {@code null} while
+     * this feature is off, so the caller falls back to its own baseline default.
+     */
+    public static Bounds currentBoundsForStacking() {
+        if (!NourishedClientConfig.get().enableActivityLogHud()) {
+            return null;
+        }
+        return resolvedBounds(currentRows().size());
+    }
+
     /** How many rows fit vertically in {@code bounds} at the current content scale — shared by {@link #drawPanel} (what to draw) and {@link #mouseScrolled} (how far scrolling can go). */
     private static int visibleRowCapacity(Bounds bounds) {
         double contentScale = ContentScaleController.resolveContentScale(persistedContentScale());
@@ -425,7 +442,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
         int panelColor = MarieColors.withOpacity(
                 MarieColors.shade(panelRgb, cc.activityLogHudBackgroundShade()), cc.activityLogHudBackgroundOpacity());
         int borderColor = MarieColors.withOpacity(
-                MarieColors.shade(context.theme().color(ThemeKey.BORDER), cc.activityLogHudBorderShade()), cc.activityLogHudBorderOpacity());
+                MarieColors.shade(MarieColors.resolveColor(NourishedColors.ACTIVITY_LOG_BORDER), cc.activityLogHudBorderShade()), cc.activityLogHudBorderOpacity());
         context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor, borderColor);
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {

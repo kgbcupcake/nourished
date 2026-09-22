@@ -1,7 +1,9 @@
 package dev.maire.nourished.client.hud.dynamic.layout;
 
 import dev.marie.framework.config.HudAnchor;
+import dev.marie.framework.ui.edit.ContentScaleController;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
+import dev.maire.nourished.client.hud.dynamic.edit.HudEditTarget;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
@@ -44,7 +46,12 @@ public final class HudLayout {
     public static Layout compute(Minecraft mc, List<String> keys, double scale) {
         NourishedClientConfig cc = NourishedClientConfig.get();
         boolean verticalLayout = cc.hudVerticalLayout();
-        float labelScale = (float) (HudDrawHelpers.BASE_LABEL_SCALE * scale);
+        // Reserves room at the scale labels are actually drawn at (the panel's own persisted Text
+        // Size — see NutrientBarComponent/ClassicHudPanelRenderer's `contentScale`), not `scale`
+        // (panel size, a wholly separate knob): reserving at BASE_LABEL_SCALE * scale while text
+        // drew at a fixed, hudScale-independent contentScale let the label overflow into the bar
+        // column, worse the larger the mismatch between the two.
+        float labelScale = (float) ContentScaleController.resolveContentScale(HudEditTarget.persistedContentScale());
         int scaledPad = Math.max(2, (int) Math.round(HudDrawHelpers.PANEL_PAD * scale));
         int barW = Mth.clamp((int) Math.round(cc.hudBarWidth() * scale), 20, 200);
         int iconSize = Math.max(8, (int) Math.round(16 * scale));

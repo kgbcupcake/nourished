@@ -38,7 +38,7 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         return NourishedColors.surfaceRgb();
     }
     private static int borderColor() {
-        return MarieColors.resolveColor(NourishedColors.BORDER);
+        return MarieColors.resolveColor(NourishedColors.ACTIVE_EFFECTS_BORDER);
     }
     private static int headerTextColor() {
         return MarieColors.resolveColor(NourishedColors.ACTIVE_EFFECTS_HEADER);
@@ -198,10 +198,17 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
             var store = DietScreenPersistence.get();
             RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
                     MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
-            headerContext.drawText(Component.translatable("nourished.screen.diet.effects_label").getString(),
-                    sx(x) + MarieModuleSettings.headerOffsetX(store, ID),
-                    sy(y + DietScreenModules.HEADER_TOP_PADDING_LOCAL) + MarieModuleSettings.headerOffsetY(store, ID),
-                    headerTextColor(), scale * 0.9f);
+            String header = Component.translatable("nourished.screen.diet.effects_label").getString();
+            float headerScale = scale * 0.9f;
+            int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
+            int headerY = sy(y + DietScreenModules.HEADER_TOP_PADDING_LOCAL) + MarieModuleSettings.headerOffsetY(store, ID);
+            headerContext.drawText(header, headerX, headerY, headerTextColor(), headerScale);
+            // The header is drawn through headerContext, not the display-settings-wrapped `context`, so its own
+            // offset applies instead of Move Text's — but that also means withDisplaySettings never sees this draw
+            // call and can't record its extent the way it auto-records text/icons/bars; report it explicitly so
+            // "Move Header"'s and "Move All"'s outlines actually hug the header instead of falling back to the
+            // effect lines below it (the only other thing this box draws through the recorded `context`).
+            MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, context.textWidth(header, headerScale), Math.round(9 * headerScale));
             y += zoomedHeaderAdvance;
 
             if (effects.isEmpty()) {

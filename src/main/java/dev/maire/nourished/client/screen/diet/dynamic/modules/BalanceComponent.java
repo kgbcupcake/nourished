@@ -44,6 +44,10 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         return MarieColors.resolveColor(NourishedColors.BALANCE_HEADER);
     }
 
+    private static int borderColor() {
+        return MarieColors.resolveColor(NourishedColors.BALANCE_BORDER);
+    }
+
     /** Reference local-unit padding used to derive the user's padding-adjustment range — see {@link ContentScaleController#resolvePadding}. */
     private static final double BASE_PADDING_LOCAL = 2.0d;
 
@@ -142,18 +146,15 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         double paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         support.begin(bounds, contentScale, paddingLocal);
 
-        support.drawOuterBox(context, bounds.width(), bounds.height(), cc, SummaryBoxRenderSupport.borderColor());
+        support.drawOuterBox(context, bounds.width(), bounds.height(), cc, borderColor());
 
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             support.drawItem(context, "minecraft:comparator", 2, 5, scale);
-            // The header is drawn outside the Move Text offset (which moves the state word) and kept inside the box, so it stays readable.
-            var displayStore = DietScreenPersistence.get();
-            RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
-                    MarieModuleSettings.textBrightness(displayStore, ID), MarieModuleSettings.iconBrightness(displayStore, ID));
-            headerContext.drawText(Component.translatable("nourished.screen.diet.balance_label").getString(),
-                    Math.max(bounds.x(), support.sx(24)), Math.max(bounds.y(), support.sy(startLocalY + 6)),
-                    headerTextColor(), scale);
+            // Drawn through the display-settings context, like the Calories and Eat More headers, so Move Text/Move All
+            // moves it together with the state word below instead of leaving it fixed in place.
+            support.drawText(context, Component.translatable("nourished.screen.diet.balance_label").getString(),
+                    24, 6, headerTextColor(), scale);
 
             String balKey = getBalanceKey(data);
             int balColor = balanceColor(balKey);
@@ -174,10 +175,18 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
             int barDy = MarieModuleSettings.barOffsetY(store, ID);
             int pipW = Math.max(1, Math.round(support.sd(10) * barScale));
             int pipH = Math.max(1, Math.round(support.sd(6) * barScale));
+            int pipY = support.sy(startLocalY + 40) + barDy;
+            int firstPipX = support.sx(pipStartX) + barDx;
+            int lastPipRight = firstPipX;
             for (int i = 0; i < 5; i++) {
                 int px = support.sx(pipStartX) + Math.round(i * support.sd(13) * barScale) + barDx;
-                context.fillRect(px, support.sy(startLocalY + 40) + barDy, pipW, pipH, i < filledPips ? balColor : SummaryBoxRenderSupport.barTrackColor());
+                context.fillRect(px, pipY, pipW, pipH, i < filledPips ? balColor : SummaryBoxRenderSupport.barTrackColor());
+                lastPipRight = px + pipW;
             }
+            // The pips have no drawBar/drawVerticalBar call of their own (they're plain fillRects), so nothing records
+            // their extent for MariesLib's move-outline/offset machinery on its own; report it so "Move Bars"/"Move All"
+            // outlines hug the pip row instead of falling back to the whole box.
+            MarieModuleSettings.recordBarExtent(store, ID, firstPipX, pipY, Math.max(1, lastPipRight - firstPipX), pipH);
         } finally {
             context.popClip();
         }

@@ -103,7 +103,10 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         int rowH = Math.max(1, (int) Math.round(9 * layout.recentMealsScale()));
         int naturalRows = Math.min(3, recentIds.size());
         this.recentHeight = HEADER_LOCAL_HEIGHT + (naturalRows * rowH);
-        boolean showable = cc.showRecentMeals() && !recentIds.isEmpty();
+        // Always showable (header-only when empty) rather than disappearing with no meals eaten yet — a
+        // fresh install otherwise reserves no room for this box, so the very first meal eaten makes it pop
+        // into existence and shove/overlap whatever the layout had already stacked in its place.
+        boolean showable = cc.showRecentMeals();
         // Continuous fade instead of an all-or-nothing header floor, and instead of dropping whole
         // rows one at a time as room tightens (the old stackedBodyUnitsFit behavior): every natural
         // row still draws, just scaled down together with the header (see render()'s heightScale,
@@ -277,6 +280,10 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                 }
                 ItemStack recent = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
                 String name = recent.getHoverName().getString();
+                if (MarieModuleSettings.isIconsHidden(store, ID)) {
+                    // Hide Icons also drops the glyph icons (private-use font characters) that follow the item's name.
+                    name = stripGlyphIcons(name);
+                }
                 boolean overCharCap = name.length() > MAX_NAME_CHARS;
                 if (overCharCap) {
                     name = name.substring(0, MAX_NAME_CHARS);
@@ -286,7 +293,9 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                     int budget = Math.max(0, maxNameFontPx - ellipsisW);
                     name = font.plainSubstrByWidth(name, budget) + "...";
                 }
-                if (!MarieModuleSettings.isIconsHidden(store, ID)) rowContext.drawItem(recent, sx(x) + barDx, sy(y) + barDy, scale * iconScale * barScale);
+                // The left item icon goes through the module context, so Move Icons, Hide Icons and icon brightness apply to it;
+                // the row still travels with Move Bars.
+                context.drawItem(recent, sx(x) + barDx, sy(y) + barDy, scale * iconScale * barScale);
 
                 Map<String, Float> nutrientBars = NutrientClassificationLookup.resolveBars(recent.getItem());
                 String nutrientKey = nutrientBars.entrySet().stream()
@@ -297,6 +306,10 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                         ? HudDrawHelpers.nutrientColorArgb(nutrientKey)
                         : textColor();
                 rowContext.drawText(name, sx(x + nameOffset) + barDx, sy(y) + barDy, nameColor, rowScale * barScale);
+                int rowLeft = sx(x) + barDx;
+                int rowTop = sy(y) + barDy;
+                int rowRight = sx(x + nameOffset) + barDx + Math.round(font.width(name) * rowScale * barScale);
+                MarieModuleSettings.recordBarExtent(store, ID, rowLeft, rowTop, Math.max(1, rowRight - rowLeft), Math.max(1, Math.round(9 * rowScale * barScale)));
                 y += zoomedRowH;
             }
         } finally {
@@ -318,6 +331,11 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
     // not the panel's layout.scale() — so icon/text/row sizing tracks this box's own independent
     // size instead of the main panel's, matching how the outer box already sizes off bounds
     // directly rather than through DietLayout.toScreenDim.
+
+    /** {@code name} without private-use glyph characters (font icons) and the whitespace they leave behind. */
+    private static String stripGlyphIcons(String name) {
+        return name.replaceAll("[\\uE000-\\uF8FF]", "").strip();
+    }
 
     private int sx(int localX) {
         return anchorBounds.x() + (int) Math.round((localX + paddingLocal) * contentScale);

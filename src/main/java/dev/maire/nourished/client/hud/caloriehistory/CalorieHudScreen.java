@@ -36,6 +36,7 @@ import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -79,6 +80,9 @@ public final class CalorieHudScreen implements MarieComponent {
     private static final int PADDING = 4;
     private static final int DEFAULT_X = 8;
     private static final int DEFAULT_Y = 60;
+
+    /** Gap kept below the Activity Log HUD's actual bottom edge when stacking this box's default underneath it — see {@link #defaultY}. */
+    private static final int STACKED_DEFAULT_GAP = 6;
 
     /** Row icon size, matching {@code HudLayout}'s own icon-size floor/scale reasoning. */
     private static final int ICON_SIZE = 10;
@@ -152,6 +156,7 @@ public final class CalorieHudScreen implements MarieComponent {
                                 NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_VALUE, "nourished.options.color.calorie");
                                 NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_OVER_GOAL, "nourished.options.color.over_goal");
                                 NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_ACCENT, "nourished.options.color.accent");
+                                NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_HUD_BORDER, "nourished.options.color.border");
                             })
                             .build())),
             UiStatePersistence.get(), Anchor.TOP_RIGHT);
@@ -363,7 +368,29 @@ public final class CalorieHudScreen implements MarieComponent {
                     int height = state.heightManual() ? state.height() : natural.height();
                     return new Bounds(state.x(), state.y(), width, height);
                 })
-                .orElseGet(() -> new Bounds(DEFAULT_X, DEFAULT_Y, natural.width(), natural.height()));
+                .orElseGet(() -> new Bounds(DEFAULT_X, defaultY(), natural.width(), natural.height()));
+    }
+
+    /**
+     * {@link #DEFAULT_Y}, or lower still if the Activity Log HUD's current bounds sit in the same
+     * horizontal column and reach past it — a fixed install used to give both boxes fixed defaults only
+     * 52px apart, which Activity Log's natural height (row-count-dependent) regularly exceeds (any more
+     * than ~2 tracked activities), so the two overlapped before either box had ever been dragged. Reads
+     * Activity Log's *current* bounds (default or user-moved) rather than assuming it's still at its own
+     * unmoved default, so this box's own still-unmoved default keeps avoiding it wherever it actually is;
+     * outside that column (e.g. the player moved Activity Log elsewhere), there's nothing to avoid and
+     * this falls back to the plain {@link #DEFAULT_Y}.
+     */
+    private static int defaultY() {
+        Bounds activityLog = ActivityLogHudPanel.currentBoundsForStacking();
+        if (activityLog == null) {
+            return DEFAULT_Y;
+        }
+        boolean sameColumn = activityLog.x() < DEFAULT_X + PANEL_WIDTH && activityLog.x() + activityLog.width() > DEFAULT_X;
+        if (!sameColumn) {
+            return DEFAULT_Y;
+        }
+        return Math.max(DEFAULT_Y, activityLog.y() + activityLog.height() + STACKED_DEFAULT_GAP);
     }
 
     /** How many rows fit vertically in {@code bounds} at the current content scale — shared by {@link #drawPanel} (what to draw) and {@link #mouseScrolled} (how far scrolling can go). */
@@ -402,7 +429,7 @@ public final class CalorieHudScreen implements MarieComponent {
         int panelColor = MarieColors.withOpacity(
                 MarieColors.shade(panelRgb, cc.calorieHudBackgroundShade()), cc.calorieHudBackgroundOpacity());
         int borderColor = MarieColors.withOpacity(
-                MarieColors.shade(context.theme().color(ThemeKey.BORDER), cc.calorieHudBorderShade()), cc.calorieHudBorderOpacity());
+                MarieColors.shade(MarieColors.resolveColor(NourishedColors.CALORIE_HUD_BORDER), cc.calorieHudBorderShade()), cc.calorieHudBorderOpacity());
         context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor, borderColor);
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {

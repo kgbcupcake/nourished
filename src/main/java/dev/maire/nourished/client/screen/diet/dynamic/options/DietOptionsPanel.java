@@ -22,7 +22,6 @@ import net.minecraft.network.chat.Component;
 public final class DietOptionsPanel {
 
     private static final double PERCENT_STEP = 0.01d;
-    private static final double SCALE_STEP = 0.05d;
     /** The config default of {@code dietBackgroundOpacity} (204/255), which "Reset This Tab" restores. */
     private static final double DEFAULT_OPACITY = 204.0d / 255.0d;
 
@@ -39,17 +38,8 @@ public final class DietOptionsPanel {
                 .textBrightness(() -> cc().dietTextBrightness(), v -> cc().setDietTextBrightness(v))
                 .iconBrightness(() -> cc().dietIconBrightness(), v -> cc().setDietIconBrightness(v))
                 .onCommit(save)
-                .layoutRows(p -> p
-                        // Sizes of the panel and its two sub-boxes as laid out; separate from each box's own Text size.
-                        .slider(text("nourished.options.diet.panel_size"),
-                                () -> cc().dietScale(), v -> cc().setDietScale(v), 0.5d, 1.5d, SCALE_STEP, save)
-                            .defaultValue(1.0d)
-                        .slider(text("nourished.options.diet.recent_meals_box_size"),
-                                () -> cc().recentMealsBoxScale(), v -> cc().setRecentMealsBoxScale(v), 0.5d, 1.5d, SCALE_STEP, save)
-                            .defaultValue(1.0d)
-                        .slider(text("nourished.options.diet.eat_more_box_size"),
-                                () -> cc().eatMoreBoxScale(), v -> cc().setEatMoreBoxScale(v), 0.5d, 1.5d, SCALE_STEP, save)
-                            .defaultValue(1.0d))
+                // No Layout-tab size sliders: the panel and its sub-boxes are all directly drag-resizable
+                // in edit mode, which makes a separate percentage slider per box redundant.
                 .behaviorRows(p -> p
                         .toggle(text("nourished.options.diet.drag_bars"),
                                 () -> cc().dietBarDragEnabled(), v -> cc().setDietBarDragEnabled(v), save)
@@ -160,19 +150,21 @@ public final class DietOptionsPanel {
         NourishedColorSlots.addFixed(panel, NourishedColors.EAT_MORE_BORDER, "nourished.options.color.border");
     }
 
-    /** The Balance box's colors: its header (a shared role, as for {@link #recentMealsColors}) and one per balance state. */
+    /** The Balance box's colors: its header (a shared role, as for {@link #recentMealsColors}), one per balance state, and its border. */
     public static void balanceColors(MarieToolbox.PanelBuilder panel) {
         NourishedColorSlots.addFixed(panel, NourishedColors.BALANCE_HEADER, "nourished.options.color.header_text");
         NourishedColorSlots.addFixed(panel, NourishedColors.BALANCE_BALANCED, "nourished.options.color.balanced");
         NourishedColorSlots.addFixed(panel, NourishedColors.BALANCE_LOW, "nourished.options.color.balance_low");
         NourishedColorSlots.addFixed(panel, NourishedColors.BALANCE_EXCESS, "nourished.options.color.balance_excess");
+        NourishedColorSlots.addFixed(panel, NourishedColors.BALANCE_BORDER, "nourished.options.color.border");
     }
 
-    /** The Active Effects box's colors: helpful and harmful effect lines. */
+    /** The Active Effects box's colors: helpful and harmful effect lines, and its border. */
     public static void effectsColors(MarieToolbox.PanelBuilder panel) {
         NourishedColorSlots.addFixed(panel, NourishedColors.ACTIVE_EFFECTS_HEADER, "nourished.options.color.header_text");
         NourishedColorSlots.addFixed(panel, NourishedColors.EFFECT_BENEFICIAL, "nourished.options.color.beneficial");
         NourishedColorSlots.addFixed(panel, NourishedColors.EFFECT_HARMFUL, "nourished.options.color.harmful");
+        NourishedColorSlots.addFixed(panel, NourishedColors.ACTIVE_EFFECTS_BORDER, "nourished.options.color.border");
     }
 
     private static NourishedClientConfig cc() {

@@ -58,9 +58,14 @@ final class NutrientBarComponent implements MarieComponent {
     private final float barScale;
     /** The panel's "Hide Icons" toggle: skips the icon draw (the layout is unchanged). */
     private final boolean iconsHidden;
+    /** The panel's "Hide Bars" toggle: skips the bar draw (the label and percentage keep their place). */
+    private final boolean barsHidden;
+    /** The panel's "Hide Text" toggle: skips the label and percentage draws (the icon and bar keep their place). */
+    private final boolean textHidden;
 
     NutrientBarComponent(String nutrientKey, boolean verticalMode, HudLayout.Layout hudLayout, Map<String, Float> displayValues, float contentScale, float iconScale,
-                          int textDx, int textDy, int iconDx, int iconDy, int barDx, int barDy, float barScale, boolean iconsHidden) {
+                          int textDx, int textDy, int iconDx, int iconDy, int barDx, int barDy, float barScale,
+                          boolean iconsHidden, boolean barsHidden, boolean textHidden) {
         this.nutrientKey = nutrientKey;
         this.verticalMode = verticalMode;
         this.hudLayout = hudLayout;
@@ -75,6 +80,8 @@ final class NutrientBarComponent implements MarieComponent {
         this.barDy = barDy;
         this.barScale = barScale;
         this.iconsHidden = iconsHidden;
+        this.barsHidden = barsHidden;
+        this.textHidden = textHidden;
     }
 
     @Override
@@ -181,16 +188,20 @@ final class NutrientBarComponent implements MarieComponent {
             int barX = bounds.x() + (bounds.width() - barW) / 2;
             int barY = bounds.y() + textH + 2;
 
-            int pctSw = (int) Math.ceil(font.width(pctText) * barScale);
-            int pctX = bounds.x() + (bounds.width() - pctSw) / 2;
-            context.drawText(pctText, pctX + barDx, bounds.y() + barDy, pctColor, barScale);
+            if (!barsHidden) {
+                int pctSw = (int) Math.ceil(font.width(pctText) * barScale);
+                int pctX = bounds.x() + (bounds.width() - pctSw) / 2;
+                context.drawText(pctText, pctX + barDx, bounds.y() + barDy, pctColor, barScale);
 
-            context.drawVerticalBar(barX + barDx, barY + barDy, barW, barH, value, bgColor, fillColor);
-            drawFlashOverlay(context, barX + barDx, barY + barDy, barW, barH);
+                context.drawVerticalBar(barX + barDx, barY + barDy, barW, barH, value, bgColor, fillColor);
+                drawFlashOverlay(context, barX + barDx, barY + barDy, barW, barH);
+            }
 
-            int labelSw = (int) Math.ceil(font.width(label) * contentScale);
-            int labelX = bounds.x() + (bounds.width() - labelSw) / 2;
-            context.drawText(label, labelX + textDx, barY + barH + 2 + textDy, labelColor, contentScale);
+            if (!textHidden) {
+                int labelSw = (int) Math.ceil(font.width(label) * contentScale);
+                int labelX = bounds.x() + (bounds.width() - labelSw) / 2;
+                context.drawText(label, labelX + textDx, barY + barH + 2 + textDy, labelColor, contentScale);
+            }
         } else {
             int rowCenterY = bounds.y() + bounds.height() / 2;
             int textY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
@@ -205,12 +216,17 @@ final class NutrientBarComponent implements MarieComponent {
             }
 
             int labelX = bounds.x() + iconSize + HudDrawHelpers.ICON_LABEL_GAP;
-            context.drawText(label, labelX + textDx, textY + textDy, labelColor, contentScale);
+            if (!textHidden) {
+                context.drawText(label, labelX + textDx, textY + textDy, labelColor, contentScale);
+            }
 
             int barX = labelX + hudLayout.maxLabelSw() + HudDrawHelpers.LABEL_BAR_GAP;
             int barW = Math.max(1, Math.round(hudLayout.barW() * barScale));
             int barH = Math.max(1, Math.round(HudDrawHelpers.BAR_H * barScale));
             int barY = rowCenterY - barH / 2;
+            if (barsHidden) {
+                return;
+            }
             context.drawBar(barX + barDx, barY + barDy, barW, barH, value, bgColor, fillColor);
             drawFlashOverlay(context, barX + barDx, barY + barDy, barW, barH);
 

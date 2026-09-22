@@ -545,20 +545,29 @@ public final class HudEditTarget implements MarieComponent {
             int labelsW = matchedLayout.maxLabelSw();
             int contentX = bounds.x() + pad + matchedLayout.leftMargin();
             int contentY = bounds.y() + pad;
-            if (moveAllMode) {
-                context.drawDashedBorder(contentX + matchedLayout.contentOffsetX() - 3, contentY + matchedLayout.contentOffsetY() - 3,
-                        contentW + 6, contentH + 6, contentOutlineColor());
-            } else if (moveTextMode) {
-                int start = vertical ? 0 : iconW + HudDrawHelpers.ICON_LABEL_GAP;
-                context.drawDashedBorder(contentX + start + matchedLayout.contentOffsetX() - 3, contentY + matchedLayout.contentOffsetY() - 3,
-                        (vertical ? contentW : labelsW) + 6, contentH + 6, contentOutlineColor());
-            } else if (moveIconsMode) {
-                context.drawDashedBorder(contentX + MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID) - 3, contentY + MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID) - 3,
-                        (vertical ? contentW : iconW) + 6, contentH + 6, contentOutlineColor());
-            } else {
-                int barsStart = vertical ? 0 : iconW + HudDrawHelpers.ICON_LABEL_GAP + labelsW + HudDrawHelpers.LABEL_BAR_GAP;
-                context.drawDashedBorder(contentX + barsStart + MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID) - 3, contentY + MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID) - 3,
-                        Math.max(0, contentW - barsStart) + 6, contentH + 6, contentOutlineColor());
+            // The outline is derived from the content's natural (unshrunk) extent, same as the content
+            // itself, so a box dragged smaller than that natural size must clip it at the box's own live
+            // edge exactly like the content fades there — otherwise the dashed line sticks out past the
+            // panel's actual border once the two diverge.
+            context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
+            try {
+                if (moveAllMode) {
+                    context.drawDashedBorder(contentX + matchedLayout.contentOffsetX() - 3, contentY + matchedLayout.contentOffsetY() - 3,
+                            contentW + 6, contentH + 6, contentOutlineColor());
+                } else if (moveTextMode) {
+                    int start = vertical ? 0 : iconW + HudDrawHelpers.ICON_LABEL_GAP;
+                    context.drawDashedBorder(contentX + start + matchedLayout.contentOffsetX() - 3, contentY + matchedLayout.contentOffsetY() - 3,
+                            (vertical ? contentW : labelsW) + 6, contentH + 6, contentOutlineColor());
+                } else if (moveIconsMode) {
+                    context.drawDashedBorder(contentX + MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID) - 3, contentY + MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID) - 3,
+                            (vertical ? contentW : iconW) + 6, contentH + 6, contentOutlineColor());
+                } else {
+                    int barsStart = vertical ? 0 : iconW + HudDrawHelpers.ICON_LABEL_GAP + labelsW + HudDrawHelpers.LABEL_BAR_GAP;
+                    context.drawDashedBorder(contentX + barsStart + MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID) - 3, contentY + MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID) - 3,
+                            Math.max(0, contentW - barsStart) + 6, contentH + 6, contentOutlineColor());
+                }
+            } finally {
+                context.popClip();
             }
         } else {
             Bounds handle = DraggableResizable.handleBounds(bounds);

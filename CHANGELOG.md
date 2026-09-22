@@ -4,6 +4,18 @@
 
 ## [ Unreleased ]
 
+### Fixed
+
+- On a fresh install (no saved HUD positions yet), the Activity Log and Calorie History HUD boxes spawned overlapping each other: both default to the same left column, only 52px apart (`ActivityLogHudPanel` at y=8, `CalorieHudScreen` at y=60), and Activity Log's natural height — it grows with however many activities are being tracked — regularly exceeds that gap with as few as 3 tracked activities. Since both boxes' editors (drag/resize handles, and the small settings window each box opens) read this same default position, editing either box in that state showed the same overlap. `CalorieHudScreen`'s default Y now stacks below Activity Log's *actual* current bottom edge (with a small gap) whenever the two share the same horizontal column, instead of a fixed 52px assumption; it falls back to the old fixed default once either box has been dragged out of that column, or if Activity Log is disabled.
+
+### Added
+
+- The Active Effects box's "Move Header" outline hugged the effect lines below the header instead of the header itself — its "Active Effects" title is drawn as a separate call with its own offset, not through the same recorded draw path as the lines, so MariesLib's outline machinery never saw where it actually was (new MariesLib `ModuleExtents.Kind.HEADER` / `MarieModuleSettings.recordHeaderExtent`, now called after the header draws). "Move All"'s outline now covers the header too; it already moved the header, just never showed it.
+
+### Added
+
+- The Nutrient HUD's Behavior tab now has "Hide Bars" and "Hide Text" toggles in its Hide group, alongside "Hide Icons" (new MariesLib feature — every module's Hide group gets them). "Hide Bars" hides each row's bar and its percentage number (icon and label keep their place); "Hide Text" hides the nutrient name label (icon and bar keep their place). Wired in both the dynamic renderer (`NutrientBarComponent`) and the classic (pre-MarieUI) one. While at it, fixed the classic renderer's "Hide Icons": it never checked the toggle at all (the dynamic renderer already did), so it kept drawing icons regardless.
+
 ### Changed
 
 - Editing a Diet Screen box with a move mode on (Move Text / Icons / Bars / All) now outlines just the part being dragged — the icons, the text, the bars, or all of them — hugging where the box drew it and following it as it moves, like the HUD boxes, instead of dashing the whole box in every mode. It falls back to the whole box until the box has drawn something of that kind.
@@ -13,6 +25,8 @@
 
 ### Fixed
 
+- The Balance box's Behavior tab had the same two problems as Recent Meals below, for its own bar-equivalent content (the five balance pips) and its "Balance" header: the pips were drawn as plain `fillRect` calls, so they never reported an extent and "Move Bars"/"Move All" always fell back to outlining the whole box instead of hugging the pips (each row now reports its own bar extent via the new MariesLib `MarieModuleSettings.recordBarExtent`, matching the pips' offset math, which was already correct); and the "Balance" header text was drawn through a plain brightness-only context with no offset applied at all — unlike the Calories and Eat More boxes, where the header moves with "Move Text" — so it never moved under any move mode, including "Move All". The header now draws through the module's display-settings context like Calories' and Eat More's, so "Move Text"/"Move All" move it too.
+- The Recent Meals box's Behavior tab had three problems for its per-row content: "Hide Icons" hid the item icon but left that item's nutrient-glyph icon in the name text; "Move Icons" did nothing, because the item icon was drawn through a brightness-only context instead of the module's display-settings context that offsets icons; and "Move Bars" also did nothing, because the rows (this box's stand-in for bars) never reported an extent for MariesLib's move-outline/offset machinery to act on. The item icon now draws through the same `withDisplaySettings` context as every other box, so Move Icons, Hide Icons and icon brightness all apply to it; Hide Icons now also strips the private-use glyph characters from the row name; and each row now reports its own bar extent (new MariesLib `MarieModuleSettings.recordBarExtent`), so Move Bars drags the rows like it already does elsewhere.
 - The "Hide Icons" toggle (Behavior tab) did nothing on the Nutrient HUD, Calorie History and Activity Log boxes: those draw their icons themselves rather than through MariesLib's `withDisplaySettings`, which is where the toggle is enforced. Each now checks `MarieModuleSettings.isIconsHidden` before drawing its icon, so turning it on hides the icons (the rows keep their layout, so nothing shifts).
 
 - Resizing the Nutrient HUD vertically no longer snaps back to the default height when you leave the editor. `HudEditTarget.resolvedLayout` discarded the saved height unconditionally; it now honors a manually-resized height (`heightManual`), the same as Calorie History and the Activity Log. A shrunk height always applies (rows past it scroll); an enlarged one applies while every bar is visible. When only some bars show (e.g. reveal-on-gain after a meal, zero bars hidden), the height is capped at what those bars need, so a full-size box never pops up around a single apple bar.
