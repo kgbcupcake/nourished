@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Static-rendering port of {@link DietScreen#drawRightPanel} (the intake legend was removed with the threshold colors). Not built on top
+ * Static-rendering port of {@link DietScreen#drawRightPanel}, including its bottom-pinned intake legend. Not built on top
  * of the HUD pass's {@code NutrientBarComponent}: that component's constructor is shaped around
  * {@code HudLayout.Layout} (icon+gap+label+bar+pct row geometry, threshold-tiered fill colors) and
  * a plain rounded bar, whereas the Diet Screen row is a fundamentally different visual — a bordered
@@ -44,6 +44,9 @@ final class DietRightColumnComponent implements MarieComponent, HeaderCollapsibl
     private static final int HEADER_LOCAL_HEIGHT = 14;
     /** The dimmed percentage text is translucent: alpha is fixed here, the RGB is the resolved color. */
     private static final int PERCENT_DIM_ALPHA = 0x99;
+    /** Legend box height and the gap left above it, in local units — matches the classic renderer's fixed {@code 34} box. */
+    private static final int LEGEND_H = 34;
+    private static final int LEGEND_GAP = 6;
 
     private static int barTrackColor() {
         return MarieColors.resolveColor(NourishedColors.DIET_BAR_TRACK);
@@ -130,7 +133,12 @@ final class DietRightColumnComponent implements MarieComponent, HeaderCollapsibl
         int liveLocalHeight = (int) Math.round(height / layout.scale());
         int maxRowY = liveLocalHeight - DietLayout.PAD;
 
-        Bounds rowProbeBounds = new Bounds(0, 0, width, DietLayout.toScreenDim(layout, Math.max(0, maxRowY - 30)));
+        // The legend sits pinned to the bottom, below the rows — reserve its space (plus the gap
+        // above it) before working out how many rows fit, so rows never grow underneath it.
+        boolean showLegend = maxRowY - y >= LEGEND_GAP + LEGEND_H;
+        int rowAreaBottom = showLegend ? maxRowY - LEGEND_GAP - LEGEND_H : maxRowY;
+
+        Bounds rowProbeBounds = new Bounds(0, 0, width, DietLayout.toScreenDim(layout, Math.max(0, rowAreaBottom - 30)));
         int rowsToShow = bodyUnitsFit(rowProbeBounds, layout.scale(), bars.size(), ROW_STEP);
 
         int rowCount = 0;
@@ -179,6 +187,65 @@ final class DietRightColumnComponent implements MarieComponent, HeaderCollapsibl
 
             y += ROW_STEP;
         }
+
+        if (showLegend) {
+            drawLegendBar(context, rx, maxRowY - LEGEND_H, (DietLayout.WIDTH - DietLayout.PAD) - rx, LEGEND_H, scale);
+        }
+    }
+
+    private void drawLegendBar(RenderContext context, int x, int y, int w, int h, float scale) {
+        drawRoundedBox(context, x, y, w, h);
+        String title = Component.translatable("nourished.screen.diet.legend").getString();
+        Font font = Minecraft.getInstance().font;
+        int titleX = x + (w - font.width(title)) / 2;
+        drawText(context, title, titleX, y + 3, dimLegend(headerTextColor()), scale);
+
+        int colLeft = x + 6;
+        int colW = (w - 12) / 3;
+        int lineTop = y + 12;
+        int lineH = h - 4 - 12;
+        fillRect(context, colLeft + colW, lineTop, 1, lineH, dividerColor());
+        fillRect(context, colLeft + colW * 2, lineTop, 1, lineH, dividerColor());
+
+        int good = dimLegend(MarieColors.resolveColor(NourishedColors.DIET_LEGEND_GOOD));
+        int low = dimLegend(MarieColors.resolveColor(NourishedColors.DIET_LEGEND_LOW));
+        int critical = dimLegend(MarieColors.resolveColor(NourishedColors.DIET_LEGEND_CRITICAL));
+
+        drawLegendEntry(context, colLeft, y + 14, colW, good, "Good", "40 - 80%", -3, -2, good, scale);
+        drawLegendEntry(context, colLeft + colW + 1, y + 14, colW, low, "Low", "25 - 40%", -3, 0, low, scale);
+        drawLegendEntry(
+                context,
+                colLeft + colW * 2 - 2,
+                y + 14,
+                colW,
+                critical,
+                Component.translatable("nourished.screen.diet.legend_bad").getString(),
+                Component.translatable("nourished.screen.diet.legend_bad_range").getString(),
+                0,
+                0,
+                critical,
+                scale
+        );
+    }
+
+    private void drawLegendEntry(RenderContext context, int x, int y, int w, int squareColor, String line1, String line2, int line1Offset, int line2Offset, int line2Color, float scale) {
+        Font font = Minecraft.getInstance().font;
+        int squareX = x + (w / 2) - 18;
+        fillRect(context, squareX, y + 1, 8, 8, squareColor);
+        int line1X = squareX + 11 + line1Offset;
+        int line2X = x + ((w - font.width(line2)) / 2) + 6 + line2Offset;
+        drawText(context, line1, line1X, y, dimLegend(textColor()), scale);
+        drawText(context, line2, line2X, y + 10, line2Color, scale);
+    }
+
+    /** ~12% darker (brightness reduction) — matches the classic legend's dimmed swatches/text. */
+    private static int dimLegend(int argb) {
+        float f = 0.88f;
+        int a = (argb >>> 24) & 0xFF;
+        int r = Mth.clamp((int) (((argb >> 16) & 0xFF) * f), 0, 255);
+        int gr = Mth.clamp((int) (((argb >> 8) & 0xFF) * f), 0, 255);
+        int b = Mth.clamp((int) ((argb & 0xFF) * f), 0, 255);
+        return (a << 24) | (r << 16) | (gr << 8) | b;
     }
 
     private static int nutrientBaseColor(String key) {
