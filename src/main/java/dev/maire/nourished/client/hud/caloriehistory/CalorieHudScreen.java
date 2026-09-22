@@ -406,6 +406,9 @@ public final class CalorieHudScreen implements MarieComponent {
     public static ColorKeyPair COLORS;
 
     private static void drawPanel(RenderContext context, Bounds bounds, int leftMargin, int contentOffsetX, int contentOffsetY, List<Row> rows, boolean editMode, boolean moveTextMode, boolean moveIconsMode, boolean moveBarsMode, boolean moveAllMode) {
+        if (MarieModuleSettings.isWindowHidden(UiStatePersistence.get(), PANEL_ID)) {
+            return;
+        }
         // Text/padding render scale is the user's persisted adjustment alone — box size (bounds)
         // plays no part in it, matching HudEditTarget's Nutrient HUD panel exactly: content never
         // shrinks to fit a smaller box, a resize only changes the box itself, and whatever doesn't

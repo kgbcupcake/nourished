@@ -45,6 +45,9 @@ public final class ClassicHudPanelRenderer {
             int panelY,
             Map<String, Float> displayValues
     ) {
+        if (MarieModuleSettings.isWindowHidden(UiStatePersistence.get(), PANEL_ID)) {
+            return;
+        }
         NourishedClientConfig cc = NourishedClientConfig.get();
         double bgOpacity = cc.hudBackgroundOpacity();
         if (bgOpacity > 0d) {

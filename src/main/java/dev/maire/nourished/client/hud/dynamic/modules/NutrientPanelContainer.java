@@ -105,6 +105,9 @@ public final class NutrientPanelContainer implements Container {
 
     @Override
     public void render(RenderContext context, Bounds bounds) {
+        if (MarieModuleSettings.isWindowHidden(UiStatePersistence.get(), PANEL_ID)) {
+            return;
+        }
         NourishedClientConfig cc = NourishedClientConfig.get();
         double bgOpacity = cc.hudBackgroundOpacity();
         if (bgOpacity > 0d) {

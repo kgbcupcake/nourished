@@ -15,6 +15,7 @@
 ### Added
 
 - The Nutrient HUD's Behavior tab now has "Hide Bars" and "Hide Text" toggles in its Hide group, alongside "Hide Icons" (new MariesLib feature — every module's Hide group gets them). "Hide Bars" hides each row's bar and its percentage number (icon and label keep their place); "Hide Text" hides the nutrient name label (icon and bar keep their place). Wired in both the dynamic renderer (`NutrientBarComponent`) and the classic (pre-MarieUI) one. While at it, fixed the classic renderer's "Hide Icons": it never checked the toggle at all (the dynamic renderer already did), so it kept drawing icons regardless.
+- Every module's Hide group now also has a "Hide Window" toggle (new MariesLib feature) that hides the box entirely — background, border, glow, text, icons and bars together — instead of hiding those individually. Wired into the Nutrient HUD (both the dynamic `NutrientPanelContainer` and the classic renderer), Calorie History and Activity Log: each now checks `MarieModuleSettings.isWindowHidden` before drawing anything, since none of the three draw through MariesLib's `withDisplaySettings` (same reason "Hide Icons" needed its own manual check on these boxes, below).
 
 ### Changed
 
