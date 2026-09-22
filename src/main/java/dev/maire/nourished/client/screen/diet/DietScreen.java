@@ -20,6 +20,8 @@ import dev.maire.nourished.client.screen.diet.dynamic.modules.ActiveEffectsCompo
 import dev.maire.nourished.client.screen.diet.dynamic.modules.BalanceComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeHeaderComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeLegendComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -105,6 +107,10 @@ public class DietScreen extends Screen {
                 new ScaleConfigEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label"))
                         .withContent(DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.effects_label").getString(),
                                 ActiveEffectsComponent.ID, false, false, true, DietOptionsPanel::effectsColors)),
+                new ScaleConfigEntry(IntakeHeaderComponent.ID, Component.translatable("nourished.screen.diet.intake"))
+                        .withContent(DietOptionsPanel.intakeHeaderPanel()),
+                new ScaleConfigEntry(IntakeLegendComponent.ID, Component.translatable("nourished.screen.diet.legend"))
+                        .withContent(DietOptionsPanel.intakeLegendPanel()),
                 new ScaleConfigEntry(DietScreenEditTarget.PANEL_ID, Component.translatable("nourished.screen.diet.options_label"))
                         .withContent(DietOptionsPanel.build())
         );

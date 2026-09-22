@@ -93,7 +93,7 @@ public final class DietPanelLayoutResolver {
         );
     }
 
-    /** Confines a sub-box to the panel, including the left-edge margin (draggable, not dead space), stopping at the column divider. */
+    /** Confines a left-column sub-box to the panel, including the left-edge margin (draggable, not dead space), stopping at the column divider. */
     public static Bounds clampToParent(Bounds child, DietLayout.Layout panelLayout) {
         Bounds parent = new Bounds(panelLayout.panelX(), panelLayout.panelY(), panelLayout.panelW(), panelLayout.panelH());
         int w = Math.min(child.width(), parent.width());
@@ -104,6 +104,27 @@ public final class DietPanelLayoutResolver {
         int dividerX = DietLayout.columnGeometry(panelLayout, parent).dividerX();
         w = Math.min(w, Math.max(1, dividerX - parent.x()));
         x = Math.max(parent.x(), Math.min(x, dividerX - w));
+
+        return new Bounds(x, y, w, h);
+    }
+
+    /**
+     * Same as {@link #clampToParent}, but for the right ("Intake Breakdown") column — confines
+     * between the column divider and the panel's right edge instead of the panel's left edge and the
+     * divider. Without this, the Intake Breakdown header/rows/legend were being run through {@link
+     * #clampToParent} in edit mode, which forces a box to stay entirely left of the divider — i.e.
+     * squeezed into the left column's space instead of its own, dragging the whole right column over
+     * on top of Calories/Balance/etc. the moment edit mode resolved its live bounds.
+     */
+    public static Bounds clampToRightColumn(Bounds child, DietLayout.Layout panelLayout) {
+        Bounds parent = new Bounds(panelLayout.panelX(), panelLayout.panelY(), panelLayout.panelW(), panelLayout.panelH());
+        DietLayout.ColumnGeometry geometry = DietLayout.columnGeometry(panelLayout, parent);
+        int rightEdge = parent.x() + parent.width();
+
+        int w = Math.min(child.width(), Math.max(1, rightEdge - geometry.rightX()));
+        int h = Math.min(child.height(), parent.height());
+        int x = Math.max(geometry.rightX(), Math.min(child.x(), rightEdge - w));
+        int y = Math.max(parent.y(), Math.min(child.y(), parent.y() + parent.height() - h));
 
         return new Bounds(x, y, w, h);
     }

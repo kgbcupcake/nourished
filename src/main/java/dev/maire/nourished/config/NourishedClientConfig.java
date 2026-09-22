@@ -84,6 +84,7 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalOffsetMigrationDone;
     private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalSizeMigrationDone;
     private final ModConfigSpec.BooleanValue recentMealsRowHeightMigrationDone;
+    private final ModConfigSpec.BooleanValue intakeBreakdownOffsetMigrationDone;
 
     /** Matches legacy {@code COL_PANEL_BG} alpha ({@code 0xCC}). */
     private static final double DEFAULT_HUD_BACKGROUND_OPACITY = 204.0d / 255.0d;
@@ -341,6 +342,17 @@ public final class NourishedClientConfig {
         // once so it recomputes fresh against the current constant instead of a stale committed one.
         recentMealsRowHeightMigrationDone = builder.define(
                 "recentMealsRowHeightMigrationDone",
+                false
+        );
+        // Fifth one-time migration flag — the Intake Breakdown header/rows/legend used to have their
+        // drag/resize commits stored relative to the left column's content X instead of the right
+        // column's (see DietScreenEditTarget#toRelativeState's javadoc), so any box moved or resized
+        // before that fix has a persisted local X hundreds of units off from what the fixed read-back
+        // path expects, rendering it far to the left of the panel instead of in the right column.
+        // Discards those specific boxes' persisted state once so they fall back to their natural
+        // stacked position and can be redragged correctly going forward.
+        intakeBreakdownOffsetMigrationDone = builder.define(
+                "intakeBreakdownOffsetMigrationDone",
                 false
         );
         builder.pop();
@@ -935,6 +947,14 @@ public final class NourishedClientConfig {
 
     public void setRecentMealsRowHeightMigrationDone(boolean value) {
         recentMealsRowHeightMigrationDone.set(value);
+    }
+
+    public boolean intakeBreakdownOffsetMigrationDone() {
+        return intakeBreakdownOffsetMigrationDone.get();
+    }
+
+    public void setIntakeBreakdownOffsetMigrationDone(boolean value) {
+        intakeBreakdownOffsetMigrationDone.set(value);
     }
 
     public void resetDietOffsets() {

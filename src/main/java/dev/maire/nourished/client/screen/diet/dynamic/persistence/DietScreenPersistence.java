@@ -7,8 +7,11 @@ import dev.marie.framework.ui.PersistenceProvider;
 import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeHeaderComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeLegendComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.config.NourishedClientConfig;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -119,6 +122,16 @@ public final class DietScreenPersistence {
         if (!cc.recentMealsRowHeightMigrationDone()) {
             get().remove(RecentMealsComponent.ID);
             cc.setRecentMealsRowHeightMigrationDone(true);
+            didWork = true;
+        }
+        if (!cc.intakeBreakdownOffsetMigrationDone()) {
+            get().remove(IntakeHeaderComponent.ID);
+            get().remove(IntakeLegendComponent.ID);
+            int slots = NutrientRegistry.getKeys().size();
+            for (int i = 0; i < slots; i++) {
+                get().remove("nourished.diet.intake.slot" + i);
+            }
+            cc.setIntakeBreakdownOffsetMigrationDone(true);
             didWork = true;
         }
         if (didWork) {

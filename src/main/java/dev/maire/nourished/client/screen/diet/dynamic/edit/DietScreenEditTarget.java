@@ -481,13 +481,13 @@ public final class DietScreenEditTarget implements MarieComponent {
         Bounds recentBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(recentMealsDrag, mx, my, recent.resolvedBounds()), matchedPanelLayout);
         Bounds eatMoreBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(eatMoreDrag, mx, my, eatMore.resolvedBounds()), matchedPanelLayout);
         Bounds activeEffectsBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(activeEffectsDrag, mx, my, activeEffects.resolvedBounds()), matchedPanelLayout);
-        Bounds headerBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(headerDrag, mx, my, intakeHeader.resolvedBounds()), matchedPanelLayout);
-        Bounds legendBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(legendDrag, mx, my, intakeLegend.resolvedBounds()), matchedPanelLayout);
+        Bounds headerBounds = DietPanelLayoutResolver.clampToRightColumn(liveOrDefault(headerDrag, mx, my, intakeHeader.resolvedBounds()), matchedPanelLayout);
+        Bounds legendBounds = DietPanelLayoutResolver.clampToRightColumn(liveOrDefault(legendDrag, mx, my, intakeLegend.resolvedBounds()), matchedPanelLayout);
         Map<String, Bounds> barBounds = new java.util.HashMap<>();
         for (IntakeBarComponent bar : intakeBars) {
             DraggableResizable drag = barRowDrags.get(bar.id());
             Bounds b = drag != null
-                    ? DietPanelLayoutResolver.clampToParent(liveOrDefault(drag, mx, my, bar.resolvedBounds()), matchedPanelLayout)
+                    ? DietPanelLayoutResolver.clampToRightColumn(liveOrDefault(drag, mx, my, bar.resolvedBounds()), matchedPanelLayout)
                     : bar.resolvedBounds();
             barBounds.put(bar.id(), b);
             keepContentInPlace(bar.id(), b);
