@@ -23,7 +23,7 @@ public class DietScreenEntry extends EntryProvider {
         this.page("diet_screen_image", () -> BookImagePageModel.create()
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText())
-                .withImages(ResourceLocation.fromNamespaceAndPath("nourished", "textures/patchouli/diet_screen.png")));
+                .withImages(ResourceLocation.fromNamespaceAndPath("nourished", "textures/images/diet_screen.png")));
         this.pageTitle("Diet Screen");
         this.pageText("The full diet screen shows detailed breakdowns of every food group and your recent eating history.");
 

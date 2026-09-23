@@ -23,7 +23,7 @@ public class FoodTooltipsEntry extends EntryProvider {
         this.page("tooltip_image", () -> BookImagePageModel.create()
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText())
-                .withImages(ResourceLocation.fromNamespaceAndPath("nourished", "textures/patchouli/tooltip.png")));
+                .withImages(ResourceLocation.fromNamespaceAndPath("nourished", "textures/images/tooltip.png")));
         this.pageTitle("Food Tooltips");
         this.pageText("Hover over any food item to see which food group it belongs to and how much nutrition it provides.");
 

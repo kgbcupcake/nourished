@@ -48,7 +48,7 @@ public class HudEntry extends EntryProvider {
                 .withImages(
                         ResourceLocation.fromNamespaceAndPath(
                                 "nourished",
-                                "textures/patchouli/mini_gui.png"
+                                "textures/images/mini_gui.png"
                         )
                 ));
 

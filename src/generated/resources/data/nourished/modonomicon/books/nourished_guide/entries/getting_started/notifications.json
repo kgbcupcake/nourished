@@ -19,7 +19,7 @@
 			"condition": {
 				"type": "modonomicon:none"
 			},
-			"images": ["nourished:textures/patchouli/notification.png"],
+			"images": ["nourished:textures/images/notification.png"],
 			"show_title_separator": true,
 			"text": "book.nourished.nourished_guide.getting_started.notifications.notification_image.text",
 			"title": "book.nourished.nourished_guide.getting_started.notifications.notification_image.title"

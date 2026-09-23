@@ -20,7 +20,7 @@
 			"condition": {
 				"type": "modonomicon:none"
 			},
-			"images": ["nourished:textures/patchouli/tooltip.png"],
+			"images": ["nourished:textures/images/tooltip.png"],
 			"text": "book.nourished.nourished_guide.getting_started.food_tooltips.tooltip_image.text",
 			"title": "book.nourished.nourished_guide.getting_started.food_tooltips.tooltip_image.title",
 			"use_legacy_rendering": false

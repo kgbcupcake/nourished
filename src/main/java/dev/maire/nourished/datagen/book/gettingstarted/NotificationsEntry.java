@@ -35,7 +35,7 @@ public class NotificationsEntry extends EntryProvider {
                 .withImages(
                         ResourceLocation.fromNamespaceAndPath(
                                 "nourished",
-                                "textures/patchouli/notification.png"
+                                "textures/images/notification.png"
                         )
                 ));
 
