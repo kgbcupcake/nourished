@@ -1,0 +1,72 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "tips_and_tricks",
+  "description": "book.nourished.nourished_guide.tips_and_tricks.daily_routine.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:clock"
+  },
+  "name": "book.nourished.nourished_guide.tips_and_tricks.daily_routine.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.daily_routine.ideal_loop.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.daily_routine.ideal_loop.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.daily_routine.hud_is_your_friend.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.daily_routine.hud_is_your_friend.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.daily_routine.batch_eating.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.daily_routine.batch_eating.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.daily_routine.before_a_fight.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.daily_routine.before_a_fight.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.daily_routine.before_an_xp_session.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.daily_routine.before_an_xp_session.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 0,
+  "x": -4,
+  "y": -4
+}

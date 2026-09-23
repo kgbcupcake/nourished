@@ -1,0 +1,84 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "server_owners",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "server_owners/configuring_effects"
+  },
+  "description": "book.nourished.nourished_guide.server_owners.food_overrides.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:chest"
+  },
+  "name": "book.nourished.nourished_guide.server_owners.food_overrides.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.server_owners.food_overrides.food_overrides.text",
+      "title": "book.nourished.nourished_guide.server_owners.food_overrides.food_overrides.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.server_owners.food_overrides.how_overrides_merge.text",
+      "title": "book.nourished.nourished_guide.server_owners.food_overrides.how_overrides_merge.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.server_owners.food_overrides.getting_starting_values.text",
+      "title": "book.nourished.nourished_guide.server_owners.food_overrides.getting_starting_values.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.server_owners.food_overrides.writing_an_override.text",
+      "title": "book.nourished.nourished_guide.server_owners.food_overrides.writing_an_override.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.server_owners.food_overrides.reloading_changes.text",
+      "title": "book.nourished.nourished_guide.server_owners.food_overrides.reloading_changes.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "server_owners/configuring_effects",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 1,
+  "x": 0,
+  "y": 1
+}

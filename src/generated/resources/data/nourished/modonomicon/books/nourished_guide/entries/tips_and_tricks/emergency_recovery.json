@@ -1,0 +1,84 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "tips_and_tricks",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "tips_and_tricks/efficient_farming"
+  },
+  "description": "book.nourished.nourished_guide.tips_and_tricks.emergency_recovery.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:golden_apple"
+  },
+  "name": "book.nourished.nourished_guide.tips_and_tricks.emergency_recovery.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.emergency_recovery.when_things_go_wrong.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.emergency_recovery.when_things_go_wrong.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.emergency_recovery.quick_fix_foods.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.emergency_recovery.quick_fix_foods.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.emergency_recovery.the_milk_trick.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.emergency_recovery.the_milk_trick.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.emergency_recovery.nutritional_debt.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.emergency_recovery.nutritional_debt.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.emergency_recovery.sleep_to_recover.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.emergency_recovery.sleep_to_recover.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "tips_and_tricks/efficient_farming",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 2,
+  "x": 0,
+  "y": 0
+}
