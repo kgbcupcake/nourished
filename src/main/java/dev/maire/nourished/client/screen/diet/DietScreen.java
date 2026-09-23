@@ -85,7 +85,11 @@ public class DietScreen extends Screen {
      */
     private final HubPanel scaleConfigPanel = new HubPanel(
             Component.translatable("nourished.screen.diet.options_label"), "nourished.diet.hub",
-            DietScreenPersistence.get(), scaleConfigEntries());
+            DietScreenPersistence.get(), scaleConfigEntries(),
+            () -> MarieColors.resolveColor(NourishedColors.HUB_BACKGROUND),
+            () -> MarieColors.resolveColor(NourishedColors.HUB_BORDER),
+            () -> MarieColors.resolveColor(NourishedColors.HUB_TITLE),
+            () -> MarieColors.resolveColor(NourishedColors.HUB_ACCENT));
     private boolean scaleConfigVisible;
 
     /** 0..1 fade-in over {@link #FADE_DURATION_SEC}; updated each render from frame delta. */
@@ -110,17 +114,22 @@ public class DietScreen extends Screen {
                 new HubEntry(RecentMealsComponent.ID, Component.translatable("nourished.screen.diet.recent_label"),
                         DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.recent_label").getString(),
                                 RecentMealsComponent.ID, true, true, true, false, DietOptionsPanel::recentMealsColors)),
-                // No "Hide Text" here: Eat More Of's suggestion text has nothing separate worth hiding
-                // on its own — "Hide Window" already covers the whole box.
+                // No "Move Text"/"Hide Text" here: Eat More Of has no body text at all separate from
+                // its header — its body is just the suggested-food icons — so neither toggle has
+                // anything of its own to move or hide; "Hide Window" already covers the whole box.
                 new HubEntry(EatMoreComponent.ID, Component.translatable("nourished.screen.diet.suggestion_label"),
                         DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.suggestion_label").getString(),
-                                EatMoreComponent.ID, false, true, true, true, false, DietOptionsPanel::eatMoreColors)),
+                                EatMoreComponent.ID, false, true, true, false, false, DietOptionsPanel::eatMoreColors)),
                 new HubEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label"),
                         DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.effects_label").getString(),
                                 ActiveEffectsComponent.ID, false, false, true, DietOptionsPanel::effectsColors)),
                 intakeGroupEntry(),
                 new HubEntry(DietScreenEditTarget.PANEL_ID, Component.translatable("nourished.screen.diet.options_label"),
-                        DietOptionsPanel.build())
+                        DietOptionsPanel.build()),
+                // The hub window's own chrome colors — separate from every box above, which customize
+                // what's being edited, not the editor doing the editing.
+                new HubEntry("nourished.diet.hub.editor", Component.translatable("nourished.options.diet.editor_title"),
+                        DietOptionsPanel.editorPanel())
         );
     }
 

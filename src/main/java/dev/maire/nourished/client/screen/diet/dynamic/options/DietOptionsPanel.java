@@ -201,6 +201,22 @@ public final class DietOptionsPanel {
         return forModule(title, moduleId, true, true, false);
     }
 
+    /**
+     * The hub editor window's own colors — its chrome, independent of the boxes it edits. A
+     * colors-only panel (no Layout/Behavior/Style tabs — there's no position/size/text of its own to
+     * move, just its four chrome colors), reached from the hub's own "Editor" sidebar entry rather
+     * than a per-box one.
+     */
+    public static MarieComponent editorPanel() {
+        MarieToolbox.PanelBuilder panel = MarieToolbox.panel(text("nourished.options.diet.editor_title"))
+                .colorTab(text("config.marieslib.moduleoptions.tab.colors"));
+        NourishedColorSlots.addFixed(panel, NourishedColors.HUB_BACKGROUND, "nourished.options.color.hub_background");
+        NourishedColorSlots.addFixed(panel, NourishedColors.HUB_BORDER, "nourished.options.color.hub_border");
+        NourishedColorSlots.addFixed(panel, NourishedColors.HUB_TITLE, "nourished.options.color.hub_title");
+        NourishedColorSlots.addFixed(panel, NourishedColors.HUB_ACCENT, "nourished.options.color.hub_accent");
+        return panel.build();
+    }
+
     private static NourishedClientConfig cc() {
         return NourishedClientConfig.get();
     }

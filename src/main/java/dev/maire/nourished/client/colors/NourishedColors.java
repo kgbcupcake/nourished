@@ -73,6 +73,12 @@ public final class NourishedColors {
     public static final ColorKey ACTIVE_EFFECTS_BORDER = themed("diet.active_effects.border", ThemeKey.BORDER);
     public static final ColorKey BORDER = themed("border", ThemeKey.BORDER);
     public static final ColorKey DIVIDER = themed("divider", ThemeKey.BORDER);
+
+    // The Diet Screen's hub editor window's own chrome — independent of the boxes it edits, customized from its own "Editor" sidebar entry.
+    public static final ColorKey HUB_BACKGROUND = themed("hub.background", ThemeKey.PANEL_BACKGROUND);
+    public static final ColorKey HUB_BORDER = themed("hub.border", ThemeKey.BORDER);
+    public static final ColorKey HUB_TITLE = themed("hub.title", ThemeKey.TEXT_PRIMARY);
+    public static final ColorKey HUB_ACCENT = themed("hub.accent", ThemeKey.BORDER_HOVER);
     public static final ColorKey BAR_TRACK = themed("bar.track", ThemeKey.BAR_BACKGROUND);
     public static final ColorKey DIET_BAR_TRACK = shaded("diet.bar_track", ThemeKey.BORDER, DIET_TRACK_SHADE);
     public static final ColorKey BALANCE_BALANCED = themed("balance.balanced", ThemeKey.TEXT_PRIMARY);
