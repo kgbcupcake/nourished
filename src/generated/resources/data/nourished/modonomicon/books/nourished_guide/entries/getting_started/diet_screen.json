@@ -2,6 +2,10 @@
   "background_u_index": 0,
   "background_v_index": 0,
   "category": "getting_started",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "getting_started/hud"
+  },
   "description": "book.nourished.nourished_guide.getting_started.diet_screen.description",
   "hide_while_locked": false,
   "icon": {

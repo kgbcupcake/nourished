@@ -551,6 +551,8 @@
   "config.nourished.rawfood.memorySecs.desc": "Seconds before raw-eat memory expires and effects reroll",
   "advancement.nourished.milestones.root.title": "Nourished Milestones",
   "advancement.nourished.milestones.root.description": "Track your dietary journey",
+  "advancement.nourished.milestones.obtained_guide.title": "Read the Label",
+  "advancement.nourished.milestones.obtained_guide.description": "Obtain the Nourished Guide.",
   "advancement.nourished.milestones.fruits_beginner.title": "Fresh Start",
   "advancement.nourished.milestones.fruits_beginner.description": "Eat your first fruits.",
   "advancement.nourished.milestones.fruits_journeyman.title": "Nature's Bounty",

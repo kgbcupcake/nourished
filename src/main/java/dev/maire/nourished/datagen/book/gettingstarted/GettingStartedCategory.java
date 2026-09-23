@@ -40,14 +40,30 @@ public class GettingStartedCategory extends CategoryProvider {
 
     @Override
     protected void generateEntries() {
+        // Each entry requires the previous one to be read before it unlocks, so the chain plays
+        // out in order rather than just being visually connected.
         var introduction = this.add(new IntroductionEntry(this).generate('i'));
-        var hud = this.add(new HudEntry(this).generate('h')).withParent(introduction);
-        var dietScreen = this.add(new DietScreenEntry(this).generate('d')).withParent(hud);
-        var sleepBonus = this.add(new SleepBonusEntry(this).generate('s')).withParent(dietScreen);
-        var effects = this.add(new EffectsEntry(this).generate('e')).withParent(sleepBonus);
-        var foodTooltips = this.add(new FoodTooltipsEntry(this).generate('t')).withParent(effects);
-        var notifications = this.add(new NotificationsEntry(this).generate('n')).withParent(foodTooltips);
-        this.add(new FirstDayEntry(this).generate('y')).withParent(notifications);
+        var hud = this.add(new HudEntry(this).generate('h'))
+                .withParent(introduction)
+                .withCondition(this.condition().entryRead(introduction));
+        var dietScreen = this.add(new DietScreenEntry(this).generate('d'))
+                .withParent(hud)
+                .withCondition(this.condition().entryRead(hud));
+        var sleepBonus = this.add(new SleepBonusEntry(this).generate('s'))
+                .withParent(dietScreen)
+                .withCondition(this.condition().entryRead(dietScreen));
+        var effects = this.add(new EffectsEntry(this).generate('e'))
+                .withParent(sleepBonus)
+                .withCondition(this.condition().entryRead(sleepBonus));
+        var foodTooltips = this.add(new FoodTooltipsEntry(this).generate('t'))
+                .withParent(effects)
+                .withCondition(this.condition().entryRead(effects));
+        var notifications = this.add(new NotificationsEntry(this).generate('n'))
+                .withParent(foodTooltips)
+                .withCondition(this.condition().entryRead(foodTooltips));
+        this.add(new FirstDayEntry(this).generate('y'))
+                .withParent(notifications)
+                .withCondition(this.condition().entryRead(notifications));
     }
 
     @Override
