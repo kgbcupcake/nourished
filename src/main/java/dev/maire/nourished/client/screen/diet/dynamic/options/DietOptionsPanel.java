@@ -57,7 +57,9 @@ public final class DietOptionsPanel {
                                     () -> cc().showDietScreenButton(), v -> cc().setShowDietScreenButton(v), save)
                             .defaultValue(true);
                     p.endSection();
-                    p.resetTab();
+                    // The consolidated "Reset This Module" button MarieModuleSettings#standardPanel
+                    // now always adds at the top of the Layout tab covers these Behavior-tab rows too
+                    // (see OptionLayout#allRows) — no separate tab-scoped reset needed here anymore.
                 })
                 .extraTabs(panel -> {
                     panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
