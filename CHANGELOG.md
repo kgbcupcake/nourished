@@ -16,7 +16,7 @@
 ### Removed
 
 - The Intake Breakdown legend box (the "Good/Low/Critical" swatch key below the nutrient bars) is gone entirely — both the dynamic (MarieUI) renderer's `IntakeLegendComponent` and its hub sidebar entry/options panel, and the classic pre-MarieUI renderer's equivalent hand-drawn box — along with its persisted position/size, its three swatch color slots (`diet.legend.good`/`.low`/`.critical`, dropped via `RetiredColorKeys` so any existing override is cleaned from `colors.json`), and its lang keys. Its content duplicated what per-nutrient bar coloring already conveys.
-- Patchouli is no longer a dependency — the guide book fully moved to Modonomicon a few commits ago, but the `compileOnly`/`runtimeOnly` Patchouli gradle dependency and version property, and the entire leftover `patchouli_books` asset/data tree (unreferenced by anything and never loading), stuck around. Removed both, plus a stale doc comment in `DietAttachment` still calling the guide a "Patchouli" book.
+- Patchouli is no longer a dependency — the guide book fully moved to Modonomicon a few commits ago, but the `compileOnly`/`runtimeOnly` Patchouli gradle dependency and its version property stuck around. Removed both, plus a stale doc comment in `DietAttachment` still calling the guide a "Patchouli" book. The old `patchouli_books` JSON trees are kept as-is (still used as reference while building out the other in-game books) — they were never loaded anyway since nothing registers them as a Patchouli book anymore.
 
 ### Changed
 

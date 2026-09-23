@@ -1,10 +1,7 @@
 {
   "display": {
     "icon": {
-      "id": "modonomicon:modonomicon",
-      "components": {
-        "modonomicon:book_id": "nourished:nourished_guide"
-      }
+      "id": "nourished:nourished_book"
     },
     "title": {
       "translate": "advancement.nourished.milestones.obtained_guide.title"
@@ -25,11 +22,8 @@
         "items": [
           {
             "items": [
-              "modonomicon:modonomicon"
-            ],
-            "components": {
-              "modonomicon:book_id": "nourished:nourished_guide"
-            }
+              "nourished:nourished_book"
+            ]
           }
         ]
       }

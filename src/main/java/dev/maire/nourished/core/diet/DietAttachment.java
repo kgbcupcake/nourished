@@ -26,7 +26,7 @@ public final class DietAttachment {
             DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, Nourished.MODID);
 
     /**
-     * One-time grant of the Patchouli {@code nourished:nourished_guide} book on first server login
+     * One-time grant of the Modonomicon {@code nourished:nourished_guide} book on first server login
      * (replaces unreliable {@code give_on_first_join} on NeoForge 1.21.1 singleplayer).
      */
     public static final Supplier<AttachmentType<Boolean>> RECEIVED_NOURISHED_GUIDE =
