@@ -19,7 +19,10 @@ public class NourishedGuideBook extends SingleBookSubProvider {
         // "node" display mode (Modonomicon's default) renders as a quest-map graph, Thaumonomicon-style.
         return book.withModel(
                 ResourceLocation.parse("nourished:nourished_book")
-        );
+        )
+                // Our own item instead of the shared modonomicon:modonomicon one, so the tooltip's
+                // mod-name attribution reads "Nourished" once instead of "Modonomicon" twice.
+                .withCustomBookItem(ResourceLocation.parse("nourished:nourished_book"));
     }
 
     @Override

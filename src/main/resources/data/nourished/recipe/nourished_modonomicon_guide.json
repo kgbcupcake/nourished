@@ -9,10 +9,7 @@
     }
   ],
   "result": {
-    "id": "modonomicon:modonomicon",
-    "count": 1,
-    "components": {
-      "modonomicon:book_id": "nourished:nourished_guide"
-    }
+    "id": "nourished:nourished_book",
+    "count": 1
   }
 }

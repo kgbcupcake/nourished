@@ -18,6 +18,7 @@ public class NourishedLangProvider extends AbstractModonomiconLanguageProvider {
 
     @Override
     protected void addTranslations() {
-        // All entries come from the book/category/entry providers via the cache.
+        // All book/category/entry text comes from the book providers via the cache.
+        this.accept("item.nourished.nourished_book", "Nourished Guide");
     }
 }

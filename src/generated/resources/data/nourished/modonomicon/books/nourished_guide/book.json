@@ -21,6 +21,7 @@
   "category_button_y_offset": 0,
   "crafting_texture": "modonomicon:textures/gui/crafting_textures.png",
   "creative_tab": "modonomicon:modonomicon",
+  "custom_book_item": "nourished:nourished_book",
   "default_text_color": 0,
   "default_title_color": 0,
   "description": "",

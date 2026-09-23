@@ -13,6 +13,7 @@ import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.color.ColorRegistry;
 import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.data.MarieDataManager;
+import dev.maire.nourished.core.book.NourishedBookItems;
 import dev.maire.nourished.core.datapack.NourishedDatapackCallbacks;
 import dev.marie.framework.registry.MarieApiRegistries;
 import dev.marie.framework.registry.RegistryLifecycleManager;
@@ -102,6 +103,7 @@ public class Nourished {
         modEventBus.addListener(NourishedClientConfig::onModConfigReloading);
         ActivityDrivenNutrientRegistry.registerSync();
         registerColorDefinitions();
+        NourishedBookItems.register(modEventBus);
 
         NourishedLifecycle.register();
         NourishedContextBuilder.registerSlim();
