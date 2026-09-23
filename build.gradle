@@ -145,6 +145,7 @@ tasks.named('processResources', ProcessResources).configure {
             mod_authors            : mod_authors,
             mod_description        : mod_description,
             maries_framework_version_range: maries_framework_version_range,
+            modonomicon_version     : modonomicon_version,
 
     ]
     inputs.properties replaceProperties
