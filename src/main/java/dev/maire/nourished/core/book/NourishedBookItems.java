@@ -18,9 +18,12 @@ public final class NourishedBookItems {
 
     // Registered under our own namespace (instead of reusing modonomicon:modonomicon) so tooltip
     // mod-name attribution (NeoForge + EMI) reads "Nourished" once, not "Modonomicon" twice.
+    // BOOK_OPEN must default to false, or the item's model renders the large "book opened" cover
+    // art (normally shown only while the reading GUI is up) all the time instead of the small icon.
     public static final DeferredHolder<Item, Item> NOURISHED_BOOK = ITEMS.register("nourished_book",
             () -> new ModonomiconItem(new Item.Properties()
-                    .component(DataComponentRegistry.BOOK_ID.get(), ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "nourished_guide"))));
+                    .component(DataComponentRegistry.BOOK_ID.get(), ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "nourished_guide"))
+                    .component(DataComponentRegistry.BOOK_OPEN.get(), false)));
 
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);

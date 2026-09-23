@@ -4,6 +4,8 @@ import com.klikli_dev.modonomicon.api.datagen.ModonomiconLanguageProvider;
 import com.klikli_dev.modonomicon.api.datagen.SingleBookSubProvider;
 import com.klikli_dev.modonomicon.api.datagen.book.BookModel;
 import dev.maire.nourished.datagen.book.gettingstarted.GettingStartedCategory;
+import dev.maire.nourished.datagen.book.serverowners.ServerOwnersCategory;
+import dev.maire.nourished.datagen.book.tipsandtricks.TipsAndTricksCategory;
 import net.minecraft.resources.ResourceLocation;
 
 public class NourishedGuideBook extends SingleBookSubProvider {
@@ -33,6 +35,8 @@ public class NourishedGuideBook extends SingleBookSubProvider {
     @Override
     protected void generateCategories() {
         this.add(new GettingStartedCategory(this).generate());
+        this.add(new TipsAndTricksCategory(this).generate());
+        this.add(new ServerOwnersCategory(this).generate());
     }
 
     @Override
