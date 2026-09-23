@@ -1,0 +1,84 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "food_safety",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "food_safety/raw_food"
+  },
+  "description": "book.nourished.nourished_guide.food_safety.gut_health.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:fermented_spider_eye"
+  },
+  "name": "book.nourished.nourished_guide.food_safety.gut_health.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_safety.gut_health.gut_health.text",
+      "title": "book.nourished.nourished_guide.food_safety.gut_health.gut_health.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_safety.gut_health.how_it_decays.text",
+      "title": "book.nourished.nourished_guide.food_safety.gut_health.how_it_decays.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_safety.gut_health.how_it_recovers.text",
+      "title": "book.nourished.nourished_guide.food_safety.gut_health.how_it_recovers.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_safety.gut_health.building_resistance.text",
+      "title": "book.nourished.nourished_guide.food_safety.gut_health.building_resistance.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_safety.gut_health.the_takeaway.text",
+      "title": "book.nourished.nourished_guide.food_safety.gut_health.the_takeaway.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "food_safety/raw_food",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 1,
+  "x": 0,
+  "y": 1
+}

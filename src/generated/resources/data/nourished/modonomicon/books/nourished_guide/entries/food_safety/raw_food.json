@@ -1,0 +1,83 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "food_safety",
+  "description": "book.nourished.nourished_guide.food_safety.raw_food.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:beef"
+  },
+  "name": "book.nourished.nourished_guide.food_safety.raw_food.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_safety.raw_food.eating_raw_food.text",
+      "title": "book.nourished.nourished_guide.food_safety.raw_food.eating_raw_food.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_safety.raw_food.mild.text",
+      "title": "book.nourished.nourished_guide.food_safety.raw_food.mild.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_safety.raw_food.medium.text",
+      "title": "book.nourished.nourished_guide.food_safety.raw_food.medium.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_safety.raw_food.severe.text",
+      "title": "book.nourished.nourished_guide.food_safety.raw_food.severe.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_safety.raw_food.missed_opportunity.text",
+      "title": "book.nourished.nourished_guide.food_safety.raw_food.missed_opportunity.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_safety.raw_food.eating_the_same_food_again.text",
+      "title": "book.nourished.nourished_guide.food_safety.raw_food.eating_the_same_food_again.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 0,
+  "x": -2,
+  "y": -1
+}

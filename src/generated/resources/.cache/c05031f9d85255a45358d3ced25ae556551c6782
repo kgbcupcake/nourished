@@ -1,8 +1,11 @@
-// 1.21.1	2026-09-23T12:31:43.146750914	Books: nourished
+// 1.21.1	2026-09-23T12:42:39.986164444	Books: nourished
 28de2a37226d629f0fd57bf08fe792cec9e1ced5 data/nourished/modonomicon/books/nourished_guide/book.json
+49edbef3e2278ff7f749d0c0501689fb690b4f2f data/nourished/modonomicon/books/nourished_guide/categories/food_safety.json
 a600e86ffd3d4e09d5f295fdc1e82278e3109def data/nourished/modonomicon/books/nourished_guide/categories/getting_started.json
 d39b99cddbfdd474db965f021537c05627db4d40 data/nourished/modonomicon/books/nourished_guide/categories/server_owners.json
 ddf042f960de24439408bbfa1f1ac8746fea2d1f data/nourished/modonomicon/books/nourished_guide/categories/tips_and_tricks.json
+d95f75bbf7c9861435930a3e18376152ef2a4400 data/nourished/modonomicon/books/nourished_guide/entries/food_safety/gut_health.json
+1a224e5dbf48e8293a594bbc8e00f12b3e6ea794 data/nourished/modonomicon/books/nourished_guide/entries/food_safety/raw_food.json
 cf8688aa4dae31972a4df88036c6a6bcdde74759 data/nourished/modonomicon/books/nourished_guide/entries/getting_started/diet_screen.json
 947aacd93622b64c4a46111d0bc923390994203f data/nourished/modonomicon/books/nourished_guide/entries/getting_started/effects.json
 dbcd2e27957e044f7dfec32090acf0caf0209445 data/nourished/modonomicon/books/nourished_guide/entries/getting_started/first_day.json
