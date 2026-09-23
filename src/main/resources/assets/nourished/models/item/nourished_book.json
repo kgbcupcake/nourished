@@ -1,6 +1,9 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "nourished:item/nourished_book"
+  "loader": "modonomicon:book_model_loader",
+  "base_model": {
+    "parent": "minecraft:item/generated",
+    "textures": {
+      "layer0": "nourished:item/nourished_book"
+    }
   }
 }
