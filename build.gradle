@@ -57,6 +57,14 @@ neoForge {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+// The Modonomicon lang provider writes assets/nourished/lang/en_us.json into src/generated/resources,
+// which collides with the hand-maintained copy in src/main/resources that holds the rest of the mod's
+// translations. The generated guide book keys are merged into that hand-maintained file instead (see
+// its "book.nourished.nourished_guide.*" keys), so skip copying the generated duplicate.
+tasks.named('processResources', ProcessResources).configure {
+    exclude { it.file.absolutePath.replace(File.separator, '/').endsWith('src/generated/resources/assets/nourished/lang/en_us.json') }
+}
+
 repositories
 {
     mavenCentral()
@@ -92,6 +100,14 @@ repositories
     }
    }
 
+    maven {
+        name = 'Modonomicon'
+        url = 'https://dl.cloudsmith.io/public/klikli-dev/mods/maven/'
+        content {
+            includeGroup 'com.klikli_dev'
+        }
+    }
+
 }
 
 dependencies {
@@ -104,6 +120,7 @@ dependencies {
     compileOnly "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"
     compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}:api"
     runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
+    implementation("com.klikli_dev:modonomicon-${minecraft_version}-neoforge:${modonomicon_version}") { transitive = false }
 
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'

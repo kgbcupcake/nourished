@@ -70,6 +70,7 @@ import dev.maire.nourished.modules.RawFood.Gut.GutHealthRecoveryHandler;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthTickHandler;
 import dev.maire.nourished.modules.RawFood.handler.RawFoodPenaltyHandler;
 import dev.maire.nourished.core.network.ModNetworking;
+import dev.maire.nourished.datagen.NourishedDataGenerators;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -138,6 +139,7 @@ public class Nourished {
             ClientEventRegistrar.register(modEventBus);
         }
         modEventBus.addListener(ModNetworking::register);
+        modEventBus.addListener(NourishedDataGenerators::gatherData);
         NourishedFoodTriggerHandler.register(NeoForge.EVENT_BUS);
         NeoForge.EVENT_BUS.addListener(NourishedTagsHandler::onTagsUpdated);
         NeoForge.EVENT_BUS.register(new NourishedServerHandler());

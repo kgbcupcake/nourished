@@ -1,0 +1,42 @@
+package dev.maire.nourished.datagen.book;
+
+import com.klikli_dev.modonomicon.api.datagen.ModonomiconLanguageProvider;
+import com.klikli_dev.modonomicon.api.datagen.SingleBookSubProvider;
+import com.klikli_dev.modonomicon.api.datagen.book.BookModel;
+import dev.maire.nourished.datagen.book.gettingstarted.GettingStartedCategory;
+import net.minecraft.resources.ResourceLocation;
+
+public class NourishedGuideBook extends SingleBookSubProvider {
+
+    public static final String ID = "nourished_guide";
+
+    public NourishedGuideBook(String modId, ModonomiconLanguageProvider lang) {
+        super(ID, modId, lang);
+    }
+
+    @Override
+    protected BookModel additionalSetup(BookModel book) {
+        // "node" display mode (Modonomicon's default) renders as a quest-map graph, Thaumonomicon-style.
+        return book.withModel(ResourceLocation.parse("modonomicon:modonomicon_green"));
+    }
+
+    @Override
+    protected void registerDefaultMacros() {
+        // none yet
+    }
+
+    @Override
+    protected void generateCategories() {
+        this.add(new GettingStartedCategory(this).generate());
+    }
+
+    @Override
+    protected String bookName() {
+        return "Nourished Guide";
+    }
+
+    @Override
+    protected String bookTooltip() {
+        return "Everything you need to know about eating well.";
+    }
+}
