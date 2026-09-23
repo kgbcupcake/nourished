@@ -1,0 +1,72 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "how_it_works",
+  "description": "book.nourished.nourished_guide.how_it_works.diminishing_returns.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:cookie"
+  },
+  "name": "book.nourished.nourished_guide.how_it_works.diminishing_returns.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.diminishing_returns.diminishing_returns.text",
+      "title": "book.nourished.nourished_guide.how_it_works.diminishing_returns.diminishing_returns.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.diminishing_returns.three_levels_at_once.text",
+      "title": "book.nourished.nourished_guide.how_it_works.diminishing_returns.three_levels_at_once.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.diminishing_returns.how_it_fades.text",
+      "title": "book.nourished.nourished_guide.how_it_works.diminishing_returns.how_it_fades.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.diminishing_returns.the_novelty_bonus.text",
+      "title": "book.nourished.nourished_guide.how_it_works.diminishing_returns.the_novelty_bonus.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.diminishing_returns.checking_your_status.text",
+      "title": "book.nourished.nourished_guide.how_it_works.diminishing_returns.checking_your_status.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 0,
+  "x": -4,
+  "y": -5
+}

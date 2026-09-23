@@ -1,0 +1,51 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "how_it_works",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "how_it_works/food_families"
+  },
+  "description": "book.nourished.nourished_guide.how_it_works.balance_score.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:golden_apple"
+  },
+  "name": "book.nourished.nourished_guide.how_it_works.balance_score.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.balance_score.balance_score.text",
+      "title": "book.nourished.nourished_guide.how_it_works.balance_score.balance_score.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.balance_score.even_vs_uneven.text",
+      "title": "book.nourished.nourished_guide.how_it_works.balance_score.even_vs_uneven.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "how_it_works/food_families",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 3,
+  "x": 2,
+  "y": 1
+}

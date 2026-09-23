@@ -1,0 +1,51 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "how_it_works",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "how_it_works/diminishing_returns"
+  },
+  "description": "book.nourished.nourished_guide.how_it_works.streak_penalty.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:barrier"
+  },
+  "name": "book.nourished.nourished_guide.how_it_works.streak_penalty.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.streak_penalty.streak_penalty.text",
+      "title": "book.nourished.nourished_guide.how_it_works.streak_penalty.streak_penalty.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.streak_penalty.breaking_the_streak.text",
+      "title": "book.nourished.nourished_guide.how_it_works.streak_penalty.breaking_the_streak.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "how_it_works/diminishing_returns",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 1,
+  "x": -2,
+  "y": -3
+}
