@@ -48,6 +48,17 @@
       "text": "book.nourished.nourished_guide.getting_started.notifications.staying_ahead.text",
       "title": "book.nourished.nourished_guide.getting_started.notifications.staying_ahead.title",
       "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.getting_started.notifications.food_eaten.text",
+      "title": "book.nourished.nourished_guide.getting_started.notifications.food_eaten.title",
+      "use_markdown_in_title": false
     }
   ],
   "parents": [

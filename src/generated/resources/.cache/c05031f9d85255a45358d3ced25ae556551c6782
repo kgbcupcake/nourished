@@ -1,4 +1,4 @@
-// 1.21.1	2026-09-23T12:50:20.589374392	Books: nourished
+// 1.21.1	2026-09-23T13:06:38.731736953	Books: nourished
 28de2a37226d629f0fd57bf08fe792cec9e1ced5 data/nourished/modonomicon/books/nourished_guide/book.json
 49edbef3e2278ff7f749d0c0501689fb690b4f2f data/nourished/modonomicon/books/nourished_guide/categories/food_safety.json
 a600e86ffd3d4e09d5f295fdc1e82278e3109def data/nourished/modonomicon/books/nourished_guide/categories/getting_started.json
@@ -13,7 +13,7 @@ dbcd2e27957e044f7dfec32090acf0caf0209445 data/nourished/modonomicon/books/nouris
 0babded0d03b86491264c2d01aad11928f7298f6 data/nourished/modonomicon/books/nourished_guide/entries/getting_started/food_tooltips.json
 67b586d722805ce25ff1054041e48d179e446fa7 data/nourished/modonomicon/books/nourished_guide/entries/getting_started/hud.json
 3662013742be75d7cab449635b8ddce4a165b266 data/nourished/modonomicon/books/nourished_guide/entries/getting_started/introduction.json
-d86502c4f9086bfb626819642898e04f3d741751 data/nourished/modonomicon/books/nourished_guide/entries/getting_started/notifications.json
+f52b4932ed1d5bc4bd9885b044aeba86417992df data/nourished/modonomicon/books/nourished_guide/entries/getting_started/notifications.json
 99714e41efde56a738fdc4f08f17395238a5eef8 data/nourished/modonomicon/books/nourished_guide/entries/getting_started/sleep_bonus.json
 9139069517986509b8c9b6b40e4a94117d9db1d3 data/nourished/modonomicon/books/nourished_guide/entries/how_it_works/balance_score.json
 1f122a1b011c8c7486c8ccda4f250591956a5eff data/nourished/modonomicon/books/nourished_guide/entries/how_it_works/diminishing_returns.json

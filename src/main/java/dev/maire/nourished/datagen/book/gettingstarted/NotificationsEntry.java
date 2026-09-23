@@ -19,6 +19,7 @@ public class NotificationsEntry extends EntryProvider {
     private static final String TOAST = "[#](F5A623)";
     private static final String HUD = "[#](6FB8E8)";
     private static final String CONFIG = "[#](B88CFF)";
+    private static final String CALORIES = "[#](7BC96F)";
 
     // Reset
     private static final String RESET = "[#]()";
@@ -80,6 +81,22 @@ public class NotificationsEntry extends EntryProvider {
                 CONFIG, RESET,
                 HUD, RESET
         ));
+
+        this.page("food_eaten", () -> BookTextPageModel.create()
+                .withTitle(this.context().pageTitle())
+                .withText(this.context().pageText()));
+
+        this.pageTitle("Food Eaten");
+
+        this.pageText("""
+                Every time you eat, Nourished also shows a small %s**food eaten**%s notification with the item's name and how many %s**calories**%s it added.
+
+                Eating the same food again quickly merges into the same notification instead of stacking a new one each bite — it just updates in place.
+
+                """.formatted(
+                TOAST, RESET,
+                CALORIES, RESET
+        ));
     }
 
     @Override
@@ -89,7 +106,7 @@ public class NotificationsEntry extends EntryProvider {
 
     @Override
     protected String entryDescription() {
-        return "Toast warnings when a food group runs critically low.";
+        return "Toast warnings and food-eaten calorie notifications.";
     }
 
     @Override
