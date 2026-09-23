@@ -23,7 +23,7 @@ public class FirstDayEntry extends EntryProvider {
                 .withText(this.context().pageText()));
         this.pageTitle("Your First Day");
         this.pageText("""
-                When you first spawn, all six nutrition bars start at a moderate level. You won't feel any effects immediately — but they will begin to decay.
+                When you first spawn, all the nutrition bars start at a moderate level. You won't feel any effects immediately, but they will begin to decay.
 
                 Your priority on day one is to gather a variety of foods before the bars run dry.
                 """);
@@ -64,7 +64,7 @@ public class FirstDayEntry extends EntryProvider {
         this.pageText("""
                 Raw meats count as Proteins, but their nutrition values are lower than their cooked equivalents. Always cook your meat when possible.
 
-                Some foods only register as their group when prepared — check tooltips if a food isn't filling the bar you expect.
+                Some foods only register as their group when prepared,  check tooltips if a food isn't filling the bar you expect.
                 """);
 
         this.page("diminishing_returns", () -> BookTextPageModel.create()
@@ -94,10 +94,10 @@ public class FirstDayEntry extends EntryProvider {
         this.pageText("""
                 Once you are past day one, check out the Tips & Tricks chapter for deeper strategies:
 
-                **Daily Routine** — the ideal loop for keeping all bars healthy.
-                **Efficient Farming** — the minimum farm that covers all six groups.
-                **Emergency Recovery** — what to do when multiple bars crash.
-                **Reading Tooltips** — food tooltips and JEI tag search.
+                **Daily Routine**: the ideal loop for keeping all bars healthy.
+                **Efficient Farming**: the minimum farm that covers all six groups.
+                **Emergency Recovery**: what to do when multiple bars crash.
+                **Reading Tooltips**: food tooltips and JEI tag search.
                 """);
     }
 

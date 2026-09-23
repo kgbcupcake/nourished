@@ -25,7 +25,7 @@ public class NotificationsEntry extends EntryProvider {
         this.pageText("""
                 When a food group drops critically low, Nourished sends a toast notification in the top-right corner of your screen.
 
-                Toasts appear once per group when they cross the critical threshold — pay attention to them or your stats will suffer.
+                Toasts appear once per group when they cross the critical threshold,  pay attention to them or your stats will suffer.
                 """);
 
         this.page("staying_ahead", () -> BookTextPageModel.create()

@@ -23,7 +23,7 @@ public class EffectsEntry extends EntryProvider {
                 .withText(this.context().pageText()));
         this.pageTitle("Balance Bonus");
         this.pageText("""
-                When all six food groups are above their threshold, you gain the Balance Bonus — a persistent buff that improves health, speed, or other stats depending on your configuration.
+                When all of the food groups are above their threshold, you gain the Balance Bonus, a persistent buff that improves health, speed, or other stats depending on your configuration.
 
                 Keeping the bonus active should be your primary goal.
                 """);
@@ -35,11 +35,11 @@ public class EffectsEntry extends EntryProvider {
         this.pageText("""
                 Each food group has its own bonus active when healthy:
 
-                **Fruits** — increased regeneration speed.
-                **Vegetables** — improved hunger saturation.
-                **Proteins** — increased max health.
-                **Grains** — faster experience gain.
-                **Dairy** — increased armor toughness.
+                **Fruits**: increased regeneration speed.
+                **Vegetables**: improved hunger saturation.
+                **Proteins**: increased max health.
+                **Grains**: faster experience gain.
+                **Dairy**: increased armor toughness.
                 """);
 
         this.page("penalties", () -> BookTextPageModel.create()
@@ -47,7 +47,7 @@ public class EffectsEntry extends EntryProvider {
                 .withText(this.context().pageText()));
         this.pageTitle("Penalties");
         this.pageText("""
-                Letting any group fall to zero applies a penalty for that group. Penalties stack — neglecting multiple groups at once causes increasingly severe debuffs.
+                Letting any group fall to zero applies a penalty for that group. Penalties stack: neglecting multiple groups at once causes increasingly severe debuffs.
 
                 Recovery is straightforward: eat foods from the depleted group and the penalty fades as the bar refills.
                 """);
@@ -59,11 +59,11 @@ public class EffectsEntry extends EntryProvider {
         this.pageText("""
                 Each food group has its own penalty when depleted:
 
-                **Fruits** — reduced max health.
-                **Vegetables** — reduced movement speed.
-                **Proteins** — reduced attack damage.
-                **Grains** — reduced hunger restoration.
-                **Dairy** — reduced knockback resistance.
+                **Fruits**: reduced max health.
+                **Vegetables**: reduced movement speed.
+                **Proteins**: reduced attack damage.
+                **Grains**: reduced hunger restoration.
+                **Dairy**: reduced knockback resistance.
                 """);
 
         this.page("stacking_effects", () -> BookTextPageModel.create()
@@ -73,7 +73,7 @@ public class EffectsEntry extends EntryProvider {
         this.pageText("""
                 Effects from multiple groups stack. Having all six bonuses active simultaneously gives a compound advantage across health, damage, speed, regen, XP, and armor.
 
-                Conversely, multiple penalties at once — especially Fruits (health) + Proteins (damage) + Dairy (knockback) — can make combat very dangerous. Prioritize preventing that combination above all else.
+                Conversely, multiple penalties at once — especially Fruits (health) + Proteins (damage) + Dairy (knockback),  can make combat very dangerous. Prioritize preventing that combination above all else.
                 """);
 
         this.page("viewing_active_effects", () -> BookTextPageModel.create()
