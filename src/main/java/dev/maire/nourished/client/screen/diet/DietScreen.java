@@ -113,7 +113,8 @@ public class DietScreen extends Screen {
                 // Text" to actually move.
                 new HubEntry(RecentMealsComponent.ID, Component.translatable("nourished.screen.diet.recent_label"),
                         DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.recent_label").getString(),
-                                RecentMealsComponent.ID, true, true, true, false, DietOptionsPanel::recentMealsColors)),
+                                RecentMealsComponent.ID, true, true, true, false, true, DietOptionsPanel::recentMealsColors,
+                                "nourished.options.diet.recent.header_size")),
                 // No "Move Text"/"Hide Text" here: Eat More Of has no body text at all separate from
                 // its header — its body is just the suggested-food icons — so neither toggle has
                 // anything of its own to move or hide; "Hide Window" already covers the whole box.

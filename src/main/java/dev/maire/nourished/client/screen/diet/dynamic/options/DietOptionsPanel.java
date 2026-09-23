@@ -122,9 +122,25 @@ public final class DietOptionsPanel {
      */
     public static MarieComponent forModule(String title, String moduleId, boolean hasBars, boolean hasIcons, boolean hasHeader,
                                            boolean hasMoveText, boolean hasHideText, java.util.function.Consumer<MarieToolbox.PanelBuilder> colors) {
+        return forModule(title, moduleId, hasBars, hasIcons, hasHeader, hasMoveText, hasHideText, colors, null);
+    }
+
+    /**
+     * Same, with the Style tab's "Text size" row relabeled to {@code textSizeLabelKey} ({@code null}:
+     * the standard "Text size" label) — for a box whose persisted text scale only ever drives its
+     * header (e.g. Recent Meals, whose row names follow Bar size instead — see {@link
+     * dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent#render}), where the
+     * generic "Text size" label would misleadingly suggest it also resizes the box's body content.
+     */
+    public static MarieComponent forModule(String title, String moduleId, boolean hasBars, boolean hasIcons, boolean hasHeader,
+                                           boolean hasMoveText, boolean hasHideText, java.util.function.Consumer<MarieToolbox.PanelBuilder> colors,
+                                           String textSizeLabelKey) {
         StandardPanelBuilder panel = MarieModuleSettings.standardPanel(title, DietScreenPersistence.get(), moduleId)
                 .storedBrightness()
                 .withoutPadding();
+        if (textSizeLabelKey != null) {
+            panel.textSizeLabel(textSizeLabelKey);
+        }
         if (!hasBars) {
             panel.withoutBars();
         }

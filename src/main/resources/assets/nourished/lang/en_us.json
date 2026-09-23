@@ -37,6 +37,7 @@
   "nourished.screen.diet.balance_state.low": "Low",
   "nourished.screen.diet.balance_state.excess": "Excess",
   "nourished.screen.diet.recent_label": "Recent Meals",
+  "nourished.options.diet.recent.header_size": "Header size",
   "nourished.screen.diet.suggestion_label": "Eat More",
   "nourished.screen.diet.tip": "Try to keep your diet balanced by eating a variety of foods.",
   "nourished.screen.diet.intake": "Intake Breakdown",

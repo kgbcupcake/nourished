@@ -11,7 +11,8 @@ public final class DietSubBoxConstraints {
     /** Calories/Balance render 4 local units wider than the other sub-boxes. */
     public static final int SUMMARY_BOX_LOCAL_WIDTH = (DietLayout.SPLIT - DietLayout.PAD * 2) + 4;
 
-    private static final double MIN_SIZE_MULTIPLIER = 0.6d;
+    /** Shrink floor every individual sub-box's own drag/resize uses — also reused by {@link DietPanelLayoutResolver#panelConstraint} for the whole panel's own width floor. */
+    static final double MIN_SIZE_MULTIPLIER = 0.6d;
     private static final double MAX_WIDTH_MULTIPLIER = 50.0d;
     private static final double MAX_HEIGHT_MULTIPLIER = 4.0d;
 

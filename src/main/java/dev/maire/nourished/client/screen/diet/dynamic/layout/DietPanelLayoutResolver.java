@@ -67,13 +67,22 @@ public final class DietPanelLayoutResolver {
         return DietLayout.toScreenDim(baseLayout, naturalHeightLocal);
     }
 
-    /** Width floors at natural + the current left margin, so the right column's fixed-size content never clips even with an existing margin; height keeps a much lower floor for the minimize-to-title-bar state. */
+    /**
+     * Width floors at {@link DietSubBoxConstraints#MIN_SIZE_MULTIPLIER} of natural (the same shrink
+     * floor every individual sub-box already uses), not the full natural width — a narrower panel just
+     * clips its fixed-size right-column content the same way a shorter panel already clips its bottom
+     * content (see every sub-box's own "extra room stays empty, less room is clipped" comment); it used
+     * to floor at 100% of natural, which made the panel's own corner-resize handle stop shrinking width
+     * at all while height could still shrink to its much lower {@link DietLayout#PANEL_MIN_LOCAL_HEIGHT}
+     * floor.
+     */
     public static Constraint panelConstraint(DietLayout.Layout baseLayout) {
         int naturalWidth = DietLayout.scaledDim(DietLayout.WIDTH, baseLayout.scale()) + baseLayout.leftMargin();
+        int minWidth = Math.max(1, (int) Math.round(naturalWidth * DietSubBoxConstraints.MIN_SIZE_MULTIPLIER));
         int maxHeight = Math.max(DietLayout.scaledDim(DietLayout.HEIGHT, 1.5d), naturalHeight(baseLayout));
         return DietSubBoxConstraints.bounded(
                 baseLayout.panelW(), baseLayout.panelH(),
-                naturalWidth, DietLayout.scaledDim(DietLayout.PANEL_MIN_LOCAL_HEIGHT, 1.0d),
+                minWidth, DietLayout.scaledDim(DietLayout.PANEL_MIN_LOCAL_HEIGHT, 1.0d),
                 Math.max(DietLayout.scaledDim(DietLayout.WIDTH, 1.5d) + baseLayout.leftMargin(),
                         Minecraft.getInstance().getWindow().getGuiScaledWidth() - baseLayout.panelX()), maxHeight
         );
