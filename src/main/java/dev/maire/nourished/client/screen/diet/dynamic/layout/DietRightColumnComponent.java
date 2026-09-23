@@ -11,19 +11,17 @@ import dev.marie.framework.ui.layout.VerticalLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.DietScreenModules;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeBarComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeHeaderComponent;
-import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeLegendComponent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * The Intake Breakdown ("right") column, rewritten as a thin {@link Container} mirroring {@link
- * DietLeftColumnComponent} — every row, the header and the legend are now independent {@link
- * MarieComponent}s built via {@link DietScreenModules#build(String, DietLayout.Layout, int)} against
- * {@link DietScreenModules#RIGHT_COLUMN_KEY} rather than hand-drawn inline here. See {@link
+ * DietLeftColumnComponent} — every row and the header are now independent {@link MarieComponent}s
+ * built via {@link DietScreenModules#build(String, DietLayout.Layout, int)} against {@link
+ * DietScreenModules#RIGHT_COLUMN_KEY} rather than hand-drawn inline here. See {@link
  * dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeHeaderComponent}/{@link
- * IntakeBarComponent}/{@link IntakeLegendComponent} for what used to be this class's {@code render}
- * body.
+ * IntakeBarComponent} for what used to be this class's {@code render} body.
  */
 public final class DietRightColumnComponent implements Container {
 
@@ -38,7 +36,6 @@ public final class DietRightColumnComponent implements Container {
     private final Layout columnLayout;
 
     private Bounds headerRenderBounds;
-    private Bounds legendRenderBounds;
     private final java.util.Map<String, Bounds> barRenderBounds = new java.util.HashMap<>();
 
     DietRightColumnComponent(TrackingData data, List<String> bars, java.util.Map<String, Float> display, DietLayout.Layout layout, int width, int height) {
@@ -54,10 +51,6 @@ public final class DietRightColumnComponent implements Container {
         return DietScreenModules.find(children, IntakeHeaderComponent.class);
     }
 
-    public IntakeLegendComponent legendComponent() {
-        return DietScreenModules.find(children, IntakeLegendComponent.class);
-    }
-
     public List<IntakeBarComponent> barComponents() {
         List<IntakeBarComponent> result = new ArrayList<>();
         for (MarieComponent child : children) {
@@ -69,17 +62,16 @@ public final class DietRightColumnComponent implements Container {
     }
 
     /**
-     * Overrides the bounds {@link #render} passes to the header/rows/legend instead of their own
-     * {@code resolvedBounds()} — for edit mode's live drag/resize preview. A {@code null} entry (or a
-     * key absent from {@code barBoundsById}) means "use that child's own resolvedBounds()."
+     * Overrides the bounds {@link #render} passes to the header/rows instead of their own {@code
+     * resolvedBounds()} — for edit mode's live drag/resize preview. A {@code null} entry (or a key
+     * absent from {@code barBoundsById}) means "use that child's own resolvedBounds()."
      */
-    public void setIntakeRenderBounds(Bounds headerBounds, java.util.Map<String, Bounds> barBoundsById, Bounds legendBounds) {
+    public void setIntakeRenderBounds(Bounds headerBounds, java.util.Map<String, Bounds> barBoundsById) {
         this.headerRenderBounds = headerBounds;
         this.barRenderBounds.clear();
         if (barBoundsById != null) {
             this.barRenderBounds.putAll(barBoundsById);
         }
-        this.legendRenderBounds = legendBounds;
     }
 
     @Override
@@ -127,11 +119,6 @@ public final class DietRightColumnComponent implements Container {
                 if (!header.isVisible()) {
                     continue;
                 }
-            } else if (child instanceof IntakeLegendComponent legend) {
-                if (!legend.isVisible()) {
-                    continue;
-                }
-                renderBounds = legendRenderBounds != null ? legendRenderBounds : legend.resolvedBounds();
             } else if (child instanceof IntakeBarComponent bar) {
                 if (!bar.isVisible()) {
                     continue;

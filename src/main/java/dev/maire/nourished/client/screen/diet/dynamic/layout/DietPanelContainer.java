@@ -16,7 +16,6 @@ import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeBarComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeHeaderComponent;
-import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeLegendComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.client.Minecraft;
@@ -127,21 +126,17 @@ public final class DietPanelContainer implements Container {
         return rightColumn().headerComponent();
     }
 
-    public IntakeLegendComponent intakeLegendComponent() {
-        return rightColumn().legendComponent();
-    }
-
     public List<IntakeBarComponent> intakeBarComponents() {
         return rightColumn().barComponents();
     }
 
     /**
-     * Overrides the bounds {@link #render} will use for the Intake Breakdown header/rows/legend
-     * instead of their own {@code resolvedBounds()} — for edit mode's live drag/resize preview, same
-     * purpose as {@link #setSubBoxRenderBounds} for the left column's sub-boxes.
+     * Overrides the bounds {@link #render} will use for the Intake Breakdown header/rows instead of
+     * their own {@code resolvedBounds()} — for edit mode's live drag/resize preview, same purpose as
+     * {@link #setSubBoxRenderBounds} for the left column's sub-boxes.
      */
-    public void setIntakeRenderBounds(Bounds headerBounds, Map<String, Bounds> barBoundsById, Bounds legendBounds) {
-        rightColumn().setIntakeRenderBounds(headerBounds, barBoundsById, legendBounds);
+    public void setIntakeRenderBounds(Bounds headerBounds, Map<String, Bounds> barBoundsById) {
+        rightColumn().setIntakeRenderBounds(headerBounds, barBoundsById);
     }
 
     private DietLeftColumnComponent leftColumn() {

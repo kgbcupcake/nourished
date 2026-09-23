@@ -8,7 +8,6 @@ import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeHeaderComponent;
-import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeLegendComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -126,7 +125,9 @@ public final class DietScreenPersistence {
         }
         if (!cc.intakeBreakdownOffsetMigrationDone()) {
             get().remove(IntakeHeaderComponent.ID);
-            get().remove(IntakeLegendComponent.ID);
+            // "nourished.diet.legend": the removed IntakeLegendComponent's old id, kept as a literal
+            // now that the class is gone — still worth clearing out any stale persisted state for it.
+            get().remove("nourished.diet.legend");
             int slots = NutrientRegistry.getKeys().size();
             for (int i = 0; i < slots; i++) {
                 get().remove("nourished.diet.intake.slot" + i);

@@ -75,10 +75,6 @@ public final class NourishedColors {
     public static final ColorKey DIVIDER = themed("divider", ThemeKey.BORDER);
     public static final ColorKey BAR_TRACK = themed("bar.track", ThemeKey.BAR_BACKGROUND);
     public static final ColorKey DIET_BAR_TRACK = shaded("diet.bar_track", ThemeKey.BORDER, DIET_TRACK_SHADE);
-    // Diet Screen intake legend (Good/Low/Critical swatches) — same semantic slots the threshold bar fills used before per-nutrient coloring replaced them
-    public static final ColorKey DIET_LEGEND_GOOD = themed("diet.legend.good", ThemeKey.BAR_FILL_POSITIVE);
-    public static final ColorKey DIET_LEGEND_LOW = themed("diet.legend.low", ThemeKey.BAR_FILL_WARNING);
-    public static final ColorKey DIET_LEGEND_CRITICAL = themed("diet.legend.critical", ThemeKey.BAR_FILL_CRITICAL);
     public static final ColorKey BALANCE_BALANCED = themed("balance.balanced", ThemeKey.TEXT_PRIMARY);
     public static final ColorKey BALANCE_LOW = themed("balance.low", ThemeKey.TEXT_SECONDARY);
     public static final ColorKey BALANCE_EXCESS = themed("balance.excess", ThemeKey.TEXT_SECONDARY);

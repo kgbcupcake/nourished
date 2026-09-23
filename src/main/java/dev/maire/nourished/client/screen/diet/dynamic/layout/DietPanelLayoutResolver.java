@@ -111,7 +111,7 @@ public final class DietPanelLayoutResolver {
     /**
      * Same as {@link #clampToParent}, but for the right ("Intake Breakdown") column — confines
      * between the column divider and the panel's right edge instead of the panel's left edge and the
-     * divider. Without this, the Intake Breakdown header/rows/legend were being run through {@link
+     * divider. Without this, the Intake Breakdown header/rows were being run through {@link
      * #clampToParent} in edit mode, which forces a box to stay entirely left of the divider — i.e.
      * squeezed into the left column's space instead of its own, dragging the whole right column over
      * on top of Calories/Balance/etc. the moment edit mode resolved its live bounds.

@@ -80,18 +80,17 @@ public final class DietScreenModules {
         ModuleRegistry.register(Nourished.MODID, (ModuleFactory<DietLayout.Layout>) EatMoreComponent::new);
         ModuleRegistry.register(Nourished.MODID, (ModuleFactory<DietLayout.Layout>) ActiveEffectsComponent::new);
 
-        // Right column: header, one row per nutrient "slot", then the legend. Each row factory
-        // resolves its actual nutrient key from NourishedClientConfig#effectiveDietBarOrder() at
-        // construction time (every frame), not here at registration time, so live bar reordering
-        // still works — see IntakeBarComponent's javadoc. The slot count is fixed at registration
-        // time to the registered nutrient count, which does not change at runtime.
+        // Right column: header, then one row per nutrient "slot". Each row factory resolves its
+        // actual nutrient key from NourishedClientConfig#effectiveDietBarOrder() at construction time
+        // (every frame), not here at registration time, so live bar reordering still works — see
+        // IntakeBarComponent's javadoc. The slot count is fixed at registration time to the
+        // registered nutrient count, which does not change at runtime.
         ModuleRegistry.register(RIGHT_COLUMN_KEY, (ModuleFactory<DietLayout.Layout>) IntakeHeaderComponent::new);
         int slots = dev.maire.nourished.core.nutrition.NutrientRegistry.getKeys().size();
         for (int i = 0; i < slots; i++) {
             final int slot = i;
             ModuleRegistry.register(RIGHT_COLUMN_KEY, (ModuleFactory<DietLayout.Layout>) (layout, startY) -> IntakeBarComponent.create(slot, layout, startY));
         }
-        ModuleRegistry.register(RIGHT_COLUMN_KEY, (ModuleFactory<DietLayout.Layout>) IntakeLegendComponent::new);
     }
 
     /**

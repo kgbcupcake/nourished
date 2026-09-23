@@ -25,7 +25,9 @@ public final class RetiredColorKeys {
             "hud.bar_low", "hud.bar_critical", "hud.pct_good", "hud.pct_low", "hud.pct_critical", "hud.flash",
             "hud.notification_text", "diet.right_panel_background", "diet.row_background", "diet.border_light",
             "diet.segment_empty", "diet.flash", "diet.legend_text", "diet.legend_low",
-            "diet.good", "diet.warn", "diet.bad");
+            "diet.good", "diet.warn", "diet.bad",
+            // The Intake Breakdown legend box itself was removed, taking its three swatch colors with it.
+            "diet.legend.good", "diet.legend.low", "diet.legend.critical");
 
     static {
         RENAMED.put("hud.calorie", "calorie.value");

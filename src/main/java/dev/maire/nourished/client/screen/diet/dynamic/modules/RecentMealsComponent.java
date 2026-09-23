@@ -267,8 +267,10 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                 int headerBudget = Math.max(0, maxHeaderFontPx - headerEllipsisW);
                 header = font.plainSubstrByWidth(header, headerBudget) + "...";
             }
-            // The header has its own offset (Move Header); Move Text moves nothing here (the row names
-            // travel with Move Bars instead — see above), same split ActiveEffectsComponent's title/lines have.
+            // The header has its own offset (Move Header); the row names travel with Move Bars instead
+            // (see above) — unlike ActiveEffectsComponent's title/lines split, there's no separate
+            // "body text" left here for Move Text to move, so this box's panel omits that toggle
+            // entirely (see DietScreen#moduleEntry's recentMeals call).
             int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
             int headerY = sy(y) + MarieModuleSettings.headerOffsetY(store, ID);
             rowContext.drawText(header, headerX, headerY, headerTextColor(), scale);
@@ -315,11 +317,18 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                 int nameColor = nutrientKey != null
                         ? HudDrawHelpers.nutrientColorArgb(nutrientKey)
                         : textColor();
-                rowContext.drawText(name, sx(x + nameOffset) + barDx, sy(y) + barDy, nameColor, rowScale * barScale);
-                int rowLeft = sx(x + nameOffset) + barDx;
-                int rowTop = sy(y) + barDy;
-                int rowRight = sx(x + nameOffset) + barDx + Math.round(font.width(name) * rowScale * barScale);
-                MarieModuleSettings.recordBarExtent(store, ID, rowLeft, rowTop, Math.max(1, rowRight - rowLeft), Math.max(1, Math.round(9 * rowScale * barScale)));
+                // The name is this box's "bar" content (see above), so it's drawn through rowContext
+                // (not the display-settings-wrapped `context`) to keep its own manual barDx/barDy
+                // offset instead of Move Text's — which also means withDisplaySettings never sees this
+                // draw call and can't auto-skip it for "Hide Bars" the way it does for a real
+                // context.drawBar call, so that has to be checked explicitly here instead.
+                if (!MarieModuleSettings.isBarsHidden(store, ID)) {
+                    rowContext.drawText(name, sx(x + nameOffset) + barDx, sy(y) + barDy, nameColor, rowScale * barScale);
+                    int rowLeft = sx(x + nameOffset) + barDx;
+                    int rowTop = sy(y) + barDy;
+                    int rowRight = sx(x + nameOffset) + barDx + Math.round(font.width(name) * rowScale * barScale);
+                    MarieModuleSettings.recordBarExtent(store, ID, rowLeft, rowTop, Math.max(1, rowRight - rowLeft), Math.max(1, Math.round(9 * rowScale * barScale)));
+                }
                 y += zoomedRowH;
             }
         } finally {

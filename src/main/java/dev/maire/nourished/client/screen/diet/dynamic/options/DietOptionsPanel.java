@@ -4,7 +4,6 @@ import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.ui.api.StandardPanelBuilder;
 import dev.maire.nourished.client.screen.diet.dynamic.edit.DietScreenEditTarget;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
-import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeLegendComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.client.colors.NourishedColorSlots;
@@ -98,8 +97,32 @@ public final class DietOptionsPanel {
     /** Same, with a Colors tab whose slots {@code colors} adds (null: no Colors tab). */
     public static MarieComponent forModule(String title, String moduleId, boolean hasBars, boolean hasIcons, boolean hasHeader,
                                            java.util.function.Consumer<MarieToolbox.PanelBuilder> colors) {
+        return forModule(title, moduleId, hasBars, hasIcons, hasHeader, true, colors);
+    }
+
+    /**
+     * Same, also choosing whether "Move Text" appears at all — false for a box whose body content
+     * already moves under some other toggle (e.g. Recent Meals, whose row names travel with "Move
+     * Bars" instead — see {@link dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent#render}),
+     * leaving nothing for "Move Text" to actually move.
+     */
+    public static MarieComponent forModule(String title, String moduleId, boolean hasBars, boolean hasIcons, boolean hasHeader,
+                                           boolean hasMoveText, java.util.function.Consumer<MarieToolbox.PanelBuilder> colors) {
+        return forModule(title, moduleId, hasBars, hasIcons, hasHeader, hasMoveText, true, colors);
+    }
+
+    /**
+     * Same, also choosing whether "Hide Text" appears — false for a box whose text serves no purpose
+     * hiding on its own (e.g. Eat More Of's suggestion text, which the "Hide Window" toggle already
+     * covers). Every Diet sub-box panel also drops the Padding slider (Layout tab): every box is
+     * directly drag-resizable and every piece of its content individually movable, so a separate
+     * padding-percentage knob is redundant.
+     */
+    public static MarieComponent forModule(String title, String moduleId, boolean hasBars, boolean hasIcons, boolean hasHeader,
+                                           boolean hasMoveText, boolean hasHideText, java.util.function.Consumer<MarieToolbox.PanelBuilder> colors) {
         StandardPanelBuilder panel = MarieModuleSettings.standardPanel(title, DietScreenPersistence.get(), moduleId)
-                .storedBrightness();
+                .storedBrightness()
+                .withoutPadding();
         if (!hasBars) {
             panel.withoutBars();
         }
@@ -108,6 +131,12 @@ public final class DietOptionsPanel {
         }
         if (hasHeader) {
             panel.withHeader();
+        }
+        if (!hasMoveText) {
+            panel.withoutMoveText();
+        }
+        if (!hasHideText) {
+            panel.withoutHideText();
         }
         if (colors != null) {
             panel.extraTabs(p -> {
@@ -168,21 +197,6 @@ public final class DietOptionsPanel {
      */
     public static MarieComponent forIntakeBar(String title, String moduleId) {
         return forModule(title, moduleId, true, true, false);
-    }
-
-    /** Options panel for the Intake Breakdown legend box. */
-    public static MarieComponent intakeLegendPanel() {
-        return forModule(text("nourished.screen.diet.legend"), IntakeLegendComponent.ID, false, false, false, DietOptionsPanel::legendColors);
-    }
-
-    /** The Intake Breakdown legend's colors: title, entry text, and the Good/Low/Critical swatches (shared roles). */
-    public static void legendColors(MarieToolbox.PanelBuilder panel) {
-        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.intake_header_text");
-        NourishedColorSlots.addFixed(panel, NourishedColors.TEXT, "nourished.options.color.text");
-        NourishedColorSlots.addFixed(panel, NourishedColors.DIET_LEGEND_GOOD, "nourished.options.color.legend_good");
-        NourishedColorSlots.addFixed(panel, NourishedColors.DIET_LEGEND_LOW, "nourished.options.color.legend_low");
-        NourishedColorSlots.addFixed(panel, NourishedColors.DIET_LEGEND_CRITICAL, "nourished.options.color.legend_critical");
-        NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
     }
 
     private static NourishedClientConfig cc() {

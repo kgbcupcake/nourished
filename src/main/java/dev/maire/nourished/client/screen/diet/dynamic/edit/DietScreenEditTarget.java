@@ -27,7 +27,6 @@ import dev.maire.nourished.client.screen.diet.dynamic.modules.DietScreenModules;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeBarComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeHeaderComponent;
-import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeLegendComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -71,7 +70,6 @@ public final class DietScreenEditTarget implements MarieComponent {
     private final DraggableResizable eatMoreDrag;
     private final DraggableResizable activeEffectsDrag;
     private final DraggableResizable headerDrag;
-    private final DraggableResizable legendDrag;
     /** One tracker per Intake Breakdown row "slot" id — the rows are structurally identical, so a single generic loop drives every id in this map instead of one named field per row (see {@code DietScreenModules#RIGHT_COLUMN_KEY}). */
     private final Map<String, DraggableResizable> barRowDrags = new HashMap<>();
 
@@ -88,7 +86,6 @@ public final class DietScreenEditTarget implements MarieComponent {
     private Bounds lastEatMoreResolvedBounds;
     private Bounds lastActiveEffectsResolvedBounds;
     private Bounds lastHeaderResolvedBounds;
-    private Bounds lastLegendResolvedBounds;
     private final Map<String, Bounds> lastBarResolvedBounds = new HashMap<>();
 
     public DietScreenEditTarget(Minecraft mc, Runnable exitEditMode, HubPanel scaleConfigPanel, BooleanSupplier scaleConfigVisible) {
@@ -170,21 +167,15 @@ public final class DietScreenEditTarget implements MarieComponent {
                 });
         activeEffectsDragRef[0] = activeEffectsDrag;
 
-        // Intake Breakdown (right column): header, one row per registered slot, and the legend —
-        // built the same way as the left column's modules above, via the shared registry chain.
+        // Intake Breakdown (right column): header, then one row per registered slot — built the same
+        // way as the left column's modules above, via the shared registry chain.
         List<MarieComponent> rightModules = DietScreenModules.build(DietScreenModules.RIGHT_COLUMN_KEY, baseLayout, DietRightColumnComponent.HEADER_START_LOCAL_Y, DietLayout.rightColumnContentX(baseLayout));
         IntakeHeaderComponent defaultHeader = DietScreenModules.find(rightModules, IntakeHeaderComponent.class);
-        IntakeLegendComponent defaultLegend = DietScreenModules.find(rightModules, IntakeLegendComponent.class);
 
         DraggableResizable[] headerDragRef = new DraggableResizable[1];
         headerDrag = new DraggableResizable(this, liveSubBoxConstraint(naturalPreferredSize(baseLayout, defaultHeader.naturalLocalHeight(), IntakeHeaderComponent.LOCAL_WIDTH)),
                 (target, bounds) -> DietScreenPersistence.get().save(defaultHeader.id(), toRelativeState(bounds, defaultHeader.id(), headerDragRef[0], DietLayout.rightColumnContentX(resolvedPanelLayout(mc)))));
         headerDragRef[0] = headerDrag;
-
-        DraggableResizable[] legendDragRef = new DraggableResizable[1];
-        legendDrag = new DraggableResizable(this, liveSubBoxConstraint(naturalPreferredSize(baseLayout, defaultLegend.naturalLocalHeight(), IntakeLegendComponent.LOCAL_WIDTH)),
-                (target, bounds) -> DietScreenPersistence.get().save(defaultLegend.id(), toRelativeState(bounds, defaultLegend.id(), legendDragRef[0], DietLayout.rightColumnContentX(resolvedPanelLayout(mc)))));
-        legendDragRef[0] = legendDrag;
 
         for (MarieComponent module : rightModules) {
             if (module instanceof IntakeBarComponent bar) {
@@ -245,9 +236,6 @@ public final class DietScreenEditTarget implements MarieComponent {
             return true;
         }
         if (lastHeaderResolvedBounds != null && clickBox(IntakeHeaderComponent.ID, headerDrag, lastHeaderResolvedBounds, mx, my)) {
-            return true;
-        }
-        if (lastLegendResolvedBounds != null && clickBox(IntakeLegendComponent.ID, legendDrag, lastLegendResolvedBounds, mx, my)) {
             return true;
         }
         for (Map.Entry<String, DraggableResizable> entry : barRowDrags.entrySet()) {
@@ -345,10 +333,6 @@ public final class DietScreenEditTarget implements MarieComponent {
             headerDrag.mouseDragged(mx, my);
             any = true;
         }
-        if (legendDrag.isDragging() || legendDrag.isResizing()) {
-            legendDrag.mouseDragged(mx, my);
-            any = true;
-        }
         for (DraggableResizable drag : barRowDrags.values()) {
             if (drag.isDragging() || drag.isResizing()) {
                 drag.mouseDragged(mx, my);
@@ -378,7 +362,6 @@ public final class DietScreenEditTarget implements MarieComponent {
                 || eatMoreDrag.isDragging() || eatMoreDrag.isResizing()
                 || activeEffectsDrag.isDragging() || activeEffectsDrag.isResizing()
                 || headerDrag.isDragging() || headerDrag.isResizing()
-                || legendDrag.isDragging() || legendDrag.isResizing()
                 || anyBar
                 || panelDrag.isDragging() || panelDrag.isResizing();
         int mx = (int) mouseX;
@@ -389,7 +372,6 @@ public final class DietScreenEditTarget implements MarieComponent {
         eatMoreDrag.mouseReleased(mx, my);
         activeEffectsDrag.mouseReleased(mx, my);
         headerDrag.mouseReleased(mx, my);
-        legendDrag.mouseReleased(mx, my);
         for (DraggableResizable drag : barRowDrags.values()) {
             drag.mouseReleased(mx, my);
         }
@@ -438,7 +420,6 @@ public final class DietScreenEditTarget implements MarieComponent {
         EatMoreComponent eatMore = panel.eatMoreComponent();
         ActiveEffectsComponent activeEffects = panel.activeEffectsComponent();
         IntakeHeaderComponent intakeHeader = panel.intakeHeaderComponent();
-        IntakeLegendComponent intakeLegend = panel.intakeLegendComponent();
         List<IntakeBarComponent> intakeBars = panel.intakeBarComponents();
 
         caloriesDrag.setConstraint(liveSubBoxConstraint(naturalPreferredSize(matchedPanelLayout, calories.naturalLocalHeight(), SUMMARY_BOX_LOCAL_WIDTH)));
@@ -447,7 +428,6 @@ public final class DietScreenEditTarget implements MarieComponent {
         eatMoreDrag.setConstraint(liveSubBoxConstraint(naturalPreferredSize(matchedPanelLayout, eatMore.naturalLocalHeight())));
         activeEffectsDrag.setConstraint(liveSubBoxConstraint(naturalPreferredSize(matchedPanelLayout, activeEffects.naturalLocalHeight())));
         headerDrag.setConstraint(liveSubBoxConstraint(naturalPreferredSize(matchedPanelLayout, intakeHeader.naturalLocalHeight(), IntakeHeaderComponent.LOCAL_WIDTH)));
-        legendDrag.setConstraint(liveSubBoxConstraint(naturalPreferredSize(matchedPanelLayout, intakeLegend.naturalLocalHeight(), IntakeLegendComponent.LOCAL_WIDTH)));
         for (IntakeBarComponent bar : intakeBars) {
             DraggableResizable drag = barRowDrags.get(bar.id());
             if (drag != null) {
@@ -461,7 +441,6 @@ public final class DietScreenEditTarget implements MarieComponent {
         Bounds eatMoreR = eatMore.resolvedBounds();
         Bounds activeEffectsR = activeEffects.resolvedBounds();
         Bounds headerR = intakeHeader.resolvedBounds();
-        Bounds legendR = intakeLegend.resolvedBounds();
         caloriesDrag.setSnapTargets(xEdges(panelBounds, balanceR, recentR, eatMoreR, activeEffectsR), yEdges(panelBounds, balanceR, recentR, eatMoreR, activeEffectsR));
         balanceDrag.setSnapTargets(xEdges(panelBounds, caloriesR, recentR, eatMoreR, activeEffectsR), yEdges(panelBounds, caloriesR, recentR, eatMoreR, activeEffectsR));
         recentMealsDrag.setSnapTargets(xEdges(panelBounds, caloriesR, balanceR, eatMoreR, activeEffectsR), yEdges(panelBounds, caloriesR, balanceR, eatMoreR, activeEffectsR));
@@ -469,15 +448,13 @@ public final class DietScreenEditTarget implements MarieComponent {
         activeEffectsDrag.setSnapTargets(xEdges(panelBounds, caloriesR, balanceR, recentR, eatMoreR), yEdges(panelBounds, caloriesR, balanceR, recentR, eatMoreR));
         // Every right-column box snaps against every OTHER right-column box (plus the panel edges),
         // same as the left column's five boxes do against each other — previously each of these only
-        // snapped against the header and legend, never against its own sibling rows.
+        // snapped against the header, never against its own sibling rows.
         List<Bounds> rightBounds = new ArrayList<>();
         rightBounds.add(headerR);
-        rightBounds.add(legendR);
         for (IntakeBarComponent bar : intakeBars) {
             rightBounds.add(bar.resolvedBounds());
         }
         headerDrag.setSnapTargets(xEdges(rightSnapTargets(panelBounds, rightBounds, headerR)), yEdges(rightSnapTargets(panelBounds, rightBounds, headerR)));
-        legendDrag.setSnapTargets(xEdges(rightSnapTargets(panelBounds, rightBounds, legendR)), yEdges(rightSnapTargets(panelBounds, rightBounds, legendR)));
         for (IntakeBarComponent bar : intakeBars) {
             DraggableResizable drag = barRowDrags.get(bar.id());
             if (drag != null) {
@@ -492,7 +469,6 @@ public final class DietScreenEditTarget implements MarieComponent {
         Bounds eatMoreBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(eatMoreDrag, mx, my, eatMore.resolvedBounds()), matchedPanelLayout);
         Bounds activeEffectsBounds = DietPanelLayoutResolver.clampToParent(liveOrDefault(activeEffectsDrag, mx, my, activeEffects.resolvedBounds()), matchedPanelLayout);
         Bounds headerBounds = DietPanelLayoutResolver.clampToRightColumn(liveOrDefault(headerDrag, mx, my, intakeHeader.resolvedBounds()), matchedPanelLayout);
-        Bounds legendBounds = DietPanelLayoutResolver.clampToRightColumn(liveOrDefault(legendDrag, mx, my, intakeLegend.resolvedBounds()), matchedPanelLayout);
         Map<String, Bounds> barBounds = new java.util.HashMap<>();
         for (IntakeBarComponent bar : intakeBars) {
             DraggableResizable drag = barRowDrags.get(bar.id());
@@ -500,7 +476,6 @@ public final class DietScreenEditTarget implements MarieComponent {
                     ? DietPanelLayoutResolver.clampToRightColumn(liveOrDefault(drag, mx, my, bar.resolvedBounds()), matchedPanelLayout)
                     : bar.resolvedBounds();
             barBounds.put(bar.id(), b);
-            keepContentInPlace(bar.id(), b);
             lastBarResolvedBounds.put(bar.id(), bar.resolvedBounds());
         }
         keepContentInPlace(CaloriesComponent.ID, caloriesBounds);
@@ -508,10 +483,15 @@ public final class DietScreenEditTarget implements MarieComponent {
         keepContentInPlace(RecentMealsComponent.ID, recentBounds);
         keepContentInPlace(EatMoreComponent.ID, eatMoreBounds);
         keepContentInPlace(ActiveEffectsComponent.ID, activeEffectsBounds);
-        keepContentInPlace(IntakeHeaderComponent.ID, headerBounds);
-        keepContentInPlace(IntakeLegendComponent.ID, legendBounds);
+        // No keepContentInPlace for the header/bars: unlike the left column's boxes, these draw every
+        // piece of their content directly off their own live Bounds at a fixed scale (see
+        // BarRowComponent/TitleBarComponent's render()), with no separate persisted local-coordinate
+        // layout to compensate for. Applying the same left/top-edge content-anchor offset compensation
+        // on top of that pushed the icon/label/bar away from their own row card during a bottom-left-
+        // corner resize — content already tracks the box's live origin correctly on its own;
+        // compensating for that origin moving was actively wrong here, not just redundant.
         panel.setSubBoxRenderBounds(caloriesBounds, balanceBounds, recentBounds, eatMoreBounds, activeEffectsBounds);
-        panel.setIntakeRenderBounds(headerBounds, barBounds, legendBounds);
+        panel.setIntakeRenderBounds(headerBounds, barBounds);
 
         lastCaloriesResolvedBounds = calories.resolvedBounds();
         lastBalanceResolvedBounds = balance.resolvedBounds();
@@ -519,7 +499,6 @@ public final class DietScreenEditTarget implements MarieComponent {
         lastEatMoreResolvedBounds = eatMore.resolvedBounds();
         lastActiveEffectsResolvedBounds = activeEffects.resolvedBounds();
         lastHeaderResolvedBounds = intakeHeader.resolvedBounds();
-        lastLegendResolvedBounds = intakeLegend.resolvedBounds();
 
         panel.render(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().dietTextBrightness(), NourishedClientConfig.get().dietIconBrightness()), panelBounds);
 
@@ -560,11 +539,6 @@ public final class DietScreenEditTarget implements MarieComponent {
                 drawSizeLabel(context, drag, b);
             }
         }
-        if (intakeLegend.isVisible()) {
-            drawBoxHandles(context, IntakeLegendComponent.ID, legendDrag, legendBounds, mx, my);
-            drawSizeLabel(context, legendDrag, legendBounds);
-        }
-
         boolean toggleHovered = DietScreen.isMouseOverEditModeToggle(matchedPanelLayout, mx, my);
         DietScreen.drawEditModeToggle(context, matchedPanelLayout, true, toggleHovered);
 
@@ -576,7 +550,7 @@ public final class DietScreenEditTarget implements MarieComponent {
     /** Starts a move drag in whichever sub-box the pointer is over, if that box has a move mode switched on. */
     private boolean startMoveDrag(double mouseX, double mouseY) {
         List<String> idList = new ArrayList<>(List.of(CaloriesComponent.ID, BalanceComponent.ID, RecentMealsComponent.ID,
-                EatMoreComponent.ID, ActiveEffectsComponent.ID, IntakeHeaderComponent.ID, IntakeLegendComponent.ID));
+                EatMoreComponent.ID, ActiveEffectsComponent.ID, IntakeHeaderComponent.ID));
         List<Bounds> boxList = new ArrayList<>(List.of());
         boxList.add(lastCaloriesResolvedBounds);
         boxList.add(lastBalanceResolvedBounds);
@@ -584,7 +558,6 @@ public final class DietScreenEditTarget implements MarieComponent {
         boxList.add(lastEatMoreResolvedBounds);
         boxList.add(lastActiveEffectsResolvedBounds);
         boxList.add(lastHeaderResolvedBounds);
-        boxList.add(lastLegendResolvedBounds);
         for (String barId : barRowDrags.keySet()) {
             idList.add(barId);
             boxList.add(lastBarResolvedBounds.get(barId));
@@ -828,7 +801,6 @@ public final class DietScreenEditTarget implements MarieComponent {
         applyLiveOverride(eatMoreDrag, EatMoreComponent.ID, mx, my);
         applyLiveOverride(activeEffectsDrag, ActiveEffectsComponent.ID, mx, my);
         applyLiveOverride(headerDrag, IntakeHeaderComponent.ID, mx, my);
-        applyLiveOverride(legendDrag, IntakeLegendComponent.ID, mx, my);
         for (Map.Entry<String, DraggableResizable> entry : barRowDrags.entrySet()) {
             applyLiveOverride(entry.getValue(), entry.getKey(), mx, my);
         }
@@ -895,7 +867,7 @@ public final class DietScreenEditTarget implements MarieComponent {
     /**
      * Same as {@link #toRelativeState(Bounds, String, DraggableResizable)}, but against an explicit
      * {@code contentX} instead of assuming the left column's — the right ("Intake Breakdown") column's
-     * header/rows/legend must pass {@link DietLayout#rightColumnContentX} here, matching what {@link
+     * header/rows must pass {@link DietLayout#rightColumnContentX} here, matching what {@link
      * DietScreenPersistence#resolveRelativeToRightColumn} uses to read the value back. Using the left
      * column's X for both (an earlier bug) stored a relative offset hundreds of local units off from
      * what the read-back path expected, so a committed right-column drag/resize would read back at a
@@ -907,7 +879,7 @@ public final class DietScreenEditTarget implements MarieComponent {
 
     /**
      * {@code rightColumn} picks which clamp the committed bounds go through — {@code
-     * clampToRightColumn} for the Intake Breakdown header/rows/legend, {@code clampToParent} (the
+     * clampToRightColumn} for the Intake Breakdown header/rows, {@code clampToParent} (the
      * left-column clamp) for every other box. An earlier version of this method hardcoded
      * {@code clampToRightColumn} for BOTH the 3-arg (left column) and 4-arg (right column) overloads
      * above, since the 3-arg one simply delegated into the 4-arg one — which fixed the right column's

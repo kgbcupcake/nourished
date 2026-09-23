@@ -20,7 +20,6 @@ import dev.maire.nourished.client.screen.diet.dynamic.modules.ActiveEffectsCompo
 import dev.maire.nourished.client.screen.diet.dynamic.modules.BalanceComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
-import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeLegendComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -37,6 +36,7 @@ import dev.marie.framework.ui.hub.HubEntry;
 import dev.marie.framework.ui.hub.HubGroupEntry;
 import dev.marie.framework.ui.hub.HubPanel;
 import dev.marie.framework.ui.hub.HubSidebarEntry;
+import dev.marie.framework.ui.component.MarieComponent;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
@@ -99,19 +99,26 @@ public class DietScreen extends Screen {
         fadeClockStarted = false;
     }
 
-    /** Sidebar rows for the hub: the five Diet Screen sub-boxes, the Legend, one "Intake" group for the dynamically-many bar rows, and the screen-wide options panel. */
+    /** Sidebar rows for the hub: the five Diet Screen sub-boxes, one "Intake" group for the dynamically-many bar rows, and the screen-wide options panel. */
     private static List<HubSidebarEntry> scaleConfigEntries() {
         return List.of(
                 moduleEntry(CaloriesComponent.ID, "nourished.screen.diet.calories_label", true, DietOptionsPanel::caloriesColors),
                 moduleEntry(BalanceComponent.ID, "nourished.screen.diet.balance_label", true, DietOptionsPanel::balanceColors),
-                moduleEntry(RecentMealsComponent.ID, "nourished.screen.diet.recent_label", true, DietOptionsPanel::recentMealsColors),
-                moduleEntry(EatMoreComponent.ID, "nourished.screen.diet.suggestion_label", false, DietOptionsPanel::eatMoreColors),
+                // No "Move Text" here, unlike the other module entries: Recent Meals' row names travel
+                // with "Move Bars" instead (see RecentMealsComponent#render), leaving nothing for "Move
+                // Text" to actually move.
+                new HubEntry(RecentMealsComponent.ID, Component.translatable("nourished.screen.diet.recent_label"),
+                        DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.recent_label").getString(),
+                                RecentMealsComponent.ID, true, true, true, false, DietOptionsPanel::recentMealsColors)),
+                // No "Hide Text" here: Eat More Of's suggestion text has nothing separate worth hiding
+                // on its own — "Hide Window" already covers the whole box.
+                new HubEntry(EatMoreComponent.ID, Component.translatable("nourished.screen.diet.suggestion_label"),
+                        DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.suggestion_label").getString(),
+                                EatMoreComponent.ID, false, true, true, true, false, DietOptionsPanel::eatMoreColors)),
                 new HubEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label"),
                         DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.effects_label").getString(),
                                 ActiveEffectsComponent.ID, false, false, true, DietOptionsPanel::effectsColors)),
                 intakeGroupEntry(),
-                new HubEntry(IntakeLegendComponent.ID, Component.translatable("nourished.screen.diet.legend"),
-                        DietOptionsPanel.intakeLegendPanel()),
                 new HubEntry(DietScreenEditTarget.PANEL_ID, Component.translatable("nourished.screen.diet.options_label"),
                         DietOptionsPanel.build())
         );
@@ -139,8 +146,16 @@ public class DietScreen extends Screen {
      * name per slot, not a generic "Row N") — while each child's id stays the stable
      * {@code nourished.diet.intake.slot<N>} regardless of reordering, matching {@code
      * IntakeBarComponent}'s own id scheme.
+     *
+     * <p>Only the {@code HubChildEntry} wrapper (id + label) is rebuilt every frame; the underlying
+     * options-panel {@code MarieComponent} for a given slot is built once and cached here, keyed by
+     * slot id, and reused across every rebuild. Without this, opening/re-rendering the group would
+     * hand the hub a brand-new {@code OptionLayout} instance 60 times a second — losing whatever
+     * color-picker listener was wired on the previous instance (the picker popup would never open)
+     * and discarding any of the panel's own transient UI state (scroll position, hover) every frame.
      */
     private static HubGroupEntry intakeGroupEntry() {
+        Map<String, MarieComponent> contentCache = new java.util.HashMap<>();
         return new HubGroupEntry("nourished.diet.intake", Component.translatable("nourished.screen.diet.intake"), () -> {
             List<String> order = NourishedClientConfig.get().effectiveDietBarOrder();
             int slots = NutrientRegistry.getKeys().size();
@@ -150,7 +165,9 @@ public class DietScreen extends Screen {
                 Component label = i < order.size()
                         ? NutrientRegistry.getLabelComponent(order.get(i))
                         : Component.translatable("nourished.screen.diet.intake_row", i + 1);
-                children.add(new HubChildEntry(slotId, label, DietOptionsPanel.forIntakeBar(label.getString(), slotId)));
+                MarieComponent content = contentCache.computeIfAbsent(slotId,
+                        id -> DietOptionsPanel.forIntakeBar(label.getString(), id));
+                children.add(new HubChildEntry(slotId, label, content));
             }
             return children;
         });

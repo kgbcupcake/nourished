@@ -18,9 +18,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Right-column rendering for the classic Diet Screen (nutrient intake bars, legend) plus the
- * diet-icon tooltips that share its row geometry — extracted verbatim from the historical
- * monolithic {@code ClassicDietScreen}; no logic changes, only relocated.
+ * Right-column rendering for the classic Diet Screen (nutrient intake bars) plus the diet-icon
+ * tooltips that share its row geometry — extracted verbatim from the historical monolithic {@code
+ * ClassicDietScreen}; no logic changes, only relocated (aside from the intake legend box, since
+ * removed — see the changelog).
  */
 final class ClassicDietRightPanel {
 
@@ -106,7 +107,6 @@ final class ClassicDietRightPanel {
                 g.drawString(mc.font, "↓", arrowLeft, y + 2, ClassicDietDrawHelpers.COL_RED, false);
             y += ROW_STEP;
         }
-        drawLegendBar(g, mc, rx, topPos + DietLayout.HEIGHT - 66, leftPos + DietLayout.WIDTH - DietLayout.PAD - rx, 34);
     }
 
     static void drawDietIconTooltips(GuiGraphics g, Minecraft mc, DietLayout.Layout layout, List<String> visibleBars, int mx, int my) {
@@ -126,41 +126,4 @@ final class ClassicDietRightPanel {
         }
     }
 
-    private static void drawLegendBar(GuiGraphics g, Minecraft mc, int x, int y, int w, int h) {
-        ClassicDietDrawHelpers.drawRoundedBox(g, x, y, w, h);
-        g.drawCenteredString(mc.font, Component.translatable("nourished.screen.diet.legend"), x + w / 2, y + 3, ClassicDietDrawHelpers.dimLegend(ClassicDietDrawHelpers.COL_HEADER));
-        int colLeft = x + 6;
-        int colW = (w - 12) / 3;
-        int lineTop = y + 12;
-        int lineBottom = y + h - 4;
-        g.fill(colLeft + colW, lineTop, colLeft + colW + 1, lineBottom, ClassicDietDrawHelpers.COL_DIVIDER);
-        g.fill(colLeft + colW * 2, lineTop, colLeft + colW * 2 + 1, lineBottom, ClassicDietDrawHelpers.COL_DIVIDER);
-        drawLegendEntry(g, mc, colLeft, y + 14, colW, ClassicDietDrawHelpers.dimLegend(ClassicDietDrawHelpers.COL_GREEN), "Good", "40 - 80%", 0, -3, -2, ClassicDietDrawHelpers.dimLegend(ClassicDietDrawHelpers.COL_GREEN));
-        drawLegendEntry(g, mc, colLeft + colW + 1, y + 14, colW, ClassicDietDrawHelpers.dimLegend(0xFFE8C24F), "Low", "25 - 40%", 0, -3, 0, ClassicDietDrawHelpers.dimLegend(0xFFE8C24F));
-        drawLegendEntry(
-                g,
-                mc,
-                colLeft + colW * 2 - 2,
-                y + 14,
-                colW,
-                ClassicDietDrawHelpers.dimLegend(ClassicDietDrawHelpers.COL_RED),
-                Component.translatable("nourished.screen.diet.legend_bad").getString(),
-                Component.translatable("nourished.screen.diet.legend_bad_range").getString(),
-                0,
-                0,
-                0,
-                ClassicDietDrawHelpers.dimLegend(ClassicDietDrawHelpers.COL_RED)
-        );
-    }
-
-    private static void drawLegendEntry(GuiGraphics g, Minecraft mc, int x, int y, int w, int color, String line1, String line2, int line1Offset, int line2Offset, int squareOffset, int line2Color) {
-        int squareX = x + (w / 2) - 18 + squareOffset;
-        g.fill(squareX, y + 1, squareX + 8, y + 9, color);
-        g.fill(squareX, y + 1, squareX + 8, y + 2, ClassicDietDrawHelpers.COL_BORDER_LT);
-        g.fill(squareX, y + 8, squareX + 8, y + 9, ClassicDietDrawHelpers.COL_BORDER);
-        int line1X = squareX + 11 + line1Offset;
-        int line2X = x + ((w - mc.font.width(line2)) / 2) + 6 + line2Offset;
-        g.drawString(mc.font, line1, line1X, y, ClassicDietDrawHelpers.dimLegend(ClassicDietDrawHelpers.COL_LEGEND_TEXT), false);
-        g.drawString(mc.font, line2, line2X, y + 10, line2Color, false);
-    }
 }
