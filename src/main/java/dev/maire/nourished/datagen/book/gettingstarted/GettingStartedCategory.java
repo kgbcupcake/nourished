@@ -18,61 +18,118 @@ public class GettingStartedCategory extends CategoryProvider {
 
     @Override
     protected String[] generateEntryMap() {
-        // A zigzag quest chain, Thaumonomicon-style.
+        /*
+         * Getting Started follows a winding learning path.
+         *
+         * The player starts at the top-left and works through
+         * Nourished's core systems before reaching the final
+         * "Your First Day" entry.
+         */
         return new String[]{
-                "_i_______",
+                "i________",
                 "_________",
-                "___h_____",
+                "____h____",
                 "_________",
-                "_____d___",
+                "________d",
                 "_________",
-                "_______s_",
+                "_____s___",
                 "_________",
-                "_______e_",
+                "___e_____",
                 "_________",
-                "_____t___",
+                "_______t_",
                 "_________",
-                "___n_____",
+                "____n____",
                 "_________",
-                "_y_______",
+                "________y"
         };
     }
 
     @Override
     protected void generateEntries() {
-        // Each entry requires the previous one to be read before it unlocks, so the chain plays
-        // out in order rather than just being visually connected.
-        var introduction = this.add(new IntroductionEntry(this).generate('i'));
-        var hud = this.add(new HudEntry(this).generate('h'))
+
+        // Introduction
+        var introduction = this.add(
+                new IntroductionEntry(this).generate('i')
+        );
+
+        // HUD
+        var hud = this.add(
+                new HudEntry(this).generate('h')
+        )
                 .withParent(introduction)
                 .withCondition(this.condition().entryRead(introduction));
-        var dietScreen = this.add(new DietScreenEntry(this).generate('d'))
+
+        // Diet Screen
+        var dietScreen = this.add(
+                new DietScreenEntry(this).generate('d')
+        )
                 .withParent(hud)
                 .withCondition(this.condition().entryRead(hud));
-        var sleepBonus = this.add(new SleepBonusEntry(this).generate('s'))
+
+        // Sleep Bonus
+        var sleepBonus = this.add(
+                new SleepBonusEntry(this).generate('s')
+        )
                 .withParent(dietScreen)
                 .withCondition(this.condition().entryRead(dietScreen));
-        var effects = this.add(new EffectsEntry(this).generate('e'))
+
+        // Effects
+        var effects = this.add(
+                new EffectsEntry(this).generate('e')
+        )
                 .withParent(sleepBonus)
                 .withCondition(this.condition().entryRead(sleepBonus));
-        var foodTooltips = this.add(new FoodTooltipsEntry(this).generate('t'))
+
+        // Food Tooltips
+        var foodTooltips = this.add(
+                new FoodTooltipsEntry(this).generate('t')
+        )
                 .withParent(effects)
                 .withCondition(this.condition().entryRead(effects));
-        var notifications = this.add(new NotificationsEntry(this).generate('n'))
+
+        // Notifications
+        var notifications = this.add(
+                new NotificationsEntry(this).generate('n')
+        )
                 .withParent(foodTooltips)
                 .withCondition(this.condition().entryRead(foodTooltips));
-        this.add(new FirstDayEntry(this).generate('y'))
+
+        // Your First Day
+        this.add(
+                new FirstDayEntry(this).generate('y')
+        )
                 .withParent(notifications)
                 .withCondition(this.condition().entryRead(notifications));
     }
 
     @Override
     protected BookCategoryModel additionalSetup(BookCategoryModel category) {
-        // Modonomicon's own nebula/starfield background, layered for parallax scrolling.
+        /*
+         * Layered Modonomicon background with different scroll speeds
+         * to create a subtle parallax effect while navigating the map.
+         */
         return category.withBackgroundParallaxLayers(
-                new BookCategoryBackgroundParallaxLayer(ResourceLocation.parse("modonomicon:textures/gui/parallax/flow/base.png"), 0.7f, -1),
-                new BookCategoryBackgroundParallaxLayer(ResourceLocation.parse("modonomicon:textures/gui/parallax/flow/1.png"), 1f, -1),
-                new BookCategoryBackgroundParallaxLayer(ResourceLocation.parse("modonomicon:textures/gui/parallax/flow/2.png"), 1.4f, -1)
+                new BookCategoryBackgroundParallaxLayer(
+                        ResourceLocation.parse(
+                                "modonomicon:textures/gui/parallax/flow/base.png"
+                        ),
+                        0.7f,
+                        -1
+                ),
+                new BookCategoryBackgroundParallaxLayer(
+                        ResourceLocation.parse(
+                                "modonomicon:textures/gui/parallax/flow/1.png"
+                        ),
+                        1.0f,
+                        -1
+                ),
+                new BookCategoryBackgroundParallaxLayer(
+                        ResourceLocation.parse(
+                                "modonomicon:textures/gui/parallax/flow/2.png"
+                        ),
+                        1.4f,
+                        -1
+                )
         );
     }
 

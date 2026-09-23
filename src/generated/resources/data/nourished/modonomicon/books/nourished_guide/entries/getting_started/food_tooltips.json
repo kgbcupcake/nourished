@@ -1,54 +1,52 @@
 {
-  "background_u_index": 0,
-  "background_v_index": 0,
-  "category": "getting_started",
-  "condition": {
-    "type": "modonomicon:entry_read",
-    "entry_id": "getting_started/effects"
-  },
-  "description": "book.nourished.nourished_guide.getting_started.food_tooltips.description",
-  "hide_while_locked": false,
-  "icon": {
-    "item": "minecraft:carrot"
-  },
-  "name": "book.nourished.nourished_guide.getting_started.food_tooltips.name",
-  "pages": [
-    {
-      "type": "modonomicon:image",
-      "anchor": "",
-      "border": true,
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "images": [
-        "nourished:textures/patchouli/tooltip.png"
-      ],
-      "text": "book.nourished.nourished_guide.getting_started.food_tooltips.tooltip_image.text",
-      "title": "book.nourished.nourished_guide.getting_started.food_tooltips.tooltip_image.title",
-      "use_legacy_rendering": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.food_tooltips.reading_tooltips.text",
-      "title": "book.nourished.nourished_guide.getting_started.food_tooltips.reading_tooltips.title",
-      "use_markdown_in_title": false
-    }
-  ],
-  "parents": [
-    {
-      "draw_arrow": true,
-      "entry": "getting_started/effects",
-      "line_enabled": true,
-      "line_reversed": false
-    }
-  ],
-  "show_when_any_parent_unlocked": false,
-  "sort_number": 5,
-  "x": 1,
-  "y": 3
+	"background_u_index": -1,
+	"background_v_index": -1,
+	"category": "getting_started",
+	"condition": {
+		"type": "modonomicon:entry_read",
+		"entry_id": "getting_started/effects"
+	},
+	"description": "book.nourished.nourished_guide.getting_started.food_tooltips.description",
+	"hide_while_locked": false,
+	"icon": {
+		"item": "minecraft:carrot"
+	},
+	"name": "book.nourished.nourished_guide.getting_started.food_tooltips.name",
+	"pages": [
+		{
+			"type": "modonomicon:image",
+			"anchor": "",
+			"border": true,
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"images": ["nourished:textures/patchouli/tooltip.png"],
+			"text": "book.nourished.nourished_guide.getting_started.food_tooltips.tooltip_image.text",
+			"title": "book.nourished.nourished_guide.getting_started.food_tooltips.tooltip_image.title",
+			"use_legacy_rendering": false
+		},
+		{
+			"type": "modonomicon:text",
+			"anchor": "",
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"show_title_separator": true,
+			"text": "book.nourished.nourished_guide.getting_started.food_tooltips.reading_tooltips.text",
+			"title": "book.nourished.nourished_guide.getting_started.food_tooltips.reading_tooltips.title",
+			"use_markdown_in_title": false
+		}
+	],
+	"parents": [
+		{
+			"draw_arrow": true,
+			"entry": "getting_started/effects",
+			"line_enabled": true,
+			"line_reversed": false
+		}
+	],
+	"show_when_any_parent_unlocked": false,
+	"sort_number": 4,
+	"x": 0,
+	"y": 2
 }

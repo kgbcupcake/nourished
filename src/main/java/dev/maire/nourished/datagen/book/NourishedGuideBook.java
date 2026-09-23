@@ -10,6 +10,13 @@ public class NourishedGuideBook extends SingleBookSubProvider {
 
     public static final String ID = "nourished_guide";
 
+    // Book colors
+    private static final String BOOK_NAME = "[#](B88CFF)";
+    private static final String BOOK_TOOLTIP = "[#](6FB8E8)";
+
+    // Reset
+    private static final String RESET = "[#]()";
+
     public NourishedGuideBook(String modId, ModonomiconLanguageProvider lang) {
         super(ID, modId, lang);
     }
@@ -17,7 +24,9 @@ public class NourishedGuideBook extends SingleBookSubProvider {
     @Override
     protected BookModel additionalSetup(BookModel book) {
         // "node" display mode (Modonomicon's default) renders as a quest-map graph, Thaumonomicon-style.
-        return book.withModel(ResourceLocation.parse("modonomicon:modonomicon_green"));
+        return book.withModel(
+                ResourceLocation.parse("nourished:nourished_book")
+        );
     }
 
     @Override
@@ -32,11 +41,11 @@ public class NourishedGuideBook extends SingleBookSubProvider {
 
     @Override
     protected String bookName() {
-        return "Nourished Guide";
+        return "%sNourished Guide%s".formatted(BOOK_NAME, RESET);
     }
 
     @Override
     protected String bookTooltip() {
-        return "Everything you need to know about eating well.";
+        return "%sEverything you need to know about eating well.%s".formatted(BOOK_TOOLTIP, RESET);
     }
 }

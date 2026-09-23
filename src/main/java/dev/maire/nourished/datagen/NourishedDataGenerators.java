@@ -14,11 +14,21 @@ public class NourishedDataGenerators {
 
         var enUsCache = new LanguageProviderCache("en_us");
 
-        generator.addProvider(event.includeServer(), NeoBookProvider.of(event,
-                new NourishedGuideBook(Nourished.MODID, enUsCache)
-        ));
+        generator.addProvider(
+                event.includeServer(),
+                NeoBookProvider.of(
+                        event,
+                        new NourishedGuideBook(Nourished.MODID, enUsCache)
+                )
+        );
 
         // Must run after the book provider so the cache it wrote to is fully populated.
-        generator.addProvider(event.includeClient(), new NourishedLangProvider(generator.getPackOutput(), enUsCache));
+        generator.addProvider(
+                event.includeClient(),
+                new NourishedLangProvider(
+                        generator.getPackOutput(),
+                        enUsCache
+                )
+        );
     }
 }

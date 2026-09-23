@@ -37,7 +37,7 @@
     "texture_height": 256,
     "texture_width": 256
   },
-  "model": "modonomicon:modonomicon_green",
+  "model": "nourished:nourished_book",
   "name": "book.nourished.nourished_guide.name",
   "page_display_mode": "double_page",
   "read_all_button_y_offset": 0,

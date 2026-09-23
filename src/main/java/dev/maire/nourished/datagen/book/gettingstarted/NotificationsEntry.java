@@ -4,13 +4,24 @@ import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
 import com.klikli_dev.modonomicon.api.datagen.EntryProvider;
 import com.klikli_dev.modonomicon.api.datagen.book.BookIconModel;
+import com.klikli_dev.modonomicon.api.datagen.book.page.BookImagePageModel;
 import com.klikli_dev.modonomicon.api.datagen.book.page.BookTextPageModel;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 
 public class NotificationsEntry extends EntryProvider {
 
     public static final String ID = "notifications";
+
+    // Notification colors
+    private static final String CRITICAL = "[#](E85D75)";
+    private static final String TOAST = "[#](F5A623)";
+    private static final String HUD = "[#](6FB8E8)";
+    private static final String CONFIG = "[#](B88CFF)";
+
+    // Reset
+    private static final String RESET = "[#]()";
 
     public NotificationsEntry(CategoryProvider parent) {
         super(parent);
@@ -18,25 +29,57 @@ public class NotificationsEntry extends EntryProvider {
 
     @Override
     protected void generatePages() {
+        this.page("notification_image", () -> BookImagePageModel.create()
+                .withTitle(this.context().pageTitle())
+                .withText(this.context().pageText())
+                .withImages(
+                        ResourceLocation.fromNamespaceAndPath(
+                                "nourished",
+                                "textures/patchouli/notification.png"
+                        )
+                ));
+
+        this.pageTitle("Notifications");
+
+        this.pageText("""
+                Nourished uses %s**notifications**%s to warn you when your nutrition needs attention.
+
+                """.formatted(
+                TOAST,
+                RESET
+        ));
+
         this.page("critical_toasts", () -> BookTextPageModel.create()
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
-        this.pageTitle("Critical Toasts");
-        this.pageText("""
-                When a food group drops critically low, Nourished sends a toast notification in the top-right corner of your screen.
 
-                Toasts appear once per group when they cross the critical threshold,  pay attention to them or your stats will suffer.
-                """);
+        this.pageTitle("Critical Toasts");
+
+        this.pageText("""
+                When a food group drops %s**critically low**%s, Nourished sends a %s**toast notification**%s in the top-right corner of your screen.
+
+                Toasts appear once per group when they cross the critical threshold. Pay attention to them, or your stats will suffer.
+
+                """.formatted(
+                CRITICAL, RESET,
+                TOAST, RESET
+        ));
 
         this.page("staying_ahead", () -> BookTextPageModel.create()
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
-        this.pageTitle("Staying Ahead");
-        this.pageText("""
-                You can disable notifications in the mod's config if you prefer to manage nutrition manually.
 
-                The HUD mini bars will still change color as groups reach critical levels, giving you a passive visual warning at all times.
-                """);
+        this.pageTitle("Staying Ahead");
+
+        this.pageText("""
+                You can disable %s**notifications**%s in the mod's config if you prefer to manage nutrition manually.
+
+                The %s**HUD mini bars**%s will still change color as groups reach critical levels, giving you a passive visual warning at all times.
+
+                """.formatted(
+                CONFIG, RESET,
+                HUD, RESET
+        ));
     }
 
     @Override

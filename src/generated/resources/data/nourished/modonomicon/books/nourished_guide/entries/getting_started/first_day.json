@@ -1,117 +1,117 @@
 {
-  "background_u_index": 0,
-  "background_v_index": 0,
-  "category": "getting_started",
-  "condition": {
-    "type": "modonomicon:entry_read",
-    "entry_id": "getting_started/notifications"
-  },
-  "description": "book.nourished.nourished_guide.getting_started.first_day.description",
-  "hide_while_locked": false,
-  "icon": {
-    "item": "minecraft:cooked_beef"
-  },
-  "name": "book.nourished.nourished_guide.getting_started.first_day.name",
-  "pages": [
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.first_day.your_first_day.text",
-      "title": "book.nourished.nourished_guide.getting_started.first_day.your_first_day.title",
-      "use_markdown_in_title": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.first_day.early_food_sources.text",
-      "title": "book.nourished.nourished_guide.getting_started.first_day.early_food_sources.title",
-      "use_markdown_in_title": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.first_day.more_early_sources.text",
-      "title": "book.nourished.nourished_guide.getting_started.first_day.more_early_sources.title",
-      "use_markdown_in_title": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.first_day.setting_up_a_farm.text",
-      "title": "book.nourished.nourished_guide.getting_started.first_day.setting_up_a_farm.title",
-      "use_markdown_in_title": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.first_day.cooking_matters.text",
-      "title": "book.nourished.nourished_guide.getting_started.first_day.cooking_matters.title",
-      "use_markdown_in_title": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.first_day.diminishing_returns.text",
-      "title": "book.nourished.nourished_guide.getting_started.first_day.diminishing_returns.title",
-      "use_markdown_in_title": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.first_day.end_of_day_one.text",
-      "title": "book.nourished.nourished_guide.getting_started.first_day.end_of_day_one.title",
-      "use_markdown_in_title": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.first_day.next_steps.text",
-      "title": "book.nourished.nourished_guide.getting_started.first_day.next_steps.title",
-      "use_markdown_in_title": false
-    }
-  ],
-  "parents": [
-    {
-      "draw_arrow": true,
-      "entry": "getting_started/notifications",
-      "line_enabled": true,
-      "line_reversed": false
-    }
-  ],
-  "show_when_any_parent_unlocked": false,
-  "sort_number": 7,
-  "x": -3,
-  "y": 7
+	"background_u_index": 0,
+	"background_v_index": 0,
+	"category": "getting_started",
+	"condition": {
+		"type": "modonomicon:entry_read",
+		"entry_id": "getting_started/notifications"
+	},
+	"description": "book.nourished.nourished_guide.getting_started.first_day.description",
+	"hide_while_locked": false,
+	"icon": {
+		"item": "minecraft:cooked_beef"
+	},
+	"name": "book.nourished.nourished_guide.getting_started.first_day.name",
+	"pages": [
+		{
+			"type": "modonomicon:text",
+			"anchor": "",
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"show_title_separator": true,
+			"text": "book.nourished.nourished_guide.getting_started.first_day.your_first_day.text",
+			"title": "book.nourished.nourished_guide.getting_started.first_day.your_first_day.title",
+			"use_markdown_in_title": false
+		},
+		{
+			"type": "modonomicon:text",
+			"anchor": "",
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"show_title_separator": true,
+			"text": "book.nourished.nourished_guide.getting_started.first_day.early_food_sources.text",
+			"title": "book.nourished.nourished_guide.getting_started.first_day.early_food_sources.title",
+			"use_markdown_in_title": false
+		},
+		{
+			"type": "modonomicon:text",
+			"anchor": "",
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"show_title_separator": true,
+			"text": "book.nourished.nourished_guide.getting_started.first_day.more_early_sources.text",
+			"title": "book.nourished.nourished_guide.getting_started.first_day.more_early_sources.title",
+			"use_markdown_in_title": false
+		},
+		{
+			"type": "modonomicon:text",
+			"anchor": "",
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"show_title_separator": true,
+			"text": "book.nourished.nourished_guide.getting_started.first_day.setting_up_a_farm.text",
+			"title": "book.nourished.nourished_guide.getting_started.first_day.setting_up_a_farm.title",
+			"use_markdown_in_title": false
+		},
+		{
+			"type": "modonomicon:text",
+			"anchor": "",
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"show_title_separator": true,
+			"text": "book.nourished.nourished_guide.getting_started.first_day.cooking_matters.text",
+			"title": "book.nourished.nourished_guide.getting_started.first_day.cooking_matters.title",
+			"use_markdown_in_title": false
+		},
+		{
+			"type": "modonomicon:text",
+			"anchor": "",
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"show_title_separator": true,
+			"text": "book.nourished.nourished_guide.getting_started.first_day.diminishing_returns.text",
+			"title": "book.nourished.nourished_guide.getting_started.first_day.diminishing_returns.title",
+			"use_markdown_in_title": false
+		},
+		{
+			"type": "modonomicon:text",
+			"anchor": "",
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"show_title_separator": true,
+			"text": "book.nourished.nourished_guide.getting_started.first_day.end_of_day_one.text",
+			"title": "book.nourished.nourished_guide.getting_started.first_day.end_of_day_one.title",
+			"use_markdown_in_title": false
+		},
+		{
+			"type": "modonomicon:text",
+			"anchor": "",
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"show_title_separator": true,
+			"text": "book.nourished.nourished_guide.getting_started.first_day.next_steps.text",
+			"title": "book.nourished.nourished_guide.getting_started.first_day.next_steps.title",
+			"use_markdown_in_title": false
+		}
+	],
+	"parents": [
+		{
+			"draw_arrow": true,
+			"entry": "getting_started/notifications",
+			"line_enabled": true,
+			"line_reversed": false
+		}
+	],
+	"show_when_any_parent_unlocked": false,
+	"sort_number": 7,
+	"x": -3,
+	"y": 7
 }

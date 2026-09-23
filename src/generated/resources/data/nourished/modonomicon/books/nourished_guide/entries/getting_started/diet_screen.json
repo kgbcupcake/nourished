@@ -1,54 +1,63 @@
 {
-  "background_u_index": 0,
-  "background_v_index": 0,
-  "category": "getting_started",
-  "condition": {
-    "type": "modonomicon:entry_read",
-    "entry_id": "getting_started/hud"
-  },
-  "description": "book.nourished.nourished_guide.getting_started.diet_screen.description",
-  "hide_while_locked": false,
-  "icon": {
-    "item": "minecraft:paper"
-  },
-  "name": "book.nourished.nourished_guide.getting_started.diet_screen.name",
-  "pages": [
-    {
-      "type": "modonomicon:image",
-      "anchor": "",
-      "border": true,
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "images": [
-        "nourished:textures/patchouli/diet_screen.png"
-      ],
-      "text": "book.nourished.nourished_guide.getting_started.diet_screen.diet_screen_image.text",
-      "title": "book.nourished.nourished_guide.getting_started.diet_screen.diet_screen_image.title",
-      "use_legacy_rendering": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.diet_screen.reading_the_screen.text",
-      "title": "book.nourished.nourished_guide.getting_started.diet_screen.reading_the_screen.title",
-      "use_markdown_in_title": false
-    }
-  ],
-  "parents": [
-    {
-      "draw_arrow": true,
-      "entry": "getting_started/hud",
-      "line_enabled": true,
-      "line_reversed": false
-    }
-  ],
-  "show_when_any_parent_unlocked": false,
-  "sort_number": 2,
-  "x": 1,
-  "y": -3
+	"background_u_index": 0,
+	"background_v_index": 0,
+	"category": "getting_started",
+	"condition": {
+		"type": "modonomicon:entry_read",
+		"entry_id": "getting_started/hud"
+	},
+	"description": "book.nourished.nourished_guide.getting_started.diet_screen.description",
+	"hide_while_locked": false,
+	"icon": {
+		"item": "minecraft:paper"
+	},
+	"name": "book.nourished.nourished_guide.getting_started.diet_screen.name",
+	"pages": [
+		{
+			"type": "modonomicon:image",
+			"anchor": "",
+			"border": true,
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"images": ["nourished:textures/patchouli/diet_screen.png"],
+			"text": "book.nourished.nourished_guide.getting_started.diet_screen.diet_screen_image.text",
+			"title": "book.nourished.nourished_guide.getting_started.diet_screen.diet_screen_image.title",
+			"use_legacy_rendering": false
+		},
+		{
+			"type": "modonomicon:text",
+			"anchor": "",
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"show_title_separator": true,
+			"text": "book.nourished.nourished_guide.getting_started.diet_screen.reading_the_screen.text",
+			"title": "book.nourished.nourished_guide.getting_started.diet_screen.reading_the_screen.title",
+			"use_markdown_in_title": false
+		},
+		{
+			"type": "modonomicon:text",
+			"anchor": "",
+			"condition": {
+				"type": "modonomicon:none"
+			},
+			"show_title_separator": true,
+			"text": "book.nourished.nourished_guide.getting_started.diet_screen.using_the_screen.text",
+			"title": "book.nourished.nourished_guide.getting_started.diet_screen.using_the_screen.title",
+			"use_markdown_in_title": false
+		}
+	],
+	"parents": [
+		{
+			"draw_arrow": true,
+			"entry": "getting_started/hud",
+			"line_enabled": true,
+			"line_reversed": false
+		}
+	],
+	"show_when_any_parent_unlocked": false,
+	"sort_number": 2,
+	"x": 1,
+	"y": -3
 }
