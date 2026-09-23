@@ -205,25 +205,30 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         float scale = ContentScaleController.resolveContentScale(DietScreenPersistence.contentScale(ID));
         double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
         this.paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
-        // Row spacing (and the header's own gap before the first row) must grow by the same ratio
-        // zoom grows text/icon draw size by — otherwise the bigger zoomed glyphs visually collide
-        // into the next row's still-unzoomed vertical slot. zoomRatio is exactly 1.0 whenever zoom
-        // is at/below fitScale (scale == contentScale), so this is a no-op at the default,
-        // unzoomed state. Applied to the LOCAL (pre-scale) Y advance fed into sy(), which then
-        // reapplies contentScale — so the resulting on-screen spacing is contentScale * (rowH *
-        // zoomRatio) == rowH * scale, matching the icon's own on-screen footprint (scale * iconScale
-        // * 16 == scale * rowH) exactly, at any zoom level. This is purely cosmetic (keeps rows from
-        // visually colliding with each other) — it does not bound on-screen overflow past the box's
-        // own edges; pushClip below does that regardless of how large `scale` gets.
+        // Text size (`scale`) is the header's own draw scale alone — the row names below are this
+        // box's "bar" content and scale with Bar size instead (see `barScale`/`rowScale` below), so
+        // moving the Text size slider only grows the header, never the meal-name rows.
+        var store = DietScreenPersistence.get();
+        float barScale = ContentScaleController.resolveContentScale(MarieModuleSettings.barScale(store, ID));
+        // The header's own gap before the first row must grow by the same ratio zoom grows the
+        // header's draw size by — otherwise a bigger zoomed header visually collides into the first
+        // row's still-unzoomed slot. zoomRatio is exactly 1.0 whenever zoom is at/below fitScale
+        // (scale == contentScale), so this is a no-op at the default, unzoomed state. Row-to-row
+        // spacing instead tracks barScale, the same multiplier the row names themselves draw at, for
+        // the same reason (bigger zoomed row text must not collide with the next row). Applied to the
+        // LOCAL (pre-scale) Y advance fed into sy(), which then reapplies contentScale. This is purely
+        // cosmetic (keeps rows from visually colliding with each other) — it does not bound on-screen
+        // overflow past the box's own edges; pushClip below does that regardless of how large `scale`
+        // or `barScale` get.
         double zoomRatio = contentScale > 0 ? scale / contentScale : 1.0d;
         int zoomedHeaderAdvance = Math.max(1, (int) Math.round(HEADER_LOCAL_HEIGHT * zoomRatio));
-        int zoomedRowH = Math.max(1, (int) Math.round(rowH * zoomRatio));
+        int zoomedRowH = Math.max(1, (int) Math.round(rowH * barScale));
 
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
 
         int naturalRowCount = rowsShown;
         float iconScale = rowH / 16f; // fits the icon exactly within rowH — deliberately the flat, unzoomed rowH: this is a size ratio, not a position advance, and scale already carries the zoom
-        float rowScale = scale * (float) recentMealsScale; // folds the recentMealsScale config knob into label size
+        float rowScale = (float) recentMealsScale; // folds the recentMealsScale config knob into label size; Bar size (barScale) is applied separately below alongside the row draw, not Text size
         int nameOffset = rowH + 2;
         Font font = Minecraft.getInstance().font;
         // Cosmetic truncation budget, not a containment guarantee — actual containment is the
@@ -247,10 +252,8 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         // instead of fading out with it.
         // Each row's name is this box's "bar" (the icon is not): Bar size scales it and Move Bars
         // offsets it, apart from the header's own text offset and the icon's own Move Icons offset.
-        var store = DietScreenPersistence.get();
         RenderContext rowContext = MarieModuleSettings.withBrightness(baseContext,
                 MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
-        float barScale = ContentScaleController.resolveContentScale(MarieModuleSettings.barScale(store, ID));
         int barDx = MarieModuleSettings.barOffsetX(store, ID);
         int barDy = MarieModuleSettings.barOffsetY(store, ID);
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
