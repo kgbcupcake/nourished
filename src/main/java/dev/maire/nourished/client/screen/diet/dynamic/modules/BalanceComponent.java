@@ -117,7 +117,10 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
     @Override
     public void render(RenderContext baseContext, Bounds bounds) {
         // The module's own text/icon offsets, icon size and brightness (see MarieModuleSettings) apply to everything it draws.
-        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID);
+        // iconFollowsText = false: this box resolves its own final icon scale below (`followText = false`)
+        // and passes it straight to drawItem, so the wrapper must not also apply its own text-relative
+        // icon ratio on top — that used to silently re-couple the icon to Text size.
+        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID, false);
         if (!visible) {
             return;
         }

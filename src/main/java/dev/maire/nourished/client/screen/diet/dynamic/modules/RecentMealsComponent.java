@@ -175,7 +175,10 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
     @Override
     public void render(RenderContext baseContext, Bounds bounds) {
         // The module's own text/icon offsets, icon size and brightness (see MarieModuleSettings) apply to everything it draws.
-        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID);
+        // iconFollowsText = false: this box resolves its own final icon scale below (`followText = false`)
+        // and passes it straight to drawItem (scaled further by iconFitRatio), so the wrapper must not
+        // also apply its own text-relative icon ratio on top of that.
+        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID, false);
         this.anchorBounds = bounds;
         if (!visible) {
             return;
@@ -210,18 +213,13 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         // an ordinary Text size slider to drive (row names are this box's "bar" content, sized by Bar
         // size instead — see `barScale`/`rowScale` below), so Text size is dropped entirely from its panel.
         float headerScale = ContentScaleController.resolveContentScale(MarieModuleSettings.headerScale(store, ID));
-        // The header's own gap before the first row must grow by the same ratio zoom grows the
-        // header's draw size by — otherwise a bigger zoomed header visually collides into the first
-        // row's still-unzoomed slot. zoomRatio is exactly 1.0 whenever zoom is at/below fitScale
-        // (headerScale == contentScale), so this is a no-op at the default, unzoomed state. Row-to-row
-        // spacing instead tracks barScale, the same multiplier the row names themselves draw at, for
-        // the same reason (bigger zoomed row text must not collide with the next row). Applied to the
-        // LOCAL (pre-scale) Y advance fed into sy(), which then reapplies contentScale. This is purely
-        // cosmetic (keeps rows from visually colliding with each other) — it does not bound on-screen
-        // overflow past the box's own edges; pushClip below does that regardless of how large `headerScale`
-        // or `barScale` get.
-        double zoomRatio = contentScale > 0 ? headerScale / contentScale : 1.0d;
-        int zoomedHeaderAdvance = Math.max(1, (int) Math.round(HEADER_LOCAL_HEIGHT * zoomRatio));
+        // The header-to-first-row gap is fixed, like Calories'/Balance's own header-to-body distance —
+        // Header size affects only the header's own draw size, nothing else about the box's layout
+        // (same rule row-to-row spacing below follows for Bar size: a slider only ever moves the thing
+        // it's named for). Row-to-row spacing tracks barScale, the same multiplier the row names
+        // themselves draw at, so bigger zoomed row text doesn't collide with the next row — that's Bar
+        // size affecting its own rows, not a different slider reaching into someone else's territory.
+        int zoomedHeaderAdvance = HEADER_LOCAL_HEIGHT;
         int zoomedRowH = Math.max(1, (int) Math.round(rowH * barScale));
 
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
