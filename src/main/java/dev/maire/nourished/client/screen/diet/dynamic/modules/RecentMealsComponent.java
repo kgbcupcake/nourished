@@ -200,34 +200,36 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         this.contentScale = layout.scale();
         // contentScale (fitScale) still drives sx/sy/availableLocalWidth unchanged below; text/icon
         // render scale (header, icon, row name) is the user's persisted per-box adjustment alone now,
-        // sanity-clamped only — no longer capped by contentScale. Whatever `scale` comes back, the
-        // pushClip(bounds...) below is what actually keeps drawn content from escaping the box.
-        float scale = ContentScaleController.resolveContentScale(DietScreenPersistence.contentScale(ID));
+        // sanity-clamped only — no longer capped by contentScale. The pushClip(bounds...) below is what
+        // actually keeps drawn content from escaping the box.
         double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
         this.paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
-        // Text size (`scale`) is the header's own draw scale alone — the row names below are this
-        // box's "bar" content and scale with Bar size instead (see `barScale`/`rowScale` below), so
-        // moving the Text size slider only grows the header, never the meal-name rows.
         var store = DietScreenPersistence.get();
         float barScale = ContentScaleController.resolveContentScale(MarieModuleSettings.barScale(store, ID));
+        // The title alone, via Header size/Hide Header — this box has no other text of its own left for
+        // an ordinary Text size slider to drive (row names are this box's "bar" content, sized by Bar
+        // size instead — see `barScale`/`rowScale` below), so Text size is dropped entirely from its panel.
+        float headerScale = ContentScaleController.resolveContentScale(MarieModuleSettings.headerScale(store, ID));
         // The header's own gap before the first row must grow by the same ratio zoom grows the
         // header's draw size by — otherwise a bigger zoomed header visually collides into the first
         // row's still-unzoomed slot. zoomRatio is exactly 1.0 whenever zoom is at/below fitScale
-        // (scale == contentScale), so this is a no-op at the default, unzoomed state. Row-to-row
+        // (headerScale == contentScale), so this is a no-op at the default, unzoomed state. Row-to-row
         // spacing instead tracks barScale, the same multiplier the row names themselves draw at, for
         // the same reason (bigger zoomed row text must not collide with the next row). Applied to the
         // LOCAL (pre-scale) Y advance fed into sy(), which then reapplies contentScale. This is purely
         // cosmetic (keeps rows from visually colliding with each other) — it does not bound on-screen
-        // overflow past the box's own edges; pushClip below does that regardless of how large `scale`
+        // overflow past the box's own edges; pushClip below does that regardless of how large `headerScale`
         // or `barScale` get.
-        double zoomRatio = contentScale > 0 ? scale / contentScale : 1.0d;
+        double zoomRatio = contentScale > 0 ? headerScale / contentScale : 1.0d;
         int zoomedHeaderAdvance = Math.max(1, (int) Math.round(HEADER_LOCAL_HEIGHT * zoomRatio));
         int zoomedRowH = Math.max(1, (int) Math.round(rowH * barScale));
 
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
 
         int naturalRowCount = rowsShown;
-        float iconScale = rowH / 16f; // fits the icon exactly within rowH — deliberately the flat, unzoomed rowH: this is a size ratio, not a position advance, and scale already carries the zoom
+        float iconFitRatio = rowH / 16f; // fits the icon exactly within rowH at iconScale == 1 — deliberately the flat, unzoomed rowH: this is a size ratio, not a position advance
+        // Independent of `scale` (Text size) — see NutrientBarComponent/CalorieHudScreen's own iconScale for the same split.
+        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID));
         float rowScale = (float) recentMealsScale; // folds the recentMealsScale config knob into label size; Bar size (barScale) is applied separately below alongside the row draw, not Text size
         int nameOffset = rowH + 2;
         Font font = Minecraft.getInstance().font;
@@ -260,27 +262,31 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         try {
             // Header gets the same width-aware truncation as row names below, for the same cosmetic
             // reason (clean "..." instead of a mid-glyph scissor cut) — it used to draw unconditionally
-            // at `scale` with no width check at all.
-            String header = Component.translatable("nourished.screen.diet.recent_label").getString();
-            int headerOffsetScreenPx = (int) Math.round(x * contentScale);
-            int availableHeaderScreenPx = bounds.width() - headerOffsetScreenPx;
-            int maxHeaderFontPx = scale > 0f ? (int) Math.max(0, Math.floor(availableHeaderScreenPx / scale)) : 0;
-            if (font.width(header) > maxHeaderFontPx) {
-                int headerEllipsisW = font.width("...");
-                int headerBudget = Math.max(0, maxHeaderFontPx - headerEllipsisW);
-                header = font.plainSubstrByWidth(header, headerBudget) + "...";
-            }
+            // at `scale` with no width check at all; now sized off the independent `headerScale`.
             // The header has its own offset (Move Header); the row names travel with Move Bars instead
             // (see above) — unlike ActiveEffectsComponent's title/lines split, there's no separate
             // "body text" left here for Move Text to move, so this box's panel omits that toggle
-            // entirely (see DietScreen#moduleEntry's recentMeals call).
-            int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
-            int headerY = sy(y) + MarieModuleSettings.headerOffsetY(store, ID);
-            rowContext.drawText(header, headerX, headerY, headerTextColor(), scale);
-            // The header is drawn through rowContext, not the display-settings-wrapped `context`, so
-            // withDisplaySettings never sees this draw call and can't auto-record its extent; report it
-            // explicitly so "Move Header"'s and "Move All"'s outlines hug the header.
-            MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, rowContext.textWidth(header, scale), Math.round(9 * scale));
+            // entirely (see DietScreen#moduleEntry's recentMeals call). The header is drawn through
+            // rowContext, not the display-settings-wrapped `context`, so withDisplaySettings' automatic
+            // Hide Text/extent-recording never sees this draw call — Hide Header is checked manually
+            // here instead (see the discovery pass: the old "Hide Text" toggle never actually reached
+            // this draw call for the same reason, which is why it's been replaced with Hide Header).
+            if (!MarieModuleSettings.isHeaderHidden(store, ID)) {
+                String header = Component.translatable("nourished.screen.diet.recent_label").getString();
+                int headerOffsetScreenPx = (int) Math.round(x * contentScale);
+                int availableHeaderScreenPx = bounds.width() - headerOffsetScreenPx;
+                int maxHeaderFontPx = headerScale > 0f ? (int) Math.max(0, Math.floor(availableHeaderScreenPx / headerScale)) : 0;
+                if (font.width(header) > maxHeaderFontPx) {
+                    int headerEllipsisW = font.width("...");
+                    int headerBudget = Math.max(0, maxHeaderFontPx - headerEllipsisW);
+                    header = font.plainSubstrByWidth(header, headerBudget) + "...";
+                }
+                int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
+                int headerY = sy(y) + MarieModuleSettings.headerOffsetY(store, ID);
+                rowContext.drawText(header, headerX, headerY, headerTextColor(), headerScale);
+                // Report the extent explicitly so "Move Header"'s and "Move All"'s outlines hug the header.
+                MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, rowContext.textWidth(header, headerScale), Math.round(9 * headerScale));
+            }
             y += zoomedHeaderAdvance;
             int count = 0;
             for (String id : recentIds) {
@@ -310,7 +316,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                 // Icons and icon brightness apply to it — Move Bars must stay off it, or dragging bars
                 // would drag icons too. Only the name (the "bar"/value part, on the right) travels with
                 // Move Bars, same split as every other HUD-style module's icon-column vs. bar-column.
-                context.drawItem(recent, sx(x), sy(y), scale * iconScale);
+                context.drawItem(recent, sx(x), sy(y), iconScale * iconFitRatio);
 
                 Map<String, Float> nutrientBars = NutrientClassificationLookup.resolveBars(recent.getItem());
                 String nutrientKey = nutrientBars.entrySet().stream()

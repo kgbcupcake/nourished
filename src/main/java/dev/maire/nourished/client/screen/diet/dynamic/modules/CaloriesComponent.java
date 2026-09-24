@@ -130,6 +130,11 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         // capped by contentScale. Real containment against the box's own edges comes from this box's
         // own pushClip below.
         float scale = ContentScaleController.resolveContentScale(DietScreenPersistence.contentScale(ID));
+        var store = DietScreenPersistence.get();
+        // Independent of `scale` (Text size) — see NutrientBarComponent/CalorieHudScreen's own iconScale for the same split.
+        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID));
+        // Independent of both `scale` and `iconScale` — the title alone, via Header size/Hide Header.
+        float headerScale = ContentScaleController.resolveContentScale(MarieModuleSettings.headerScale(store, ID));
         double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
         double paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         support.begin(bounds, contentScale, paddingLocal);
@@ -138,21 +143,22 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
 
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
-            support.drawItem(context, "minecraft:fire_charge", 2, 5, scale);
+            support.drawItem(context, "minecraft:fire_charge", 2, 5, iconScale);
 
             // The header has its own offset (Move Header); Move Text moves only the calorie value below it —
             // same split ActiveEffectsComponent's title/lines already have.
-            var store = DietScreenPersistence.get();
-            RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
-                    MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
-            String header = Component.translatable("nourished.screen.diet.calories_label").getString();
-            int headerX = support.sx(24) + MarieModuleSettings.headerOffsetX(store, ID);
-            int headerY = support.sy(startLocalY + 6) + MarieModuleSettings.headerOffsetY(store, ID);
-            headerContext.drawText(header, headerX, headerY, MarieColors.resolveColor(NourishedColors.CALORIES_HEADER), scale);
-            // The header is drawn through headerContext, not the display-settings-wrapped `context`, so
-            // withDisplaySettings never sees this draw call and can't auto-record its extent; report it
-            // explicitly so "Move Header"'s and "Move All"'s outlines hug the header, not the value below it.
-            MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, headerContext.textWidth(header, scale), Math.round(9 * scale));
+            if (!MarieModuleSettings.isHeaderHidden(store, ID)) {
+                RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+                String header = Component.translatable("nourished.screen.diet.calories_label").getString();
+                int headerX = support.sx(24) + MarieModuleSettings.headerOffsetX(store, ID);
+                int headerY = support.sy(startLocalY + 6) + MarieModuleSettings.headerOffsetY(store, ID);
+                headerContext.drawText(header, headerX, headerY, MarieColors.resolveColor(NourishedColors.CALORIES_HEADER), headerScale);
+                // The header is drawn through headerContext, not the display-settings-wrapped `context`, so
+                // withDisplaySettings never sees this draw call and can't auto-record its extent; report it
+                // explicitly so "Move Header"'s and "Move All"'s outlines hug the header, not the value below it.
+                MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, headerContext.textWidth(header, headerScale), Math.round(9 * headerScale));
+            }
 
             float today = MarieTracking.getCurrentTrackerValue(Minecraft.getInstance().player, NourishedAPI.CALORIES_TRACKER_ID);
             String calStr = (int) today + " / " + (int) data.maxTotal;

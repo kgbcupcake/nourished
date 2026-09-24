@@ -110,20 +110,30 @@ public class DietScreen extends Screen {
                 moduleEntry(BalanceComponent.ID, "nourished.screen.diet.balance_label", true, DietOptionsPanel::balanceColors),
                 // No "Move Text" here, unlike the other module entries: Recent Meals' row names travel
                 // with "Move Bars" instead (see RecentMealsComponent#render), leaving nothing for "Move
-                // Text" to actually move.
+                // Text" to actually move. Its title now gets independent Header size/Hide Header — the
+                // old "Hide Text" toggle this box exposed here never actually reached the header draw
+                // (it goes through rowContext, which withDisplaySettings/Hide Text never wraps — see the
+                // discovery pass), so it's dropped in favor of the toggle that now actually works.
                 new HubEntry(RecentMealsComponent.ID, Component.translatable("nourished.screen.diet.recent_label"),
                         DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.recent_label").getString(),
-                                RecentMealsComponent.ID, true, true, true, false, true, DietOptionsPanel::recentMealsColors,
-                                "nourished.options.diet.recent.header_size")),
+                                RecentMealsComponent.ID, true, true, true, false, false, true, true, false, null,
+                                DietOptionsPanel::recentMealsColors)),
                 // No "Move Text"/"Hide Text" here: Eat More Of has no body text at all separate from
                 // its header — its body is just the suggested-food icons — so neither toggle has
-                // anything of its own to move or hide; "Hide Window" already covers the whole box.
+                // anything of its own to move or hide; "Hide Window" already covers the whole box. Its
+                // "Eat More" label now sizes/hides via Header size/Hide Header instead of the ordinary
+                // Text size slider, so Text size is dropped entirely (nothing is left for it to drive).
                 new HubEntry(EatMoreComponent.ID, Component.translatable("nourished.screen.diet.suggestion_label"),
                         DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.suggestion_label").getString(),
-                                EatMoreComponent.ID, false, true, true, false, false, DietOptionsPanel::eatMoreColors)),
+                                EatMoreComponent.ID, false, true, true, false, false, true, true, false, null,
+                                DietOptionsPanel::eatMoreColors)),
+                // The title now sizes/hides via Header size/Hide Header instead of the fixed 0.9x-of-Text-
+                // size proxy it used to draw at; Text size remains (it still drives the effect lines below
+                // the title) but is relabeled "Bars" since that's now its only remaining job.
                 new HubEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label"),
                         DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.effects_label").getString(),
-                                ActiveEffectsComponent.ID, false, false, true, DietOptionsPanel::effectsColors)),
+                                ActiveEffectsComponent.ID, false, false, true, true, true, true, true, true,
+                                "nourished.options.diet.effects_bars_size", DietOptionsPanel::effectsColors)),
                 intakeGroupEntry(),
                 new HubEntry(DietScreenEditTarget.PANEL_ID, Component.translatable("nourished.screen.diet.options_label"),
                         DietOptionsPanel.build()),
@@ -139,12 +149,14 @@ public class DietScreen extends Screen {
      * move modes, reset; plus bar options when the box has a bar). {@code hasHeader = true}: each of
      * these four boxes draws a title separate from its body text (the value/rows below it), so Move
      * Header moves just the title and Move Text moves only the body — same split Active Effects
-     * already had.
+     * already had. The title now also gets independent Header size/Hide Header, on top of Move Header;
+     * Text size (unrenamed) still drives the body value below it, unchanged.
      */
     private static HubEntry moduleEntry(String moduleId, String labelKey, boolean hasBars,
                                                 java.util.function.Consumer<dev.marie.framework.ui.api.MarieToolbox.PanelBuilder> colors) {
         return new HubEntry(moduleId, Component.translatable(labelKey),
-                DietOptionsPanel.forModule(Component.translatable(labelKey).getString(), moduleId, hasBars, true, true, colors));
+                DietOptionsPanel.forModule(Component.translatable(labelKey).getString(), moduleId, hasBars, true, true,
+                        true, true, true, true, true, null, colors));
     }
 
     /**

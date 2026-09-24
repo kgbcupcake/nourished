@@ -118,29 +118,30 @@ public final class DietOptionsPanel {
      * hiding on its own (e.g. Eat More Of's suggestion text, which the "Hide Window" toggle already
      * covers). Every Diet sub-box panel also drops the Padding slider (Layout tab): every box is
      * directly drag-resizable and every piece of its content individually movable, so a separate
-     * padding-percentage knob is redundant.
+     * padding-percentage knob is redundant. No independent Header size/Hide Header here — see the
+     * overload below for a box whose title is sized/hidden separately from its body content.
      */
     public static MarieComponent forModule(String title, String moduleId, boolean hasBars, boolean hasIcons, boolean hasHeader,
                                            boolean hasMoveText, boolean hasHideText, java.util.function.Consumer<MarieToolbox.PanelBuilder> colors) {
-        return forModule(title, moduleId, hasBars, hasIcons, hasHeader, hasMoveText, hasHideText, colors, null);
+        return forModule(title, moduleId, hasBars, hasIcons, hasHeader, hasMoveText, hasHideText, false, false, true, null, colors);
     }
 
     /**
-     * Same, with the Style tab's "Text size" row relabeled to {@code textSizeLabelKey} ({@code null}:
-     * the standard "Text size" label) — for a box whose persisted text scale only ever drives its
-     * header (e.g. Recent Meals, whose row names follow Bar size instead — see {@link
-     * dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent#render}), where the
-     * generic "Text size" label would misleadingly suggest it also resizes the box's body content.
+     * Full form: also choosing whether the Sizes tab gets an independent "Header size" row and the Hide
+     * group a "Hide Header" toggle ({@code hasHeaderSize}/{@code hasHideHeader} — read back with {@link
+     * MarieModuleSettings#headerScale}/{@link MarieModuleSettings#isHeaderHidden}), whether the module's
+     * ordinary "Text size" row appears at all ({@code hasTextSize} — false for a box whose only text was
+     * its title, now moved onto Header size, leaving nothing left for Text size to drive), and an
+     * override for the Text size row's label ({@code textSizeLabelKey}, null: the standard label) — for
+     * a box whose remaining text-size slider drives something other than generic body text (e.g. Active
+     * Effects' effect lines, labeled "Bars" once its title moves onto Header size).
      */
     public static MarieComponent forModule(String title, String moduleId, boolean hasBars, boolean hasIcons, boolean hasHeader,
-                                           boolean hasMoveText, boolean hasHideText, java.util.function.Consumer<MarieToolbox.PanelBuilder> colors,
-                                           String textSizeLabelKey) {
+                                           boolean hasMoveText, boolean hasHideText, boolean hasHeaderSize, boolean hasHideHeader,
+                                           boolean hasTextSize, String textSizeLabelKey, java.util.function.Consumer<MarieToolbox.PanelBuilder> colors) {
         StandardPanelBuilder panel = MarieModuleSettings.standardPanel(title, DietScreenPersistence.get(), moduleId)
                 .storedBrightness()
                 .withoutPadding();
-        if (textSizeLabelKey != null) {
-            panel.textSizeLabel(textSizeLabelKey);
-        }
         if (!hasBars) {
             panel.withoutBars();
         }
@@ -155,6 +156,18 @@ public final class DietOptionsPanel {
         }
         if (!hasHideText) {
             panel.withoutHideText();
+        }
+        if (hasHeaderSize) {
+            panel.withHeaderSize();
+        }
+        if (hasHideHeader) {
+            panel.withHideHeader();
+        }
+        if (!hasTextSize) {
+            panel.withoutTextSize();
+        }
+        if (textSizeLabelKey != null) {
+            panel.textSizeLabel(textSizeLabelKey);
         }
         if (colors != null) {
             panel.extraTabs(p -> {

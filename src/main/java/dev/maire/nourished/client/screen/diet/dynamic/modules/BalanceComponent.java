@@ -149,22 +149,28 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         support.drawOuterBox(context, bounds.width(), bounds.height(), cc, borderColor());
 
         var store = DietScreenPersistence.get();
+        // Independent of `scale` (Text size) — see NutrientBarComponent/CalorieHudScreen's own iconScale for the same split.
+        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID));
+        // Independent of both `scale` and `iconScale` — the title alone, via Header size/Hide Header.
+        float headerScale = ContentScaleController.resolveContentScale(MarieModuleSettings.headerScale(store, ID));
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
-            support.drawItem(context, "minecraft:comparator", 2, 5, scale);
+            support.drawItem(context, "minecraft:comparator", 2, 5, iconScale);
 
             // The header has its own offset (Move Header); Move Text moves only the balance state word
             // below it — same split ActiveEffectsComponent's title/lines already have.
-            RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
-                    MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
-            String header = Component.translatable("nourished.screen.diet.balance_label").getString();
-            int headerX = support.sx(24) + MarieModuleSettings.headerOffsetX(store, ID);
-            int headerY = support.sy(startLocalY + 6) + MarieModuleSettings.headerOffsetY(store, ID);
-            headerContext.drawText(header, headerX, headerY, headerTextColor(), scale);
-            // The header is drawn through headerContext, not the display-settings-wrapped `context`, so
-            // withDisplaySettings never sees this draw call and can't auto-record its extent; report it
-            // explicitly so "Move Header"'s and "Move All"'s outlines hug the header, not the state word below it.
-            MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, headerContext.textWidth(header, scale), Math.round(9 * scale));
+            if (!MarieModuleSettings.isHeaderHidden(store, ID)) {
+                RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+                String header = Component.translatable("nourished.screen.diet.balance_label").getString();
+                int headerX = support.sx(24) + MarieModuleSettings.headerOffsetX(store, ID);
+                int headerY = support.sy(startLocalY + 6) + MarieModuleSettings.headerOffsetY(store, ID);
+                headerContext.drawText(header, headerX, headerY, headerTextColor(), headerScale);
+                // The header is drawn through headerContext, not the display-settings-wrapped `context`, so
+                // withDisplaySettings never sees this draw call and can't auto-record its extent; report it
+                // explicitly so "Move Header"'s and "Move All"'s outlines hug the header, not the state word below it.
+                MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, headerContext.textWidth(header, headerScale), Math.round(9 * headerScale));
+            }
 
             String balKey = getBalanceKey(data);
             int balColor = balanceColor(balKey);

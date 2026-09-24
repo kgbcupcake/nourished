@@ -166,9 +166,15 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         // user's persisted per-box adjustment alone now, sanity-clamped only — no longer capped by
         // contentScale. Real containment against the box's own edges comes from the
         // pushClip(bounds...) below.
-        float scale = ContentScaleController.resolveContentScale(DietScreenPersistence.contentScale(ID));
         double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
         this.paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
+        var store = DietScreenPersistence.get();
+        // Independent of `headerScale` — see NutrientBarComponent/CalorieHudScreen's own iconScale for the same split.
+        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID));
+        // The "Eat More" label alone, via Header size/Hide Header — this box has no other text of its
+        // own (its body is just the suggestion icons below), so nothing else reads the old contentScale
+        // ("Text size") path anymore.
+        float headerScale = ContentScaleController.resolveContentScale(MarieModuleSettings.headerScale(store, ID));
 
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
         int y = startLocalY;
@@ -180,17 +186,18 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         try {
             // The header has its own offset (Move Header), independent from Move Text — same split
             // ActiveEffectsComponent's title/lines already have.
-            var store = DietScreenPersistence.get();
-            RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
-                    MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
-            String suggestionHeader = font.plainSubstrByWidth(Component.translatable("nourished.screen.diet.suggestion_label").getString(), bw);
-            int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
-            int headerY = sy(y + DietScreenModules.HEADER_TOP_PADDING_LOCAL) + MarieModuleSettings.headerOffsetY(store, ID);
-            headerContext.drawText(suggestionHeader, headerX, headerY, headerTextColor(), scale);
-            // The header is drawn through headerContext, not the display-settings-wrapped `context`, so
-            // withDisplaySettings never sees this draw call and can't auto-record its extent; report it
-            // explicitly so "Move Header"'s and "Move All"'s outlines hug the header.
-            MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, headerContext.textWidth(suggestionHeader, scale), Math.round(9 * scale));
+            if (!MarieModuleSettings.isHeaderHidden(store, ID)) {
+                RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+                String suggestionHeader = font.plainSubstrByWidth(Component.translatable("nourished.screen.diet.suggestion_label").getString(), bw);
+                int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
+                int headerY = sy(y + DietScreenModules.HEADER_TOP_PADDING_LOCAL) + MarieModuleSettings.headerOffsetY(store, ID);
+                headerContext.drawText(suggestionHeader, headerX, headerY, headerTextColor(), headerScale);
+                // The header is drawn through headerContext, not the display-settings-wrapped `context`, so
+                // withDisplaySettings never sees this draw call and can't auto-record its extent; report it
+                // explicitly so "Move Header"'s and "Move All"'s outlines hug the header.
+                MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, headerContext.textWidth(suggestionHeader, headerScale), Math.round(9 * headerScale));
+            }
             y += HEADER_LOCAL_HEIGHT;
 
             for (int col = 0; col < Math.min(2, neglected.size()); col++) {
@@ -208,7 +215,7 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
 
                 int suggestionColW = (bw - 4) / 2;
                 int colX = x + col * suggestionColW;
-                context.drawItem(new ItemStack(exampleItem), sx(colX), sy(y), scale);
+                context.drawItem(new ItemStack(exampleItem), sx(colX), sy(y), iconScale);
             }
         } finally {
             context.popClip();

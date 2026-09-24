@@ -192,22 +192,25 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         // render past the box's actual (shrunk) bottom edge instead of fading out with it.
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
-            // Slightly smaller than body text, purely a visual tweak — HEADER_LOCAL_HEIGHT (the layout reservation below) is untouched.
-            // The header has its own offset (Move Header); Move Text moves only the effect lines below it.
+            // The header has its own offset (Move Header) and now its own independent size/visibility
+            // via Header size/Hide Header, replacing the old fixed "0.9x of body text" proxy — Move Text
+            // still moves only the effect lines below it.
             var store = DietScreenPersistence.get();
-            RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
-                    MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
-            String header = Component.translatable("nourished.screen.diet.effects_label").getString();
-            float headerScale = scale * 0.9f;
-            int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
-            int headerY = sy(y + DietScreenModules.HEADER_TOP_PADDING_LOCAL) + MarieModuleSettings.headerOffsetY(store, ID);
-            headerContext.drawText(header, headerX, headerY, headerTextColor(), headerScale);
-            // The header is drawn through headerContext, not the display-settings-wrapped `context`, so its own
-            // offset applies instead of Move Text's — but that also means withDisplaySettings never sees this draw
-            // call and can't record its extent the way it auto-records text/icons/bars; report it explicitly so
-            // "Move Header"'s and "Move All"'s outlines actually hug the header instead of falling back to the
-            // effect lines below it (the only other thing this box draws through the recorded `context`).
-            MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, context.textWidth(header, headerScale), Math.round(9 * headerScale));
+            float headerScale = ContentScaleController.resolveContentScale(MarieModuleSettings.headerScale(store, ID));
+            if (!MarieModuleSettings.isHeaderHidden(store, ID)) {
+                RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+                String header = Component.translatable("nourished.screen.diet.effects_label").getString();
+                int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
+                int headerY = sy(y + DietScreenModules.HEADER_TOP_PADDING_LOCAL) + MarieModuleSettings.headerOffsetY(store, ID);
+                headerContext.drawText(header, headerX, headerY, headerTextColor(), headerScale);
+                // The header is drawn through headerContext, not the display-settings-wrapped `context`, so its own
+                // offset applies instead of Move Text's — but that also means withDisplaySettings never sees this draw
+                // call and can't record its extent the way it auto-records text/icons/bars; report it explicitly so
+                // "Move Header"'s and "Move All"'s outlines actually hug the header instead of falling back to the
+                // effect lines below it (the only other thing this box draws through the recorded `context`).
+                MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, context.textWidth(header, headerScale), Math.round(9 * headerScale));
+            }
             y += zoomedHeaderAdvance;
 
             if (effects.isEmpty()) {
