@@ -281,6 +281,7 @@ public class Nourished {
         CalorieHudScreen.COLORS = MarieColors.registerColorPair(MODID, "calorie_hud", defaultPanelArgb, defaultTextArgb);
         ActivityLogHudPanel.COLORS = MarieColors.registerColorPair(MODID, "activity_log_hud", defaultPanelArgb, defaultTextArgb);
         dev.maire.nourished.client.colors.NourishedColors.register();
+        dev.maire.nourished.client.colors.NourishedColors.registerIntakeBarColors();
     }
 
     /**

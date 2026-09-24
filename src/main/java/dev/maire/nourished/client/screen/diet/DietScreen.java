@@ -189,11 +189,12 @@ public class DietScreen extends Screen {
             List<HubChildEntry> children = new ArrayList<>(slots);
             for (int i = 0; i < slots; i++) {
                 String slotId = "nourished.diet.intake.slot" + i;
-                Component label = i < order.size()
-                        ? NutrientRegistry.getLabelComponent(order.get(i))
+                String nutrientKey = i < order.size() ? order.get(i) : null;
+                Component label = nutrientKey != null
+                        ? NutrientRegistry.getLabelComponent(nutrientKey)
                         : Component.translatable("nourished.screen.diet.intake_row", i + 1);
                 MarieComponent content = contentCache.computeIfAbsent(slotId,
-                        id -> DietOptionsPanel.forIntakeBar(label.getString(), id));
+                        id -> DietOptionsPanel.forIntakeBar(label.getString(), id, nutrientKey));
                 children.add(new HubChildEntry(slotId, label, content));
             }
             return children;

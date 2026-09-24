@@ -56,6 +56,18 @@ public final class NourishedColorSlots {
         add(panel, key, text(langKey), NourishedColors.defaultRgb(key));
     }
 
+    /**
+     * Text, bar track and border slots for one Intake Breakdown nutrient's row — bound to {@code
+     * nutrient}'s own dedicated colors (see {@link NourishedColors#registerIntakeBarColors}), not a
+     * role shared across every row, so each of Fruits/Vegetables/Proteins/Grains/Dairy is
+     * independently colorable instead of all five sharing one setting.
+     */
+    public static void addIntakeBarColors(MarieToolbox.PanelBuilder panel, String nutrient) {
+        add(panel, NourishedColors.intakeBarTextKey(nutrient), text("nourished.options.color.text"));
+        add(panel, NourishedColors.intakeBarTrackKey(nutrient), text("nourished.options.color.bar_track"));
+        add(panel, NourishedColors.intakeBarBorderKey(nutrient), text("nourished.options.color.border"));
+    }
+
     private static void add(MarieToolbox.PanelBuilder panel, ColorKey key, String label) {
         ColorDefinition definition = ColorDefinitionRegistry.get(key);
         add(panel, key, label, definition != null ? definition.getDefaultArgb() & 0xFFFFFF : 0xFF00FF);

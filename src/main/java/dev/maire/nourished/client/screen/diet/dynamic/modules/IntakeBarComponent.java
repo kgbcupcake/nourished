@@ -60,16 +60,17 @@ public final class IntakeBarComponent implements MarieComponent, SelfPositioning
      */
     private static final Map<String, AnimatedFloat> ANIMATED_VALUES = new ConcurrentHashMap<>();
 
-    private static int borderColor() {
-        return MarieColors.resolveColor(NourishedColors.BORDER);
+    /** Each of these is per-nutrient (see {@link NourishedColors#registerIntakeBarColors}), so Fruits/Vegetables/etc. are independently colorable, not all sharing one setting. */
+    private static int borderColor(String nutrientKey) {
+        return MarieColors.resolveColor(NourishedColors.intakeBarBorderKey(nutrientKey));
     }
 
-    private static int textColor() {
-        return MarieColors.resolveColor(NourishedColors.TEXT);
+    private static int textColor(String nutrientKey) {
+        return MarieColors.resolveColor(NourishedColors.intakeBarTextKey(nutrientKey));
     }
 
-    private static int barTrackColor() {
-        return MarieColors.resolveColor(NourishedColors.DIET_BAR_TRACK);
+    private static int barTrackColor(String nutrientKey) {
+        return MarieColors.resolveColor(NourishedColors.intakeBarTrackKey(nutrientKey));
     }
 
     private final BarRowComponent delegate;
@@ -122,16 +123,16 @@ public final class IntakeBarComponent implements MarieComponent, SelfPositioning
                 BarRowComponent.DEFAULT_PERCENT_DIM_ALPHA,
                 () -> resolveIcon(nutrientKey),
                 () -> NutrientRegistry.getLabelComponent(nutrientKey).getString(),
-                IntakeBarComponent::textColor,
+                () -> textColor(nutrientKey),
                 () -> animatedDisp,
                 () -> previousValue(nutrientKey, data),
                 () -> HudDrawHelpers.nutrientColorArgb(nutrientKey),
-                IntakeBarComponent::barTrackColor,
+                () -> barTrackColor(nutrientKey),
                 () -> HudDrawHelpers.nutrientColorArgb(nutrientKey),
                 () -> NourishedColors.nutrient(nutrientKey),
                 () -> NourishedColors.nutrient(nutrientKey),
                 () -> panelFillColor(),
-                IntakeBarComponent::borderColor,
+                () -> borderColor(nutrientKey),
                 () -> flashOverlayColor(nutrientKey),
                 () -> currentValue(nutrientKey, data)
         );

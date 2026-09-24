@@ -579,6 +579,8 @@ public final class DietScreenEditTarget implements MarieComponent {
                         MarieModuleSettings.textOffsetX(DietScreenPersistence.get(), ids[i]), MarieModuleSettings.textOffsetY(DietScreenPersistence.get(), ids[i]));
                 case ICONS -> moveDrag.start(mode, mouseX, mouseY,
                         MarieModuleSettings.iconOffsetX(DietScreenPersistence.get(), ids[i]), MarieModuleSettings.iconOffsetY(DietScreenPersistence.get(), ids[i]));
+                case ICON_INNER -> moveDrag.start(mode, mouseX, mouseY,
+                        MarieModuleSettings.iconInnerOffsetX(DietScreenPersistence.get(), ids[i]), MarieModuleSettings.iconInnerOffsetY(DietScreenPersistence.get(), ids[i]));
                 case BARS -> moveDrag.start(mode, mouseX, mouseY,
                         MarieModuleSettings.barOffsetX(DietScreenPersistence.get(), ids[i]), MarieModuleSettings.barOffsetY(DietScreenPersistence.get(), ids[i]));
                 case HEADER -> moveDrag.start(mode, mouseX, mouseY,
@@ -602,6 +604,8 @@ public final class DietScreenEditTarget implements MarieComponent {
             case TEXT -> MarieModuleSettings.setTextOffset(DietScreenPersistence.get(), movingBoxId,
                     clamp(moveDrag.offsetX(mouseX), maxX), clamp(moveDrag.offsetY(mouseY), maxY));
             case ICONS -> MarieModuleSettings.setIconOffset(DietScreenPersistence.get(), movingBoxId,
+                    clamp(moveDrag.offsetX(mouseX), maxX), clamp(moveDrag.offsetY(mouseY), maxY));
+            case ICON_INNER -> MarieModuleSettings.setIconInnerOffset(DietScreenPersistence.get(), movingBoxId,
                     clamp(moveDrag.offsetX(mouseX), maxX), clamp(moveDrag.offsetY(mouseY), maxY));
             case BARS -> MarieModuleSettings.setBarOffset(DietScreenPersistence.get(), movingBoxId,
                     clamp(moveDrag.offsetX(mouseX), maxX), clamp(moveDrag.offsetY(mouseY), maxY));
@@ -636,6 +640,9 @@ public final class DietScreenEditTarget implements MarieComponent {
         }
         if (all || mode == MoveDrag.Mode.ICONS) {
             MarieModuleSettings.commitIconOffset(DietScreenPersistence.get(), movingBoxId);
+        }
+        if (mode == MoveDrag.Mode.ICON_INNER) {
+            MarieModuleSettings.commitIconInnerOffset(DietScreenPersistence.get(), movingBoxId);
         }
         if (all || mode == MoveDrag.Mode.BARS) {
             MarieModuleSettings.commitBarOffset(DietScreenPersistence.get(), movingBoxId);

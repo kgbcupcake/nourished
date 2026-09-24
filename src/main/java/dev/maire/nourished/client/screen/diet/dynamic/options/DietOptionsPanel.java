@@ -139,6 +139,20 @@ public final class DietOptionsPanel {
     public static MarieComponent forModule(String title, String moduleId, boolean hasBars, boolean hasIcons, boolean hasHeader,
                                            boolean hasMoveText, boolean hasHideText, boolean hasHeaderSize, boolean hasHideHeader,
                                            boolean hasTextSize, String textSizeLabelKey, java.util.function.Consumer<MarieToolbox.PanelBuilder> colors) {
+        return forModule(title, moduleId, hasBars, hasIcons, hasHeader, hasMoveText, hasHideText, hasHeaderSize, hasHideHeader,
+                hasTextSize, textSizeLabelKey, false, colors);
+    }
+
+    /**
+     * Full form, also choosing whether the box's icon gets a "Move Icon" toggle independent of "Move
+     * Icons" — true only for {@link #forIntakeBar}, whose row draws its icon inside its own small box
+     * (see {@code BarRowComponent}); every other Diet box's icon has no such box to keep still while
+     * the icon moves within it, so this stays opt-in rather than a blanket addition to every module.
+     */
+    public static MarieComponent forModule(String title, String moduleId, boolean hasBars, boolean hasIcons, boolean hasHeader,
+                                           boolean hasMoveText, boolean hasHideText, boolean hasHeaderSize, boolean hasHideHeader,
+                                           boolean hasTextSize, String textSizeLabelKey, boolean hasIconInnerMove,
+                                           java.util.function.Consumer<MarieToolbox.PanelBuilder> colors) {
         StandardPanelBuilder panel = MarieModuleSettings.standardPanel(title, DietScreenPersistence.get(), moduleId)
                 .storedBrightness()
                 .withoutPadding();
@@ -148,6 +162,9 @@ public final class DietOptionsPanel {
         if (!hasIcons) {
             panel.withoutIcons();
         } else {
+            if (hasIconInnerMove) {
+                panel.withIconInnerMove();
+            }
             // Icon size must never fall back to Text size for these boxes: several of them (Recent
             // Meals, Eat More) no longer even expose a Text size row, so a player's old persisted value
             // from before this split — or before Text size was repurposed onto Header size — would
@@ -230,11 +247,37 @@ public final class DietOptionsPanel {
      * label, bar, percent, arrow), differing only in which nutrient a given slot currently shows, so
      * one panel definition is reused per row id rather than one bespoke panel per nutrient. Reached via
      * the hub's "Intake" group picker (see {@code DietScreen#intakeGroupEntry}), one popup per row.
-     * Per-row bar-fill color is intentionally NOT exposed here: that stays driven by the existing
-     * global per-nutrient color system (see the "Nutrients" colors tab), same as the HUD's own bars.
+     * Per-row bar-fill/percent/arrow color is intentionally NOT exposed here: that stays driven by the
+     * existing global per-nutrient color system (see the "Nutrients" colors tab), same as the HUD's own
+     * bars, so setting it there applies to every row and HUD bar for that nutrient at once. Its label
+     * text, bar track and border ARE exposed, one dedicated color set per nutrient (see {@link
+     * #intakeColors}) so each of Fruits/Vegetables/Proteins/Grains/Dairy is independently colorable
+     * rather than all five sharing one setting. Also the only Diet box with a "Move Icon" toggle (see
+     * {@link #forModule}'s full-form overload): its icon sits inside its own small box (see {@code
+     * BarRowComponent}), so the icon and its box are independently movable here, unlike every other
+     * module's plain icon draw.
+     *
+     * @param nutrientKey the nutrient currently shown in this slot ({@code null} for a slot beyond the
+     *                     live bar order, e.g. more editor slots than registered nutrients) — {@code
+     *                     null} leaves out the Colors tab entirely, since there's no nutrient here yet
+     *                     to bind per-nutrient colors to.
      */
-    public static MarieComponent forIntakeBar(String title, String moduleId) {
-        return forModule(title, moduleId, true, true, false);
+    public static MarieComponent forIntakeBar(String title, String moduleId, String nutrientKey) {
+        java.util.function.Consumer<MarieToolbox.PanelBuilder> colors = nutrientKey != null
+                ? p -> intakeColors(p, nutrientKey)
+                : null;
+        return forModule(title, moduleId, true, true, false, true, true, false, false, true, null, true, colors);
+    }
+
+    /**
+     * One Intake Breakdown row's own colors: its label text, bar track and border, bound to {@code
+     * nutrientKey}'s own dedicated color set (see {@link NourishedColorSlots#addIntakeBarColors}) —
+     * not a role shared across every row, so Fruits' border can differ from Vegetables' without
+     * affecting it. The bar's fill, percent text and trend arrow are deliberately NOT here — see
+     * {@link #forIntakeBar}'s doc for why.
+     */
+    public static void intakeColors(MarieToolbox.PanelBuilder panel, String nutrientKey) {
+        NourishedColorSlots.addIntakeBarColors(panel, nutrientKey);
     }
 
     /**

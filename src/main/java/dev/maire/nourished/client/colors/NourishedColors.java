@@ -168,6 +168,43 @@ public final class NourishedColors {
         return nutrient(nutrient) & 0x00FFFFFF;
     }
 
+    // Per-nutrient Intake Breakdown row colors (label text, bar track, border) — one set per
+    // registered nutrient, keyed by nutrient rather than by row/slot so a nutrient's own colors
+    // travel with it if the row order is ever changed, the same way its bar-fill nutrient() color
+    // already does. Unlike the fixed keys above, the nutrient count is dynamic (a registry, not a
+    // fixed field list), so these are registered separately by #registerIntakeBarColors, mirroring
+    // how #register's fixed keys and the nutrient fill colors registered in Nourished#registerColorDefinitions
+    // already split "fixed field" registration from "one per dynamic registry entry" registration.
+
+    public static ColorKey intakeBarTextKey(String nutrient) {
+        return key("diet.intake_bar." + nutrient + ".text");
+    }
+
+    public static ColorKey intakeBarTrackKey(String nutrient) {
+        return key("diet.intake_bar." + nutrient + ".track");
+    }
+
+    public static ColorKey intakeBarBorderKey(String nutrient) {
+        return key("diet.intake_bar." + nutrient + ".border");
+    }
+
+    /**
+     * Registers one text/track/border color per registered nutrient, defaulting to the same RGB the
+     * shared text/bar-track/border roles use. Call alongside {@link #register()} — unlike its fixed
+     * keys, these depend on {@link dev.maire.nourished.core.nutrition.NutrientRegistry}'s live count,
+     * so they can't be filed as a static field/{@link #DEFAULTS} entry the same way.
+     */
+    public static void registerIntakeBarColors() {
+        int textDefault = themeRgb(ThemeKey.TEXT_PRIMARY);
+        int trackDefault = MarieColors.shade(OPAQUE | themeRgb(ThemeKey.BORDER), DIET_TRACK_SHADE) & 0x00FFFFFF;
+        int borderDefault = themeRgb(ThemeKey.BORDER);
+        for (String nutrient : dev.maire.nourished.core.nutrition.NutrientRegistry.getKeys()) {
+            MarieColors.registerColor(ColorDefinition.of(intakeBarTextKey(nutrient), OPAQUE | textDefault));
+            MarieColors.registerColor(ColorDefinition.of(intakeBarTrackKey(nutrient), OPAQUE | trackDefault));
+            MarieColors.registerColor(ColorDefinition.of(intakeBarBorderKey(nutrient), OPAQUE | borderDefault));
+        }
+    }
+
     /** Diet sub-surface RGB (alpha stripped): the Diet panel color shaded toward white. */
     public static int surfaceRgb() {
         return MarieColors.shade(MarieColors.resolveColor(DIET_PANEL), SURFACE_SHADE) & 0x00FFFFFF;
