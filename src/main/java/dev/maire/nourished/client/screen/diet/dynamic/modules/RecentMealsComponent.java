@@ -228,8 +228,10 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
 
         int naturalRowCount = rowsShown;
         float iconFitRatio = rowH / 16f; // fits the icon exactly within rowH at iconScale == 1 — deliberately the flat, unzoomed rowH: this is a size ratio, not a position advance
-        // Independent of `scale` (Text size) — see NutrientBarComponent/CalorieHudScreen's own iconScale for the same split.
-        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID));
+        // Independent of `barScale`/`headerScale`, and never falls back to (the now-nonexistent) Text
+        // size either (`followText = false`) — this box's panel is built with independentIconSize()
+        // precisely so a stale/leftover Text size value never silently sizes the icon.
+        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID, false));
         float rowScale = (float) recentMealsScale; // folds the recentMealsScale config knob into label size; Bar size (barScale) is applied separately below alongside the row draw, not Text size
         int nameOffset = rowH + 2;
         Font font = Minecraft.getInstance().font;

@@ -149,8 +149,10 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         support.drawOuterBox(context, bounds.width(), bounds.height(), cc, borderColor());
 
         var store = DietScreenPersistence.get();
-        // Independent of `scale` (Text size) — see NutrientBarComponent/CalorieHudScreen's own iconScale for the same split.
-        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID));
+        // Independent of `scale` (Text size), and never falls back to it either (`followText = false`) —
+        // this box's panel is built with independentIconSize() precisely so a stale/leftover Text size
+        // value never silently sizes the icon.
+        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID, false));
         // Independent of both `scale` and `iconScale` — the title alone, via Header size/Hide Header.
         float headerScale = ContentScaleController.resolveContentScale(MarieModuleSettings.headerScale(store, ID));
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());

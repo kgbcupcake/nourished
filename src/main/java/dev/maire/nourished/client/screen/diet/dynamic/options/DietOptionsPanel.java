@@ -147,6 +147,13 @@ public final class DietOptionsPanel {
         }
         if (!hasIcons) {
             panel.withoutIcons();
+        } else {
+            // Icon size must never fall back to Text size for these boxes: several of them (Recent
+            // Meals, Eat More) no longer even expose a Text size row, so a player's old persisted value
+            // from before this split — or before Text size was repurposed onto Header size — would
+            // otherwise silently keep sizing the icon with no slider left to see or change it by. The
+            // matching render-side read is `MarieModuleSettings.iconScale(store, ID, false)`.
+            panel.independentIconSize();
         }
         if (hasHeader) {
             panel.withHeader();

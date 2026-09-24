@@ -169,8 +169,10 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
         double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
         this.paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         var store = DietScreenPersistence.get();
-        // Independent of `headerScale` — see NutrientBarComponent/CalorieHudScreen's own iconScale for the same split.
-        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID));
+        // Independent of `headerScale`, and never falls back to (the now-nonexistent) Text size either
+        // (`followText = false`) — this box's panel is built with independentIconSize() precisely so a
+        // stale/leftover Text size value never silently sizes the icon.
+        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID, false));
         // The "Eat More" label alone, via Header size/Hide Header — this box has no other text of its
         // own (its body is just the suggestion icons below), so nothing else reads the old contentScale
         // ("Text size") path anymore.

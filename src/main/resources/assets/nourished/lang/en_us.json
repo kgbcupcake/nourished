@@ -25,6 +25,7 @@
   "nourished.options.diet.recent_meals_box_size": "Recent Meals box size",
   "nourished.options.diet.eat_more_box_size": "Eat More box size",
   "nourished.options.diet.effects_bars_size": "Bars",
+  "nourished.options.diet.calories_number_size": "Number size",
   "nourished.options.diet.drag_bars": "Drag bars to reorder",
   "nourished.options.diet.reset_bar_order": "Reset bar order",
   "nourished.options.diet.reset_caption": "RESET",

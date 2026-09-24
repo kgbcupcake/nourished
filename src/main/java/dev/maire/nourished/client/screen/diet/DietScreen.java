@@ -106,8 +106,12 @@ public class DietScreen extends Screen {
     /** Sidebar rows for the hub: the five Diet Screen sub-boxes, one "Intake" group for the dynamically-many bar rows, and the screen-wide options panel. */
     private static List<HubSidebarEntry> scaleConfigEntries() {
         return List.of(
-                moduleEntry(CaloriesComponent.ID, "nourished.screen.diet.calories_label", true, DietOptionsPanel::caloriesColors),
-                moduleEntry(BalanceComponent.ID, "nourished.screen.diet.balance_label", true, DietOptionsPanel::balanceColors),
+                // "Number size" here (not the shared "Text size" label): this box's Text size slider
+                // only ever drives its calorie value, a number — the generic label would say less than
+                // this specific one does.
+                moduleEntry(CaloriesComponent.ID, "nourished.screen.diet.calories_label", true,
+                        "nourished.options.diet.calories_number_size", DietOptionsPanel::caloriesColors),
+                moduleEntry(BalanceComponent.ID, "nourished.screen.diet.balance_label", true, null, DietOptionsPanel::balanceColors),
                 // No "Move Text" here, unlike the other module entries: Recent Meals' row names travel
                 // with "Move Bars" instead (see RecentMealsComponent#render), leaving nothing for "Move
                 // Text" to actually move. Its title now gets independent Header size/Hide Header — the
@@ -153,10 +157,11 @@ public class DietScreen extends Screen {
      * Text size (unrenamed) still drives the body value below it, unchanged.
      */
     private static HubEntry moduleEntry(String moduleId, String labelKey, boolean hasBars,
+                                                String textSizeLabelKey,
                                                 java.util.function.Consumer<dev.marie.framework.ui.api.MarieToolbox.PanelBuilder> colors) {
         return new HubEntry(moduleId, Component.translatable(labelKey),
                 DietOptionsPanel.forModule(Component.translatable(labelKey).getString(), moduleId, hasBars, true, true,
-                        true, true, true, true, true, null, colors));
+                        true, true, true, true, true, textSizeLabelKey, colors));
     }
 
     /**
