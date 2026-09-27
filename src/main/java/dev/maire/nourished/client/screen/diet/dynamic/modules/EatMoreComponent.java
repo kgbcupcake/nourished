@@ -192,7 +192,7 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
             // The header has its own offset (Move Header), independent from Move Text — same split
             // ActiveEffectsComponent's title/lines already have.
             if (!MarieModuleSettings.isHeaderHidden(store, ID)) {
-                RenderContext headerContext = MarieModuleSettings.withTextEffects(MarieModuleSettings.withBrightness(baseContext,
+                RenderContext headerContext = MarieModuleSettings.withHeaderTextEffects(MarieModuleSettings.withBrightness(baseContext,
                         MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID)), store, ID);
                 String suggestionHeader = font.plainSubstrByWidth(Component.translatable("nourished.screen.diet.suggestion_label").getString(), bw);
                 int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);

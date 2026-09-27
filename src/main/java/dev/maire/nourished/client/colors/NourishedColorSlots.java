@@ -10,7 +10,9 @@ import dev.marie.framework.color.ColorKeyPair;
 import dev.marie.framework.color.ColorPreviewOverrides;
 import dev.marie.framework.color.ColorRegistry;
 import dev.marie.framework.color.MarieColors;
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.ui.api.MarieToolbox;
+import dev.maire.nourished.client.UiStatePersistence;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -30,6 +32,28 @@ public final class NourishedColorSlots {
     public static void addNutrients(MarieToolbox.PanelBuilder panel) {
         for (String key : NutrientRegistry.getKeys()) {
             add(panel, key(Nourished.MODID, "nutrient." + key), NutrientRegistry.getLabel(key));
+        }
+    }
+
+    /**
+     * One Bar glow (color + strength) slot per registered nutrient for the Nutrient HUD, each keyed
+     * by its own synthetic panel id ({@code nourished.hud.bar.<key>}, in the HUD's own {@link
+     * UiStatePersistence} store) so every nutrient's bar glows independently instead of sharing one
+     * setting across the whole panel — matching how each Intake Breakdown row already has its own
+     * dedicated Glow controls, just surfaced here on the Colors tab rather than a per-row popup, since
+     * the Nutrient HUD (unlike Intake Breakdown) has no per-row options panel of its own to host one.
+     */
+    public static void addNutrientBarGlow(MarieToolbox.PanelBuilder panel) {
+        var store = UiStatePersistence.get();
+        for (String key : NutrientRegistry.getKeys()) {
+            String panelId = "nourished.hud.bar." + key;
+            String label = NutrientRegistry.getLabel(key) + " " + text("nourished.options.color.bar_glow_suffix");
+            panel.color(label,
+                    () -> MarieModuleSettings.barGlowColor(store, panelId), rgb -> MarieModuleSettings.setBarGlowColor(store, panelId, rgb),
+                    0xFFFFFF, () -> {});
+            panel.slider(label + " %",
+                    () -> MarieModuleSettings.barGlowStrength(store, panelId), v -> MarieModuleSettings.setBarGlowStrength(store, panelId, v),
+                    0.0d, 1.0d, 0.01d, () -> {}).defaultValue(0.0d);
         }
     }
 

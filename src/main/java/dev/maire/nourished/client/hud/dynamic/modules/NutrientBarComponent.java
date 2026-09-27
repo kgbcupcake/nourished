@@ -1,6 +1,7 @@
 package dev.maire.nourished.client.hud.dynamic.modules;
 
 import dev.maire.nourished.client.colors.NourishedColors;
+import dev.maire.nourished.client.UiStatePersistence;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.marie.framework.client.config.state.MarieClientCache;
@@ -119,6 +120,23 @@ final class NutrientBarComponent implements MarieComponent {
     }
 
     /**
+     * This nutrient's own dedicated Bar glow (see {@link NourishedColorSlots#addNutrientBarGlow}) —
+     * unlike every other Diet/HUD box, the Nutrient HUD is edited as one panel with no per-row options
+     * popup, so each nutrient's glow is stored under its own synthetic panel id rather than sharing
+     * the panel-wide Glow tab's single Bar glow setting.
+     */
+    private static void drawNutrientBarGlow(RenderContext context, String nutrientKey, int x, int y, int width, int height) {
+        String panelId = "nourished.hud.bar." + nutrientKey;
+        double strength = MarieModuleSettings.barGlowStrength(UiStatePersistence.get(), panelId);
+        if (strength <= 0) {
+            return;
+        }
+        int color = MarieModuleSettings.barGlowColor(UiStatePersistence.get(), panelId);
+        int alpha = Math.min(255, (int) Math.round(strength * 255));
+        context.drawGlow(x, y, width, height, (alpha << 24) | (color & 0xFFFFFF));
+    }
+
+    /**
      * {@link NutrientRegistry#getIconItem(String)} resolves/validates the icon id string once per
      * distinct id and caches the {@link net.minecraft.world.item.Item} forever — this only wraps
      * that cached, already-validated item in a fresh {@link ItemStack} per call, instead of
@@ -193,6 +211,7 @@ final class NutrientBarComponent implements MarieComponent {
                 int pctX = bounds.x() + (bounds.width() - pctSw) / 2;
                 context.drawText(pctText, pctX + barDx, bounds.y() + barDy, pctColor, barScale);
 
+                drawNutrientBarGlow(context, nutrientKey, barX + barDx, barY + barDy, barW, barH);
                 context.drawVerticalBar(barX + barDx, barY + barDy, barW, barH, value, bgColor, fillColor);
                 drawFlashOverlay(context, barX + barDx, barY + barDy, barW, barH);
             }
@@ -227,6 +246,7 @@ final class NutrientBarComponent implements MarieComponent {
             if (barsHidden) {
                 return;
             }
+            drawNutrientBarGlow(context, nutrientKey, barX + barDx, barY + barDy, barW, barH);
             context.drawBar(barX + barDx, barY + barDy, barW, barH, value, bgColor, fillColor);
             drawFlashOverlay(context, barX + barDx, barY + barDy, barW, barH);
 

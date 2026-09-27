@@ -254,8 +254,10 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         // instead of fading out with it.
         // Each row's name is this box's "bar" (the icon is not): Bar size scales it and Move Bars
         // offsets it, apart from the header's own text offset and the icon's own Move Icons offset.
-        RenderContext rowContext = MarieModuleSettings.withTextEffects(MarieModuleSettings.withBrightness(baseContext,
-                MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID)), store, ID);
+        RenderContext brightnessContext = MarieModuleSettings.withBrightness(baseContext,
+                MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+        RenderContext rowContext = MarieModuleSettings.withBarTextEffects(brightnessContext, store, ID);
+        RenderContext headerContext = MarieModuleSettings.withHeaderTextEffects(brightnessContext, store, ID);
         int barDx = MarieModuleSettings.barOffsetX(store, ID);
         int barDy = MarieModuleSettings.barOffsetY(store, ID);
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
@@ -283,9 +285,9 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
                 }
                 int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
                 int headerY = sy(y) + MarieModuleSettings.headerOffsetY(store, ID);
-                rowContext.drawText(header, headerX, headerY, headerTextColor(), headerScale);
+                headerContext.drawText(header, headerX, headerY, headerTextColor(), headerScale);
                 // Report the extent explicitly so "Move Header"'s and "Move All"'s outlines hug the header.
-                MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, rowContext.textWidth(header, headerScale), Math.round(9 * headerScale));
+                MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, headerContext.textWidth(header, headerScale), Math.round(9 * headerScale));
             }
             y += zoomedHeaderAdvance;
             int count = 0;
