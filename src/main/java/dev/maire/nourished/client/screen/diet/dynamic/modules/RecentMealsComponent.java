@@ -257,7 +257,7 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         RenderContext brightnessContext = MarieModuleSettings.withBrightness(baseContext,
                 MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
         RenderContext rowContext = MarieModuleSettings.withBarTextEffects(brightnessContext, store, ID);
-        RenderContext headerContext = MarieModuleSettings.withHeaderTextEffects(brightnessContext, store, ID);
+        RenderContext headerContext = brightnessContext;
         int barDx = MarieModuleSettings.barOffsetX(store, ID);
         int barDy = MarieModuleSettings.barOffsetY(store, ID);
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());

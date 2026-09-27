@@ -165,8 +165,8 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
             // The header has its own offset (Move Header); Move Text moves only the balance state word
             // below it — same split ActiveEffectsComponent's title/lines already have.
             if (!MarieModuleSettings.isHeaderHidden(store, ID)) {
-                RenderContext headerContext = MarieModuleSettings.withHeaderTextEffects(MarieModuleSettings.withBrightness(baseContext,
-                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID)), store, ID);
+                RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
                 String header = Component.translatable("nourished.screen.diet.balance_label").getString();
                 int headerX = support.sx(24) + MarieModuleSettings.headerOffsetX(store, ID);
                 int headerY = support.sy(startLocalY + 6) + MarieModuleSettings.headerOffsetY(store, ID);

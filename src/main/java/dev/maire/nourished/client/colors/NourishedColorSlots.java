@@ -36,24 +36,29 @@ public final class NourishedColorSlots {
     }
 
     /**
-     * One Bar glow (color + strength) slot per registered nutrient for the Nutrient HUD, each keyed
-     * by its own synthetic panel id ({@code nourished.hud.bar.<key>}, in the HUD's own {@link
-     * UiStatePersistence} store) so every nutrient's bar glows independently instead of sharing one
-     * setting across the whole panel — matching how each Intake Breakdown row already has its own
-     * dedicated Glow controls, just surfaced here on the Colors tab rather than a per-row popup, since
-     * the Nutrient HUD (unlike Intake Breakdown) has no per-row options panel of its own to host one.
+     * A collapsible section, one per registered nutrient, added to the end of the Nutrient HUD's own
+     * Glow tab (via {@link dev.marie.framework.ui.api.StandardPanelBuilder#glowRows}) — each holding
+     * that nutrient's own Bar glow, keyed by its own synthetic panel id ({@code
+     * nourished.hud.bar.<key>}, in the HUD's own {@link UiStatePersistence} store) so every nutrient's
+     * bar glows independently instead of sharing one setting across the whole panel — matching how
+     * each Intake Breakdown row already has its own dedicated Bar glow. No Text glow (see {@link
+     * dev.marie.framework.ui.api.StandardPanelBuilder}'s Glow tab doc for why that's gone everywhere)
+     * and no Border glow: a nutrient row draws no box of its own to glow the edge of. The Nutrient HUD
+     * has no per-row options popup the way Intake Breakdown rows do, so these live as sections under
+     * the panel's single Glow tab instead of a separate tab per nutrient.
      */
-    public static void addNutrientBarGlow(MarieToolbox.PanelBuilder panel) {
+    public static void addNutrientBarGlowSections(MarieToolbox.PanelBuilder panel) {
         var store = UiStatePersistence.get();
         for (String key : NutrientRegistry.getKeys()) {
             String panelId = "nourished.hud.bar." + key;
-            String label = NutrientRegistry.getLabel(key) + " " + text("nourished.options.color.bar_glow_suffix");
-            panel.color(label,
+            panel.section(NutrientRegistry.getLabel(key));
+            panel.color(text("config.marieslib.moduleoptions.barGlow"),
                     () -> MarieModuleSettings.barGlowColor(store, panelId), rgb -> MarieModuleSettings.setBarGlowColor(store, panelId, rgb),
                     0xFFFFFF, () -> {});
-            panel.slider(label + " %",
+            panel.slider(text("config.marieslib.moduleoptions.barGlowStrength"),
                     () -> MarieModuleSettings.barGlowStrength(store, panelId), v -> MarieModuleSettings.setBarGlowStrength(store, panelId, v),
                     0.0d, 1.0d, 0.01d, () -> {}).defaultValue(0.0d);
+            panel.endSection();
         }
     }
 

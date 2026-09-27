@@ -198,8 +198,8 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
             var store = DietScreenPersistence.get();
             float headerScale = ContentScaleController.resolveContentScale(MarieModuleSettings.headerScale(store, ID));
             if (!MarieModuleSettings.isHeaderHidden(store, ID)) {
-                RenderContext headerContext = MarieModuleSettings.withHeaderTextEffects(MarieModuleSettings.withBrightness(baseContext,
-                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID)), store, ID);
+                RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
                 String header = Component.translatable("nourished.screen.diet.effects_label").getString();
                 int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
                 int headerY = sy(y + DietScreenModules.HEADER_TOP_PADDING_LOCAL) + MarieModuleSettings.headerOffsetY(store, ID);
