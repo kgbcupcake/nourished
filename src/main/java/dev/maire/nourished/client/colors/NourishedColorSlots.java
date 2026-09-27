@@ -57,12 +57,17 @@ public final class NourishedColorSlots {
     }
 
     /**
-     * Text, bar track and border slots for one Intake Breakdown nutrient's row — bound to {@code
-     * nutrient}'s own dedicated colors (see {@link NourishedColors#registerIntakeBarColors}), not a
-     * role shared across every row, so each of Fruits/Vegetables/Proteins/Grains/Dairy is
-     * independently colorable instead of all five sharing one setting.
+     * Text, bar track, border and bar-fill slots for one Intake Breakdown nutrient's row. Text/track/
+     * border are bound to {@code nutrient}'s own dedicated colors (see {@link
+     * NourishedColors#registerIntakeBarColors}), not a role shared across every row, so each of
+     * Fruits/Vegetables/Proteins/Grains/Dairy is independently colorable instead of all five sharing
+     * one setting. Bar fill is bound to the same {@code nutrient.<key>} color {@link #addNutrients}
+     * already exposes on the Diet Screen's own Colors tab — not a separate/divergent value — so a
+     * player editing a row's own Colors tab can change that nutrient's bar color without having to
+     * find it on a different tab first.
      */
     public static void addIntakeBarColors(MarieToolbox.PanelBuilder panel, String nutrient) {
+        add(panel, key(Nourished.MODID, "nutrient." + nutrient), text("nourished.options.color.bar_fill"));
         add(panel, NourishedColors.intakeBarTextKey(nutrient), text("nourished.options.color.text"));
         add(panel, NourishedColors.intakeBarTrackKey(nutrient), text("nourished.options.color.bar_track"));
         add(panel, NourishedColors.intakeBarBorderKey(nutrient), text("nourished.options.color.border"));

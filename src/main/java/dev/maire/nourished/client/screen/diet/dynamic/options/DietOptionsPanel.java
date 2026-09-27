@@ -155,7 +155,13 @@ public final class DietOptionsPanel {
                                            java.util.function.Consumer<MarieToolbox.PanelBuilder> colors) {
         StandardPanelBuilder panel = MarieModuleSettings.standardPanel(title, DietScreenPersistence.get(), moduleId)
                 .storedBrightness()
-                .withoutPadding();
+                .withoutPadding()
+                // Self-contained Background/Border opacity+shade, Text/Border shadow and the Glow tab —
+                // every Diet box gets these for free, no config field needed (see MariesLib's
+                // StandardPanelBuilder#withOwnStyle/withShadow/withGlow).
+                .withOwnStyle()
+                .withShadow()
+                .withGlow();
         if (!hasBars) {
             panel.withoutBars();
         }
@@ -164,6 +170,7 @@ public final class DietOptionsPanel {
         } else {
             if (hasIconInnerMove) {
                 panel.withIconInnerMove();
+                panel.withIconInnerSize();
             }
             // Icon size must never fall back to Text size for these boxes: several of them (Recent
             // Meals, Eat More) no longer even expose a Text size row, so a player's old persisted value
@@ -247,15 +254,16 @@ public final class DietOptionsPanel {
      * label, bar, percent, arrow), differing only in which nutrient a given slot currently shows, so
      * one panel definition is reused per row id rather than one bespoke panel per nutrient. Reached via
      * the hub's "Intake" group picker (see {@code DietScreen#intakeGroupEntry}), one popup per row.
-     * Per-row bar-fill/percent/arrow color is intentionally NOT exposed here: that stays driven by the
-     * existing global per-nutrient color system (see the "Nutrients" colors tab), same as the HUD's own
-     * bars, so setting it there applies to every row and HUD bar for that nutrient at once. Its label
-     * text, bar track and border ARE exposed, one dedicated color set per nutrient (see {@link
-     * #intakeColors}) so each of Fruits/Vegetables/Proteins/Grains/Dairy is independently colorable
-     * rather than all five sharing one setting. Also the only Diet box with a "Move Icon" toggle (see
-     * {@link #forModule}'s full-form overload): its icon sits inside its own small box (see {@code
-     * BarRowComponent}), so the icon and its box are independently movable here, unlike every other
-     * module's plain icon draw.
+     * Its label text, bar track, border AND bar fill are all exposed, one dedicated color set per
+     * nutrient (see {@link #intakeColors}) so each of Fruits/Vegetables/Proteins/Grains/Dairy is
+     * independently colorable rather than all five sharing one setting. The bar-fill swatch here binds
+     * the same underlying {@code nutrient.<key>} color the "Nutrients" colors tab already exposes (see
+     * {@link NourishedColorSlots#addIntakeBarColors}) — editing it from either place changes the same
+     * value, applying to every row and HUD bar for that nutrient at once, so there's no second source
+     * of truth. Also the only Diet box with a "Move Icon"/"Icon size (in box)" pair (see {@link
+     * #forModule}'s full-form overload): its icon sits inside its own small box (see {@code
+     * BarRowComponent}), so the icon and its box are independently movable and sizable here, unlike
+     * every other module's plain icon draw.
      *
      * @param nutrientKey the nutrient currently shown in this slot ({@code null} for a slot beyond the
      *                     live bar order, e.g. more editor slots than registered nutrients) — {@code
@@ -270,11 +278,13 @@ public final class DietOptionsPanel {
     }
 
     /**
-     * One Intake Breakdown row's own colors: its label text, bar track and border, bound to {@code
-     * nutrientKey}'s own dedicated color set (see {@link NourishedColorSlots#addIntakeBarColors}) —
+     * One Intake Breakdown row's own colors: its label text, bar track, border and bar fill, bound to
+     * {@code nutrientKey}'s own dedicated color set (see {@link NourishedColorSlots#addIntakeBarColors}) —
      * not a role shared across every row, so Fruits' border can differ from Vegetables' without
-     * affecting it. The bar's fill, percent text and trend arrow are deliberately NOT here — see
-     * {@link #forIntakeBar}'s doc for why.
+     * affecting it. The bar fill here is the same underlying value as the "Nutrients" colors tab's
+     * entry for this nutrient (not a duplicate), so it stays in sync however it's edited. The percent
+     * text and trend arrow, which also follow the nutrient's own color, are still only reachable from
+     * the "Nutrients" colors tab — they're minor accents rather than a dedicated per-row setting.
      */
     public static void intakeColors(MarieToolbox.PanelBuilder panel, String nutrientKey) {
         NourishedColorSlots.addIntakeBarColors(panel, nutrientKey);

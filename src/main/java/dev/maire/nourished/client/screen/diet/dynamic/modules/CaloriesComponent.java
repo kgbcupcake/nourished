@@ -144,7 +144,7 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         double paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         support.begin(bounds, contentScale, paddingLocal);
 
-        support.drawOuterBox(context, bounds.width(), bounds.height(), cc, MarieColors.resolveColor(NourishedColors.CALORIES_BORDER));
+        support.drawOuterBox(context, bounds.width(), bounds.height(), cc, MarieColors.resolveColor(NourishedColors.CALORIES_BORDER), store, ID);
 
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {

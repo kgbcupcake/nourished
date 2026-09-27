@@ -85,6 +85,7 @@
   "nourished.options.color.calorie": "Calorie value",
   "nourished.options.color.over_goal": "Over-goal bar",
   "nourished.options.color.bar_track": "Bar track",
+  "nourished.options.color.bar_fill": "Bar fill",
   "nourished.options.color.accent": "Accent",
   "nourished.options.color.activity.mining": "Mining",
   "nourished.options.color.activity.combat": "Combat",

@@ -2,7 +2,9 @@ package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
 import dev.marie.framework.color.MarieColors;
 import dev.maire.nourished.client.colors.NourishedColors;
+import dev.marie.framework.ui.PersistenceProvider;
 import dev.marie.framework.ui.RenderContext;
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -79,9 +81,12 @@ final class SummaryBoxRenderSupport {
         context.drawItem(new ItemStack(item), sx(localX), sy(startLocalY + localY), scale);
     }
 
-    void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc, int borderColor) {
-        int fill = panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity());
-        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, borderColor);
+    void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc, int borderColor,
+                       PersistenceProvider store, String panelId) {
+        int fill = MarieModuleSettings.styledBackground(panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity()), store, panelId);
+        int styledBorder = MarieModuleSettings.styledBorder(borderColor, store, panelId);
+        MarieModuleSettings.drawBoxGlow(context, store, panelId, anchorBounds.x(), anchorBounds.y(), screenW, screenH);
+        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, styledBorder);
     }
 
     static int panelColorWithOpacity(int rgb, double opacity) {

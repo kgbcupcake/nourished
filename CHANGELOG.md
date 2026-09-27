@@ -4,6 +4,12 @@
 
 ## [ Unreleased ]
 
+### Added
+
+- Every Diet box (Calories, Balance, Recent Meals, Eat More, Active Effects, and every Intake Breakdown row) now has its own Style tab Background opacity/shade, Border opacity/shade, Text shadow and Border shadow sliders, and a new Glow tab (Text glow, Border glow, and — where the box has one — Bar glow), via MariesLib's new self-contained `StandardPanelBuilder#withOwnStyle`/`withShadow`/`withGlow` (see MariesLib's changelog) — no config field needed per box, so this rolled out to every box at once. Wired through `SummaryBoxRenderSupport#drawOuterBox` (Calories/Balance) and each of `EatMoreComponent`/`RecentMealsComponent`/`ActiveEffectsComponent`/MariesLib's `BarRowComponent`'s own box-drawing code, all now calling `MarieModuleSettings#styledBackground`/`styledBorder`/`drawBoxGlow` before drawing their box.
+- Every Intake Breakdown row's own Colors tab now has a "Bar fill" swatch (`NourishedColorSlots#addIntakeBarColors`), bound to the same `nutrient.<key>` color the Diet Screen's "Nutrients" colors tab already exposes — previously that color was only reachable from the Diet Screen's own Colors tab, not from a row's own panel, even though its label text/bar track/border already lived there.
+- Every Intake Breakdown row now also has an "Icon size (in box)" slider (Style tab), pairing with the existing "Move Icon" toggle so the icon can be resized independently of its own box, via MariesLib's new `StandardPanelBuilder#withIconInnerSize` (see MariesLib's changelog).
+
 ### Fixed
 
 - Recent Meals' "Text size" slider (Style tab) resized the meal-name rows along with the header — the rows are this box's "bar" content (per its own "Move Bars"/"Bar size" wiring), so they should only respond to "Bar size", but their draw scale also multiplied in the header's own Text size. Now Text size affects only the header; row size/spacing tracks "Bar size" instead. Also renamed the "Recent" sidebar entry/header to "Recent Meals" (`nourished.screen.diet.recent_label`), matching how it's already referred to elsewhere, and relabeled its Style tab's "Text size" row to "Header size" (new `nourished.options.diet.recent.header_size` key, via MariesLib's new `StandardPanelBuilder#textSizeLabel` — see MariesLib's changelog), since that's now literally all it controls.

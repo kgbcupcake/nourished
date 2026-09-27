@@ -149,9 +149,9 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         double paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         support.begin(bounds, contentScale, paddingLocal);
 
-        support.drawOuterBox(context, bounds.width(), bounds.height(), cc, borderColor());
-
         var store = DietScreenPersistence.get();
+        support.drawOuterBox(context, bounds.width(), bounds.height(), cc, borderColor(), store, ID);
+
         // Independent of `scale` (Text size), and never falls back to it either (`followText = false`) —
         // this box's panel is built with independentIconSize() precisely so a stale/leftover Text size
         // value never silently sizes the icon.

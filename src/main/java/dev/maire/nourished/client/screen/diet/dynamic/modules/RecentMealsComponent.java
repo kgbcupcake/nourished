@@ -396,8 +396,11 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
      * handle and hit-testing are computed against.
      */
     private void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc) {
-        int fill = panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity());
-        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, borderColor());
+        var store = DietScreenPersistence.get();
+        int fill = MarieModuleSettings.styledBackground(panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity()), store, ID);
+        int border = MarieModuleSettings.styledBorder(borderColor(), store, ID);
+        MarieModuleSettings.drawBoxGlow(context, store, ID, anchorBounds.x(), anchorBounds.y(), screenW, screenH);
+        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, border);
     }
 
     private static int panelColorWithOpacity(int rgb, double opacity) {
