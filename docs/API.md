@@ -1,201 +1,146 @@
 # Nourished API
 
-`NourishedAPI` is a thin, stable facade over [MariesLib](https://github.com/kgbcupcake/MariesLib), 
-the engine that actually runs classification, tracking, decay, and effects. If you're building a new Marie mod with its own value bars (not nutrition), 
-depend on MariesLib directly — see [MariesLib's API.md](https://github.com/kgbcupcake/MariesLib/blob/main/API.md).
+`dev.maire.nourished.api.NourishedAPI` is Nourished's public Java API for querying player nutrition state, registering nutrition definitions, and extending Nourished behavior. Nourished uses [MariesLib](https://github.com/kgbcupcake/MariesLib) for shared value tracking and definition types.
 
-Every method below is verified directly against source (`dev.maire.nourished.api.NourishedAPI` — the package really is spelled `maire`, not a typo).
+Use Nourished's API for nutrition-specific integrations. If your mod only needs a general-purpose value or tracking system, depend on MariesLib directly instead.
 
-## Getting started
+## Requirements and setup
 
-Nourished requires MariesLib as a separate mod at runtime — no JarJar bundling. Add both to your dev environment:
+Nourished targets Minecraft 1.21.1 on NeoForge 21.1.228 or later and requires MariesLib 0.1.1-beta.5 or later at runtime. Cloth Config is also required on the client.
+
+For a development environment, make the Nourished and MariesLib API available at compile time using your project's normal NeoForge dependency setup. Example Gradle coordinates:
 
 ```gradle
 dependencies {
-    compileOnly "dev.marie.MariesLib:marieslib:<version>"
-    compileOnly "dev.maire.nourished:nourished:<version>"
+    compileOnly "dev.maire.nourished:nourished:<nourished-version>"
+    compileOnly "dev.marie.MariesLib:marieslib:<marieslib-version>"
 }
 ```
 
-Bootstrap follows MariesLib's own pattern: see [MariesLib's bootstrap docs](https://github.com/kgbcupcake/MariesLib/blob/main/API.md#bootstrap) 
-for the underlying mechanism. Nourished itself calls `MarieBootstrap.attach("nourished", modEventBus)` in its own `@Mod` constructor; addon mods building against `NourishedAPI` 
-don't need to call this themselves, just declare Nourished as a dependency and register during your own mod init.
+Do not bundle Nourished or MariesLib inside your mod. If Nourished is an optional integration, declare it as an optional mod dependency and isolate code that references Nourished classes so that it is only loaded when Nourished is present. If your mod directly uses MariesLib types exposed by the API, those types must also be available at compile time.
 
-## Registration window
+## API stability and compatibility
 
-All `register*` calls must happen during mod initialization: your `@Mod` constructor or `FMLCommonSetupEvent`. 
-The window closes after init; calling register outside it throws `IllegalStateException`.
+`NourishedAPI` and each of its public methods are marked `@ApiStatus.Stable`. Nourished's API policy is that these method signatures will not break without a major version bump and deprecation cycle. Types supplied by MariesLib, such as `ValueDefinition` and `ThresholdEffect`, follow MariesLib's stability policy.
 
-## Stability
+Nourished does not currently expose a separate Nourished API version. `NourishedAPI.getVersion()` returns MariesLib's API version, not Nourished's mod or API version. Check the installed mod versions and their dependency requirements when determining compatibility.
 
-`NourishedAPI` is `@ApiStatus.Stable` at the class level, and **every single method** carries the same `@Stable`
-tier individually: no method on this facade is `@Experimental` or `@Internal`. Shared definition types (`ValueDefinition`, `ThresholdEffect`, `CompatDefinition`, etc.) 
-come from MariesLib and follow its stability rules — see MariesLib's API.md for those.
+Only depend on `dev.maire.nourished.api` and documented public MariesLib API types. Packages such as `dev.maire.nourished.core`, `client`, `config`, `compat`, and `api.impl` are implementation details and are not supported integration surfaces.
 
----
+## Registration lifecycle
 
-## `NourishedAPI` reference
+All `NourishedAPI` registration methods must be called while MariesLib's registration window is open. Nourished opens its registrations during mod initialization and closes them during `FMLCommonSetupEvent` after its setup work. A registration attempted after the window closes throws `IllegalStateException`.
 
-All static, in `dev.maire.nourished.api.NourishedAPI`. 29 public methods total: 18 primary, 11 pure aliases (each alias just delegates to its primary, no added logic).
+There is currently no dedicated Nourished registration event. Register early during mod initialization; do not defer registrations to server start, datapack reload, or runtime callbacks. Where one registration references another definition, register the referenced definition first—for example, register a custom nutrient before registering a food mapping that uses its key. Addons with complex cross-mod ordering requirements should account for NeoForge mod initialization ordering rather than assuming a separate, ordered Nourished phase.
+
+## Registering a nutrient and food
+
+`ValueDefinition` is supplied by MariesLib. See the [MariesLib API reference](https://github.com/kgbcupcake/MariesLib/blob/main/API.md) for its builder and available fields.
+
+```java
+import dev.maire.nourished.api.NourishedAPI;
+import dev.marie.framework.api.value.ValueDefinition;
+import net.minecraft.resources.ResourceLocation;
+
+ValueDefinition omega3 = ValueDefinition.builder("omega3")
+        .displayName("Omega-3")
+        .beneficial(true)
+        .build();
+
+NourishedAPI.registerValue(omega3);
+NourishedAPI.registerSourceClassification(
+        ResourceLocation.fromNamespaceAndPath("example_food", "starfruit"),
+        "omega3",
+        1.0f
+);
+```
+
+Nutrient keys must be unique. A duplicate key passed to `registerValue` throws `IllegalArgumentException`. `registerSourceClassification` accepts an item ID, a registered nutrient key, and a finite contribution amount. An unknown nutrient key is rejected; an item ID that is not registered yet is logged as a warning.
+
+An explicit source classification is a direct mapping for the specified item and is considered ahead of scanner inference. It does not bypass Nourished's excluded-item handling or other runtime food overrides. For tag-based mappings or richer static data, use datapacks instead; see the [Datapack Support wiki page](https://github.com/kgbcupcake/nourished/wiki/Datapack-Support).
+
+## API reference
+
+All methods are static on `dev.maire.nourished.api.NourishedAPI`. Registration methods (the `register*` methods below) require the registration window described above. Each `add*` method is an alias for its corresponding registration method.
+
+The public constant `NourishedAPI.CALORIES_TRACKER_ID` is the MariesLib tracker ID used for Nourished's calorie history.
 
 ### Player state queries
 
-No registration-window restriction: safe to call any time.
+These methods do not require the registration window to be open:
 
 ```java
 float getTotal(Player player)
 float getValueLevel(Player player, String valueKey)
 ApplicationHistoryView getSourceMemory(Player player)
-float getTotalCount(Player player)              // alias of getTotal
-MariePlayerData getTrackingData(Player player)   // aggregate snapshot of the above three
+float getTotalCount(Player player) // alias of getTotal
+float getYesterdayCalories(Player player)
+List<TrackerHistoryEntry> getCalorieHistory(Player player)
+MariePlayerData getTrackingData(Player player)
 void modifyValue(Player player, String valueKey, float delta)
 String getVersion()
 ```
 
-### Registration:  nutrients & foods
+- `getTotal` and `getTotalCount` return the player's current calorie total.
+- `getValueLevel` returns a nutrient level, or `-1.0f` for an unknown key or a `null` player.
+- `getSourceMemory` returns a read-only view of recent food history; a `null` player yields an empty view.
+- `getYesterdayCalories` returns the latest completed daily calorie total, or `-1.0f` if calorie history is disabled or no history is available.
+- `getCalorieHistory` returns completed-period entries, newest first. It returns an empty list when history is disabled, unavailable, or the player is `null`.
+- `getTrackingData` returns a snapshot of calories, registered nutrient levels, and food memory.
+- `modifyValue` applies a direct nutrient delta through the NeoForge `ValueModifierEvent`; a cancelled event prevents the change. The server synchronizes the updated value for server players.
+- `getVersion` returns the MariesLib API version; it is not a Nourished version query.
 
-```java
-void registerValue(ValueDefinition definition)
-void addNutrient(ValueDefinition definition)                 // alias
-void registerSourceClassification(ResourceLocation sourceId, String valueKey, float amount)
-void registerSource(ResourceLocation sourceId, String valueKey, float amount)  // alias
-```
+Nutrient keys are data-defined and may vary with datapacks and other integrations. Avoid hardcoding assumptions about the set of keys; inspect `getTrackingData(player)` for the registered keys and values.
 
-### Registration:  effects
+### Registration methods
 
-```java
-void registerCustomEffect(ThresholdEffect definition)
-void addEffect(ThresholdEffect definition)  // alias
-```
+| Method | Purpose |
+|---|---|
+| `registerValue(ValueDefinition)` | Register a nutrient. Alias: `addNutrient`. |
+| `registerSourceClassification(ResourceLocation, String, float)` | Map one item to a nutrient and contribution amount. Alias: `registerSource`. |
+| `registerCustomEffect(ThresholdEffect)` | Register an effect triggered by nutrient thresholds. Alias: `addEffect`. |
+| `registerCompatEntry(CompatDefinition)` | Register a compatibility definition. Alias: `addCompat`. |
+| `registerValueSynergy(SynergyDefinition)` | Register an interaction between nutrient values. Alias: `addNutrientSynergy`. |
+| `registerSourcePairSynergy(SourcePairSynergy)` | Register a food-pair synergy. Alias: `addFoodSynergy`. |
+| `registerTrackingProfile(ProfileDefinition)` | Register a named nutrition profile. Alias: `addProfile`. |
+| `registerMilestone(MilestoneDefinition)` | Register a nutrition milestone. Alias: `addMilestone`. |
+| `registerSeasonHook(MarieSeasonHook)` | Register a seasonal integration hook. Alias: `addSeasonHook`. |
+| `registerAbsorptionModifier(AbsorptionModifier)` | Register an absorption modifier. Alias: `addAbsorptionModifier`. |
+| `registerReportProvider(ReportProvider)` | Add a section to the `/nourished` report. Alias: `addReportSection`. |
 
-### Registration:  compatibility
-
-```java
-void registerCompatEntry(CompatDefinition definition)
-void addCompat(CompatDefinition definition)  // alias
-```
-
-### Registration:  synergies & combos
-
-```java
-void registerValueSynergy(SynergyDefinition definition)
-void addNutrientSynergy(SynergyDefinition definition)         // alias
-void registerSourcePairSynergy(SourcePairSynergy definition)
-void addFoodSynergy(SourcePairSynergy definition)              // alias
-```
-
-### Registration — profiles & milestones
-
-```java
-void registerTrackingProfile(ProfileDefinition definition)
-void addProfile(ProfileDefinition definition)      // alias
-void registerMilestone(MilestoneDefinition definition)
-void addMilestone(MilestoneDefinition definition)  // alias
-```
-
-### Registration: hooks & modifiers
-
-```java
-void registerSeasonHook(MarieSeasonHook hook)
-void addSeasonHook(MarieSeasonHook hook)                        // alias
-void registerAbsorptionModifier(AbsorptionModifier modifier)
-void addAbsorptionModifier(AbsorptionModifier modifier)         // alias
-void registerReportProvider(ReportProvider provider)
-void addReportSection(ReportProvider provider)                  // alias
-```
-
-All 12 `register*` primaries throw `IllegalStateException` if called after the registration window closes. The 7 query methods have no such restriction.
-
-Definition types (`ValueDefinition`, `ThresholdEffect`, `SynergyDefinition`, `SourcePairSynergy`, `ProfileDefinition`, `MilestoneDefinition`, `CompatDefinition`)
-are MariesLib types — see [MariesLib's builder reference](https://github.com/kgbcupcake/MariesLib/blob/main/API.md#definition-builders)
-for their full builder syntax; Nourished doesn't wrap or replace them.
-
----
-
-## Gameplay modules
-
-Nourished currently ships one true gameplay module beyond core nutrition tracking:
-
-**Raw Food / Gut Health**: tracks per-player gut health, degrading from raw food and recovering from cooked food and variety.
-Config toggles: `enableRawFoodPenalty`, `enableGutHealth`. Config file: `config/nourished/raw_food.json`.
-
-Stamina is **not** a native module: it's a compat integration with the separate [Peak Stamina](https://modrinth.com)
-mod, registered like any other compat entry, not a Nourished-owned system.
-
----
-
-## Dynamic UI config
-
-New this release: these live in `NourishedClientConfig`:
-
-| Key | Type | Purpose |
-|---|---|---|
-| `hudClassicMode` | boolean | Force the HUD back to the pre-dynamic classic renderer |
-| `dietScreenClassicMode` | boolean | Force the Diet Screen back to the classic renderer |
-| `showDietScreenButton` | boolean (default `true`) | Show/hide the Diet Screen's inventory button. The Diet Screen keybind still opens the screen when this is off only the button disappears. |
-
----
+These definition and hook interfaces are provided by MariesLib. Consult the [MariesLib API reference](https://github.com/kgbcupcake/MariesLib/blob/main/API.md) for builder syntax and type-specific contracts.
 
 ## NeoForge events
 
-Subscribe to MariesLib's `MarieEvents` — Nourished doesn't define its own parallel event set for Java consumers:
+For Java event integration, subscribe to MariesLib's `MarieEvents` on the NeoForge event bus. Relevant events include:
 
-- `ValueChangedEvent`:  nutrient bar changed
-- `SourceAppliedEvent`:  food eaten, value applied
-- `ValueCriticalEvent`: `ValueExcessEvent` — threshold crossings
-- `ValueModifierEvent`:  cancellable, fires before a delta lands
-- `SourceTriggerEvent`:  cancellable, before the pipeline runs
+- `ValueChangedEvent`
+- `ValueCriticalEvent`
+- `ValueExcessEvent`
+- `SourceAppliedEvent`
+- `ValueModifierEvent`
+- `SourceTriggerEvent`
 
-Full signatures in [MariesLib's API.md](https://github.com/kgbcupcake/MariesLib/blob/main/API.md#neoforge-events).
-
----
+These events are provided by MariesLib, not duplicated as a Nourished-specific Java event API. See [MariesLib's event documentation](https://github.com/kgbcupcake/MariesLib/blob/main/API.md#neoforge-events) for signatures and event behavior.
 
 ## KubeJS
 
-Backed by `dev.maire.nourished.kubejs.NourishedKubeEvents`. The global JS binding is `NourishedEvents` (an event-group ID, not a Java class, don't confuse the two when reading source). Confirmed real events:
+Nourished's optional KubeJS integration is experimental. It exposes the `NourishedAPI` script binding and the `NourishedEvents` event group. The binding includes nutrient, nutrient-curve, and tracker-milestone registration, along with player nutrient and gut-health queries. Events cover nutrient changes and thresholds, food consumption, gut health, raw-food penalties, and nutrient modifiers.
 
-```js
-NourishedEvents.nutrientChanged(event => { /* ... */ })
-NourishedEvents.foodEaten(event => { /* ... */ })
-NourishedEvents.gutHealthChanged(event => { /* ... */ })
-NourishedEvents.rawFoodPenalty(event => { /* ... */ })
+See the [KubeJS Integration wiki page](https://github.com/kgbcupcake/nourished/wiki/KubeJS-Integration) for script examples, event fields, and cancellation behavior.
+
+## Datapacks and configuration
+
+Prefer datapacks for static food classifications and content. Nourished datapack resources use paths such as:
+
+```text
+data/<namespace>/nourished/nutrients/<id>.json
+data/<namespace>/nourished/source_classifications/<id>.json
+data/<namespace>/nourished/effects/<id>.json
+data/<namespace>/nourished/compat/<id>.json
+data/nourished/tags/item/nutrients/<nutrient>.json
 ```
 
-The real event group has 8 total handlers; the remaining 4 weren't individually enumerated in the last source pass.
-If you're relying on KubeJS integration beyond the four above, check `NourishedKubeEvents` 
-directly or ask for a follow-up pass to fill in the rest before depending on undocumented ones.
+The `data/nourished/tags/...` path is for tags in the `nourished` namespace. Other Nourished resource types can use the namespace of the datapack that provides them.
 
----
-
-## Datapack & config paths
-
-| Concept | Path |
-|---|---|
-| Food classification tags | `data/nourished/tags/item/nutrients/{fruits,vegetables,proteins,grains,dairy}.json` |
-| Food overrides | `config/nourished/overrides/Overrides/food_overrides.json` |
-| Source classification overrides | `config/nourished/overrides/Overrides/source_classifications.json` |
-| Excluded items | `config/nourished/overrides/Overrides/excluded_items.json` (owned by MariesLib's `ExcludedItemsRegistry`; Nourished only reads via `isExcluded(...)`) |
-| Effects | `effects.json` |
-| Colors | `colors.json` |
-| Raw Food config | `config/nourished/raw_food.json` |
-| Scanner spec (food-classification weights) | `config/nourished/scanner_spec.json` — see [CONTRIBUTING.md](CONTRIBUTING.md) for how to extend this |
-
-Legacy flat `overrides/` paths (without the nested `Overrides/` subfolder) auto-migrate on load — no manual file moves needed.
-
-Note: `excluded_items.json`'s array here is unrelated to `scanner_spec.json`'s own separate `excluded_items` JSON key — same concept, two independent mechanisms owned by different MariesLib registries. Don't conflate them.
-
----
-
-## Mod compatibility
-
-30+ dedicated `CompatDefinition` entries beyond automatic `FoodProperties` detection: Delight-family mods, Pam's HarvestCraft 2, Croptopia, Farmer's Delight, Cold Sweat, 
-and more. Full list in [README.md](README.md#-broad-mod-compatibility).
-
-Any mod exposing standard `FoodProperties` is auto-classified with zero configuration.
-
----
-
-## Versioning
-
-Nourished tracks MariesLib's API version (`MarieAPIVersion` — see MariesLib's API.md). Both mods must be present at runtime and compatible. 
-This release hard-depends on MariesLib **0.1.1-beta.5+**.
+See the [Datapack Support](https://github.com/kgbcupcake/nourished/wiki/Datapack-Support) and [Community Tags](https://github.com/kgbcupcake/nourished/wiki/Community-Tags) wiki pages for schemas and examples.
