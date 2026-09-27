@@ -120,6 +120,7 @@ public final class NutrientPanelContainer implements Container {
             int panelColor = HudDrawHelpers.panelColorWithOpacity(panelRgb, bgOpacity);
             int borderRgb = MarieColors.shade(NourishedColors.rgb(NourishedColors.HUD_BORDER), cc.hudBorderShade());
             int borderColor = HudDrawHelpers.panelColorWithOpacity(borderRgb, bgOpacity * cc.hudBorderOpacity());
+            MarieModuleSettings.drawBoxGlow(context, UiStatePersistence.get(), PANEL_ID, bounds.x(), bounds.y(), bounds.width(), bounds.height());
             context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor, borderColor);
         }
         // Content position offset is the user's persisted padding adjustment alone — hudLayout's own
@@ -141,7 +142,7 @@ public final class NutrientPanelContainer implements Container {
         // own pushClip/popClip around their row drawing.
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
-            Container.super.render(context, content);
+            Container.super.render(MarieModuleSettings.withTextEffects(context, UiStatePersistence.get(), PANEL_ID), content);
             HudEditTarget.drawScrollIndicator(context, bounds);
         } finally {
             context.popClip();

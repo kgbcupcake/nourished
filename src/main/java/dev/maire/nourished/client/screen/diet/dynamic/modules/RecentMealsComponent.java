@@ -254,8 +254,8 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         // instead of fading out with it.
         // Each row's name is this box's "bar" (the icon is not): Bar size scales it and Move Bars
         // offsets it, apart from the header's own text offset and the icon's own Move Icons offset.
-        RenderContext rowContext = MarieModuleSettings.withBrightness(baseContext,
-                MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+        RenderContext rowContext = MarieModuleSettings.withTextEffects(MarieModuleSettings.withBrightness(baseContext,
+                MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID)), store, ID);
         int barDx = MarieModuleSettings.barOffsetX(store, ID);
         int barDy = MarieModuleSettings.barOffsetY(store, ID);
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());

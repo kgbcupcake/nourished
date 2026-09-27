@@ -153,8 +153,8 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
             // The header has its own offset (Move Header); Move Text moves only the calorie value below it —
             // same split ActiveEffectsComponent's title/lines already have.
             if (!MarieModuleSettings.isHeaderHidden(store, ID)) {
-                RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
-                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+                RenderContext headerContext = MarieModuleSettings.withTextEffects(MarieModuleSettings.withBrightness(baseContext,
+                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID)), store, ID);
                 String header = Component.translatable("nourished.screen.diet.calories_label").getString();
                 int headerX = support.sx(24) + MarieModuleSettings.headerOffsetX(store, ID);
                 int headerY = support.sy(startLocalY + 6) + MarieModuleSettings.headerOffsetY(store, ID);

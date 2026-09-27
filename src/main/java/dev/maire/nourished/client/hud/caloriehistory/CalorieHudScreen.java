@@ -148,6 +148,7 @@ public final class CalorieHudScreen implements MarieComponent {
                             .backgroundShade(() -> NourishedClientConfig.get().calorieHudBackgroundShade(), v -> NourishedClientConfig.get().setCalorieHudBackgroundShade(v))
                             .borderOpacity(() -> NourishedClientConfig.get().calorieHudBorderOpacity(), v -> NourishedClientConfig.get().setCalorieHudBorderOpacity(v))
                             .borderShade(() -> NourishedClientConfig.get().calorieHudBorderShade(), v -> NourishedClientConfig.get().setCalorieHudBorderShade(v))
+                            .withGlow()
                             .onCommit(NourishedClientConfig::saveNow)
                             .onReset(this::resetContentOffset)
                             .extraTabs(panel -> {
@@ -282,7 +283,7 @@ public final class CalorieHudScreen implements MarieComponent {
         // drawPanel throws partway through its pushClip/popClip pair — see
         // GuiGraphicsRenderContext#resetClip.
         try {
-            drawPanel(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().calorieHudTextBrightness(), NourishedClientConfig.get().calorieHudIconBrightness()),
+            drawPanel(MarieModuleSettings.withTextEffects(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().calorieHudTextBrightness(), NourishedClientConfig.get().calorieHudIconBrightness()), UiStatePersistence.get(), PANEL_ID),
                     bounds, persistedLeftMargin(), offsetX, offsetY, rows, false, false, false, false, false);
         } finally {
             context.resetClip();
@@ -433,6 +434,7 @@ public final class CalorieHudScreen implements MarieComponent {
                 MarieColors.shade(panelRgb, cc.calorieHudBackgroundShade()), cc.calorieHudBackgroundOpacity());
         int borderColor = MarieColors.withOpacity(
                 MarieColors.shade(MarieColors.resolveColor(NourishedColors.CALORIE_HUD_BORDER), cc.calorieHudBorderShade()), cc.calorieHudBorderOpacity());
+        MarieModuleSettings.drawBoxGlow(context, UiStatePersistence.get(), PANEL_ID, bounds.x(), bounds.y(), bounds.width(), bounds.height());
         context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor, borderColor);
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
@@ -720,7 +722,7 @@ public final class CalorieHudScreen implements MarieComponent {
         // Re-clamped defensively here too — see the same comment on the onRenderGuiPost call site.
         int offsetX = clampContentOffsetX(contentOffsetX, bounds);
         int offsetY = clampContentOffsetY(contentOffsetY, bounds);
-        drawPanel(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().calorieHudTextBrightness(), NourishedClientConfig.get().calorieHudIconBrightness()),
+        drawPanel(MarieModuleSettings.withTextEffects(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().calorieHudTextBrightness(), NourishedClientConfig.get().calorieHudIconBrightness()), UiStatePersistence.get(), PANEL_ID),
                 bounds, liveLeftMargin(drag, bounds, defaultBounds), offsetX, offsetY, rows, true, moveTextMode, moveIconsMode, moveBarsMode, moveAllMode);
 
         // While move-content mode is active, dragging is exclusively routed to the content offset

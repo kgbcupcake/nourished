@@ -162,6 +162,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
                             .backgroundShade(() -> NourishedClientConfig.get().activityLogHudBackgroundShade(), v -> NourishedClientConfig.get().setActivityLogHudBackgroundShade(v))
                             .borderOpacity(() -> NourishedClientConfig.get().activityLogHudBorderOpacity(), v -> NourishedClientConfig.get().setActivityLogHudBorderOpacity(v))
                             .borderShade(() -> NourishedClientConfig.get().activityLogHudBorderShade(), v -> NourishedClientConfig.get().setActivityLogHudBorderShade(v))
+                            .withGlow()
                             .onCommit(NourishedClientConfig::saveNow)
                             .onReset(this::resetContentOffset)
                             .extraTabs(panel -> {
@@ -295,7 +296,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
         // drawPanel throws partway through its pushClip/popClip pair — see
         // GuiGraphicsRenderContext#resetClip.
         try {
-            drawPanel(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().activityLogHudTextBrightness(), NourishedClientConfig.get().activityLogHudIconBrightness()),
+            drawPanel(MarieModuleSettings.withTextEffects(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().activityLogHudTextBrightness(), NourishedClientConfig.get().activityLogHudIconBrightness()), UiStatePersistence.get(), PANEL_ID),
                     bounds, persistedLeftMargin(), offsetX, offsetY, rows, false, false, false, false, false);
         } finally {
             context.resetClip();
@@ -446,6 +447,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
                 MarieColors.shade(panelRgb, cc.activityLogHudBackgroundShade()), cc.activityLogHudBackgroundOpacity());
         int borderColor = MarieColors.withOpacity(
                 MarieColors.shade(MarieColors.resolveColor(NourishedColors.ACTIVITY_LOG_BORDER), cc.activityLogHudBorderShade()), cc.activityLogHudBorderOpacity());
+        MarieModuleSettings.drawBoxGlow(context, UiStatePersistence.get(), PANEL_ID, bounds.x(), bounds.y(), bounds.width(), bounds.height());
         context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor, borderColor);
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
@@ -732,7 +734,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
         // Re-clamped defensively here too — see the same comment on the onRenderGuiPost call site.
         int offsetX = clampContentOffsetX(contentOffsetX, bounds);
         int offsetY = clampContentOffsetY(contentOffsetY, bounds);
-        drawPanel(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().activityLogHudTextBrightness(), NourishedClientConfig.get().activityLogHudIconBrightness()),
+        drawPanel(MarieModuleSettings.withTextEffects(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().activityLogHudTextBrightness(), NourishedClientConfig.get().activityLogHudIconBrightness()), UiStatePersistence.get(), PANEL_ID),
                 bounds, liveLeftMargin(drag, bounds, defaultBounds), offsetX, offsetY, rows, true, moveTextMode, moveIconsMode, moveBarsMode, moveAllMode);
 
         // While move-content mode is active, dragging is exclusively routed to the content offset

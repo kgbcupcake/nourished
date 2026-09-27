@@ -36,6 +36,7 @@ public final class HudOptionsPanel {
                 .backgroundShade(() -> cc().hudBackgroundShade(), v -> cc().setHudBackgroundShade(v))
                 .borderOpacity(() -> cc().hudBorderOpacity(), v -> cc().setHudBorderOpacity(v))
                 .borderShade(() -> cc().hudBorderShade(), v -> cc().setHudBorderShade(v))
+                .withGlow()
                 .onCommit(NourishedClientConfig::saveNow)
                 .onReset(resetTextOffset)
                 .layoutRows(p -> p.toggle(text("nourished.options.hud.vertical_layout"),
