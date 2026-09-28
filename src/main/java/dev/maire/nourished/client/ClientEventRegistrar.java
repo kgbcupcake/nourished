@@ -31,6 +31,7 @@ public final class ClientEventRegistrar {
     public static void register(IEventBus modEventBus) {
         DietScreenModules.registerAll();
         registerCommandCenter();
+        NourishedTestCommandCenter.register();
         MarieNotifications.registerClientListeners();
         EditModeCoordinator.registerGroupCapable(
                 "nourished.hud",

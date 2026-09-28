@@ -109,6 +109,8 @@ public final class NourishedColors {
     public static final ColorKey CC_FRAMEWORK_MODS = themed("command_center.framework.mods", ThemeKey.TEXT_SECONDARY);
     public static final ColorKey CC_FRAMEWORK_API = themed("command_center.framework.api", ThemeKey.TEXT_SECONDARY);
     public static final ColorKey CC_FRAMEWORK_REGISTRIES = themed("command_center.framework.registries", ThemeKey.TEXT_SECONDARY);
+    public static final ColorKey CC_TEST_REGISTRATIONS = themed("command_center.test.registrations", ThemeKey.TEXT_PRIMARY);
+    public static final ColorKey CC_TEST_HELD_FOOD = themed("command_center.test.held_food", ThemeKey.TEXT_PRIMARY);
 
     private NourishedColors() {}
 
@@ -188,6 +190,21 @@ public final class NourishedColors {
         return key("diet.intake_bar." + nutrient + ".border");
     }
 
+    public static ColorKey intakeBarIconBorderKey(String nutrient) {
+        return key("diet.intake_bar." + nutrient + ".icon_border");
+    }
+
+    /** Icon border follows the row's Border color until it's given its own. */
+    public static int resolveIntakeBarIconBorder(String nutrient) {
+        ColorKey icon = intakeBarIconBorderKey(nutrient);
+        Integer preview = dev.marie.framework.color.ColorPreviewOverrides.getOverride(icon);
+        if (preview != null) {
+            return preview;
+        }
+        return dev.marie.framework.color.ColorRegistry.getArgb(icon.id().toString())
+                .orElseGet(() -> MarieColors.resolveColor(intakeBarBorderKey(nutrient)));
+    }
+
     /**
      * Registers one text/track/border color per registered nutrient, defaulting to the same RGB the
      * shared text/bar-track/border roles use. Call alongside {@link #register()} — unlike its fixed
@@ -202,6 +219,7 @@ public final class NourishedColors {
             MarieColors.registerColor(ColorDefinition.of(intakeBarTextKey(nutrient), OPAQUE | textDefault));
             MarieColors.registerColor(ColorDefinition.of(intakeBarTrackKey(nutrient), OPAQUE | trackDefault));
             MarieColors.registerColor(ColorDefinition.of(intakeBarBorderKey(nutrient), OPAQUE | borderDefault));
+            MarieColors.registerColor(ColorDefinition.of(intakeBarIconBorderKey(nutrient), OPAQUE | borderDefault));
         }
     }
 

@@ -34,6 +34,7 @@ import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
+import dev.maire.nourished.client.hud.dynamic.edit.HudEditTabs;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel;
@@ -265,6 +266,9 @@ public final class CalorieHudScreen implements MarieComponent {
         if (player == null || !player.isAlive()) {
             return;
         }
+        if (MarieModuleSettings.isWindowHidden(UiStatePersistence.get(), PANEL_ID)) {
+            return;
+        }
         List<Row> rows = currentRows();
         if (rows.isEmpty()) {
             return;
@@ -363,24 +367,24 @@ public final class CalorieHudScreen implements MarieComponent {
 
     private static Bounds resolvedBounds(int rowCount) {
         Size natural = naturalSize(rowCount);
-        return UiStatePersistence.get().load(PANEL_ID)
+        Bounds resolved = UiStatePersistence.get().load(PANEL_ID)
                 .map(state -> {
                     int width = state.widthManual() ? state.width() : natural.width();
                     int height = state.heightManual() ? state.height() : natural.height();
                     return new Bounds(state.x(), state.y(), width, height);
                 })
                 .orElseGet(() -> new Bounds(DEFAULT_X, defaultY(), natural.width(), natural.height()));
+        return avoidActivityLogOverlap(resolved);
     }
 
     /**
      * {@link #DEFAULT_Y}, or lower still if the Activity Log HUD's current bounds sit in the same
-     * horizontal column and reach past it — a fixed install used to give both boxes fixed defaults only
-     * 52px apart, which Activity Log's natural height (row-count-dependent) regularly exceeds (any more
-     * than ~2 tracked activities), so the two overlapped before either box had ever been dragged. Reads
-     * Activity Log's *current* bounds (default or user-moved) rather than assuming it's still at its own
-     * unmoved default, so this box's own still-unmoved default keeps avoiding it wherever it actually is;
-     * outside that column (e.g. the player moved Activity Log elsewhere), there's nothing to avoid and
-     * this falls back to the plain {@link #DEFAULT_Y}.
+     * horizontal column and reach past it — a fresh install used to give both boxes fixed defaults only
+     * 52px apart, which Activity Log's natural height (row-count-dependent) regularly exceeds, so the
+     * two overlapped before either box had ever been dragged. Only the "never positioned" fallback uses
+     * this gapped default; {@link #avoidActivityLogOverlap} below is the ongoing (every-resolve) safety
+     * net once a position is persisted, and deliberately allows a flush 0-gap edge so the two boxes can
+     * still be snapped together via {@code SnapRegistry}.
      */
     private static int defaultY() {
         Bounds activityLog = ActivityLogHudPanel.currentBoundsForStacking();
@@ -392,6 +396,36 @@ public final class CalorieHudScreen implements MarieComponent {
             return DEFAULT_Y;
         }
         return Math.max(DEFAULT_Y, activityLog.y() + activityLog.height() + STACKED_DEFAULT_GAP);
+    }
+
+    /**
+     * Pushes {@code bounds} down to sit flush against the Activity Log HUD's current bottom edge
+     * whenever the two would otherwise genuinely overlap in the same horizontal column — evaluated
+     * every time this box's bounds are resolved (not just when this box has never been positioned), so
+     * it keeps re-separating the two any time either one's position or size changes: a "Reset This
+     * Module" on either box (which wipes that box's saved position back to its natural default and,
+     * for Activity Log, can also change its natural height), or a manual drag of either box on top of
+     * the other. Unlike {@link #defaultY()}'s gapped fallback, this enforces no minimum gap — only that
+     * {@code bounds} never starts above Activity Log's bottom edge — so dragging this box up to
+     * snap flush against Activity Log (0-gap) still works; only true overlap gets corrected. Reads
+     * Activity Log's *current* bounds (default or user-moved) so this always avoids wherever it
+     * actually sits; outside that column (e.g. the player moved one of them elsewhere), there's
+     * nothing to avoid and {@code bounds} is returned unchanged.
+     */
+    private static Bounds avoidActivityLogOverlap(Bounds bounds) {
+        Bounds activityLog = ActivityLogHudPanel.currentBoundsForStacking();
+        if (activityLog == null) {
+            return bounds;
+        }
+        boolean sameColumn = activityLog.x() < bounds.x() + bounds.width() && activityLog.x() + activityLog.width() > bounds.x();
+        if (!sameColumn) {
+            return bounds;
+        }
+        int minY = activityLog.y() + activityLog.height();
+        if (bounds.y() >= minY) {
+            return bounds;
+        }
+        return new Bounds(bounds.x(), minY, bounds.width(), bounds.height());
     }
 
     /** How many rows fit vertically in {@code bounds} at the current content scale — shared by {@link #drawPanel} (what to draw) and {@link #mouseScrolled} (how far scrolling can go). */
@@ -407,9 +441,9 @@ public final class CalorieHudScreen implements MarieComponent {
     public static ColorKeyPair COLORS;
 
     private static void drawPanel(RenderContext context, Bounds bounds, int leftMargin, int contentOffsetX, int contentOffsetY, List<Row> rows, boolean editMode, boolean moveTextMode, boolean moveIconsMode, boolean moveBarsMode, boolean moveAllMode) {
-        if (MarieModuleSettings.isWindowHidden(UiStatePersistence.get(), PANEL_ID)) {
-            return;
-        }
+        // The "hide window" flag is only honored by onRenderGuiPost (normal play) — render() (edit
+        // mode) always draws the box regardless, so hiding a panel never yanks it out from under the
+        // player mid-edit; it only takes effect again once they exit edit mode.
         // Text/padding render scale is the user's persisted adjustment alone — box size (bounds)
         // plays no part in it, matching HudEditTarget's Nutrient HUD panel exactly: content never
         // shrinks to fit a smaller box, a resize only changes the box itself, and whatever doesn't
@@ -610,7 +644,19 @@ public final class CalorieHudScreen implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            Bounds tabBounds = HudEditTabs.tabBounds(PANEL_ID);
+            if (button == 0 && tabBounds.contains((int) mouseX, (int) mouseY)) {
+                HudEditTabs.setCollapsed(UiStatePersistence.get(), PANEL_ID, false);
+                return true;
+            }
+            return false;
+        }
         Bounds bounds = resolvedBounds(currentRows().size());
+        if (button == 0 && HudEditTabs.collapseButtonBounds(bounds).contains((int) mouseX, (int) mouseY)) {
+            HudEditTabs.setCollapsed(UiStatePersistence.get(), PANEL_ID, true);
+            return true;
+        }
         MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(UiStatePersistence.get(), PANEL_ID);
         if (mode != null && bounds.contains((int) mouseX, (int) mouseY)) {
             switch (mode) {
@@ -633,6 +679,9 @@ public final class CalorieHudScreen implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
             return true;
         }
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            return false;
+        }
         List<Row> rows = currentRows();
         Bounds bounds = resolvedBounds(rows.size());
         if (scrollY == 0 || !bounds.contains((int) mouseX, (int) mouseY)) {
@@ -650,6 +699,9 @@ public final class CalorieHudScreen implements MarieComponent {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (scaleConfigVisible && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
             return true;
+        }
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            return false;
         }
         if (moveDrag.isActive()) {
             Bounds bounds = resolvedBounds(currentRows().size());
@@ -708,6 +760,15 @@ public final class CalorieHudScreen implements MarieComponent {
 
     @Override
     public void render(RenderContext context, Bounds ignoredBounds) {
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            HudEditTabs.drawTab(context, Component.translatable("nourished.hud.calorieHistory.label").getString(),
+                    titleAccentColor(), HudEditTabs.tabBounds(PANEL_ID));
+            if (scaleConfigVisible) {
+                scaleConfigPanel.render(context, new Bounds(0, 0, context.screenWidth(), context.screenHeight()));
+            }
+            return;
+        }
+
         List<Row> rows = currentRows();
         drag.setConstraint(panelConstraintFor(naturalSize(rows.size())));
 
@@ -724,6 +785,7 @@ public final class CalorieHudScreen implements MarieComponent {
         int offsetY = clampContentOffsetY(contentOffsetY, bounds);
         drawPanel(MarieModuleSettings.withTextEffects(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().calorieHudTextBrightness(), NourishedClientConfig.get().calorieHudIconBrightness()), UiStatePersistence.get(), PANEL_ID),
                 bounds, liveLeftMargin(drag, bounds, defaultBounds), offsetX, offsetY, rows, true, moveTextMode, moveIconsMode, moveBarsMode, moveAllMode);
+        HudEditTabs.drawCollapseButton(context, HudEditTabs.collapseButtonBounds(bounds), titleAccentColor());
 
         // While move-content mode is active, dragging is exclusively routed to the content offset
         // (see mouseClicked/mouseDragged) — the panel's own resize handles would be inert, so they

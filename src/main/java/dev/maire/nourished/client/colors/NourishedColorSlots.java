@@ -100,6 +100,15 @@ public final class NourishedColorSlots {
         add(panel, NourishedColors.intakeBarTextKey(nutrient), text("nourished.options.color.text"));
         add(panel, NourishedColors.intakeBarTrackKey(nutrient), text("nourished.options.color.bar_track"));
         add(panel, NourishedColors.intakeBarBorderKey(nutrient), text("nourished.options.color.border"));
+        ColorKey iconBorder = NourishedColors.intakeBarIconBorderKey(nutrient);
+        ColorDefinition iconDef = ColorDefinitionRegistry.get(iconBorder);
+        int iconDefault = iconDef != null ? iconDef.getDefaultArgb() & 0xFFFFFF : 0xFF00FF;
+        panel.color(text("nourished.options.color.icon_border"),
+                () -> NourishedColors.resolveIntakeBarIconBorder(nutrient),
+                rgb -> ColorPreviewOverrides.setOverride(iconBorder, 0xFF000000 | rgb),
+                iconDefault,
+                () -> commit(iconBorder, iconDefault),
+                () -> ColorPreviewOverrides.setOverride(iconBorder, null));
     }
 
     private static void add(MarieToolbox.PanelBuilder panel, ColorKey key, String label) {

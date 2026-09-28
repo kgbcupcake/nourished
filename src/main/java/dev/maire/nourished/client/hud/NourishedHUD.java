@@ -140,6 +140,11 @@ public final class NourishedHUD {
      * HudEditTarget} independently, so both entry points (the H keybind and the coordinator's
      * group) always share the exact same target instance.
      */
+    public static boolean isEditing() {
+        return (marieEditModeController != null && marieEditModeController.isActive())
+                || EditModeController.isGroupActive();
+    }
+
     public static HudEditTarget editTarget() {
         marieEditModeController();
         return marieEditTarget;

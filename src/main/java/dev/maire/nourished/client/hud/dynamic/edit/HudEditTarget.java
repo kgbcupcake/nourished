@@ -629,6 +629,10 @@ public final class HudEditTarget implements MarieComponent {
             return List.of();
         }
         NourishedClientConfig cc = NourishedClientConfig.get();
+        // Editing shows every bar so hidden ones can still be placed and styled.
+        if (dev.maire.nourished.client.hud.NourishedHUD.isEditing()) {
+            return cc.effectiveDietBarOrder();
+        }
         return HudVisibility.visibleKeys(data, cc.effectiveDietBarOrder(), cc);
     }
 

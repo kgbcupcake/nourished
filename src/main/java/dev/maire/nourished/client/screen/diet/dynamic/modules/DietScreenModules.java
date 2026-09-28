@@ -5,6 +5,8 @@ import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.component.ModuleFactory;
 import dev.marie.framework.ui.component.ModuleRegistry;
 import dev.marie.framework.ui.component.SelfPositioningModule;
+import dev.marie.framework.ui.geometry.Bounds;
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLeftColumnComponent;
 import dev.maire.nourished.core.Nourished;
@@ -83,12 +85,18 @@ public final class DietScreenModules {
         // Right column: header, then one row per nutrient "slot". Each row factory resolves its
         // actual nutrient key from NourishedClientConfig#effectiveDietBarOrder() at construction time
         // (every frame), not here at registration time, so live bar reordering still works — see
-        // IntakeBarComponent's javadoc. The slot count is fixed at registration time to the
-        // registered nutrient count, which does not change at runtime.
+        // IntakeBarComponent's javadoc.
         ModuleRegistry.register(RIGHT_COLUMN_KEY, (ModuleFactory<DietLayout.Layout>) IntakeHeaderComponent::new);
-        int slots = dev.maire.nourished.core.nutrition.NutrientRegistry.getKeys().size();
-        for (int i = 0; i < slots; i++) {
-            final int slot = i;
+        ensureIntakeSlots();
+    }
+
+    private static int intakeSlots;
+
+    // Addon nutrients arrive via NourishedRegisterEvent after client setup, so top up slots lazily.
+    private static synchronized void ensureIntakeSlots() {
+        int wanted = dev.maire.nourished.core.nutrition.NutrientRegistry.getKeys().size();
+        for (; intakeSlots < wanted; intakeSlots++) {
+            final int slot = intakeSlots;
             ModuleRegistry.register(RIGHT_COLUMN_KEY, (ModuleFactory<DietLayout.Layout>) (layout, startY) -> IntakeBarComponent.create(slot, layout, startY));
         }
     }
@@ -129,20 +137,56 @@ public final class DietScreenModules {
      */
     @SuppressWarnings("unchecked")
     public static List<MarieComponent> build(String registryKey, DietLayout.Layout layout, int startLocalY, int expectedContentX) {
+        if (RIGHT_COLUMN_KEY.equals(registryKey)) {
+            ensureIntakeSlots();
+        }
         List<MarieComponent> built = new ArrayList<>();
         int cursorY = startLocalY;
+        boolean rightColumn = RIGHT_COLUMN_KEY.equals(registryKey);
         for (ModuleFactory<?> factory : ModuleRegistry.get(registryKey)) {
             // Safe: every factory registered above is a ModuleFactory<DietLayout.Layout> — the
             // registry itself is type-erased per-entry (marie-ui doesn't know Nourished's layout
             // type), so this cast is the one place that mod-local knowledge is reasserted.
             ModuleFactory<DietLayout.Layout> typed = (ModuleFactory<DietLayout.Layout>) factory;
-            MarieComponent module = typed.create(layout, cursorY);
+            int startY = cursorY;
+            MarieComponent module = typed.create(layout, startY);
+            // A never-placed row whose default spot is covered by a moved row goes below the lowest row instead.
+            if (rightColumn && module instanceof SelfPositioningModule self
+                    && DietScreenPersistence.get().load(module.id()).isEmpty()
+                    && overlapsAny(self.resolvedBounds(), built)) {
+                startY = Math.max(startY, lowestBottomLocalY(built, layout));
+                module = typed.create(layout, startY);
+            }
             built.add(module);
             if (module instanceof SelfPositioningModule self) {
-                cursorY = DietLeftColumnComponent.nextSiblingStartLocalY(cursorY, self.localHeight(), self.resolvedBounds(), layout, expectedContentX);
+                cursorY = DietLeftColumnComponent.nextSiblingStartLocalY(startY, self.localHeight(), self.resolvedBounds(), layout, expectedContentX);
             }
         }
         return built;
+    }
+
+    private static boolean overlapsAny(Bounds bounds, List<MarieComponent> placed) {
+        for (MarieComponent other : placed) {
+            if (other instanceof SelfPositioningModule self) {
+                Bounds b = self.resolvedBounds();
+                if (bounds.x() < b.x() + b.width() && b.x() < bounds.x() + bounds.width()
+                        && bounds.y() < b.y() + b.height() && b.y() < bounds.y() + bounds.height()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static int lowestBottomLocalY(List<MarieComponent> placed, DietLayout.Layout layout) {
+        int lowest = 0;
+        for (MarieComponent other : placed) {
+            if (other instanceof SelfPositioningModule self) {
+                Bounds b = self.resolvedBounds();
+                lowest = Math.max(lowest, (int) Math.ceil((b.y() + b.height() - layout.panelY()) / layout.scale()));
+            }
+        }
+        return lowest;
     }
 
     /**

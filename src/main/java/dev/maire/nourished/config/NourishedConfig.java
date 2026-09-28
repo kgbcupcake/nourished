@@ -667,11 +667,8 @@ public final class NourishedConfig {
      * Resolves decay rate for a nutrient: per-nutrient override (when set), else the global slider.
      */
     public double resolvedDecayRateFor(String key) {
-        ModConfigSpec.DoubleValue value = nutrientDecayRateOverrides.get(key);
-        if (value != null && value.get() >= 0d) {
-            return value.get();
-        }
-        return decayRate();
+        double override = NutrientOverrideStore.decayRate(key);
+        return override >= 0d ? override : decayRate();
     }
 
     /** Shared resolution for synced snapshots and live config (override map, then global). */
@@ -681,11 +678,11 @@ public final class NourishedConfig {
     }
 
     public double criticalThresholdFor(String key) {
-        ModConfigSpec.DoubleValue value = nutrientCriticalThresholdOverrides.get(key);
-        if (value == null || value.get() < 0d) return criticalThreshold();
-        return value.get();
+        double override = NutrientOverrideStore.criticalThreshold(key);
+        return override >= 0d ? override : criticalThreshold();
     }
 
+    /** Legacy TOML entries, only read to migrate into {@link NutrientOverrideStore}. */
     public Map<String, ModConfigSpec.DoubleValue> nutrientDecayRateOverrides() {
         return nutrientDecayRateOverrides;
     }

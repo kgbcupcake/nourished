@@ -30,6 +30,7 @@ import dev.marie.framework.ui.scaleconfig.ScaleConfigPanel;
 import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
+import dev.maire.nourished.client.hud.dynamic.edit.HudEditTabs;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientRegistry;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityTrackerIds;
@@ -279,6 +280,9 @@ public final class ActivityLogHudPanel implements MarieComponent {
         if (player == null || !player.isAlive()) {
             return;
         }
+        if (MarieModuleSettings.isWindowHidden(UiStatePersistence.get(), PANEL_ID)) {
+            return;
+        }
         List<Row> rows = currentRows();
         if (rows.isEmpty()) {
             return;
@@ -394,11 +398,12 @@ public final class ActivityLogHudPanel implements MarieComponent {
     /**
      * This box's current on-screen bounds (persisted, or its own default) — for {@link
      * dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen}, whose own fixed default sits in the
-     * same top-left corner just below this one, to stack its default underneath this box's actual bottom
-     * edge instead of a fixed gap: a first-time install used to give both boxes fixed defaults only 52px
-     * apart, which this box's natural height (it grows with however many activities are being tracked)
-     * regularly exceeds, so they overlapped before either box had ever been dragged. {@code null} while
-     * this feature is off, so the caller falls back to its own baseline default.
+     * same top-left corner just below this one, so it can continuously stack itself underneath this box's
+     * actual bottom edge instead of relying on a fixed gap: this box's natural height (it grows with
+     * however many activities are being tracked) can exceed that gap, so the two would otherwise overlap
+     * on a first install, or again any time either box's position/size changes afterward (a drag, a
+     * resize, or a "Reset This Module" on either one). {@code null} while this feature is off, so the
+     * caller falls back to its own baseline default.
      */
     public static Bounds currentBoundsForStacking() {
         if (!NourishedClientConfig.get().enableActivityLogHud()) {
@@ -420,9 +425,9 @@ public final class ActivityLogHudPanel implements MarieComponent {
     public static ColorKeyPair COLORS;
 
     private static void drawPanel(RenderContext context, Bounds bounds, int leftMargin, int contentOffsetX, int contentOffsetY, List<Row> rows, boolean editMode, boolean moveTextMode, boolean moveIconsMode, boolean moveBarsMode, boolean moveAllMode) {
-        if (MarieModuleSettings.isWindowHidden(UiStatePersistence.get(), PANEL_ID)) {
-            return;
-        }
+        // The "hide window" flag is only honored by onRenderGuiPost (normal play) — render() (edit
+        // mode) always draws the box regardless, so hiding a panel never yanks it out from under the
+        // player mid-edit; it only takes effect again once they exit edit mode.
         // Text/padding render scale is the user's persisted adjustment alone — box size (bounds)
         // plays no part in it, matching HudEditTarget's Nutrient HUD panel exactly: content never
         // shrinks to fit a smaller box, a resize only changes the box itself, and whatever doesn't
@@ -622,7 +627,19 @@ public final class ActivityLogHudPanel implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            Bounds tabBounds = HudEditTabs.tabBounds(PANEL_ID);
+            if (button == 0 && tabBounds.contains((int) mouseX, (int) mouseY)) {
+                HudEditTabs.setCollapsed(UiStatePersistence.get(), PANEL_ID, false);
+                return true;
+            }
+            return false;
+        }
         Bounds bounds = resolvedBounds(currentRows().size());
+        if (button == 0 && HudEditTabs.collapseButtonBounds(bounds).contains((int) mouseX, (int) mouseY)) {
+            HudEditTabs.setCollapsed(UiStatePersistence.get(), PANEL_ID, true);
+            return true;
+        }
         MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(UiStatePersistence.get(), PANEL_ID);
         if (mode != null && bounds.contains((int) mouseX, (int) mouseY)) {
             switch (mode) {
@@ -645,6 +662,9 @@ public final class ActivityLogHudPanel implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
             return true;
         }
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            return false;
+        }
         List<Row> rows = currentRows();
         Bounds bounds = resolvedBounds(rows.size());
         if (scrollY == 0 || !bounds.contains((int) mouseX, (int) mouseY)) {
@@ -662,6 +682,9 @@ public final class ActivityLogHudPanel implements MarieComponent {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (scaleConfigVisible && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
             return true;
+        }
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            return false;
         }
         if (moveDrag.isActive()) {
             Bounds bounds = resolvedBounds(currentRows().size());
@@ -720,6 +743,15 @@ public final class ActivityLogHudPanel implements MarieComponent {
 
     @Override
     public void render(RenderContext context, Bounds ignoredBounds) {
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            HudEditTabs.drawTab(context, Component.translatable("nourished.hud.activityLog.label").getString(),
+                    titleAccentColor(), HudEditTabs.tabBounds(PANEL_ID));
+            if (scaleConfigVisible) {
+                scaleConfigPanel.render(context, new Bounds(0, 0, context.screenWidth(), context.screenHeight()));
+            }
+            return;
+        }
+
         List<Row> rows = currentRows();
         drag.setConstraint(panelConstraintFor(naturalSize(rows.size())));
 
@@ -736,6 +768,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
         int offsetY = clampContentOffsetY(contentOffsetY, bounds);
         drawPanel(MarieModuleSettings.withTextEffects(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().activityLogHudTextBrightness(), NourishedClientConfig.get().activityLogHudIconBrightness()), UiStatePersistence.get(), PANEL_ID),
                 bounds, liveLeftMargin(drag, bounds, defaultBounds), offsetX, offsetY, rows, true, moveTextMode, moveIconsMode, moveBarsMode, moveAllMode);
+        HudEditTabs.drawCollapseButton(context, HudEditTabs.collapseButtonBounds(bounds), titleAccentColor());
 
         // While move-content mode is active, dragging is exclusively routed to the content offset
         // (see mouseClicked/mouseDragged) — the panel's own resize handles would be inert, so they

@@ -91,7 +91,7 @@ public final class DietOptionsPanel {
         return forModule(title, moduleId, hasBars, true, false);
     }
 
-    /** Same, also choosing whether the box has icons to move and whether its header moves apart from its text (Active Effects: a title plus effect lines, no icons). */
+    /** Same, also choosing whether the box has icons to move and whether its header moves apart from its text (e.g. Active Effects: a title plus effect lines, each with its own icon). */
     public static MarieComponent forModule(String title, String moduleId, boolean hasBars, boolean hasIcons, boolean hasHeader) {
         return forModule(title, moduleId, hasBars, hasIcons, hasHeader, null);
     }

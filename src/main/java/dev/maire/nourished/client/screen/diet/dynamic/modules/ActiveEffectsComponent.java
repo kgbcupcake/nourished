@@ -139,7 +139,9 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
     @Override
     public void render(RenderContext baseContext, Bounds bounds) {
         // The module's own text/icon offsets, icon size and brightness (see MarieModuleSettings) apply to everything it draws.
-        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID);
+        // iconFollowsText false: this box's panel uses independentIconSize, so render() resolves the final icon scale
+        // itself (iconScale below) and the wrapper must not also apply its own text-relative ratio on top.
+        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID, false);
         this.anchorBounds = bounds;
         if (!visible) {
             return;
@@ -217,16 +219,38 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
                 return;
             }
 
+            // Each line is "+ [icon] Name": the effect's icon and its +/- marker are the icon group (Move Icons/
+            // Hide Icons/icon brightness), the name alone is text (Move Text), so the two move apart. The icon
+            // fits the 9-unit text line at Icon size 100%, same fit-ratio idea as Recent Meals' rows.
+            float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID, false)) * (9f / 16f);
+            int iconPx = Math.round(16 * iconScale);
+            int textPx = Math.round(9 * scale);
+            // The marker is text, but it belongs to the icon group: drawn outside `context` (whose drawText would
+            // shift it by the text offset and record it as text) at the icon offset, and recorded as icon extent
+            // so Move Text's outline hugs just the names while Move Icons' covers marker and icon together.
+            boolean iconsHidden = MarieModuleSettings.isIconsHidden(store, ID);
+            int iconDx = MarieModuleSettings.iconOffsetX(store, ID);
+            int iconDy = MarieModuleSettings.iconOffsetY(store, ID);
+            RenderContext markerContext = MarieModuleSettings.withBrightness(baseContext, MarieModuleSettings.iconBrightness(store, ID), 1.0d);
             int count = 0;
             for (MobEffectInstance effect : effects) {
                 if (count >= naturalLineCount) break;
                 MobEffect type = effect.getEffect().value();
-                String name = Component.translatable(type.getDescriptionId()).getString();
+                String name = stripIconGlyphs(Component.translatable(type.getDescriptionId()).getString());
                 int amplifier = effect.getAmplifier();
                 String label = (amplifier > 0 ? name + " " + (amplifier + 1) : name);
                 int color = type.isBeneficial() ? beneficialColor() : harmfulColor();
                 String prefix = type.isBeneficial() ? "+ " : "- ";
-                drawText(context, prefix + label, x, y, color, scale);
+                int lineX = sx(x);
+                int lineY = sy(y);
+                int prefixW = context.textWidth(prefix, scale);
+                if (!iconsHidden) {
+                    markerContext.drawText(prefix, lineX + iconDx, lineY + iconDy, color, scale);
+                    MarieModuleSettings.recordIconExtent(store, ID, lineX + iconDx, lineY + iconDy, context.textWidth(prefix.strip(), scale), textPx);
+                }
+                int iconX = lineX + prefixW;
+                context.drawEffectIcon(effect.getEffect(), iconX, lineY + (textPx - iconPx) / 2, iconScale);
+                context.drawText(label, iconX + iconPx + 1, lineY, color, scale);
                 y += zoomedLineAdvance;
                 count++;
             }
@@ -251,8 +275,18 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         return anchorBounds.y() + (int) Math.round((localY - startLocalY + paddingLocal) * contentScale);
     }
 
-    private void drawText(RenderContext context, String text, int localX, int localY, int color, float scale) {
-        context.drawText(text, sx(localX), sy(localY), color, scale);
+    /**
+     * {@code name} without private-use-area characters — the font glyphs some mods/resource packs put in
+     * effect names to show the effect's icon inline. This box draws the real icon itself as a separate,
+     * independently movable piece, so leaving the glyph in would show the icon twice and drag one copy
+     * along with the text.
+     */
+    private static String stripIconGlyphs(String name) {
+        StringBuilder out = new StringBuilder(name.length());
+        name.codePoints()
+                .filter(cp -> Character.getType(cp) != Character.PRIVATE_USE)
+                .forEach(out::appendCodePoint);
+        return out.toString().strip();
     }
 
     private void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc) {

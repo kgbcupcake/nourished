@@ -135,13 +135,7 @@ public record SyncNourishedConfigSnapshot(
             );
 
     public static SyncNourishedConfigSnapshot fromConfig(NourishedConfig config) {
-        Map<String, Double> overrides = new HashMap<>();
-        config.nutrientDecayRateOverrides().forEach((key, val) -> {
-            double v = val.get();
-            if (v >= 0.0) {
-                overrides.put(key, v);
-            }
-        });
+        Map<String, Double> overrides = new HashMap<>(dev.maire.nourished.config.NutrientOverrideStore.decayRates());
         return new SyncNourishedConfigSnapshot(
                 PROTOCOL_VERSION,
                 config.decayRate(),

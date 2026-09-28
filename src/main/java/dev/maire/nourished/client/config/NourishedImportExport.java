@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.config.NutrientOverrideStore;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
@@ -268,16 +269,8 @@ public final class NourishedImportExport {
         o.addProperty("calorieDisplayMax", c.calorieDisplayMax());
         JsonObject decay = new JsonObject();
         JsonObject crit = new JsonObject();
-        for (String key : NutrientRegistry.getKeys()) {
-            ModConfigSpec.DoubleValue dv = c.nutrientDecayRateOverrides().get(key);
-            if (dv != null) {
-                decay.addProperty(key, dv.get());
-            }
-            ModConfigSpec.DoubleValue cv = c.nutrientCriticalThresholdOverrides().get(key);
-            if (cv != null) {
-                crit.addProperty(key, cv.get());
-            }
-        }
+        NutrientOverrideStore.decayRates().forEach(decay::addProperty);
+        NutrientOverrideStore.criticalThresholds().forEach(crit::addProperty);
         o.add("nutrientDecayOverrides", decay);
         o.add("nutrientCriticalOverrides", crit);
         return o;
@@ -417,29 +410,21 @@ public final class NourishedImportExport {
             JsonObject map = o.getAsJsonObject("nutrientDecayOverrides");
             MarieValidation.requireBoundedMap(map.asMap(), 64, "applyGeneral.nutrientDecayOverrides");
             for (String key : NutrientRegistry.getKeys()) {
-                if (!map.has(key)) {
-                    continue;
-                }
-                ModConfigSpec.DoubleValue spec = c.nutrientDecayRateOverrides().get(key);
-                if (spec != null) {
-                    double v = map.get(key).getAsDouble();
-                    spec.set(Double.isFinite(v) ? clamp(v, 0d, 1d) : 0d);
+                if (map.has(key)) {
+                    NutrientOverrideStore.setDecayRate(key, map.get(key).getAsDouble());
                 }
             }
+            NutrientOverrideStore.save();
         }
         if (o.has("nutrientCriticalOverrides") && o.get("nutrientCriticalOverrides").isJsonObject()) {
             JsonObject map = o.getAsJsonObject("nutrientCriticalOverrides");
             MarieValidation.requireBoundedMap(map.asMap(), 64, "applyGeneral.nutrientCriticalOverrides");
             for (String key : NutrientRegistry.getKeys()) {
-                if (!map.has(key)) {
-                    continue;
-                }
-                ModConfigSpec.DoubleValue spec = c.nutrientCriticalThresholdOverrides().get(key);
-                if (spec != null) {
-                    double v = map.get(key).getAsDouble();
-                    spec.set(Double.isFinite(v) ? clamp(v, 0d, 1d) : 0d);
+                if (map.has(key)) {
+                    NutrientOverrideStore.setCriticalThreshold(key, map.get(key).getAsDouble());
                 }
             }
+            NutrientOverrideStore.save();
         }
     }
 

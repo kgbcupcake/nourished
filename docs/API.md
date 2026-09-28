@@ -2,6 +2,8 @@
 
 `dev.maire.nourished.api.NourishedAPI` is Nourished's public Java API for querying player nutrition state, registering nutrition definitions, and extending Nourished behavior. Nourished uses [MariesLib](https://github.com/kgbcupcake/MariesLib) for shared value tracking and definition types.
 
+New to making an addon? Start with the [Addon Guide](ADDON_GUIDE.md), which walks through a complete example.
+
 Use Nourished's API for nutrition-specific integrations. If your mod only needs a general-purpose value or tracking system, depend on MariesLib directly instead.
 
 ## Requirements and setup
@@ -31,7 +33,34 @@ Only depend on `dev.maire.nourished.api` and documented public MariesLib API typ
 
 All `NourishedAPI` registration methods must be called while MariesLib's registration window is open. Nourished opens its registrations during mod initialization and closes them during `FMLCommonSetupEvent` after its setup work. A registration attempted after the window closes throws `IllegalStateException`.
 
-There is currently no dedicated Nourished registration event. Register early during mod initialization; do not defer registrations to server start, datapack reload, or runtime callbacks. Where one registration references another definition, register the referenced definition first—for example, register a custom nutrient before registering a food mapping that uses its key. Addons with complex cross-mod ordering requirements should account for NeoForge mod initialization ordering rather than assuming a separate, ordered Nourished phase.
+### `NourishedRegisterEvent` (recommended)
+
+`dev.maire.nourished.api.event.NourishedRegisterEvent` is fired once on each mod's event bus during Nourished's common setup, before nutrients are frozen. It runs in two phases:
+
+1. **Collect.** Every listener's registrations go into a temporary batch. Nothing is applied yet, so listener order across addons doesn't matter.
+2. **Validate and apply.** Once all listeners return, Nourished drops duplicates and entries that reference unknown nutrients, then applies the rest in dependency order: nutrients, food classifications, compat entries, effects, nutrient synergies, food synergies, profiles, milestones. Each rejected entry is logged as an error naming the mod that submitted it, and the other entries still apply.
+
+Because of this, one addon can register a nutrient while another maps food to it in the same event:
+
+```java
+modEventBus.addListener(NourishedRegisterEvent.class, event -> {
+    event.registerNutrient(ValueDefinition.builder("omega3").displayName("Omega-3").build());
+    event.registerFood(ResourceLocation.fromNamespaceAndPath("example_food", "starfruit"), "omega3", 1.0f);
+});
+```
+
+The event has `registerNutrient`, `registerFood`, `registerCompat`, `registerEffect`, `registerNutrientSynergy`, `registerFoodSynergy`, `registerProfile` and `registerMilestone`. Calling the matching `NourishedAPI.register*` methods from inside the listener is equivalent, because they're staged in the same batch. Season hooks, absorption modifiers and report providers don't reference nutrients, so they're applied immediately either way.
+
+Rules:
+
+- If two mods register the same nutrient key, the first mod in load order wins and the other registration is rejected. Nutrients that already exist, including built-in ones, can't be registered again.
+- Keeping a reference to the event and calling it after the listener returns throws `IllegalStateException`.
+- If Nourished is an optional dependency, register the listener only when `ModList.get().isLoaded("nourished")`, so the event class is never loaded without Nourished present.
+- Nutrients added through the event don't get per-nutrient TOML config sections, because the config spec is built during mod construction. This also applies to nutrients added directly during mod initialization.
+
+### Direct registration
+
+You can still call `NourishedAPI.register*` directly during mod initialization, outside the event. Those calls are applied immediately and validated at the moment they run, so if one registration references another, register the referenced definition first. For example, register a custom nutrient before a food mapping that uses its key. Any cross-mod ordering then depends on NeoForge's mod initialization order, which is why the event is recommended.
 
 ## Registering a nutrient and food
 

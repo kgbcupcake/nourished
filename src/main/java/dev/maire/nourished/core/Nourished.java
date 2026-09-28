@@ -13,6 +13,7 @@ import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.color.ColorRegistry;
 import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.data.MarieDataManager;
+import dev.maire.nourished.api.impl.RegistrationPhase;
 import dev.maire.nourished.core.book.NourishedBookItems;
 import dev.maire.nourished.core.datapack.NourishedDatapackCallbacks;
 import dev.marie.framework.registry.MarieApiRegistries;
@@ -159,9 +160,13 @@ public class Nourished {
             event.enqueueWork(() -> {
                 // Runs after MarieBootstrap.onCommonSetup → RegistryLifecycleManager.loadAll(), so
                 // ColorRegistry and ActivityDrivenNutrientRegistry have both loaded from disk here.
+                if (RegistrationPhase.run() > 0) {
+                    registerColorDefinitions();
+                }
                 migrateNutrientColorKeys();
                 dev.maire.nourished.client.colors.RetiredColorKeys.migrate();
                 ActivityDrivenNutrientRegistry.migrateLegacyColorsToColorRegistry();
+                dev.maire.nourished.config.NutrientOverrideStore.init(NourishedConfig.get());
                 NourishedConfigValidation.runAfterInitialLoad();
                 NutrientRegistry.syncAndFreeze();
                 ModCompat.discoverUnknownMods();

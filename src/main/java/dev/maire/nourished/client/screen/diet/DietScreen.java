@@ -133,10 +133,12 @@ public class DietScreen extends Screen {
                                 DietOptionsPanel::eatMoreColors)),
                 // The title now sizes/hides via Header size/Hide Header instead of the fixed 0.9x-of-Text-
                 // size proxy it used to draw at; Text size remains (it still drives the effect lines below
-                // the title) but is relabeled "Bars" since that's now its only remaining job.
+                // the title) but is relabeled "Bars" since that's now its only remaining job. Icons on: each
+                // line's effect icon draws apart from its text, so "Move Icons" moves the icons and "Move
+                // Text" only the +/- markers and names (see ActiveEffectsComponent#render).
                 new HubEntry(ActiveEffectsComponent.ID, Component.translatable("nourished.screen.diet.effects_label"),
                         DietOptionsPanel.forModule(Component.translatable("nourished.screen.diet.effects_label").getString(),
-                                ActiveEffectsComponent.ID, false, false, true, true, true, true, true, true,
+                                ActiveEffectsComponent.ID, false, true, true, true, true, true, true, true,
                                 "nourished.options.diet.effects_bars_size", DietOptionsPanel::effectsColors)),
                 intakeGroupEntry(),
                 new HubEntry(DietScreenEditTarget.PANEL_ID, Component.translatable("nourished.screen.diet.options_label"),

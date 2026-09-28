@@ -134,7 +134,8 @@ public final class IntakeBarComponent implements MarieComponent, SelfPositioning
                 () -> panelFillColor(),
                 () -> borderColor(nutrientKey),
                 () -> flashOverlayColor(nutrientKey),
-                () -> currentValue(nutrientKey, data)
+                () -> currentValue(nutrientKey, data),
+                () -> NourishedColors.resolveIntakeBarIconBorder(nutrientKey)
         );
     }
 

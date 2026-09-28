@@ -17,6 +17,7 @@ import dev.maire.nourished.client.config.categories.ThresholdCategory;
 import dev.marie.framework.color.ColorRegistry;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.config.NutrientOverrideStore;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -76,15 +77,14 @@ public final class NourishedConfigScreen {
 
         builder.setSavingRunnable(() -> {
             for (Map.Entry<String, PendingOverride> entry : decayOverrides.entrySet()) {
-                ModConfigSpec.DoubleValue value = config.nutrientDecayRateOverrides().get(entry.getKey());
-                if (value == null) continue;
-                value.set(entry.getValue().enabled.get() ? entry.getValue().value.get() : -1.0d);
+                NutrientOverrideStore.setDecayRate(entry.getKey(),
+                        entry.getValue().enabled.get() ? entry.getValue().value.get() : NutrientOverrideStore.UNSET);
             }
             for (Map.Entry<String, PendingOverride> entry : criticalOverrides.entrySet()) {
-                ModConfigSpec.DoubleValue value = config.nutrientCriticalThresholdOverrides().get(entry.getKey());
-                if (value == null) continue;
-                value.set(entry.getValue().enabled.get() ? entry.getValue().value.get() : -1.0d);
+                NutrientOverrideStore.setCriticalThreshold(entry.getKey(),
+                        entry.getValue().enabled.get() ? entry.getValue().value.get() : NutrientOverrideStore.UNSET);
             }
+            NutrientOverrideStore.save();
             for (Map.Entry<String, PendingCurvePreset> entry : curvePresetPending.entrySet()) {
                 NutrientCurveRegistry.setFromConfigScreen(entry.getKey(), entry.getValue().presetId.get());
             }
