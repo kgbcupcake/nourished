@@ -1,0 +1,93 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "compat_mods",
+  "condition": {
+    "type": "modonomicon:and",
+    "children": [
+      {
+        "type": "modonomicon:entry_read",
+        "entry_id": "compat_mods/overview"
+      },
+      {
+        "type": "modonomicon:mod_loaded",
+        "mod_id": "farm_and_charm"
+      }
+    ]
+  },
+  "description": "book.nourished.nourished_guide.compat_mods.farm_and_charm.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:carrot"
+  },
+  "name": "book.nourished.nourished_guide.compat_mods.farm_and_charm.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.farm_and_charm.farm_and_charm.text",
+      "title": "book.nourished.nourished_guide.compat_mods.farm_and_charm.farm_and_charm.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.farm_and_charm.vegetables.text",
+      "title": "book.nourished.nourished_guide.compat_mods.farm_and_charm.vegetables.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.farm_and_charm.grains.text",
+      "title": "book.nourished.nourished_guide.compat_mods.farm_and_charm.grains.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.farm_and_charm.processed_foods.text",
+      "title": "book.nourished.nourished_guide.compat_mods.farm_and_charm.processed_foods.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.farm_and_charm.getting_started.text",
+      "title": "book.nourished.nourished_guide.compat_mods.farm_and_charm.getting_started.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "compat_mods/overview",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 6,
+  "x": -3,
+  "y": 2
+}

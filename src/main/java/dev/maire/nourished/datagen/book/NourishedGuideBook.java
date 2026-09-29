@@ -3,6 +3,8 @@ package dev.maire.nourished.datagen.book;
 import com.klikli_dev.modonomicon.api.datagen.ModonomiconLanguageProvider;
 import com.klikli_dev.modonomicon.api.datagen.SingleBookSubProvider;
 import com.klikli_dev.modonomicon.api.datagen.book.BookModel;
+import dev.maire.nourished.datagen.book.compatmods.CompatModsCategory;
+import dev.maire.nourished.datagen.book.foodgroups.FoodGroupsCategory;
 import dev.maire.nourished.datagen.book.foodsafety.FoodSafetyCategory;
 import dev.maire.nourished.datagen.book.gettingstarted.GettingStartedCategory;
 import dev.maire.nourished.datagen.book.howitworks.HowItWorksCategory;
@@ -41,6 +43,8 @@ public class NourishedGuideBook extends SingleBookSubProvider {
         this.add(new ServerOwnersCategory(this).generate());
         this.add(new FoodSafetyCategory(this).generate());
         this.add(new HowItWorksCategory(this).generate());
+        this.add(new FoodGroupsCategory(this).generate());
+        this.add(new CompatModsCategory(this).generate());
     }
 
     @Override

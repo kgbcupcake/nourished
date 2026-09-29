@@ -1,0 +1,82 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "compat_mods",
+  "condition": {
+    "type": "modonomicon:and",
+    "children": [
+      {
+        "type": "modonomicon:entry_read",
+        "entry_id": "compat_mods/overview"
+      },
+      {
+        "type": "modonomicon:mod_loaded",
+        "mod_id": "legendarysurvivaloverhaul"
+      }
+    ]
+  },
+  "description": "book.nourished.nourished_guide.compat_mods.legendary_survival_overhaul.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:shield"
+  },
+  "name": "book.nourished.nourished_guide.compat_mods.legendary_survival_overhaul.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.legendary_survival_overhaul.legendary_survival_overhaul.text",
+      "title": "book.nourished.nourished_guide.compat_mods.legendary_survival_overhaul.legendary_survival_overhaul.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.legendary_survival_overhaul.what_still_works.text",
+      "title": "book.nourished.nourished_guide.compat_mods.legendary_survival_overhaul.what_still_works.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.legendary_survival_overhaul.what_is_disabled.text",
+      "title": "book.nourished.nourished_guide.compat_mods.legendary_survival_overhaul.what_is_disabled.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.legendary_survival_overhaul.why_keep_bars_healthy.text",
+      "title": "book.nourished.nourished_guide.compat_mods.legendary_survival_overhaul.why_keep_bars_healthy.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "compat_mods/overview",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 4,
+  "x": 2,
+  "y": 0
+}

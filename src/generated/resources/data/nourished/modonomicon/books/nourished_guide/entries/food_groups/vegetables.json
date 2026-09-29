@@ -1,0 +1,98 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "food_groups",
+  "description": "book.nourished.nourished_guide.food_groups.vegetables.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:carrot"
+  },
+  "name": "book.nourished.nourished_guide.food_groups.vegetables.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:carrot"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.vegetables.spotlight.text",
+      "title": "book.nourished.nourished_guide.food_groups.vegetables.spotlight.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.vegetables.vanilla_sources.text",
+      "title": "book.nourished.nourished_guide.food_groups.vegetables.vanilla_sources.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.vegetables.golden_carrot.text",
+      "title": "book.nourished.nourished_guide.food_groups.vegetables.golden_carrot.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.vegetables.farming_tips.text",
+      "title": "book.nourished.nourished_guide.food_groups.vegetables.farming_tips.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:beetroot"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.vegetables.vanilla_secondary.text",
+      "title": "book.nourished.nourished_guide.food_groups.vegetables.vanilla_secondary.title"
+    },
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:mod_loaded",
+        "mod_id": "farm_and_charm"
+      },
+      "item": {
+        "item": "minecraft:carrot"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.vegetables.farm_and_charm.text",
+      "title": "book.nourished.nourished_guide.food_groups.vegetables.farm_and_charm.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.vegetables.rotation_strategy.text",
+      "title": "book.nourished.nourished_guide.food_groups.vegetables.rotation_strategy.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 0,
+  "x": -4,
+  "y": -4
+}

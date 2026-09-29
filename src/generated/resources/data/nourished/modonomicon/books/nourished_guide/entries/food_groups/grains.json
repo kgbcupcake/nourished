@@ -1,0 +1,97 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "food_groups",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "food_groups/fruits"
+  },
+  "description": "book.nourished.nourished_guide.food_groups.grains.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:bread"
+  },
+  "name": "book.nourished.nourished_guide.food_groups.grains.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:bread"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.grains.spotlight.text",
+      "title": "book.nourished.nourished_guide.food_groups.grains.spotlight.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.grains.vanilla_sources.text",
+      "title": "book.nourished.nourished_guide.food_groups.grains.vanilla_sources.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:pumpkin_pie"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.grains.baked_goods.text",
+      "title": "book.nourished.nourished_guide.food_groups.grains.baked_goods.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.grains.farming_tips.text",
+      "title": "book.nourished.nourished_guide.food_groups.grains.farming_tips.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.grains.rotation_strategy.text",
+      "title": "book.nourished.nourished_guide.food_groups.grains.rotation_strategy.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.grains.experience_bonus.text",
+      "title": "book.nourished.nourished_guide.food_groups.grains.experience_bonus.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "food_groups/fruits",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 2,
+  "x": 0,
+  "y": 0
+}

@@ -1,0 +1,110 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "food_groups",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "food_groups/proteins"
+  },
+  "description": "book.nourished.nourished_guide.food_groups.dairy.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:milk_bucket"
+  },
+  "name": "book.nourished.nourished_guide.food_groups.dairy.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:milk_bucket"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.dairy.spotlight.text",
+      "title": "book.nourished.nourished_guide.food_groups.dairy.spotlight.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.dairy.vanilla_sources.text",
+      "title": "book.nourished.nourished_guide.food_groups.dairy.vanilla_sources.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.dairy.armor_toughness.text",
+      "title": "book.nourished.nourished_guide.food_groups.dairy.armor_toughness.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.dairy.knockback_penalty.text",
+      "title": "book.nourished.nourished_guide.food_groups.dairy.knockback_penalty.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:milk_bucket"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.dairy.vanilla_secondary.text",
+      "title": "book.nourished.nourished_guide.food_groups.dairy.vanilla_secondary.title"
+    },
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:mod_loaded",
+        "mod_id": "herbsandharvest"
+      },
+      "item": {
+        "item": "minecraft:milk_bucket"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.dairy.herbs_and_harvest.text",
+      "title": "book.nourished.nourished_guide.food_groups.dairy.herbs_and_harvest.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.dairy.farming_tips.text",
+      "title": "book.nourished.nourished_guide.food_groups.dairy.farming_tips.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "food_groups/proteins",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 4,
+  "x": 4,
+  "y": 4
+}
