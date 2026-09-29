@@ -214,13 +214,12 @@ public final class RecentMealsComponent implements MarieComponent, HeaderCollaps
         // size instead — see `barScale`/`rowScale` below), so Text size is dropped entirely from its panel.
         float headerScale = ContentScaleController.resolveContentScale(MarieModuleSettings.headerScale(store, ID));
         // The header-to-first-row gap is fixed, like Calories'/Balance's own header-to-body distance —
-        // Header size affects only the header's own draw size, nothing else about the box's layout
-        // (same rule row-to-row spacing below follows for Bar size: a slider only ever moves the thing
-        // it's named for). Row-to-row spacing tracks barScale, the same multiplier the row names
-        // themselves draw at, so bigger zoomed row text doesn't collide with the next row — that's Bar
-        // size affecting its own rows, not a different slider reaching into someone else's territory.
+        // Header size affects only the header's own draw size, nothing else about the box's layout.
+        // Row-to-row spacing (and therefore icon position) stays fixed too: Bar size must only resize
+        // the row name text drawn next to each icon, never move the icon itself (moving barScale used
+        // to also shift row spacing, which dragged every icon below row 1 along with the slider).
         int zoomedHeaderAdvance = HEADER_LOCAL_HEIGHT;
-        int zoomedRowH = Math.max(1, (int) Math.round(rowH * barScale));
+        int zoomedRowH = rowH;
 
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
 
