@@ -27,7 +27,9 @@ public final class RetiredColorKeys {
             "diet.segment_empty", "diet.flash", "diet.legend_text", "diet.legend_low",
             "diet.good", "diet.warn", "diet.bad",
             // The Intake Breakdown legend box itself was removed, taking its three swatch colors with it.
-            "diet.legend.good", "diet.legend.low", "diet.legend.critical");
+            "diet.legend.good", "diet.legend.low", "diet.legend.critical",
+            // Shared Intake Breakdown border, replaced by per-nutrient diet.intake_bar.<nutrient>.border.
+            "diet.intake_bar.border");
 
     static {
         RENAMED.put("hud.calorie", "calorie.value");

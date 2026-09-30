@@ -9,6 +9,7 @@ import dev.marie.framework.config.validation.Finding;
 import dev.marie.framework.config.validation.ValidationResult;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
@@ -43,6 +44,7 @@ public final class ColorsValidator implements ConfigValidator {
     private static final String ACTIVITY_PREFIX = Nourished.MODID + ":activity.";
     private static final String PANEL_PREFIX = Nourished.MODID + ":panel.";
     private static final String TEXT_PREFIX = Nourished.MODID + ":text.";
+    private static final String INTAKE_BAR_PREFIX = Nourished.MODID + ":diet.intake_bar.";
 
     @Override
     public ValidationResult validate() {
@@ -108,6 +110,15 @@ public final class ColorsValidator implements ConfigValidator {
             return validNutrientKeys.contains(key.substring(NUTRIENT_PREFIX.length()));
         }
         if (key.startsWith(ACTIVITY_PREFIX) || key.startsWith(PANEL_PREFIX) || key.startsWith(TEXT_PREFIX)) {
+            return true;
+        }
+        if (key.startsWith(INTAKE_BAR_PREFIX)) {
+            String rest = key.substring(INTAKE_BAR_PREFIX.length());
+            int dot = rest.indexOf('.');
+            return dot > 0 && validNutrientKeys.contains(rest.substring(0, dot));
+        }
+        // UI colors are only registered on the client, so a dedicated server can't check them.
+        if (FMLEnvironment.dist.isDedicatedServer()) {
             return true;
         }
         // Any other color this mod registered (hud.*, diet.*, calorie_hud.* ... ) is known by its registered definition.

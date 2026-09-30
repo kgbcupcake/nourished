@@ -1,8 +1,7 @@
 /**
  * Configuration-driven registries.
  *
- * <p>{@link dev.marie.framework.config.LockRegistry},
- * {@link dev.marie.framework.config.ModCompatRegistry}, and
+ * <p>{@link dev.marie.framework.config.LockRegistry} and
  * {@link dev.marie.framework.config.PresetRegistry} are loaded from config
  * files and may be reloaded at runtime.
  * {@link dev.maire.nourished.config.NourishedConfig} and
