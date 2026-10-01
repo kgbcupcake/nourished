@@ -5,6 +5,7 @@ import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.maire.nourished.client.UiStatePersistence;
+import dev.maire.nourished.client.hud.dynamic.edit.HudRowMove;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.network.chat.Component;
 
@@ -44,7 +45,16 @@ public final class HudOptionsPanel {
                 .layoutRows(p -> p.toggle(text("nourished.options.hud.vertical_layout"),
                                 () -> cc().hudVerticalLayout(), v -> cc().setHudVerticalLayout(v), NourishedClientConfig::saveNow)
                         .defaultValue(false))
-                .behaviorRows(p -> p.section(text("nourished.options.hud.section.visibility"))
+                // "Move Nutrient": pick a row, switch on Move Row, then drag anywhere in the HUD box to move
+                // that whole row (see HudRowMove) — every row is inside the one box, so none can be grabbed directly.
+                .behaviorRows(p -> p.section(text("nourished.options.hud.section.move_nutrient"))
+                        .cycle(text("nourished.options.hud.move_nutrient"), HudRowMove.nutrientLabels(),
+                                HudRowMove::selectedIndex, HudRowMove::setSelectedIndex, () -> {})
+                        .toggle(text("nourished.options.hud.move_row"), HudRowMove::isEnabled, HudRowMove::setEnabled, () -> {})
+                        .button(text("nourished.options.hud.reset_rows"), text("nourished.options.diet.reset_caption"),
+                                HudRowMove::resetAll, () -> {})
+                        .endSection()
+                        .section(text("nourished.options.hud.section.visibility"))
                         .toggle(text("nourished.options.hud.reveal_on_gain"),
                                 () -> cc().hudRevealOnNutrientGain(), v -> cc().setHudRevealOnNutrientGain(v), NourishedClientConfig::saveNow)
                             .defaultValue(true)

@@ -105,6 +105,13 @@ public final class HudEditTarget implements MarieComponent {
             UiStatePersistence.get(), Anchor.TOP_RIGHT);
     private boolean scaleConfigVisible;
 
+    /** The nutrient whose whole row is being dragged by "Move Nutrient" (see {@link HudRowMove}), or {@code null}. */
+    private String rowDragKey;
+    private double rowDragStartMouseX;
+    private double rowDragStartMouseY;
+    private int rowDragStartX;
+    private int rowDragStartY;
+
     public HudEditTarget(Minecraft mc) {
         this.mc = mc;
 
@@ -353,6 +360,17 @@ public final class HudEditTarget implements MarieComponent {
             return false;
         }
         Bounds bounds = resolvedBounds(mc, keys);
+        // "Move Nutrient" wins over the panel-wide move modes: while it's on, a drag anywhere in the box
+        // moves the picked nutrient's whole row.
+        String rowKey = HudRowMove.activeKey();
+        if (rowKey != null && bounds.contains((int) mouseX, (int) mouseY)) {
+            rowDragKey = rowKey;
+            rowDragStartMouseX = mouseX;
+            rowDragStartMouseY = mouseY;
+            rowDragStartX = HudRowMove.offsetX(rowKey);
+            rowDragStartY = HudRowMove.offsetY(rowKey);
+            return true;
+        }
         MoveDrag.Mode mode = MarieModuleSettings.activeMoveMode(UiStatePersistence.get(), PANEL_ID);
         if (mode != null && bounds.contains((int) mouseX, (int) mouseY)) {
             switch (mode) {
@@ -439,6 +457,14 @@ public final class HudEditTarget implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
             return true;
         }
+        if (rowDragKey != null) {
+            List<String> keys = currentVisibleKeysOrFallback();
+            Bounds box = keys.isEmpty() ? null : resolvedBounds(mc, keys);
+            HudRowMove.setOffset(rowDragKey,
+                    rowDragStartX + (int) Math.round(mouseX - rowDragStartMouseX),
+                    rowDragStartY + (int) Math.round(mouseY - rowDragStartMouseY), box);
+            return true;
+        }
         if (moveDrag.isActive()) {
             List<String> keys = currentVisibleKeysOrFallback();
             if (!keys.isEmpty()) {
@@ -475,6 +501,11 @@ public final class HudEditTarget implements MarieComponent {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (scaleConfigVisible && scaleConfigPanel.mouseReleased(mouseX, mouseY, button)) {
+            return true;
+        }
+        if (rowDragKey != null) {
+            HudRowMove.commit(rowDragKey);
+            rowDragKey = null;
             return true;
         }
         if (moveDrag.isActive()) {
@@ -518,6 +549,8 @@ public final class HudEditTarget implements MarieComponent {
         Map<String, Float> displayValues = NourishedHUD.currentDisplayValues();
         HudLayout.Layout matchedLayout = matchedLayoutFor(keys, bounds);
         if (NourishedClientConfig.get().hudClassicMode() && context instanceof GuiGraphicsRenderContext guiContext) {
+            // The classic renderer records no extents, so no move outline is drawn for it.
+            HudDrawnExtents.beginFrame();
             TrackingData data = MarieClientCache.get();
             ClassicHudPanelRenderer.drawPanel(
                     guiContext.graphics(), mc, data, scrolledKeys(keys, matchedLayout), matchedLayout, bounds.x(), bounds.y(), displayValues
@@ -527,47 +560,37 @@ public final class HudEditTarget implements MarieComponent {
             panel.render(context, bounds);
         }
 
+        // Every outline wraps what the rows actually drew this frame (HudDrawnExtents), so it stays on
+        // the content however rows, icons, text or bars have been moved or resized.
+        String rowKey = HudRowMove.activeKey();
         boolean moveTextMode = moveContentEnabled();
         boolean moveBarsMode = moveBarsEnabled();
         boolean moveIconsMode = MarieModuleSettings.isMoveIconsEnabled(UiStatePersistence.get(), PANEL_ID);
         boolean moveAllMode = MarieModuleSettings.isMoveAllEnabled(UiStatePersistence.get(), PANEL_ID);
-        if (moveTextMode || moveBarsMode || moveIconsMode || moveAllMode) {
-            // Dashed rather than a solid glow outline — a live drag affordance shown only while a
-            // move toggle is active, not a persistent separately-hit-tested box. Text mode wraps the
-            // name column, icons mode the icon column, bars mode the bar+percentage part, each a few
-            // pixels further out so it doesn't overlap them (the vertical layout has no such split, so
-            // it wraps the whole content).
-            int pad = Math.round(ContentScaleController.resolvePadding(HudDrawHelpers.PANEL_PAD * persistedPaddingScale()));
-            int contentW = Math.max(0, matchedLayout.naturalPanelW() - 2 * pad);
-            int contentH = Math.max(0, matchedLayout.naturalPanelH() - 2 * pad);
-            boolean vertical = matchedLayout.verticalLayout();
-            int iconW = matchedLayout.iconSize();
-            int labelsW = matchedLayout.maxLabelSw();
-            int contentX = bounds.x() + pad + matchedLayout.leftMargin();
-            int contentY = bounds.y() + pad;
-            // The outline is derived from the content's natural (unshrunk) extent, same as the content
-            // itself, so a box dragged smaller than that natural size must clip it at the box's own live
-            // edge exactly like the content fades there — otherwise the dashed line sticks out past the
-            // panel's actual border once the two diverge.
-            context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
-            try {
-                if (moveAllMode) {
-                    context.drawDashedBorder(contentX + matchedLayout.contentOffsetX() - 3, contentY + matchedLayout.contentOffsetY() - 3,
-                            contentW + 6, contentH + 6, contentOutlineColor());
-                } else if (moveTextMode) {
-                    int start = vertical ? 0 : iconW + HudDrawHelpers.ICON_LABEL_GAP;
-                    context.drawDashedBorder(contentX + start + matchedLayout.contentOffsetX() - 3, contentY + matchedLayout.contentOffsetY() - 3,
-                            (vertical ? contentW : labelsW) + 6, contentH + 6, contentOutlineColor());
-                } else if (moveIconsMode) {
-                    context.drawDashedBorder(contentX + MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID) - 3, contentY + MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID) - 3,
-                            (vertical ? contentW : iconW) + 6, contentH + 6, contentOutlineColor());
-                } else {
-                    int barsStart = vertical ? 0 : iconW + HudDrawHelpers.ICON_LABEL_GAP + labelsW + HudDrawHelpers.LABEL_BAR_GAP;
-                    context.drawDashedBorder(contentX + barsStart + MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID) - 3, contentY + MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID) - 3,
-                            Math.max(0, contentW - barsStart) + 6, contentH + 6, contentOutlineColor());
+        if (rowKey != null || moveTextMode || moveBarsMode || moveIconsMode || moveAllMode) {
+            // Dashed rather than a solid glow outline — a live drag affordance shown only while a move
+            // toggle is active, not a persistent separately-hit-tested box. "Move Nutrient" (the picked
+            // row) wins over the panel-wide modes, matching which one a drag actually moves.
+            Bounds outline;
+            if (rowKey != null) {
+                outline = HudDrawnExtents.row(rowKey);
+            } else if (moveAllMode) {
+                outline = HudDrawnExtents.all();
+            } else if (moveTextMode) {
+                outline = HudDrawnExtents.part(HudDrawnExtents.Part.TEXT);
+            } else if (moveIconsMode) {
+                outline = HudDrawnExtents.part(HudDrawnExtents.Part.ICON);
+            } else {
+                outline = HudDrawnExtents.part(HudDrawnExtents.Part.BAR);
+            }
+            if (outline != null) {
+                // Clipped to the box, the same way the content itself is cut off at its edge.
+                context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
+                try {
+                    context.drawDashedBorder(outline.x() - 3, outline.y() - 2, outline.width() + 6, outline.height() + 4, contentOutlineColor());
+                } finally {
+                    context.popClip();
                 }
-            } finally {
-                context.popClip();
             }
         } else {
             Bounds handle = DraggableResizable.handleBounds(bounds);

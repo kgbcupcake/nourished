@@ -50,6 +50,8 @@ import static dev.maire.nourished.client.screen.diet.dynamic.layout.DietSubBoxCo
 public final class DietScreenEditTarget implements MarieComponent {
 
     private static final String ID = "nourished.diet.editwrapper";
+    /** Gap kept between a box pulled past the panel's bottom and the panel's grown bottom edge. */
+    private static final int GROW_PADDING_LOCAL = 4;
     public static final String PANEL_ID = "nourished.diet.panel";
 
     private final Minecraft mc;
@@ -366,6 +368,9 @@ public final class DietScreenEditTarget implements MarieComponent {
                 || panelDrag.isDragging() || panelDrag.isResizing();
         int mx = (int) mouseX;
         int my = (int) mouseY;
+        // Before any box commits: its commit clamps against the persisted panel, so the panel must
+        // already be tall enough to hold it or the box gets pushed back up into its neighbours.
+        persistPanelGrowth(mx, my);
         caloriesDrag.mouseReleased(mx, my);
         balanceDrag.mouseReleased(mx, my);
         recentMealsDrag.mouseReleased(mx, my);
@@ -400,7 +405,10 @@ public final class DietScreenEditTarget implements MarieComponent {
         int my = mouse[1];
 
         Bounds panelDefault = new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
-        Bounds panelBounds = liveOrDefault(panelDrag, mx, my, panelDefault);
+        // Snap against the panel as it was before growing to fit the box being dragged — snapping
+        // to the grown bottom edge would pull the box down, grow the panel again, and creep forever.
+        Bounds snapPanelBounds = liveOrDefault(panelDrag, mx, my, panelDefault);
+        Bounds panelBounds = growToFitActiveBox(snapPanelBounds, layout, mx, my);
 
         TrackingData data = mc.player != null ? MarieClientCache.get() : null;
         List<String> bars = NourishedClientConfig.get().effectiveDietBarOrder();
@@ -441,11 +449,16 @@ public final class DietScreenEditTarget implements MarieComponent {
         Bounds eatMoreR = eatMore.resolvedBounds();
         Bounds activeEffectsR = activeEffects.resolvedBounds();
         Bounds headerR = intakeHeader.resolvedBounds();
-        caloriesDrag.setSnapTargets(xEdges(panelBounds, balanceR, recentR, eatMoreR, activeEffectsR), yEdges(panelBounds, balanceR, recentR, eatMoreR, activeEffectsR));
-        balanceDrag.setSnapTargets(xEdges(panelBounds, caloriesR, recentR, eatMoreR, activeEffectsR), yEdges(panelBounds, caloriesR, recentR, eatMoreR, activeEffectsR));
-        recentMealsDrag.setSnapTargets(xEdges(panelBounds, caloriesR, balanceR, eatMoreR, activeEffectsR), yEdges(panelBounds, caloriesR, balanceR, eatMoreR, activeEffectsR));
-        eatMoreDrag.setSnapTargets(xEdges(panelBounds, caloriesR, balanceR, recentR, activeEffectsR), yEdges(panelBounds, caloriesR, balanceR, recentR, activeEffectsR));
-        activeEffectsDrag.setSnapTargets(xEdges(panelBounds, caloriesR, balanceR, recentR, eatMoreR), yEdges(panelBounds, caloriesR, balanceR, recentR, eatMoreR));
+        caloriesDrag.setSnapTargets(xEdges(snapPanelBounds, balanceR, recentR, eatMoreR, activeEffectsR), yEdges(snapPanelBounds, balanceR, recentR, eatMoreR, activeEffectsR));
+        balanceDrag.setSnapTargets(xEdges(snapPanelBounds, caloriesR, recentR, eatMoreR, activeEffectsR), yEdges(snapPanelBounds, caloriesR, recentR, eatMoreR, activeEffectsR));
+        recentMealsDrag.setSnapTargets(xEdges(snapPanelBounds, caloriesR, balanceR, eatMoreR, activeEffectsR), yEdges(snapPanelBounds, caloriesR, balanceR, eatMoreR, activeEffectsR));
+        eatMoreDrag.setSnapTargets(xEdges(snapPanelBounds, caloriesR, balanceR, recentR, activeEffectsR), yEdges(snapPanelBounds, caloriesR, balanceR, recentR, activeEffectsR));
+        activeEffectsDrag.setSnapTargets(xEdges(snapPanelBounds, caloriesR, balanceR, recentR, eatMoreR), yEdges(snapPanelBounds, caloriesR, balanceR, recentR, eatMoreR));
+        caloriesDrag.setSizeSnapTargets(widths(balanceR, recentR, eatMoreR, activeEffectsR), heights(balanceR, recentR, eatMoreR, activeEffectsR));
+        balanceDrag.setSizeSnapTargets(widths(caloriesR, recentR, eatMoreR, activeEffectsR), heights(caloriesR, recentR, eatMoreR, activeEffectsR));
+        recentMealsDrag.setSizeSnapTargets(widths(caloriesR, balanceR, eatMoreR, activeEffectsR), heights(caloriesR, balanceR, eatMoreR, activeEffectsR));
+        eatMoreDrag.setSizeSnapTargets(widths(caloriesR, balanceR, recentR, activeEffectsR), heights(caloriesR, balanceR, recentR, activeEffectsR));
+        activeEffectsDrag.setSizeSnapTargets(widths(caloriesR, balanceR, recentR, eatMoreR), heights(caloriesR, balanceR, recentR, eatMoreR));
         // Every right-column box snaps against every OTHER right-column box (plus the panel edges),
         // same as the left column's five boxes do against each other — previously each of these only
         // snapped against the header, never against its own sibling rows.
@@ -454,12 +467,15 @@ public final class DietScreenEditTarget implements MarieComponent {
         for (IntakeBarComponent bar : intakeBars) {
             rightBounds.add(bar.resolvedBounds());
         }
-        headerDrag.setSnapTargets(xEdges(rightSnapTargets(panelBounds, rightBounds, headerR)), yEdges(rightSnapTargets(panelBounds, rightBounds, headerR)));
+        headerDrag.setSnapTargets(xEdges(rightSnapTargets(snapPanelBounds, rightBounds, headerR)), yEdges(rightSnapTargets(snapPanelBounds, rightBounds, headerR)));
         for (IntakeBarComponent bar : intakeBars) {
             DraggableResizable drag = barRowDrags.get(bar.id());
             if (drag != null) {
                 Bounds self = bar.resolvedBounds();
-                drag.setSnapTargets(xEdges(rightSnapTargets(panelBounds, rightBounds, self)), yEdges(rightSnapTargets(panelBounds, rightBounds, self)));
+                drag.setSnapTargets(xEdges(rightSnapTargets(snapPanelBounds, rightBounds, self)), yEdges(rightSnapTargets(snapPanelBounds, rightBounds, self)));
+                // Size-match against sibling rows only — the header and panel are different shapes.
+                Bounds[] rowSiblings = rightBounds.stream().filter(b -> b != self && b != headerR).toArray(Bounds[]::new);
+                drag.setSizeSnapTargets(widths(rowSiblings), heights(rowSiblings));
             }
         }
 
@@ -783,6 +799,22 @@ public final class DietScreenEditTarget implements MarieComponent {
         return lines;
     }
 
+    private static List<Integer> widths(Bounds... boxes) {
+        List<Integer> sizes = new ArrayList<>(boxes.length);
+        for (Bounds b : boxes) {
+            sizes.add(b.width());
+        }
+        return sizes;
+    }
+
+    private static List<Integer> heights(Bounds... boxes) {
+        List<Integer> sizes = new ArrayList<>(boxes.length);
+        for (Bounds b : boxes) {
+            sizes.add(b.height());
+        }
+        return sizes;
+    }
+
     private static List<Integer> yEdges(Bounds... boxes) {
         List<Integer> lines = new ArrayList<>(boxes.length * 2);
         for (Bounds b : boxes) {
@@ -821,6 +853,52 @@ public final class DietScreenEditTarget implements MarieComponent {
         if (preview != null) {
             DietScreenPersistence.setLiveOverride(componentId, preview);
         }
+    }
+
+    private List<DraggableResizable> boxDrags() {
+        List<DraggableResizable> drags = new ArrayList<>(List.of(caloriesDrag, balanceDrag, recentMealsDrag, eatMoreDrag, activeEffectsDrag, headerDrag));
+        drags.addAll(barRowDrags.values());
+        return drags;
+    }
+
+    /**
+     * {@code panelBounds} stretched downward so whichever box is mid-drag/resize fits inside it with
+     * {@link #GROW_PADDING_LOCAL} to spare, up to the bottom of the screen; unchanged if it already
+     * fits. Lets a box be pulled past the panel's bottom — the panel grows to hold it instead of the
+     * box being shoved back up into its neighbours by the parent clamp.
+     */
+    private Bounds growToFitActiveBox(Bounds panelBounds, DietLayout.Layout layout, int mx, int my) {
+        int bottom = panelBounds.y() + panelBounds.height();
+        int padding = DietLayout.toScreenDim(layout, GROW_PADDING_LOCAL);
+        for (DraggableResizable drag : boxDrags()) {
+            if (!drag.isDragging() && !drag.isResizing()) {
+                continue;
+            }
+            Bounds preview = drag.mouseDragged(mx, my);
+            if (preview != null) {
+                bottom = Math.max(bottom, preview.y() + preview.height() + padding);
+            }
+        }
+        bottom = Math.max(panelBounds.y() + panelBounds.height(), Math.min(bottom, mc.getWindow().getGuiScaledHeight()));
+        if (bottom == panelBounds.y() + panelBounds.height()) {
+            return panelBounds;
+        }
+        return new Bounds(panelBounds.x(), panelBounds.y(), panelBounds.width(), bottom - panelBounds.y());
+    }
+
+    /** Saves the panel at the height {@link #growToFitActiveBox} grew it to (as a manual height), if the box being released needed more room. */
+    private void persistPanelGrowth(int mx, int my) {
+        DietLayout.Layout layout = resolvedPanelLayout(mc);
+        Bounds current = new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
+        Bounds grown = growToFitActiveBox(current, layout, mx, my);
+        if (grown.height() == current.height()) {
+            return;
+        }
+        ComponentState base = DietScreenPersistence.get().load(PANEL_ID)
+                .orElseGet(() -> new ComponentState(current.x(), current.y(), current.width(), current.height(), false, false, false, 0));
+        DietScreenPersistence.get().save(PANEL_ID, new ComponentState(
+                base.x(), base.y(), base.width(), grown.height(),
+                false, base.widthManual(), true, base.leftMargin(), base.contentScale(), base.paddingScale()));
     }
 
     private static Bounds liveOrDefault(DraggableResizable drag, int mx, int my, Bounds fallback) {

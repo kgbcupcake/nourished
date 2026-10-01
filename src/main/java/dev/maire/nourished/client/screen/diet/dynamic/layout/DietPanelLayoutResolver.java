@@ -79,7 +79,10 @@ public final class DietPanelLayoutResolver {
     public static Constraint panelConstraint(DietLayout.Layout baseLayout) {
         int naturalWidth = DietLayout.scaledDim(DietLayout.WIDTH, baseLayout.scale()) + baseLayout.leftMargin();
         int minWidth = Math.max(1, (int) Math.round(naturalWidth * DietSubBoxConstraints.MIN_SIZE_MULTIPLIER));
-        int maxHeight = Math.max(DietLayout.scaledDim(DietLayout.HEIGHT, 1.5d), naturalHeight(baseLayout));
+        // Also never below the panel's current height (it may have grown to fit a box pulled past its
+        // bottom) or the room left down to the screen's bottom, so a panel resize never snaps it shorter.
+        int maxHeight = Math.max(Math.max(DietLayout.scaledDim(DietLayout.HEIGHT, 1.5d), naturalHeight(baseLayout)),
+                Math.max(baseLayout.panelH(), Minecraft.getInstance().getWindow().getGuiScaledHeight() - baseLayout.panelY()));
         return DietSubBoxConstraints.bounded(
                 baseLayout.panelW(), baseLayout.panelH(),
                 minWidth, DietLayout.scaledDim(DietLayout.PANEL_MIN_LOCAL_HEIGHT, 1.0d),

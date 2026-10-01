@@ -453,7 +453,8 @@ public final class ActivityLogHudPanel implements MarieComponent {
         int borderColor = MarieColors.withOpacity(
                 MarieColors.shade(MarieColors.resolveColor(NourishedColors.ACTIVITY_LOG_BORDER), cc.activityLogHudBorderShade()), cc.activityLogHudBorderOpacity());
         MarieModuleSettings.drawBoxGlow(context, UiStatePersistence.get(), PANEL_ID, bounds.x(), bounds.y(), bounds.width(), bounds.height());
-        context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor, borderColor);
+        context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor,
+                MarieModuleSettings.pulsedBorder(borderColor, UiStatePersistence.get(), PANEL_ID));
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             context.drawText(Component.translatable("nourished.hud.activityLog.label").getString(),

@@ -17,7 +17,10 @@ import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeBarComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.IntakeHeaderComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.edit.DietScreenEditTarget;
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.config.NourishedClientConfig;
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
@@ -172,14 +175,25 @@ public final class DietPanelContainer implements Container {
         double opacity = NourishedClientConfig.get().dietBackgroundOpacity();
         int alpha = Math.max(0, Math.min(255, (int) Math.round(opacity * 255.0d)));
         int fill = (alpha << 24) | (colBgRgb() & 0x00FFFFFF);
-        context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, fill, borderColor());
+        // The Diet Screen entry's own Style/Glow settings (see DietOptionsPanel#build): Background
+        // shade, Border opacity/shade, Border shadow/glow — all no-ops at their defaults.
+        var store = DietScreenPersistence.get();
+        String panelId = DietScreenEditTarget.PANEL_ID;
+        MarieModuleSettings.drawBoxGlow(context, store, panelId, bounds.x(), bounds.y(), bounds.width(), bounds.height());
+        context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1,
+                MarieModuleSettings.styledBackground(fill, store, panelId), MarieModuleSettings.styledBorder(borderColor(), store, panelId));
 
         float scale = (float) layout.scale();
         Font font = Minecraft.getInstance().font;
-        String title = "☘ Diet ☘";
-        int titleW = (int) Math.ceil(font.width(title) * scale);
-        int titleX = bounds.x() + (bounds.width() - titleW) / 2;
-        context.drawText(title, titleX, DietLayout.toScreenY(layout, 9), colTitle(), scale);
+        if (!MarieModuleSettings.isHeaderHidden(store, panelId)) {
+            String title = "☘ Diet ☘";
+            float titleScale = scale * (float) MarieModuleSettings.headerScale(store, panelId);
+            int titleW = (int) Math.ceil(font.width(title) * titleScale);
+            int titleX = bounds.x() + (bounds.width() - titleW) / 2;
+            // Grows around the title's usual center line rather than pushing down from its top.
+            int titleY = DietLayout.toScreenY(layout, 9) - (int) Math.round(9 * (titleScale - scale) / 2);
+            MarieModuleSettings.withTextEffects(context, store, panelId).drawText(title, titleX, titleY, colTitle(), titleScale);
+        }
 
         // Panel-level minimize: below this threshold, the panel shows title-bar only — divider, both
         // columns (and everything under them, including every sub-box's own collapse behavior), and

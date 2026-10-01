@@ -16,6 +16,8 @@ import dev.marie.framework.ui.layout.HorizontalLayout;
 import dev.marie.framework.ui.layout.VerticalLayout;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.hud.dynamic.edit.HudEditTarget;
+import dev.maire.nourished.client.hud.dynamic.edit.HudDrawnExtents;
+import dev.maire.nourished.client.hud.dynamic.edit.HudRowMove;
 import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
 import dev.maire.nourished.config.NourishedClientConfig;
 
@@ -53,10 +55,14 @@ public final class NutrientPanelContainer implements Container {
         float iconScale = (float) ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(UiStatePersistence.get(), PANEL_ID));
         float barScale = (float) ContentScaleController.resolveContentScale(MarieModuleSettings.barScale(UiStatePersistence.get(), PANEL_ID));
         for (String key : keys) {
+            // The row's own "Move Nutrient" offset (see HudRowMove) shifts all of it — icon, name, bar
+            // and percentage — on top of the panel-wide Move Text/Icons/Bars offsets.
+            int rowDx = HudRowMove.offsetX(key);
+            int rowDy = HudRowMove.offsetY(key);
             children.add(new NutrientBarComponent(key, verticalMode, hudLayout, displayValues, contentScale, iconScale,
-                    hudLayout.contentOffsetX(), hudLayout.contentOffsetY(),
-                    MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID),
-                    MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID),
+                    hudLayout.contentOffsetX() + rowDx, hudLayout.contentOffsetY() + rowDy,
+                    MarieModuleSettings.iconOffsetX(UiStatePersistence.get(), PANEL_ID) + rowDx, MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), PANEL_ID) + rowDy,
+                    MarieModuleSettings.barOffsetX(UiStatePersistence.get(), PANEL_ID) + rowDx, MarieModuleSettings.barOffsetY(UiStatePersistence.get(), PANEL_ID) + rowDy,
                     barScale, MarieModuleSettings.isIconsHidden(UiStatePersistence.get(), PANEL_ID),
                     MarieModuleSettings.isBarsHidden(UiStatePersistence.get(), PANEL_ID), MarieModuleSettings.isTextHidden(UiStatePersistence.get(), PANEL_ID)));
         }
@@ -105,6 +111,7 @@ public final class NutrientPanelContainer implements Container {
 
     @Override
     public void render(RenderContext context, Bounds bounds) {
+        HudDrawnExtents.beginFrame();
         if (MarieModuleSettings.isWindowHidden(UiStatePersistence.get(), PANEL_ID)) {
             return;
         }
@@ -121,7 +128,8 @@ public final class NutrientPanelContainer implements Container {
             int borderRgb = MarieColors.shade(NourishedColors.rgb(NourishedColors.HUD_BORDER), cc.hudBorderShade());
             int borderColor = HudDrawHelpers.panelColorWithOpacity(borderRgb, bgOpacity * cc.hudBorderOpacity());
             MarieModuleSettings.drawBoxGlow(context, UiStatePersistence.get(), PANEL_ID, bounds.x(), bounds.y(), bounds.width(), bounds.height());
-            context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor, borderColor);
+            context.drawRoundedRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), 1, HudDrawHelpers.PANEL_CORNER_RADIUS, panelColor,
+                    MarieModuleSettings.pulsedBorder(borderColor, UiStatePersistence.get(), PANEL_ID));
         }
         // Content position offset is the user's persisted padding adjustment alone — hudLayout's own
         // scaledPad (box geometry, used for this panel's natural size in HudLayout#compute) plays no

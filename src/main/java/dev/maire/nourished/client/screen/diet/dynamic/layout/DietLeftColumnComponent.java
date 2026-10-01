@@ -1,7 +1,5 @@
 package dev.maire.nourished.client.screen.diet.dynamic.layout;
 
-import dev.marie.framework.color.MarieColors;
-import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.AutoGrowPanelContainer;
@@ -18,41 +16,28 @@ import dev.maire.nourished.client.screen.diet.dynamic.modules.DietScreenModules;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
 /**
- * Only the "Today" header stays drawn directly here now (small static text/icon, not worth its own
- * class). Calories, Balance, Recent Meals, Eat more of..., and Active Effects are all independent
- * {@link MarieComponent}s — {@link CaloriesComponent}, {@link BalanceComponent}, {@link
- * RecentMealsComponent}, {@link EatMoreComponent}, {@link ActiveEffectsComponent} — built via {@link
- * DietScreenModules#build} from {@link dev.marie.framework.ui.component.ModuleRegistry} rather than
- * hardcoded fields, and looked up here by type via {@link DietScreenModules#find} rather than list
- * position. None of them are positioned by {@link #layout()} — a {@link Layout} recomputes child
+ * The Diet Screen's left column. Calories, Balance, Recent Meals, Eat more of..., and Active Effects
+ * are all independent {@link MarieComponent}s — {@link CaloriesComponent}, {@link BalanceComponent},
+ * {@link RecentMealsComponent}, {@link EatMoreComponent}, {@link ActiveEffectsComponent} — built via
+ * {@link DietScreenModules#build} from {@link dev.marie.framework.ui.component.ModuleRegistry} rather
+ * than hardcoded fields, and looked up here by type via {@link DietScreenModules#find} rather than
+ * list position. None of them are positioned by {@link #layout()} — a {@link Layout} recomputes child
  * position every {@code render()} call, which would silently override any future drag/resize commit
  * on the very next frame. Instead each resolves its own {@link Bounds} once at construction (an
  * offset from the panel's current position if the user has already committed a drag/resize,
- * otherwise today's default stacked position — see {@link DietScreenPersistence
+ * otherwise the default stacked position — see {@link DietScreenPersistence
  * #resolveRelativeToPanel}), and this container renders them directly against that Bounds.
  * {@code layout()}/{@code columnLayout} are kept only for {@link Container} structural conformance
  * ({@code children()}/{@code addChild()} etc.), not because anything still calls
- * {@code computeBounds()} on them. All coordinates for the "Today" header that stays inline here are
- * expressed in DietScreen's original local (pre-scale) pixel space and converted to absolute screen
- * pixels via {@link DietLayout}'s {@code toScreenX}/{@code toScreenY}/{@code toScreenDim} helpers,
- * same as {@link DietPanelContainer}.
+ * {@code computeBounds()} on them. (The column used to draw a "Today" header with a sunflower icon
+ * above the boxes; it was removed, but the boxes still start at the same default height so they stay
+ * level with the Intake Breakdown column.)
  */
 public final class DietLeftColumnComponent implements Container {
-
-    private static int todayTextColor() {
-        return MarieColors.resolveColor(NourishedColors.DIET_TODAY);
-    }
 
     private final TrackingData data;
     private final DietLayout.Layout layout;
@@ -114,8 +99,8 @@ public final class DietLeftColumnComponent implements Container {
     }
 
     /**
-     * Local (pre-scale) Y just past the "Today" header block (still drawn inline — see {@link
-     * #render}) — the start position handed to the first module in {@link DietScreenModules#build}'s
+     * Local (pre-scale) Y where the column's boxes start (where the removed "Today" header used to
+     * end, kept so the boxes stay level with the Intake Breakdown column) — the start position handed to the first module in {@link DietScreenModules#build}'s
      * chain. Calories/Balance are no longer pre-added here: as of their extraction into {@link
      * CaloriesComponent}/{@link BalanceComponent}, they're chained modules like RecentMeals/EatMore/
      * ActiveEffects, so their space is accounted for by the chain itself (via {@link
@@ -175,20 +160,6 @@ public final class DietLeftColumnComponent implements Container {
         if (data == null) {
             return;
         }
-        Font font = Minecraft.getInstance().font;
-        float scale = (float) layout.scale();
-
-        int x = DietLayout.PAD;
-        int y = 20;
-        int bw = DietLayout.SPLIT - DietLayout.PAD * 2;
-
-        String todayText = Component.translatable("nourished.screen.diet.today").getString();
-        int todayW = font.width(todayText);
-        int todayGroupW = 16 + 4 + todayW;
-        int todayStartX = x + (bw - todayGroupW) / 2;
-        drawItem(context, "minecraft:sunflower", todayStartX, y - 8, scale);
-        drawText(context, todayText, todayStartX + 20, y - 4, todayTextColor(), scale);
-
         CaloriesComponent calories = caloriesComponent();
         BalanceComponent balance = balanceComponent();
         RecentMealsComponent recentMeals = recentMealsComponent();
@@ -217,28 +188,4 @@ public final class DietLeftColumnComponent implements Container {
             activeEffects.render(context, activeEffectsBounds);
         }
     }
-
-    // ── Coordinate + drawing helpers ─────────────────────────────────────────
-
-    private int sx(int localX) {
-        return DietLayout.toScreenX(layout, localX);
-    }
-
-    private int sy(int localY) {
-        return DietLayout.toScreenY(layout, localY);
-    }
-
-    private int sd(int localDim) {
-        return DietLayout.toScreenDim(layout, localDim);
-    }
-
-    private void drawText(RenderContext context, String text, int localX, int localY, int color, float scale) {
-        context.drawText(text, sx(localX), sy(localY), color, scale);
-    }
-
-    private void drawItem(RenderContext context, String itemId, int localX, int localY, float scale) {
-        Item item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(itemId)).orElse(net.minecraft.world.item.Items.APPLE);
-        context.drawItem(new ItemStack(item), sx(localX), sy(localY), scale);
-    }
-
 }

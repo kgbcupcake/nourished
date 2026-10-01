@@ -45,7 +45,6 @@ public final class NourishedColors {
     public static final ColorKey HUD_BORDER = themed("hud.border", ThemeKey.BORDER);
     public static final ColorKey DIET_PANEL = shaded("panel.diet", ThemeKey.PANEL_BACKGROUND, DIET_PANEL_SHADE);
     public static final ColorKey DIET_TITLE = themed("diet.title", ThemeKey.TEXT_PRIMARY);
-    public static final ColorKey DIET_TODAY = themed("diet.today_text", ThemeKey.TEXT_PRIMARY);
 
     // Calories and the accents of the Calorie History / Activity Log panels
     public static final ColorKey CALORIE_VALUE = themed("calorie.value", ThemeKey.TEXT_PRIMARY);

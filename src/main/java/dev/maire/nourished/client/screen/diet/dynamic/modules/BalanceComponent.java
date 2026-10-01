@@ -200,6 +200,8 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
             int lastPipRight = firstPipX;
             for (int i = 0; i < 5; i++) {
                 int px = support.sx(pipStartX) + Math.round(i * support.sd(13) * barScale) + barDx;
+                // Plain fillRects, so the wrapper's automatic Bar glow (and its Pulse) never sees them — glow each pip here.
+                MarieModuleSettings.drawBarGlow(baseContext, store, ID, px, pipY, pipW, pipH);
                 context.fillRect(px, pipY, pipW, pipH, i < filledPips ? balColor : SummaryBoxRenderSupport.barTrackColor());
                 lastPipRight = px + pipW;
             }

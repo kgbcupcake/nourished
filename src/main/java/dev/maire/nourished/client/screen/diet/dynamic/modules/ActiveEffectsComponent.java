@@ -72,6 +72,8 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         Minecraft mc = Minecraft.getInstance();
         int effectCount = (mc.player != null) ? mc.player.getActiveEffects().size() : 0;
         int naturalLineCount = Math.max(1, Math.min(3, effectCount));
+        // The default line height, not the grown one render() spaces lines by — see RecentMealsComponent:
+        // Icon size must never change where the boxes below this one stack.
         this.effectsBoxH = HEADER_LOCAL_HEIGHT + naturalLineCount * 9;
         // Continuous fade instead of an all-or-nothing header floor, and instead of dropping whole
         // effect lines one at a time as room tightens (the old stackedBodyUnitsFit behavior): every
@@ -183,7 +185,10 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         // contentScale), so this is a no-op at the default, unzoomed state. Purely cosmetic (keeps
         // lines from visually colliding) — pushClip below is what actually bounds on-screen overflow.
         double zoomRatio = contentScale > 0 ? scale / contentScale : 1.0d;
-        int zoomedHeaderAdvance = Math.max(1, (int) Math.round(HEADER_LOCAL_HEIGHT * zoomRatio));
+        // The header-to-first-line gap is fixed at its default-text-size value (like Recent Meals'),
+        // not grown with the effect text: it's where the icons start too, so growing it with the text
+        // size slider nudged every icon down. Header size has its own slider and never affected it.
+        int zoomedHeaderAdvance = Math.max(1, (int) Math.round(HEADER_LOCAL_HEIGHT / (contentScale > 0 ? contentScale : 1.0d)));
         int zoomedLineAdvance = Math.max(1, (int) Math.round(9 * zoomRatio));
 
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
@@ -222,9 +227,26 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
             // Each line is "+ [icon] Name": the effect's icon and its +/- marker are the icon group (Move Icons/
             // Hide Icons/icon brightness), the name alone is text (Move Text), so the two move apart. The icon
             // fits the 9-unit text line at Icon size 100%, same fit-ratio idea as Recent Meals' rows.
-            float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID, false)) * (9f / 16f);
+            float userIconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID, false));
+            float iconScale = userIconScale * (9f / 16f);
             int iconPx = Math.round(16 * iconScale);
+            // The +/- marker belongs to the icon group, so it sizes with Icon size (100% = the default
+            // text size), never with the text size slider — which otherwise pushed the icons sideways.
+            float markerScale = userIconScale;
+            int markerPx = Math.round(9 * markerScale);
             int textPx = Math.round(9 * scale);
+            // The icon group (marker + icon) and the names each keep their own spacing: Icon size spreads
+            // only the icons apart (so bigger icons don't stack on top of each other), and never moves the
+            // names — they stay at the spacing and indent of a 100% icon, so a column moved apart with
+            // Move Icons stays put. At the default sizes it's the same layout as always.
+            int textPitch = (int) Math.round(zoomedLineAdvance * contentScale);
+            // The icons' base spacing is the line spacing at the default text size, so the text size
+            // slider doesn't move the icons either.
+            int defaultTextPitch = (int) Math.round(Math.max(1, Math.round(9 / contentScale)) * contentScale);
+            int iconPitch = linePx(defaultTextPitch, Math.max(iconPx, markerPx));
+            int defaultIconPx = Math.round(16 * (9f / 16f));
+            int textTop = sy(y);
+            int iconTop = textTop;
             // The marker is text, but it belongs to the icon group: drawn outside `context` (whose drawText would
             // shift it by the text offset and record it as text) at the icon offset, and recorded as icon extent
             // so Move Text's outline hugs just the names while Move Icons' covers marker and icon together.
@@ -242,21 +264,36 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
                 int color = type.isBeneficial() ? beneficialColor() : harmfulColor();
                 String prefix = type.isBeneficial() ? "+ " : "- ";
                 int lineX = sx(x);
-                int lineY = sy(y);
-                int prefixW = context.textWidth(prefix, scale);
+                int lineY = textTop + (textPitch - textPx) / 2;
+                // The marker travels with its icon (same group), centered on the icon's own slot.
+                int markerY = iconTop + (iconPitch - markerPx) / 2;
+                int prefixW = context.textWidth(prefix, markerScale);
                 if (!iconsHidden) {
-                    markerContext.drawText(prefix, lineX + iconDx, lineY + iconDy, color, scale);
-                    MarieModuleSettings.recordIconExtent(store, ID, lineX + iconDx, lineY + iconDy, context.textWidth(prefix.strip(), scale), textPx);
+                    markerContext.drawText(prefix, lineX + iconDx, markerY + iconDy, color, markerScale);
+                    MarieModuleSettings.recordIconExtent(store, ID, lineX + iconDx, markerY + iconDy, context.textWidth(prefix.strip(), markerScale), markerPx);
                 }
                 int iconX = lineX + prefixW;
-                context.drawEffectIcon(effect.getEffect(), iconX, lineY + (textPx - iconPx) / 2, iconScale);
-                context.drawText(label, iconX + iconPx + 1, lineY, color, scale);
-                y += zoomedLineAdvance;
+                context.drawEffectIcon(effect.getEffect(), iconX, iconTop + (iconPitch - iconPx) / 2, iconScale);
+                // The name's indent is that of a default-size marker and icon, so neither Icon size nor the
+                // text size slider moves where the names start.
+                int labelX = lineX + context.textWidth(prefix, 1.0f) + defaultIconPx + 1;
+                context.drawText(label, labelX, lineY, color, scale);
+                textTop += textPitch;
+                iconTop += iconPitch;
                 count++;
             }
         } finally {
             context.popClip();
         }
+    }
+
+    /**
+     * Screen-pixel spacing between consecutive effect icons: {@code base} (the line spacing at the
+     * default text size) until the icon outgrows it, then the icon height plus a 1px gap so
+     * neighbouring icons never touch.
+     */
+    private static int linePx(int base, int iconPx) {
+        return iconPx > base ? iconPx + 1 : base;
     }
 
     // ── Coordinate + drawing helpers ─────────────────────────────────────────

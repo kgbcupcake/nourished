@@ -34,6 +34,17 @@ public final class DietOptionsPanel {
                 .withoutPadding()
                 .withoutMoveAndHide()
                 .withoutSizes()
+                // The panel's own box and "Diet" title: Background shade and Border opacity/shade (Style),
+                // Border shadow, and Border glow — Background opacity stays the config-backed slider below.
+                .withOwnStyle()
+                .withShadow()
+                .withGlow()
+                .withoutBarGlow()
+                .styleRows(p -> p.headerSize(DietScreenPersistence.get(), DietScreenEditTarget.PANEL_ID, "nourished.options.diet.title_size")
+                        .toggle(text("nourished.options.diet.hide_title"),
+                                () -> MarieModuleSettings.isHeaderHidden(DietScreenPersistence.get(), DietScreenEditTarget.PANEL_ID),
+                                v -> MarieModuleSettings.setHeaderHidden(DietScreenPersistence.get(), DietScreenEditTarget.PANEL_ID, v), () -> {})
+                        .defaultValue(false))
                 .opacity(() -> cc().dietBackgroundOpacity(), v -> cc().setDietBackgroundOpacity(v), DEFAULT_OPACITY)
                 .textBrightness(() -> cc().dietTextBrightness(), v -> cc().setDietTextBrightness(v))
                 .iconBrightness(() -> cc().dietIconBrightness(), v -> cc().setDietIconBrightness(v))
@@ -62,18 +73,17 @@ public final class DietOptionsPanel {
                     // (see OptionLayout#allRows) — no separate tab-scoped reset needed here anymore.
                 })
                 .extraTabs(panel -> {
+                    // No per-nutrient colors here: each Intake Breakdown row's own Colors tab has its Bar fill.
                     panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
-                    NourishedColorSlots.addNutrients(panel);
                     NourishedColorSlots.addFixed(panel, NourishedColors.DIET_PANEL, "nourished.options.color.panel");
                     NourishedColorSlots.addFixed(panel, NourishedColors.DIET_TITLE, "nourished.options.color.title");
-                    NourishedColorSlots.addFixed(panel, NourishedColors.DIET_TODAY, "nourished.options.color.today_text");
+                    // The main panel's own border line (the one its Pulse breathes) — its own slot here
+                    // rather than on the Shared tab.
+                    NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
                     // Roles several Diet boxes draw live here once, so a shared key is never repeated across tabs. The
                     // toggle's housing, border and lever colors (toggle.housing/border/lever) are deliberately left to colors.json.
                     panel.colorTab(text("nourished.options.tab.shared"));
-                    NourishedColorSlots.addFixed(panel, NourishedColors.TEXT, "nourished.options.color.text");
                     NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_HEADER, "nourished.options.color.intake_header_text");
-                    NourishedColorSlots.addFixed(panel, NourishedColors.TEXT_MUTED, "nourished.options.color.muted_text");
-                    NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
                     NourishedColorSlots.addFixed(panel, NourishedColors.DIVIDER, "nourished.options.color.divider");
                     NourishedColorSlots.addFixed(panel, NourishedColors.TOGGLE_ON, "nourished.options.color.toggle_on");
                     NourishedColorSlots.addFixed(panel, NourishedColors.TOGGLE_OFF, "nourished.options.color.toggle_off");
@@ -156,7 +166,7 @@ public final class DietOptionsPanel {
         StandardPanelBuilder panel = MarieModuleSettings.standardPanel(title, DietScreenPersistence.get(), moduleId)
                 .storedBrightness()
                 .withoutPadding()
-                // Self-contained Background/Border opacity+shade, Text/Border shadow and the Glow tab —
+                // Self-contained Background/Border opacity+shade, Border shadow and the Glow tab —
                 // every Diet box gets these for free, no config field needed (see MariesLib's
                 // StandardPanelBuilder#withOwnStyle/withShadow/withGlow).
                 .withOwnStyle()

@@ -13,6 +13,7 @@ import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.geometry.Size;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
+import dev.maire.nourished.client.hud.dynamic.edit.HudDrawnExtents;
 import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
 import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -29,6 +30,9 @@ import java.util.Map;
  * it's taken from {@link HudLayout.Layout}, which stays the single source of truth for bar sizing.
  */
 final class NutrientBarComponent implements MarieComponent {
+
+    /** The Nutrient HUD panel's own id, whose Pulse settings every row's bar glow follows. */
+    private static final String HUD_PANEL_ID = "nourished.hud.panel";
 
     private final String nutrientKey;
     private final boolean verticalMode;
@@ -126,14 +130,11 @@ final class NutrientBarComponent implements MarieComponent {
      * the panel-wide Glow tab's single Bar glow setting.
      */
     private static void drawNutrientBarGlow(RenderContext context, String nutrientKey, int x, int y, int width, int height) {
+        var store = UiStatePersistence.get();
         String panelId = "nourished.hud.bar." + nutrientKey;
-        double strength = MarieModuleSettings.barGlowStrength(UiStatePersistence.get(), panelId);
-        if (strength <= 0) {
-            return;
-        }
-        int color = MarieModuleSettings.barGlowColor(UiStatePersistence.get(), panelId);
-        int alpha = Math.min(255, (int) Math.round(strength * 255));
-        context.drawGlow(x, y, width, height, (alpha << 24) | (color & 0xFFFFFF));
+        // Breathes with the HUD panel's own Pulse (Pulse tab), shared by every nutrient's bar glow.
+        MarieModuleSettings.barGlowPulse(store, HUD_PANEL_ID).drawGlow(context, x, y, width, height,
+                MarieModuleSettings.barGlowColor(store, panelId), MarieModuleSettings.barGlowStrength(store, panelId));
     }
 
     /**
@@ -214,12 +215,17 @@ final class NutrientBarComponent implements MarieComponent {
                 drawNutrientBarGlow(context, nutrientKey, barX + barDx, barY + barDy, barW, barH);
                 context.drawVerticalBar(barX + barDx, barY + barDy, barW, barH, value, bgColor, fillColor);
                 drawFlashOverlay(context, barX + barDx, barY + barDy, barW, barH);
+                int left = Math.min(pctX, barX);
+                HudDrawnExtents.record(nutrientKey, HudDrawnExtents.Part.BAR, left + barDx, bounds.y() + barDy,
+                        Math.max(pctX + pctSw, barX + barW) - left, barY + barH - bounds.y());
             }
 
             if (!textHidden) {
                 int labelSw = (int) Math.ceil(font.width(label) * contentScale);
                 int labelX = bounds.x() + (bounds.width() - labelSw) / 2;
                 context.drawText(label, labelX + textDx, barY + barH + 2 + textDy, labelColor, contentScale);
+                HudDrawnExtents.record(nutrientKey, HudDrawnExtents.Part.TEXT, labelX + textDx, barY + barH + 2 + textDy,
+                        labelSw, (int) Math.ceil(9 * contentScale));
             }
         } else {
             int rowCenterY = bounds.y() + bounds.height() / 2;
@@ -229,7 +235,11 @@ final class NutrientBarComponent implements MarieComponent {
             float tint = (float) NourishedClientConfig.get().hudIconBrightness();
             RenderSystem.setShaderColor(tint, tint, tint, alpha);
             try {
-                if (!iconsHidden) context.drawItem(resolveIconStack(nutrientKey), bounds.x() + iconDx, rowCenterY - iconSize / 2 + iconDy, iconScale);
+                if (!iconsHidden) {
+                    context.drawItem(resolveIconStack(nutrientKey), bounds.x() + iconDx, rowCenterY - iconSize / 2 + iconDy, iconScale);
+                    int drawnIcon = Math.round(16 * iconScale);
+                    HudDrawnExtents.record(nutrientKey, HudDrawnExtents.Part.ICON, bounds.x() + iconDx, rowCenterY - iconSize / 2 + iconDy, drawnIcon, drawnIcon);
+                }
             } finally {
                 RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
             }
@@ -237,6 +247,8 @@ final class NutrientBarComponent implements MarieComponent {
             int labelX = bounds.x() + iconSize + HudDrawHelpers.ICON_LABEL_GAP;
             if (!textHidden) {
                 context.drawText(label, labelX + textDx, textY + textDy, labelColor, contentScale);
+                HudDrawnExtents.record(nutrientKey, HudDrawnExtents.Part.TEXT, labelX + textDx, textY + textDy,
+                        (int) Math.ceil(font.width(label) * contentScale), (int) Math.ceil(9 * contentScale));
             }
 
             int barX = labelX + hudLayout.maxLabelSw() + HudDrawHelpers.LABEL_BAR_GAP;
@@ -254,6 +266,10 @@ final class NutrientBarComponent implements MarieComponent {
             int pctX = barX + barW + HudDrawHelpers.BAR_PCT_GAP;
             int pctY = rowCenterY - (int) Math.ceil(9 * barScale) / 2;
             context.drawText(pctText, pctX + barDx, pctY + barDy, pctColor, barScale);
+            int pctH = (int) Math.ceil(9 * barScale);
+            int top = Math.min(barY, pctY);
+            HudDrawnExtents.record(nutrientKey, HudDrawnExtents.Part.BAR, barX + barDx, top + barDy,
+                    pctX + (int) Math.ceil(font.width(pctText) * barScale) - barX, Math.max(barY + barH, pctY + pctH) - top);
         }
     }
 }
