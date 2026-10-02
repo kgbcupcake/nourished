@@ -3,6 +3,8 @@ package dev.maire.nourished.client.screen.diet.classic;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
+import dev.marie.framework.tracking.tracker.MarieTracking;
+import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -58,16 +60,17 @@ final class ClassicDietLeftPanel {
         g.drawString(mc.font, Component.translatable("nourished.screen.diet.today"),
                 todayStartX + 20, y - 4, ClassicDietDrawHelpers.COL_GOLD, false);
         y += 10;
-        if (FeatureFlagCache.enableTotalTracking() && cc.showCaloriesBox()) {
+        if (FeatureFlagCache.enableTotalTracking() && FeatureFlagCache.enableCalorieHistory() && cc.showCaloriesBox()) {
             ClassicDietDrawHelpers.drawRoundedBox(g, x - 2, y - 2, bw + 4, 40);
             g.renderItem(new net.minecraft.world.item.ItemStack(
                             BuiltInRegistries.ITEM.get(ResourceLocation.parse("minecraft:fire_charge"))),
                     x, y + 3);
             g.drawString(mc.font, Component.translatable("nourished.screen.diet.calories_label"),
                     x + 22, y + 4, ClassicDietDrawHelpers.COL_WHITE, false);
-            String calStr = (int) data.total + " / " + (int) data.maxTotal;
+            float today = MarieTracking.getCurrentTrackerValue(mc.player, NourishedAPI.CALORIES_TRACKER_ID);
+            String calStr = (int) today + " / " + (int) data.maxTotal;
             g.drawString(mc.font, calStr, x + 22, y + 15, ClassicDietDrawHelpers.COL_GREEN, false);
-            float calPct = data.maxTotal > 0 ? Mth.clamp(data.total / data.maxTotal, 0f, 1f) : 0f;
+            float calPct = data.maxTotal > 0 ? Mth.clamp(today / data.maxTotal, 0f, 1f) : 0f;
             ClassicDietDrawHelpers.drawSolidBar(g, x, y + 31, bw, 4, calPct, ClassicDietDrawHelpers.COL_GREEN);
             y += 45;
         }

@@ -22,7 +22,6 @@ public final class ScannerCategory {
                                     config.scannerEnableRecipeInheritance()
                             )
                             .setDefaultValue(true)
-                            .setTooltip(Component.translatable("config.nourished.scanner.enableRecipeInheritance.desc"))
                             .setSaveConsumer(config::setScannerEnableRecipeInheritance)
                             .build()
             );
@@ -37,8 +36,7 @@ public final class ScannerCategory {
                             0.0d,
                             20.0d,
                             3.0d,
-                            config::setScannerConfidenceSpreadThreshold,
-                            Component.translatable("config.nourished.scanner.confidenceSpreadThreshold.desc")
+                            config::setScannerConfidenceSpreadThreshold
                     )
             );
         }
@@ -52,8 +50,7 @@ public final class ScannerCategory {
                             0.0d,
                             1.0d,
                             0.20d,
-                            config::setMultiNutrientInheritanceThreshold,
-                            Component.translatable("config.nourished.scanner.multiNutrientInheritanceThreshold.desc")
+                            config::setMultiNutrientInheritanceThreshold
                     )
             );
         }

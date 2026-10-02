@@ -1,0 +1,93 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "compat_mods",
+  "condition": {
+    "type": "modonomicon:and",
+    "children": [
+      {
+        "type": "modonomicon:entry_read",
+        "entry_id": "compat_mods/overview"
+      },
+      {
+        "type": "modonomicon:mod_loaded",
+        "mod_id": "peakstamina"
+      }
+    ]
+  },
+  "description": "book.nourished.nourished_guide.compat_mods.peak_stamina.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:feather"
+  },
+  "name": "book.nourished.nourished_guide.compat_mods.peak_stamina.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.peak_stamina.peak_stamina.text",
+      "title": "book.nourished.nourished_guide.compat_mods.peak_stamina.peak_stamina.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.peak_stamina.how_its_calculated.text",
+      "title": "book.nourished.nourished_guide.compat_mods.peak_stamina.how_its_calculated.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.peak_stamina.bonuses.text",
+      "title": "book.nourished.nourished_guide.compat_mods.peak_stamina.bonuses.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.peak_stamina.penalties.text",
+      "title": "book.nourished.nourished_guide.compat_mods.peak_stamina.penalties.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.peak_stamina.practical_advice.text",
+      "title": "book.nourished.nourished_guide.compat_mods.peak_stamina.practical_advice.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "compat_mods/overview",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 9,
+  "x": 3,
+  "y": 2
+}

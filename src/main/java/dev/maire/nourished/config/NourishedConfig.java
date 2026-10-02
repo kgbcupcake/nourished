@@ -257,8 +257,8 @@ public final class NourishedConfig {
                 .comment("Steepness of the logistic diminishing curve. Higher = sharper transition.")
                 .defineInRange("diminishingSteepness", ConfigDefaultsLoader.getDouble(defaults, "diminishingSteepness", 0.8), 0.1, 3.0);
         diminishingMidpoint = builder
-                .comment("Midpoint of the logistic curve (eat count where multiplier = 0.5).")
-                .defineInRange("diminishingMidpoint", ConfigDefaultsLoader.getDouble(defaults, "diminishingMidpoint", 2.0), 1.0, 10.0);
+                .comment("Free bites: how many times the same food can be eaten at full value before diminishing returns start reducing it (the curve's midpoint, where the multiplier is 1.0). Streak weighting only begins after these bites. 0 = reduce from the first repeat.")
+                .defineInRange("diminishingMidpoint", ConfigDefaultsLoader.getDouble(defaults, "diminishingMidpoint", 2.0), 0.0, 10.0);
 
         // Streak settings
         streakWindowMs = builder
@@ -667,11 +667,8 @@ public final class NourishedConfig {
      * Resolves decay rate for a nutrient: per-nutrient override (when set), else the global slider.
      */
     public double resolvedDecayRateFor(String key) {
-        ModConfigSpec.DoubleValue value = nutrientDecayRateOverrides.get(key);
-        if (value != null && value.get() >= 0d) {
-            return value.get();
-        }
-        return decayRate();
+        double override = NutrientOverrideStore.decayRate(key);
+        return override >= 0d ? override : decayRate();
     }
 
     /** Shared resolution for synced snapshots and live config (override map, then global). */
@@ -681,11 +678,11 @@ public final class NourishedConfig {
     }
 
     public double criticalThresholdFor(String key) {
-        ModConfigSpec.DoubleValue value = nutrientCriticalThresholdOverrides.get(key);
-        if (value == null || value.get() < 0d) return criticalThreshold();
-        return value.get();
+        double override = NutrientOverrideStore.criticalThreshold(key);
+        return override >= 0d ? override : criticalThreshold();
     }
 
+    /** Legacy TOML entries, only read to migrate into {@link NutrientOverrideStore}. */
     public Map<String, ModConfigSpec.DoubleValue> nutrientDecayRateOverrides() {
         return nutrientDecayRateOverrides;
     }

@@ -1,0 +1,61 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "server_owners",
+  "description": "book.nourished.nourished_guide.server_owners.configuring_effects.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:command_block"
+  },
+  "name": "book.nourished.nourished_guide.server_owners.configuring_effects.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.server_owners.configuring_effects.configuring_effects.text",
+      "title": "book.nourished.nourished_guide.server_owners.configuring_effects.configuring_effects.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.server_owners.configuring_effects.effect_entry_fields.text",
+      "title": "book.nourished.nourished_guide.server_owners.configuring_effects.effect_entry_fields.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.server_owners.configuring_effects.disabling_effects.text",
+      "title": "book.nourished.nourished_guide.server_owners.configuring_effects.disabling_effects.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.server_owners.configuring_effects.reloading_changes.text",
+      "title": "book.nourished.nourished_guide.server_owners.configuring_effects.reloading_changes.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 0,
+  "x": -2,
+  "y": -1
+}

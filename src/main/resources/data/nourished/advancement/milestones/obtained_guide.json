@@ -1,0 +1,32 @@
+{
+  "display": {
+    "icon": {
+      "id": "nourished:nourished_book"
+    },
+    "title": {
+      "translate": "advancement.nourished.milestones.obtained_guide.title"
+    },
+    "description": {
+      "translate": "advancement.nourished.milestones.obtained_guide.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "parent": "nourished:milestones/root",
+  "criteria": {
+    "got_book": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "nourished:nourished_book"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

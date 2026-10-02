@@ -83,8 +83,7 @@ public final class DietLayout {
      * Whether a block starting at {@code startLocalY} and {@code blockLocalHeight} tall still fits
      * within the panel's live vertical space, leaving {@link #PAD} clearance above the bottom edge —
      * the single fit-check every stacked left-column sub-box (Calories/Balance/RecentMeals/EatMore/
-     * ActiveEffects) and the right column's intake legend share, replacing what used to be five
-     * near-identical hand-rolled copies (plus a sixth, differently-anchored one for the legend) that
+     * ActiveEffects) share, replacing what used to be five near-identical hand-rolled copies that
      * could each drift out of sync with each other.
      */
     public static boolean fitsInPanel(Layout layout, int startLocalY, int blockLocalHeight) {
@@ -121,6 +120,16 @@ public final class DietLayout {
 
     public static int toScreenDim(Layout layout, int localDim) {
         return Math.max(1, (int) Math.round(localDim * layout.scale()));
+    }
+
+    /**
+     * Screen X the right ("Intake Breakdown") column's content starts at — local X {@code SPLIT +
+     * PAD}, matching the legacy hand-drawn column's {@code rx = SPLIT + PAD} and every {@code
+     * Intake*Component}'s {@code LOCAL_WIDTH} (each measured from this same X to {@code WIDTH - PAD}).
+     * The left column's equivalent is local X {@code 0} (i.e. plain {@link #toScreenX}).
+     */
+    public static int rightColumnContentX(Layout layout) {
+        return toScreenX(layout, SPLIT + PAD);
     }
 
     /** Single source of truth for the column split — every caller (render, drag preview, clamps) must go through this. */

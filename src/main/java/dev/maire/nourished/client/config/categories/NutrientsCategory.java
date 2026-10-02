@@ -3,6 +3,7 @@ package dev.maire.nourished.client.config.categories;
 import dev.maire.nourished.client.config.NourishedConfigScreen.PendingCurvePreset;
 import dev.maire.nourished.client.config.NourishedConfigScreen.PendingOverride;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.config.NutrientOverrideStore;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurveDef;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurvePreset;
@@ -12,7 +13,6 @@ import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +32,8 @@ public final class NutrientsCategory {
     ) {
         ConfigCategory nutrients = builder.getOrCreateCategory(Component.translatable("config.nourished.category.nutrients"));
         for (String key : NutrientRegistry.getKeys()) {
-            double decayRaw = overrideRaw(config.nutrientDecayRateOverrides().get(key));
-            double criticalRaw = overrideRaw(config.nutrientCriticalThresholdOverrides().get(key));
+            double decayRaw = NutrientOverrideStore.decayRate(key);
+            double criticalRaw = NutrientOverrideStore.criticalThreshold(key);
 
             PendingOverride decay = new PendingOverride(decayRaw >= 0d, decayRaw >= 0d ? decayRaw : config.decayRate());
             PendingOverride critical = new PendingOverride(criticalRaw >= 0d, criticalRaw >= 0d ? criticalRaw : config.criticalThreshold());
@@ -87,7 +87,6 @@ public final class NutrientsCategory {
                             )
                             .setSelections(curvePresetDropdownOptions())
                             .setDefaultValue("")
-                            .setTooltip(Component.translatable("config.nourished.nutrient.curvePreset.desc"))
                             .setSaveConsumer(curvePending.presetId::set)
                             .build()
             );
@@ -108,8 +107,5 @@ public final class NutrientsCategory {
             options.add(preset.name());
         }
         return options;
-    }
-    private static double overrideRaw(ModConfigSpec.DoubleValue value) {
-        return value != null ? value.get() : -1.0d;
     }
 }

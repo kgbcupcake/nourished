@@ -54,7 +54,7 @@ public ModuleToggleListEntry(
             String dependsOnKey,
             Map<String, AtomicBoolean> modulePending
     ) {
-        super(label, () -> Optional.of(new Component[]{tooltip}), false);
+        super(label, Optional::empty, false);
         this.label = label;
         this.pending = pending;
         this.group = group;

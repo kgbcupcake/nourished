@@ -16,9 +16,7 @@ public final class HudNutrientColorsResetAllEntry extends TooltipListEntry<Objec
     private final Button button;
 
     public HudNutrientColorsResetAllEntry(Runnable onResetAll) {
-        super(Component.empty(), () -> Optional.of(new Component[]{
-                Component.translatable("config.nourished.hudColors.resetAll.tooltip")
-        }), false);
+        super(Component.empty(), Optional::empty, false);
         this.button = Button.builder(Component.translatable("config.nourished.hudColors.resetAll"), b -> onResetAll.run())
                 .bounds(0, 0, 160, 20)
                 .build();

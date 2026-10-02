@@ -1,19 +1,16 @@
 package dev.maire.nourished.client.config.categories;
 
-import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.config.NourishedClientConfig;
-import com.mojang.blaze3d.platform.InputConstants;
+import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,7 +23,8 @@ public final class DietScreenCategory {
 
         category.addEntry(new DietScreenResetPositionListEntry(client));
 
-        category.addEntry(
+        List<AbstractConfigListEntry> layoutEntries = new ArrayList<>();
+        layoutEntries.add(
                 buildDoubleSlider(
                         eb,
                         Component.translatable("config.nourished.dietScale"),
@@ -34,11 +32,10 @@ public final class DietScreenCategory {
                         0.5d,
                         1.5d,
                         1.0d,
-                        client::setDietScale,
-                        Component.translatable("config.nourished.dietScale.desc")
+                        client::setDietScale
                 )
         );
-        category.addEntry(
+        layoutEntries.add(
                 buildFloatSlider(
                         eb,
                         Component.translatable("config.nourished.dietBackgroundOpacity"),
@@ -46,25 +43,22 @@ public final class DietScreenCategory {
                         0.0f,
                         1.0f,
                         204f / 255f,
-                        v -> client.setDietBackgroundOpacity(v),
-                        Component.translatable("config.nourished.dietBackgroundOpacity.desc")
+                        v -> client.setDietBackgroundOpacity(v)
                 )
         );
-        category.addEntry(
+        layoutEntries.add(
                 eb.startIntSlider(Component.translatable("config.nourished.dietOffsetX"), client.dietOffsetX(), -2000, 2000)
                         .setDefaultValue(0)
                         .setSaveConsumer(client::setDietOffsetX)
-                        .setTooltip(Component.translatable("config.nourished.dietOffsetX.desc"))
                         .build()
         );
-        category.addEntry(
+        layoutEntries.add(
                 eb.startIntSlider(Component.translatable("config.nourished.dietOffsetY"), client.dietOffsetY(), -2000, 2000)
                         .setDefaultValue(0)
                         .setSaveConsumer(client::setDietOffsetY)
-                        .setTooltip(Component.translatable("config.nourished.dietOffsetY.desc"))
                         .build()
         );
-        category.addEntry(
+        layoutEntries.add(
                 buildDoubleSlider(
                         eb,
                         Component.translatable("config.nourished.recentMealsBoxScale"),
@@ -72,11 +66,10 @@ public final class DietScreenCategory {
                         0.5d,
                         1.5d,
                         1.0d,
-                        client::setRecentMealsBoxScale,
-                        Component.translatable("config.nourished.recentMealsBoxScale.desc")
+                        client::setRecentMealsBoxScale
                 )
         );
-        category.addEntry(
+        layoutEntries.add(
                 buildDoubleSlider(
                         eb,
                         Component.translatable("config.nourished.eatMoreBoxScale"),
@@ -84,79 +77,58 @@ public final class DietScreenCategory {
                         0.5d,
                         1.5d,
                         1.0d,
-                        client::setEatMoreBoxScale,
-                        Component.translatable("config.nourished.eatMoreBoxScale.desc")
+                        client::setEatMoreBoxScale
                 )
         );
-        category.addEntry(
+        category.addEntry(eb.startSubCategory(Component.translatable("config.nourished.dietScreen.group.layout"), layoutEntries).setExpanded(true).build());
+
+        List<AbstractConfigListEntry> visibilityEntries = new ArrayList<>();
+        visibilityEntries.add(
                 eb.startBooleanToggle(Component.translatable("config.nourished.showRecentMeals"), client.showRecentMeals())
                         .setDefaultValue(true)
                         .setSaveConsumer(client::setShowRecentMeals)
                         .build()
         );
-        category.addEntry(
+        visibilityEntries.add(
                 eb.startBooleanToggle(Component.translatable("config.nourished.showEatMoreOf"), client.showEatMoreOf())
                         .setDefaultValue(true)
                         .setSaveConsumer(client::setShowEatMoreOf)
                         .build()
         );
-        category.addEntry(
+        visibilityEntries.add(
                 eb.startBooleanToggle(Component.translatable("config.nourished.showActiveEffects"), client.showActiveEffects())
                         .setDefaultValue(true)
                         .setSaveConsumer(client::setShowActiveEffects)
                         .build()
         );
-        category.addEntry(
+        visibilityEntries.add(
                 eb.startBooleanToggle(Component.translatable("config.nourished.showCaloriesBox"), client.showCaloriesBox())
                         .setDefaultValue(true)
                         .setSaveConsumer(client::setShowCaloriesBox)
                         .build()
         );
-        category.addEntry(
+        visibilityEntries.add(
                 eb.startBooleanToggle(Component.translatable("config.nourished.showBalanceBox"), client.showBalanceBox())
                         .setDefaultValue(true)
                         .setSaveConsumer(client::setShowBalanceBox)
                         .build()
         );
-        category.addEntry(
+        visibilityEntries.add(
                 eb.startBooleanToggle(Component.translatable("config.nourished.showDietScreenButton"), client.showDietScreenButton())
                         .setDefaultValue(true)
                         .setSaveConsumer(client::setShowDietScreenButton)
                         .build()
         );
-        category.addEntry(
+        category.addEntry(eb.startSubCategory(Component.translatable("config.nourished.dietScreen.group.visibility"), visibilityEntries).setExpanded(true).build());
+
+        List<AbstractConfigListEntry> behaviorEntries = new ArrayList<>();
+        behaviorEntries.add(
                 eb.startBooleanToggle(Component.translatable("config.nourished.dietScreenClassicMode"), client.dietScreenClassicMode())
                         .setDefaultValue(false)
                         .setSaveConsumer(client::setDietScreenClassicMode)
-                        .setTooltip(Component.translatable("config.nourished.dietScreenClassicMode.desc"))
                         .build()
         );
-        category.addEntry(
-                eb.startKeyCodeField(
-                                Component.translatable("config.nourished.dietEditHotkey"),
-                                NourishedKeys.EDIT_DIET_SCREEN.getKey()
-                        )
-                        .setDefaultValue(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_J))
-                        .setKeySaveConsumer(key -> {
-                            NourishedKeys.EDIT_DIET_SCREEN.setKey(key);
-                            KeyMapping.resetMapping();
-                            Minecraft.getInstance().options.save();
-                        })
-                        .build()
-        );
-        category.addEntry(
-                eb.startKeyCodeField(
-                                Component.translatable("config.nourished.dietScaleConfigHotkey"),
-                                NourishedKeys.OPEN_SCALE_CONFIG.getKey()
-                        )
-                        .setDefaultValue(InputConstants.UNKNOWN)
-                        .setKeySaveConsumer(key -> {
-                            NourishedKeys.OPEN_SCALE_CONFIG.setKey(key);
-                            KeyMapping.resetMapping();
-                            Minecraft.getInstance().options.save();
-                        })
-                        .build()
-        );
+        category.addEntry(eb.startSubCategory(Component.translatable("config.nourished.dietScreen.group.behavior"), behaviorEntries).setExpanded(false).build());
 
         addReloadButton(category, eb, false);
     }
@@ -172,7 +144,7 @@ public final class DietScreenCategory {
         DietScreenResetPositionListEntry(NourishedClientConfig client) {
             super(
                     Component.translatable("config.nourished.diet.resetPosition"),
-                    () -> Optional.of(new Component[]{Component.translatable("config.nourished.diet.resetPosition.desc")}),
+                    () -> Optional.empty(),
                     false);
             this.client = client;
             this.resetButton = Button.builder(

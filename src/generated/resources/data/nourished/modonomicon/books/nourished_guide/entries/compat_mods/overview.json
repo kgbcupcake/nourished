@@ -1,0 +1,50 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "compat_mods",
+  "description": "book.nourished.nourished_guide.compat_mods.overview.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:crafting_table"
+  },
+  "name": "book.nourished.nourished_guide.compat_mods.overview.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.overview.overview.text",
+      "title": "book.nourished.nourished_guide.compat_mods.overview.overview.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.overview.supported_mods.text",
+      "title": "book.nourished.nourished_guide.compat_mods.overview.supported_mods.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.overview.adding_custom_foods.text",
+      "title": "book.nourished.nourished_guide.compat_mods.overview.adding_custom_foods.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 0,
+  "x": 0,
+  "y": -2
+}

@@ -67,18 +67,45 @@ public final class DietPanelLayoutResolver {
         return DietLayout.toScreenDim(baseLayout, naturalHeightLocal);
     }
 
-    /** Width floors at natural + the current left margin, so the right column's fixed-size content never clips even with an existing margin; height keeps a much lower floor for the minimize-to-title-bar state. */
+    /**
+     * Width floors at {@link DietSubBoxConstraints#MIN_SIZE_MULTIPLIER} of natural (the same shrink
+     * floor every individual sub-box already uses), not the full natural width — a narrower panel just
+     * clips its fixed-size right-column content the same way a shorter panel already clips its bottom
+     * content (see every sub-box's own "extra room stays empty, less room is clipped" comment); it used
+     * to floor at 100% of natural, which made the panel's own corner-resize handle stop shrinking width
+     * at all while height could still shrink to its much lower {@link DietLayout#PANEL_MIN_LOCAL_HEIGHT}
+     * floor.
+     */
     public static Constraint panelConstraint(DietLayout.Layout baseLayout) {
         int naturalWidth = DietLayout.scaledDim(DietLayout.WIDTH, baseLayout.scale()) + baseLayout.leftMargin();
-        int maxHeight = Math.max(DietLayout.scaledDim(DietLayout.HEIGHT, 1.5d), naturalHeight(baseLayout));
+        int minWidth = Math.max(1, (int) Math.round(naturalWidth * DietSubBoxConstraints.MIN_SIZE_MULTIPLIER));
+        // Also never below the panel's current height (it may have grown to fit a box pulled past its
+        // bottom) or the room left down to the screen's bottom, so a panel resize never snaps it shorter.
+        int maxHeight = Math.max(Math.max(DietLayout.scaledDim(DietLayout.HEIGHT, 1.5d), naturalHeight(baseLayout)),
+                Math.max(baseLayout.panelH(), Minecraft.getInstance().getWindow().getGuiScaledHeight() - baseLayout.panelY()));
         return DietSubBoxConstraints.bounded(
                 baseLayout.panelW(), baseLayout.panelH(),
-                naturalWidth, DietLayout.scaledDim(DietLayout.PANEL_MIN_LOCAL_HEIGHT, 1.0d),
-                DietLayout.scaledDim(DietLayout.WIDTH, 1.5d) + baseLayout.leftMargin(), maxHeight
+                minWidth, DietLayout.scaledDim(DietLayout.PANEL_MIN_LOCAL_HEIGHT, 1.0d),
+                Math.max(DietLayout.scaledDim(DietLayout.WIDTH, 1.5d) + baseLayout.leftMargin(),
+                        Minecraft.getInstance().getWindow().getGuiScaledWidth() - baseLayout.panelX()), maxHeight
         );
     }
 
-    /** Confines a sub-box to the panel, including the left-edge margin (draggable, not dead space), stopping at the column divider. */
+    /**
+     * The constraint for a left-edge gesture: identical to {@link #panelConstraint} except width may keep growing
+     * leftward until the panel reaches the screen's left edge, so the left side stretches as freely as the right.
+     */
+    public static Constraint leftEdgeConstraint(DietLayout.Layout baseLayout) {
+        Constraint c = panelConstraint(baseLayout);
+        int maxWidth = Math.max(c.maxSize().width(), baseLayout.panelX() + baseLayout.panelW());
+        return DietSubBoxConstraints.bounded(
+                baseLayout.panelW(), baseLayout.panelH(),
+                c.minSize().width(), c.minSize().height(),
+                maxWidth, c.maxSize().height()
+        );
+    }
+
+    /** Confines a left-column sub-box to the panel, including the left-edge margin (draggable, not dead space), stopping at the column divider. */
     public static Bounds clampToParent(Bounds child, DietLayout.Layout panelLayout) {
         Bounds parent = new Bounds(panelLayout.panelX(), panelLayout.panelY(), panelLayout.panelW(), panelLayout.panelH());
         int w = Math.min(child.width(), parent.width());
@@ -89,6 +116,27 @@ public final class DietPanelLayoutResolver {
         int dividerX = DietLayout.columnGeometry(panelLayout, parent).dividerX();
         w = Math.min(w, Math.max(1, dividerX - parent.x()));
         x = Math.max(parent.x(), Math.min(x, dividerX - w));
+
+        return new Bounds(x, y, w, h);
+    }
+
+    /**
+     * Same as {@link #clampToParent}, but for the right ("Intake Breakdown") column — confines
+     * between the column divider and the panel's right edge instead of the panel's left edge and the
+     * divider. Without this, the Intake Breakdown header/rows were being run through {@link
+     * #clampToParent} in edit mode, which forces a box to stay entirely left of the divider — i.e.
+     * squeezed into the left column's space instead of its own, dragging the whole right column over
+     * on top of Calories/Balance/etc. the moment edit mode resolved its live bounds.
+     */
+    public static Bounds clampToRightColumn(Bounds child, DietLayout.Layout panelLayout) {
+        Bounds parent = new Bounds(panelLayout.panelX(), panelLayout.panelY(), panelLayout.panelW(), panelLayout.panelH());
+        DietLayout.ColumnGeometry geometry = DietLayout.columnGeometry(panelLayout, parent);
+        int rightEdge = parent.x() + parent.width();
+
+        int w = Math.min(child.width(), Math.max(1, rightEdge - geometry.rightX()));
+        int h = Math.min(child.height(), parent.height());
+        int x = Math.max(geometry.rightX(), Math.min(child.x(), rightEdge - w));
+        int y = Math.max(parent.y(), Math.min(child.y(), parent.y() + parent.height() - h));
 
         return new Bounds(x, y, w, h);
     }

@@ -26,7 +26,7 @@ public final class ModuleBulkToggleListEntry extends TooltipListEntry<Object> {
 public ModuleBulkToggleListEntry(List<String> editableModuleKeys, Map<String, AtomicBoolean> modulePending) {
         super(
                 Component.translatable("config.nourished.modules.bulk"),
-                () -> Optional.of(new Component[]{Component.translatable("config.nourished.modules.bulk.desc")}),
+                () -> Optional.empty(),
                 false);
         this.editableModuleKeys = editableModuleKeys;
         this.modulePending = modulePending;

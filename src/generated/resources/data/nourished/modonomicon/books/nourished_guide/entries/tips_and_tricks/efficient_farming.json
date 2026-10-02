@@ -1,0 +1,84 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "tips_and_tricks",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "tips_and_tricks/daily_routine"
+  },
+  "description": "book.nourished.nourished_guide.tips_and_tricks.efficient_farming.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:wheat"
+  },
+  "name": "book.nourished.nourished_guide.tips_and_tricks.efficient_farming.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.efficient_farming.minimal_farm.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.efficient_farming.minimal_farm.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.efficient_farming.high_value_crops.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.efficient_farming.high_value_crops.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.efficient_farming.animal_priority.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.efficient_farming.animal_priority.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.efficient_farming.automation_ideas.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.efficient_farming.automation_ideas.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.tips_and_tricks.efficient_farming.storing_supplies.text",
+      "title": "book.nourished.nourished_guide.tips_and_tricks.efficient_farming.storing_supplies.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "tips_and_tricks/daily_routine",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 1,
+  "x": -2,
+  "y": -2
+}

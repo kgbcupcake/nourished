@@ -43,6 +43,17 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue hudShowZeroBars;
     private final ModConfigSpec.BooleanValue hudRevealOnNutrientGain;
     private final ModConfigSpec.DoubleValue hudBackgroundOpacity;
+    private final ModConfigSpec.DoubleValue hudBorderOpacity;
+    private final ModConfigSpec.DoubleValue hudBackgroundShade;
+    private final ModConfigSpec.DoubleValue hudBorderShade;
+    private final ModConfigSpec.DoubleValue hudTextBrightness;
+    private final ModConfigSpec.DoubleValue hudIconBrightness;
+    private final ModConfigSpec.DoubleValue calorieHudTextBrightness;
+    private final ModConfigSpec.DoubleValue calorieHudIconBrightness;
+    private final ModConfigSpec.DoubleValue activityLogHudTextBrightness;
+    private final ModConfigSpec.DoubleValue activityLogHudIconBrightness;
+    private final ModConfigSpec.DoubleValue dietTextBrightness;
+    private final ModConfigSpec.DoubleValue dietIconBrightness;
     private final ModConfigSpec.BooleanValue hudVerticalLayout;
     private final ModConfigSpec.BooleanValue hudClassicMode;
     private final ModConfigSpec.BooleanValue enableActivityLogHud;
@@ -73,6 +84,7 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalOffsetMigrationDone;
     private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalSizeMigrationDone;
     private final ModConfigSpec.BooleanValue recentMealsRowHeightMigrationDone;
+    private final ModConfigSpec.BooleanValue intakeBreakdownOffsetMigrationDone;
 
     /** Matches legacy {@code COL_PANEL_BG} alpha ({@code 0xCC}). */
     private static final double DEFAULT_HUD_BACKGROUND_OPACITY = 204.0d / 255.0d;
@@ -117,6 +129,73 @@ public final class NourishedClientConfig {
                 ConfigDefaultsLoader.getDouble(defaults, "hudBackgroundOpacity", DEFAULT_HUD_BACKGROUND_OPACITY),
                 0.0d,
                 1.0d
+        );
+        hudBorderOpacity = builder.defineInRange(
+                "hudBorderOpacity",
+                ConfigDefaultsLoader.getDouble(defaults, "hudBorderOpacity", 1.0d),
+                0.0d,
+                1.0d
+        );
+        hudBackgroundShade = builder.defineInRange(
+                "hudBackgroundShade",
+                ConfigDefaultsLoader.getDouble(defaults, "hudBackgroundShade", 0.0d),
+                -1.0d,
+                1.0d
+        );
+        hudBorderShade = builder.defineInRange(
+                "hudBorderShade",
+                ConfigDefaultsLoader.getDouble(defaults, "hudBorderShade", 0.0d),
+                -1.0d,
+                1.0d
+        );
+        // Dynamic-UI only (no Cloth entry): brightness multiplier for the Nutrient HUD's icons and text.
+        hudTextBrightness = builder.defineInRange(
+                "hudTextBrightness",
+                ConfigDefaultsLoader.getDouble(defaults, "hudTextBrightness", 1.0d),
+                0.2d,
+                2.0d
+        );
+        hudIconBrightness = builder.defineInRange(
+                "hudIconBrightness",
+                ConfigDefaultsLoader.getDouble(defaults, "hudIconBrightness", 1.0d),
+                0.2d,
+                2.0d
+        );
+        calorieHudTextBrightness = builder.defineInRange(
+                "calorieHudTextBrightness",
+                ConfigDefaultsLoader.getDouble(defaults, "calorieHudTextBrightness", 1.0d),
+                0.2d,
+                2.0d
+        );
+        calorieHudIconBrightness = builder.defineInRange(
+                "calorieHudIconBrightness",
+                ConfigDefaultsLoader.getDouble(defaults, "calorieHudIconBrightness", 1.0d),
+                0.2d,
+                2.0d
+        );
+        activityLogHudTextBrightness = builder.defineInRange(
+                "activityLogHudTextBrightness",
+                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudTextBrightness", 1.0d),
+                0.2d,
+                2.0d
+        );
+        activityLogHudIconBrightness = builder.defineInRange(
+                "activityLogHudIconBrightness",
+                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudIconBrightness", 1.0d),
+                0.2d,
+                2.0d
+        );
+        dietTextBrightness = builder.defineInRange(
+                "dietTextBrightness",
+                ConfigDefaultsLoader.getDouble(defaults, "dietTextBrightness", 1.0d),
+                0.2d,
+                2.0d
+        );
+        dietIconBrightness = builder.defineInRange(
+                "dietIconBrightness",
+                ConfigDefaultsLoader.getDouble(defaults, "dietIconBrightness", 1.0d),
+                0.2d,
+                2.0d
         );
         hudVerticalLayout = builder.define(
                 "hudVerticalLayout",
@@ -265,6 +344,17 @@ public final class NourishedClientConfig {
                 "recentMealsRowHeightMigrationDone",
                 false
         );
+        // Fifth one-time migration flag — the Intake Breakdown header/rows/legend used to have their
+        // drag/resize commits stored relative to the left column's content X instead of the right
+        // column's (see DietScreenEditTarget#toRelativeState's javadoc), so any box moved or resized
+        // before that fix has a persisted local X hundreds of units off from what the fixed read-back
+        // path expects, rendering it far to the left of the panel instead of in the right column.
+        // Discards those specific boxes' persisted state once so they fall back to their natural
+        // stacked position and can be redragged correctly going forward.
+        intakeBreakdownOffsetMigrationDone = builder.define(
+                "intakeBreakdownOffsetMigrationDone",
+                false
+        );
         builder.pop();
     }
 
@@ -311,7 +401,12 @@ public final class NourishedClientConfig {
                         || trimmed.startsWith("balanceContentScale")
                         || trimmed.startsWith("recentMealsContentScale")
                         || trimmed.startsWith("eatMoreContentScale")
-                        || trimmed.startsWith("activeEffectsContentScale")) {
+                        || trimmed.startsWith("activeEffectsContentScale")
+                        // Short-lived single brightness keys, split into per-text/per-icon keys before release.
+                        || trimmed.startsWith("hudContentBrightness")
+                        || trimmed.startsWith("calorieHudContentBrightness")
+                        || trimmed.startsWith("activityLogHudContentBrightness")
+                        || trimmed.startsWith("dietContentBrightness")) {
                     changed = true;
                     continue;
                 }
@@ -468,6 +563,102 @@ public final class NourishedClientConfig {
 
     public void setHudBackgroundOpacity(double value) {
         hudBackgroundOpacity.set(value);
+    }
+
+    public double hudBorderOpacity() {
+        return hudBorderOpacity.get();
+    }
+
+    public void setHudBorderOpacity(double value) {
+        hudBorderOpacity.set(value);
+    }
+
+    public double hudBackgroundShade() {
+        return hudBackgroundShade.get();
+    }
+
+    public void setHudBackgroundShade(double value) {
+        hudBackgroundShade.set(value);
+    }
+
+    public double hudBorderShade() {
+        return hudBorderShade.get();
+    }
+
+    public void setHudBorderShade(double value) {
+        hudBorderShade.set(value);
+    }
+
+    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Nutrient HUD's text. */
+    public double hudTextBrightness() {
+        return hudTextBrightness.get();
+    }
+
+    public void setHudTextBrightness(double value) {
+        hudTextBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
+    }
+
+    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Nutrient HUD's icons. */
+    public double hudIconBrightness() {
+        return hudIconBrightness.get();
+    }
+
+    public void setHudIconBrightness(double value) {
+        hudIconBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
+    }
+
+    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Calorie History HUD's text. */
+    public double calorieHudTextBrightness() {
+        return calorieHudTextBrightness.get();
+    }
+
+    public void setCalorieHudTextBrightness(double value) {
+        calorieHudTextBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
+    }
+
+    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Calorie History HUD's icons. */
+    public double calorieHudIconBrightness() {
+        return calorieHudIconBrightness.get();
+    }
+
+    public void setCalorieHudIconBrightness(double value) {
+        calorieHudIconBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
+    }
+
+    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Activity Log HUD's text. */
+    public double activityLogHudTextBrightness() {
+        return activityLogHudTextBrightness.get();
+    }
+
+    public void setActivityLogHudTextBrightness(double value) {
+        activityLogHudTextBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
+    }
+
+    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Activity Log HUD's icons. */
+    public double activityLogHudIconBrightness() {
+        return activityLogHudIconBrightness.get();
+    }
+
+    public void setActivityLogHudIconBrightness(double value) {
+        activityLogHudIconBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
+    }
+
+    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Diet screen dynamic panel's text. */
+    public double dietTextBrightness() {
+        return dietTextBrightness.get();
+    }
+
+    public void setDietTextBrightness(double value) {
+        dietTextBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
+    }
+
+    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Diet screen dynamic panel's icons. */
+    public double dietIconBrightness() {
+        return dietIconBrightness.get();
+    }
+
+    public void setDietIconBrightness(double value) {
+        dietIconBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
     }
 
     public boolean hudVerticalLayout() {
@@ -756,6 +947,14 @@ public final class NourishedClientConfig {
 
     public void setRecentMealsRowHeightMigrationDone(boolean value) {
         recentMealsRowHeightMigrationDone.set(value);
+    }
+
+    public boolean intakeBreakdownOffsetMigrationDone() {
+        return intakeBreakdownOffsetMigrationDone.get();
+    }
+
+    public void setIntakeBreakdownOffsetMigrationDone(boolean value) {
+        intakeBreakdownOffsetMigrationDone.set(value);
     }
 
     public void resetDietOffsets() {

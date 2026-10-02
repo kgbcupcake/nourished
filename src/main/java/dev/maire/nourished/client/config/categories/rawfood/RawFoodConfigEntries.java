@@ -25,7 +25,6 @@ public final class RawFoodConfigEntries {
                 eb.startIntSlider(Component.translatable("config.nourished.rawfood.memorySecs"), Math.round(RawFoodConfig.memorySecs() / 10.0f), 1, 60)
                         .setDefaultValue(12)
                         .setTextGetter(v -> Component.literal((v * 10) + " seconds"))
-                        .setTooltip(Component.translatable("config.nourished.rawfood.memorySecs.desc"))
                         .setSaveConsumer(v -> RawFoodConfig.setMemorySecs(v * 10))
                         .build()
         );
@@ -45,7 +44,6 @@ public final class RawFoodConfigEntries {
                 eb.startIntSlider(Component.translatable("config.nourished.rawfood." + keyPrefix + "Duration"), Math.round(tier.durationTicks() / 20.0f), 1, 300)
                         .setDefaultValue(defaultDurationTicks / 20)
                         .setTextGetter(v -> Component.literal((v * 20) + " ticks"))
-                        .setTooltip(Component.translatable("config.nourished.rawfood." + keyPrefix + "Duration.desc"))
                         .setSaveConsumer(v -> RawFoodConfig.setDurationTicks(severity, v * 20))
                         .build()
         );
@@ -57,8 +55,7 @@ public final class RawFoodConfigEntries {
                 0.01f,
                 defaultNutrientPenalty,
                 v -> RawFoodConfig.setNutrientPenalty(severity, v),
-                () -> true,
-                Component.translatable("config.nourished.rawfood." + keyPrefix + "NutrientPenalty.desc")
+                () -> true
         ));
         tierEntries.add(buildSteppedFloatSlider(
                 Component.translatable("config.nourished.rawfood." + keyPrefix + "MissedOpportunity"),
@@ -68,8 +65,7 @@ public final class RawFoodConfigEntries {
                 0.05f,
                 defaultMissedOpportunity,
                 v -> RawFoodConfig.setMissedOpportunityMultiplier(severity, v),
-                () -> true,
-                Component.translatable("config.nourished.rawfood." + keyPrefix + "MissedOpportunity.desc")
+                () -> true
         ));
         return eb.startSubCategory(Component.literal(severity.name() + " Tier"), tierEntries)
                 .setExpanded(false)

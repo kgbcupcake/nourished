@@ -1,0 +1,108 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "food_groups",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "food_groups/grains"
+  },
+  "description": "book.nourished.nourished_guide.food_groups.proteins.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:cooked_beef"
+  },
+  "name": "book.nourished.nourished_guide.food_groups.proteins.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:cooked_beef"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.proteins.spotlight.text",
+      "title": "book.nourished.nourished_guide.food_groups.proteins.spotlight.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.proteins.vanilla_sources.text",
+      "title": "book.nourished.nourished_guide.food_groups.proteins.vanilla_sources.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.proteins.fish_sources.text",
+      "title": "book.nourished.nourished_guide.food_groups.proteins.fish_sources.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:cooked_salmon"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.proteins.fish_spotlight.text",
+      "title": "book.nourished.nourished_guide.food_groups.proteins.fish_spotlight.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.proteins.non_meat.text",
+      "title": "book.nourished.nourished_guide.food_groups.proteins.non_meat.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.proteins.farming_tips.text",
+      "title": "book.nourished.nourished_guide.food_groups.proteins.farming_tips.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.proteins.rotation_strategy.text",
+      "title": "book.nourished.nourished_guide.food_groups.proteins.rotation_strategy.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "food_groups/grains",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 3,
+  "x": 2,
+  "y": 2
+}

@@ -66,7 +66,7 @@ class HudVisibilityRulesTest {
                 "fruits", 0.90f
         );
 
-        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.8f, 0.674f, Set.of());
+        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.674f, 0.8f, Set.of());
 
         assertEquals(KEYS, visible);
     }
@@ -141,6 +141,20 @@ class HudVisibilityRulesTest {
         List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.8f, 0.0f, Set.of());
 
         assertEquals(KEYS, visible);
+    }
+
+    @Test
+    @DisplayName("showAbove set below hideAbove is ignored, so hideAbove still hides")
+    void showAboveBelowHideAboveIsIgnored() {
+        Map<String, Float> nutrients = Map.of(
+                "proteins", 0.50f,
+                "grains", 0.85f,
+                "fruits", 0.90f
+        );
+
+        List<String> visible = HudVisibilityRules.filter(nutrients, KEYS, false, 0.54f, 0.33f, Set.of());
+
+        assertEquals(List.of("proteins"), visible);
     }
 
     @Test

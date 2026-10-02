@@ -1,0 +1,73 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "how_it_works",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "how_it_works/nutritional_debt"
+  },
+  "description": "book.nourished.nourished_guide.how_it_works.multiplier_system.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:nether_star"
+  },
+  "name": "book.nourished.nourished_guide.how_it_works.multiplier_system.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.multiplier_system.the_bonuses.text",
+      "title": "book.nourished.nourished_guide.how_it_works.multiplier_system.the_bonuses.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.multiplier_system.the_penalties.text",
+      "title": "book.nourished.nourished_guide.how_it_works.multiplier_system.the_penalties.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.multiplier_system.balance_and_gut.text",
+      "title": "book.nourished.nourished_guide.how_it_works.multiplier_system.balance_and_gut.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.how_it_works.multiplier_system.putting_it_together.text",
+      "title": "book.nourished.nourished_guide.how_it_works.multiplier_system.putting_it_together.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "how_it_works/nutritional_debt",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 5,
+  "x": 4,
+  "y": 5
+}

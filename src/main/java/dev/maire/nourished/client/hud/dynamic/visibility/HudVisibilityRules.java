@@ -17,7 +17,10 @@ public final class HudVisibilityRules {
     /**
      * @param showZero     when true, include 0% bars (dimmed in the renderer)
      * @param hideAbove    hide non-zero bars at/above this level; 1.0 disables
-     * @param showAbove    re-enable non-zero bars at/above this level even when hide would apply; 1.0 disables; 0.0 re-enables all hidden bars
+     * @param showAbove    re-enable non-zero bars at/above this level even when hide would apply; 1.0 disables; 0.0 re-enables all hidden bars.
+     *                     Otherwise only takes effect when it's set above {@code hideAbove} — if it were left at or
+     *                     below hideAbove, every value that clears the hide threshold would also clear this one and
+     *                     hiding would never happen.
      */
     public static List<String> filter(
             Map<String, Float> nutrients,
@@ -30,7 +33,8 @@ public final class HudVisibilityRules {
         hideAbove = Math.max(0f, Math.min(1f, hideAbove));
         showAbove = Math.max(0f, Math.min(1f, showAbove));
         boolean hideActive = hideAbove < 1f - ZERO_EPSILON;
-        boolean showActive = showAbove < 1f - ZERO_EPSILON;
+        boolean showActive = showAbove < 1f - ZERO_EPSILON
+                && (showAbove <= ZERO_EPSILON || showAbove > hideAbove);
 
         if (showZero && !hideActive && !showActive) {
             return new ArrayList<>(keys);

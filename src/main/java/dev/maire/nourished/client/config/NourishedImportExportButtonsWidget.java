@@ -28,7 +28,7 @@ public final class NourishedImportExportButtonsWidget extends TooltipListEntry<O
     public NourishedImportExportButtonsWidget(Screen reopenParent) {
         super(
                 Component.translatable(configKey("importExport.groupTitle")),
-                () -> Optional.of(new Component[]{Component.translatable(configKey("importExport.groupTitle.desc"))}),
+                Optional::empty,
                 false);
         Minecraft mc = Minecraft.getInstance();
         this.exportButton = Button.builder(Component.translatable(configKey("importExport.export")), b -> {

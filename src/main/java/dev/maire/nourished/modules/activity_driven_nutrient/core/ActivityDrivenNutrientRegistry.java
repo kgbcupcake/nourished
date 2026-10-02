@@ -48,13 +48,18 @@ public final class ActivityDrivenNutrientRegistry {
     private static final String CONFIG_RELATIVE_PATH = "modules/activity/activity_config.json";
     private static final String DATAPACK_RELATIVE_PATH = "config/modules/activity/activity_config.json";
 
-    private static final Map<String, Integer> DEFAULT_COLORS = Map.of(
-            "mining", 0xFF8B6F47,
-            "combat", 0xFFCC3333,
-            "sprint", 0xFF33CC66,
-            "swim", 0xFF3399CC,
-            "starvation", 0xFFCC8833
-    );
+    /** Built-in log color per activity module, in a stable display order (insertion order). */
+    private static final Map<String, Integer> DEFAULT_COLORS = orderedColors();
+
+    private static Map<String, Integer> orderedColors() {
+        Map<String, Integer> colors = new LinkedHashMap<>();
+        colors.put("mining", 0xFF8B6F47);
+        colors.put("combat", 0xFFCC3333);
+        colors.put("sprint", 0xFF33CC66);
+        colors.put("swim", 0xFF3399CC);
+        colors.put("starvation", 0xFFCC8833);
+        return java.util.Collections.unmodifiableMap(colors);
+    }
 
     private static volatile boolean enabled = true;
     private static volatile boolean sprintEnabled = true;
@@ -176,8 +181,13 @@ public final class ActivityDrivenNutrientRegistry {
 
     // ── Per-module colors ────────────────────────────────────────────────────────────────────
 
-    /** {@link ColorKey} identity for {@code moduleId}, namespaced under {@code activity.<moduleId>}. */
-    private static ColorKey colorKey(String moduleId) {
+    /** Ids of the activity modules that have a log color, in stable display order. */
+    public static java.util.List<String> colorModuleIds() {
+        return java.util.List.copyOf(DEFAULT_COLORS.keySet());
+    }
+
+    /** {@link ColorKey} identity for {@code moduleId}, namespaced under {@code activity.<moduleId>}; what {@link #getColor} resolves. */
+    public static ColorKey colorKey(String moduleId) {
         return ColorKey.of(ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "activity." + moduleId));
     }
 

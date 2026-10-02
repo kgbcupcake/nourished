@@ -13,6 +13,8 @@ import dev.marie.framework.color.ColorKey;
 import dev.marie.framework.color.ColorRegistry;
 import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.data.MarieDataManager;
+import dev.maire.nourished.api.impl.RegistrationPhase;
+import dev.maire.nourished.core.book.NourishedBookItems;
 import dev.maire.nourished.core.datapack.NourishedDatapackCallbacks;
 import dev.marie.framework.registry.MarieApiRegistries;
 import dev.marie.framework.registry.RegistryLifecycleManager;
@@ -70,6 +72,7 @@ import dev.maire.nourished.modules.RawFood.Gut.GutHealthRecoveryHandler;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthTickHandler;
 import dev.maire.nourished.modules.RawFood.handler.RawFoodPenaltyHandler;
 import dev.maire.nourished.core.network.ModNetworking;
+import dev.maire.nourished.datagen.NourishedDataGenerators;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -101,6 +104,7 @@ public class Nourished {
         modEventBus.addListener(NourishedClientConfig::onModConfigReloading);
         ActivityDrivenNutrientRegistry.registerSync();
         registerColorDefinitions();
+        NourishedBookItems.register(modEventBus);
 
         NourishedLifecycle.register();
         NourishedContextBuilder.registerSlim();
@@ -138,6 +142,7 @@ public class Nourished {
             ClientEventRegistrar.register(modEventBus);
         }
         modEventBus.addListener(ModNetworking::register);
+        modEventBus.addListener(NourishedDataGenerators::gatherData);
         NourishedFoodTriggerHandler.register(NeoForge.EVENT_BUS);
         NeoForge.EVENT_BUS.addListener(NourishedTagsHandler::onTagsUpdated);
         NeoForge.EVENT_BUS.register(new NourishedServerHandler());
@@ -155,8 +160,13 @@ public class Nourished {
             event.enqueueWork(() -> {
                 // Runs after MarieBootstrap.onCommonSetup → RegistryLifecycleManager.loadAll(), so
                 // ColorRegistry and ActivityDrivenNutrientRegistry have both loaded from disk here.
+                if (RegistrationPhase.run() > 0) {
+                    registerColorDefinitions();
+                }
                 migrateNutrientColorKeys();
+                dev.maire.nourished.client.colors.RetiredColorKeys.migrate();
                 ActivityDrivenNutrientRegistry.migrateLegacyColorsToColorRegistry();
+                dev.maire.nourished.config.NutrientOverrideStore.init(NourishedConfig.get());
                 NourishedConfigValidation.runAfterInitialLoad();
                 NutrientRegistry.syncAndFreeze();
                 ModCompat.discoverUnknownMods();
@@ -249,8 +259,23 @@ public class Nourished {
             MarieColors.registerColor(ColorDefinition.of(
                     ColorKey.of(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "nutrient." + def.key())),
                     def.color()));
+            MarieColors.registerColor(ColorDefinition.of(
+                    ColorKey.of(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "tooltip." + def.key())),
+                    def.tooltipColor()));
         }
         ActivityDrivenNutrientRegistry.registerColors();
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            registerClientPanelColorDefinitions();
+        }
+    }
+
+    /**
+     * Client-only HUD panel color pairs, split out from {@link #registerColorDefinitions()}.
+     * Referencing {@link CalorieHudScreen}/{@link ActivityLogHudPanel}'s static fields loads those
+     * classes, and both are client-only (they import {@code net.minecraft.client.player.LocalPlayer}
+     * etc.), which trips NeoForge's RuntimeDistCleaner on a dedicated server.
+     */
+    private static void registerClientPanelColorDefinitions() {
         // Matches ThemeKey.PANEL_BACKGROUND's RGB (0x101010) — the flat color both panels drew
         // before this feature existed; alpha here is nominal since draw time composes the real
         // alpha from each panel's own opacity config value.
@@ -260,6 +285,8 @@ public class Nourished {
         int defaultTextArgb = 0xFFE0E0E0;
         CalorieHudScreen.COLORS = MarieColors.registerColorPair(MODID, "calorie_hud", defaultPanelArgb, defaultTextArgb);
         ActivityLogHudPanel.COLORS = MarieColors.registerColorPair(MODID, "activity_log_hud", defaultPanelArgb, defaultTextArgb);
+        dev.maire.nourished.client.colors.NourishedColors.register();
+        dev.maire.nourished.client.colors.NourishedColors.registerIntakeBarColors();
     }
 
     /**

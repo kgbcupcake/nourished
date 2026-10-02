@@ -1,0 +1,150 @@
+package dev.maire.nourished.client.colors;
+
+import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientRegistry;
+import dev.marie.framework.color.ColorDefinition;
+import dev.marie.framework.color.ColorDefinitionRegistry;
+import dev.marie.framework.color.ColorKey;
+import dev.marie.framework.color.ColorKeyPair;
+import dev.marie.framework.color.ColorPreviewOverrides;
+import dev.marie.framework.color.ColorRegistry;
+import dev.marie.framework.color.MarieColors;
+import dev.marie.framework.ui.api.MarieModuleSettings;
+import dev.marie.framework.ui.api.MarieToolbox;
+import dev.maire.nourished.client.UiStatePersistence;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+
+/**
+ * Binds this mod's registered colors to MariesLib's toolbox color slots, so the in-game picker edits the same
+ * values the renderers already read through {@link MarieColors#resolveColor}. The live preview is a
+ * {@link ColorPreviewOverrides} entry (what the Cloth hex row pushes while typing); on release the color is
+ * written to {@link ColorRegistry} (or removed when it equals its default) and saved, exactly as
+ * {@code ColorHexRowWidget#save} does, and the preview override is cleared. If the picker is closed or moved to
+ * another slot first, the slot's cancel callback clears the uncommitted preview. Nothing here stores a color itself.
+ */
+public final class NourishedColorSlots {
+
+    private NourishedColorSlots() {}
+
+    /** One slot per registered nutrient, bound to {@code nourished:nutrient.<key>} — the color its bar and Diet-screen rows draw. */
+    public static void addNutrients(MarieToolbox.PanelBuilder panel) {
+        for (String key : NutrientRegistry.getKeys()) {
+            add(panel, key(Nourished.MODID, "nutrient." + key), NutrientRegistry.getLabel(key));
+        }
+    }
+
+    /**
+     * A collapsible section, one per registered nutrient, added to the end of the Nutrient HUD's own
+     * Glow tab (via {@link dev.marie.framework.ui.api.StandardPanelBuilder#glowRows}) — each holding
+     * that nutrient's own Bar glow, keyed by its own synthetic panel id ({@code
+     * nourished.hud.bar.<key>}, in the HUD's own {@link UiStatePersistence} store) so every nutrient's
+     * bar glows independently instead of sharing one setting across the whole panel — matching how
+     * each Intake Breakdown row already has its own dedicated Bar glow. No Text glow (see {@link
+     * dev.marie.framework.ui.api.StandardPanelBuilder}'s Glow tab doc for why that's gone everywhere)
+     * and no Border glow: a nutrient row draws no box of its own to glow the edge of. The Nutrient HUD
+     * has no per-row options popup the way Intake Breakdown rows do, so these live as sections under
+     * the panel's single Glow tab instead of a separate tab per nutrient.
+     */
+    public static void addNutrientBarGlowSections(MarieToolbox.PanelBuilder panel) {
+        var store = UiStatePersistence.get();
+        for (String key : NutrientRegistry.getKeys()) {
+            String panelId = "nourished.hud.bar." + key;
+            panel.section(NutrientRegistry.getLabel(key));
+            panel.color(text("config.marieslib.moduleoptions.barGlow"),
+                    () -> MarieModuleSettings.barGlowColor(store, panelId), rgb -> MarieModuleSettings.setBarGlowColor(store, panelId, rgb),
+                    0xFFFFFF, () -> {});
+            panel.slider(text("config.marieslib.moduleoptions.barGlowStrength"),
+                    () -> MarieModuleSettings.barGlowStrength(store, panelId), v -> MarieModuleSettings.setBarGlowStrength(store, panelId, v),
+                    0.0d, 1.0d, 0.01d, () -> {}).defaultValue(0.0d);
+            panel.endSection();
+        }
+    }
+
+    /** Background and text slots for a panel's {@link ColorKeyPair}; skipped if the pair was never registered. */
+    public static void addPair(MarieToolbox.PanelBuilder panel, ColorKeyPair pair) {
+        if (pair == null) {
+            return;
+        }
+        add(panel, pair.background(), text("nourished.options.color.background"));
+        add(panel, pair.text(), text("nourished.options.color.text"));
+    }
+
+    /** One slot per activity module the activity registry knows a log color for, in its display order, bound to the registry's own key. */
+    public static void addActivities(MarieToolbox.PanelBuilder panel) {
+        for (String id : ActivityDrivenNutrientRegistry.colorModuleIds()) {
+            String langKey = "nourished.options.color.activity." + id;
+            String label = text(langKey);
+            add(panel, ActivityDrivenNutrientRegistry.colorKey(id), label.equals(langKey) ? id : label);
+        }
+    }
+
+    /** A slot for one of {@link NourishedColors}' fixed colors; {@code langKey} names it. */
+    public static void addFixed(MarieToolbox.PanelBuilder panel, ColorKey key, String langKey) {
+        add(panel, key, text(langKey), NourishedColors.defaultRgb(key));
+    }
+
+    /**
+     * Text, bar track, border and bar-fill slots for one Intake Breakdown nutrient's row. Text/track/
+     * border are bound to {@code nutrient}'s own dedicated colors (see {@link
+     * NourishedColors#registerIntakeBarColors}), not a role shared across every row, so each of
+     * Fruits/Vegetables/Proteins/Grains/Dairy is independently colorable instead of all five sharing
+     * one setting. Bar fill is bound to the same {@code nutrient.<key>} color {@link #addNutrients}
+     * already exposes on the Diet Screen's own Colors tab — not a separate/divergent value — so a
+     * player editing a row's own Colors tab can change that nutrient's bar color without having to
+     * find it on a different tab first.
+     */
+    public static void addIntakeBarColors(MarieToolbox.PanelBuilder panel, String nutrient) {
+        add(panel, key(Nourished.MODID, "nutrient." + nutrient), text("nourished.options.color.bar_fill"));
+        add(panel, NourishedColors.intakeBarTextKey(nutrient), text("nourished.options.color.text"));
+        add(panel, NourishedColors.intakeBarTrackKey(nutrient), text("nourished.options.color.bar_track"));
+        add(panel, NourishedColors.intakeBarBorderKey(nutrient), text("nourished.options.color.border"));
+        ColorKey iconBorder = NourishedColors.intakeBarIconBorderKey(nutrient);
+        ColorDefinition iconDef = ColorDefinitionRegistry.get(iconBorder);
+        int iconDefault = iconDef != null ? iconDef.getDefaultArgb() & 0xFFFFFF : 0xFF00FF;
+        panel.color(text("nourished.options.color.icon_border"),
+                () -> NourishedColors.resolveIntakeBarIconBorder(nutrient),
+                rgb -> ColorPreviewOverrides.setOverride(iconBorder, 0xFF000000 | rgb),
+                iconDefault,
+                () -> commit(iconBorder, iconDefault),
+                () -> ColorPreviewOverrides.setOverride(iconBorder, null));
+    }
+
+    private static void add(MarieToolbox.PanelBuilder panel, ColorKey key, String label) {
+        ColorDefinition definition = ColorDefinitionRegistry.get(key);
+        add(panel, key, label, definition != null ? definition.getDefaultArgb() & 0xFFFFFF : 0xFF00FF);
+    }
+
+    private static void add(MarieToolbox.PanelBuilder panel, ColorKey key, String label, int defaultRgb) {
+        panel.color(label,
+                () -> MarieColors.resolveColor(key),
+                rgb -> ColorPreviewOverrides.setOverride(key, 0xFF000000 | rgb),
+                defaultRgb,
+                () -> commit(key, defaultRgb),
+                () -> ColorPreviewOverrides.setOverride(key, null));
+    }
+
+    /** Persists the previewed color (or drops the override when it equals the default), saves, and clears the preview. */
+    private static void commit(ColorKey key, int defaultRgb) {
+        Integer preview = ColorPreviewOverrides.getOverride(key);
+        if (preview != null) {
+            String registryKey = key.id().toString();
+            if ((preview & 0xFFFFFF) == defaultRgb) {
+                ColorRegistry.remove(registryKey);
+            } else {
+                ColorRegistry.setArgb(registryKey, 0xFF000000 | (preview & 0xFFFFFF));
+            }
+            ColorRegistry.save();
+        }
+        ColorPreviewOverrides.setOverride(key, null);
+    }
+
+    private static ColorKey key(String modId, String path) {
+        return ColorKey.of(ResourceLocation.fromNamespaceAndPath(modId, path));
+    }
+
+    private static String text(String key) {
+        return Component.translatable(key).getString();
+    }
+}

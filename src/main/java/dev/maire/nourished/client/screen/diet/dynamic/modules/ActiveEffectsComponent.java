@@ -1,5 +1,8 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.marie.framework.color.MarieColors;
+import dev.maire.nourished.client.colors.NourishedColors;
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import java.util.Collection;
 
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
@@ -31,11 +34,21 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
     public static final String ID = "nourished.diet.activeeffects";
     private static final int HEADER_LOCAL_HEIGHT = 10;
 
-    private static final int COL_ROW_BG_RGB = 0x001E1E1E;
-    private static final int COL_BORDER_LT = 0xFF555555;
-    private static final int COL_HEADER = 0xFF888888;
-    private static final int COL_GREEN = 0xFF55FF55;
-    private static final int COL_RED = 0xFFFF5555;
+    private static int surfaceRgb() {
+        return NourishedColors.surfaceRgb();
+    }
+    private static int borderColor() {
+        return MarieColors.resolveColor(NourishedColors.ACTIVE_EFFECTS_BORDER);
+    }
+    private static int headerTextColor() {
+        return MarieColors.resolveColor(NourishedColors.ACTIVE_EFFECTS_HEADER);
+    }
+    private static int beneficialColor() {
+        return MarieColors.resolveColor(NourishedColors.EFFECT_BENEFICIAL);
+    }
+    private static int harmfulColor() {
+        return MarieColors.resolveColor(NourishedColors.EFFECT_HARMFUL);
+    }
 
     /** Reference local-unit padding used to derive the user's padding-adjustment range — see {@link ContentScaleController#resolvePadding}. */
     private static final double BASE_PADDING_LOCAL = 2.0d;
@@ -56,17 +69,18 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         this.layout = layout;
         this.startLocalY = startLocalY;
 
-        NourishedClientConfig cc = NourishedClientConfig.get();
         Minecraft mc = Minecraft.getInstance();
         int effectCount = (mc.player != null) ? mc.player.getActiveEffects().size() : 0;
         int naturalLineCount = Math.max(1, Math.min(3, effectCount));
+        // The default line height, not the grown one render() spaces lines by — see RecentMealsComponent:
+        // Icon size must never change where the boxes below this one stack.
         this.effectsBoxH = HEADER_LOCAL_HEIGHT + naturalLineCount * 9;
         // Continuous fade instead of an all-or-nothing header floor, and instead of dropping whole
         // effect lines one at a time as room tightens (the old stackedBodyUnitsFit behavior): every
         // natural line still draws, just scaled down together with the header (see render()'s
         // heightScale, divided by the fixed effectsBoxH rather than this frame's shrunk room) — the
         // box only actually disappears once there's less than MIN_VISIBLE_ROOM_LOCAL of room left.
-        boolean enabled = cc.showActiveEffects() && mc.player != null;
+        boolean enabled = !MarieModuleSettings.isWindowHidden(DietScreenPersistence.get(), ID) && mc.player != null;
         int room = enabled ? DietLayout.roomInPanel(layout, startLocalY, effectsBoxH) : 0;
         this.visible = room >= DietScreenModules.MIN_VISIBLE_ROOM_LOCAL;
         this.linesShown = naturalLineCount;
@@ -125,7 +139,11 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
     }
 
     @Override
-    public void render(RenderContext context, Bounds bounds) {
+    public void render(RenderContext baseContext, Bounds bounds) {
+        // The module's own text/icon offsets, icon size and brightness (see MarieModuleSettings) apply to everything it draws.
+        // iconFollowsText false: this box's panel uses independentIconSize, so render() resolves the final icon scale
+        // itself (iconScale below) and the wrapper must not also apply its own text-relative ratio on top.
+        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID, false);
         this.anchorBounds = bounds;
         if (!visible) {
             return;
@@ -149,7 +167,10 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         // it's clipped off.
         double widthScale = bounds.width() / (double) bw;
         double heightScale = bounds.height() / (double) effectsBoxH;
-        this.contentScale = Math.min(widthScale, heightScale);
+                // Content geometry is fixed, like the Activity Log's: it follows the panel's own scale, never this
+        // box's size, so resizing the box only changes the box (extra room stays empty, less room is
+        // clipped by the box's own clip). Text/icon sizes come from their sliders alone.
+        this.contentScale = layout.scale();
         // contentScale (fitScale) still drives sx/sy unchanged below; header/line render scale is the
         // user's persisted per-box adjustment alone now, sanity-clamped only — no longer capped by
         // contentScale. Real containment against the box's own edges comes from the
@@ -164,7 +185,10 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         // contentScale), so this is a no-op at the default, unzoomed state. Purely cosmetic (keeps
         // lines from visually colliding) — pushClip below is what actually bounds on-screen overflow.
         double zoomRatio = contentScale > 0 ? scale / contentScale : 1.0d;
-        int zoomedHeaderAdvance = Math.max(1, (int) Math.round(HEADER_LOCAL_HEIGHT * zoomRatio));
+        // The header-to-first-line gap is fixed at its default-text-size value (like Recent Meals'),
+        // not grown with the effect text: it's where the icons start too, so growing it with the text
+        // size slider nudged every icon down. Header size has its own slider and never affected it.
+        int zoomedHeaderAdvance = Math.max(1, (int) Math.round(HEADER_LOCAL_HEIGHT / (contentScale > 0 ? contentScale : 1.0d)));
         int zoomedLineAdvance = Math.max(1, (int) Math.round(9 * zoomRatio));
 
         drawOuterBox(context, bounds.width(), bounds.height(), cc);
@@ -175,30 +199,101 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         // render past the box's actual (shrunk) bottom edge instead of fading out with it.
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
-            // Slightly smaller than body text, purely a visual tweak — HEADER_LOCAL_HEIGHT (the layout reservation below) is untouched.
-            drawText(context, Component.translatable("nourished.screen.diet.effects_label").getString(), x, y + DietScreenModules.HEADER_TOP_PADDING_LOCAL, COL_HEADER, scale * 0.9f);
+            // The header has its own offset (Move Header) and now its own independent size/visibility
+            // via Header size/Hide Header, replacing the old fixed "0.9x of body text" proxy — Move Text
+            // still moves only the effect lines below it.
+            var store = DietScreenPersistence.get();
+            float headerScale = ContentScaleController.resolveContentScale(MarieModuleSettings.headerScale(store, ID));
+            if (!MarieModuleSettings.isHeaderHidden(store, ID)) {
+                RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+                String header = Component.translatable("nourished.screen.diet.effects_label").getString();
+                int headerX = sx(x) + MarieModuleSettings.headerOffsetX(store, ID);
+                int headerY = sy(y + DietScreenModules.HEADER_TOP_PADDING_LOCAL) + MarieModuleSettings.headerOffsetY(store, ID);
+                headerContext.drawText(header, headerX, headerY, headerTextColor(), headerScale);
+                // The header is drawn through headerContext, not the display-settings-wrapped `context`, so its own
+                // offset applies instead of Move Text's — but that also means withDisplaySettings never sees this draw
+                // call and can't record its extent the way it auto-records text/icons/bars; report it explicitly so
+                // "Move Header"'s and "Move All"'s outlines actually hug the header instead of falling back to the
+                // effect lines below it (the only other thing this box draws through the recorded `context`).
+                MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, context.textWidth(header, headerScale), Math.round(9 * headerScale));
+            }
             y += zoomedHeaderAdvance;
 
             if (effects.isEmpty()) {
                 return;
             }
 
+            // Each line is "+ [icon] Name": the effect's icon and its +/- marker are the icon group (Move Icons/
+            // Hide Icons/icon brightness), the name alone is text (Move Text), so the two move apart. The icon
+            // fits the 9-unit text line at Icon size 100%, same fit-ratio idea as Recent Meals' rows.
+            float userIconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID, false));
+            float iconScale = userIconScale * (9f / 16f);
+            int iconPx = Math.round(16 * iconScale);
+            // The +/- marker belongs to the icon group, so it sizes with Icon size (100% = the default
+            // text size), never with the text size slider — which otherwise pushed the icons sideways.
+            float markerScale = userIconScale;
+            int markerPx = Math.round(9 * markerScale);
+            int textPx = Math.round(9 * scale);
+            // The icon group (marker + icon) and the names each keep their own spacing: Icon size spreads
+            // only the icons apart (so bigger icons don't stack on top of each other), and never moves the
+            // names — they stay at the spacing and indent of a 100% icon, so a column moved apart with
+            // Move Icons stays put. At the default sizes it's the same layout as always.
+            int textPitch = (int) Math.round(zoomedLineAdvance * contentScale);
+            // The icons' base spacing is the line spacing at the default text size, so the text size
+            // slider doesn't move the icons either.
+            int defaultTextPitch = (int) Math.round(Math.max(1, Math.round(9 / contentScale)) * contentScale);
+            int iconPitch = linePx(defaultTextPitch, Math.max(iconPx, markerPx));
+            int defaultIconPx = Math.round(16 * (9f / 16f));
+            int textTop = sy(y);
+            int iconTop = textTop;
+            // The marker is text, but it belongs to the icon group: drawn outside `context` (whose drawText would
+            // shift it by the text offset and record it as text) at the icon offset, and recorded as icon extent
+            // so Move Text's outline hugs just the names while Move Icons' covers marker and icon together.
+            boolean iconsHidden = MarieModuleSettings.isIconsHidden(store, ID);
+            int iconDx = MarieModuleSettings.iconOffsetX(store, ID);
+            int iconDy = MarieModuleSettings.iconOffsetY(store, ID);
+            RenderContext markerContext = MarieModuleSettings.withBrightness(baseContext, MarieModuleSettings.iconBrightness(store, ID), 1.0d);
             int count = 0;
             for (MobEffectInstance effect : effects) {
                 if (count >= naturalLineCount) break;
                 MobEffect type = effect.getEffect().value();
-                String name = Component.translatable(type.getDescriptionId()).getString();
+                String name = stripIconGlyphs(Component.translatable(type.getDescriptionId()).getString());
                 int amplifier = effect.getAmplifier();
                 String label = (amplifier > 0 ? name + " " + (amplifier + 1) : name);
-                int color = type.isBeneficial() ? COL_GREEN : COL_RED;
+                int color = type.isBeneficial() ? beneficialColor() : harmfulColor();
                 String prefix = type.isBeneficial() ? "+ " : "- ";
-                drawText(context, prefix + label, x, y, color, scale);
-                y += zoomedLineAdvance;
+                int lineX = sx(x);
+                int lineY = textTop + (textPitch - textPx) / 2;
+                // The marker travels with its icon (same group), centered on the icon's own slot.
+                int markerY = iconTop + (iconPitch - markerPx) / 2;
+                int prefixW = context.textWidth(prefix, markerScale);
+                if (!iconsHidden) {
+                    markerContext.drawText(prefix, lineX + iconDx, markerY + iconDy, color, markerScale);
+                    MarieModuleSettings.recordIconExtent(store, ID, lineX + iconDx, markerY + iconDy, context.textWidth(prefix.strip(), markerScale), markerPx);
+                }
+                int iconX = lineX + prefixW;
+                context.drawEffectIcon(effect.getEffect(), iconX, iconTop + (iconPitch - iconPx) / 2, iconScale);
+                // The name's indent is that of a default-size marker and icon, so neither Icon size nor the
+                // text size slider moves where the names start.
+                int labelX = lineX + context.textWidth(prefix, 1.0f) + defaultIconPx + 1;
+                context.drawText(label, labelX, lineY, color, scale);
+                textTop += textPitch;
+                iconTop += iconPitch;
                 count++;
             }
         } finally {
             context.popClip();
         }
+    }
+
+    /**
+     * Screen-pixel spacing between consecutive effect icons: {@code base} (the line spacing at the
+     * default text size) until the icon outgrows it, then the icon height plus a 1px gap so
+     * neighbouring icons never touch.
+     */
+    private static int linePx(int base, int iconPx) {
+        return iconPx > base ? iconPx + 1 : base;
     }
 
     // ── Coordinate + drawing helpers ─────────────────────────────────────────
@@ -217,13 +312,26 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
         return anchorBounds.y() + (int) Math.round((localY - startLocalY + paddingLocal) * contentScale);
     }
 
-    private void drawText(RenderContext context, String text, int localX, int localY, int color, float scale) {
-        context.drawText(text, sx(localX), sy(localY), color, scale);
+    /**
+     * {@code name} without private-use-area characters — the font glyphs some mods/resource packs put in
+     * effect names to show the effect's icon inline. This box draws the real icon itself as a separate,
+     * independently movable piece, so leaving the glyph in would show the icon twice and drag one copy
+     * along with the text.
+     */
+    private static String stripIconGlyphs(String name) {
+        StringBuilder out = new StringBuilder(name.length());
+        name.codePoints()
+                .filter(cp -> Character.getType(cp) != Character.PRIVATE_USE)
+                .forEach(out::appendCodePoint);
+        return out.toString().strip();
     }
 
     private void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc) {
-        int fill = panelColorWithOpacity(COL_ROW_BG_RGB, cc.dietBackgroundOpacity());
-        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, COL_BORDER_LT);
+        var store = DietScreenPersistence.get();
+        int fill = MarieModuleSettings.styledBackground(panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity()), store, ID);
+        int border = MarieModuleSettings.styledBorder(borderColor(), store, ID);
+        MarieModuleSettings.drawBoxGlow(context, store, ID, anchorBounds.x(), anchorBounds.y(), screenW, screenH);
+        context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, border);
     }
 
     private static int panelColorWithOpacity(int rgb, double opacity) {

@@ -25,7 +25,7 @@ public final class ModuleProfilesListEntry extends TooltipListEntry<Object> {
 public ModuleProfilesListEntry(Map<String, AtomicBoolean> modulePending, List<String> editableModuleKeys) {
         super(
                 Component.translatable("config.nourished.modules.profiles"),
-                () -> Optional.of(new Component[]{Component.translatable("config.nourished.modules.profiles.desc")}),
+                Optional::empty,
                 false);
         this.modulePending = modulePending;
         this.editableModuleKeys = editableModuleKeys;

@@ -1,0 +1,110 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "food_groups",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "food_groups/vegetables"
+  },
+  "description": "book.nourished.nourished_guide.food_groups.fruits.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:apple"
+  },
+  "name": "book.nourished.nourished_guide.food_groups.fruits.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:apple"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.fruits.spotlight.text",
+      "title": "book.nourished.nourished_guide.food_groups.fruits.spotlight.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.fruits.vanilla_sources.text",
+      "title": "book.nourished.nourished_guide.food_groups.fruits.vanilla_sources.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.fruits.golden_and_enchanted.text",
+      "title": "book.nourished.nourished_guide.food_groups.fruits.golden_and_enchanted.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.fruits.farming_tips.text",
+      "title": "book.nourished.nourished_guide.food_groups.fruits.farming_tips.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:sweet_berries"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.fruits.vanilla_secondary.text",
+      "title": "book.nourished.nourished_guide.food_groups.fruits.vanilla_secondary.title"
+    },
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:mod_loaded",
+        "mod_id": "croptopia"
+      },
+      "item": {
+        "item": "minecraft:sweet_berries"
+      },
+      "text": "book.nourished.nourished_guide.food_groups.fruits.croptopia.text",
+      "title": "book.nourished.nourished_guide.food_groups.fruits.croptopia.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food_groups.fruits.rotation_strategy.text",
+      "title": "book.nourished.nourished_guide.food_groups.fruits.rotation_strategy.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "food_groups/vegetables",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 1,
+  "x": -2,
+  "y": -2
+}

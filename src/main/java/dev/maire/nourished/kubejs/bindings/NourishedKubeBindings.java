@@ -10,6 +10,8 @@ import dev.marie.framework.api.value.ValueDefinition;
 import dev.marie.framework.core.IMarieConfig;
 import dev.marie.framework.curve.math.CurveGrid;
 import dev.marie.framework.curve.serialization.CurveGridJson;
+import dev.marie.framework.tooltips.TooltipMessageRegistry;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurveDef;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurvePreset;
@@ -34,6 +36,9 @@ public final class NourishedKubeBindings {
         if (spec.containsKey("color")) {
             builder.color(asInt(spec.get("color")));
         }
+        if (spec.containsKey("tooltipColor")) {
+            builder.tooltipColor(asInt(spec.get("tooltipColor")));
+        }
         if (spec.containsKey("decayRate")) {
             builder.defaultDecayRate(asFloat(spec.get("decayRate")));
         }
@@ -51,7 +56,16 @@ public final class NourishedKubeBindings {
         } else {
             builder.beneficial(true);
         }
+        if (spec.containsKey("icon")) {
+            builder.icon(String.valueOf(spec.get("icon")));
+        }
+        if (spec.containsKey("tags")) {
+            builder.tags(asStringList(spec.get("tags")));
+        }
         MarieAPI.registerValue(builder.build());
+        if (spec.containsKey("tooltipText")) {
+            TooltipMessageRegistry.registerExternal(Nourished.MODID, id, String.valueOf(spec.get("tooltipText")));
+        }
     }
 
     /**
@@ -199,6 +213,20 @@ public final class NourishedKubeBindings {
             return bool;
         }
         return Boolean.parseBoolean(String.valueOf(value));
+    }
+
+    private static List<String> asStringList(Object value) {
+        if (!(value instanceof List<?> list)) {
+            throw new IllegalArgumentException("NourishedAPI.registerNutrient: 'tags' must be a list of strings");
+        }
+        List<String> tags = new java.util.ArrayList<>(list.size());
+        for (Object item : list) {
+            if (!(item instanceof String s)) {
+                throw new IllegalArgumentException("NourishedAPI.registerNutrient: 'tags' must be a list of strings");
+            }
+            tags.add(s);
+        }
+        return tags;
     }
 
     private static JsonObject mapToJsonObject(Map<?, ?> map) {

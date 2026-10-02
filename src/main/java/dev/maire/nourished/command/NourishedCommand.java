@@ -44,7 +44,11 @@ public final class NourishedCommand {
                     .requires(s -> s.hasPermission(2))
                     .then(Commands.literal("activitylog")
                         .requires(s -> s.hasPermission(2))
-                        .executes(NourishedActivityLogCommand::run)))
+                        .executes(NourishedActivityLogCommand::run))
+                    .then(Commands.literal("food")
+                        .executes(NourishedRegistrationDebugCommand::food))
+                    .then(Commands.literal("registrations")
+                        .executes(NourishedRegistrationDebugCommand::report)))
         );
     }
 }

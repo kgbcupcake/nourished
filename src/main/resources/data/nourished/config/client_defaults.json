@@ -2,7 +2,7 @@
   "hudOffsetX": 0,
   "hudOffsetY": 0,
   "hudBarWidth": 60,
-  "hudScale": 1.0,
+  "hudScale": 1.4,
   "hudReservedBottom": 52,
   "hudDraggable": true,
   "dietBarDragEnabled": true,

@@ -30,7 +30,6 @@ final class ClassicDietDrawHelpers {
     static final int COL_ORANGE     = 0xFFFFAA00;
     static final int COL_RED        = 0xFFFF5555;
     static final int COL_PURPLE     = 0xFFA95FFF;
-    static final int COL_LEGEND_TEXT = 0xFFE0E0E0; // base; legend uses dimLegend() ~12% darker
     /** Warm white/yellow (RGB) for nutrient bar flash overlay; alpha applied at draw time. */
     static final int COL_FLASH_RGB  = 0xFFFFE0;
 
@@ -79,15 +78,5 @@ final class ClassicDietDrawHelpers {
             int sx = x + i * sw;
             g.fill(sx, y, sx + sw - 1, y + h, i < filled ? color : COL_SEG_EMPTY);
         }
-    }
-
-    /** ~12% darker legend text and swatches (brightness reduction). */
-    static int dimLegend(int argb) {
-        float f = 0.88f;
-        int a = (argb >>> 24) & 0xFF;
-        int r = Mth.clamp((int) (((argb >> 16) & 0xFF) * f), 0, 255);
-        int g = Mth.clamp((int) (((argb >> 8) & 0xFF) * f), 0, 255);
-        int b = Mth.clamp((int) ((argb & 0xFF) * f), 0, 255);
-        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 }

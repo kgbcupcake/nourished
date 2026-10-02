@@ -51,7 +51,7 @@ public final class CompatTabbedListEntry extends TooltipListEntry<Object> {
     public CompatTabbedListEntry(NourishedConfig config, Map<String, CompatPending> compatPending) {
         super(
                 Component.translatable("config.nourished.compat.title"),
-                () -> Optional.of(new Component[]{Component.translatable("config.nourished.compat.desc")}),
+                Optional::empty,
                 false
         );
         this.compatPending = compatPending;

@@ -1,8 +1,13 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
+import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.config.FeatureFlagCache;
+import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.tracking.TrackingData;
+import dev.marie.framework.tracking.tracker.MarieTracking;
+import dev.maire.nourished.api.NourishedAPI;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.component.HeaderCollapsibleComponent;
@@ -56,7 +61,8 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         // rather than this frame's shrunk room) — the box only actually disappears once there's less
         // than MIN_VISIBLE_ROOM_LOCAL of room left, instead of vanishing the instant its full natural
         // height stops fitting.
-        boolean enabled = FeatureFlagCache.enableTotalTracking() && cc.showCaloriesBox() && data != null;
+        boolean enabled = FeatureFlagCache.enableTotalTracking() && FeatureFlagCache.enableCalorieHistory()
+                && !MarieModuleSettings.isWindowHidden(DietScreenPersistence.get(), ID) && data != null;
         int room = enabled ? DietLayout.roomInPanel(layout, startLocalY, boxLocalHeight) : 0;
         this.visible = room >= DietScreenModules.MIN_VISIBLE_ROOM_LOCAL;
         this.renderedContentHeight = visible ? room : 0;
@@ -101,7 +107,12 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
     }
 
     @Override
-    public void render(RenderContext context, Bounds bounds) {
+    public void render(RenderContext baseContext, Bounds bounds) {
+        // The module's own text/icon offsets, icon size and brightness (see MarieModuleSettings) apply to everything it draws.
+        // iconFollowsText = false: this box resolves its own final icon scale below (`followText = false`)
+        // and passes it straight to drawItem, so the wrapper must not also apply its own text-relative
+        // icon ratio on top — that used to silently re-couple the icon to Text/Number size.
+        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID, false);
         if (!visible) {
             return;
         }
@@ -113,29 +124,54 @@ public final class CaloriesComponent implements MarieComponent, HeaderCollapsibl
         // tightens, instead of the header staying full-size right up until it's clipped off.
         double widthScale = bounds.width() / (double) SUMMARY_BOX_LOCAL_WIDTH;
         double heightScale = bounds.height() / (double) boxLocalHeight;
-        this.contentScale = Math.min(widthScale, heightScale);
+                // Content geometry is fixed, like the Activity Log's: it follows the panel's own scale, never this
+        // box's size, so resizing the box only changes the box (extra room stays empty, less room is
+        // clipped by the box's own clip). Text/icon sizes come from their sliders alone.
+        this.contentScale = layout.scale();
         // contentScale (fitScale) still drives sx/sy/sd/outer-box sizing unchanged; text/icon render
         // scale is the user's persisted per-box adjustment alone now, sanity-clamped only — no longer
         // capped by contentScale. Real containment against the box's own edges comes from this box's
         // own pushClip below.
         float scale = ContentScaleController.resolveContentScale(DietScreenPersistence.contentScale(ID));
+        var store = DietScreenPersistence.get();
+        // Independent of `scale` (Text size), and never falls back to it either (`followText = false`) —
+        // this box's panel is built with independentIconSize() precisely so a stale/leftover Text size
+        // value never silently sizes the icon.
+        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID, false));
+        // Independent of both `scale` and `iconScale` — the title alone, via Header size/Hide Header.
+        float headerScale = ContentScaleController.resolveContentScale(MarieModuleSettings.headerScale(store, ID));
         double userPaddingLocal = BASE_PADDING_LOCAL * DietScreenPersistence.paddingScale(ID);
         double paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         support.begin(bounds, contentScale, paddingLocal);
 
-        support.drawOuterBox(context, bounds.width(), bounds.height(), cc);
+        support.drawOuterBox(context, bounds.width(), bounds.height(), cc, MarieColors.resolveColor(NourishedColors.CALORIES_BORDER), store, ID);
 
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
-            support.drawItem(context, "minecraft:fire_charge", 2, 5, scale);
-            support.drawText(context, Component.translatable("nourished.screen.diet.calories_label").getString(), 24, 6, SummaryBoxRenderSupport.COL_WHITE, scale);
+            support.drawItem(context, "minecraft:fire_charge", 2, 5, iconScale);
 
-            String calStr = (int) data.total + " / " + (int) data.maxTotal;
-            support.drawText(context, calStr, 24, 17, SummaryBoxRenderSupport.COL_GREEN, scale);
+            // The header has its own offset (Move Header); Move Text moves only the calorie value below it —
+            // same split ActiveEffectsComponent's title/lines already have.
+            if (!MarieModuleSettings.isHeaderHidden(store, ID)) {
+                RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+                String header = Component.translatable("nourished.screen.diet.calories_label").getString();
+                int headerX = support.sx(24) + MarieModuleSettings.headerOffsetX(store, ID);
+                int headerY = support.sy(startLocalY + 6) + MarieModuleSettings.headerOffsetY(store, ID);
+                headerContext.drawText(header, headerX, headerY, MarieColors.resolveColor(NourishedColors.CALORIES_HEADER), headerScale);
+                // The header is drawn through headerContext, not the display-settings-wrapped `context`, so
+                // withDisplaySettings never sees this draw call and can't auto-record its extent; report it
+                // explicitly so "Move Header"'s and "Move All"'s outlines hug the header, not the value below it.
+                MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, headerContext.textWidth(header, headerScale), Math.round(9 * headerScale));
+            }
+
+            float today = MarieTracking.getCurrentTrackerValue(Minecraft.getInstance().player, NourishedAPI.CALORIES_TRACKER_ID);
+            String calStr = (int) today + " / " + (int) data.maxTotal;
+            support.drawText(context, calStr, 24, 17, SummaryBoxRenderSupport.calorieColor(), scale);
 
             int barLocalWidth = SUMMARY_BOX_LOCAL_WIDTH - 4;
-            float calPct = data.maxTotal > 0 ? Mth.clamp(data.total / data.maxTotal, 0f, 1f) : 0f;
-            context.drawBar(support.sx(2), support.sy(startLocalY + 33), support.sd(barLocalWidth), support.sd(4), calPct, SummaryBoxRenderSupport.COL_SEG_EMPTY, SummaryBoxRenderSupport.COL_GREEN);
+            float calPct = data.maxTotal > 0 ? Mth.clamp(today / data.maxTotal, 0f, 1f) : 0f;
+            context.drawBar(support.sx(2), support.sy(startLocalY + 33), support.sd(barLocalWidth), support.sd(4), calPct, SummaryBoxRenderSupport.barTrackColor(), SummaryBoxRenderSupport.calorieColor());
         } finally {
             context.popClip();
         }

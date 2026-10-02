@@ -1,0 +1,93 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "compat_mods",
+  "condition": {
+    "type": "modonomicon:and",
+    "children": [
+      {
+        "type": "modonomicon:entry_read",
+        "entry_id": "compat_mods/overview"
+      },
+      {
+        "type": "modonomicon:mod_loaded",
+        "mod_id": "farmersdelight"
+      }
+    ]
+  },
+  "description": "book.nourished.nourished_guide.compat_mods.farmers_delight.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:cooked_beef"
+  },
+  "name": "book.nourished.nourished_guide.compat_mods.farmers_delight.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.farmers_delight.farmers_delight.text",
+      "title": "book.nourished.nourished_guide.compat_mods.farmers_delight.farmers_delight.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.farmers_delight.new_crops.text",
+      "title": "book.nourished.nourished_guide.compat_mods.farmers_delight.new_crops.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.farmers_delight.cooked_meals.text",
+      "title": "book.nourished.nourished_guide.compat_mods.farmers_delight.cooked_meals.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.farmers_delight.cooking_pot.text",
+      "title": "book.nourished.nourished_guide.compat_mods.farmers_delight.cooking_pot.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.farmers_delight.rotation_advice.text",
+      "title": "book.nourished.nourished_guide.compat_mods.farmers_delight.rotation_advice.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "compat_mods/overview",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 2,
+  "x": -2,
+  "y": 0
+}

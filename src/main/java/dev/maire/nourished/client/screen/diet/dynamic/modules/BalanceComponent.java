@@ -1,5 +1,8 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.marie.framework.color.MarieColors;
+import dev.maire.nourished.client.colors.NourishedColors;
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Bounds;
@@ -27,8 +30,23 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
     private static final int BODY_LOCAL_HEIGHT = 20;
     private static final int BOX_LOCAL_HEIGHT = HEADER_LOCAL_HEIGHT + BODY_LOCAL_HEIGHT;
 
-    private static final int COL_ORANGE = 0xFFFFAA00;
-    private static final int COL_RED = 0xFFFF5555;
+    private static int balanceBalancedColor() {
+        return MarieColors.resolveColor(NourishedColors.BALANCE_BALANCED);
+    }
+
+    private static int balanceLowColor() {
+        return MarieColors.resolveColor(NourishedColors.BALANCE_LOW);
+    }
+    private static int balanceExcessColor() {
+        return MarieColors.resolveColor(NourishedColors.BALANCE_EXCESS);
+    }
+    private static int headerTextColor() {
+        return MarieColors.resolveColor(NourishedColors.BALANCE_HEADER);
+    }
+
+    private static int borderColor() {
+        return MarieColors.resolveColor(NourishedColors.BALANCE_BORDER);
+    }
 
     /** Reference local-unit padding used to derive the user's padding-adjustment range — see {@link ContentScaleController#resolvePadding}. */
     private static final double BASE_PADDING_LOCAL = 2.0d;
@@ -54,7 +72,7 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
 
         // Continuous fade instead of an all-or-nothing header floor — see CaloriesComponent's
         // constructor comment; same pattern, header+pips scale down together as room tightens.
-        boolean enabled = cc.showBalanceBox() && data != null;
+        boolean enabled = !MarieModuleSettings.isWindowHidden(DietScreenPersistence.get(), ID) && data != null;
         int room = enabled ? DietLayout.roomInPanel(layout, startLocalY, BOX_LOCAL_HEIGHT) : 0;
         this.visible = room >= DietScreenModules.MIN_VISIBLE_ROOM_LOCAL;
         this.renderedContentHeight = visible ? room : 0;
@@ -97,7 +115,12 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
     }
 
     @Override
-    public void render(RenderContext context, Bounds bounds) {
+    public void render(RenderContext baseContext, Bounds bounds) {
+        // The module's own text/icon offsets, icon size and brightness (see MarieModuleSettings) apply to everything it draws.
+        // iconFollowsText = false: this box resolves its own final icon scale below (`followText = false`)
+        // and passes it straight to drawItem, so the wrapper must not also apply its own text-relative
+        // icon ratio on top — that used to silently re-couple the icon to Text size.
+        RenderContext context = MarieModuleSettings.withDisplaySettings(baseContext, DietScreenPersistence.get(), ID, false);
         if (!visible) {
             return;
         }
@@ -110,7 +133,10 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         // tightens, instead of the header staying full-size right up until it's clipped off.
         double widthScale = bounds.width() / (double) SUMMARY_BOX_LOCAL_WIDTH;
         double heightScale = bounds.height() / (double) BOX_LOCAL_HEIGHT;
-        this.contentScale = Math.min(widthScale, heightScale);
+                // Content geometry is fixed, like the Activity Log's: it follows the panel's own scale, never this
+        // box's size, so resizing the box only changes the box (extra room stays empty, less room is
+        // clipped by the box's own clip). Text/icon sizes come from their sliders alone.
+        this.contentScale = layout.scale();
         // contentScale (fitScale) still drives sx/sy/sd/outer-box sizing unchanged; text/icon render
         // scale is the user's persisted per-box adjustment alone now, sanity-clamped only — no longer
         // capped by contentScale. Real containment against the box's own edges comes from this box's
@@ -123,23 +149,39 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         double paddingLocal = ContentScaleController.resolvePadding(userPaddingLocal) - BASE_PADDING_LOCAL;
         support.begin(bounds, contentScale, paddingLocal);
 
-        support.drawOuterBox(context, bounds.width(), bounds.height(), cc);
+        var store = DietScreenPersistence.get();
+        support.drawOuterBox(context, bounds.width(), bounds.height(), cc, borderColor(), store, ID);
 
+        // Independent of `scale` (Text size), and never falls back to it either (`followText = false`) —
+        // this box's panel is built with independentIconSize() precisely so a stale/leftover Text size
+        // value never silently sizes the icon.
+        float iconScale = ContentScaleController.resolveContentScale(MarieModuleSettings.iconScale(store, ID, false));
+        // Independent of both `scale` and `iconScale` — the title alone, via Header size/Hide Header.
+        float headerScale = ContentScaleController.resolveContentScale(MarieModuleSettings.headerScale(store, ID));
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
-            support.drawItem(context, "minecraft:comparator", 2, 5, scale);
-            support.drawText(context, Component.translatable("nourished.screen.diet.balance_label").getString(), 24, 6, SummaryBoxRenderSupport.COL_WHITE, scale);
+            support.drawItem(context, "minecraft:comparator", 2, 5, iconScale);
+
+            // The header has its own offset (Move Header); Move Text moves only the balance state word
+            // below it — same split ActiveEffectsComponent's title/lines already have.
+            if (!MarieModuleSettings.isHeaderHidden(store, ID)) {
+                RenderContext headerContext = MarieModuleSettings.withBrightness(baseContext,
+                        MarieModuleSettings.textBrightness(store, ID), MarieModuleSettings.iconBrightness(store, ID));
+                String header = Component.translatable("nourished.screen.diet.balance_label").getString();
+                int headerX = support.sx(24) + MarieModuleSettings.headerOffsetX(store, ID);
+                int headerY = support.sy(startLocalY + 6) + MarieModuleSettings.headerOffsetY(store, ID);
+                headerContext.drawText(header, headerX, headerY, headerTextColor(), headerScale);
+                // The header is drawn through headerContext, not the display-settings-wrapped `context`, so
+                // withDisplaySettings never sees this draw call and can't auto-record its extent; report it
+                // explicitly so "Move Header"'s and "Move All"'s outlines hug the header, not the state word below it.
+                MarieModuleSettings.recordHeaderExtent(store, ID, headerX, headerY, headerContext.textWidth(header, headerScale), Math.round(9 * headerScale));
+            }
 
             String balKey = getBalanceKey(data);
             int balColor = balanceColor(balKey);
             String balText = Component.translatable("nourished.screen.diet.balance_state." + balKey).getString();
 
-            Font font = mc.font;
             float balanceScale = 1.2f * (10f / 9f);
-            float balTextW = font.width(balText) * balanceScale;
-            int bgAlpha = 51;
-            int bgColor = (bgAlpha << 24) | (balColor & 0x00FFFFFF);
-            context.fillRect(support.sx(22), support.sy(startLocalY + 16), support.sd((int) balTextW + 5), support.sd(11), bgColor);
             support.drawText(context, balText, 24, 17, balColor, scale * balanceScale);
 
             int barLocalWidth = SUMMARY_BOX_LOCAL_WIDTH - 4;
@@ -147,10 +189,26 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
             int filledPips = Math.round(balScore * 5);
             int pipTotalW = 5 * 10 + 4 * 3;
             int pipStartX = (barLocalWidth - pipTotalW) / 2 + 2;
+            // The pips are this box's "bar": Bar size scales them (from the row's start) and Move Bars offsets them.
+            float barScale = ContentScaleController.resolveContentScale(MarieModuleSettings.barScale(store, ID));
+            int barDx = MarieModuleSettings.barOffsetX(store, ID);
+            int barDy = MarieModuleSettings.barOffsetY(store, ID);
+            int pipW = Math.max(1, Math.round(support.sd(10) * barScale));
+            int pipH = Math.max(1, Math.round(support.sd(6) * barScale));
+            int pipY = support.sy(startLocalY + 40) + barDy;
+            int firstPipX = support.sx(pipStartX) + barDx;
+            int lastPipRight = firstPipX;
             for (int i = 0; i < 5; i++) {
-                int px = pipStartX + i * 13;
-                context.fillRect(support.sx(px), support.sy(startLocalY + 40), support.sd(10), support.sd(6), i < filledPips ? balColor : SummaryBoxRenderSupport.COL_SEG_EMPTY);
+                int px = support.sx(pipStartX) + Math.round(i * support.sd(13) * barScale) + barDx;
+                // Plain fillRects, so the wrapper's automatic Bar glow (and its Pulse) never sees them — glow each pip here.
+                MarieModuleSettings.drawBarGlow(baseContext, store, ID, px, pipY, pipW, pipH);
+                context.fillRect(px, pipY, pipW, pipH, i < filledPips ? balColor : SummaryBoxRenderSupport.barTrackColor());
+                lastPipRight = px + pipW;
             }
+            // The pips have no drawBar/drawVerticalBar call of their own (they're plain fillRects), so nothing records
+            // their extent for MariesLib's move-outline/offset machinery on its own; report it so "Move Bars"/"Move All"
+            // outlines hug the pip row instead of falling back to the whole box.
+            MarieModuleSettings.recordBarExtent(store, ID, firstPipX, pipY, Math.max(1, lastPipRight - firstPipX), pipH);
         } finally {
             context.popClip();
         }
@@ -169,10 +227,10 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
 
     private static int balanceColor(String key) {
         return switch (key) {
-            case "balanced" -> SummaryBoxRenderSupport.COL_GREEN;
-            case "low" -> COL_ORANGE;
-            case "excess" -> COL_RED;
-            default -> SummaryBoxRenderSupport.COL_WHITE;
+            case "balanced" -> balanceBalancedColor();
+            case "low" -> balanceLowColor();
+            case "excess" -> balanceExcessColor();
+            default -> SummaryBoxRenderSupport.textColor();
         };
     }
 }

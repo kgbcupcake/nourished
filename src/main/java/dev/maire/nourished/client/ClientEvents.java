@@ -1,8 +1,10 @@
 package dev.maire.nourished.client;
 
+import dev.maire.nourished.client.config.EffectPreview;
 import dev.maire.nourished.client.screen.diet.DietScreen;
 import dev.maire.nourished.client.screen.diet.classic.ClassicDietScreen;
 import dev.maire.nourished.config.NourishedClientConfig;
+import dev.maire.nourished.config.NourishedConfig;
 import dev.marie.framework.tooltips.MarieTooltipHelper;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.ui.api.MarieCommandCenter;
@@ -58,6 +60,9 @@ public final class ClientEvents {
     }
 
     public static void onItemTooltip(ItemTooltipEvent event) {
+        if (!NourishedConfig.get().enableFoodTooltips()) {
+            return;
+        }
         ItemStack stack = event.getItemStack();
         if (stack.isEmpty()) {
             return;
@@ -72,6 +77,7 @@ public final class ClientEvents {
     }
 
     public static void onClientTick(ClientTickEvent.Post event) {
+        EffectPreview.tick();
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.screen != null) {
             return;

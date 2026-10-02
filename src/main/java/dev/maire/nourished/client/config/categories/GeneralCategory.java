@@ -26,8 +26,7 @@ public final class GeneralCategory {
                             0.0d,
                             1.0d,
                             0.1d,
-                            config::setDecayRate,
-                            Component.translatable("config.nourished.decayRate.desc")
+                            config::setDecayRate
                     )
             );
         }
@@ -37,7 +36,6 @@ public final class GeneralCategory {
                     eb.startIntSlider(Component.translatable("config.nourished.decayIntervalTicks"), config.decayIntervalTicks(), 20, 72000)
                             .setDefaultValue(1200)
                             .setTextGetter(v -> Component.literal(v + " ticks"))
-                            .setTooltip(Component.translatable("config.nourished.decayIntervalTicks.desc"))
                             .setSaveConsumer(config::setDecayIntervalTicks)
                             .build()
             );
@@ -52,8 +50,7 @@ public final class GeneralCategory {
                             0.0d,
                             1.0d,
                             0.5d,
-                            config::setStartingNutrientValue,
-                            Component.translatable("config.nourished.startingNutrientValue.desc")
+                            config::setStartingNutrientValue
                     )
             );
         }
@@ -65,7 +62,6 @@ public final class GeneralCategory {
                                     config.deathNutritionBehaviorConfigId()
                             )
                             .setDefaultValue(RespawnValueBehavior.PRESERVE.configId())
-                            .setTooltip(Component.translatable("config.nourished.deathNutritionBehavior.desc"))
                             .setSaveConsumer(config::setDeathNutritionBehavior)
                             .build()
             );
@@ -80,8 +76,7 @@ public final class GeneralCategory {
                             0.5d,
                             20.0d,
                             5.0d,
-                            config::setNutrientGainScale,
-                            Component.translatable("config.nourished.nutrientGainScale.desc")
+                            config::setNutrientGainScale
                     )
             );
         }
@@ -95,8 +90,7 @@ public final class GeneralCategory {
                             0.05d,
                             1.0d,
                             0.2d,
-                            config::setNutrientGainPerBiteMax,
-                            Component.translatable("config.nourished.nutrientGainPerBiteMax.desc")
+                            config::setNutrientGainPerBiteMax
                     )
             );
         }
@@ -105,7 +99,6 @@ public final class GeneralCategory {
             category.addEntry(
                     eb.startBooleanToggle(Component.translatable("config.nourished.enableNutrientCurves"), config.enableNutrientCurves())
                             .setDefaultValue(false)
-                            .setTooltip(Component.translatable("config.nourished.enableNutrientCurves.desc"))
                             .setSaveConsumer(config::setEnableNutrientCurves)
                             .build()
             );
@@ -119,7 +112,6 @@ public final class GeneralCategory {
                                     parseDefaultCurvePreset(config.defaultCurvePreset())
                             )
                             .setDefaultValue(NutrientCurvePreset.FLAT)
-                            .setTooltip(Component.translatable("config.nourished.defaultCurvePreset.desc"))
                             .setSaveConsumer(preset -> config.setDefaultCurvePreset(preset.name()))
                             .build()
             );

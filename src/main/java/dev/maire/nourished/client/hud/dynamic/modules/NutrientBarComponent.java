@@ -1,5 +1,9 @@
 package dev.maire.nourished.client.hud.dynamic.modules;
 
+import dev.maire.nourished.client.colors.NourishedColors;
+import dev.maire.nourished.client.UiStatePersistence;
+import dev.marie.framework.ui.api.MarieModuleSettings;
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
@@ -8,20 +12,16 @@ import dev.marie.framework.ui.geometry.Insets;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.geometry.Size;
-import dev.marie.framework.ui.VisibilityRule;
-import dev.marie.framework.ui.visibility.AnyOf;
-import dev.marie.framework.ui.visibility.ConfigToggleVisibility;
-import dev.marie.framework.ui.visibility.ThresholdVisibility;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
+import dev.maire.nourished.client.hud.dynamic.edit.HudDrawnExtents;
 import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
-import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibilityRules;
+import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 import java.util.Map;
 
@@ -30,6 +30,9 @@ import java.util.Map;
  * it's taken from {@link HudLayout.Layout}, which stays the single source of truth for bar sizing.
  */
 final class NutrientBarComponent implements MarieComponent {
+
+    /** The Nutrient HUD panel's own id, whose Pulse settings every row's bar glow follows. */
+    private static final String HUD_PANEL_ID = "nourished.hud.panel";
 
     private final String nutrientKey;
     private final boolean verticalMode;
@@ -45,13 +48,45 @@ final class NutrientBarComponent implements MarieComponent {
      * modules maintain.
      */
     private final float contentScale;
+    /** Icon size multiplier — independent of {@link #contentScale}, which sizes the text (see {@code MarieModuleSettings#iconScale}). */
+    private final float iconScale;
+    /** "Move Text and Icons" offset — moves the icon and the name label. */
+    private final int textDx;
+    private final int textDy;
+    /** "Move Icons" offset — moves the icon. */
+    private final int iconDx;
+    private final int iconDy;
+    /** "Move Bars" offset — moves the bar and its percentage text. */
+    private final int barDx;
+    private final int barDy;
+    /** Bar size multiplier — scales the bar and, with it, the percentage text at its end (the text size does not touch that number). */
+    private final float barScale;
+    /** The panel's "Hide Icons" toggle: skips the icon draw (the layout is unchanged). */
+    private final boolean iconsHidden;
+    /** The panel's "Hide Bars" toggle: skips the bar draw (the label and percentage keep their place). */
+    private final boolean barsHidden;
+    /** The panel's "Hide Text" toggle: skips the label and percentage draws (the icon and bar keep their place). */
+    private final boolean textHidden;
 
-    NutrientBarComponent(String nutrientKey, boolean verticalMode, HudLayout.Layout hudLayout, Map<String, Float> displayValues, float contentScale) {
+    NutrientBarComponent(String nutrientKey, boolean verticalMode, HudLayout.Layout hudLayout, Map<String, Float> displayValues, float contentScale, float iconScale,
+                          int textDx, int textDy, int iconDx, int iconDy, int barDx, int barDy, float barScale,
+                          boolean iconsHidden, boolean barsHidden, boolean textHidden) {
         this.nutrientKey = nutrientKey;
         this.verticalMode = verticalMode;
         this.hudLayout = hudLayout;
         this.displayValues = displayValues;
         this.contentScale = contentScale;
+        this.iconScale = iconScale;
+        this.textDx = textDx;
+        this.textDy = textDy;
+        this.iconDx = iconDx;
+        this.iconDy = iconDy;
+        this.barDx = barDx;
+        this.barDy = barDy;
+        this.barScale = barScale;
+        this.iconsHidden = iconsHidden;
+        this.barsHidden = barsHidden;
+        this.textHidden = textHidden;
     }
 
     @Override
@@ -64,48 +99,18 @@ final class NutrientBarComponent implements MarieComponent {
         if (verticalMode) {
             int textH = (int) Math.ceil(9 * hudLayout.labelScale());
             int contentH = textH + 2 + hudLayout.verticalBarH() + 2 + textH;
-            // CENTER so HorizontalLayout vertically centers each column when the box is taller than
-            // content needs, same reasoning as the horizontal-mode CENTER below.
-            return Constraint.fixed(hudLayout.verticalColumnW(), contentH).withAnchor(Anchor.CENTER);
+            return Constraint.fixed(hudLayout.verticalColumnW(), contentH);
         }
         // naturalPanelW, not panelW: the on-screen box can be freely resized wider than content
         // needs (see HudEditTarget) without rescaling content, so content must size itself from its
-        // own natural (scale-only) width, not whatever the box currently measures. CENTER anchor lets
-        // VerticalLayout's existing horizontal-centering offset place each row in the middle of
-        // whatever width is actually available, instead of pinning it flush to the left.
+        // own natural (scale-only) width, not whatever the box currently measures. Pinned to the
+        // top-left, so a resize moves the content with the box.
         int contentW = hudLayout.naturalPanelW() - hudLayout.scaledPad() * 2;
         Size preferred = new Size(contentW, hudLayout.rowH());
         Size minSize = new Size(0, hudLayout.rowH());
         Size maxSize = new Size(Integer.MAX_VALUE, hudLayout.rowH());
         return new Constraint(preferred, minSize, maxSize, false, false, true, false,
-                Anchor.CENTER, Insets.NONE, Insets.NONE);
-    }
-
-    /**
-     * Wraps HudVisibility/HudVisibilityRules' hide/show-above thresholds, OR'd with the nutrient-gain
-     * flash window (via {@link MarieClientCache#flashAlpha}) so a bar temporarily reveals itself when
-     * its value just increased, even while otherwise threshold-hidden.
-     */
-    @Override
-    public VisibilityRule visibilityRule() {
-        NourishedClientConfig cc = NourishedClientConfig.get();
-        Float hideAtOrAbove = activeThreshold((float) cc.hudHideAboveThreshold());
-        Float showAtOrAbove = activeThreshold((float) cc.hudShowAboveThreshold());
-        VisibilityRule threshold = new ThresholdVisibility<>(
-                () -> MarieClientCache.get().values.getOrDefault(nutrientKey, 0f),
-                hideAtOrAbove,
-                showAtOrAbove
-        );
-        if (!cc.hudRevealOnNutrientGain()) {
-            return threshold;
-        }
-        VisibilityRule flashing = new ConfigToggleVisibility(() -> MarieClientCache.flashAlpha(nutrientKey) > 0f);
-        return new AnyOf(threshold, flashing);
-    }
-
-    private static Float activeThreshold(float raw) {
-        float clamped = Math.max(0f, Math.min(1f, raw));
-        return clamped < 1f - HudVisibilityRules.ZERO_EPSILON ? clamped : null;
+                Anchor.TOP_LEFT, Insets.NONE, Insets.NONE);
     }
 
     /** Translucent white highlight over the bar while {@link MarieClientCache#flashAlpha} is decaying, matching the pre-MarieUI legacy renderer's treatment. */
@@ -113,18 +118,34 @@ final class NutrientBarComponent implements MarieComponent {
         float flash = MarieClientCache.flashAlpha(nutrientKey);
         if (flash > 0f) {
             int a = (int) (flash * 80);
-            int flashColor = (a << 24) | 0xFFFFFF;
+            int flashColor = (a << 24) | NourishedColors.nutrientRgb(nutrientKey);
             context.fillRect(barX, barY, barW, barH, flashColor);
         }
     }
 
+    /**
+     * This nutrient's own dedicated Bar glow (see {@link NourishedColorSlots#addNutrientBarGlow}) —
+     * unlike every other Diet/HUD box, the Nutrient HUD is edited as one panel with no per-row options
+     * popup, so each nutrient's glow is stored under its own synthetic panel id rather than sharing
+     * the panel-wide Glow tab's single Bar glow setting.
+     */
+    private static void drawNutrientBarGlow(RenderContext context, String nutrientKey, int x, int y, int width, int height) {
+        var store = UiStatePersistence.get();
+        String panelId = "nourished.hud.bar." + nutrientKey;
+        // Breathes with the HUD panel's own Pulse (Pulse tab), shared by every nutrient's bar glow.
+        MarieModuleSettings.barGlowPulse(store, HUD_PANEL_ID).drawGlow(context, x, y, width, height,
+                MarieModuleSettings.barGlowColor(store, panelId), MarieModuleSettings.barGlowStrength(store, panelId));
+    }
+
+    /**
+     * {@link NutrientRegistry#getIconItem(String)} resolves/validates the icon id string once per
+     * distinct id and caches the {@link net.minecraft.world.item.Item} forever — this only wraps
+     * that cached, already-validated item in a fresh {@link ItemStack} per call, instead of
+     * re-running {@link ResourceLocation#tryParse} and a {@link BuiltInRegistries#ITEM} lookup on
+     * every HUD frame for every visible bar.
+     */
     private static ItemStack resolveIconStack(String key) {
-        String iconId = NutrientRegistry.getIcon(key);
-        ResourceLocation iconLoc = ResourceLocation.tryParse(iconId);
-        var item = iconLoc == null
-                ? Items.APPLE
-                : BuiltInRegistries.ITEM.getOptional(iconLoc).orElse(Items.APPLE);
-        return new ItemStack(item);
+        return new ItemStack(NutrientRegistry.getIconItem(key));
     }
 
     @Override
@@ -133,7 +154,16 @@ final class NutrientBarComponent implements MarieComponent {
         // unaffected by contentScale, so a persisted zoom above hudLayout's own proportions is
         // clipped at this row's own edges instead of overlapping neighboring rows — same pattern as
         // the other 7 ContentScaleController-managed modules' pushClip.
-        context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
+        // The per-row clip would cut off content moved out of its own row slot by the move offsets
+        // (the panel-wide clip in NutrientPanelContainer still applies), so it only applies unshifted.
+        if (textDx != 0 || textDy != 0 || iconDx != 0 || iconDy != 0 || barDx != 0 || barDy != 0) {
+            renderContent(context, bounds);
+            return;
+        }
+        // Horizontally the row slot is only the natural width, so a bigger box or bar size would be cut
+        // off there; the panel-wide clip already bounds the width, so this one only guards rows.
+        int clipW = verticalMode ? bounds.width() : Math.max(bounds.width(), 4096);
+        context.pushClip(bounds.x(), bounds.y(), clipW, bounds.height());
         try {
             renderContent(context, bounds);
         } finally {
@@ -141,50 +171,105 @@ final class NutrientBarComponent implements MarieComponent {
         }
     }
 
+    /** Same "show empty bars" dimming as the classic renderer: an empty row is drawn at 40% alpha. */
     private void renderContent(RenderContext context, Bounds bounds) {
+        float truePct = MarieClientCache.get().values.getOrDefault(nutrientKey, 0f);
+        float alpha = HudVisibility.dimZeroRow(truePct, NourishedClientConfig.get()) ? 0.4f : 1f;
+        if (alpha >= 1f) {
+            drawContent(context, bounds, alpha);
+            return;
+        }
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
+        try {
+            drawContent(context, bounds, alpha);
+        } finally {
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        }
+    }
+
+    private void drawContent(RenderContext context, Bounds bounds, float alpha) {
         float value = displayValues.getOrDefault(nutrientKey, 0f);
         String label = HudDrawHelpers.nutrientLabel(nutrientKey);
         int fillColor = HudDrawHelpers.barFillColor(nutrientKey, value);
-        int pctColor = HudDrawHelpers.pctColor(nutrientKey, value);
+        double textBrightness = NourishedClientConfig.get().hudTextBrightness();
+        int pctColor = MarieModuleSettings.scaleBrightness(HudDrawHelpers.pctColor(nutrientKey, value), textBrightness);
         int bgColor = HudDrawHelpers.barBackgroundColor();
-        int labelColor = HudDrawHelpers.labelColor();
+        int labelColor = MarieModuleSettings.scaleBrightness(HudDrawHelpers.labelColor(), textBrightness);
         String pctText = Math.round(value * 100f) + "%";
         var font = Minecraft.getInstance().font;
 
         if (verticalMode) {
-            int textH = (int) Math.ceil(9 * contentScale);
-            int barW = hudLayout.verticalBarW();
-            int barH = hudLayout.verticalBarH();
+            int textH = (int) Math.ceil(9 * barScale);
+            int barW = Math.max(1, Math.round(hudLayout.verticalBarW() * barScale));
+            int barH = Math.max(1, Math.round(hudLayout.verticalBarH() * barScale));
             int barX = bounds.x() + (bounds.width() - barW) / 2;
             int barY = bounds.y() + textH + 2;
 
-            int pctSw = (int) Math.ceil(font.width(pctText) * contentScale);
-            int pctX = bounds.x() + (bounds.width() - pctSw) / 2;
-            context.drawText(pctText, pctX, bounds.y(), pctColor, contentScale);
+            if (!barsHidden) {
+                int pctSw = (int) Math.ceil(font.width(pctText) * barScale);
+                int pctX = bounds.x() + (bounds.width() - pctSw) / 2;
+                context.drawText(pctText, pctX + barDx, bounds.y() + barDy, pctColor, barScale);
 
-            context.drawVerticalBar(barX, barY, barW, barH, value, bgColor, fillColor);
-            drawFlashOverlay(context, barX, barY, barW, barH);
+                drawNutrientBarGlow(context, nutrientKey, barX + barDx, barY + barDy, barW, barH);
+                context.drawVerticalBar(barX + barDx, barY + barDy, barW, barH, value, bgColor, fillColor);
+                drawFlashOverlay(context, barX + barDx, barY + barDy, barW, barH);
+                int left = Math.min(pctX, barX);
+                HudDrawnExtents.record(nutrientKey, HudDrawnExtents.Part.BAR, left + barDx, bounds.y() + barDy,
+                        Math.max(pctX + pctSw, barX + barW) - left, barY + barH - bounds.y());
+            }
 
-            int labelSw = (int) Math.ceil(font.width(label) * contentScale);
-            int labelX = bounds.x() + (bounds.width() - labelSw) / 2;
-            context.drawText(label, labelX, barY + barH + 2, labelColor, contentScale);
+            if (!textHidden) {
+                int labelSw = (int) Math.ceil(font.width(label) * contentScale);
+                int labelX = bounds.x() + (bounds.width() - labelSw) / 2;
+                context.drawText(label, labelX + textDx, barY + barH + 2 + textDy, labelColor, contentScale);
+                HudDrawnExtents.record(nutrientKey, HudDrawnExtents.Part.TEXT, labelX + textDx, barY + barH + 2 + textDy,
+                        labelSw, (int) Math.ceil(9 * contentScale));
+            }
         } else {
             int rowCenterY = bounds.y() + bounds.height() / 2;
             int textY = rowCenterY - (int) Math.ceil(9 * contentScale) / 2;
             int iconSize = hudLayout.iconSize();
 
-            context.drawItem(resolveIconStack(nutrientKey), bounds.x(), rowCenterY - iconSize / 2, contentScale);
+            float tint = (float) NourishedClientConfig.get().hudIconBrightness();
+            RenderSystem.setShaderColor(tint, tint, tint, alpha);
+            try {
+                if (!iconsHidden) {
+                    context.drawItem(resolveIconStack(nutrientKey), bounds.x() + iconDx, rowCenterY - iconSize / 2 + iconDy, iconScale);
+                    int drawnIcon = Math.round(16 * iconScale);
+                    HudDrawnExtents.record(nutrientKey, HudDrawnExtents.Part.ICON, bounds.x() + iconDx, rowCenterY - iconSize / 2 + iconDy, drawnIcon, drawnIcon);
+                }
+            } finally {
+                RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
+            }
 
             int labelX = bounds.x() + iconSize + HudDrawHelpers.ICON_LABEL_GAP;
-            context.drawText(label, labelX, textY, labelColor, contentScale);
+            if (!textHidden) {
+                context.drawText(label, labelX + textDx, textY + textDy, labelColor, contentScale);
+                HudDrawnExtents.record(nutrientKey, HudDrawnExtents.Part.TEXT, labelX + textDx, textY + textDy,
+                        (int) Math.ceil(font.width(label) * contentScale), (int) Math.ceil(9 * contentScale));
+            }
 
             int barX = labelX + hudLayout.maxLabelSw() + HudDrawHelpers.LABEL_BAR_GAP;
-            int barY = rowCenterY - HudDrawHelpers.BAR_H / 2;
-            context.drawBar(barX, barY, hudLayout.barW(), HudDrawHelpers.BAR_H, value, bgColor, fillColor);
-            drawFlashOverlay(context, barX, barY, hudLayout.barW(), HudDrawHelpers.BAR_H);
+            int barW = Math.max(1, Math.round(hudLayout.barW() * barScale));
+            int barH = Math.max(1, Math.round(HudDrawHelpers.BAR_H * barScale));
+            int barY = rowCenterY - barH / 2;
+            if (barsHidden) {
+                return;
+            }
+            drawNutrientBarGlow(context, nutrientKey, barX + barDx, barY + barDy, barW, barH);
+            context.drawBar(barX + barDx, barY + barDy, barW, barH, value, bgColor, fillColor);
+            drawFlashOverlay(context, barX + barDx, barY + barDy, barW, barH);
 
-            int pctX = barX + hudLayout.barW() + HudDrawHelpers.BAR_PCT_GAP;
-            context.drawText(pctText, pctX, textY, pctColor, contentScale);
+            // The number at the bar's end sizes and moves with the bar, not with the text.
+            int pctX = barX + barW + HudDrawHelpers.BAR_PCT_GAP;
+            int pctY = rowCenterY - (int) Math.ceil(9 * barScale) / 2;
+            context.drawText(pctText, pctX + barDx, pctY + barDy, pctColor, barScale);
+            int pctH = (int) Math.ceil(9 * barScale);
+            int top = Math.min(barY, pctY);
+            HudDrawnExtents.record(nutrientKey, HudDrawnExtents.Part.BAR, barX + barDx, top + barDy,
+                    pctX + (int) Math.ceil(font.width(pctText) * barScale) - barX, Math.max(barY + barH, pctY + pctH) - top);
         }
     }
 }

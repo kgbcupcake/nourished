@@ -1,0 +1,82 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "compat_mods",
+  "condition": {
+    "type": "modonomicon:and",
+    "children": [
+      {
+        "type": "modonomicon:entry_read",
+        "entry_id": "compat_mods/overview"
+      },
+      {
+        "type": "modonomicon:mod_loaded",
+        "mod_id": "spiceoflife"
+      }
+    ]
+  },
+  "description": "book.nourished.nourished_guide.compat_mods.spice_of_life.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:book"
+  },
+  "name": "book.nourished.nourished_guide.compat_mods.spice_of_life.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.spice_of_life.spice_of_life.text",
+      "title": "book.nourished.nourished_guide.compat_mods.spice_of_life.spice_of_life.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.spice_of_life.how_they_interact.text",
+      "title": "book.nourished.nourished_guide.compat_mods.spice_of_life.how_they_interact.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.spice_of_life.diminishing_returns_and_sol.text",
+      "title": "book.nourished.nourished_guide.compat_mods.spice_of_life.diminishing_returns_and_sol.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.compat_mods.spice_of_life.practical_advice.text",
+      "title": "book.nourished.nourished_guide.compat_mods.spice_of_life.practical_advice.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "compat_mods/overview",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 8,
+  "x": 1,
+  "y": 2
+}

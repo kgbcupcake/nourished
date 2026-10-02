@@ -3,6 +3,10 @@
 # Only Claude can write a good prose entry, so this just forces the step, not the wording.
 set -euo pipefail
 
+# The settings "if" filter lets through commands it can't parse, so check for a commit here too.
+CMD=$(jq -r '.tool_input.command // ""')
+[[ "$CMD" =~ (^|[;\&|[:space:]])git[[:space:]]+commit ]] || exit 0
+
 REPO_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 cd "$REPO_DIR"
 

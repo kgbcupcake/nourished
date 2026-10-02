@@ -41,3 +41,10 @@ side = "BOTH"
     versionRange = "[15.0.0,)"
     ordering = "NONE"
     side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId = "modonomicon"
+    type = "required"
+    versionRange = "[${modonomicon_version},)"
+    ordering = "NONE"
+    side = "BOTH"
