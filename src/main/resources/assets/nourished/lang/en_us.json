@@ -1051,5 +1051,14 @@
   "book.nourished.nourished_guide.tips_and_tricks.reading_tooltips.streak_warning.title": "Streak Warning",
   "book.nourished.nourished_guide.tips_and_tricks.reading_tooltips.unrecognized_foods.text": "If a food item shows **Unclassified** or no Nourished tooltip at all, it has not been assigned to a food group on this server.\n\nFor modded foods this is usually resolved by the server's datapack configuration. If you believe a food should belong to a specific group, contact your server admin or check the Nourished datapack documentation in the **Server Owners** chapter.\n",
   "book.nourished.nourished_guide.tips_and_tricks.reading_tooltips.unrecognized_foods.title": "Unrecognized Foods",
-  "book.nourished.nourished_guide.tooltip": "Everything you need to know about eating well."
+  "book.nourished.nourished_guide.tooltip": "Everything you need to know about eating well.",
+  "item.nourished.nourished_book.tooltip.header": "What's Inside:",
+  "item.nourished.nourished_book.tooltip.getting_started": "Getting Started|your first few days in the game",
+  "item.nourished.nourished_book.tooltip.food_groups": "Food Groups|bonuses, penalties, and what counts",
+  "item.nourished.nourished_book.tooltip.how_it_works": "How It Works|multipliers, balance, and nutritional debt",
+  "item.nourished.nourished_book.tooltip.food_safety": "Food Safety|raw food risks and gut health",
+  "item.nourished.nourished_book.tooltip.tips_and_tricks": "Tips & Tricks|daily routines and emergency recovery",
+  "item.nourished.nourished_book.tooltip.compat_mods": "Compat Mods|integration with popular food mods",
+  "item.nourished.nourished_book.tooltip.server_owners": "Server Owners|configuring effects and datapack overrides",
+  "item.nourished.nourished_book.tooltip.hint": "Right-click to open"
 }

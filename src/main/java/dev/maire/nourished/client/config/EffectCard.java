@@ -11,7 +11,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
@@ -492,7 +491,7 @@ class EffectCard {
             return;
         }
         BuiltInRegistries.MOB_EFFECT.getHolder(rl).ifPresent(holder ->
-                mc.player.addEffect(new MobEffectInstance(holder, 5 * 20, parseAmplifier(), false, true, true)));
+                EffectPreview.show(holder, 5 * 20, parseAmplifier()));
     }
 
     private void saveCard() {

@@ -1,5 +1,6 @@
 package dev.maire.nourished.client;
 
+import dev.maire.nourished.client.config.EffectPreview;
 import dev.maire.nourished.client.screen.diet.DietScreen;
 import dev.maire.nourished.client.screen.diet.classic.ClassicDietScreen;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -76,6 +77,7 @@ public final class ClientEvents {
     }
 
     public static void onClientTick(ClientTickEvent.Post event) {
+        EffectPreview.tick();
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.screen != null) {
             return;

@@ -1,6 +1,5 @@
 package dev.maire.nourished.core.book;
 
-import com.klikli_dev.modonomicon.item.ModonomiconItem;
 import com.klikli_dev.modonomicon.registry.DataComponentRegistry;
 import dev.maire.nourished.core.Nourished;
 import net.minecraft.core.registries.Registries;
@@ -21,7 +20,7 @@ public final class NourishedBookItems {
     // BOOK_OPEN must default to false, or the item's model renders the large "book opened" cover
     // art (normally shown only while the reading GUI is up) all the time instead of the small icon.
     public static final DeferredHolder<Item, Item> NOURISHED_BOOK = ITEMS.register("nourished_book",
-            () -> new ModonomiconItem(new Item.Properties()
+            () -> new NourishedBookItem(new Item.Properties()
                     .component(DataComponentRegistry.BOOK_ID.get(), ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "nourished_guide"))
                     .component(DataComponentRegistry.BOOK_OPEN.get(), false)));
 
