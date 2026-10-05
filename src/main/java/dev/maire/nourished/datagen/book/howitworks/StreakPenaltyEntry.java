@@ -32,9 +32,8 @@ public class StreakPenaltyEntry extends EntryProvider {
         this.pageTitle("Streak Penalty");
 
         this.pageText("""
-                Eating the same food back-to-back applies a %sStreak Penalty%s. Three meals of plain bread in a row? The third gives noticeably less grain nutrition than the first.
-
-                A streak isn't a separate system bolted onto Diminishing Returns — it's what makes that item's diminishing-returns count climb faster than normal. Eating it again soon after adds a bigger hit to the same counter instead of a normal-sized one.
+                Eating the same food back-to-back applies a %sStreak Penalty%s. Three meals of plain bread in a row? The third gives noticeably less grain nutrition than the first.\s\s
+                A streak isn't a separate system bolted onto Diminishing Returns; it's what makes that item's diminishing-returns count climb faster than normal. Eating it again soon after adds a bigger hit to the same counter instead of a normal-sized one.
                 """.formatted(
                 STREAK, RESET
         ));
@@ -46,8 +45,7 @@ public class StreakPenaltyEntry extends EntryProvider {
         this.pageTitle("Breaking the Streak");
 
         this.pageText("""
-                Eating any **different food** breaks the streak immediately. You don't need to switch groups — just switch items.
-
+                Eating any **different food** breaks the streak immediately. You don't need to switch groups: just switch items.\s\s
                 The streak counter shows in the food tooltip when it's active, so you always know before you take the hit.
                 """);
     }

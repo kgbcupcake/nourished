@@ -36,8 +36,7 @@ public class ButcheryEntry extends EntryProvider {
         this.pageTitle("Conventional Cuts");
 
         this.pageText("""
-                Butchery adds proper butcher cuts from vanilla animals — ribeye, sirloin, T-bone, rump steak, chuck steak, pork belly, pork loin, lamb loin, lamb rib, leg of lamb, chicken leg, chicken wing, ham, sausage, and more.
-
+                Butchery adds proper butcher cuts from vanilla animals: ribeye, sirloin, T-bone, rump steak, chuck steak, pork belly, pork loin, lamb loin, lamb rib, leg of lamb, chicken leg, chicken wing, ham, sausage, and more.\s\s
                 Each cut is a distinct protein family, meaning rotating through different cuts of the same animal still gives better nutrition than eating the same cut repeatedly.
                 """);
 
@@ -48,8 +47,7 @@ public class ButcheryEntry extends EntryProvider {
         this.pageTitle("Organs & Offal");
 
         this.pageText("""
-                Butchery adds organ meats including heart, liver, kidney, lungs, stomach, and intestines — all classified as Proteins.
-
+                Butchery adds organ meats including heart, liver, kidney, lungs, stomach, and intestines, all classified as Proteins.\s\s
                 Organ meats are distinct families from muscle cuts, so mixing organs into your protein rotation alongside steaks and chops gives excellent variety and keeps diminishing returns low.
                 """);
 
@@ -60,12 +58,11 @@ public class ButcheryEntry extends EntryProvider {
         this.pageTitle("Exotic Meats");
 
         this.pageText("""
-                Butchery lets you process almost any mob — including hostile and boss mobs. These exotic meats are all classified as Proteins:
-
-                **Cooked Enderman Steak / Liver / Kidney** — hard to obtain but very high nutrition.
-                **Cooked Warden Meat** — extremely rare; treat as a luxury protein.
-                **Cooked Dragon Meat** — the ultimate exotic protein source.
-                **Cooked Creeper, Spider, Shulker** — common hostile mob proteins.
+                Butchery lets you process almost any mob, including hostile and boss mobs. These exotic meats are all classified as Proteins:\s\s
+                - **Cooked Enderman Steak / Liver / Kidney**: hard to obtain but very high nutrition.
+                - **Cooked Warden Meat**: extremely rare; treat as a luxury protein.
+                - **Cooked Dragon Meat**: the ultimate exotic protein source.
+                - **Cooked Creeper, Spider, Shulker**: common hostile mob proteins.
                 """);
 
         this.page("rotation_strategy", () -> BookTextPageModel.create()
@@ -75,9 +72,8 @@ public class ButcheryEntry extends EntryProvider {
         this.pageTitle("Rotation Strategy");
 
         this.pageText("""
-                With Butchery installed, the Proteins group has more variety than any other group. The risk is **defaulting to one favourite cut** and losing the benefit of all that variety.
-
-                Aim to rotate across at least three distinct families per day — for example a lamb cut, a fish fillet, and an organ meat. Use JEI and search **nourished:nutrients/proteins** to see the full list of what's available.
+                With Butchery installed, the Proteins group has more variety than any other group. The risk is **defaulting to one favourite cut** and losing the benefit of all that variety.\s\s
+                Aim to rotate across at least three distinct families per day, for example a lamb cut, a fish fillet, and an organ meat. Use JEI and search **nourished:nutrients/proteins** to see the full list of what's available.
                 """);
     }
 

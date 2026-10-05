@@ -46,11 +46,11 @@ public class ProteinsEntry extends EntryProvider {
         this.pageTitle("Vanilla Meat Sources");
 
         this.pageText("""
-                **Cooked Beef** — highest nutrition of vanilla meats; keep a cow farm.
-                **Cooked Porkchop** — nearly equal to beef; pigs breed quickly.
-                **Cooked Chicken** — lower nutrition but very common and fast to farm.
-                **Cooked Mutton** — solid mid-tier protein from sheep.
-                **Cooked Rabbit** — lower yield but easy to obtain in the wild early on.
+                - **Cooked Beef**: highest nutrition of vanilla meats; keep a cow farm.
+                - **Cooked Porkchop**: nearly equal to beef; pigs breed quickly.
+                - **Cooked Chicken**: lower nutrition but very common and fast to farm.
+                - **Cooked Mutton**: solid mid-tier protein from sheep.
+                - **Cooked Rabbit**: lower yield but easy to obtain in the wild early on.
                 """);
 
         this.page("fish_sources", () -> BookTextPageModel.create()
@@ -60,8 +60,7 @@ public class ProteinsEntry extends EntryProvider {
         this.pageTitle("Fish Sources");
 
         this.pageText("""
-                **Cooked Salmon** and **Cooked Cod** are excellent early-game proteins available near any river or ocean before you have an animal farm established.
-
+                **Cooked Salmon** and **Cooked Cod** are excellent early-game proteins available near any river or ocean before you have an animal farm established.\s\s
                 Fishing also yields **Tropical Fish** which counts as Proteins, though it has low nutrition. Use it as a supplement rather than a primary source.
                 """);
 
@@ -70,11 +69,10 @@ public class ProteinsEntry extends EntryProvider {
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
 
-        this.pageTitle("Proteins — Fish");
+        this.pageTitle("Proteins: Fish");
 
         this.pageText("""
-                Cooked salmon and cod are excellent protein sources and easy to obtain near any river or ocean. A fishing rod from early game makes this group trivial to maintain before any farm is built.
-
+                Cooked salmon and cod are excellent protein sources and easy to obtain near any river or ocean. A fishing rod from early game makes this group trivial to maintain before any farm is built.\s\s
                 Auto-fishing farms are very effective for this group if you want a fully passive protein supply.
                 """);
 
@@ -85,11 +83,9 @@ public class ProteinsEntry extends EntryProvider {
         this.pageTitle("Non-Meat Proteins");
 
         this.pageText("""
-                Not all proteins come from animals. Several plant-based and processed foods also count:
-
-                **Cooked Chicken Egg** (if enabled) — high nutrition density.
-                **Mushroom Stew** — counts as Proteins in many configurations.
-
+                Not all proteins come from animals. Several plant-based and processed foods also count:\s\s
+                **Cooked Chicken Egg** (if enabled): high nutrition density.
+                **Mushroom Stew**: counts as Proteins in many configurations.\s\s
                 Check tooltips on any food item to confirm which group it belongs to on your server.
                 """);
 
@@ -100,8 +96,7 @@ public class ProteinsEntry extends EntryProvider {
         this.pageTitle("Farming Tips");
 
         this.pageText("""
-                A cow, pig, and chicken pen near your base covers three distinct protein families at once. Breed them regularly — you want a surplus, not just enough to survive.
-
+                A cow, pig, and chicken pen near your base covers three distinct protein families at once. Breed them regularly; you want a surplus, not just enough to survive.\s\s
                 If you are playing early-game without a farm, keep a fishing rod ready. Fishing covers Proteins reliably with no infrastructure required and also produces bonus loot.
                 """);
 
@@ -112,9 +107,8 @@ public class ProteinsEntry extends EntryProvider {
         this.pageTitle("Rotation Strategy");
 
         this.pageText("""
-                Each animal type is its own protein family. Eating beef, then porkchop, then chicken gives better returns than eating three steaks in a row.
-
-                Fish counts as a separate family from land meat — switching between a cooked salmon and cooked beef at the same meal is an easy way to avoid diminishing returns on both.
+                Each animal type is its own protein family. Eating beef, then porkchop, then chicken gives better returns than eating three steaks in a row.\s\s
+                Fish counts as a separate family from land meat: switching between a cooked salmon and cooked beef at the same meal is an easy way to avoid diminishing returns on both.
                 """);
     }
 

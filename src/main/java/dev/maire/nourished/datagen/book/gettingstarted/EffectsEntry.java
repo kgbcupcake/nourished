@@ -59,8 +59,7 @@ public class EffectsEntry extends EntryProvider {
         this.pageTitle("Balance Bonus");
 
         this.pageText("""
-                When all of the food groups are above their threshold, you gain the %s**Balance Bonus**%s, a persistent buff that improves health, speed, or other stats depending on your configuration.
-
+                When all of the food groups are above their threshold, you gain the %s**Balance Bonus**%s, a persistent buff that improves health, speed, or other stats depending on your configuration.\s\s
                 Keeping the bonus active should be your primary goal.
 
                 """.formatted(
@@ -79,16 +78,11 @@ public class EffectsEntry extends EntryProvider {
         this.pageTitle("Per-Group Bonuses");
 
         this.pageText("""
-                Each food group has its own bonus active when healthy:
-
-                %s**Fruits**%s: %s increased regeneration speed.%s
-
-                %s**Vegetables**%s: %s improved hunger saturation.%s
-
-                %s**Proteins**%s: %s increased max health.%s
-
-                %s**Grains**%s: %s faster experience gain.%s
-
+                Each food group has its own bonus active when healthy:\s\s
+                %s**Fruits**%s: %s increased regeneration speed.%s\s\s
+                %s**Vegetables**%s: %s improved hunger saturation.%s\s\s
+                %s**Proteins**%s: %s increased max health.%s\s\s
+                %s**Grains**%s: %s faster experience gain.%s\s\s
                 %s**Dairy**%s: %s increased armor toughness.%s
 
                 """.formatted(
@@ -110,8 +104,7 @@ public class EffectsEntry extends EntryProvider {
         this.pageTitle("Penalties");
 
         this.pageText("""
-                Letting any group fall to zero applies a %s**penalty**%s for that group. Penalties stack: neglecting multiple groups at once causes increasingly severe debuffs.
-
+                Letting any group fall to zero applies a %s**penalty**%s for that group. Penalties stack: neglecting multiple groups at once causes increasingly severe debuffs.\s\s
                 Recovery is straightforward: eat foods from the depleted group and the penalty fades as the bar refills.
 
                 """.formatted(
@@ -130,16 +123,11 @@ public class EffectsEntry extends EntryProvider {
         this.pageTitle("Per-Group Penalties");
 
         this.pageText("""
-                Each food group has its own penalty when depleted:
-
-                %s**Fruits**%s: %s reduced max health.%s
-
-                %s**Vegetables**%s: %s reduced movement speed.%s
-
-                %s**Proteins**%s: %s reduced attack damage.%s
-
-                %s**Grains**%s: %s reduced hunger restoration.%s
-
+                Each food group has its own penalty when depleted:\s\s
+                %s**Fruits**%s: %s reduced max health.%s\s\s
+                %s**Vegetables**%s: %s reduced movement speed.%s\s\s
+                %s**Proteins**%s: %s reduced attack damage.%s\s\s
+                %s**Grains**%s: %s reduced hunger restoration.%s\s\s
                 %s**Dairy**%s: %s reduced knockback resistance.%s
 
                 """.formatted(
@@ -161,9 +149,8 @@ public class EffectsEntry extends EntryProvider {
         this.pageTitle("Stacking Effects");
 
         this.pageText("""
-                Effects from multiple groups stack. Having all bonuses active simultaneously gives a compound advantage across health, damage, speed, regen, XP, and armor.
-
-                Conversely, multiple penalties at once — especially %s**Fruits**%s (health) + %s**Proteins**%s (damage) + %s**Dairy**%s (knockback) — can make combat very dangerous. Prioritize preventing that combination above all else.
+                Effects from multiple groups stack. Having all bonuses active simultaneously gives a compound advantage across health, damage, speed, regen, XP, and armor.\s\s
+                Conversely, stacking multiple penalties at once can make combat very dangerous, especially %s**Fruits**%s (health) + %s**Proteins**%s (damage) + %s**Dairy**%s (knockback). Prioritize preventing that combination above all else.
 
                 """.formatted(
                 FRUITS, RESET,
@@ -182,8 +169,7 @@ public class EffectsEntry extends EntryProvider {
         this.pageTitle("Viewing Active Effects");
 
         this.pageText("""
-                Your currently active Nourished bonuses and penalties are shown on the left panel of the Diet Screen. Open it to see a full list of current effects and which groups are causing them.
-
+                Your currently active Nourished bonuses and penalties are shown on the left panel of the Diet Screen. Open it to see a full list of current effects and which groups are causing them.\s\s
                 The HUD bar overlay gives a quick at-a-glance view of bar levels in the game world without opening any screen.
 
                 """);

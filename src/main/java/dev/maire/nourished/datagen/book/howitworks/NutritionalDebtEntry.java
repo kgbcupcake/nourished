@@ -33,7 +33,7 @@ public class NutritionalDebtEntry extends EntryProvider {
         this.pageTitle("Nutritional Debt");
 
         this.pageText("""
-                %sNutritional Debt%s isn't about letting a bar sit empty — it's the cost of eating too narrowly. Lean hard on one food group over and over, past a configurable threshold, and the system starts looking for payback.
+                %sNutritional Debt%s isn't about letting a bar sit empty; it's the cost of eating too narrowly. Lean hard on one food group over and over, past a configurable threshold, and the system starts looking for payback.
                 """.formatted(
                 DEBT, RESET
         ));
@@ -45,8 +45,7 @@ public class NutritionalDebtEntry extends EntryProvider {
         this.pageTitle("Who Pays for It");
 
         this.pageText("""
-                Once that threshold is crossed, Nourished finds whichever group you've been %sneglecting%s the most — your lowest bar, excluding the one you're currently overeating — and drains it a little.
-
+                Once that threshold is crossed, Nourished finds whichever group you've been %sneglecting%s the most (your lowest bar, excluding the one you're currently overeating) and drains it a little.\s\s
                 In other words: bingeing on Proteins doesn't just fail to help your other bars, it can actively cost you whichever one you've been ignoring.
                 """.formatted(
                 NEGLECTED, RESET
@@ -59,9 +58,8 @@ public class NutritionalDebtEntry extends EntryProvider {
         this.pageTitle("Avoiding It");
 
         this.pageText("""
-                The fix is the same as everything else in this chapter: rotate. Spreading your meals across groups instead of running one group at a time keeps your eat-count on any single group below the threshold, so debt never triggers in the first place.
-
-                A high Balance Score and staying out of Nutritional Debt go hand in hand — both reward the same even, varied diet.
+                The fix is the same as everything else in this chapter: rotate. Spreading your meals across groups instead of running one group at a time keeps your eat-count on any single group below the threshold, so debt never triggers in the first place.\s\s
+                A high Balance Score and staying out of Nutritional Debt go hand in hand: both reward the same even, varied diet.
                 """);
     }
 

@@ -41,14 +41,13 @@ public class LegendarySurvivalOverhaulEntry extends EntryProvider {
         this.pageTitle("What Still Works");
 
         this.pageText("""
-                Even with effects disabled, the following Nourished systems work exactly as normal:
-
-                **All six nutrition bars** — track and decay as usual.
-                **Diet Screen** — fully functional.
-                **HUD overlay** — fully functional.
-                **Food tooltips** — freshness, family, group all shown.
-                **Diminishing returns** — still applies to nutrition gain.
-                **Sleep Bonus** — still applies if configured.
+                Even with effects disabled, the following Nourished systems work exactly as normal:\s\s
+                - **All six nutrition bars**: track and decay as usual.
+                - **Diet Screen**: fully functional.
+                - **HUD overlay**: fully functional.
+                - **Food tooltips**: freshness, family, group all shown.
+                - **Diminishing returns**: still applies to nutrition gain.
+                - **Sleep Bonus**: still applies if configured.
                 """);
 
         this.page("what_is_disabled", () -> BookTextPageModel.create()
@@ -58,13 +57,11 @@ public class LegendarySurvivalOverhaulEntry extends EntryProvider {
         this.pageTitle("What Is Disabled");
 
         this.pageText("""
-                The following are suppressed to avoid conflicts with LSO:
-
-                **Per-group bonuses** — e.g. Proteins max health, Grains XP gain.
-                **Per-group penalties** — e.g. Fruits health reduction, Dairy knockback.
-                **Balance Bonus** — the combined all-groups buff.
-
-                LSO handles survival effects through its own systems instead. Keeping your bars healthy still matters — it feeds into LSO's own calculations.
+                The following are suppressed to avoid conflicts with LSO:\s\s
+                - **Per-group bonuses**: e.g. Proteins max health, Grains XP gain.
+                - **Per-group penalties**: e.g. Fruits health reduction, Dairy knockback.
+                - **Balance Bonus**: the combined all-groups buff.\s\s
+                LSO handles survival effects through its own systems instead. Keeping your bars healthy still matters; it feeds into LSO's own calculations.
                 """);
 
         this.page("why_keep_bars_healthy", () -> BookTextPageModel.create()
@@ -74,9 +71,8 @@ public class LegendarySurvivalOverhaulEntry extends EntryProvider {
         this.pageTitle("Why Keep Bars Healthy?");
 
         this.pageText("""
-                Even without Nourished's direct effects, your nutrition bars still feed data into LSO's survival systems. A well-balanced diet contributes positively to LSO's stamina, resilience, and recovery mechanics.
-
-                Think of Nourished as the **nutrition tracking layer** and LSO as the **effects layer** — they work together rather than duplicating each other.
+                Even without Nourished's direct effects, your nutrition bars still feed data into LSO's survival systems. A well-balanced diet contributes positively to LSO's stamina, resilience, and recovery mechanics.\s\s
+                Think of Nourished as the **nutrition tracking layer** and LSO as the **effects layer**: they work together rather than duplicating each other.
                 """);
     }
 

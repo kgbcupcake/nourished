@@ -41,9 +41,8 @@ public class GutHealthEntry extends EntryProvider {
         this.pageTitle("Gut Health");
 
         this.pageText("""
-                Your gut flora is a separate hidden stat that tracks how well your digestive system is holding up.
-
-                It starts healthy and decays when you eat raw food. Let it get low enough and it starts amplifying the penalties you take — a bad gut makes raw food even worse.
+                Your gut flora is a separate hidden stat that tracks how well your digestive system is holding up.\s\s
+                It starts healthy and decays when you eat raw food. Let it get low enough and it starts amplifying the penalties you take: a bad gut makes raw food even worse.
                 """);
 
         this.page("how_it_decays", () -> BookTextPageModel.create()
@@ -53,9 +52,8 @@ public class GutHealthEntry extends EntryProvider {
         this.pageTitle("How It Decays");
 
         this.pageText("""
-                Every raw food event damages your gut flora by an amount based on the tier. %sSevere%s foods do the most damage, %sMild%s foods do the least.
-
-                Gut damage doesn't happen instantly from one bad meal — it accumulates. Eating raw occasionally is survivable. Making it a habit is not.
+                Every raw food event damages your gut flora by an amount based on the tier. %sSevere%s foods do the most damage, %sMild%s foods do the least.\s\s
+                Gut damage doesn't happen instantly from one bad meal; it accumulates. Eating raw occasionally is survivable. Making it a habit is not.
                 """.formatted(
                 SEVERE, RESET,
                 MILD, RESET
@@ -68,9 +66,8 @@ public class GutHealthEntry extends EntryProvider {
         this.pageTitle("How It Recovers");
 
         this.pageText("""
-                Gut flora recovers two ways. Eating **cooked** food gives an immediate boost proportional to how well-cooked it is — a fully cooked meal helps more than a barely-seared one.
-
-                It also regenerates passively over time, and that passive rate gets a **diversity bonus** the more balanced your overall diet is. A well-rounded diet across all six groups isn't just good for your bars — it heals your gut faster too.
+                Gut flora recovers two ways. Eating **cooked** food gives an immediate boost proportional to how well-cooked it is: a fully cooked meal helps more than a barely-seared one.\s\s
+                It also regenerates passively over time, and that passive rate gets a **diversity bonus** the more balanced your overall diet is. A well-rounded diet across all six groups isn't just good for your bars; it heals your gut faster too.
                 """);
 
         this.page("building_resistance", () -> BookTextPageModel.create()
@@ -80,8 +77,7 @@ public class GutHealthEntry extends EntryProvider {
         this.pageTitle("Building Resistance");
 
         this.pageText("""
-                Beyond gut health, keeping specific nutrient bars topped up builds direct **resistance** to raw food penalties — reducing how hard each event hits before it even happens. Different tiers respond to different groups:
-
+                Beyond gut health, keeping specific nutrient bars topped up builds direct **resistance** to raw food penalties, reducing how hard each event hits before it even happens. Different tiers respond to different groups:\s\s
                 %sMild%s resistance comes from %sVegetables%s and %sFruits%s.
                 %sMedium%s resistance comes from %sProteins%s and %sGrains%s.
                 %sSevere%s resistance comes from %sProteins%s and %sDairy%s.
@@ -98,8 +94,7 @@ public class GutHealthEntry extends EntryProvider {
         this.pageTitle("The Takeaway");
 
         this.pageText("""
-                Cook your food whenever possible. Keep your overall diet balanced to speed up gut recovery, and pay attention to Proteins in particular — it contributes to resistance against both Medium and Severe raw food.
-
+                Cook your food whenever possible. Keep your overall diet balanced to speed up gut recovery, and pay attention to Proteins in particular; it contributes to resistance against both Medium and Severe raw food.\s\s
                 If your gut is already low, prioritize cooked meals until it recovers before worrying about the rest of your bars.
                 """);
     }

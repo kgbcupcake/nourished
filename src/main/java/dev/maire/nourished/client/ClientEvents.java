@@ -5,6 +5,7 @@ import dev.maire.nourished.client.screen.diet.DietScreen;
 import dev.maire.nourished.client.screen.diet.classic.ClassicDietScreen;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.core.book.NourishedBookItems;
 import dev.marie.framework.tooltips.MarieTooltipHelper;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.ui.api.MarieCommandCenter;
@@ -15,9 +16,11 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
@@ -74,6 +77,18 @@ public final class ClientEvents {
         var lines = event.getToolTip();
         lines.add(Component.empty());
         lines.addAll(nourishedLines);
+    }
+
+    /** Pulsing magenta glow on the guide book's tooltip border, to match its Epic rarity. */
+    public static void onTooltipColor(RenderTooltipEvent.Color event) {
+        if (!event.getItemStack().is(NourishedBookItems.NOURISHED_BOOK.get())) {
+            return;
+        }
+        float pulse = (Mth.sin(System.currentTimeMillis() / 300f) + 1f) / 2f;
+        int topAlpha = (int) Mth.lerp(pulse, 170, 255);
+        int bottomAlpha = (int) Mth.lerp(pulse, 80, 150);
+        event.setBorderStart((topAlpha << 24) | 0xE060FF);
+        event.setBorderEnd((bottomAlpha << 24) | 0x8000C8);
     }
 
     public static void onClientTick(ClientTickEvent.Post event) {

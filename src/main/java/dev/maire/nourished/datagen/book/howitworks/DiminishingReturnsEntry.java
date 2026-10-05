@@ -35,8 +35,7 @@ public class DiminishingReturnsEntry extends EntryProvider {
         this.pageTitle("Diminishing Returns");
 
         this.pageText("""
-                Eating the same food repeatedly gives %sless nutrition each time%s. The first apple of the day fills your Fruits bar noticeably. The fifth apple barely moves it.
-
+                Eating the same food repeatedly gives %sless nutrition each time%s. The first apple of the day fills your Fruits bar noticeably. The fifth apple barely moves it.\s\s
                 This system exists to reward variety over repetition.
                 """.formatted(
                 LESS, RESET
@@ -49,9 +48,8 @@ public class DiminishingReturnsEntry extends EntryProvider {
         this.pageTitle("Three Levels at Once");
 
         this.pageText("""
-                Nourished tracks how much you've recently leaned on a food at three levels simultaneously: the **specific item**, its **family**, and its **food group**.
-
-                These aren't three separate penalties stacked on top of each other — they blend into one multiplier. Early on, the item-specific level dominates. The more you've recently eaten broadly from that family or group, the more those broader levels start pulling your multiplier down too.
+                Nourished tracks how much you've recently leaned on a food at three levels simultaneously: the **specific item**, its **family**, and its **food group**.\s\s
+                These aren't three separate penalties stacked on top of each other; they blend into one multiplier. Early on, the item-specific level dominates. The more you've recently eaten broadly from that family or group, the more those broader levels start pulling your multiplier down too.
                 """);
 
         this.page("how_it_fades", () -> BookTextPageModel.create()
@@ -61,8 +59,7 @@ public class DiminishingReturnsEntry extends EntryProvider {
         this.pageTitle("How It Fades");
 
         this.pageText("""
-                Diminishing returns aren't tied to sleeping or the in-game day — they fade continuously based on real time elapsed since you last ate that food.
-
+                Diminishing returns aren't tied to sleeping or the in-game day; they fade continuously based on real time elapsed since you last ate that food.\s\s
                 Give something a break for a while and its multiplier recovers on its own. There's no need to wait for morning; just eat something else in the meantime.
                 """);
 
@@ -73,8 +70,7 @@ public class DiminishingReturnsEntry extends EntryProvider {
         this.pageTitle("The Novelty Bonus");
 
         this.pageText("""
-                Eating something you haven't touched in a while gives a %snovelty bonus%s that pushes the multiplier above 1.0 — genuinely diverse eating gives more nutrition than the safe, familiar choice.
-
+                Eating something you haven't touched in a while gives a %snovelty bonus%s that pushes the multiplier above 1.0: genuinely diverse eating gives more nutrition than the safe, familiar choice.\s\s
                 The tooltip shows %sFresh%s when the novelty bonus is active on a food.
                 """.formatted(
                 FRESH, RESET,
@@ -88,12 +84,10 @@ public class DiminishingReturnsEntry extends EntryProvider {
         this.pageTitle("Checking Your Status");
 
         this.pageText("""
-                The food tooltip shows your current freshness for any item:
-
-                %sFresh%s — full or bonus nutrition, novelty active.
-                %sReduced%s — diminishing returns pulling the multiplier down.
-                %sSaturated%s — heavily repeated, near the floor.
-
+                The food tooltip shows your current freshness for any item:\s\s
+                - %sFresh%s: full or bonus nutrition, novelty active.
+                - %sReduced%s: diminishing returns pulling the multiplier down.
+                - %sSaturated%s: heavily repeated, near the floor.\s\s
                 Check this before eating if you're trying to efficiently top up a specific bar.
                 """.formatted(
                 FRESH, RESET,

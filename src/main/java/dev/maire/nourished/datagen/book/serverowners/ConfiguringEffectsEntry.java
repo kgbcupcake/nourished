@@ -33,8 +33,7 @@ public class ConfiguringEffectsEntry extends EntryProvider {
         this.pageTitle("Configuring Effects");
 
         this.pageText("""
-                Nourished exposes every bonus and penalty as a status effect entry in a config file. Server owners can change which potion effect is applied, its amplifier and duration, and the nutrient threshold that triggers it — no restart required.
-
+                Nourished exposes every bonus and penalty as a status effect entry in a config file. Server owners can change which potion effect is applied, its amplifier and duration, and the nutrient threshold that triggers it, with no restart required.\s\s
                 The config lives at %sconfig/nourished/effects.json%s.
                 """.formatted(
                 FILE_PATH, RESET
@@ -47,18 +46,19 @@ public class ConfiguringEffectsEntry extends EntryProvider {
         this.pageTitle("Effect Entry Fields");
 
         this.pageText("""
-                Each entry in the array is one effect tied to one nutrient:
-
-                %seffect%s — the status effect id to apply, e.g. %sminecraft:weakness%s.
-                %snutrient%s — the nutrient key this entry watches, or %sall%s.
-                %strigger%s — %sbelow%s, %sabove%s, or %sall_above%s: when the effect fires relative to %sthreshold%s.
-                %samplifier%s / %sduration_ticks%s — potion strength and how long it lasts.
-                %senabled%s — set %sfalse%s to disable the entry without deleting it.
+                Each entry in the array is one effect tied to one nutrient:\s\s
+                - %seffect%s: the status effect id to apply, e.g. %sminecraft:weakness%s.\s\s
+                - %snutrient%s: the nutrient key this entry watches, or %sall%s.\s\s
+                - %strigger%s: %sbelow%s, %sabove%s, or %sall_above%s, relative to %sthreshold%s.\s\s
+                - %samplifier%s: potion strength.\s\s
+                - %sduration_ticks%s: how long the effect lasts.\s\s
+                - %senabled%s: set %sfalse%s to disable the entry without deleting it.
                 """.formatted(
                 FIELD, RESET, FIELD, RESET,
                 FIELD, RESET, FIELD, RESET,
                 FIELD, RESET, FIELD, RESET, FIELD, RESET, FIELD, RESET, FIELD, RESET,
-                FIELD, RESET, FIELD, RESET,
+                FIELD, RESET,
+                FIELD, RESET,
                 FIELD, RESET, FIELD, RESET
         ));
 
@@ -69,8 +69,7 @@ public class ConfiguringEffectsEntry extends EntryProvider {
         this.pageTitle("Disabling Effects");
 
         this.pageText("""
-                To turn off a specific bonus or penalty, set its %senabled%s field to %sfalse%s. The nutrient bar keeps tracking as normal — the entry is simply skipped when deciding which effects to apply.
-
+                To turn off a specific bonus or penalty, set its %senabled%s field to %sfalse%s. The nutrient bar keeps tracking as normal; the entry is simply skipped when deciding which effects to apply.\s\s
                 This is useful for lighter server experiences or modpacks with their own progression systems. Built-in effects are only regenerated into the file if it is missing or invalid, so a disabled entry stays disabled.
                 """.formatted(
                 FIELD, RESET, FIELD, RESET
@@ -83,8 +82,7 @@ public class ConfiguringEffectsEntry extends EntryProvider {
         this.pageTitle("Reloading Changes");
 
         this.pageText("""
-                After editing %seffects.json%s, run %s/nourished reload%s to pick up the change without restarting the server.
-
+                After editing %seffects.json%s, run %s/nourished reload%s to pick up the change without restarting the server.\s\s
                 Effects registered by other mods through the API or KubeJS are merged into this same file at runtime, so it always reflects everything currently active.
                 """.formatted(
                 FILE_PATH, RESET, FIELD, RESET

@@ -34,6 +34,17 @@
         "type": "modonomicon:none"
       },
       "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.getting_started.notifications.food_eaten.text",
+      "title": "book.nourished.nourished_guide.getting_started.notifications.food_eaten.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
       "text": "book.nourished.nourished_guide.getting_started.notifications.critical_toasts.text",
       "title": "book.nourished.nourished_guide.getting_started.notifications.critical_toasts.title",
       "use_markdown_in_title": false
@@ -48,17 +59,6 @@
       "text": "book.nourished.nourished_guide.getting_started.notifications.staying_ahead.text",
       "title": "book.nourished.nourished_guide.getting_started.notifications.staying_ahead.title",
       "use_markdown_in_title": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.notifications.food_eaten.text",
-      "title": "book.nourished.nourished_guide.getting_started.notifications.food_eaten.title",
-      "use_markdown_in_title": false
     }
   ],
   "parents": [
@@ -70,7 +70,7 @@
     }
   ],
   "show_when_any_parent_unlocked": false,
-  "sort_number": 6,
+  "sort_number": 7,
   "x": 0,
   "y": 5
 }

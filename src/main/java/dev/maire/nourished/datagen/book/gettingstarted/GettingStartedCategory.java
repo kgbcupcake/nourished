@@ -31,7 +31,7 @@ public class GettingStartedCategory extends CategoryProvider {
                 "____h____",
                 "_________",
                 "________d",
-                "_________",
+                "_______u_",
                 "_____s___",
                 "_________",
                 "___e_____",
@@ -66,12 +66,19 @@ public class GettingStartedCategory extends CategoryProvider {
                 .withParent(hud)
                 .withCondition(this.condition().entryRead(hud));
 
+        // Dynamic UI
+        var dynamicUi = this.add(
+                new DynamicUiEntry(this).generate('u')
+        )
+                .withParent(dietScreen)
+                .withCondition(this.condition().entryRead(dietScreen));
+
         // Sleep Bonus
         var sleepBonus = this.add(
                 new SleepBonusEntry(this).generate('s')
         )
-                .withParent(dietScreen)
-                .withCondition(this.condition().entryRead(dietScreen));
+                .withParent(dynamicUi)
+                .withCondition(this.condition().entryRead(dynamicUi));
 
         // Effects
         var effects = this.add(

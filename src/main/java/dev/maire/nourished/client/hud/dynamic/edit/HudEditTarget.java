@@ -355,11 +355,23 @@ public final class HudEditTarget implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            Bounds tabBounds = HudEditTabs.tabBounds(PANEL_ID);
+            if (button == 0 && tabBounds.contains((int) mouseX, (int) mouseY)) {
+                HudEditTabs.open(UiStatePersistence.get(), PANEL_ID);
+                return true;
+            }
+            return false;
+        }
         List<String> keys = currentVisibleKeysOrFallback();
         if (keys.isEmpty()) {
             return false;
         }
         Bounds bounds = resolvedBounds(mc, keys);
+        if (button == 0 && HudEditTabs.collapseButtonBounds(bounds).contains((int) mouseX, (int) mouseY)) {
+            HudEditTabs.setCollapsed(UiStatePersistence.get(), PANEL_ID, true);
+            return true;
+        }
         // "Move Nutrient" wins over the panel-wide move modes: while it's on, a drag anywhere in the box
         // moves the picked nutrient's whole row.
         String rowKey = HudRowMove.activeKey();
@@ -392,6 +404,9 @@ public final class HudEditTarget implements MarieComponent {
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (scaleConfigVisible && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
             return true;
+        }
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            return false;
         }
         List<String> keys = currentVisibleKeysOrFallback();
         if (scrollY == 0 || keys.isEmpty()) {
@@ -456,6 +471,9 @@ public final class HudEditTarget implements MarieComponent {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (scaleConfigVisible && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
             return true;
+        }
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            return false;
         }
         if (rowDragKey != null) {
             List<String> keys = currentVisibleKeysOrFallback();
@@ -530,6 +548,15 @@ public final class HudEditTarget implements MarieComponent {
 
     @Override
     public void render(RenderContext context, Bounds ignoredBounds) {
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            HudEditTabs.drawTab(context, Component.translatable("nourished.hud.nutrientPanel.label").getString(),
+                    contentOutlineColor(), HudEditTabs.tabBounds(PANEL_ID));
+            if (scaleConfigVisible) {
+                scaleConfigPanel.render(context, new Bounds(0, 0, context.screenWidth(), context.screenHeight()));
+            }
+            return;
+        }
+
         List<String> keys = currentVisibleKeysOrFallback();
         if (keys.isEmpty()) {
             return;
@@ -559,6 +586,7 @@ public final class HudEditTarget implements MarieComponent {
             NutrientPanelContainer panel = new NutrientPanelContainer(scrolledKeys(keys, matchedLayout), matchedLayout, displayValues);
             panel.render(context, bounds);
         }
+        HudEditTabs.drawCollapseButton(context, HudEditTabs.collapseButtonBounds(bounds), contentOutlineColor());
 
         // Every outline wraps what the rows actually drew this frame (HudDrawnExtents), so it stays on
         // the content however rows, icons, text or bars have been moved or resized.

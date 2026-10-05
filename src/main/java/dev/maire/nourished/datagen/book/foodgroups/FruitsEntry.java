@@ -47,10 +47,10 @@ public class FruitsEntry extends EntryProvider {
         this.pageTitle("Vanilla Fruit Sources");
 
         this.pageText("""
-                **Apple** — drops from oak and dark oak trees. Plant a small orchard early.
-                **Sweet Berries** — found wild in taiga biomes; bushes are renewable and fast.
-                **Melon Slice** — grown from seeds found in dungeon chests or jungle temples.
-                **Glow Berries** — found in lush caves; low nutrition but accessible early.
+                - **Apple**: drops from oak and dark oak trees. Plant a small orchard early.
+                - **Sweet Berries**: found wild in taiga biomes; bushes are renewable and fast.
+                - **Melon Slice**: grown from seeds found in dungeon chests or jungle temples.
+                - **Glow Berries**: found in lush caves; low nutrition but accessible early.
                 """);
 
         this.page("golden_and_enchanted", () -> BookTextPageModel.create()
@@ -60,8 +60,7 @@ public class FruitsEntry extends EntryProvider {
         this.pageTitle("Golden & Enchanted");
 
         this.pageText("""
-                **Golden Apple** and **Enchanted Golden Apple** both count as Fruits and give high nutrition — but they are expensive luxuries, not reliable staples.
-
+                **Golden Apple** and **Enchanted Golden Apple** both count as Fruits and give high nutrition, but they are expensive luxuries, not reliable staples.\s\s
                 Save them for emergencies. A melon farm is far more cost-effective for keeping this group stable day to day.
                 """);
 
@@ -72,8 +71,7 @@ public class FruitsEntry extends EntryProvider {
         this.pageTitle("Farming Tips");
 
         this.pageText("""
-                Melon farms are among the most space-efficient for Fruits. A 3×3 patch of melon stems produces enough slices to keep this group topped up indefinitely.
-
+                Melon farms are among the most space-efficient for Fruits. A 3×3 patch of melon stems produces enough slices to keep this group topped up indefinitely.\s\s
                 Sweet berry bushes planted in rows are low-maintenance. They grow without irrigation and produce reliably each season without replanting.
                 """);
 
@@ -82,12 +80,11 @@ public class FruitsEntry extends EntryProvider {
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
 
-        this.pageTitle("Fruits — Vanilla");
+        this.pageTitle("Fruits: Vanilla");
 
         this.pageText("""
-                Sweet berries are one of your most accessible wild fruit sources alongside apples and melons. Keep a berry bush farm early on to maintain this group easily.
-
-                Apple trees near your base make passive top-ups effortless — just grab drops when you pass by.
+                Sweet berries are one of your most accessible wild fruit sources alongside apples and melons. Keep a berry bush farm early on to maintain this group easily.\s\s
+                Apple trees near your base make passive top-ups effortless: just grab drops when you pass by.
                 """);
 
         this.page("croptopia", () -> BookSpotlightPageModel.create()
@@ -96,7 +93,7 @@ public class FruitsEntry extends EntryProvider {
                 .withText(this.context().pageText())
                 .withCondition(BookModLoadedConditionModel.create().withModId("croptopia")));
 
-        this.pageTitle("Fruits — Croptopia");
+        this.pageTitle("Fruits: Croptopia");
 
         this.pageText("""
                 With Croptopia installed, the Fruits group expands significantly. Strawberries, peaches, mangoes, kiwis, and many more exotic fruits are available. See the **Compat Mods** chapter for the full Croptopia food list.
@@ -109,9 +106,8 @@ public class FruitsEntry extends EntryProvider {
         this.pageTitle("Rotation Strategy");
 
         this.pageText("""
-                Fruits has several distinct food families: Apple, Berry, and Melon. Rotating across all three gives you better nutrition gain than eating only apples.
-
-                If you have Croptopia or another fruit mod installed, you have even more families to rotate through — check tooltips to see which family each fruit belongs to.
+                Fruits has several distinct food families: Apple, Berry, and Melon. Rotating across all three gives you better nutrition gain than eating only apples.\s\s
+                If you have Croptopia or another fruit mod installed, you have even more families to rotate through; check tooltips to see which family each fruit belongs to.
                 """);
     }
 

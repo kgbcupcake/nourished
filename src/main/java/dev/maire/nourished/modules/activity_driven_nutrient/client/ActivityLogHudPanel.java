@@ -631,7 +631,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
         if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
             Bounds tabBounds = HudEditTabs.tabBounds(PANEL_ID);
             if (button == 0 && tabBounds.contains((int) mouseX, (int) mouseY)) {
-                HudEditTabs.setCollapsed(UiStatePersistence.get(), PANEL_ID, false);
+                HudEditTabs.open(UiStatePersistence.get(), PANEL_ID);
                 return true;
             }
             return false;

@@ -367,24 +367,26 @@ public final class CalorieHudScreen implements MarieComponent {
 
     private static Bounds resolvedBounds(int rowCount) {
         Size natural = naturalSize(rowCount);
-        Bounds resolved = UiStatePersistence.get().load(PANEL_ID)
+        return UiStatePersistence.get().load(PANEL_ID)
                 .map(state -> {
                     int width = state.widthManual() ? state.width() : natural.width();
                     int height = state.heightManual() ? state.height() : natural.height();
                     return new Bounds(state.x(), state.y(), width, height);
                 })
                 .orElseGet(() -> new Bounds(DEFAULT_X, defaultY(), natural.width(), natural.height()));
-        return avoidActivityLogOverlap(resolved);
     }
 
     /**
      * {@link #DEFAULT_Y}, or lower still if the Activity Log HUD's current bounds sit in the same
      * horizontal column and reach past it — a fresh install used to give both boxes fixed defaults only
      * 52px apart, which Activity Log's natural height (row-count-dependent) regularly exceeds, so the
-     * two overlapped before either box had ever been dragged. Only the "never positioned" fallback uses
-     * this gapped default; {@link #avoidActivityLogOverlap} below is the ongoing (every-resolve) safety
-     * net once a position is persisted, and deliberately allows a flush 0-gap edge so the two boxes can
-     * still be snapped together via {@code SnapRegistry}.
+     * two overlapped before either box had ever been dragged. Only applies to this "never positioned"
+     * fallback, not once a position is persisted: an earlier version re-applied this avoidance on every
+     * resolve, which fought the player's own placement — dropping this box anywhere Activity Log's
+     * column happened to reach (a wide zone, since it only checked for horizontal overlap) snapped it
+     * back down on the very next frame. Once the player has moved this box at all, {@link #commit}
+     * persists it and it's taken as-is from then on; only the untouched default keeps dodging Activity
+     * Log, and only at the moment it's first computed.
      */
     private static int defaultY() {
         Bounds activityLog = ActivityLogHudPanel.currentBoundsForStacking();
@@ -396,36 +398,6 @@ public final class CalorieHudScreen implements MarieComponent {
             return DEFAULT_Y;
         }
         return Math.max(DEFAULT_Y, activityLog.y() + activityLog.height() + STACKED_DEFAULT_GAP);
-    }
-
-    /**
-     * Pushes {@code bounds} down to sit flush against the Activity Log HUD's current bottom edge
-     * whenever the two would otherwise genuinely overlap in the same horizontal column — evaluated
-     * every time this box's bounds are resolved (not just when this box has never been positioned), so
-     * it keeps re-separating the two any time either one's position or size changes: a "Reset This
-     * Module" on either box (which wipes that box's saved position back to its natural default and,
-     * for Activity Log, can also change its natural height), or a manual drag of either box on top of
-     * the other. Unlike {@link #defaultY()}'s gapped fallback, this enforces no minimum gap — only that
-     * {@code bounds} never starts above Activity Log's bottom edge — so dragging this box up to
-     * snap flush against Activity Log (0-gap) still works; only true overlap gets corrected. Reads
-     * Activity Log's *current* bounds (default or user-moved) so this always avoids wherever it
-     * actually sits; outside that column (e.g. the player moved one of them elsewhere), there's
-     * nothing to avoid and {@code bounds} is returned unchanged.
-     */
-    private static Bounds avoidActivityLogOverlap(Bounds bounds) {
-        Bounds activityLog = ActivityLogHudPanel.currentBoundsForStacking();
-        if (activityLog == null) {
-            return bounds;
-        }
-        boolean sameColumn = activityLog.x() < bounds.x() + bounds.width() && activityLog.x() + activityLog.width() > bounds.x();
-        if (!sameColumn) {
-            return bounds;
-        }
-        int minY = activityLog.y() + activityLog.height();
-        if (bounds.y() >= minY) {
-            return bounds;
-        }
-        return new Bounds(bounds.x(), minY, bounds.width(), bounds.height());
     }
 
     /** How many rows fit vertically in {@code bounds} at the current content scale — shared by {@link #drawPanel} (what to draw) and {@link #mouseScrolled} (how far scrolling can go). */
@@ -648,7 +620,7 @@ public final class CalorieHudScreen implements MarieComponent {
         if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
             Bounds tabBounds = HudEditTabs.tabBounds(PANEL_ID);
             if (button == 0 && tabBounds.contains((int) mouseX, (int) mouseY)) {
-                HudEditTabs.setCollapsed(UiStatePersistence.get(), PANEL_ID, false);
+                HudEditTabs.open(UiStatePersistence.get(), PANEL_ID);
                 return true;
             }
             return false;

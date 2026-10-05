@@ -5,6 +5,7 @@ import dev.maire.nourished.core.Nourished;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -22,7 +23,8 @@ public final class NourishedBookItems {
     public static final DeferredHolder<Item, Item> NOURISHED_BOOK = ITEMS.register("nourished_book",
             () -> new NourishedBookItem(new Item.Properties()
                     .component(DataComponentRegistry.BOOK_ID.get(), ResourceLocation.fromNamespaceAndPath(Nourished.MODID, "nourished_guide"))
-                    .component(DataComponentRegistry.BOOK_OPEN.get(), false)));
+                    .component(DataComponentRegistry.BOOK_OPEN.get(), false)
+                    .rarity(Rarity.EPIC)));
 
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);

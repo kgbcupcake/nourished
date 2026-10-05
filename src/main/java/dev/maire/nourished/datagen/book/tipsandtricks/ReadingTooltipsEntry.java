@@ -35,12 +35,11 @@ public class ReadingTooltipsEntry extends EntryProvider {
         this.pageTitle("Food Tooltips");
 
         this.pageText("""
-                Hover over any food item to see Nourished tooltip information below the item name:
-
-                **Food Group** — which bar this food fills.
-                **Nutrition Value** — how much it fills the bar under ideal conditions.
-                **Food Family** — which family it belongs to for diminishing returns.
-                **Freshness** — whether this food currently gives full, reduced, or bonus nutrition.
+                Hover over any food item to see Nourished tooltip information below the item name:\s\s
+                - **Food Group**: which bar this food fills.
+                - **Nutrition Value**: how much it fills the bar under ideal conditions.
+                - **Food Family**: which family it belongs to for diminishing returns.
+                - **Freshness**: whether this food currently gives full, reduced, or bonus nutrition.
                 """);
 
         this.page("freshness_indicator", () -> BookTextPageModel.create()
@@ -50,12 +49,10 @@ public class ReadingTooltipsEntry extends EntryProvider {
         this.pageTitle("Freshness Indicator");
 
         this.pageText("""
-                The %sfreshness indicator%s tells you how much nutrition you will actually receive:
-
-                %sFresh%s — first time eating this food today; full or bonus nutrition.
-                %sReduced%s — diminishing returns active; lower nutrition than base.
-                %sSaturated%s — heavily repeated; minimal nutrition gain.
-
+                The %sfreshness indicator%s tells you how much nutrition you will actually receive:\s\s
+                - %sFresh%s: first time eating this food today; full or bonus nutrition.
+                - %sReduced%s: diminishing returns active; lower nutrition than base.
+                - %sSaturated%s: heavily repeated; minimal nutrition gain.\s\s
                 If a food shows Saturated, switch to a different family within that group for better returns.
                 """.formatted(
                 FRESH, RESET,
@@ -71,8 +68,7 @@ public class ReadingTooltipsEntry extends EntryProvider {
         this.pageTitle("Streak Warning");
 
         this.pageText("""
-                When the streak penalty is active, the tooltip shows a %sstreak counter%s. This appears after eating the same food consecutively without switching.
-
+                When the streak penalty is active, the tooltip shows a %sstreak counter%s. This appears after eating the same food consecutively without switching.\s\s
                 If you see this, eat one different food before continuing with your usual diet. Even a single item from a different food family resets the streak and restores full multipliers.
                 """.formatted(
                 STREAK_WARNING, RESET
@@ -85,8 +81,7 @@ public class ReadingTooltipsEntry extends EntryProvider {
         this.pageTitle("JEI Tag Search");
 
         this.pageText("""
-                If you have JEI installed, you can filter the entire item list by food group. Type any of these into the JEI search bar:
-
+                If you have JEI installed, you can filter the entire item list by food group. Type any of these into the JEI search bar:\s\s
                 **nourished:nutrients/fruits**
                 **nourished:nutrients/vegetables**
                 **nourished:nutrients/proteins**
@@ -101,9 +96,8 @@ public class ReadingTooltipsEntry extends EntryProvider {
         this.pageTitle("JEI Tag Search (cont.)");
 
         this.pageText("""
-                This is the fastest way to answer the question **"what can I eat right now?"** when a bar is low.
-
-                JEI will show every item on the server assigned to that group — including modded foods — so you can see at a glance what you have in your inventory or nearby chests that qualifies.
+                This is the fastest way to answer the question **"what can I eat right now?"** when a bar is low.\s\s
+                JEI will show every item on the server assigned to that group (including modded foods), so you can see at a glance what you have in your inventory or nearby chests that qualifies.
                 """);
 
         this.page("unrecognized_foods", () -> BookTextPageModel.create()
@@ -113,8 +107,7 @@ public class ReadingTooltipsEntry extends EntryProvider {
         this.pageTitle("Unrecognized Foods");
 
         this.pageText("""
-                If a food item shows **Unclassified** or no Nourished tooltip at all, it has not been assigned to a food group on this server.
-
+                If a food item shows **Unclassified** or no Nourished tooltip at all, it has not been assigned to a food group on this server.\s\s
                 For modded foods this is usually resolved by the server's datapack configuration. If you believe a food should belong to a specific group, contact your server admin or check the Nourished datapack documentation in the **Server Owners** chapter.
                 """);
     }

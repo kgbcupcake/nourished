@@ -32,7 +32,7 @@ public class FoodTooltipsEntry extends EntryProvider {
                 .withText(this.context().pageText()));
         this.pageTitle("Reading Tooltips");
         this.pageText("""
-                The tooltip shows the food's **group**, its **nutrition value**, and its **family**. Foods from the same family give diminishing returns — variety within a group matters as much as the group itself.
+                The tooltip shows the food's **group**, its **nutrition value**, and its **family**. Foods from the same family give diminishing returns: variety within a group matters as much as the group itself.
                 """);
     }
 

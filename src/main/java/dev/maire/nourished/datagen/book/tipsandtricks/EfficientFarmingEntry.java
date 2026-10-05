@@ -36,13 +36,12 @@ public class EfficientFarmingEntry extends EntryProvider {
         this.pageTitle("The Minimal Farm");
 
         this.pageText("""
-                You do not need a mega-farm to stay healthy. A surprisingly small setup covers all five groups:
-
-                **Wheat patch** — covers %sGrains%s via bread.
-                **Carrot + potato rows** — covers %sVegetables%s.
-                **Melon or berry patch** — covers %sFruits%s.
-                **Cow pen (2+)** — covers %sDairy%s.
-                **Chicken or pig pen** — covers %sProteins%s.
+                You do not need a mega-farm to stay healthy. A surprisingly small setup covers all five groups:\s\s
+                - **Wheat patch**: covers %sGrains%s via bread.
+                - **Carrot + potato rows**: covers %sVegetables%s.
+                - **Melon or berry patch**: covers %sFruits%s.
+                - **Cow pen (2+)**: covers %sDairy%s.
+                - **Chicken or pig pen**: covers %sProteins%s.
                 """.formatted(
                 GRAINS, RESET,
                 VEGETABLES, RESET,
@@ -58,12 +57,11 @@ public class EfficientFarmingEntry extends EntryProvider {
         this.pageTitle("High-Value Crops");
 
         this.pageText("""
-                If you can only tend a few crops, prioritize these:
-
-                **Wheat** — most versatile; makes bread, cake, and cookies.
-                **Pumpkin** — makes pumpkin pie (high-value Grains).
-                **Melon** — the easiest renewable Fruit at scale.
-                **Carrots** — fast-growing, no replanting needed, renewable golden carrots.
+                If you can only tend a few crops, prioritize these:\s\s
+                - **Wheat**: most versatile; makes bread, cake, and cookies.
+                - **Pumpkin**: makes pumpkin pie (high-value Grains).
+                - **Melon**: the easiest renewable Fruit at scale.
+                - **Carrots**: fast-growing, no replanting needed, renewable golden carrots.
                 """);
 
         this.page("animal_priority", () -> BookTextPageModel.create()
@@ -73,11 +71,9 @@ public class EfficientFarmingEntry extends EntryProvider {
         this.pageTitle("Animal Priority");
 
         this.pageText("""
-                If you can only keep one or two animal pens early on, choose:
-
-                **Cows** — cover both Dairy (milk) and Proteins (cooked beef). The single most efficient animal for Nourished.
-                **Bees** — passive honey supply with zero daily effort once hives are set up. Useful for recipes even without a separate sweets group.
-
+                If you can only keep one or two animal pens early on, choose:\s\s
+                - **Cows**: cover both Dairy (milk) and Proteins (cooked beef). The single most efficient animal for Nourished.
+                - **Bees**: passive honey supply with zero daily effort once hives are set up. Useful for recipes even without a separate sweets group.\s\s
                 Chickens are lower priority since their protein value is lower, but they breed quickly and are easy to maintain.
                 """);
 
@@ -88,12 +84,11 @@ public class EfficientFarmingEntry extends EntryProvider {
         this.pageTitle("Automation Ideas");
 
         this.pageText("""
-                A few simple automations make Nourished almost invisible:
-
-                **Auto-wheat harvester** — keeps bread in constant supply.
-                **Dispenser + water harvester** — hands-off carrot and potato farming.
-                **Auto honey collector** — dispensers with bottles harvest hives automatically when full.
-                **Auto fish farm** — provides passive protein with no mobs required.
+                A few simple automations make Nourished almost invisible:\s\s
+                - **Auto-wheat harvester**: keeps bread in constant supply.
+                - **Dispenser + water harvester**: hands-off carrot and potato farming.
+                - **Auto honey collector**: dispensers with bottles harvest hives automatically when full.
+                - **Auto fish farm**: provides passive protein with no mobs required.
                 """);
 
         this.page("storing_supplies", () -> BookTextPageModel.create()
@@ -103,8 +98,7 @@ public class EfficientFarmingEntry extends EntryProvider {
         this.pageTitle("Storing Supplies");
 
         this.pageText("""
-                Keep a dedicated **nutrition chest** near your base — a small chest stocked with one stack each of your six key foods.
-
+                Keep a dedicated **nutrition chest** near your base: a small chest stocked with one stack each of your six key foods.\s\s
                 Refill it during farm harvests and draw from it when a bar is low. This prevents emergency scrambles and means you always have something from each group on hand when you need it.
                 """);
     }

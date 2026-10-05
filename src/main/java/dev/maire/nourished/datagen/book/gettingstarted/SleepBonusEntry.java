@@ -53,8 +53,7 @@ public class SleepBonusEntry extends EntryProvider {
         this.pageTitle("How It Scales");
 
         this.pageText("""
-                Filling %s**all Five groups**%s to a %s**healthy level**%s before bed gives the %s**maximum bonus**%s — a burst of %s**regeneration**%s and a small boost to your %s**nutrient levels**%s on waking.
-
+                Filling %s**all Five groups**%s to a %s**healthy level**%s before bed gives the %s**maximum bonus**%s: a burst of %s**regeneration**%s and a small boost to your %s**nutrient levels**%s on waking.\s\s
                 Neglecting your diet means waking up feeling no better than when you went to sleep.
 
                 """.formatted(

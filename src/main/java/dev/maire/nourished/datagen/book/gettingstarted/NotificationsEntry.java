@@ -50,6 +50,23 @@ public class NotificationsEntry extends EntryProvider {
                 RESET
         ));
 
+        // Paired with the notification_image page as a two-page spread, so this page's
+        // topic must match what that screenshot actually shows (a food-eaten toast).
+        this.page("food_eaten", () -> BookTextPageModel.create()
+                .withTitle(this.context().pageTitle())
+                .withText(this.context().pageText()));
+
+        this.pageTitle("Food Eaten");
+
+        this.pageText("""
+                Every time you eat, Nourished shows a small %s**food eaten**%s notification with the item's name and how many %s**calories**%s it added.\s\s
+                Eating the same food again quickly merges into the same notification instead of stacking a new one each bite; it just updates in place.
+
+                """.formatted(
+                TOAST, RESET,
+                CALORIES, RESET
+        ));
+
         this.page("critical_toasts", () -> BookTextPageModel.create()
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
@@ -57,8 +74,7 @@ public class NotificationsEntry extends EntryProvider {
         this.pageTitle("Critical Toasts");
 
         this.pageText("""
-                When a food group drops %s**critically low**%s, Nourished sends a %s**toast notification**%s in the top-right corner of your screen.
-
+                When a food group drops %s**critically low**%s, Nourished sends a separate %s**toast notification**%s in the top-right corner of your screen.\s\s
                 Toasts appear once per group when they cross the critical threshold. Pay attention to them, or your stats will suffer.
 
                 """.formatted(
@@ -73,29 +89,12 @@ public class NotificationsEntry extends EntryProvider {
         this.pageTitle("Staying Ahead");
 
         this.pageText("""
-                You can disable %s**notifications**%s in the mod's config if you prefer to manage nutrition manually.
-
+                You can disable %s**notifications**%s in the mod's config if you prefer to manage nutrition manually.\s\s
                 The %s**HUD mini bars**%s will still change color as groups reach critical levels, giving you a passive visual warning at all times.
 
                 """.formatted(
                 CONFIG, RESET,
                 HUD, RESET
-        ));
-
-        this.page("food_eaten", () -> BookTextPageModel.create()
-                .withTitle(this.context().pageTitle())
-                .withText(this.context().pageText()));
-
-        this.pageTitle("Food Eaten");
-
-        this.pageText("""
-                Every time you eat, Nourished also shows a small %s**food eaten**%s notification with the item's name and how many %s**calories**%s it added.
-
-                Eating the same food again quickly merges into the same notification instead of stacking a new one each bite — it just updates in place.
-
-                """.formatted(
-                TOAST, RESET,
-                CALORIES, RESET
         ));
     }
 
