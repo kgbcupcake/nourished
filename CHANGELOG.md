@@ -7,7 +7,17 @@
 ### Added
 
 - Food scanner config screen: each scanned row now has an edit button that opens MarieLib's new generic item value editor (`dev.marie.framework.ui.itemeditor.ItemEditorApi`) for that item, scoped to `Nourished.MODID` — shows the live classification trace, lets you edit/save a per-item value override (applies immediately, no reload needed), and supports dragging an item out of JEI to retarget the open editor. `FoodScannerWidget`'s `Row` gained an `editButton` alongside its existing `nutrientButton`.
+- New `key.nourished.openItemEditor` keybind (unbound by default, bindable in the Hotkeys config) opens the same item editor with nothing pre-selected, so it can be reached directly — not only via the Food Scanner's edit button — for dragging any item straight out of JEI's list to target it. `ClientEvents#openItemEditor`.
 - The guide book is now Epic rarity, with its item name colored accordingly, and its JEI/inventory tooltip border pulses a magenta glow (`ClientEvents#onTooltipColor`, new `RenderTooltipEvent.Color` listener gated to the book item specifically) to match.
+
+### Fixed
+
+- The item editor keybind did nothing while any screen (including the inventory) was already open — the usual `consumeClick()` tick polling it relied on only runs while `mc.screen == null`, same as vanilla's own key handling, so the one case it's actually meant for (opening it while looking at JEI's list in the inventory) never worked. `ClientEvents#onScreenKeyPressed` now catches the raw key press via `ScreenEvent.KeyPressed.Pre` instead, which fires regardless of what screen is open.
+- Even once it opened, it closed the inventory (and JEI's list with it) instead of appearing alongside it — it called `ItemEditorApi.open`, which replaces whatever screen is open via `Minecraft#setScreen`. `ClientEvents#onScreenKeyPressed` now calls the new `ItemEditorApi.toggleOverlay` instead specifically when a screen is already open, which draws the editor on top of it without touching `mc.screen`, so the inventory and JEI's list both stay up exactly as they were (see MariesLib's changelog for `ItemEditorOverlay`). The `consumeClick()` tick path still uses `open` for the no-screen-open case, where there's nothing to layer it over.
+- JEI never showed its ingredient list over the standalone item editor window at all (the case above, with no other screen open), leaving nothing to drag from — two compounding bugs in MariesLib's `ItemEditorScreen` (see MariesLib's changelog): it had no `IGuiProperties` registered with JEI, and separately never actually called its own `renderBackground()`, the call JEI's overlay hooks into to know a screen exists at all.
+- With EMI active instead of JEI, dragging an item onto the item editor didn't work at all — only a JEI ghost-ingredient handler existed. MariesLib now also ships an EMI drag-drop handler (see MariesLib's changelog for `ItemEditorEmiPlugin`) covering both the standalone window and the new overlay.
+
+[ nourished 0.2.7-beta.2]
 
 ### Added
 
@@ -225,10 +235,6 @@
 - Closed the actual hazard the `popPose()` fix above only contained rather than removed: both HUD render backends re-resolved a nutrient's icon string into an `ItemStack` from scratch on every single frame, for every visible bar — `NutrientBarComponent#resolveIconStack` and `HudDrawHelpers#renderIcon` each ran `ResourceLocation.tryParse(NutrientRegistry.getIcon(key))` followed by a `BuiltInRegistries.ITEM.getOptional(...)` lookup inline in the render path, at up to 60fps per bar, instead of resolving/validating the icon once. `NutrientRegistry` gained `getIconItem(String)`, which resolves and caches the backing `Item` in a `ConcurrentHashMap` keyed by icon id string (falling back to `Items.APPLE` for a null/malformed/unregistered id, same as before) — parsed and looked up only once per distinct icon id for the process lifetime, not per frame per bar. Both render call sites now build their `ItemStack` from that cached `Item` instead of re-parsing/re-querying the registry themselves.
 
 - Opening edit mode ("edit all") crashed with `IllegalStateException: an index default only applies to a cycle` while building the Nutrient HUD box: its new Base bar width and Bottom margin sliders set their reset value with the `int` overload of `defaultValue`, which is the cycle-only one. They now use the `double` overload. The other two HUD boxes crashed too only because edit-all builds all three at once.
-
-[ nourished 0.2.7-beta.2]
-
-> Do Not Add Anything Here, This Is A Placeholder For The Next Release Notes, everything in this section is automatically generated from the commit history and will be replaced on release.Keep All New Work In The Section Up Above This One In #Unreleased And Only Move It Down When The Release Is Ready To Ship.
 
 [ nourished 0.2.7-beta.1-Hotfix]
 

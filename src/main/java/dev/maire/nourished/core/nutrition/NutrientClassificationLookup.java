@@ -70,7 +70,8 @@ public final class NutrientClassificationLookup {
 
         if (itemId != null
                 && (ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())
-                        || ExcludedItemsRegistry.isExcluded(itemId.toString()))) {
+                        || ExcludedItemsRegistry.isExcluded(itemId.toString())
+                        || ExcludedFoodOverrideRegistry.isExcluded(itemId.toString()))) {
             return override.isPresent() ? Map.copyOf(override.get().nutrients()) : Map.of();
         }
 

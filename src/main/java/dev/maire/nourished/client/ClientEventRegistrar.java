@@ -56,6 +56,7 @@ public final class ClientEventRegistrar {
         );
         modEventBus.addListener(NourishedKeys::onRegisterKeyMappings);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onScreenInit);
+        NeoForge.EVENT_BUS.addListener(ClientEvents::onScreenKeyPressed);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onItemTooltip);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onTooltipColor);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onClientTick);

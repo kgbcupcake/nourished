@@ -5,11 +5,13 @@ import dev.maire.nourished.client.screen.diet.DietScreen;
 import dev.maire.nourished.client.screen.diet.classic.ClassicDietScreen;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.book.NourishedBookItems;
 import dev.marie.framework.tooltips.MarieTooltipHelper;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.ui.api.MarieCommandCenter;
 import dev.marie.framework.ui.api.EditModeCoordinator;
+import dev.marie.framework.ui.itemeditor.ItemEditorApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -19,6 +21,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
@@ -76,7 +79,12 @@ public final class ClientEvents {
         }
         var lines = event.getToolTip();
         lines.add(Component.empty());
-        lines.addAll(nourishedLines);
+        if (NourishedKeys.SHOW_TOOLTIP_DETAILS.isDown()) {
+            lines.addAll(nourishedLines);
+        } else {
+            lines.add(Component.translatable("nourished.tooltip.holdForDetails",
+                    NourishedKeys.SHOW_TOOLTIP_DETAILS.getTranslatedKeyMessage()));
+        }
     }
 
     /** Pulsing magenta glow on the guide book's tooltip border, to match its Epic rarity. */
@@ -112,9 +120,46 @@ public final class ClientEvents {
         while (NourishedKeys.OPEN_COMMAND_CENTER.consumeClick()) {
             MarieCommandCenter.openScreen();
         }
+        while (NourishedKeys.OPEN_ITEM_EDITOR.consumeClick()) {
+            openItemEditor(mc);
+        }
         while (NourishedKeys.EDIT_ALL_HUDS.consumeClick()) {
             EditModeCoordinator.toggleAll();
         }
+    }
+
+    /**
+     * {@code onClientTick}'s {@code consumeClick()} polling only runs while no screen is open (it
+     * bails out early whenever {@code mc.screen != null}), same as vanilla's own key-binding
+     * handling — so pressing the item editor's key while the inventory (or any other screen) is
+     * open never reached {@code openItemEditor} at all. This intercepts the raw key press at the
+     * screen level instead, specifically so the editor can be opened while looking at JEI's list in
+     * the inventory.
+     *
+     * <p>Since a screen (the inventory) is already open here, this calls {@code toggleOverlay}
+     * instead of {@code open} — {@code open} would replace that screen with the editor via {@code
+     * Minecraft#setScreen}, closing the inventory (and JEI's list with it) instead of leaving it up.
+     * {@code toggleOverlay} draws the same editor window on top without touching {@code mc.screen}
+     * at all, so the inventory and JEI both stay exactly as they were.
+     */
+    public static void onScreenKeyPressed(ScreenEvent.KeyPressed.Pre event) {
+        if (!NourishedKeys.OPEN_ITEM_EDITOR.matches(event.getKeyCode(), event.getScanCode())) {
+            return;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        RecipeManager recipeManager = mc.level != null ? mc.level.getRecipeManager() : null;
+        ItemEditorApi.toggleOverlay(Nourished.MODID, ItemStack.EMPTY, recipeManager);
+        event.setCanceled(true);
+    }
+
+    /**
+     * Opens the item value editor with no item selected, so a player drags any item straight out
+     * of JEI's list onto it — the editor's slot is a JEI ghost-ingredient target regardless of
+     * what's in it, not limited to a pre-scanned list.
+     */
+    private static void openItemEditor(Minecraft mc) {
+        RecipeManager recipeManager = mc.level != null ? mc.level.getRecipeManager() : null;
+        ItemEditorApi.open(mc.screen, Nourished.MODID, ItemStack.EMPTY, recipeManager);
     }
 
     private static Screen openDietScreen() {

@@ -102,12 +102,38 @@ public final class HotkeysCategory {
         category.addEntry(eb.startTextDescription(Component.translatable("config.nourished.hotkeys.group.other")).build());
         category.addEntry(
                 eb.startKeyCodeField(
+                                Component.translatable("config.nourished.showTooltipDetailsHotkey"),
+                                NourishedKeys.SHOW_TOOLTIP_DETAILS.getKey()
+                        )
+                        .setDefaultValue(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_LEFT_SHIFT))
+                        .setKeySaveConsumer(key -> {
+                            NourishedKeys.SHOW_TOOLTIP_DETAILS.setKey(key);
+                            KeyMapping.resetMapping();
+                            Minecraft.getInstance().options.save();
+                        })
+                        .build()
+        );
+        category.addEntry(
+                eb.startKeyCodeField(
                                 Component.translatable("config.nourished.commandCenterHotkey"),
                                 NourishedKeys.OPEN_COMMAND_CENTER.getKey()
                         )
                         .setDefaultValue(InputConstants.UNKNOWN)
                         .setKeySaveConsumer(key -> {
                             NourishedKeys.OPEN_COMMAND_CENTER.setKey(key);
+                            KeyMapping.resetMapping();
+                            Minecraft.getInstance().options.save();
+                        })
+                        .build()
+        );
+        category.addEntry(
+                eb.startKeyCodeField(
+                                Component.translatable("config.nourished.itemEditorHotkey"),
+                                NourishedKeys.OPEN_ITEM_EDITOR.getKey()
+                        )
+                        .setDefaultValue(InputConstants.UNKNOWN)
+                        .setKeySaveConsumer(key -> {
+                            NourishedKeys.OPEN_ITEM_EDITOR.setKey(key);
                             KeyMapping.resetMapping();
                             Minecraft.getInstance().options.save();
                         })
