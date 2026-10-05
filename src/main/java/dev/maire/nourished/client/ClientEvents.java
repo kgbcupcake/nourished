@@ -12,6 +12,8 @@ import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.ui.api.MarieCommandCenter;
 import dev.marie.framework.ui.api.EditModeCoordinator;
 import dev.marie.framework.ui.itemeditor.ItemEditorApi;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -79,12 +81,27 @@ public final class ClientEvents {
         }
         var lines = event.getToolTip();
         lines.add(Component.empty());
-        if (NourishedKeys.SHOW_TOOLTIP_DETAILS.isDown()) {
+        if (isKeyHeld(NourishedKeys.SHOW_TOOLTIP_DETAILS)) {
             lines.addAll(nourishedLines);
         } else {
             lines.add(Component.translatable("nourished.tooltip.holdForDetails",
                     NourishedKeys.SHOW_TOOLTIP_DETAILS.getTranslatedKeyMessage()));
         }
+    }
+
+    /**
+     * {@link KeyMapping#isDown()} only reflects GLFW key callbacks, which can lag or get swallowed
+     * while a screen has keyboard focus (e.g. inventory search boxes). Tooltip gating needs the
+     * actual current hardware state every frame, so poll it directly the same way
+     * {@link Screen#hasShiftDown()} does for its own modifier checks.
+     */
+    private static boolean isKeyHeld(KeyMapping mapping) {
+        var key = mapping.getKey();
+        if (key.getType() != InputConstants.Type.KEYSYM) {
+            return mapping.isDown();
+        }
+        long window = Minecraft.getInstance().getWindow().getWindow();
+        return InputConstants.isKeyDown(window, key.getValue());
     }
 
     /** Pulsing magenta glow on the guide book's tooltip border, to match its Epic rarity. */
