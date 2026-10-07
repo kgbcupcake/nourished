@@ -22,7 +22,10 @@ import java.util.Set;
 
 /**
  * Loads items the player excluded from nutrient classification through the in-game item editor,
- * stored at {@code config/nourished/item_editor/excluded_foods.json}.
+ * stored at {@code config/nourished/item_editor/Excluded Foods/General/excluded_foods.json} — its
+ * own {@code General} subfolder, matching MariesLib's {@code SourceClassificationRegistry} pattern
+ * for a category folder that (so far) only ever holds one file; nothing sits loose anywhere in this
+ * tree, not even one level inside {@code Excluded Foods/} itself.
  * <p>
  * This is a separate layer from MariesLib's {@code ExcludedItemsRegistry}
  * ({@code config/nourished/overrides/Overrides/excluded_items.json}), which is the modpack-author
@@ -77,19 +80,43 @@ public final class ExcludedFoodOverrideRegistry {
         INSTANCE.freeze();
     }
 
+    private static Path itemEditorDir() {
+        return FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("item_editor");
+    }
+
     private static Path file() {
-        return FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("item_editor").resolve("excluded_foods.json");
+        return itemEditorDir().resolve("Excluded Foods").resolve("General").resolve("excluded_foods.json");
     }
 
     public static void load() {
         Path file = file();
         try {
-            Files.createDirectories(file.getParent());
-            if (!Files.exists(file)) {
-                writeDefaults(file);
+            // Earlier layouts of this file, both migrated below like any other old location: briefly
+            // loose directly under item_editor/, then loose directly under Excluded Foods/ (nothing
+            // should sit loose anywhere in this tree, including one level inside a category folder
+            // that only ever holds the one file).
+            Path oldLooseFile = itemEditorDir().resolve("excluded_foods.json");
+            if (Files.exists(oldLooseFile) && !Files.exists(file)) {
+                Files.createDirectories(file.getParent());
+                Files.move(oldLooseFile, file);
             }
-            parse(file);
-            Nourished.LOGGER.info("[ExcludedFoodOverrideRegistry] Loaded {} editor-excluded items", INSTANCE.size());
+            Files.deleteIfExists(oldLooseFile);
+            Path oldCategoryLooseFile = itemEditorDir().resolve("Excluded Foods").resolve("excluded_foods.json");
+            if (Files.exists(oldCategoryLooseFile) && !Files.exists(file)) {
+                Files.createDirectories(file.getParent());
+                Files.move(oldCategoryLooseFile, file);
+            }
+            Files.deleteIfExists(oldCategoryLooseFile);
+            if (Files.exists(file)) {
+                parse(file);
+                Nourished.LOGGER.info("[ExcludedFoodOverrideRegistry] Loaded {} editor-excluded items", INSTANCE.size());
+            } else {
+                // Nothing excluded yet: leave Excluded Foods/ unwritten rather than creating an
+                // empty General/excluded_foods.json placeholder — #save() creates it the first time
+                // there's actually something to persist.
+                INSTANCE.reset();
+                INSTANCE.freeze();
+            }
         } catch (IOException e) {
             Nourished.LOGGER.error("[ExcludedFoodOverrideRegistry] Failed to load excluded_foods.json", e);
             INSTANCE.reset();
@@ -102,10 +129,11 @@ public final class ExcludedFoodOverrideRegistry {
         load();
     }
 
-    /** Persists the current in-memory state to {@code item_editor/excluded_foods.json}. */
+    /** Persists the current in-memory state to {@code item_editor/Excluded Foods/General/excluded_foods.json}, creating that folder the first time there's actually something to write. */
     public static void save() {
         Path file = file();
         try {
+            Files.createDirectories(file.getParent());
             writeRegistry(file);
             Nourished.LOGGER.info("[ExcludedFoodOverrideRegistry] Saved excluded_foods.json");
         } catch (IOException e) {
@@ -132,13 +160,6 @@ public final class ExcludedFoodOverrideRegistry {
                 }
             }
             INSTANCE.freeze();
-        }
-    }
-
-    private static void writeDefaults(Path file) throws IOException {
-        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "ExcludedFoodOverrideRegistry");
-        try (Writer w = Files.newBufferedWriter(file)) {
-            GSON.toJson(new JsonArray(), w);
         }
     }
 

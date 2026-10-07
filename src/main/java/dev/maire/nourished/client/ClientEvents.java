@@ -7,12 +7,18 @@ import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.book.NourishedBookItems;
+import dev.maire.nourished.core.nutrition.ExcludedTooltipPulseRegistry;
+import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.marie.framework.tooltips.MarieTooltipHelper;
+import dev.marie.framework.tooltips.TooltipColorRegistry;
+import dev.marie.framework.tooltips.TooltipMessageRegistry;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.ui.api.MarieCommandCenter;
 import dev.marie.framework.ui.api.EditModeCoordinator;
 import dev.marie.framework.ui.itemeditor.ItemEditorApi;
+import dev.marie.framework.util.MarieRegistryUtils;
 import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -20,6 +26,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -28,6 +36,10 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public final class ClientEvents {
 
@@ -75,7 +87,10 @@ public final class ClientEvents {
         if (stack.isEmpty()) {
             return;
         }
-        var nourishedLines = MarieTooltipHelper.getTooltipLines(stack);
+        ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
+        List<Component> nourishedLines = itemId != null && NutrientClassificationLookup.isExcluded(itemId.toString())
+                ? excludedTooltipLines(itemId.toString())
+                : MarieTooltipHelper.getTooltipLines(stack);
         if (nourishedLines.isEmpty()) {
             return;
         }
@@ -102,6 +117,51 @@ public final class ClientEvents {
         }
         long window = Minecraft.getInstance().getWindow().getWindow();
         return InputConstants.isKeyDown(window, key.getValue());
+    }
+
+    /**
+     * Builds the "Excluded from nutrition tracking" line ourselves, instead of {@link
+     * MarieTooltipHelper#getTooltipLines}, for any item Nourished considers excluded (editor
+     * toggle, scanner exclusion, or MariesLib's own escape hatch — see {@link
+     * NutrientClassificationLookup#isExcluded}). MariesLib's own helper only recognizes its own
+     * {@code ExcludedItemsRegistry}/{@code ScannerSpecRegistry} exclusions for this branch, so an
+     * item excluded purely via Nourished's item editor would otherwise fall through to the
+     * generic "Unclassified" line instead. Message/color overrides come from the same {@code
+     * TooltipMessageRegistry}/{@code TooltipColorRegistry} "excluded" lookups MariesLib's own
+     * branch uses, so behavior for non-editor exclusions is unchanged; pulse (see {@link
+     * ExcludedTooltipPulseRegistry}) has no MariesLib equivalent and is applied here only.
+     */
+    private static List<Component> excludedTooltipLines(String itemId) {
+        List<Component> lines = new ArrayList<>();
+        String modId = Nourished.MODID;
+        lines.add(Component.literal("✦ " + modId).withStyle(ChatFormatting.GOLD));
+
+        Optional<String> override = TooltipMessageRegistry.getForItem(modId, itemId, "excluded");
+        Component excludedLine = override.isPresent()
+                ? Component.literal(override.get())
+                : Component.translatable(modId + ".tooltip.excluded");
+        int baseColor = TooltipColorRegistry.getForItem(modId, itemId, "excluded")
+                .orElse(ChatFormatting.DARK_GRAY.getColor());
+        int color = ExcludedTooltipPulseRegistry.isEnabled(itemId)
+                ? pulseColor(baseColor, ExcludedTooltipPulseRegistry.getSpeed(itemId))
+                : baseColor;
+        lines.add(excludedLine.copy().withStyle(Style.EMPTY.withColor(color)));
+        return lines;
+    }
+
+    /** Oscillates {@code rgb}'s brightness over time; tooltip text color has no usable alpha channel (see TOOLTIP_COLORS_README.md), so pulse has to modulate the RGB channels themselves. */
+    private static int pulseColor(int rgb, ExcludedTooltipPulseRegistry.Speed speed) {
+        float periodMs = switch (speed) {
+            case SLOW -> 1400f;
+            case FAST -> 450f;
+            default -> 800f;
+        };
+        float t = (Mth.sin(System.currentTimeMillis() / periodMs) + 1f) / 2f;
+        float factor = 0.35f + 0.65f * t;
+        int r = Math.round(((rgb >> 16) & 0xFF) * factor);
+        int g = Math.round(((rgb >> 8) & 0xFF) * factor);
+        int b = Math.round((rgb & 0xFF) * factor);
+        return 0xFF000000 | (r << 16) | (g << 8) | b;
     }
 
     /** Pulsing magenta glow on the guide book's tooltip border, to match its Epic rarity. */

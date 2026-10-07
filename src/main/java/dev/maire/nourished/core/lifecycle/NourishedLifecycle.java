@@ -6,6 +6,7 @@ import dev.maire.nourished.config.NourishedPresetRegistry;
 import dev.marie.framework.registry.RegistryLifecycleManager;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.ExcludedFoodOverrideRegistry;
+import dev.maire.nourished.core.nutrition.ExcludedTooltipPulseRegistry;
 import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.core.nutrition.NutrientWeightRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
@@ -44,6 +45,8 @@ public final class NourishedLifecycle {
                 "FoodOverrideRegistry", FoodOverrideRegistry::load, FoodOverrideRegistry::reload, FoodOverrideRegistry::loadFromDatapack);
         RegistryLifecycleManager.registerRegistry(
                 "ExcludedFoodOverrideRegistry", ExcludedFoodOverrideRegistry::load, ExcludedFoodOverrideRegistry::reload);
+        RegistryLifecycleManager.registerRegistry(
+                "ExcludedTooltipPulseRegistry", ExcludedTooltipPulseRegistry::load, ExcludedTooltipPulseRegistry::reload);
         RegistryLifecycleManager.registerRegistry(
                 "NutrientWeightRegistry", NutrientWeightRegistry::load, NutrientWeightRegistry::reload,
                 NutrientWeightRegistry::loadFromDatapack);

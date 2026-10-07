@@ -26,6 +26,32 @@ public final class NutrientClassificationLookup {
 
     private NutrientClassificationLookup() {}
 
+    /**
+     * The override that actually applies for {@code itemId}: {@link FoodOverrideRegistry}'s
+     * datapack/modpack-escape-hatch layer. The in-game item editor is a separate layer entirely —
+     * MariesLib's own {@code SourceClassificationRegistry}/{@link SourceRegistry}, which {@link
+     * #resolveNutrientBars} already reads from directly as the authoritative base classification —
+     * so it never needs to go through this override at all.
+     */
+    public static Optional<FoodOverrideRegistry.FoodOverride> getEffectiveOverride(String itemId) {
+        return FoodOverrideRegistry.getOverride(itemId);
+    }
+
+    /**
+     * Whether Nourished considers {@code itemId} excluded from classification entirely — the
+     * modpack-author escape hatches ({@link ScannerSpecRegistry}'s own exclusion list, MariesLib's
+     * {@link ExcludedItemsRegistry}) or the player-authored item-editor toggle ({@link
+     * ExcludedFoodOverrideRegistry}). Shared between {@link #resolveNutrientBars} and {@link
+     * dev.maire.nourished.core.context.NourishedContextBuilder}'s {@code sourceExclusionFilter}
+     * wiring, so both the tooltip/HUD/eating resolution path and MariesLib's generic
+     * {@code SourceClassificationRegistry} override check agree on what's excluded.
+     */
+    public static boolean isExcluded(String itemId) {
+        return ScannerSpecRegistry.get().excludedItems().contains(itemId)
+                || ExcludedItemsRegistry.isExcluded(itemId)
+                || ExcludedFoodOverrideRegistry.isExcluded(itemId);
+    }
+
     public static Map<String, Float> resolveBars(ItemStack stack, @Nullable Level level) {
         if (stack == null || stack.isEmpty()) {
             return Map.of();
@@ -65,13 +91,10 @@ public final class NutrientClassificationLookup {
         ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
 
         Optional<FoodOverrideRegistry.FoodOverride> override = itemId != null
-                ? FoodOverrideRegistry.getOverride(itemId.toString())
+                ? getEffectiveOverride(itemId.toString())
                 : Optional.empty();
 
-        if (itemId != null
-                && (ScannerSpecRegistry.get().excludedItems().contains(itemId.toString())
-                        || ExcludedItemsRegistry.isExcluded(itemId.toString())
-                        || ExcludedFoodOverrideRegistry.isExcluded(itemId.toString()))) {
+        if (itemId != null && isExcluded(itemId.toString())) {
             return override.isPresent() ? Map.copyOf(override.get().nutrients()) : Map.of();
         }
 

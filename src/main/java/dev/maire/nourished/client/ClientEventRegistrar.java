@@ -7,7 +7,11 @@ import dev.marie.framework.ui.commandcenter.CommandCenterCard;
 import dev.marie.framework.ui.commandcenter.CommandCenterCategory;
 import dev.marie.framework.ui.commandcenter.CommandCenterRegistry;
 import dev.marie.framework.ui.api.EditModeCoordinator;
+import dev.marie.framework.ui.itemeditor.ItemEditorScreenProviderRegistry;
 import dev.maire.nourished.client.colors.NourishedColors;
+import dev.maire.nourished.client.screen.itemeditor.ExcludeTooltipScreenProvider;
+import dev.maire.nourished.client.screen.itemeditor.OptionsScreenProvider;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen;
 import dev.maire.nourished.client.NourishedClientMemoryConfig;
@@ -33,6 +37,8 @@ public final class ClientEventRegistrar {
         registerCommandCenter();
         NourishedTestCommandCenter.register();
         MarieNotifications.registerClientListeners();
+        ItemEditorScreenProviderRegistry.register(Nourished.MODID, new OptionsScreenProvider());
+        ItemEditorScreenProviderRegistry.register(Nourished.MODID, new ExcludeTooltipScreenProvider());
         EditModeCoordinator.registerGroupCapable(
                 "nourished.hud",
                 NourishedHUD::editTarget,

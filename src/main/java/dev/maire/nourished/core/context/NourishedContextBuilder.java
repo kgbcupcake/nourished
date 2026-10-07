@@ -68,6 +68,10 @@ public final class NourishedContextBuilder {
                 .joinMessageLine2(NourishedJoinMessage::line2)
                 .heavySourceBlocker(NourishedSourceRules::isHeavyBlocked)
                 .sourceItemFilter(() -> NourishedItems::isNutritiousFood)
+                .sourceExclusionFilter(() -> stack -> {
+                    ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
+                    return itemId != null && NutrientClassificationLookup.isExcluded(itemId.toString());
+                })
                 .valueIconProvider(NutrientRegistry::getIcon)
                 .sourceFamilyResolver(FoodFamilyResolver::resolve)
                 .valueTagScoresProvider(FoodNutritionRegistry::getNutrientTagScores)
@@ -105,7 +109,7 @@ public final class NourishedContextBuilder {
                     ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
                     if (itemId != null) {
                         Optional<FoodOverrideRegistry.FoodOverride> override =
-                                FoodOverrideRegistry.getOverride(itemId.toString());
+                                NutrientClassificationLookup.getEffectiveOverride(itemId.toString());
                         if (override.isPresent()) {
                             return new MarieContext.SourceDelta(override.get().calories(), Map.copyOf(bars));
                         }

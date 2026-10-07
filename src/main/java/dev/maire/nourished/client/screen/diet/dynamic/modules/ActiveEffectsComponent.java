@@ -318,7 +318,7 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
      * independently movable piece, so leaving the glyph in would show the icon twice and drag one copy
      * along with the text.
      */
-    private static String stripIconGlyphs(String name) {
+    public static String stripIconGlyphs(String name) {
         StringBuilder out = new StringBuilder(name.length());
         name.codePoints()
                 .filter(cp -> Character.getType(cp) != Character.PRIVATE_USE)

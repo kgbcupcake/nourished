@@ -225,13 +225,21 @@ public final class HudEditTarget implements MarieComponent {
                     AutoGrowPanelContainer.ManualOverride override =
                             new AutoGrowPanelContainer.ManualOverride(state.widthManual(), state.heightManual());
                     int width = AutoGrowPanelContainer.resolveWidth(override, state.width(), natural.panelW());
-                    // A manually shrunk height always applies (the rows past it scroll). A manually
-                    // enlarged one only applies while every bar is showing; with just a subset visible
-                    // (reveal-on-gain after a meal, zero bars hidden) the box is capped at the natural
-                    // height so a full-size box never pops up around one or two bars.
+                    // A manual height only applies once every bar is showing — the "settled" state the
+                    // player was actually looking at when they dragged the handle. With just a subset
+                    // visible (reveal-on-gain after a meal, some bars still hidden) the box always uses
+                    // the natural height for however many rows are showing right now instead: capping a
+                    // manually *enlarged* box down to natural keeps a full-size box from popping up
+                    // around one or two bars, and — the bug this used to have — NOT also flooring a
+                    // manually *shrunk* box at its old (smaller) natural height meant a box resized back
+                    // when fewer nutrients were revealed stayed stuck at that size as more crossed the
+                    // reveal threshold, clipping/half-showing whichever row didn't fit instead of the
+                    // box growing to fit them. `Math.min` against the stale manual height was exactly
+                    // that floor; natural alone can't undershoot the current row count since it's
+                    // computed from it.
                     boolean allBarsVisible = keys.size() >= NourishedClientConfig.get().effectiveDietBarOrder().size();
                     int manualHeight = AutoGrowPanelContainer.resolveHeight(override, state.height(), natural.panelH());
-                    int height = allBarsVisible ? manualHeight : Math.min(manualHeight, natural.panelH());
+                    int height = allBarsVisible ? manualHeight : natural.panelH();
                     return new HudLayout.Layout(
                             state.x(), state.y(), width, height,
                             natural.baseX(), natural.baseY(),

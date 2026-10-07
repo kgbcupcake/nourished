@@ -248,6 +248,12 @@ public class FoodOverrideRegistry {
 
     /**
      * Saves the current registry state back to food_overrides.json.
+     *
+     * <p><b>Do not call this (or {@link #setOverride}/{@link #removeOverride}) from the in-game item
+     * editor UI.</b> This file is the modpack-author escape hatch. The in-game item editor is a
+     * separate layer entirely — MariesLib's own {@code SourceClassificationRegistry}, which never
+     * touches this file — so there's nothing to wire here; writing to this class directly would
+     * silently overwrite the modpack author's hand-edited file with a single player's local changes.
      */
     public static void save() {
         Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
@@ -261,7 +267,8 @@ public class FoodOverrideRegistry {
     }
 
     /**
-     * Adds or updates an override.
+     * Adds or updates an override. See {@link #save()}'s javadoc: this mutates the modpack
+     * escape-hatch layer — the in-game item editor never calls this at all.
      */
     public static void setOverride(String item, Map<String, Float> nutrients, int calories, boolean enabled) {
         Objects.requireNonNull(item, "item");
