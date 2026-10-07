@@ -66,6 +66,8 @@ public final class HudEditTarget implements MarieComponent {
     private static final String ID = "nourished.hud.editwrapper";
     private static final String PANEL_ID = "nourished.hud.panel";
     private static final String CONTENT_OFFSET_ID = "nourished.hud.contentOffset";
+    /** How many rows {@link #commit}'s persisted height last fit — see {@link #persistedManualHeightRowCount()}. */
+    private static final String ROW_COUNT_ID = "nourished.hud.panel.rowCount";
 
     /** Accent used for the "Move Text and Icons" live drag affordance — this panel draws no title text of its own to already have an established accent color, unlike {@code CalorieHudScreen}/{@code ActivityLogHudPanel}. */
     private static int contentOutlineColor() {
@@ -238,8 +240,14 @@ public final class HudEditTarget implements MarieComponent {
                     // that floor; natural alone can't undershoot the current row count since it's
                     // computed from it.
                     boolean allBarsVisible = keys.size() >= NourishedClientConfig.get().effectiveDietBarOrder().size();
+                    // A manual height is also only trusted for however many rows it was actually sized
+                    // for: a third-party mod (or the player) adding more nutrients than were visible at
+                    // the last resize grows effectiveDietBarOrder()/keys past that, and without this
+                    // check allBarsVisible alone would still honor the now-too-small persisted height,
+                    // clipping whichever new row doesn't fit instead of the box growing for it.
+                    boolean manualHeightFitsCurrentRows = keys.size() <= persistedManualHeightRowCount();
                     int manualHeight = AutoGrowPanelContainer.resolveHeight(override, state.height(), natural.panelH());
-                    int height = allBarsVisible ? manualHeight : natural.panelH();
+                    int height = (allBarsVisible && manualHeightFitsCurrentRows) ? manualHeight : natural.panelH();
                     return new HudLayout.Layout(
                             state.x(), state.y(), width, height,
                             natural.baseX(), natural.baseY(),
@@ -258,6 +266,11 @@ public final class HudEditTarget implements MarieComponent {
         return UiStatePersistence.get().load(PANEL_ID)
                 .map(ComponentState::leftMargin)
                 .orElse(0);
+    }
+
+    /** How many rows were currently visible the last time {@link #commit} persisted a manual height — 0 if never committed under this check. */
+    private static int persistedManualHeightRowCount() {
+        return UiStatePersistence.get().load(ROW_COUNT_ID).map(ComponentState::x).orElse(0);
     }
 
     /** Committed "Move Text and Icons" offset — see {@link #contentOffsetX}. */
@@ -344,6 +357,7 @@ public final class HudEditTarget implements MarieComponent {
         UiStatePersistence.get().save(PANEL_ID, new ComponentState(
                 bounds.x(), bounds.y(), bounds.width(), bounds.height(), false,
                 override.widthManual(), override.heightManual(), leftMargin, contentScale, paddingScale));
+        UiStatePersistence.get().save(ROW_COUNT_ID, new ComponentState(keys.size(), 0, 0, 0, false, false, false, 0));
     }
 
     @Override

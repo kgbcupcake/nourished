@@ -14,6 +14,12 @@ Nourished turns food into a configurable nutrition system for NeoForge 1.21.1. T
 <details open>
 <summary>✨ Dynamic UI</summary>
 
+### Video showcase
+[![Dynamic UI showcase](https://img.youtube.com/vi/WgrOxjer6Tw/maxresdefault.jpg)](https://youtu.be/WgrOxjer6Tw)
+
+> ▶️ Click the image above to watch the Dynamic UI showcase on YouTube.
+
+---
 ### diet screen
 ![diet screen](https://cdn.modrinth.com/data/cached_images/d4f8bad921b1e2b37981a592fcec18207a803ce6_0.webp)
 ---
@@ -89,6 +95,44 @@ Each nutrient bar has its own glow, independently toggleable and tunable:
 Bars that are critical or low can pulse to draw your eye, tied into the same visibility system that auto-hides or reveals bars at custom thresholds.
 
 Every setting here writes straight to config in the background, so anything you set through the in-game editor is saved automatically and shows up the same way in `config/nourished/` if you'd rather hand-edit it later.
+
+</details>
+
+---
+
+<details>
+<summary>🛠️ Item Editor</summary>
+
+[![Item Editor showcase](https://img.youtube.com/vi/gOLJr8XRMx0/maxresdefault.jpg)](https://youtu.be/gOLJr8XRMx0)
+
+> ▶️ Click the image above to watch the Item Editor showcase on YouTube.
+
+The **Item Editor** lets you inspect and tune how any individual item is handled by Nourished, right in-game — no config files or reloads required.
+
+### Opening the editor
+
+* Click the **edit** button next to any item in the Food Scanner config screen
+* Or bind the **Open Item Editor** hotkey (unbound by default) to open it from anywhere, including on top of your inventory
+* Drag any item straight out of **JEI** or **EMI** onto the editor to target it
+
+### Values
+
+* See the live classification trace for the targeted item
+* Edit and save per-item nutrient value overrides that apply immediately
+
+### Options
+
+* Toggle **Excluded from classification** to stop an item from counting toward nutrition entirely — both in its tooltip and when it's eaten
+
+### Exclude Tooltip
+
+Style the "Excluded from nutrition tracking" tooltip line per item:
+
+* Custom **message**
+* Custom **color** with a color-wheel picker
+* **Pulse** animation with Slow / Normal / Fast speeds
+
+Every page uses the same header-level **Save** / **Revert** controls.
 
 </details>
 
