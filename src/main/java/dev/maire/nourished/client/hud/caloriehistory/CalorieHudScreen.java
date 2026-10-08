@@ -143,6 +143,7 @@ public final class CalorieHudScreen implements MarieComponent {
     private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(
             List.of(new ScaleConfigEntry(PANEL_ID, Component.translatable("nourished.hud.calorieHistory.label"))
                     .withContent(MarieModuleSettings.standardPanel(Component.translatable("nourished.hud.calorieHistory.label").getString(), UiStatePersistence.get(), PANEL_ID)
+                            .withoutPadding()
                             .opacity(() -> NourishedClientConfig.get().calorieHudBackgroundOpacity(), v -> NourishedClientConfig.get().setCalorieHudBackgroundOpacity(v), 204.0d / 255.0d)
                             .textBrightness(() -> NourishedClientConfig.get().calorieHudTextBrightness(), v -> NourishedClientConfig.get().setCalorieHudTextBrightness(v))
                             .iconBrightness(() -> NourishedClientConfig.get().calorieHudIconBrightness(), v -> NourishedClientConfig.get().setCalorieHudIconBrightness(v))
@@ -595,9 +596,9 @@ public final class CalorieHudScreen implements MarieComponent {
         return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::contentScale).orElse(ComponentState.DEFAULT_CONTENT_SCALE);
     }
 
-    /** This panel's persisted padding multiplier — defaults to {@link ComponentState#DEFAULT_PADDING_SCALE} if never set. */
+    /** Always {@link ComponentState#DEFAULT_PADDING_SCALE} — the Padding slider is removed from this panel's editor (see its {@code withoutPadding()}), so any value set before it was removed is no longer read back. */
     private static double persistedPaddingScale() {
-        return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::paddingScale).orElse(ComponentState.DEFAULT_PADDING_SCALE);
+        return ComponentState.DEFAULT_PADDING_SCALE;
     }
 
     @Override

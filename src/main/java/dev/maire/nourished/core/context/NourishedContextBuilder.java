@@ -18,6 +18,8 @@ import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
+import dev.maire.nourished.core.nutrition.NoCaloriesOverrideRegistry;
+import dev.maire.nourished.core.nutrition.CustomCaloriesOverrideRegistry;
 import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.reload.NourishedReloadHelper;
@@ -78,8 +80,9 @@ public final class NourishedContextBuilder {
                 .registrationDelegate(new NourishedRegistrationDelegate())
                 .runtimeResolverStages(NourishedResolverStages.STAGES)
                 .clientTrackingDataProvider(MarieClientCache::get)
-                .clientMemoryConfigProvider(NourishedClientMemoryConfig::get)
-                .trackingMemoryConfigProvider(NourishedMemoryConfig::serverTrackingMemoryConfig)
+                .clientMemoryConfigProvider(() -> NourishedClientMemoryConfig.get())
+                .clientMemoryConfigProvider((String sourceKey) -> NourishedClientMemoryConfig.get(sourceKey))
+                .trackingMemoryConfigProvider((String sourceKey) -> NourishedMemoryConfig.serverTrackingMemoryConfig(sourceKey))
                 .scannerConfidenceSpreadThreshold(
                         () -> (float) NourishedConfig.get().scannerConfidenceSpreadThreshold())
                 .compositeRatioThreshold(NourishedConfig.get()::compositeRatioThreshold)
@@ -107,17 +110,23 @@ public final class NourishedContextBuilder {
                         NutrientClassificationLookup.resolveNutrientBars(stack, false, level))
                 .sourceDeltaResolver((stack, level, payload, bars) -> {
                     ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
+                    boolean caloriesOff = itemId != null && NoCaloriesOverrideRegistry.isCaloriesOff(itemId.toString());
+                    Integer customCalories = itemId != null
+                            ? CustomCaloriesOverrideRegistry.getOverride(itemId.toString()) : null;
                     if (itemId != null) {
                         Optional<FoodOverrideRegistry.FoodOverride> override =
                                 NutrientClassificationLookup.getEffectiveOverride(itemId.toString());
                         if (override.isPresent()) {
-                            return new MarieContext.SourceDelta(override.get().calories(), Map.copyOf(bars));
+                            int calories = caloriesOff ? 0
+                                    : customCalories != null ? customCalories : override.get().calories();
+                            return new MarieContext.SourceDelta(calories, Map.copyOf(bars));
                         }
                     }
                     float realSaturation = resolveRealSaturation(stack);
                     FoodNutritionRegistry.DietDelta d = FoodNutritionRegistry.computeDietDelta(
                             stack, level, (int) payload, realSaturation, bars);
-                    return new MarieContext.SourceDelta(d.calories(), d.nutrients());
+                    int calories = caloriesOff ? 0 : customCalories != null ? customCalories : d.calories();
+                    return new MarieContext.SourceDelta(calories, d.nutrients());
                 })
                 .onReloadBroadcast(NourishedReloadHelper::reregisterAndBroadcast)
                 .postValueModifierHook(NourishedKubeIntegration::fireNutrientModifier)

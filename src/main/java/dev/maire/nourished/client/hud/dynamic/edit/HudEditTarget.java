@@ -192,9 +192,14 @@ public final class HudEditTarget implements MarieComponent {
         return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::contentScale).orElse(ComponentState.DEFAULT_CONTENT_SCALE);
     }
 
-    /** This panel's persisted padding multiplier — see {@link #persistedContentScale()}. */
+    /**
+     * Always {@link ComponentState#DEFAULT_PADDING_SCALE} — the Padding slider is removed from this
+     * panel's editor (see {@code HudOptionsPanel#build}'s {@code withoutPadding()}), so any value a
+     * player set before it was removed is no longer read back, rather than silently continuing to
+     * affect this panel's padding with no slider left to see or change it by.
+     */
     public static double persistedPaddingScale() {
-        return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::paddingScale).orElse(ComponentState.DEFAULT_PADDING_SCALE);
+        return ComponentState.DEFAULT_PADDING_SCALE;
     }
 
     /** Same "empty visible keys -> fall back to every registered nutrient" reasoning the constructor uses above, so the {@link SnapRegistry} bounds supplier never resolves an empty-key layout while other components still expect this panel's real on-screen box. */

@@ -31,6 +31,7 @@ public final class HudOptionsPanel {
     public static MarieComponent build(String panelId, Runnable resetTextOffset) {
         var ui = UiStatePersistence.get();
         return MarieModuleSettings.standardPanel(text("nourished.hud.nutrientPanel.label"), ui, panelId)
+                .withoutPadding()
                 .opacity(() -> cc().hudBackgroundOpacity(), v -> cc().setHudBackgroundOpacity(v), DEFAULT_OPACITY)
                 .textBrightness(() -> cc().hudTextBrightness(), v -> cc().setHudTextBrightness(v))
                 .iconBrightness(() -> cc().hudIconBrightness(), v -> cc().setHudIconBrightness(v))

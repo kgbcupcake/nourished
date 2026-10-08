@@ -1,7 +1,9 @@
 package dev.maire.nourished.client.hud.dynamic.layout;
 
 import dev.marie.framework.config.HudAnchor;
+import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.ui.edit.ContentScaleController;
+import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.hud.dynamic.edit.HudEditTarget;
 import dev.maire.nourished.config.NourishedClientConfig;
@@ -69,20 +71,38 @@ public final class HudLayout {
         int innerH = keys.size() * rowH + (keys.size() - 1) * HudDrawHelpers.ROW_GAP;
 
         int verticalColumnW = Math.max(maxLabelSw, Math.max(verticalBarW, pctW));
+        // Height is reserved using the box-geometry pad (scaledPad, above) for everything else in
+        // this method, but NutrientPanelContainer/ClassicHudPanelRenderer actually position content
+        // using the panel's own persisted Padding slider instead (see their own "scaledPad plays no
+        // part in it" comments) — a player who's turned Padding up gets more top/bottom padding than
+        // this reserved, overflowing the panel's own clip at the bottom. Reserving at the larger of
+        // the two keeps the box tall enough for whichever one actually ends up bigger.
+        int actualPad = Math.round(ContentScaleController.resolvePadding(HudDrawHelpers.PANEL_PAD * HudEditTarget.persistedPaddingScale()));
+        int heightPad = Math.max(scaledPad, actualPad);
+        // "Move Bars"/"Move Icons"/"Move Text and Icons" push every row's content down by this many
+        // pixels on top of its natural position (see HudEditTarget/NutrientBarComponent); a negative
+        // offset pulls content up and needs no extra room, but a positive one needs the box tall
+        // enough to still contain the last row once shifted, or it clips straight through the bar
+        // and percentage (the elements "Move Bars" actually moves).
+        String panelId = "nourished.hud.panel";
+        int offsetSlack = Math.max(0, Math.max(
+                MarieModuleSettings.barOffsetY(UiStatePersistence.get(), panelId),
+                MarieModuleSettings.iconOffsetY(UiStatePersistence.get(), panelId)));
         int panelW;
         int panelH;
         if (verticalLayout) {
             panelW = scaledPad * 2 + keys.size() * verticalColumnW + Math.max(0, keys.size() - 1) * columnGap;
-            panelH = scaledPad * 2
+            panelH = heightPad * 2
                     + (int) Math.ceil(9 * labelScale)
                     + 2
                     + verticalBarH
                     + 2
-                    + (int) Math.ceil(9 * labelScale);
+                    + (int) Math.ceil(9 * labelScale)
+                    + offsetSlack;
         } else {
             panelW = scaledPad * 2 + iconSize + HudDrawHelpers.ICON_LABEL_GAP + maxLabelSw
                     + HudDrawHelpers.LABEL_BAR_GAP + barW + HudDrawHelpers.BAR_PCT_GAP + pctW;
-            panelH = innerH + scaledPad * 2;
+            panelH = innerH + heightPad * 2 + offsetSlack;
         }
 
         int sw = mc.getWindow().getGuiScaledWidth();

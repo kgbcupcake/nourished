@@ -5,14 +5,20 @@ import dev.maire.nourished.config.NourishedLockRegistry;
 import dev.maire.nourished.config.NourishedPresetRegistry;
 import dev.marie.framework.registry.RegistryLifecycleManager;
 import dev.maire.nourished.core.effect.EffectRegistry;
+import dev.maire.nourished.core.nutrition.DiminishingReturnsOverrideRegistry;
 import dev.maire.nourished.core.nutrition.ExcludedFoodOverrideRegistry;
 import dev.maire.nourished.core.nutrition.ExcludedTooltipPulseRegistry;
 import dev.maire.nourished.core.nutrition.FoodOverrideRegistry;
 import dev.maire.nourished.core.nutrition.NutrientWeightRegistry;
+import dev.maire.nourished.core.nutrition.NoCaloriesOverrideRegistry;
+import dev.maire.nourished.core.nutrition.CustomCaloriesOverrideRegistry;
+import dev.maire.nourished.core.nutrition.SilentEatOverrideRegistry;
+import dev.maire.nourished.core.nutrition.NoRecentMealsOverrideRegistry;
 import dev.maire.nourished.core.nutrition.FoodValueRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.curve.NutrientCurveRegistry;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
+import dev.maire.nourished.modules.RawFood.core.RawFoodTierOverrideRegistry;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientRegistry;
 
 /**
@@ -47,6 +53,18 @@ public final class NourishedLifecycle {
                 "ExcludedFoodOverrideRegistry", ExcludedFoodOverrideRegistry::load, ExcludedFoodOverrideRegistry::reload);
         RegistryLifecycleManager.registerRegistry(
                 "ExcludedTooltipPulseRegistry", ExcludedTooltipPulseRegistry::load, ExcludedTooltipPulseRegistry::reload);
+        RegistryLifecycleManager.registerRegistry(
+                "NoCaloriesOverrideRegistry", NoCaloriesOverrideRegistry::load, NoCaloriesOverrideRegistry::reload);
+        RegistryLifecycleManager.registerRegistry(
+                "CustomCaloriesOverrideRegistry", CustomCaloriesOverrideRegistry::load, CustomCaloriesOverrideRegistry::reload);
+        RegistryLifecycleManager.registerRegistry(
+                "SilentEatOverrideRegistry", SilentEatOverrideRegistry::load, SilentEatOverrideRegistry::reload);
+        RegistryLifecycleManager.registerRegistry(
+                "NoRecentMealsOverrideRegistry", NoRecentMealsOverrideRegistry::load, NoRecentMealsOverrideRegistry::reload);
+        RegistryLifecycleManager.registerRegistry(
+                "DiminishingReturnsOverrideRegistry", DiminishingReturnsOverrideRegistry::load, DiminishingReturnsOverrideRegistry::reload);
+        RegistryLifecycleManager.registerRegistry(
+                "RawFoodTierOverrideRegistry", RawFoodTierOverrideRegistry::load, RawFoodTierOverrideRegistry::reload);
         RegistryLifecycleManager.registerRegistry(
                 "NutrientWeightRegistry", NutrientWeightRegistry::load, NutrientWeightRegistry::reload,
                 NutrientWeightRegistry::loadFromDatapack);

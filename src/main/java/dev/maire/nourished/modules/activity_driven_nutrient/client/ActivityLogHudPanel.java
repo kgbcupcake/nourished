@@ -157,6 +157,7 @@ public final class ActivityLogHudPanel implements MarieComponent {
     private final ScaleConfigPanel scaleConfigPanel = MarieScaleConfig.create(
             List.of(new ScaleConfigEntry(PANEL_ID, Component.translatable("nourished.hud.activityLog.label"))
                     .withContent(MarieModuleSettings.standardPanel(Component.translatable("nourished.hud.activityLog.label").getString(), UiStatePersistence.get(), PANEL_ID)
+                            .withoutPadding()
                             .opacity(() -> NourishedClientConfig.get().activityLogHudBackgroundOpacity(), v -> NourishedClientConfig.get().setActivityLogHudBackgroundOpacity(v), 204.0d / 255.0d)
                             .textBrightness(() -> NourishedClientConfig.get().activityLogHudTextBrightness(), v -> NourishedClientConfig.get().setActivityLogHudTextBrightness(v))
                             .iconBrightness(() -> NourishedClientConfig.get().activityLogHudIconBrightness(), v -> NourishedClientConfig.get().setActivityLogHudIconBrightness(v))
@@ -606,9 +607,9 @@ public final class ActivityLogHudPanel implements MarieComponent {
         return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::contentScale).orElse(ComponentState.DEFAULT_CONTENT_SCALE);
     }
 
-    /** This panel's persisted padding multiplier — defaults to {@link ComponentState#DEFAULT_PADDING_SCALE} if never set. */
+    /** Always {@link ComponentState#DEFAULT_PADDING_SCALE} — the Padding slider is removed from this panel's editor (see its {@code withoutPadding()}), so any value set before it was removed is no longer read back. */
     private static double persistedPaddingScale() {
-        return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::paddingScale).orElse(ComponentState.DEFAULT_PADDING_SCALE);
+        return ComponentState.DEFAULT_PADDING_SCALE;
     }
 
     @Override
