@@ -100,7 +100,9 @@ public final class ExcludedTooltipOverrides {
                 try (Reader r = Files.newBufferedReader(file)) {
                     root = GSON.fromJson(r, JsonObject.class);
                 } catch (RuntimeException e) {
-                    Nourished.LOGGER.warn("[ExcludedTooltipOverrides] {} failed to parse, rewriting from scratch", file, e);
+                    Path backup = file.resolveSibling(file.getFileName() + ".invalid-" + System.currentTimeMillis());
+                    Files.move(file, backup);
+                    Nourished.LOGGER.warn("[ExcludedTooltipOverrides] {} failed to parse; moved it to {} before rewriting", file, backup, e);
                 }
             }
             if (root == null) {
