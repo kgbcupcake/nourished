@@ -1,0 +1,104 @@
+name: Player changelog
+
+# Keeps MODRINTH_CHANGELOG.md (shown on Marie's Wiki as the release in development) up to date: on every
+# push to dev it lists the commits since the last v* tag, sorted into sections by cliff.toml.
+# The file is only rewritten while it still has the "generated-by: player-changelog" line — delete that
+# line to take the file over by hand, and this workflow leaves it alone from then on.
+# Pushes made with GITHUB_TOKEN don't start other workflows, so this starts the wiki build itself
+# (WIKI_DEPLOY_HOOK, same secret as wiki-rebuild.yml).
+on:
+    push:
+        branches: [dev]
+        paths-ignore:
+            - MODRINTH_CHANGELOG.md
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+concurrency:
+    group: player-changelog
+    cancel-in-progress: true
+
+jobs:
+    changelog:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+              with:
+                  ref: dev
+                  fetch-depth: 0
+
+            - name: Check the file is still generated
+              id: check
+              run: |
+                  if [ -f MODRINTH_CHANGELOG.md ] && ! grep -q 'generated-by: player-changelog' MODRINTH_CHANGELOG.md; then
+                    echo "MODRINTH_CHANGELOG.md is hand-written (no generated-by line), leaving it alone."
+                    echo "skip=true" >> "$GITHUB_OUTPUT"
+                    exit 0
+                  fi
+                  # Tags sit on main's merge commits, so take the range from the newest tag rather than
+                  # asking git-cliff for "unreleased" (it would walk back to an older tag dev contains).
+                  TAG=$(git tag -l 'v*' --sort=-creatordate | head -n1)
+                  echo "range=${TAG:+$TAG..HEAD}" >> "$GITHUB_OUTPUT"
+                  echo "Commits since ${TAG:-the beginning}."
+
+            - name: Sort the commits into sections
+              if: steps.check.outputs.skip != 'true'
+              uses: orhun/git-cliff-action@v4
+              with:
+                  config: cliff.toml
+                  args: ${{ steps.check.outputs.range }} --strip all
+              env:
+                  OUTPUT: cliff-output.md
+
+            - name: Write MODRINTH_CHANGELOG.md
+              id: write
+              if: steps.check.outputs.skip != 'true'
+              run: |
+                  if [ -z "$(tr -d '[:space:]' < cliff-output.md)" ]; then
+                    echo "Nothing changelog-worthy since the last tag, leaving the file as it is."
+                    rm -f cliff-output.md
+                    exit 0
+                  fi
+                  VERSION=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2 | tr -d '\r')
+                  NAME=$(grep '^mod_name=' gradle.properties | cut -d'=' -f2- | tr -d '\r')
+                  {
+                    echo "# ${NAME} ${VERSION}"
+                    echo
+                    echo "<!-- generated-by: player-changelog (commits since the last tag, rewritten on every push to dev). Delete this line to edit the file by hand. -->"
+                    echo
+                    sed '/./,$!d' cliff-output.md
+                  } > MODRINTH_CHANGELOG.md
+                  rm -f cliff-output.md
+                  echo "written=true" >> "$GITHUB_OUTPUT"
+
+            - name: Commit
+              id: commit
+              if: steps.write.outputs.written == 'true'
+              run: |
+                  git add -f MODRINTH_CHANGELOG.md
+                  if git diff --cached --quiet; then
+                    echo "No changes."
+                    exit 0
+                  fi
+                  git config user.name "github-actions[bot]"
+                  git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+                  git commit -m "chore: update player changelog"
+                  if git push origin HEAD:dev; then
+                    echo "pushed=true" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "::notice::dev moved on while this ran; the next push regenerates the changelog."
+                  fi
+
+            - name: Start a wiki build
+              if: steps.commit.outputs.pushed == 'true'
+              env:
+                  HOOK: ${{ secrets.WIKI_DEPLOY_HOOK }}
+              run: |
+                  if [ -z "$HOOK" ]; then
+                    echo "WIKI_DEPLOY_HOOK isn't set, skipping."
+                    exit 0
+                  fi
+                  curl -fsS -X POST "$HOOK" > /dev/null
+                  echo "Wiki build started."

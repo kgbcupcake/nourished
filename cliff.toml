@@ -1,0 +1,41 @@
+# Player changelog for the version in development (git-cliff). .github/workflows/player-changelog.yml
+# runs it over the commits since the last v* tag and writes the result to MODRINTH_CHANGELOG.md, which
+# Marie's Wiki shows as the upcoming release. Sections follow the commit's first word: feat/add → Added,
+# fix → Fixed, remove → Removed, anything else → Changed; tooling, docs and merges are left out.
+
+[changelog]
+header = ""
+body = """
+{% for group, commits in commits | group_by(attribute="group") %}
+## {{ group | striptags | trim }}
+
+{% for commit in commits -%}
+- {% if commit.breaking %}**Breaking:** {% endif %}{{ commit.message | split(pat="\n") | first | trim | trim_end_matches(pat=".") | upper_first }}
+{% endfor -%}
+{% endfor %}
+"""
+footer = ""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = false
+split_commits = false
+protect_breaking_commits = true
+filter_commits = false
+tag_pattern = "^v[0-9]"
+sort_commits = "oldest"
+commit_preprocessors = [
+    { pattern = '\s*\((#\d+|[0-9a-f]{7,})\)\s*$', replace = "" },
+]
+commit_parsers = [
+    { message = '^Merge', skip = true },
+    { message = '^(chore|ci|docs|style|test|tests|build)(\(.*\))?!?:', skip = true },
+    { message = '(?i)^(bump|release|prepare release|update (mod_)?version)\b', skip = true },
+    { message = '(?i)^(update|fix) (the )?(readme|docs|documentation|changelog)\b', skip = true },
+    { message = '(?i)^wip\b', skip = true },
+    { message = '(?i)^(fix(es|ed)?|bug ?fix|hotfix)\b', group = "<!-- 3 -->🐛 Fixed" },
+    { message = '(?i)^(feat(ure)?|adds?|added|new|introduc(e|es|ed)|implement(s|ed)?)\b', group = "<!-- 1 -->➕ Added" },
+    { message = '(?i)^(remov(e|es|ed)|delet(e|es|ed)|drop(s|ped)?)\b', group = "<!-- 4 -->🗑️ Removed" },
+    { message = '.*', group = "<!-- 2 -->🔧 Changed" },
+]
