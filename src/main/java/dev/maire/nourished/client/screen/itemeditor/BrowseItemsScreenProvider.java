@@ -47,16 +47,15 @@ import java.util.function.BooleanSupplier;
  * The candidate universe (before "Show" narrows it) is every item {@link
  * NourishedItems#isNutritiousFood} already considers food, unioned with every item that has a
  * saved override anywhere (so something deliberately classified despite not looking like vanilla
- * food — e.g. via a {@code nourished:nutrients/*} tag — still shows up). Capped at {@value
- * #MAX_RESULTS} rows: {@link OptionLayout} draws every row it holds regardless of scroll position,
- * so an uncapped "All"/"Unmodified" on a large modpack would mean thousands of per-frame draws —
- * narrowing the filter is the intended way to see the rest, the same reasoning the pasted feature
- * request itself gave for wanting filters instead of one giant list.
+ * food — e.g. via a {@code nourished:nutrients/*} tag — still shows up). Paged at {@value
+ * #PAGE_SIZE} rows: {@link OptionLayout} draws every row it holds regardless of scroll position,
+ * so an unpaged "All"/"Unmodified" on a large modpack would mean thousands of per-frame draws — a
+ * "Page" cycle steps through the rest, so every match stays reachable.
  */
 @ApiStatus.Internal
 public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider {
 
-    private static final int MAX_RESULTS = 150;
+    private static final int PAGE_SIZE = 150;
 
     private enum Show {
         ALL("All"),
@@ -99,6 +98,7 @@ public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider
 
         private final String modId;
         private int showIndex;
+        private int pageIndex;
         private OptionLayout layout;
         @Nullable
         private BiConsumer<ItemStack, ItemEditorScreenProvider> retargetHandler;
@@ -116,11 +116,21 @@ public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider
             next.addTab("");
             next.addRow(new CycleOption("Show", Show.labels(), () -> showIndex, i -> {
                 showIndex = i;
+                pageIndex = 0;
                 rebuild();
             }, () -> {}));
             next.addRow(new CountRow(results.size()));
-            int shown = Math.min(results.size(), MAX_RESULTS);
-            for (int i = 0; i < shown; i++) {
+            int pageCount = Math.max(1, (results.size() + PAGE_SIZE - 1) / PAGE_SIZE);
+            pageIndex = Math.min(pageIndex, pageCount - 1);
+            if (pageCount > 1) {
+                next.addRow(new CycleOption("Page", pageLabels(pageCount), () -> pageIndex, i -> {
+                    pageIndex = i;
+                    rebuild();
+                }, () -> {}));
+            }
+            int start = pageIndex * PAGE_SIZE;
+            int end = Math.min(results.size(), start + PAGE_SIZE);
+            for (int i = start; i < end; i++) {
                 ItemStack stack = results.get(i);
                 next.addRow(new BrowseItemRow(stack, () -> {
                     if (retargetHandler != null) {
@@ -128,10 +138,15 @@ public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider
                     }
                 }));
             }
-            if (results.size() > MAX_RESULTS) {
-                next.addRow(new CountRow(results.size() - MAX_RESULTS, true));
-            }
             this.layout = next;
+        }
+
+        private static String[] pageLabels(int pageCount) {
+            String[] labels = new String[pageCount];
+            for (int i = 0; i < pageCount; i++) {
+                labels[i] = (i + 1) + " / " + pageCount;
+            }
+            return labels;
         }
 
         private static List<ItemStack> candidatesFor(String modId, Show show) {
@@ -196,7 +211,7 @@ public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider
         @Override
         public Constraint constraint() {
             // Deliberately NOT layout.constraint(): that reports the natural height of every row
-            // combined, and with up to MAX_RESULTS+2 rows that would balloon the editor window to
+            // combined, and with up to PAGE_SIZE+3 rows that would balloon the editor window to
             // an enormous size (and un-resizable, since the window's own floor already sits at this
             // reported preferred size). A fixed, page-sized constraint instead keeps the window the
             // same size switching to/from this page that every other page already has, and relies on
@@ -292,7 +307,7 @@ public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider
         }
     }
 
-    /** A plain info line — the match count up top, or a "+N more" notice when the list was capped. */
+    /** A plain info line — the match count up top. */
     private static final class CountRow implements OptionRow {
 
         private static final int HEIGHT = 10;
@@ -301,10 +316,6 @@ public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider
 
         CountRow(int count) {
             this.text = count + " match" + (count == 1 ? "" : "es");
-        }
-
-        CountRow(int remaining, boolean capped) {
-            this.text = "+" + remaining + " more — narrow the filter to see them";
         }
 
         @Override
