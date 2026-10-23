@@ -273,9 +273,13 @@ public final class HudEditTarget implements MarieComponent {
                 .orElse(0);
     }
 
-    /** How many rows were currently visible the last time {@link #commit} persisted a manual height — 0 if never committed under this check. */
+    /**
+     * How many rows were currently visible the last time {@link #commit} persisted a manual height.
+     * A save from before this record existed has none — treated as legacy state that still fits, so
+     * an existing manual height keeps applying after upgrading instead of resetting to natural.
+     */
     private static int persistedManualHeightRowCount() {
-        return UiStatePersistence.get().load(ROW_COUNT_ID).map(ComponentState::x).orElse(0);
+        return UiStatePersistence.get().load(ROW_COUNT_ID).map(ComponentState::x).orElse(Integer.MAX_VALUE);
     }
 
     /** Committed "Move Text and Icons" offset — see {@link #contentOffsetX}. */
