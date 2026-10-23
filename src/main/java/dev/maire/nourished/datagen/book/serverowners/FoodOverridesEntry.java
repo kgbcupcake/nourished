@@ -34,8 +34,7 @@ public class FoodOverridesEntry extends EntryProvider {
         this.pageTitle("Food Value Overrides");
 
         this.pageText("""
-                Nourished supports per-item %svalue overrides%s for nutrients and calories. This lets server owners and modpack makers correct or reassign how any specific item is classified without touching the mod itself.
-
+                Nourished supports per-item %svalue overrides%s for nutrients and calories. This lets server owners and modpack makers correct or reassign how any specific item is classified without touching the mod itself.\s\s
                 Overrides live at %sconfig/nourished/food_overrides.json%s.
                 """.formatted(
                 FILE_PATH, RESET,
@@ -49,9 +48,8 @@ public class FoodOverridesEntry extends EntryProvider {
         this.pageTitle("How Overrides Merge");
 
         this.pageText("""
-                An override entry has %sitem%s, %snutrients%s, %scalories%s, and %senabled%s fields. It is merged over normal classification, not a full replacement:
-
-                Any nutrient key you list wins outright — including a value of %s0%s, which zeroes that nutrient out entirely.
+                An override entry has %sitem%s, %snutrients%s, %scalories%s, and %senabled%s fields. It is merged over normal classification, not a full replacement:\s\s
+                Any nutrient key you list wins outright, including a value of %s0%s, which zeroes that nutrient out entirely.
                 Any key you omit still falls back to whatever Nourished would normally classify for that item.
                 %scalories%s is always a full override when present.
                 """.formatted(
@@ -67,8 +65,7 @@ public class FoodOverridesEntry extends EntryProvider {
         this.pageTitle("Getting Starting Values");
 
         this.pageText("""
-                Run %s/marieslib dump nourished_nutrients%s (or the "Export All Foods" button in the Scanner tab of the config screen) to write a reference folder — one file per nutrient, listing every item Nourished currently resolves into that category with its live values.
-
+                Run %s/marieslib dump nourished_nutrients%s (or the "Export All Foods" button in the Scanner tab of the config screen) to write a reference folder: one file per nutrient, listing every item Nourished currently resolves into that category with its live values.\s\s
                 These export files are read-only reference; editing them does nothing by itself.
                 """.formatted(
                 COMMAND, RESET
@@ -81,11 +78,9 @@ public class FoodOverridesEntry extends EntryProvider {
         this.pageTitle("Writing an Override");
 
         this.pageText("""
-                Copy the entry you want to change out of an export file and into %sfood_overrides.json%s, then add %senabled: true%s:
-
-                { "item": "minecraft:steak", "nutrients": { "proteins": 0.8 }, "calories": 60, "enabled": true }
-
-                Only entries actually present in %sfood_overrides.json%s take effect — the export files themselves are ignored.
+                Copy the entry you want to change out of an export file and into %sfood_overrides.json%s, then add %senabled: true%s:\s\s
+                { "item": "minecraft:steak", "nutrients": { "proteins": 0.8 }, "calories": 60, "enabled": true }\s\s
+                Only entries actually present in %sfood_overrides.json%s take effect; the export files themselves are ignored.
                 """.formatted(
                 FILE_PATH, RESET, FIELD, RESET,
                 FILE_PATH, RESET

@@ -33,8 +33,7 @@ public class MultiplayerAdventureEntry extends EntryProvider {
         this.pageTitle("Traveling Far from Base");
 
         this.pageText("""
-                When leaving base for extended exploration, pack food from all six groups — not just your usual hunger food. A nutrition emergency two thousand blocks from home is much worse than one in your base.
-
+                When leaving base for extended exploration, pack food from all six groups, not just your usual hunger food. A nutrition emergency two thousand blocks from home is much worse than one in your base.\s\s
                 A good travel kit: cooked beef, carrot, apple, bread, honey bottle, and a milk bucket. That covers all six groups in six inventory slots.
                 """);
 
@@ -45,12 +44,10 @@ public class MultiplayerAdventureEntry extends EntryProvider {
         this.pageTitle("Shared Farms");
 
         this.pageText("""
-                In multiplayer, a shared farm benefits everyone. Consider assigning different players to maintain different groups:
-
-                **Farmer** — wheat, carrots, potatoes, beetroot.
-                **Rancher** — cows, pigs, chickens, bees.
-                **Forager** — collects wild fruits, mushrooms, fishing.
-
+                In multiplayer, a shared farm benefits everyone. Consider assigning different players to maintain different groups:\s\s
+                - **Farmer**: wheat, carrots, potatoes, beetroot.
+                - **Rancher**: cows, pigs, chickens, bees.
+                - **Forager**: collects wild fruits, mushrooms, fishing.\s\s
                 A well-organized community farm makes Nourished invisible for the whole server.
                 """);
 
@@ -61,12 +58,10 @@ public class MultiplayerAdventureEntry extends EntryProvider {
         this.pageTitle("Long Dungeon Runs");
 
         this.pageText("""
-                For long dungeon or nether runs where you cannot eat freely between fights, prioritize **pre-loading** your bars before entering:
-
-                — All six groups above 60%%
-                — %sProteins%s and %sDairy%s at or above bonus threshold
-                — Milk bucket in hotbar for emergency debuff clear
-
+                For long dungeon or nether runs where you cannot eat freely between fights, prioritize **pre-loading** your bars before entering:\s\s
+                - All six groups above 60%%
+                - %sProteins%s and %sDairy%s at or above bonus threshold
+                - Milk bucket in hotbar for emergency debuff clear\s\s
                 Bars decay slowly enough that a two-hour session rarely causes a problem if you start fully topped up.
                 """.formatted(
                 PROTEINS, RESET,
@@ -80,13 +75,11 @@ public class MultiplayerAdventureEntry extends EntryProvider {
         this.pageTitle("Trading for Nutrition");
 
         this.pageText("""
-                Village trading is an underrated nutrition tool. Farmer villagers often sell:
-
-                **Bread** — cheap Grains in bulk.
-                **Apple** — easy early Fruits.
-                **Cooked Chicken** — decent Proteins trade.
-                **Pumpkin Pie** — excellent value Grains.
-
+                Village trading is an underrated nutrition tool. Farmer villagers often sell:\s\s
+                - **Bread**: cheap Grains in bulk.
+                - **Apple**: easy early Fruits.
+                - **Cooked Chicken**: decent Proteins trade.
+                - **Pumpkin Pie**: excellent value Grains.\s\s
                 Early-game trading can cover multiple nutrition groups before your own farm is established.
                 """);
     }

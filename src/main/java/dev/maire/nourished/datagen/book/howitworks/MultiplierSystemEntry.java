@@ -33,9 +33,8 @@ public class MultiplierSystemEntry extends EntryProvider {
         this.pageTitle("The Bonuses");
 
         this.pageText("""
-                Everything in this chapter feeds into one question: how much nutrition does this specific meal actually give you? Two things can push that number up:
-
-                %sCooking:%s eating something cooked avoids the raw food penalty entirely — see the Food Safety chapter.
+                Everything in this chapter feeds into one question: how much nutrition does this specific meal actually give you? Two things can push that number up:\s\s
+                %sCooking:%s eating something cooked avoids the raw food penalty entirely (see the Food Safety chapter).
                 %sNovelty:%s eating a food you haven't touched in a while gives a one-time boost on top of its normal value.
                 """.formatted(
                 BONUS, RESET,
@@ -49,8 +48,7 @@ public class MultiplierSystemEntry extends EntryProvider {
         this.pageTitle("The Penalties");
 
         this.pageText("""
-                And several things can push it down:
-
+                And several things can push it down:\s\s
                 %sDiminishing Returns:%s repeating the same item, family, or group recently reduces its multiplier.
                 %sStreak:%s eating the exact same item again soon makes that drop steeper.
                 %sNutritional Debt:%s overeating one group past a threshold drains whichever group you've neglected most.
@@ -67,7 +65,7 @@ public class MultiplierSystemEntry extends EntryProvider {
         this.pageTitle("Balance and Gut Health");
 
         this.pageText("""
-                Your **Balance Score** doesn't multiply nutrition directly — instead, a well-balanced diet speeds up passive Gut Health recovery, and Gut Health itself amplifies every raw-food penalty you take when it's low. See the previous entry and the Food Safety chapter for both.
+                Your **Balance Score** doesn't multiply nutrition directly; instead, a well-balanced diet speeds up passive Gut Health recovery, and Gut Health itself amplifies every raw-food penalty you take when it's low. See the previous entry and the Food Safety chapter for both.
                 """);
 
         this.page("putting_it_together", () -> BookTextPageModel.create()
@@ -77,8 +75,7 @@ public class MultiplierSystemEntry extends EntryProvider {
         this.pageTitle("Putting It Together");
 
         this.pageText("""
-                None of these systems need to be memorized in detail. The practical takeaway is consistent across all of them: cook your food, rotate what you eat across items and families, and spread your meals across groups instead of running one at a time.
-
+                None of these systems need to be memorized in detail. The practical takeaway is consistent across all of them: cook your food, rotate what you eat across items and families, and spread your meals across groups instead of running one at a time.\s\s
                 Do that, and most of this chapter simply never comes up.
                 """);
     }

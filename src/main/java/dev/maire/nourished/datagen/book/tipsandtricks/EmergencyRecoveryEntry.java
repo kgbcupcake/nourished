@@ -39,8 +39,7 @@ public class EmergencyRecoveryEntry extends EntryProvider {
         this.pageTitle("When Things Go Wrong");
 
         this.pageText("""
-                If multiple bars hit critical at once — maybe after a long trip far from base — do not panic. Address groups one at a time, starting with the penalty that hurts most in your current situation.
-
+                If multiple bars hit critical at once, maybe after a long trip far from base, do not panic. Address groups one at a time, starting with the penalty that hurts most in your current situation.\s\s
                 %sIn combat or exploring:%s fix Proteins (attack) and Dairy (knockback) first.
                 %sBack at base:%s fix Fruits (health regen) and Vegetables (saturation) for recovery.
                 """.formatted(
@@ -55,12 +54,11 @@ public class EmergencyRecoveryEntry extends EntryProvider {
         this.pageTitle("Quick Fix Foods");
 
         this.pageText("""
-                Keep these high-nutrition emergency foods in your inventory for quick recovery:
-
-                **Cooked Beef** — fastest %sProteins%s top-up per item.
-                **Golden Carrot** — fast %sVegetables%s recovery.
-                **Apple** — widely available, decent %sFruits%s nutrition.
-                **Milk Bucket** — instant %sDairy%s coverage and also removes debuffs.
+                Keep these high-nutrition emergency foods in your inventory for quick recovery:\s\s
+                - **Cooked Beef**: fastest %sProteins%s top-up per item.
+                - **Golden Carrot**: fast %sVegetables%s recovery.
+                - **Apple**: widely available, decent %sFruits%s nutrition.
+                - **Milk Bucket**: instant %sDairy%s coverage and also removes debuffs.
                 """.formatted(
                 PROTEINS, RESET,
                 VEGETABLES, RESET,
@@ -75,8 +73,7 @@ public class EmergencyRecoveryEntry extends EntryProvider {
         this.pageTitle("The Milk Trick");
 
         this.pageText("""
-                **Milk Bucket** not only fills the Dairy bar — it also removes all active status effects including nutrition penalties.
-
+                **Milk Bucket** not only fills the Dairy bar; it also removes all active status effects including nutrition penalties.\s\s
                 If you are stacking multiple penalties at once, drinking a milk bucket gives you a clean slate and buys time to properly address the underlying bar levels. Keep at least one in your hotbar when venturing far from home.
                 """);
 
@@ -87,8 +84,7 @@ public class EmergencyRecoveryEntry extends EntryProvider {
         this.pageTitle("Nutritional Debt");
 
         this.pageText("""
-                If a bar has been at zero for a sustained period, you may be in %sNutritional Debt%s — a stronger debuff state. Refilling the bar does not immediately clear debt.
-
+                If a bar has been at zero for a sustained period, you may be in %sNutritional Debt%s: a stronger debuff state. Refilling the bar does not immediately clear debt.\s\s
                 To recover: keep the group above zero consistently. Do not let it drop back to empty while recovering. Eat from that group multiple times over the next in-game day to work off the debt.
                 """.formatted(
                 CRITICAL, RESET
@@ -101,8 +97,7 @@ public class EmergencyRecoveryEntry extends EntryProvider {
         this.pageTitle("Sleep to Recover");
 
         this.pageText("""
-                Sleep is the most powerful recovery tool in Nourished. Even if not all bars are above the bonus threshold, sleeping with all bars above **zero** prevents debt accumulation and gives a partial recovery.
-
+                Sleep is the most powerful recovery tool in Nourished. Even if not all bars are above the bonus threshold, sleeping with all bars above **zero** prevents debt accumulation and gives a partial recovery.\s\s
                 If you are in a rough state, prioritize getting every bar above the critical line, then sleep. The next morning you will be in a much better position to top up properly.
                 """);
     }

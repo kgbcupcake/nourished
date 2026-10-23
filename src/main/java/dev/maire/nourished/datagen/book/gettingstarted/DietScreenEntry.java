@@ -32,8 +32,7 @@ public class DietScreenEntry extends EntryProvider {
                 .withText(this.context().pageText()));
         this.pageTitle("Reading the Screen");
         this.pageText("""
-                Each food group shows a **fill bar** representing your current level. Bars drain over time through nutrient decay.
-
+                Each food group shows a **fill bar** representing your current level. Bars drain over time through nutrient decay.\s\s
                 Hover over a bar to see the exact value, your active bonus or penalty, and which foods you have recently eaten in that group.
                 """);
     }

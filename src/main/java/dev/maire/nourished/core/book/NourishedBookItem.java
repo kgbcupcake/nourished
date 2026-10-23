@@ -2,6 +2,7 @@ package dev.maire.nourished.core.book;
 
 import com.klikli_dev.modonomicon.item.ModonomiconItem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
@@ -29,6 +30,12 @@ public class NourishedBookItem extends ModonomiconItem {
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> list, TooltipFlag flag) {
         super.appendHoverText(stack, context, list, flag);
 
+        if (!Screen.hasShiftDown()) {
+            list.add(Component.translatable("item.nourished.nourished_book.tooltip.hold_shift")
+                    .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+            return;
+        }
+
         list.add(Component.empty());
         list.add(Component.translatable("item.nourished.nourished_book.tooltip.header")
                 .withStyle(style -> style.withColor(HEADER).withBold(true)));
@@ -41,7 +48,7 @@ public class NourishedBookItem extends ModonomiconItem {
             MutableComponent line = Component.literal(" - ").withStyle(ChatFormatting.DARK_GRAY)
                     .append(Component.literal(parts[0]).withStyle(style -> style.withColor(ACCENT)));
             if (parts.length > 1) {
-                line = line.append(Component.literal(" — " + parts[1]).withStyle(ChatFormatting.GRAY));
+                line = line.append(Component.literal(": " + parts[1]).withStyle(ChatFormatting.GRAY));
             }
             list.add(line);
         }

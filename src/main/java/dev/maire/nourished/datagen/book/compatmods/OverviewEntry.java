@@ -26,9 +26,8 @@ public class OverviewEntry extends EntryProvider {
         this.pageTitle("Mod Compatibility");
 
         this.pageText("""
-                Nourished automatically detects installed food mods and assigns their foods to the appropriate groups via tag-based classification.
-
-                This chapter contains entries for supported mods. Entries only appear when the relevant mod is installed. If a mod you use is not listed here, its foods may still be classified automatically — check tooltips.
+                Nourished automatically detects installed food mods and assigns their foods to the appropriate groups via tag-based classification.\s\s
+                This chapter contains entries for supported mods. Entries only appear when the relevant mod is installed. If a mod you use is not listed here, its foods may still be classified automatically; check tooltips.
                 """);
 
         this.page("supported_mods", () -> BookTextPageModel.create()
@@ -38,14 +37,12 @@ public class OverviewEntry extends EntryProvider {
         this.pageTitle("Supported Mods");
 
         this.pageText("""
-                Mods with dedicated book entries:
-
-                **Croptopia** — fruits, vegetables, nuts, grains.
-                **Farmer's Delight** — crops, multi-group cooked meals.
-                **Pam's HarvestCraft 2** — hundreds of crops across all groups.
-                **Legendary Survival Overhaul** — effects compatibility notes.
-                **Spice of Life: Onion** — how it interacts with diminishing returns.
-
+                Mods with dedicated book entries:\s\s
+                - **Croptopia**: fruits, vegetables, nuts, grains.
+                - **Farmer's Delight**: crops, multi-group cooked meals.
+                - **Pam's HarvestCraft 2**: hundreds of crops across all groups.
+                - **Legendary Survival Overhaul**: effects compatibility notes.
+                - **Spice of Life: Onion**: how it interacts with diminishing returns.\s\s
                 Entries only appear when the relevant mod is installed.
                 """);
 
@@ -56,9 +53,8 @@ public class OverviewEntry extends EntryProvider {
         this.pageTitle("Adding Custom Foods");
 
         this.pageText("""
-                If you are a server owner or modpack maker and want to ensure specific modded foods are classified correctly, you can override assignments using datapacks.
-
-                See the **Server Owners** chapter — specifically **Datapack Overrides** — for full instructions on assigning custom foods to groups and adjusting their nutrition values.
+                If you are a server owner or modpack maker and want to ensure specific modded foods are classified correctly, you can override assignments using datapacks.\s\s
+                See the **Server Owners** chapter, specifically **Datapack Overrides**, for full instructions on assigning custom foods to groups and adjusting their nutrition values.
                 """);
     }
 

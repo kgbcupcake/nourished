@@ -40,11 +40,10 @@ public class DailyRoutineEntry extends EntryProvider {
         this.pageTitle("The Ideal Daily Loop");
 
         this.pageText("""
-                Nourished is designed around a simple daily rhythm. Follow this loop and you will rarely suffer a penalty:
-
+                Nourished is designed around a simple daily rhythm. Follow this loop and you will rarely suffer a penalty:\s\s
                 **Morning:** eat one food from any low group before leaving base.
                 **During the day:** eat normally for hunger; rotate food types.
-                **Evening:** top up any bars below 50% before sleeping.
+                **Evening:** top up any bars below 50%% before sleeping.
                 **Sleep:** with all bars healthy to earn the Sleep Bonus.
                 """);
 
@@ -55,8 +54,7 @@ public class DailyRoutineEntry extends EntryProvider {
         this.pageTitle("The HUD is Your Friend");
 
         this.pageText("""
-                Glance at the HUD bar overlay regularly — not just when you feel effects. Bars drop slowly and you want to catch them before they hit the critical threshold, not after.
-
+                Glance at the HUD bar overlay regularly, not just when you feel effects. Bars drop slowly and you want to catch them before they hit the critical threshold, not after.\s\s
                 If a bar is in the %sred range%s, address it immediately. If it is in the %syellow range%s, eat something from that group before your next sleep.
                 """.formatted(
                 CRITICAL, RESET,
@@ -70,13 +68,11 @@ public class DailyRoutineEntry extends EntryProvider {
         this.pageTitle("Batch Eating");
 
         this.pageText("""
-                You do not need to eat from all five groups at every meal. Instead, eat 2–3 groups per sitting and rotate which groups you cover each time.
-
+                You do not need to eat from all five groups at every meal. Instead, eat 2–3 groups per sitting and rotate which groups you cover each time.\s\s
                 Example rotation:
                 **Morning:** %sFruits%s + %sProteins%s
                 **Midday:** %sGrains%s + %sVegetables%s
-                **Evening:** %sDairy%s
-
+                **Evening:** %sDairy%s\s\s
                 This keeps all bars healthy without ever feeling like a chore.
                 """.formatted(
                 FRUITS, RESET, PROTEINS, RESET,
@@ -91,11 +87,9 @@ public class DailyRoutineEntry extends EntryProvider {
         this.pageTitle("Before a Fight");
 
         this.pageText("""
-                Before entering a dungeon, raid, or boss fight, check that these two groups are above their good threshold:
-
-                %sProteins%s — bonus max health helps survive burst damage.
-                %sDairy%s — bonus armor toughness reduces effective incoming damage.
-
+                Before entering a dungeon, raid, or boss fight, check that these two groups are above their good threshold:\s\s
+                - %sProteins%s: bonus max health helps survive burst damage.
+                - %sDairy%s: bonus armor toughness reduces effective incoming damage.\s\s
                 If either is low, eat a cooked steak and bucket a cow before you go in. The difference in survivability is significant.
                 """.formatted(
                 PROTEINS, RESET,
@@ -109,9 +103,8 @@ public class DailyRoutineEntry extends EntryProvider {
         this.pageTitle("Before an XP Session");
 
         this.pageText("""
-                Planning to enchant gear or grind a mob farm? Make sure your %sGrains%s group is well above the bonus threshold before you start.
-
-                The Grains bonus — faster experience gain — passively increases all XP earned while active. A pumpkin pie and a loaf of bread before your session can meaningfully speed up an enchanting or leveling run.
+                Planning to enchant gear or grind a mob farm? Make sure your %sGrains%s group is well above the bonus threshold before you start.\s\s
+                The Grains bonus (faster experience gain) passively increases all XP earned while active. A pumpkin pie and a loaf of bread before your session can meaningfully speed up an enchanting or leveling run.
                 """.formatted(
                 GRAINS, RESET
         ));

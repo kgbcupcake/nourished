@@ -26,8 +26,7 @@ public class CroptopiaEntry extends EntryProvider {
         this.pageTitle("Croptopia");
 
         this.pageText("""
-                Croptopia massively expands the crop roster and touches every food group. Its biggest impact is on **Fruits** and **Vegetables**, where it adds dozens of new families that make rotation trivially easy.
-
+                Croptopia massively expands the crop roster and touches every food group. Its biggest impact is on **Fruits** and **Vegetables**, where it adds dozens of new families that make rotation trivially easy.\s\s
                 With Croptopia installed, maintaining a diverse diet becomes natural rather than deliberate.
                 """);
 
@@ -35,32 +34,30 @@ public class CroptopiaEntry extends EntryProvider {
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
 
-        this.pageTitle("Fruits — Croptopia");
+        this.pageTitle("Fruits: Croptopia");
 
         this.pageText("""
-                Croptopia adds many distinct fruit families. Key ones to grow:
-
-                **Strawberry** — fast-growing, excellent nutrition.
-                **Peach / Mango / Kiwi** — tree fruits, slower but high value.
-                **Grape** — vine crop; good density per plot.
-                **Pineapple** — tropical; high nutrition per harvest.
-                **Tomato** — fast, pairs well with vegetable rotation.
+                Croptopia adds many distinct fruit families. Key ones to grow:\s\s
+                - **Strawberry**: fast-growing, excellent nutrition.
+                - **Peach / Mango / Kiwi**: tree fruits, slower but high value.
+                - **Grape**: vine crop; good density per plot.
+                - **Pineapple**: tropical; high nutrition per harvest.
+                - **Tomato**: fast, pairs well with vegetable rotation.
                 """);
 
         this.page("vegetables", () -> BookTextPageModel.create()
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
 
-        this.pageTitle("Vegetables — Croptopia");
+        this.pageTitle("Vegetables: Croptopia");
 
         this.pageText("""
-                Croptopia vegetable additions include:
-
-                **Corn** — high-yield crop; excellent base vegetable.
-                **Onion / Leek** — fast-growing alliums; distinct family.
-                **Spinach / Lettuce** — leafy greens; quick crop cycle.
-                **Pepper / Chili** — spicy vegetables; unique family.
-                **Artichoke / Asparagus** — slow but high nutrition value.
+                Croptopia vegetable additions include:\s\s
+                - **Corn**: high-yield crop; excellent base vegetable.
+                - **Onion / Leek**: fast-growing alliums; distinct family.
+                - **Spinach / Lettuce**: leafy greens; quick crop cycle.
+                - **Pepper / Chili**: spicy vegetables; unique family.
+                - **Artichoke / Asparagus**: slow but high nutrition value.
                 """);
 
         this.page("proteins_and_grains", () -> BookTextPageModel.create()
@@ -70,13 +67,11 @@ public class CroptopiaEntry extends EntryProvider {
         this.pageTitle("Proteins & Grains");
 
         this.pageText("""
-                Croptopia also adds to Proteins and Grains:
-
-                **Almonds / Peanuts / Cashews** — nut-family proteins; no animal farm needed.
-                **Tofu** — plant-based protein made from soybeans.
-                **Rice** — adds a Grains family distinct from wheat.
-                **Oats / Corn Flour** — alternative grain crops.
-
+                Croptopia also adds to Proteins and Grains:\s\s
+                - **Almonds / Peanuts / Cashews**: nut-family proteins; no animal farm needed.
+                - **Tofu**: plant-based protein made from soybeans.
+                - **Rice**: adds a Grains family distinct from wheat.
+                - **Oats / Corn Flour**: alternative grain crops.\s\s
                 Nuts make a great supplemental protein for players who prefer less combat-heavy farming.
                 """);
 
@@ -87,8 +82,7 @@ public class CroptopiaEntry extends EntryProvider {
         this.pageTitle("Rotation Advice");
 
         this.pageText("""
-                With Croptopia, the main risk is **over-focusing** on a few favourite crops and ignoring the rest. The mod gives you so many options that it is easy to default to strawberries for Fruits every day.
-
+                With Croptopia, the main risk is **over-focusing** on a few favourite crops and ignoring the rest. The mod gives you so many options that it is easy to default to strawberries for Fruits every day.\s\s
                 Set up a multi-crop farm covering at least 3 distinct families per group. Croptopia's crop variety is only an advantage if you actually use it.
                 """);
     }

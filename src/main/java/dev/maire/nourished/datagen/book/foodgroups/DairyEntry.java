@@ -47,8 +47,7 @@ public class DairyEntry extends EntryProvider {
         this.pageTitle("Vanilla Dairy Sources");
 
         this.pageText("""
-                **Milk Bucket** — the primary vanilla dairy source. Bucket a cow whenever passing by.
-
+                **Milk Bucket**: the primary vanilla dairy source. Bucket a cow whenever passing by.\s\s
                 Vanilla has only one dairy item, which means this group has almost no rotation options without a food mod installed. The upside: there is nothing to overthink. Keep a cow, bucket regularly.
                 """);
 
@@ -59,8 +58,7 @@ public class DairyEntry extends EntryProvider {
         this.pageTitle("Armor Toughness Bonus");
 
         this.pageText("""
-                The Dairy bonus — increased armor toughness — makes incoming damage more predictable and reduces the effectiveness of high-damage hits.
-
+                The Dairy bonus (increased armor toughness) makes incoming damage more predictable and reduces the effectiveness of high-damage hits.\s\s
                 This makes Dairy especially valuable in combat-heavy playthroughs. Players who fight frequently or play on hard difficulty should treat this group as a high priority.
                 """);
 
@@ -71,8 +69,7 @@ public class DairyEntry extends EntryProvider {
         this.pageTitle("Knockback Resistance Penalty");
 
         this.pageText("""
-                The Dairy penalty — reduced knockback resistance — means depleted Dairy makes you easier to push around in combat. This is especially dangerous around ledges, lava, or enemies that spam attacks.
-
+                The Dairy penalty (reduced knockback resistance) means depleted Dairy makes you easier to push around in combat. This is especially dangerous around ledges, lava, or enemies that spam attacks.\s\s
                 Keep this group above zero before entering any dungeon or boss fight.
                 """);
 
@@ -81,10 +78,10 @@ public class DairyEntry extends EntryProvider {
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
 
-        this.pageTitle("Dairy — Vanilla");
+        this.pageTitle("Dairy: Vanilla");
 
         this.pageText("""
-                Milk bucket is your only vanilla dairy source. Since there is no rotation possible, diminishing returns do not apply the same way — just bucket a cow every morning and evening and this group stays healthy with minimal effort.
+                Milk bucket is your only vanilla dairy source. Since there is no rotation possible, diminishing returns do not apply the same way: just bucket a cow every morning and evening and this group stays healthy with minimal effort.
                 """);
 
         this.page("herbs_and_harvest", () -> BookSpotlightPageModel.create()
@@ -93,7 +90,7 @@ public class DairyEntry extends EntryProvider {
                 .withText(this.context().pageText())
                 .withCondition(BookModLoadedConditionModel.create().withModId("herbsandharvest")));
 
-        this.pageTitle("Dairy — Herbs & Harvest");
+        this.pageTitle("Dairy: Herbs & Harvest");
 
         this.pageText("""
                 Herbs & Harvest adds aged cheeses including Swiss, cheddar, and brie. These provide significantly higher dairy nutrition than plain milk and introduce distinct cheese families for rotation. See the **Compat Mods** chapter for more.
@@ -106,9 +103,8 @@ public class DairyEntry extends EntryProvider {
         this.pageTitle("Farming Tips");
 
         this.pageText("""
-                Two cows is the minimum for a sustainable dairy setup — one to breed from, one to milk. Three or more ensures you always have milk available without waiting.
-
-                Keep your cow pen close to your base. Dairy is the easiest group to maintain once you have any cows at all — the challenge is remembering to actually bucket them each day.
+                Two cows is the minimum for a sustainable dairy setup: one to breed from, one to milk. Three or more ensures you always have milk available without waiting.\s\s
+                Keep your cow pen close to your base. Dairy is the easiest group to maintain once you have any cows at all; the challenge is remembering to actually bucket them each day.
                 """);
     }
 

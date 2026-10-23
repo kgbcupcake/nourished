@@ -65,6 +65,7 @@ public final class NourishedConfig {
     private final ModConfigSpec.IntValue heavySourcePropertyThreshold;
 
     // General
+    private final ModConfigSpec.BooleanValue grantGuideBook;
     private final ModConfigSpec.BooleanValue showJoinMessage;
     private final ModConfigSpec.ConfigValue<String> joinMessageLine1;
     private final ModConfigSpec.ConfigValue<String> joinMessageLine2;
@@ -177,6 +178,9 @@ public final class NourishedConfig {
         builder.pop();
 
         builder.push("general");
+        grantGuideBook = builder
+                .comment("When false, players are not given the Nourished guide book on first join")
+                .define("grantGuideBook", ConfigDefaultsLoader.getBoolean(defaults, "grantGuideBook", true));
         showJoinMessage = builder
                 .comment("When false, welcome and beta notice chat messages are not sent on player join")
                 .define("showJoinMessage", ConfigDefaultsLoader.getBoolean(defaults, "showJoinMessage", true));
@@ -430,7 +434,8 @@ public final class NourishedConfig {
                 c.isModuleEnabled("enableSeasonHooks"),
                 c.isModuleEnabled("enableAbsorptionModifiers"),
                 c.isModuleEnabled("enableDebugLogging"),
-                c.isModuleEnabled("enableCalorieHistory")
+                c.isModuleEnabled("enableCalorieHistory"),
+                c.enableDiminishingReturns()
         ));
     }
 
@@ -443,6 +448,14 @@ public final class NourishedConfig {
 
     public static ModConfigSpec spec() {
         return SPEC;
+    }
+
+    public boolean grantGuideBook() {
+        return grantGuideBook.get();
+    }
+
+    public void setGrantGuideBook(boolean value) {
+        grantGuideBook.set(value);
     }
 
     public boolean showJoinMessage() {

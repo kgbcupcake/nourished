@@ -55,9 +55,9 @@ public final class DietScreenPersistence {
         return get().load(componentId).map(ComponentState::contentScale).orElse(ComponentState.DEFAULT_CONTENT_SCALE);
     }
 
-    /** A box's persisted padding multiplier — see {@link ComponentState#paddingScale()}. Defaults to {@code 1.0} (no adjustment) if never set. */
+    /** Always {@link ComponentState#DEFAULT_PADDING_SCALE} — the Diet Screen and its sub-boxes have no Padding slider (every panel here is built with {@code withoutPadding()}), so a value set before that slider was removed is no longer read back. */
     public static double paddingScale(String componentId) {
-        return get().load(componentId).map(ComponentState::paddingScale).orElse(ComponentState.DEFAULT_PADDING_SCALE);
+        return ComponentState.DEFAULT_PADDING_SCALE;
     }
 
     /** Resolves a sub-box's screen bounds relative to the panel: a live drag/resize preview if one is active this frame, else persisted local-unit offset/size if manually moved/resized, otherwise the natural stacked position. Confined between the panel's left edge and the column divider. */

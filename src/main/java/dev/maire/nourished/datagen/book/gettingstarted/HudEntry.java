@@ -55,9 +55,7 @@ public class HudEntry extends EntryProvider {
         this.pageTitle("Nutrition HUD");
 
         this.pageText("""
-                The %s**Nutrition HUD**%s displays your current nutrition levels at a glance.
-
-                Each bar represents one of your food groups, making it easy to see which parts of your diet need attention without opening a screen.
+                The %s**Nutrition HUD**%s shows your levels at a glance, one bar per food group.
 
                 """.formatted(
                 HUD,
@@ -75,10 +73,8 @@ public class HudEntry extends EntryProvider {
         this.pageTitle("Edit Mode");
 
         this.pageText("""
-                Press %s**H**%s to enter %s**Edit Mode**%s. In edit mode you can drag the HUD to any position on your screen.
-
-                Press %s**H**%s again to lock it back in place. Your %s**position**%s is saved between sessions.
-
+                Press %s**H**%s to enter %s**Edit Mode**%s. In edit mode you can drag the HUD to any position on your screen.\s\s
+                Press %s**H**%s again to lock it back in place. Your %s**position**%s is saved between sessions.\s\s
                 The HUD can be positioned wherever it is most convenient for you while playing.
 
                 """.formatted(

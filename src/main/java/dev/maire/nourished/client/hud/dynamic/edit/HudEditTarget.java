@@ -66,6 +66,8 @@ public final class HudEditTarget implements MarieComponent {
     private static final String ID = "nourished.hud.editwrapper";
     private static final String PANEL_ID = "nourished.hud.panel";
     private static final String CONTENT_OFFSET_ID = "nourished.hud.contentOffset";
+    /** How many rows {@link #commit}'s persisted height last fit — see {@link #persistedManualHeightRowCount()}. */
+    private static final String ROW_COUNT_ID = "nourished.hud.panel.rowCount";
 
     /** Accent used for the "Move Text and Icons" live drag affordance — this panel draws no title text of its own to already have an established accent color, unlike {@code CalorieHudScreen}/{@code ActivityLogHudPanel}. */
     private static int contentOutlineColor() {
@@ -190,9 +192,14 @@ public final class HudEditTarget implements MarieComponent {
         return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::contentScale).orElse(ComponentState.DEFAULT_CONTENT_SCALE);
     }
 
-    /** This panel's persisted padding multiplier — see {@link #persistedContentScale()}. */
+    /**
+     * Always {@link ComponentState#DEFAULT_PADDING_SCALE} — the Padding slider is removed from this
+     * panel's editor (see {@code HudOptionsPanel#build}'s {@code withoutPadding()}), so any value a
+     * player set before it was removed is no longer read back, rather than silently continuing to
+     * affect this panel's padding with no slider left to see or change it by.
+     */
     public static double persistedPaddingScale() {
-        return UiStatePersistence.get().load(PANEL_ID).map(ComponentState::paddingScale).orElse(ComponentState.DEFAULT_PADDING_SCALE);
+        return ComponentState.DEFAULT_PADDING_SCALE;
     }
 
     /** Same "empty visible keys -> fall back to every registered nutrient" reasoning the constructor uses above, so the {@link SnapRegistry} bounds supplier never resolves an empty-key layout while other components still expect this panel's real on-screen box. */
@@ -225,13 +232,27 @@ public final class HudEditTarget implements MarieComponent {
                     AutoGrowPanelContainer.ManualOverride override =
                             new AutoGrowPanelContainer.ManualOverride(state.widthManual(), state.heightManual());
                     int width = AutoGrowPanelContainer.resolveWidth(override, state.width(), natural.panelW());
-                    // A manually shrunk height always applies (the rows past it scroll). A manually
-                    // enlarged one only applies while every bar is showing; with just a subset visible
-                    // (reveal-on-gain after a meal, zero bars hidden) the box is capped at the natural
-                    // height so a full-size box never pops up around one or two bars.
+                    // A manual height only applies once every bar is showing — the "settled" state the
+                    // player was actually looking at when they dragged the handle. With just a subset
+                    // visible (reveal-on-gain after a meal, some bars still hidden) the box always uses
+                    // the natural height for however many rows are showing right now instead: capping a
+                    // manually *enlarged* box down to natural keeps a full-size box from popping up
+                    // around one or two bars, and — the bug this used to have — NOT also flooring a
+                    // manually *shrunk* box at its old (smaller) natural height meant a box resized back
+                    // when fewer nutrients were revealed stayed stuck at that size as more crossed the
+                    // reveal threshold, clipping/half-showing whichever row didn't fit instead of the
+                    // box growing to fit them. `Math.min` against the stale manual height was exactly
+                    // that floor; natural alone can't undershoot the current row count since it's
+                    // computed from it.
                     boolean allBarsVisible = keys.size() >= NourishedClientConfig.get().effectiveDietBarOrder().size();
+                    // A manual height is also only trusted for however many rows it was actually sized
+                    // for: a third-party mod (or the player) adding more nutrients than were visible at
+                    // the last resize grows effectiveDietBarOrder()/keys past that, and without this
+                    // check allBarsVisible alone would still honor the now-too-small persisted height,
+                    // clipping whichever new row doesn't fit instead of the box growing for it.
+                    boolean manualHeightFitsCurrentRows = keys.size() <= persistedManualHeightRowCount();
                     int manualHeight = AutoGrowPanelContainer.resolveHeight(override, state.height(), natural.panelH());
-                    int height = allBarsVisible ? manualHeight : Math.min(manualHeight, natural.panelH());
+                    int height = (allBarsVisible && manualHeightFitsCurrentRows) ? manualHeight : natural.panelH();
                     return new HudLayout.Layout(
                             state.x(), state.y(), width, height,
                             natural.baseX(), natural.baseY(),
@@ -250,6 +271,11 @@ public final class HudEditTarget implements MarieComponent {
         return UiStatePersistence.get().load(PANEL_ID)
                 .map(ComponentState::leftMargin)
                 .orElse(0);
+    }
+
+    /** How many rows were currently visible the last time {@link #commit} persisted a manual height — 0 if never committed under this check. */
+    private static int persistedManualHeightRowCount() {
+        return UiStatePersistence.get().load(ROW_COUNT_ID).map(ComponentState::x).orElse(0);
     }
 
     /** Committed "Move Text and Icons" offset — see {@link #contentOffsetX}. */
@@ -336,6 +362,7 @@ public final class HudEditTarget implements MarieComponent {
         UiStatePersistence.get().save(PANEL_ID, new ComponentState(
                 bounds.x(), bounds.y(), bounds.width(), bounds.height(), false,
                 override.widthManual(), override.heightManual(), leftMargin, contentScale, paddingScale));
+        UiStatePersistence.get().save(ROW_COUNT_ID, new ComponentState(keys.size(), 0, 0, 0, false, false, false, 0));
     }
 
     @Override
@@ -355,11 +382,23 @@ public final class HudEditTarget implements MarieComponent {
         if (scaleConfigVisible && scaleConfigPanel.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            Bounds tabBounds = HudEditTabs.tabBounds(PANEL_ID);
+            if (button == 0 && tabBounds.contains((int) mouseX, (int) mouseY)) {
+                HudEditTabs.open(UiStatePersistence.get(), PANEL_ID);
+                return true;
+            }
+            return false;
+        }
         List<String> keys = currentVisibleKeysOrFallback();
         if (keys.isEmpty()) {
             return false;
         }
         Bounds bounds = resolvedBounds(mc, keys);
+        if (button == 0 && HudEditTabs.collapseButtonBounds(bounds).contains((int) mouseX, (int) mouseY)) {
+            HudEditTabs.setCollapsed(UiStatePersistence.get(), PANEL_ID, true);
+            return true;
+        }
         // "Move Nutrient" wins over the panel-wide move modes: while it's on, a drag anywhere in the box
         // moves the picked nutrient's whole row.
         String rowKey = HudRowMove.activeKey();
@@ -392,6 +431,9 @@ public final class HudEditTarget implements MarieComponent {
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (scaleConfigVisible && scaleConfigPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
             return true;
+        }
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            return false;
         }
         List<String> keys = currentVisibleKeysOrFallback();
         if (scrollY == 0 || keys.isEmpty()) {
@@ -456,6 +498,9 @@ public final class HudEditTarget implements MarieComponent {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (scaleConfigVisible && scaleConfigPanel.mouseDragged(mouseX, mouseY, button)) {
             return true;
+        }
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            return false;
         }
         if (rowDragKey != null) {
             List<String> keys = currentVisibleKeysOrFallback();
@@ -530,6 +575,15 @@ public final class HudEditTarget implements MarieComponent {
 
     @Override
     public void render(RenderContext context, Bounds ignoredBounds) {
+        if (HudEditTabs.isCollapsed(UiStatePersistence.get(), PANEL_ID)) {
+            HudEditTabs.drawTab(context, Component.translatable("nourished.hud.nutrientPanel.label").getString(),
+                    contentOutlineColor(), HudEditTabs.tabBounds(PANEL_ID));
+            if (scaleConfigVisible) {
+                scaleConfigPanel.render(context, new Bounds(0, 0, context.screenWidth(), context.screenHeight()));
+            }
+            return;
+        }
+
         List<String> keys = currentVisibleKeysOrFallback();
         if (keys.isEmpty()) {
             return;
@@ -559,6 +613,7 @@ public final class HudEditTarget implements MarieComponent {
             NutrientPanelContainer panel = new NutrientPanelContainer(scrolledKeys(keys, matchedLayout), matchedLayout, displayValues);
             panel.render(context, bounds);
         }
+        HudEditTabs.drawCollapseButton(context, HudEditTabs.collapseButtonBounds(bounds), contentOutlineColor());
 
         // Every outline wraps what the rows actually drew this frame (HudDrawnExtents), so it stays on
         // the content however rows, icons, text or bars have been moved or resized.

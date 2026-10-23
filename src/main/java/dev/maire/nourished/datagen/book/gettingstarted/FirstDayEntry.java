@@ -48,8 +48,7 @@ public class FirstDayEntry extends EntryProvider {
         this.pageTitle("Your First Day");
 
         this.pageText("""
-                When you first spawn, all the nutrition bars start at a moderate level. You won't feel any effects immediately, but they will begin to decay.
-
+                When you first spawn, all the nutrition bars start at a moderate level. You won't feel any effects immediately, but they will begin to decay.\s\s
                 Your priority on day one is to gather a variety of foods before the bars run dry.
 
                 """);
@@ -65,10 +64,8 @@ public class FirstDayEntry extends EntryProvider {
         this.pageTitle("Early Food Sources");
 
         this.pageText("""
-                %s**Fruits**%s: Berry bushes, apple-bearing trees, and melon patches.
-
-                %s**Vegetables**%s: Carrots, potatoes, and beetroot from villages or the ground.
-
+                %s**Fruits**%s: Berry bushes, apple-bearing trees, and melon patches.\s\s
+                %s**Vegetables**%s: Carrots, potatoes, and beetroot from villages or the ground.\s\s
                 %s**Proteins**%s: Cooked chicken, beef, or fish from nearby animals and rivers.
 
                 """.formatted(
@@ -88,8 +85,7 @@ public class FirstDayEntry extends EntryProvider {
         this.pageTitle("More Early Sources");
 
         this.pageText("""
-                %s**Grains**%s: Bread from village chests, or seeds to plant wheat immediately.
-
+                %s**Grains**%s: Bread from village chests, or seeds to plant wheat immediately.\s\s
                 %s**Dairy**%s: A bucket of milk from any cow covers the dairy group in a pinch.
 
                 """.formatted(
@@ -108,8 +104,7 @@ public class FirstDayEntry extends EntryProvider {
         this.pageTitle("Setting Up a Farm");
 
         this.pageText("""
-                A small mixed farm is the most reliable long-term strategy. Plant %s**wheat**%s, %s**carrots**%s, %s**potatoes**%s, and %s**beetroot**%s early.
-
+                A small mixed farm is the most reliable long-term strategy. Plant %s**wheat**%s, %s**carrots**%s, %s**potatoes**%s, and %s**beetroot**%s early.\s\s
                 Keep a cow pen nearby for milk and cooked beef. Even a tiny farm can cover most of your core food groups with minimal effort.
 
                 """.formatted(
@@ -130,8 +125,7 @@ public class FirstDayEntry extends EntryProvider {
         this.pageTitle("Cooking Matters");
 
         this.pageText("""
-                Raw meats count as %s**Proteins**%s, but their nutrition values are lower than their cooked equivalents. Always cook your meat when possible.
-
+                Raw meats count as %s**Proteins**%s, but their nutrition values are lower than their cooked equivalents. Always cook your meat when possible.\s\s
                 Some foods only register as their group when prepared. Check tooltips if a food isn't filling the bar you expect.
 
                 """.formatted(
@@ -149,8 +143,7 @@ public class FirstDayEntry extends EntryProvider {
         this.pageTitle("Diminishing Returns");
 
         this.pageText("""
-                Eating the same food repeatedly gives less nutrition each time due to diminishing returns. Rotate through different foods within each group to maximize efficiency.
-
+                Eating the same food repeatedly gives less nutrition each time due to diminishing returns. Rotate through different foods within each group to maximize efficiency.\s\s
                 See the How It Works chapter for the full details.
 
                 """);
@@ -166,8 +159,7 @@ public class FirstDayEntry extends EntryProvider {
         this.pageTitle("End of Day One");
 
         this.pageText("""
-                Sleep when all five bars are above their threshold and wake up with the %s**Sleep Bonus**%s. This is the ideal daily rhythm Nourished is designed around.
-
+                Sleep when all five bars are above their threshold and wake up with the %s**Sleep Bonus**%s. This is the ideal daily rhythm Nourished is designed around.\s\s
                 With a bit of preparation, staying balanced becomes second nature.
 
                 """.formatted(
@@ -185,14 +177,10 @@ public class FirstDayEntry extends EntryProvider {
         this.pageTitle("Next Steps");
 
         this.pageText("""
-                Once you are past day one, check out the Tips & Tricks chapter for deeper strategies:
-
-                %s**Daily Routine**%s: the ideal loop for keeping all bars healthy.
-
-                %s**Efficient Farming**%s: the minimum farm that covers all five groups.
-
-                %s**Emergency Recovery**%s: what to do when multiple bars crash.
-
+                Once you are past day one, check out the Tips & Tricks chapter for deeper strategies:\s\s
+                %s**Daily Routine**%s: the ideal loop for keeping all bars healthy.\s\s
+                %s**Efficient Farming**%s: the minimum farm that covers all five groups.\s\s
+                %s**Emergency Recovery**%s: what to do when multiple bars crash.\s\s
                 %s**Reading Tooltips**%s: food tooltips and JEI tag search.
 
                 """.formatted(

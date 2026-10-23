@@ -6,6 +6,7 @@ import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.tags.NourishedItemTags;
 import dev.marie.framework.util.MarieRegistryUtils;
 import dev.maire.nourished.modules.RawFood.core.RawFoodConfig;
+import dev.maire.nourished.modules.RawFood.core.RawFoodTierOverrideRegistry;
 import dev.maire.nourished.modules.RawFood.core.RawSeverity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -19,6 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Resolves {@link RawSeverity} for an {@link ItemStack}.
  * This is the single entry point the handler uses — it orchestrates tags, tokens, and cookedness into one answer.
+ *
+ * <p>A player-set {@link RawFoodTierOverrideRegistry} override, if any, wins outright before any of
+ * that heuristic classification (and before the cache) ever runs.
  *
  * <p>All classification results are cached after first resolution.
  * The hot path (player eating) performs only cache lookups.</p>
@@ -39,6 +43,11 @@ public final class RawFoodClassifier {
      */
     public static RawSeverity classify(ItemStack stack, Level level) {
         ResourceLocation itemId = MarieRegistryUtils.itemKey(stack);
+
+        RawSeverity override = RawFoodTierOverrideRegistry.getOverride(itemId.toString());
+        if (override != null) {
+            return override;
+        }
 
         RawSeverity cached = SEVERITY_CACHE.get(itemId);
         if (cached != null) {

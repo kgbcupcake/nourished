@@ -41,11 +41,10 @@ public class PeakStaminaEntry extends EntryProvider {
         this.pageTitle("How It's Calculated");
 
         this.pageText("""
-                All six nutrition bars are averaged together into a single value. This average drives all stamina modifiers — it is **not** per-group. Keeping all six bars healthy is more important than maxing one or two.
-
-                %sAbove 75%% average%s — bonuses apply.
-                %s25%% – 75%% average%s — neutral, no modifier.
-                %sBelow 25%% average%s — penalties apply.
+                All six nutrition bars are averaged together into a single value. This average drives all stamina modifiers: it is **not** per-group. Keeping all six bars healthy is more important than maxing one or two.\s\s
+                %sAbove 75%% average%s: bonuses apply.
+                %s25%% – 75%% average%s: neutral, no modifier.
+                %sBelow 25%% average%s: penalties apply.
                 """.formatted(
                 GOOD, RESET,
                 NEUTRAL, RESET,
@@ -56,16 +55,14 @@ public class PeakStaminaEntry extends EntryProvider {
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
 
-        this.pageTitle("Bonuses (avg > 75%)");
+        this.pageTitle("Bonuses (avg > 75%%)");
 
         this.pageText("""
-                When your average nutrition is above 75%%:
-
-                %s+25%% Stamina Regen%s — stamina recovers significantly faster.
-                %s+10%% Max Stamina%s — larger total stamina pool.
-                %s-15%% Stamina Usage%s — actions cost less stamina.
-                %s+30%% Penalty Decay%s — stamina exhaustion penalties fade faster.
-
+                When your average nutrition is above 75%%:\s\s
+                %s+25%% Stamina Regen%s: stamina recovers significantly faster.
+                %s+10%% Max Stamina%s: larger total stamina pool.
+                %s-15%% Stamina Usage%s: actions cost less stamina.
+                %s+30%% Penalty Decay%s: stamina exhaustion penalties fade faster.\s\s
                 All four bonuses are active simultaneously when the threshold is met.
                 """.formatted(
                 GOOD, RESET,
@@ -78,16 +75,14 @@ public class PeakStaminaEntry extends EntryProvider {
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
 
-        this.pageTitle("Penalties (avg < 25%)");
+        this.pageTitle("Penalties (avg < 25%%)");
 
         this.pageText("""
-                When your average nutrition drops below 25%%:
-
-                %s-25%% Stamina Regen%s — stamina recovers much slower.
-                %s-15%% Max Stamina%s — smaller total stamina pool.
-                %s+25%% Stamina Usage%s — actions cost more stamina.
-                %s+30%% Exhaustion Duration%s — stamina exhaustion lasts longer.
-
+                When your average nutrition drops below 25%%:\s\s
+                %s-25%% Stamina Regen%s: stamina recovers much slower.
+                %s-15%% Max Stamina%s: smaller total stamina pool.
+                %s+25%% Stamina Usage%s: actions cost more stamina.
+                %s+30%% Exhaustion Duration%s: stamina exhaustion lasts longer.\s\s
                 This combination makes low nutrition extremely punishing in combat and exploration.
                 """.formatted(
                 BAD, RESET,
@@ -103,9 +98,8 @@ public class PeakStaminaEntry extends EntryProvider {
         this.pageTitle("Practical Advice");
 
         this.pageText("""
-                The 75% bonus threshold means keeping **all six bars above 75%** on average — not just one or two at full. A single bar at zero drags the average down significantly.
-
-                A player with five bars at 100% and one bar at zero has an average of ~83% — just above the bonus line. Let **two** bars hit zero and the average drops to ~67%, losing all bonuses. Keep every bar topped up.
+                The 75%% bonus threshold means keeping **all six bars above 75%%** on average, not just one or two at full. A single bar at zero drags the average down significantly.\s\s
+                A player with five bars at 100%% and one bar at zero has an average of ~83%%, just above the bonus line. Let **two** bars hit zero and the average drops to ~67%%, losing all bonuses. Keep every bar topped up.
                 """);
     }
 

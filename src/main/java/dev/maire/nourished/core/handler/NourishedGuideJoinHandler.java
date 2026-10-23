@@ -3,6 +3,7 @@ package dev.maire.nourished.core.handler;
 import com.klikli_dev.modonomicon.registry.DataComponentRegistry;
 import com.klikli_dev.modonomicon.registry.ItemRegistry;
 import dev.marie.framework.api.ApiStatus;
+import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.diet.DietAttachment;
 import net.minecraft.resources.ResourceLocation;
@@ -36,6 +37,9 @@ public final class NourishedGuideJoinHandler {
     }
 
     private static void tryGrantStarterGuide(ServerPlayer player) {
+        if (!NourishedConfig.get().grantGuideBook()) {
+            return;
+        }
         if (Boolean.TRUE.equals(player.getData(DietAttachment.RECEIVED_NOURISHED_GUIDE.get()))) {
             return;
         }

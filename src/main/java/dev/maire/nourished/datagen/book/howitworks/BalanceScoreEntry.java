@@ -34,8 +34,7 @@ public class BalanceScoreEntry extends EntryProvider {
         this.pageTitle("Balance Score");
 
         this.pageText("""
-                The %sBalance Score%s measures how evenly spread your nutrition is across all six groups — not how full any single bar is.
-
+                The %sBalance Score%s measures how evenly spread your nutrition is across all six groups, not how full any single bar is.\s\s
                 It compares each bar to the average of all of them. Five groups full and one empty scores worse than all six sitting at a moderate, even level. It's shown on the left panel of the diet screen.
                 """.formatted(
                 BALANCE_SCORE, RESET
@@ -48,9 +47,8 @@ public class BalanceScoreEntry extends EntryProvider {
         this.pageTitle("Even vs. Uneven");
 
         this.pageText("""
-                The score isn't a fixed pass/fail band — it's continuous. The further any bar drifts from the average of the rest, the more the score drops, whether that bar is unusually low or unusually high.
-
-                %sEven%s coverage across all six groups keeps the score high. %sLopsided%s eating — maxing one or two bars while others sit empty — drags it down even if your total nutrition looks fine on paper.
+                The score isn't a fixed pass/fail band; it's continuous. The further any bar drifts from the average of the rest, the more the score drops, whether that bar is unusually low or unusually high.\s\s
+                %sEven%s coverage across all six groups keeps the score high. %sLopsided%s eating (maxing one or two bars while others sit empty) drags it down even if your total nutrition looks fine on paper.
                 """.formatted(
                 EVEN, RESET,
                 UNEVEN, RESET

@@ -19,7 +19,7 @@ public class TipsAndTricksCategory extends CategoryProvider {
     @Override
     protected String[] generateEntryMap() {
         /*
-         * Tips & Tricks is a short, linear staircase of practical advice —
+         * Tips & Tricks is a short, linear staircase of practical advice:
          * daily routine, farming, recovery, multiplayer, then tooltips.
          */
         return new String[]{

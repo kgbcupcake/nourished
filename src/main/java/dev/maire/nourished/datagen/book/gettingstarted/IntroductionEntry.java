@@ -47,10 +47,8 @@ public class IntroductionEntry extends EntryProvider {
         this.pageTitle("Welcome to Nourished");
 
         this.pageText("""
-                %s**Welcome to Nourished**%s
-
-                Nourished adds a nutrition system that encourages eating a %s**varied diet**%s. Each food group you consume contributes to your overall %s**health**%s and %s**performance**%s.
-
+                %s**Welcome to Nourished**%s\s\s
+                Nourished adds a nutrition system that encourages eating a %s**varied diet**%s. Each food group you consume contributes to your overall %s**health**%s and %s**performance**%s.\s\s
                 Eat well, sleep soundly, and your body will reward you.
 
                 """.formatted(
@@ -67,16 +65,13 @@ public class IntroductionEntry extends EntryProvider {
         this.pageTitle("The Core Idea");
 
         this.pageText("""
-                %s**The Core Idea**%s
-
-                There are five food groups:
-
+                %s**The Core Idea**%s\s\s
+                There are five food groups:\s\s
                 %s**Fruits**%s
                 %s**Vegetables**%s
                 %s**Proteins**%s
                 %s**Grains**%s
-                %s**Dairy**%s
-
+                %s**Dairy**%s\s\s
                 Maintaining each group provides %s**bonuses**%s, while neglecting them causes %s**penalties**%s. %s**Balance**%s is everything.
 
                 """.formatted(

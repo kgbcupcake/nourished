@@ -34,9 +34,8 @@ public class RawFoodEntry extends EntryProvider {
         this.pageTitle("Eating Raw Food");
 
         this.pageText("""
-                Eating raw meat and other uncooked foods %sisn't free%s. Nourished tracks what you eat and penalizes you when you skip the campfire.
-
-                The penalty scales with how raw the food is — there are three tiers: **Mild**, **Medium**, and **Severe**. Foods that are fine raw (bread, apples, carrots) skip all of this entirely.
+                Eating raw meat and other uncooked foods %sisn't free%s. Nourished tracks what you eat and penalizes you when you skip the campfire.\s\s
+                The penalty scales with how raw the food is; there are three tiers: **Mild**, **Medium**, and **Severe**. Foods that are fine raw (bread, apples, carrots) skip all of this entirely.
                 """.formatted(
                 SEVERE, RESET
         ));
@@ -48,8 +47,7 @@ public class RawFoodEntry extends EntryProvider {
         this.pageTitle("Mild");
 
         this.pageText("""
-                %sMild%s penalties apply to foods that are technically edible raw but clearly not ideal — lightly processed or borderline items.
-
+                %sMild%s penalties apply to foods that are technically edible raw but clearly not ideal: lightly processed or borderline items.\s\s
                 You take a small nutrient penalty and miss out on a portion of the nutrition the cooked version would have given. Not a disaster, but it adds up.
                 """.formatted(
                 MILD, RESET
@@ -62,8 +60,7 @@ public class RawFoodEntry extends EntryProvider {
         this.pageTitle("Medium");
 
         this.pageText("""
-                %sMedium%s penalties apply to clearly raw foods — standard raw meats like beef, pork, and chicken.
-
+                %sMedium%s penalties apply to clearly raw foods: standard raw meats like beef, pork, and chicken.\s\s
                 The nutrient penalty is larger and a significant portion of the nutrition is lost compared to eating the cooked version. You are also more likely to trigger gut flora damage at this tier.
                 """.formatted(
                 MEDIUM, RESET
@@ -76,8 +73,7 @@ public class RawFoodEntry extends EntryProvider {
         this.pageTitle("Severe");
 
         this.pageText("""
-                %sSevere%s penalties apply to foods that should never be eaten raw under any circumstances.
-
+                %sSevere%s penalties apply to foods that should never be eaten raw under any circumstances.\s\s
                 Nutrient bars take a meaningful hit, nearly all of the cooked nutrition is denied, and your gut flora takes the hardest damage. Just cook it.
                 """.formatted(
                 SEVERE, RESET
@@ -90,9 +86,8 @@ public class RawFoodEntry extends EntryProvider {
         this.pageTitle("Missed Opportunity");
 
         this.pageText("""
-                Every tier includes a **missed opportunity** multiplier. This is the fraction of nutrition the cooked version would have given that you simply don't get.
-
-                Eating raw doesn't just hurt you — it wastes the food. A raw beef gives far less Protein than a cooked one, even before the penalty kicks in.
+                Every tier includes a **missed opportunity** multiplier. This is the fraction of nutrition the cooked version would have given that you simply don't get.\s\s
+                Eating raw doesn't just hurt you; it wastes the food. A raw beef gives far less Protein than a cooked one, even before the penalty kicks in.
                 """);
 
         this.page("eating_the_same_food_again", () -> BookTextPageModel.create()
@@ -102,8 +97,7 @@ public class RawFoodEntry extends EntryProvider {
         this.pageTitle("Eating the Same Food Again");
 
         this.pageText("""
-                Nourished remembers recent raw food events for a short window. If you eat the same raw item again inside that window, the system does not roll a fresh random debuff — it **extends the one you already have**, stacking its duration on top.
-
+                Nourished remembers recent raw food events for a short window. If you eat the same raw item again inside that window, the system does not roll a fresh random debuff: it **extends the one you already have**, stacking its duration on top.\s\s
                 Back-to-back raw meals of the same item make the debuff last longer, not shorter. Switching to a cooked meal (or a different food entirely) breaks the chain.
                 """);
     }

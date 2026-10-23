@@ -7,7 +7,16 @@ import dev.marie.framework.ui.commandcenter.CommandCenterCard;
 import dev.marie.framework.ui.commandcenter.CommandCenterCategory;
 import dev.marie.framework.ui.commandcenter.CommandCenterRegistry;
 import dev.marie.framework.ui.api.EditModeCoordinator;
+import dev.marie.framework.ui.itemeditor.ItemEditorScreenProviderRegistry;
 import dev.maire.nourished.client.colors.NourishedColors;
+import dev.maire.nourished.client.screen.itemeditor.CaloriesScreenProvider;
+import dev.maire.nourished.client.screen.itemeditor.BrowseItemsScreenProvider;
+import dev.maire.nourished.client.screen.itemeditor.BulkEditScreenProvider;
+import dev.maire.nourished.client.screen.itemeditor.EditedItemsScreenProvider;
+import dev.maire.nourished.client.screen.itemeditor.ExcludeTooltipScreenProvider;
+import dev.maire.nourished.client.screen.itemeditor.NutrientGroupsScreenProvider;
+import dev.maire.nourished.client.screen.itemeditor.OptionsScreenProvider;
+import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen;
 import dev.maire.nourished.client.NourishedClientMemoryConfig;
@@ -33,6 +42,13 @@ public final class ClientEventRegistrar {
         registerCommandCenter();
         NourishedTestCommandCenter.register();
         MarieNotifications.registerClientListeners();
+        ItemEditorScreenProviderRegistry.register(Nourished.MODID, new OptionsScreenProvider());
+        ItemEditorScreenProviderRegistry.register(Nourished.MODID, new CaloriesScreenProvider());
+        ItemEditorScreenProviderRegistry.register(Nourished.MODID, new NutrientGroupsScreenProvider());
+        ItemEditorScreenProviderRegistry.register(Nourished.MODID, new BulkEditScreenProvider());
+        ItemEditorScreenProviderRegistry.register(Nourished.MODID, new EditedItemsScreenProvider());
+        ItemEditorScreenProviderRegistry.register(Nourished.MODID, new BrowseItemsScreenProvider());
+        ItemEditorScreenProviderRegistry.register(Nourished.MODID, new ExcludeTooltipScreenProvider());
         EditModeCoordinator.registerGroupCapable(
                 "nourished.hud",
                 NourishedHUD::editTarget,
@@ -56,7 +72,9 @@ public final class ClientEventRegistrar {
         );
         modEventBus.addListener(NourishedKeys::onRegisterKeyMappings);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onScreenInit);
+        NeoForge.EVENT_BUS.addListener(ClientEvents::onScreenKeyPressed);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onItemTooltip);
+        NeoForge.EVENT_BUS.addListener(ClientEvents::onTooltipColor);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onClientTick);
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onRenderGuiPost);
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onClientTick);

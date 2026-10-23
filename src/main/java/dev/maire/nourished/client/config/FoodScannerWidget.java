@@ -15,6 +15,7 @@ import dev.marie.framework.scanner.ClassificationResult;
 import dev.marie.framework.scanner.ClassificationSignal;
 import dev.marie.framework.runtime.SourceCollector;
 import dev.marie.framework.scanner.analysis.MultiValueAnalysisPipeline;
+import dev.marie.framework.ui.itemeditor.ItemEditorApi;
 import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.client.Minecraft;
@@ -23,10 +24,14 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.storage.LevelResource;
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -113,9 +118,22 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             float spread = result != null ? result.confidenceSpread() : 0f;
             List<ClassificationSignal> signals = result != null ? result.topSignals(3) : List.of();
 
-            rows.add(new Row(hit.itemId(), hit.fallbackValue(), dominant, uncertain, spread, signals, keys));
+            ResourceLocation itemId = hit.itemId();
+            rows.add(new Row(itemId, hit.fallbackValue(), dominant, uncertain, spread, signals, keys,
+                    () -> openItemEditor(itemId)));
         }
         requestReferenceRebuilding();
+    }
+
+    /** Opens MarieLib's generic item value editor for a scanned row, so a value can be inspected/overridden without leaving this screen. */
+    private void openItemEditor(ResourceLocation itemId) {
+        Minecraft mc = Minecraft.getInstance();
+        Item item = BuiltInRegistries.ITEM.get(itemId);
+        if (item == null) {
+            return;
+        }
+        RecipeManager recipeManager = mc.level != null ? mc.level.getRecipeManager() : null;
+        ItemEditorApi.open(mc.screen, Nourished.MODID, new ItemStack(item), recipeManager);
     }
 
     private void runAnalysis() {
@@ -363,6 +381,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         out.add(writeButton);
         out.add(fullExportButton);
         for (Row row : rows) {
+            out.add(row.editButton);
             out.add(row.nutrientButton);
         }
         return out;
@@ -376,6 +395,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         out.add(writeButton);
         out.add(fullExportButton);
         for (Row row : rows) {
+            out.add(row.editButton);
             out.add(row.nutrientButton);
         }
         return out;
@@ -502,13 +522,20 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
 
             String idStr = row.itemId.toString();
             int btnW = Math.min(110, Math.max(72, innerW / 3));
-            int idMaxW = Math.max(24, innerW - btnW - 12);
+            int editBtnW = 18;
+            int idMaxW = Math.max(24, innerW - btnW - editBtnW - 16);
             idStr = NourishedConfigSharedWidgets.ellipsize(mc.font, idStr, idMaxW);
             graphics.drawString(mc.font, idStr, sx + 4, ry + 4, textColor, false);
 
             String spreadStr = String.format("%.1f", row.confidenceSpread);
             String confidenceLabel = row.uncertain ? "?" : "✓";
             graphics.drawString(mc.font, confidenceLabel + " " + spreadStr, sx + 4, ry + 14, 0xAAAAAA, false);
+
+            row.editButton.setX(sx + innerW - btnW - editBtnW - 8);
+            row.editButton.setY(ry + 4);
+            row.editButton.setWidth(editBtnW);
+            row.editButton.active = isEditable();
+            row.editButton.render(graphics, mouseX, mouseY, delta);
 
             row.nutrientButton.setX(sx + innerW - btnW - 4);
             row.nutrientButton.setY(ry + 4);
@@ -568,6 +595,7 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
         private final List<String> keys;
         private String assignedNutrient;
         private final Button nutrientButton;
+        private final Button editButton;
 
         Row(ResourceLocation itemId,
             String fallbackValue,
@@ -575,7 +603,8 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             boolean uncertain,
             float confidenceSpread,
             List<ClassificationSignal> topSignals,
-            List<String> keys) {
+            List<String> keys,
+            Runnable onEdit) {
             this.itemId = itemId;
             this.fallbackValue = fallbackValue;
             this.uncertain = uncertain;
@@ -585,6 +614,11 @@ public final class FoodScannerWidget extends TooltipListEntry<Object> {
             this.assignedNutrient = dominant;
             this.nutrientButton = Button.builder(Component.literal(assignedNutrient), b -> cycle())
                     .bounds(0, 0, 100, 18)
+                    .build();
+            this.editButton = Button.builder(Component.literal("✎"), b -> onEdit.run())
+                    .bounds(0, 0, 18, 18)
+                    .tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                            Component.translatable("config.nourished.foodScanner.editItem")))
                     .build();
         }
 

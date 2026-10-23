@@ -36,13 +36,12 @@ public class FarmersDelightEntry extends EntryProvider {
         this.pageTitle("New Crops");
 
         this.pageText("""
-                Farmer's Delight adds several new crops that slot into existing groups:
-
-                **Tomato** — Vegetables; fast-growing and versatile.
-                **Onion** — Vegetables; distinct allium family.
-                **Rice** — Grains; introduces a new grain family separate from wheat.
-                **Cabbage** — Vegetables; leafy green family.
-                **Beetroot Seeds** (improved) — better yield than vanilla beetroot.
+                Farmer's Delight adds several new crops that slot into existing groups:\s\s
+                - **Tomato**: Vegetables; fast-growing and versatile.
+                - **Onion**: Vegetables; distinct allium family.
+                - **Rice**: Grains; introduces a new grain family separate from wheat.
+                - **Cabbage**: Vegetables; leafy green family.
+                **Beetroot Seeds** (improved): better yield than vanilla beetroot.
                 """);
 
         this.page("cooked_meals", () -> BookTextPageModel.create()
@@ -52,13 +51,12 @@ public class FarmersDelightEntry extends EntryProvider {
         this.pageTitle("Cooked Meals");
 
         this.pageText("""
-                Farmer's Delight meals are where Nourished integration shines. Many dishes cover two or three groups in one item:
-
-                **Stew / Soup** — typically Vegetables + Grains.
-                **Roast Chicken** — Proteins + Vegetables.
-                **Bacon and Eggs** — Proteins + Dairy.
-                **Rice Bowl** — Grains + Vegetables.
-                **Stuffed Pumpkin** — Grains + Vegetables + Proteins.
+                Farmer's Delight meals are where Nourished integration shines. Many dishes cover two or three groups in one item:\s\s
+                - **Stew / Soup**: typically Vegetables + Grains.
+                - **Roast Chicken**: Proteins + Vegetables.
+                - **Bacon and Eggs**: Proteins + Dairy.
+                - **Rice Bowl**: Grains + Vegetables.
+                - **Stuffed Pumpkin**: Grains + Vegetables + Proteins.
                 """);
 
         this.page("cooking_pot", () -> BookTextPageModel.create()
@@ -68,8 +66,7 @@ public class FarmersDelightEntry extends EntryProvider {
         this.pageTitle("Cooking Pot");
 
         this.pageText("""
-                The **Cooking Pot** is Farmer's Delight's crafting station for meals. Investing in one early pays off immediately for Nourished — cooking a pot of stew that covers three groups is far more inventory-efficient than carrying separate foods for each.
-
+                The **Cooking Pot** is Farmer's Delight's crafting station for meals. Investing in one early pays off immediately for Nourished: cooking a pot of stew that covers three groups is far more inventory-efficient than carrying separate foods for each.\s\s
                 Prioritize recipes that cover your weakest groups. Check the tooltip of any cooked meal to see which Nourished groups it contributes to.
                 """);
 
@@ -80,8 +77,7 @@ public class FarmersDelightEntry extends EntryProvider {
         this.pageTitle("Rotation Advice");
 
         this.pageText("""
-                Farmer's Delight meals each have their own food family, so rotating between different dishes avoids diminishing returns even when multiple dishes share a group.
-
+                Farmer's Delight meals each have their own food family, so rotating between different dishes avoids diminishing returns even when multiple dishes share a group.\s\s
                 A good daily rotation might be: **Roast Chicken** for lunch (Proteins + Veg), **Rice Bowl** for dinner (Grains + Veg), and a dairy item when needed. Three meals can cover every group with zero repetition.
                 """);
     }

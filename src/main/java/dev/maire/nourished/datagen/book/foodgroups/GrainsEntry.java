@@ -46,10 +46,10 @@ public class GrainsEntry extends EntryProvider {
         this.pageTitle("Vanilla Grain Sources");
 
         this.pageText("""
-                **Bread** — crafted from 3 wheat; the most cost-efficient grain per crop.
-                **Cookie** — 8 cookies per craft; high volume, lower nutrition per piece.
-                **Cake** — placed block; each slice gives grain nutrition. Good for group eating.
-                **Pumpkin Pie** — excellent nutrition value; worth the pumpkin investment.
+                - **Bread**: crafted from 3 wheat; the most cost-efficient grain per crop.
+                - **Cookie**: 8 cookies per craft; high volume, lower nutrition per piece.
+                - **Cake**: placed block; each slice gives grain nutrition. Good for group eating.
+                - **Pumpkin Pie**: excellent nutrition value; worth the pumpkin investment.
                 """);
 
         this.page("baked_goods", () -> BookSpotlightPageModel.create()
@@ -57,11 +57,10 @@ public class GrainsEntry extends EntryProvider {
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
 
-        this.pageTitle("Grains — Baked Goods");
+        this.pageTitle("Grains: Baked Goods");
 
         this.pageText("""
-                Pumpkin pie and other baked goods also count toward Grains. They provide higher nutrition values than plain bread, making them worth crafting once you can supply the ingredients reliably.
-
+                Pumpkin pie and other baked goods also count toward Grains. They provide higher nutrition values than plain bread, making them worth crafting once you can supply the ingredients reliably.\s\s
                 Keep a pumpkin farm and you always have access to pie as a high-value grain top-up.
                 """);
 
@@ -72,9 +71,8 @@ public class GrainsEntry extends EntryProvider {
         this.pageTitle("Farming Tips");
 
         this.pageText("""
-                Wheat is the most fundamental farm crop and the backbone of the Grains group. A moderate wheat farm covers this group indefinitely with bread alone.
-
-                Automating a bread farm — harvest wheat, craft bread, store — is one of the easiest and most impactful nutrition automations you can build early in a world.
+                Wheat is the most fundamental farm crop and the backbone of the Grains group. A moderate wheat farm covers this group indefinitely with bread alone.\s\s
+                Automating a bread farm (harvest wheat, craft bread, store) is one of the easiest and most impactful nutrition automations you can build early in a world.
                 """);
 
         this.page("rotation_strategy", () -> BookTextPageModel.create()
@@ -84,9 +82,8 @@ public class GrainsEntry extends EntryProvider {
         this.pageTitle("Rotation Strategy");
 
         this.pageText("""
-                Bread, cookie, and pumpkin pie are all distinct grain families. Rotating between them gives better nutrition than eating only bread each day.
-
-                Cake is a special case — each slice of the same cake is the same item, so eating an entire cake counts as eating the same food repeatedly. Pair cake slices with other grain foods on the same day for best efficiency.
+                Bread, cookie, and pumpkin pie are all distinct grain families. Rotating between them gives better nutrition than eating only bread each day.\s\s
+                Cake is a special case: each slice of the same cake is the same item, so eating an entire cake counts as eating the same food repeatedly. Pair cake slices with other grain foods on the same day for best efficiency.
                 """);
 
         this.page("experience_bonus", () -> BookTextPageModel.create()
@@ -96,8 +93,7 @@ public class GrainsEntry extends EntryProvider {
         this.pageTitle("Experience Bonus");
 
         this.pageText("""
-                The Grains bonus — faster experience gain — is one of the most impactful in the game for combat and enchanting progression.
-
+                The Grains bonus (faster experience gain) is one of the most impactful in the game for combat and enchanting progression.\s\s
                 Prioritizing Grains early is especially worthwhile if you plan to enchant gear or grind XP. The bonus stacks with other XP sources and applies passively while it is active.
                 """);
     }

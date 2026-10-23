@@ -1,0 +1,30 @@
+name: Rebuild wiki
+
+# Rebuilds Marie's Wiki when something it reads from this repo changes (README, mod version,
+# player changelog). Needs the WIKI_DEPLOY_HOOK repo secret: a Cloudflare Workers Builds deploy
+# hook URL, which can only start a wiki build. Does nothing if the secret isn't set.
+on:
+    push:
+        branches: [dev, main]
+        paths:
+            - README.md
+            - gradle.properties
+            - MODRINTH_CHANGELOG.md
+    workflow_dispatch:
+
+permissions: {}
+
+jobs:
+    rebuild:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Start a wiki build
+              env:
+                  HOOK: ${{ secrets.WIKI_DEPLOY_HOOK }}
+              run: |
+                  if [ -z "$HOOK" ]; then
+                    echo "WIKI_DEPLOY_HOOK isn't set, skipping."
+                    exit 0
+                  fi
+                  curl -fsS -X POST "$HOOK" > /dev/null
+                  echo "Wiki build started."

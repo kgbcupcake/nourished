@@ -13,7 +13,9 @@ import dev.maire.nourished.core.NourishedKubeIntegration;
 import dev.maire.nourished.core.diet.DietAttachment;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
+import dev.maire.nourished.core.nutrition.NoRecentMealsOverrideRegistry;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import dev.maire.nourished.core.nutrition.SilentEatOverrideRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -141,13 +143,17 @@ public final class NourishedFoodTriggerHandler {
 
         boolean hadRealEffect = totalDelta != 0f || deltas.values().stream().anyMatch(v -> v != 0f);
         if (hadRealEffect) {
-            DietAttachment.recordRecentMeal(player, itemId.toString());
+            if (!NoRecentMealsOverrideRegistry.isExcluded(itemId.toString())) {
+                DietAttachment.recordRecentMeal(player, itemId.toString());
+            }
             // fireSourceTrigger already sent a diet delta sync from inside SourceApplicationPipeline,
             // before recordRecentMeal above ran — that sync's snapshot predates this meal, so push
             // one more sync now or the client won't show it until (if ever) the next meal is eaten.
             if (TrackingAttachment.getData(player) instanceof dev.maire.nourished.core.diet.NourishedTrackingData trackingData) {
                 ModNetworking.SyncDietDeltaPayload.FoodEatenDelta foodEatenDelta =
-                        new ModNetworking.SyncDietDeltaPayload.FoodEatenDelta(itemId, totalDelta, deltas);
+                        SilentEatOverrideRegistry.isSilentEat(itemId.toString())
+                                ? null
+                                : new ModNetworking.SyncDietDeltaPayload.FoodEatenDelta(itemId, totalDelta, deltas);
                 ModNetworking.syncDietDelta(player, trackingData, foodEatenDelta);
             }
         }

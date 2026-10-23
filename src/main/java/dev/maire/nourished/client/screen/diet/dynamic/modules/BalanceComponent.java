@@ -214,7 +214,8 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         }
     }
 
-    private static String getBalanceKey(TrackingData data) {
+    /** {@code "low"}, {@code "excess"} or {@code "balanced"} — the {@code nourished.screen.diet.balance_state.*} suffix this box shows for {@code data}. */
+    public static String getBalanceKey(TrackingData data) {
         NourishedConfig config = NourishedConfig.get();
         float critical = (float) config.criticalThreshold();
         float excessThreshold = (float) config.excessThreshold();
@@ -225,7 +226,7 @@ public final class BalanceComponent implements MarieComponent, HeaderCollapsible
         return "balanced";
     }
 
-    private static int balanceColor(String key) {
+    public static int balanceColor(String key) {
         return switch (key) {
             case "balanced" -> balanceBalancedColor();
             case "low" -> balanceLowColor();

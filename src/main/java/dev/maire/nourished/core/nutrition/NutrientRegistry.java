@@ -475,13 +475,24 @@ public class NutrientRegistry {
         reapplyExternals();
     }
 
-    /** Persists the in-memory registry to config/nourished/nutrients.json. */
+    /**
+     * Persists the in-memory registry to config/nourished/nutrients.json — excluding
+     * {@link #EXTERNALLY_REGISTERED} (KubeJS/addon) entries, which belong at the top of the
+     * priority stack precisely so they're re-applied fresh from whichever mods/scripts are
+     * actually present each launch, not frozen into this hand-editable file: baking one in here
+     * would make it survive its contributing addon being removed, since {@link #parse} can no
+     * longer tell an addon-sourced entry apart from a built-in or player-added one once it's on
+     * disk.
+     */
     public static void save() {
         Path file = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("nutrients.json");
         try {
             Files.createDirectories(file.getParent());
-            writeNutrientsToPath(file, INSTANCE.values());
-            Nourished.LOGGER.info("[NutrientRegistry] Saved nutrients.json ({} entries)", INSTANCE.size());
+            List<NutrientDef> toWrite = INSTANCE.values().stream()
+                    .filter(def -> !EXTERNALLY_REGISTERED.containsKey(def.key()))
+                    .toList();
+            writeNutrientsToPath(file, toWrite);
+            Nourished.LOGGER.info("[NutrientRegistry] Saved nutrients.json ({} entries)", toWrite.size());
         } catch (IOException e) {
             Nourished.LOGGER.error("[NutrientRegistry] Failed to save nutrients.json", e);
         }

@@ -47,10 +47,10 @@ public class VegetablesEntry extends EntryProvider {
         this.pageTitle("Vanilla Vegetable Sources");
 
         this.pageText("""
-                **Carrot** — found in village farms or zombie drops; very easy to obtain early.
-                **Potato** — also found in villages; bake for higher nutrition value.
-                **Baked Potato** — cook any potato for a significant nutrition boost.
-                **Beetroot** — grown from seeds; lower yield than carrots but still reliable.
+                - **Carrot**: found in village farms or zombie drops; very easy to obtain early.
+                - **Potato**: also found in villages; bake for higher nutrition value.
+                - **Baked Potato**: cook any potato for a significant nutrition boost.
+                - **Beetroot**: grown from seeds; lower yield than carrots but still reliable.
                 """);
 
         this.page("golden_carrot", () -> BookTextPageModel.create()
@@ -60,8 +60,7 @@ public class VegetablesEntry extends EntryProvider {
         this.pageTitle("Golden Carrot");
 
         this.pageText("""
-                **Golden Carrot** is the single highest-nutrition vanilla vegetable. It fills the bar noticeably more than a plain carrot and also provides excellent hunger saturation.
-
+                **Golden Carrot** is the single highest-nutrition vanilla vegetable. It fills the bar noticeably more than a plain carrot and also provides excellent hunger saturation.\s\s
                 If you have a gold surplus, a small stock of golden carrots makes a great emergency top-up for the Vegetables group.
                 """);
 
@@ -72,8 +71,7 @@ public class VegetablesEntry extends EntryProvider {
         this.pageTitle("Farming Tips");
 
         this.pageText("""
-                Carrots and potatoes are the most efficient vanilla vegetables to farm — they replant themselves and grow quickly with irrigation.
-
+                Carrots and potatoes are the most efficient vanilla vegetables to farm: they replant themselves and grow quickly with irrigation.\s\s
                 A mixed row of carrots, potatoes, and beetroot covers three distinct vegetable families. Plant them side by side in alternating rows to make rotating your diet effortless.
                 """);
 
@@ -82,11 +80,10 @@ public class VegetablesEntry extends EntryProvider {
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
 
-        this.pageTitle("Vegetables — Vanilla");
+        this.pageTitle("Vegetables: Vanilla");
 
         this.pageText("""
-                Beetroot is your best secondary vegetable alongside carrots and potatoes. A small mixed crop farm covers this group reliably from early game onward.
-
+                Beetroot is your best secondary vegetable alongside carrots and potatoes. A small mixed crop farm covers this group reliably from early game onward.\s\s
                 Beetroot soup counts as Vegetables and provides more nutrition per craft than raw beetroot alone.
                 """);
 
@@ -96,7 +93,7 @@ public class VegetablesEntry extends EntryProvider {
                 .withText(this.context().pageText())
                 .withCondition(BookModLoadedConditionModel.create().withModId("farm_and_charm")));
 
-        this.pageTitle("Vegetables — Farm & Charm");
+        this.pageTitle("Vegetables: Farm & Charm");
 
         this.pageText("""
                 Farm & Charm adds tomatoes, onions, peppers, and more. These introduce new vegetable families and significantly expand rotation options. See the **Compat Mods** chapter for the full Farm & Charm food list.
@@ -109,9 +106,8 @@ public class VegetablesEntry extends EntryProvider {
         this.pageTitle("Rotation Strategy");
 
         this.pageText("""
-                The main vanilla vegetable families are Carrot, Potato, and Beetroot. Rotating through all three maximizes your nutrition gain compared to eating only one type.
-
-                Noting that **baked potato** and **raw potato** share a family — cooking improves nutrition value but does not count as variety. Use both baked and raw in a pinch, but branch out to carrots and beetroot for best results.
+                The main vanilla vegetable families are Carrot, Potato, and Beetroot. Rotating through all three maximizes your nutrition gain compared to eating only one type.\s\s
+                **Baked potato** and **raw potato** share a family, so cooking improves nutrition value but does not count as variety. Use both baked and raw in a pinch, but branch out to carrots and beetroot for best results.
                 """);
     }
 
