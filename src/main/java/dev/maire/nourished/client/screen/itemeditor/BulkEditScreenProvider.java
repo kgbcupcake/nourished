@@ -142,6 +142,7 @@ public final class BulkEditScreenProvider implements ItemEditorScreenProvider {
             next.enabledWhenLast(() -> nutrientGroupIndex > 0);
             next.addRow(new ButtonOption("Apply to Selected",
                     () -> "APPLY (" + selected.size() + ")", this::applyBulkEdit, () -> {}));
+            ItemEditorRemoteGuard.disableIfRemote(next);
             this.layout = next;
         }
 

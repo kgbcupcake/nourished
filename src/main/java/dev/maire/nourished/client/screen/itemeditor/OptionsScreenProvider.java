@@ -101,6 +101,7 @@ public final class OptionsScreenProvider implements ItemEditorScreenProvider {
                     () -> diminishingReturnsOff, v -> diminishingReturnsOff = v, () -> {}));
             layout.addRow(new ToggleOption("Diminishing Returns (All Food)",
                     () -> diminishingReturnsEnabled, v -> diminishingReturnsEnabled = v, () -> {}));
+            ItemEditorRemoteGuard.disableIfRemote(layout);
         }
 
         private static int rawTierIndexFromRegistry(@Nullable String sourceId) {

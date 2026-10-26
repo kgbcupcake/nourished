@@ -76,6 +76,7 @@ public final class CaloriesScreenProvider implements ItemEditorScreenProvider {
             layout.addRow(SliderOption.ofInt("Calories", () -> customCalories, v -> customCalories = v,
                     CALORIES_MIN, CALORIES_MAX, CALORIES_STEP, "cal", () -> {}));
             layout.enabledWhenLast(() -> useCustomCalories);
+            ItemEditorRemoteGuard.disableIfRemote(layout);
         }
 
         @Override

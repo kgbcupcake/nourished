@@ -63,7 +63,7 @@ public final class NutrientGroupsScreenProvider implements ItemEditorScreenProvi
         }
         Minecraft mc = Minecraft.getInstance();
         RecipeManager recipeManager = mc.level != null ? mc.level.getRecipeManager() : null;
-        for (Map.Entry<String, Float> e : NutrientClassificationLookup.resolveNutrientBars(stack, false, recipeManager).entrySet()) {
+        for (Map.Entry<String, Float> e : NutrientClassificationLookup.resolveNutrientBarsIgnoringExclusion(stack, recipeManager).entrySet()) {
             if (e.getValue() != null && e.getValue() > 0f) {
                 out.put(e.getKey(), e.getValue());
             }
@@ -96,6 +96,7 @@ public final class NutrientGroupsScreenProvider implements ItemEditorScreenProvi
                         v -> checked.put(def.key(), v),
                         () -> {}));
             }
+            ItemEditorRemoteGuard.disableIfRemote(layout);
         }
 
         private void loadChecked() {
