@@ -177,7 +177,7 @@ public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider
                     case MISSING_NUTRITION -> isFood && !excluded && NutrientClassificationLookup.resolveBars(item).isEmpty();
                     case EXCLUDED -> excluded;
                     case FOODS -> isFood;
-                    case WITH_RECIPES -> RecipeDisplayLookup.find(stack, recipeManager) != null;
+                    case WITH_RECIPES -> !RecipeDisplayLookup.findAll(stack, recipeManager).isEmpty();
                 };
                 if (matches) {
                     results.add(stack);
