@@ -88,13 +88,27 @@ public final class NutrientClassificationLookup {
 
     public static Map<String, Float> resolveNutrientBars(
             ItemStack stack, boolean warnIfUnmatched, @Nullable RecipeManager recipeManager) {
+        return resolveNutrientBars(stack, warnIfUnmatched, recipeManager, true);
+    }
+
+    /**
+     * The classification an item would have if it weren't excluded — what an item editor page should
+     * seed from, so an exclusion saved alongside a group edit doesn't snapshot as "no groups".
+     */
+    public static Map<String, Float> resolveNutrientBarsIgnoringExclusion(
+            ItemStack stack, @Nullable RecipeManager recipeManager) {
+        return resolveNutrientBars(stack, false, recipeManager, false);
+    }
+
+    private static Map<String, Float> resolveNutrientBars(
+            ItemStack stack, boolean warnIfUnmatched, @Nullable RecipeManager recipeManager, boolean honorExclusion) {
         ResourceLocation itemId = MarieRegistryUtils.itemKey(stack.getItem());
 
         Optional<FoodOverrideRegistry.FoodOverride> override = itemId != null
                 ? getEffectiveOverride(itemId.toString())
                 : Optional.empty();
 
-        if (itemId != null && isExcluded(itemId.toString())) {
+        if (honorExclusion && itemId != null && isExcluded(itemId.toString())) {
             return override.isPresent() ? Map.copyOf(override.get().nutrients()) : Map.of();
         }
 
