@@ -3,6 +3,7 @@ package dev.maire.nourished.client.screen.itemeditor;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.geometry.Bounds;
+import dev.marie.framework.ui.toolbox.OptionLayout;
 import dev.marie.framework.ui.toolbox.OptionRow;
 import dev.marie.framework.ui.toolbox.OptionStyle;
 import dev.maire.nourished.core.Nourished;
@@ -33,6 +34,16 @@ final class ItemEditorRemoteGuard {
         }
         Nourished.LOGGER.warn("[ItemEditor] {} edits are local-only and were not saved: connected to a remote server", page);
         return true;
+    }
+
+    /** Greys out every row of a page built while connected to a remote server, so nothing looks editable. */
+    static void disableIfRemote(OptionLayout layout) {
+        if (!isRemoteServer()) {
+            return;
+        }
+        for (OptionRow row : layout.allRows()) {
+            row.enabledWhen(() -> false);
+        }
     }
 
     static OptionRow noticeRow() {
