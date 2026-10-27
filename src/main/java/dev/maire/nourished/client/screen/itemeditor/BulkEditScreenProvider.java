@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -115,6 +116,9 @@ public final class BulkEditScreenProvider implements ItemEditorScreenProvider {
 
             OptionLayout next = new OptionLayout("nourished-bulk-edit");
             next.addTab("");
+            if (ItemEditorRemoteGuard.isRemoteServer()) {
+                next.addRow(ItemEditorRemoteGuard.noticeRow());
+            }
             for (ItemStack stack : List.copyOf(selected)) {
                 next.addRow(new SelectedItemRow(stack, () -> removeSelected(stack)));
             }
@@ -138,6 +142,7 @@ public final class BulkEditScreenProvider implements ItemEditorScreenProvider {
             next.enabledWhenLast(() -> nutrientGroupIndex > 0);
             next.addRow(new ButtonOption("Apply to Selected",
                     () -> "APPLY (" + selected.size() + ")", this::applyBulkEdit, () -> {}));
+            ItemEditorRemoteGuard.disableIfRemote(next);
             this.layout = next;
         }
 
@@ -147,14 +152,16 @@ public final class BulkEditScreenProvider implements ItemEditorScreenProvider {
         }
 
         private void applyBulkEdit() {
-            if (selected.isEmpty()) {
+            if (selected.isEmpty() || ItemEditorRemoteGuard.blockSave("Bulk Edit")) {
                 return;
             }
             List<String> itemIds = new ArrayList<>();
+            Map<String, ItemStack> stacksById = new LinkedHashMap<>();
             for (ItemStack stack : selected) {
                 ResourceLocation id = MarieRegistryUtils.itemKey(stack.getItem());
                 if (id != null) {
                     itemIds.add(id.toString());
+                    stacksById.put(id.toString(), stack);
                 }
             }
 
@@ -174,12 +181,25 @@ public final class BulkEditScreenProvider implements ItemEditorScreenProvider {
             if (nutrientGroupIndex > 0) {
                 String nutrientKey = NutrientRegistry.getAll().get(nutrientGroupIndex - 1).key();
                 boolean add = groupActionIndex == 0;
+                // An item with no editor entry yet gets one seeded from its effective classification
+                // (tags / resolved weights), since the new entry replaces those sources outright.
+                Map<String, Map<String, Float>> baselines = new LinkedHashMap<>();
+                MarieContext.runAs(MarieContext.forMod(modId), () -> {
+                    for (String itemId : itemIds) {
+                        if (SourceClassificationRegistry.get(itemId) == null) {
+                            baselines.put(itemId, null);
+                        }
+                    }
+                });
+                baselines.replaceAll((itemId, ignored) ->
+                        NutrientGroupsScreenProvider.effectiveWeights(stacksById.get(itemId)));
                 MarieContext.runAs(MarieContext.forMod(modId), () -> {
                     for (String itemId : itemIds) {
                         SourceClassificationRegistry.SourceClassification existing =
                                 SourceClassificationRegistry.get(itemId);
                         LinkedHashMap<String, Float> values = existing != null
-                                ? new LinkedHashMap<>(existing.values()) : new LinkedHashMap<>();
+                                ? new LinkedHashMap<>(existing.values())
+                                : new LinkedHashMap<>(baselines.getOrDefault(itemId, Map.of()));
                         int calories = existing != null ? existing.calories() : 0;
                         boolean enabled = existing == null || existing.enabled();
                         if (add) {

@@ -67,17 +67,21 @@ public final class CaloriesScreenProvider implements ItemEditorScreenProvider {
             this.customCalories = savedCustomCalories != null ? savedCustomCalories : DEFAULT_CUSTOM_CALORIES;
             this.layout = new OptionLayout("nourished-calories");
             layout.addTab("");
+            if (ItemEditorRemoteGuard.isRemoteServer()) {
+                layout.addRow(ItemEditorRemoteGuard.noticeRow());
+            }
             layout.addRow(new ToggleOption("Calories Off", () -> caloriesOff, v -> caloriesOff = v, () -> {}));
             layout.addRow(new ToggleOption("Use Custom Calories",
                     () -> useCustomCalories, v -> useCustomCalories = v, () -> {}));
             layout.addRow(SliderOption.ofInt("Calories", () -> customCalories, v -> customCalories = v,
                     CALORIES_MIN, CALORIES_MAX, CALORIES_STEP, "cal", () -> {}));
             layout.enabledWhenLast(() -> useCustomCalories);
+            ItemEditorRemoteGuard.disableIfRemote(layout);
         }
 
         @Override
         public void save() {
-            if (sourceId == null) {
+            if (sourceId == null || ItemEditorRemoteGuard.blockSave("Calories")) {
                 return;
             }
             if (caloriesOff) {

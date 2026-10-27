@@ -24,6 +24,5 @@
   "showActiveEffects": true,
   "showCaloriesBox": true,
   "showBalanceBox": true,
-  "showDietScreenButton": true,
-  "dietScreenClassicMode": false
+  "showDietScreenButton": true
 }

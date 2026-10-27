@@ -45,6 +45,8 @@ public final class NourishedColors {
     public static final ColorKey HUD_BORDER = themed("hud.border", ThemeKey.BORDER);
     public static final ColorKey DIET_PANEL = shaded("panel.diet", ThemeKey.PANEL_BACKGROUND, DIET_PANEL_SHADE);
     public static final ColorKey DIET_TITLE = themed("diet.title", ThemeKey.TEXT_PRIMARY);
+    /** The Nutritional Panel's sidebar tab text; starts as the title color it used to share. */
+    public static final ColorKey DIET_TABS = themed("diet.tabs", ThemeKey.TEXT_PRIMARY);
 
     // Calories and the accents of the Calorie History / Activity Log panels
     public static final ColorKey CALORIE_VALUE = themed("calorie.value", ThemeKey.TEXT_PRIMARY);
@@ -85,8 +87,8 @@ public final class NourishedColors {
     public static final ColorKey BALANCE_EXCESS = themed("balance.excess", ThemeKey.TEXT_SECONDARY);
     public static final ColorKey EFFECT_BENEFICIAL = themed("effect.beneficial", ThemeKey.TEXT_PRIMARY);
     public static final ColorKey EFFECT_HARMFUL = themed("effect.harmful", ThemeKey.TEXT_SECONDARY);
-    public static final ColorKey TOGGLE_ON = themed("toggle.on", ThemeKey.TEXT_PRIMARY);
-    public static final ColorKey TOGGLE_OFF = themed("toggle.off", ThemeKey.BORDER);
+    public static final ColorKey TOGGLE_ON = def("toggle.on", 0x20E025);
+    public static final ColorKey TOGGLE_OFF = def("toggle.off", 0xF72826);
     public static final ColorKey TOGGLE_BORDER = themed("toggle.border", ThemeKey.PANEL_BACKGROUND);
     public static final ColorKey TOGGLE_HOUSING = themed("toggle.housing", ThemeKey.PANEL_BACKGROUND);
     public static final ColorKey TOGGLE_LEVER = themed("toggle.lever", ThemeKey.TEXT_SECONDARY);
@@ -195,7 +197,7 @@ public final class NourishedColors {
 
     /** Icon border follows the row's Border color until it's given its own. */
     public static int resolveIntakeBarIconBorder(String nutrient) {
-        ColorKey icon = intakeBarIconBorderKey(nutrient);
+        ColorKey icon = MarieColors.currentColorScope().scoped(intakeBarIconBorderKey(nutrient));
         Integer preview = dev.marie.framework.color.ColorPreviewOverrides.getOverride(icon);
         if (preview != null) {
             return preview;

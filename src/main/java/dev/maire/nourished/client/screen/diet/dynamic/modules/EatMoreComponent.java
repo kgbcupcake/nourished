@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietSettings;
 import dev.marie.framework.color.MarieColors;
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
@@ -259,7 +260,7 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
     }
 
     private void drawRoundedBox(RenderContext context, int localX, int localY, int localW, int localH, NourishedClientConfig cc) {
-        int fill = panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity());
+        int fill = panelColorWithOpacity(surfaceRgb(), DietSettings.backgroundOpacity());
         context.drawRoundedRect(sx(localX), sy(localY), sd(localW), sd(localH), 1, fill, borderColor());
     }
 
@@ -274,7 +275,7 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
      */
     private void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc) {
         var store = DietScreenPersistence.get();
-        int fill = MarieModuleSettings.styledBackground(panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity()), store, ID);
+        int fill = MarieModuleSettings.styledBackground(panelColorWithOpacity(surfaceRgb(), DietSettings.backgroundOpacity()), store, ID);
         int border = MarieModuleSettings.styledBorder(borderColor(), store, ID);
         MarieModuleSettings.drawBoxGlow(context, store, ID, anchorBounds.x(), anchorBounds.y(), screenW, screenH);
         context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, border);

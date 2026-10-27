@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.config.categories;
 
+import dev.maire.nourished.config.DietScreenMode;
 import dev.maire.nourished.config.NourishedClientConfig;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
@@ -123,9 +124,9 @@ public final class DietScreenCategory {
 
         List<AbstractConfigListEntry> behaviorEntries = new ArrayList<>();
         behaviorEntries.add(
-                eb.startBooleanToggle(Component.translatable("config.nourished.dietScreenClassicMode"), client.dietScreenClassicMode())
-                        .setDefaultValue(false)
-                        .setSaveConsumer(client::setDietScreenClassicMode)
+                eb.startEnumSelector(Component.translatable("config.nourished.dietScreenMode"), DietScreenMode.class, client.dietScreenMode())
+                        .setDefaultValue(DietScreenMode.DYNAMIC)
+                        .setSaveConsumer(client::setDietScreenMode)
                         .build()
         );
         category.addEntry(eb.startSubCategory(Component.translatable("config.nourished.dietScreen.group.behavior"), behaviorEntries).setExpanded(false).build());

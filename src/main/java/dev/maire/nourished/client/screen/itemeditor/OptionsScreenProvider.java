@@ -88,6 +88,9 @@ public final class OptionsScreenProvider implements ItemEditorScreenProvider {
             this.diminishingReturnsEnabled = NourishedConfig.get().enableDiminishingReturns();
             this.layout = new OptionLayout("nourished-options");
             layout.addTab("");
+            if (ItemEditorRemoteGuard.isRemoteServer()) {
+                layout.addRow(ItemEditorRemoteGuard.noticeRow());
+            }
             layout.addRow(new ToggleOption("Excluded from classification", () -> excluded, v -> excluded = v, () -> {}));
             layout.addRow(new ToggleOption("Silent Eat", () -> silentEat, v -> silentEat = v, () -> {}));
             layout.addRow(new ToggleOption("Exclude from Recent Meals",
@@ -98,6 +101,7 @@ public final class OptionsScreenProvider implements ItemEditorScreenProvider {
                     () -> diminishingReturnsOff, v -> diminishingReturnsOff = v, () -> {}));
             layout.addRow(new ToggleOption("Diminishing Returns (All Food)",
                     () -> diminishingReturnsEnabled, v -> diminishingReturnsEnabled = v, () -> {}));
+            ItemEditorRemoteGuard.disableIfRemote(layout);
         }
 
         private static int rawTierIndexFromRegistry(@Nullable String sourceId) {
@@ -110,6 +114,9 @@ public final class OptionsScreenProvider implements ItemEditorScreenProvider {
 
         @Override
         public void save() {
+            if (ItemEditorRemoteGuard.blockSave("Options")) {
+                return;
+            }
             if (sourceId != null) {
                 if (excluded) {
                     ExcludedFoodOverrideRegistry.addExcluded(sourceId);

@@ -10,8 +10,11 @@ import dev.marie.framework.ui.itemeditor.ItemEditorPage;
 import dev.marie.framework.ui.itemeditor.ItemEditorScreenProvider;
 import dev.marie.framework.ui.toolbox.OptionLayout;
 import dev.marie.framework.ui.toolbox.ToggleOption;
+import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeManager;
 
 import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
@@ -32,6 +35,10 @@ import java.util.Set;
  * when opened and only touch the field(s) actually changed on save. Calories/Enabled are read
  * from, and written back to, whatever the existing entry already has — this page never touches
  * them.
+ * <p>An item with no editor entry yet starts from its effective classification instead (nutrient
+ * tags / resolved recipe weights, via {@link NutrientClassificationLookup#resolveNutrientBars}):
+ * the first save creates an authoritative entry that replaces those sources, so it is seeded with
+ * them rather than holding only the groups toggled here.
  */
 @ApiStatus.Internal
 public final class NutrientGroupsScreenProvider implements ItemEditorScreenProvider {
@@ -45,7 +52,23 @@ public final class NutrientGroupsScreenProvider implements ItemEditorScreenProvi
 
     @Override
     public ItemEditorPage buildScreen(String modId, @Nullable String sourceId, ItemStack stack) {
-        return new NutrientGroupsScreen(modId, sourceId);
+        return new NutrientGroupsScreen(modId, sourceId, stack);
+    }
+
+    /** The positive per-nutrient weights {@code stack} currently counts toward, from every classification source. */
+    static Map<String, Float> effectiveWeights(ItemStack stack) {
+        Map<String, Float> out = new LinkedHashMap<>();
+        if (stack == null || stack.isEmpty()) {
+            return out;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        RecipeManager recipeManager = mc.level != null ? mc.level.getRecipeManager() : null;
+        for (Map.Entry<String, Float> e : NutrientClassificationLookup.resolveNutrientBarsIgnoringExclusion(stack, recipeManager).entrySet()) {
+            if (e.getValue() != null && e.getValue() > 0f) {
+                out.put(e.getKey(), e.getValue());
+            }
+        }
+        return out;
     }
 
     private static final class NutrientGroupsScreen implements ItemEditorPage {
@@ -53,21 +76,27 @@ public final class NutrientGroupsScreenProvider implements ItemEditorScreenProvi
         private final String modId;
         @Nullable
         private final String sourceId;
+        private final ItemStack stack;
         private final Map<String, Boolean> checked = new LinkedHashMap<>();
         private final OptionLayout layout;
 
-        NutrientGroupsScreen(String modId, @Nullable String sourceId) {
+        NutrientGroupsScreen(String modId, @Nullable String sourceId, ItemStack stack) {
             this.modId = modId;
             this.sourceId = sourceId;
+            this.stack = stack;
             loadChecked();
             this.layout = new OptionLayout("nourished-nutrient-groups");
             layout.addTab("");
+            if (ItemEditorRemoteGuard.isRemoteServer()) {
+                layout.addRow(ItemEditorRemoteGuard.noticeRow());
+            }
             for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
                 layout.addRow(new ToggleOption(def.displayName(),
                         () -> checked.getOrDefault(def.key(), false),
                         v -> checked.put(def.key(), v),
                         () -> {}));
             }
+            ItemEditorRemoteGuard.disableIfRemote(layout);
         }
 
         private void loadChecked() {
@@ -86,21 +115,32 @@ public final class NutrientGroupsScreenProvider implements ItemEditorScreenProvi
                     }
                 }
             });
+            if (active.isEmpty() && !hasEditorEntry()) {
+                active.addAll(effectiveWeights(stack).keySet());
+            }
             for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
                 checked.put(def.key(), active.contains(def.key()));
             }
         }
 
+        private boolean hasEditorEntry() {
+            boolean[] present = {false};
+            MarieContext.runAs(MarieContext.forMod(modId),
+                    () -> present[0] = SourceClassificationRegistry.get(sourceId) != null);
+            return present[0];
+        }
+
         @Override
         public void save() {
-            if (sourceId == null) {
+            if (sourceId == null || ItemEditorRemoteGuard.blockSave("Nutrient Groups")) {
                 return;
             }
+            Map<String, Float> baseline = hasEditorEntry() ? Map.of() : effectiveWeights(stack);
             MarieContext.runAs(MarieContext.forMod(modId), () -> {
                 SourceClassificationRegistry.SourceClassification existing = SourceClassificationRegistry.get(sourceId);
                 Map<String, Float> values = existing != null
                         ? new LinkedHashMap<>(existing.values())
-                        : new LinkedHashMap<>();
+                        : new LinkedHashMap<>(baseline);
                 int calories = existing != null ? existing.calories() : 0;
                 boolean enabled = existing == null || existing.enabled();
                 for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {

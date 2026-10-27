@@ -4,6 +4,8 @@ import dev.marie.framework.ui.api.ComponentPersistence;
 import dev.marie.framework.ui.component.ComponentState;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.PersistenceProvider;
+import dev.marie.framework.ui.api.ModuleProfile;
+import dev.marie.framework.color.ColorScope;
 import dev.maire.nourished.client.UiStatePersistence;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
@@ -14,6 +16,7 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /** Facade over the shared {@link UiStatePersistence} store for the Diet Screen's panel-relative sub-boxes. */
 public final class DietScreenPersistence {
@@ -36,8 +39,35 @@ public final class DietScreenPersistence {
      */
     private static final Map<String, Bounds> liveOverrides = new HashMap<>();
 
+    private static final ModuleProfile DYNAMIC = ModuleProfile.of(UiStatePersistence.get());
+    // The store and color prefixes the Nutritional Panel has saved under since it got its own settings.
+    private static final ModuleProfile NUTRITIONAL_PANEL = ModuleProfile.of(
+            UiStatePersistence.get().scoped("nourished.nutritionalhud/"), ColorScope.prefixed("nutritionalhud/"));
+    private static boolean nutritionalPanelScope;
+
+    /** The profile the Diet Screen boxes are drawn and edited in right now. */
+    public static ModuleProfile profile() {
+        return nutritionalPanelScope ? NUTRITIONAL_PANEL : DYNAMIC;
+    }
+
+    /** The Diet Screen boxes' store — the Nutritional Panel's own copy while {@link #inNutritionalPanel} is running, the dynamic screen's otherwise. */
     public static PersistenceProvider get() {
-        return UiStatePersistence.get();
+        return profile().store();
+    }
+
+    public static boolean isNutritionalPanel() {
+        return nutritionalPanelScope;
+    }
+
+    /** Runs {@code action} with every box and options panel reading/writing the Nutritional Panel's own settings and colors. */
+    public static <T> T inNutritionalPanel(Supplier<T> action) {
+        boolean previous = nutritionalPanelScope;
+        nutritionalPanelScope = true;
+        try {
+            return NUTRITIONAL_PANEL.run(action);
+        } finally {
+            nutritionalPanelScope = previous;
+        }
     }
 
     /** Registers {@code bounds} as the live preview for {@code componentId} for the remainder of this frame's module build. */
@@ -101,36 +131,36 @@ public final class DietScreenPersistence {
         NourishedClientConfig cc = NourishedClientConfig.get();
         boolean didWork = false;
         if (!cc.recentMealsEatMoreOffsetMigrationDone()) {
-            get().remove(RecentMealsComponent.ID);
-            get().remove(EatMoreComponent.ID);
+            UiStatePersistence.get().remove(RecentMealsComponent.ID);
+            UiStatePersistence.get().remove(EatMoreComponent.ID);
             cc.setRecentMealsEatMoreOffsetMigrationDone(true);
             didWork = true;
         }
         if (!cc.recentMealsEatMoreLocalOffsetMigrationDone()) {
-            get().remove(RecentMealsComponent.ID);
-            get().remove(EatMoreComponent.ID);
+            UiStatePersistence.get().remove(RecentMealsComponent.ID);
+            UiStatePersistence.get().remove(EatMoreComponent.ID);
             cc.setRecentMealsEatMoreLocalOffsetMigrationDone(true);
             didWork = true;
         }
         if (!cc.recentMealsEatMoreLocalSizeMigrationDone()) {
-            get().remove(RecentMealsComponent.ID);
-            get().remove(EatMoreComponent.ID);
+            UiStatePersistence.get().remove(RecentMealsComponent.ID);
+            UiStatePersistence.get().remove(EatMoreComponent.ID);
             cc.setRecentMealsEatMoreLocalSizeMigrationDone(true);
             didWork = true;
         }
         if (!cc.recentMealsRowHeightMigrationDone()) {
-            get().remove(RecentMealsComponent.ID);
+            UiStatePersistence.get().remove(RecentMealsComponent.ID);
             cc.setRecentMealsRowHeightMigrationDone(true);
             didWork = true;
         }
         if (!cc.intakeBreakdownOffsetMigrationDone()) {
-            get().remove(IntakeHeaderComponent.ID);
+            UiStatePersistence.get().remove(IntakeHeaderComponent.ID);
             // "nourished.diet.legend": the removed IntakeLegendComponent's old id, kept as a literal
             // now that the class is gone — still worth clearing out any stale persisted state for it.
-            get().remove("nourished.diet.legend");
+            UiStatePersistence.get().remove("nourished.diet.legend");
             int slots = NutrientRegistry.getKeys().size();
             for (int i = 0; i < slots; i++) {
-                get().remove("nourished.diet.intake.slot" + i);
+                UiStatePersistence.get().remove("nourished.diet.intake.slot" + i);
             }
             cc.setIntakeBreakdownOffsetMigrationDone(true);
             didWork = true;

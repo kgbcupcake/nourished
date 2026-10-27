@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietSettings;
 import dev.marie.framework.color.MarieColors;
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.PersistenceProvider;
@@ -83,7 +84,7 @@ final class SummaryBoxRenderSupport {
 
     void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc, int borderColor,
                        PersistenceProvider store, String panelId) {
-        int fill = MarieModuleSettings.styledBackground(panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity()), store, panelId);
+        int fill = MarieModuleSettings.styledBackground(panelColorWithOpacity(surfaceRgb(), DietSettings.backgroundOpacity()), store, panelId);
         int styledBorder = MarieModuleSettings.styledBorder(borderColor, store, panelId);
         MarieModuleSettings.drawBoxGlow(context, store, panelId, anchorBounds.x(), anchorBounds.y(), screenW, screenH);
         context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, styledBorder);
