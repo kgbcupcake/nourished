@@ -71,11 +71,16 @@ public final class DietOptionsPanel {
                 // No Layout-tab size sliders: the panel and its sub-boxes are all directly drag-resizable
                 // in edit mode, which makes a separate percentage slider per box redundant.
                 .behaviorRows(p -> {
-                    p.toggle(text("nourished.options.diet.drag_bars"),
-                                    DietSettings::barDragEnabled, DietSettings::setBarDragEnabled, save)
-                            .defaultValue(true);
-                    p.button(text("nourished.options.diet.reset_bar_order"), text("nourished.options.diet.reset_caption"),
-                            DietSettings::resetBarOrder, save);
+                    // Nutritional Panel rows are dragged freely as boxes (see TabModuleHosts), not
+                    // swapped in a list order, so the Classic screen's drag-to-reorder toggle and its
+                    // reset button have nothing to act on there and are dynamic-screen-only.
+                    if (!nutritional) {
+                        p.toggle(text("nourished.options.diet.drag_bars"),
+                                        DietSettings::barDragEnabled, DietSettings::setBarDragEnabled, save)
+                                .defaultValue(true);
+                        p.button(text("nourished.options.diet.reset_bar_order"), text("nourished.options.diet.reset_caption"),
+                                DietSettings::resetBarOrder, save);
+                    }
                     // Per-row Move/Hide/Reset now lives on each row's own panel again, reached via the
                     // hub's "Intake" group picker (see DietScreen#intakeGroupEntry) — no duplicate
                     // reset-position buttons needed here.
