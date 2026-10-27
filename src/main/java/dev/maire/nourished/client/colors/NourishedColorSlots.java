@@ -82,7 +82,7 @@ public final class NourishedColorSlots {
 
     /** A slot for one of {@link NourishedColors}' fixed colors; {@code langKey} names it. */
     public static void addFixed(MarieToolbox.PanelBuilder panel, ColorKey key, String langKey) {
-        add(panel, key, text(langKey), NourishedColors.defaultRgb(key));
+        add(panel, key, text(langKey));
     }
 
     /**
@@ -100,8 +100,8 @@ public final class NourishedColorSlots {
         add(panel, NourishedColors.intakeBarTextKey(nutrient), text("nourished.options.color.text"));
         add(panel, NourishedColors.intakeBarTrackKey(nutrient), text("nourished.options.color.bar_track"));
         add(panel, NourishedColors.intakeBarBorderKey(nutrient), text("nourished.options.color.border"));
-        ColorKey iconBorder = NourishedColors.intakeBarIconBorderKey(nutrient);
-        ColorDefinition iconDef = ColorDefinitionRegistry.get(iconBorder);
+        ColorKey iconBorder = MarieColors.currentColorScope().scoped(NourishedColors.intakeBarIconBorderKey(nutrient));
+        ColorDefinition iconDef = ColorDefinitionRegistry.get(NourishedColors.intakeBarIconBorderKey(nutrient));
         int iconDefault = iconDef != null ? iconDef.getDefaultArgb() & 0xFFFFFF : 0xFF00FF;
         panel.color(text("nourished.options.color.icon_border"),
                 () -> NourishedColors.resolveIntakeBarIconBorder(nutrient),
@@ -112,17 +112,7 @@ public final class NourishedColorSlots {
     }
 
     private static void add(MarieToolbox.PanelBuilder panel, ColorKey key, String label) {
-        ColorDefinition definition = ColorDefinitionRegistry.get(key);
-        add(panel, key, label, definition != null ? definition.getDefaultArgb() & 0xFFFFFF : 0xFF00FF);
-    }
-
-    private static void add(MarieToolbox.PanelBuilder panel, ColorKey key, String label, int defaultRgb) {
-        panel.color(label,
-                () -> MarieColors.resolveColor(key),
-                rgb -> ColorPreviewOverrides.setOverride(key, 0xFF000000 | rgb),
-                defaultRgb,
-                () -> commit(key, defaultRgb),
-                () -> ColorPreviewOverrides.setOverride(key, null));
+        panel.colorKey(label, key);
     }
 
     /** Persists the previewed color (or drops the override when it equals the default), saves, and clears the preview. */

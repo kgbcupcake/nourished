@@ -12,9 +12,7 @@ import dev.marie.framework.ui.component.AutoGrowPanelContainer;
 import dev.marie.framework.ui.component.ComponentState;
 import dev.marie.framework.ui.component.Constraint;
 import dev.marie.framework.ui.edit.ContentScaleController;
-import dev.marie.framework.ui.drag.DraggableResizable;
 import dev.marie.framework.ui.api.MarieScaleConfig;
-import dev.marie.framework.ui.drag.SnapRegistry;
 import dev.marie.framework.ui.geometry.Insets;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.RenderContext;
@@ -23,6 +21,10 @@ import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
 import dev.marie.framework.ui.scaleconfig.ScaleConfigEntry;
 import dev.marie.framework.ui.scaleconfig.ScaleConfigPanel;
 import dev.maire.nourished.client.UiStatePersistence;
+import dev.maire.nourished.client.edit.HostedEditBox;
+import dev.marie.framework.ui.api.EditCapabilities;
+import dev.marie.framework.ui.api.EditGesture;
+import dev.marie.framework.ui.api.ModuleEditHost;
 import dev.maire.nourished.client.hud.NourishedHUD;
 import dev.maire.nourished.client.hud.classic.ClassicHudPanelRenderer;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
@@ -42,8 +44,8 @@ import java.util.Optional;
 /**
  * Single stable {@link MarieComponent} target for the HUD's MarieUI edit mode. Unlike
  * {@link dev.maire.nourished.client.screen.diet.dynamic.edit.DietScreenEditTarget} this wraps exactly one
- * draggable/resizable region (the whole nutrient panel), so it holds a single
- * {@link DraggableResizable} rather than one per sub-region.
+ * draggable/resizable region (the whole nutrient panel), moved and resized through MariesLib's
+ * {@link ModuleEditHost} rather than one tracker per sub-region.
  *
  * <p>Dragging is purely spatial now, on every edge and both corners: content size (icon/bar/text
  * scale) always comes from {@link HudLayout#compute(Minecraft, List)}'s own {@code cc.hudScale()} —
@@ -78,8 +80,15 @@ public final class HudEditTarget implements MarieComponent {
     /** How much bigger than content's natural size the box may be dragged, on either axis. */
     private static final double MAX_MARGIN_MULTIPLIER = 5.0d;
 
+    private static final EditCapabilities PANEL_CAPS = EditCapabilities.full().withMoveModes().keepContentOnEdgeResize(false);
+
     private final Minecraft mc;
-    private final DraggableResizable panelDrag;
+    /** Moves and resizes the panel itself; its content moves (and Move Nutrient) stay below, since they use this HUD's own offsets and outlines. */
+    private final ModuleEditHost host = ModuleEditHost.builder(UiStatePersistence.get(), new HudPanelPlacement())
+            .useSnapRegistry(true)
+            .sizeLabels(false)
+            .afterCommit((id, bounds) -> saveManualHeightRowCount(currentVisibleKeysOrFallback().size()))
+            .build();
 
     /** Whether a content-move drag (see {@link #moveContentEnabled}) is currently in progress. */
     /** Grab state for a "Move Text and Icons" or "Move Bars" drag (see {@link MoveDrag}). */
@@ -118,16 +127,6 @@ public final class HudEditTarget implements MarieComponent {
     public HudEditTarget(Minecraft mc) {
         this.mc = mc;
 
-        List<String> keys = currentVisibleKeys();
-        if (keys.isEmpty()) {
-            keys = NutrientRegistry.getKeys();
-        }
-        HudLayout.Layout natural = HudLayout.compute(mc, keys);
-
-        panelDrag = new DraggableResizable(this, constraintFor(natural), (target, bounds) -> commit(bounds));
-        panelDrag.setSnapRegistryId(PANEL_ID);
-        SnapRegistry.register(PANEL_ID, () -> resolvedBounds(this.mc, currentVisibleKeysOrFallback()));
-
         UiStatePersistence.get().load(CONTENT_OFFSET_ID).ifPresent(state -> {
             contentOffsetX = state.x();
             contentOffsetY = state.y();
@@ -159,14 +158,8 @@ public final class HudEditTarget implements MarieComponent {
     }
 
     /**
-     * {@code panelDrag}'s min/preferred/max clamp, rebuilt from {@code natural} — never cached past
-     * a single call. {@code natural} depends on {@code cc.hudScale()}/{@code cc.hudBarWidth()}/
-     * {@code cc.hudVerticalLayout()}/visible-nutrient count, any of which the player can change via
-     * the config screen while this edit target (a session-lifetime singleton, unlike {@code
-     * DietScreenEditTarget} which is rebuilt each time the Diet Screen reopens) is still alive.
-     * {@link #render} calls this every frame — same as {@code DietScreenEditTarget}'s own drag
-     * trackers — so {@code panelDrag}'s clamp never goes stale the way {@link DraggableResizable
-     * #setConstraint}'s own javadoc warns against.
+     * The panel's resize clamp, rebuilt from {@code natural} every frame: the HUD scale, bar width,
+     * layout and visible-nutrient count can all change in the config screen while this target is alive.
      */
     private static Constraint constraintFor(HudLayout.Layout natural) {
         return new Constraint(
@@ -203,7 +196,7 @@ public final class HudEditTarget implements MarieComponent {
         return ComponentState.DEFAULT_PADDING_SCALE;
     }
 
-    /** Same "empty visible keys -> fall back to every registered nutrient" reasoning the constructor uses above, so the {@link SnapRegistry} bounds supplier never resolves an empty-key layout while other components still expect this panel's real on-screen box. */
+    /** Same "empty visible keys -> fall back to every registered nutrient" reasoning the constructor uses above, so nothing ever resolves an empty-key layout while other components still expect this panel's real on-screen box. */
     private static List<String> currentVisibleKeysOrFallback() {
         List<String> keys = currentVisibleKeys();
         return keys.isEmpty() ? NutrientRegistry.getKeys() : keys;
@@ -356,33 +349,6 @@ public final class HudEditTarget implements MarieComponent {
         return new Bounds(layout.panelX(), layout.panelY(), layout.panelW(), layout.panelH());
     }
 
-    private static AutoGrowPanelContainer.ManualOverride existingManualOverride() {
-        return UiStatePersistence.get().load(PANEL_ID)
-                .map(s -> new AutoGrowPanelContainer.ManualOverride(s.widthManual(), s.heightManual()))
-                .orElse(AutoGrowPanelContainer.ManualOverride.NONE);
-    }
-
-    private void commit(Bounds bounds) {
-        List<String> keys = currentVisibleKeysOrFallback();
-        if (keys.isEmpty()) {
-            return;
-        }
-        // Read before this commit's own save below overwrites it.
-        int leftMargin = AutoGrowPanelContainer.leftMarginAfterResize(persistedLeftMargin(),
-                resolvedBounds(mc, keys).width(), bounds.width(), panelDrag.lastCommitWasLeftEdge());
-        AutoGrowPanelContainer.ManualOverride existing = existingManualOverride();
-        AutoGrowPanelContainer.ManualOverride override = AutoGrowPanelContainer.withCommit(existing, panelDrag);
-        // Carries forward the existing persisted contentScale/paddingScale so a drag/resize commit
-        // never resets the user's text-scale or padding adjustment — same fix CalorieHudScreen/
-        // ActivityLogHudPanel's own commit() already applies.
-        double contentScale = persistedContentScale();
-        double paddingScale = persistedPaddingScale();
-        UiStatePersistence.get().save(PANEL_ID, new ComponentState(
-                bounds.x(), bounds.y(), bounds.width(), bounds.height(), false,
-                override.widthManual(), override.heightManual(), leftMargin, contentScale, paddingScale));
-        saveManualHeightRowCount(keys.size());
-    }
-
     @Override
     public String id() {
         return ID;
@@ -390,8 +356,7 @@ public final class HudEditTarget implements MarieComponent {
 
     @Override
     public Constraint constraint() {
-        // Unused: DraggableResizable clamps against the Constraint passed to its own constructor,
-        // never against target.constraint() — same as DietScreenEditTarget's constraint() override.
+        // Unused: the edit host clamps resizes with the panel box's own constraint, never this one.
         return Constraint.preferred(0, 0);
     }
 
@@ -442,7 +407,7 @@ public final class HudEditTarget implements MarieComponent {
             }
             return true;
         }
-        return panelDrag.mouseClicked((int) mouseX, (int) mouseY, bounds);
+        return host.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
@@ -554,11 +519,7 @@ public final class HudEditTarget implements MarieComponent {
             }
             return true;
         }
-        if (panelDrag.isDragging() || panelDrag.isResizing()) {
-            panelDrag.mouseDragged((int) mouseX, (int) mouseY);
-            return true;
-        }
-        return false;
+        return host.mouseDragged(mouseX, mouseY, button);
     }
 
     @Override
@@ -586,9 +547,7 @@ public final class HudEditTarget implements MarieComponent {
             }
             return true;
         }
-        boolean any = panelDrag.isDragging() || panelDrag.isResizing();
-        panelDrag.mouseReleased((int) mouseX, (int) mouseY);
-        return any;
+        return host.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
@@ -607,11 +566,17 @@ public final class HudEditTarget implements MarieComponent {
             return;
         }
 
-        panelDrag.setConstraint(constraintFor(HudLayout.compute(mc, keys)));
-
         int[] mouse = scaledMouse(mc);
         Bounds defaultBounds = resolvedBounds(mc, keys);
-        Bounds bounds = liveOrDefault(mouse[0], mouse[1], defaultBounds);
+        String rowKey = HudRowMove.activeKey();
+        boolean moveTextMode = moveContentEnabled();
+        boolean moveBarsMode = moveBarsEnabled();
+        boolean moveIconsMode = MarieModuleSettings.isMoveIconsEnabled(UiStatePersistence.get(), PANEL_ID);
+        boolean moveAllMode = MarieModuleSettings.isMoveAllEnabled(UiStatePersistence.get(), PANEL_ID);
+        boolean contentMode = rowKey != null || moveTextMode || moveBarsMode || moveIconsMode || moveAllMode;
+        host.beginFrame();
+        Bounds bounds = host.track(new HostedEditBox(PANEL_ID, defaultBounds, constraintFor(HudLayout.compute(mc, keys)),
+                PANEL_CAPS, "", "", null, !contentMode), defaultBounds);
 
         // Offsets are clamped only while dragging (see mouseDragged), never here: clamping at draw time
         // rewrote the shared offsets against whatever the box measured this frame, so the edit preview
@@ -635,12 +600,7 @@ public final class HudEditTarget implements MarieComponent {
 
         // Every outline wraps what the rows actually drew this frame (HudDrawnExtents), so it stays on
         // the content however rows, icons, text or bars have been moved or resized.
-        String rowKey = HudRowMove.activeKey();
-        boolean moveTextMode = moveContentEnabled();
-        boolean moveBarsMode = moveBarsEnabled();
-        boolean moveIconsMode = MarieModuleSettings.isMoveIconsEnabled(UiStatePersistence.get(), PANEL_ID);
-        boolean moveAllMode = MarieModuleSettings.isMoveAllEnabled(UiStatePersistence.get(), PANEL_ID);
-        if (rowKey != null || moveTextMode || moveBarsMode || moveIconsMode || moveAllMode) {
+        if (contentMode) {
             // Dashed rather than a solid glow outline — a live drag affordance shown only while a move
             // toggle is active, not a persistent separately-hit-tested box. "Move Nutrient" (the picked
             // row) wins over the panel-wide modes, matching which one a drag actually moves.
@@ -665,31 +625,12 @@ public final class HudEditTarget implements MarieComponent {
                     context.popClip();
                 }
             }
-        } else {
-            Bounds handle = DraggableResizable.handleBounds(bounds);
-            context.drawResizeHandle(handle.x(), handle.y(), panelDrag.isHandleHovered(mouse[0], mouse[1], bounds), panelDrag.isHandleActive());
-            Bounds handleBL = DraggableResizable.handleBoundsBottomLeft(bounds);
-            context.drawResizeHandle(handleBL.x(), handleBL.y(), panelDrag.isHandleBottomLeftHovered(mouse[0], mouse[1], bounds), panelDrag.isBottomLeftCornerActive());
-            for (DraggableResizable.Edge edge : DraggableResizable.Edge.values()) {
-                Bounds strip = DraggableResizable.edgeHandleBounds(bounds, edge);
-                context.drawEdgeHandle(strip.x(), strip.y(), strip.width(), strip.height(), mouse[0], mouse[1],
-                        panelDrag.isEdgeHovered(mouse[0], mouse[1], bounds, edge), panelDrag.isEdgeActive(edge));
-            }
         }
+        host.renderOverlay(context, mouse[0], mouse[1]);
 
         if (scaleConfigVisible) {
             scaleConfigPanel.render(context, new Bounds(0, 0, context.screenWidth(), context.screenHeight()));
         }
-    }
-
-    private Bounds liveOrDefault(int mx, int my, Bounds fallback) {
-        if (panelDrag.isDragging() || panelDrag.isResizing()) {
-            Bounds preview = panelDrag.mouseDragged(mx, my);
-            if (preview != null) {
-                return preview;
-            }
-        }
-        return fallback;
     }
 
     /**
@@ -701,8 +642,10 @@ public final class HudEditTarget implements MarieComponent {
      * only {@link #resolvedLayout}'s doc explains why width/height are still independently tracked.
      */
     private HudLayout.Layout matchedLayoutFor(List<String> keys, Bounds bounds) {
+        EditGesture gesture = host.activeGesture();
+        boolean leftEdgeResize = gesture != null && gesture.kind() == EditGesture.Kind.RESIZE && gesture.leftEdge();
         int leftMargin = AutoGrowPanelContainer.leftMarginAfterResize(persistedLeftMargin(),
-                resolvedBounds(mc, keys).width(), bounds.width(), panelDrag.isLeftEdgeGestureActive());
+                resolvedBounds(mc, keys).width(), bounds.width(), leftEdgeResize);
         HudLayout.Layout natural = HudLayout.compute(mc, keys);
         return new HudLayout.Layout(
                 bounds.x(), bounds.y(), bounds.width(), bounds.height(),

@@ -72,7 +72,6 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.IntValue dietOffsetY;
     private final ModConfigSpec.DoubleValue recentMealsBoxScale;
     private final ModConfigSpec.DoubleValue eatMoreBoxScale;
-    private final ModConfigSpec.BooleanValue dietScreenClassicMode;
     private final ModConfigSpec.DoubleValue dietBackgroundOpacity;
     private final ModConfigSpec.BooleanValue showRecentMeals;
     private final ModConfigSpec.BooleanValue showEatMoreOf;
@@ -85,6 +84,8 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.BooleanValue recentMealsEatMoreLocalSizeMigrationDone;
     private final ModConfigSpec.BooleanValue recentMealsRowHeightMigrationDone;
     private final ModConfigSpec.BooleanValue intakeBreakdownOffsetMigrationDone;
+    private final ModConfigSpec.EnumValue<DietScreenMode> dietScreenMode;
+    private final ModConfigSpec.BooleanValue dietScreenModeMigrationDone;
 
     /** Matches legacy {@code COL_PANEL_BG} alpha ({@code 0xCC}). */
     private static final double DEFAULT_HUD_BACKGROUND_OPACITY = 204.0d / 255.0d;
@@ -292,9 +293,17 @@ public final class NourishedClientConfig {
                 0.5d,
                 1.5d
         );
-        dietScreenClassicMode = builder.define(
-                "dietScreenClassicMode",
-                ConfigDefaultsLoader.getBoolean(defaults, "dietScreenClassicMode", false)
+        // Supersedes the removed dietScreenClassicMode boolean (Classic Diet Screen was removed in
+        // 0.2.8-beta) — dietScreenMode() migrates anyone still on that legacy value to DYNAMIC lazily
+        // on first read, see that accessor.
+        dietScreenMode = builder.defineEnum(
+                "dietScreenMode",
+                DietScreenMode.DYNAMIC,
+                Arrays.asList(DietScreenMode.values())
+        );
+        dietScreenModeMigrationDone = builder.define(
+                "dietScreenModeMigrationDone",
+                false
         );
         dietBackgroundOpacity = builder.defineInRange(
                 "dietBackgroundOpacity",
@@ -393,6 +402,9 @@ public final class NourishedClientConfig {
                 String trimmed = line.trim();
                 if (trimmed.startsWith("hideZeroNutrients")
                         || trimmed.startsWith("hudShowBelowThreshold")
+                        // Classic Diet Screen was removed in 0.2.8-beta — dietScreenMode (the enum
+                        // that superseded this boolean) handles the actual mode now.
+                        || trimmed.startsWith("dietScreenClassicMode")
                         // Superseded by each Diet Screen sub-box's own persisted ComponentState#contentScale
                         // (DietScreenPersistence), keyed alongside its position/size rather than duplicated
                         // here as a separate global config value — any zoom level set under the old scheme
@@ -843,15 +855,21 @@ public final class NourishedClientConfig {
     }
 
     /**
-     * When true, the Diet Screen opens as {@link dev.maire.nourished.client.screen.diet.classic.ClassicDietScreen}
-     * (pre-MarieUI raw {@code GuiGraphics} rendering) instead of the MarieUI {@code DietScreen}.
+     * Which Diet Screen implementation opens — see {@link DietScreenMode}. On first read, anyone
+     * still carrying the removed Classic mode's legacy persisted value lands on {@link
+     * DietScreenMode#DYNAMIC} instead of erroring — {@code ModConfigSpec.EnumValue} already falls
+     * back to the default for an unrecognized persisted constant, so this flag just makes that
+     * one-time landing explicit and permanent rather than re-checking every load.
      */
-    public boolean dietScreenClassicMode() {
-        return dietScreenClassicMode.get();
+    public DietScreenMode dietScreenMode() {
+        if (!dietScreenModeMigrationDone.get()) {
+            dietScreenModeMigrationDone.set(true);
+        }
+        return dietScreenMode.get();
     }
 
-    public void setDietScreenClassicMode(boolean value) {
-        dietScreenClassicMode.set(value);
+    public void setDietScreenMode(DietScreenMode value) {
+        dietScreenMode.set(value);
     }
 
     public double dietBackgroundOpacity() {

@@ -2,7 +2,7 @@ package dev.maire.nourished.client;
 
 import dev.maire.nourished.client.config.EffectPreview;
 import dev.maire.nourished.client.screen.diet.DietScreen;
-import dev.maire.nourished.client.screen.diet.classic.ClassicDietScreen;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.NutritionalHudScreen;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
@@ -240,7 +240,10 @@ public final class ClientEvents {
     }
 
     private static Screen openDietScreen() {
-        return NourishedClientConfig.get().dietScreenClassicMode() ? new ClassicDietScreen() : new DietScreen();
+        return switch (NourishedClientConfig.get().dietScreenMode()) {
+            case DYNAMIC -> new DietScreen();
+            case HUB -> new NutritionalHudScreen();
+        };
     }
 
     /**

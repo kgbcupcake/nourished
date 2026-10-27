@@ -368,8 +368,6 @@
   "config.nourished.showBalanceBox": "显示均衡度框",
   "config.nourished.showDietScreenButton": "显示物品栏按钮",
   "config.nourished.showDietScreenButton.desc": "在物品栏界面显示饮食界面快捷按钮。不影响饮食界面的快捷键。",
-  "config.nourished.dietScreenClassicMode": "经典饮食界面渲染方式",
-  "config.nourished.dietScreenClassicMode.desc": "使用最初的（MarieUI 之前的）渲染方式打开饮食界面，而非 MarieUI 面板。无论哪种方式，拖动/调整大小的操作都相同。",
   "config.nourished.dietEditHotkey": "编辑饮食界面快捷键",
   "config.nourished.dietEditHotkey.desc": "在饮食界面打开时按下此键以进入编辑模式。",
   "config.nourished.dietScaleConfigHotkey": "打开缩放配置快捷键",

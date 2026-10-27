@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietSettings;
 import dev.marie.framework.color.MarieColors;
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieModuleSettings;
@@ -328,7 +329,7 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
 
     private void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc) {
         var store = DietScreenPersistence.get();
-        int fill = MarieModuleSettings.styledBackground(panelColorWithOpacity(surfaceRgb(), cc.dietBackgroundOpacity()), store, ID);
+        int fill = MarieModuleSettings.styledBackground(panelColorWithOpacity(surfaceRgb(), DietSettings.backgroundOpacity()), store, ID);
         int border = MarieModuleSettings.styledBorder(borderColor(), store, ID);
         MarieModuleSettings.drawBoxGlow(context, store, ID, anchorBounds.x(), anchorBounds.y(), screenW, screenH);
         context.drawRoundedRect(anchorBounds.x(), anchorBounds.y(), screenW, screenH, 1, fill, border);

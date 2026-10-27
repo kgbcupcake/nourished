@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.screen.diet.dynamic.modules;
 
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietSettings;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.color.MarieColors;
 import dev.marie.framework.tracking.TrackingData;
@@ -84,7 +85,7 @@ public final class IntakeBarComponent implements MarieComponent, SelfPositioning
     }
 
     private IntakeBarComponent(int slotIndex, DietLayout.Layout layout, int startLocalY) {
-        var order = NourishedClientConfig.get().effectiveDietBarOrder();
+        var order = DietSettings.barOrder();
         String key = slotIndex < order.size() ? order.get(slotIndex) : null;
         this.id = "nourished.diet.intake.slot" + slotIndex;
 
@@ -136,7 +137,7 @@ public final class IntakeBarComponent implements MarieComponent, SelfPositioning
                 () -> flashOverlayColor(nutrientKey),
                 () -> currentValue(nutrientKey, data),
                 () -> NourishedColors.resolveIntakeBarIconBorder(nutrientKey)
-        );
+        ).independentIconSize();
     }
 
     /**
@@ -173,7 +174,7 @@ public final class IntakeBarComponent implements MarieComponent, SelfPositioning
     }
 
     private static int panelFillColor() {
-        int alpha = Math.max(0, Math.min(255, (int) Math.round(NourishedClientConfig.get().dietBackgroundOpacity() * 255.0d)));
+        int alpha = Math.max(0, Math.min(255, (int) Math.round(DietSettings.backgroundOpacity() * 255.0d)));
         return (alpha << 24) | (NourishedColors.surfaceRgb() & 0x00FFFFFF);
     }
 

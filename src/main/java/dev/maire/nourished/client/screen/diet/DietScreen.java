@@ -10,11 +10,7 @@ import java.util.Map;
 
 import dev.maire.nourished.client.NourishedKeys;
 import dev.marie.framework.client.config.state.MarieClientCache;
-import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingData;
-import dev.marie.framework.tracking.tracker.MarieTracking;
-import dev.maire.nourished.api.NourishedAPI;
-import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.screen.diet.dynamic.edit.DietScreenEditTarget;
 import dev.maire.nourished.client.screen.diet.dynamic.options.DietOptionsPanel;
 import dev.maire.nourished.client.screen.diet.dynamic.layout.DietLayout;
@@ -30,15 +26,13 @@ import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.edit.EditModeController;
+import dev.marie.framework.ui.api.EditModeToggle;
 import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.Theme;
-import dev.marie.framework.ui.ThemeKey;
 import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
 import dev.marie.framework.ui.hub.HubChildEntry;
 import dev.marie.framework.ui.hub.HubEntry;
 import dev.marie.framework.ui.hub.HubGroupEntry;
-import dev.marie.framework.ui.hub.HubInfoPage;
-import dev.marie.framework.ui.hub.HubInfoSection;
 import dev.marie.framework.ui.hub.HubPanel;
 import dev.marie.framework.ui.hub.HubSidebarEntry;
 import dev.marie.framework.ui.component.MarieComponent;
@@ -49,9 +43,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffectUtil;
 
 @ApiStatus.Internal
 public class DietScreen extends Screen {
@@ -100,6 +91,17 @@ public class DietScreen extends Screen {
             () -> MarieColors.resolveColor(NourishedColors.HUB_ACCENT));
     private boolean scaleConfigVisible;
 
+    private final EditModeToggle editToggle = DietEditModeToggle.forPanel(
+            () -> DietScreenEditTarget.resolvedPanelLayout(minecraft),
+            () -> marieEditModeController != null && marieEditModeController.isActive(),
+            () -> {
+                if (marieEditModeController != null && marieEditModeController.isActive()) {
+                    marieEditModeController.exit();
+                } else {
+                    enterEditModeWithScaleConfig();
+                }
+            });
+
     /** 0..1 fade-in over {@link #FADE_DURATION_SEC}; updated each render from frame delta. */
     private float fadeAlpha;
     private long fadeLastFrameNanos;
@@ -111,10 +113,9 @@ public class DietScreen extends Screen {
         fadeClockStarted = false;
     }
 
-    /** Sidebar rows for the hub: a Home overview (first, so the hub opens on it), the five Diet Screen sub-boxes, one "Intake" group for the dynamically-many bar rows, and the screen-wide options panel. */
-    private static List<HubSidebarEntry> scaleConfigEntries() {
+    /** Sidebar rows for the editor hub: the five Diet Screen sub-boxes, one "Intake" group for the dynamically-many bar rows, the screen-wide options panel, and the editor window's own colors. */
+    public static List<HubSidebarEntry> scaleConfigEntries() {
         return List.of(
-                new HubEntry("nourished.diet.hub.home", Component.translatable("nourished.screen.diet.home_label"), homePage()),
                 // "Number size" here (not the shared "Text size" label): this box's Text size slider
                 // only ever drives its calorie value, a number — the generic label would say less than
                 // this specific one does.
@@ -150,80 +151,12 @@ public class DietScreen extends Screen {
                                 ActiveEffectsComponent.ID, false, true, true, true, true, true, true, true,
                                 "nourished.options.diet.effects_bars_size", DietOptionsPanel::effectsColors)),
                 intakeGroupEntry(),
-                new HubEntry(DietScreenEditTarget.PANEL_ID, Component.translatable("nourished.screen.diet.options_label"),
-                        DietOptionsPanel.build()),
+                new HubEntry(DietScreenEditTarget.PANEL_ID, DietOptionsPanel.panelLabel(), DietOptionsPanel.build()),
                 // The hub window's own chrome colors — separate from every box above, which customize
                 // what's being edited, not the editor doing the editing.
                 new HubEntry("nourished.diet.hub.editor", Component.translatable("nourished.options.diet.editor_title"),
                         DietOptionsPanel.editorPanel())
         );
-    }
-
-    /**
-     * The hub's Home page: the viewing player in 3D beside a live nutrition summary. Every value is
-     * read from the same client-side state the Diet Screen's own boxes draw from, so the summary
-     * always matches them.
-     */
-    private static MarieComponent homePage() {
-        return new HubInfoPage("nourished.diet.hub.home",
-                () -> Minecraft.getInstance().player,
-                () -> {
-                    var player = Minecraft.getInstance().player;
-                    return player != null ? player.getName().getString()
-                            : Component.translatable("nourished.screen.diet.home.no_player").getString();
-                },
-                Component.translatable("nourished.screen.diet.home.join_world").getString(),
-                DietScreen::homeSections);
-    }
-
-    private static List<HubInfoSection> homeSections() {
-        Minecraft mc = Minecraft.getInstance();
-        TrackingData data = getClientData();
-        String todayTitle = Component.translatable("nourished.screen.diet.today").getString();
-        if (mc.player == null || data == null) {
-            return List.of(new HubInfoSection(todayTitle, List.of(
-                    new HubInfoSection.Row(Component.translatable("nourished.screen.diet.no_player").getString(), ""))));
-        }
-
-        List<HubInfoSection.Row> today = new ArrayList<>();
-        // Same gate CaloriesComponent uses — no calorie row when that box can't show either.
-        if (FeatureFlagCache.enableTotalTracking() && FeatureFlagCache.enableCalorieHistory()) {
-            float calories = MarieTracking.getCurrentTrackerValue(mc.player, NourishedAPI.CALORIES_TRACKER_ID);
-            today.add(new HubInfoSection.Row(Component.translatable("nourished.screen.diet.calories_label").getString(),
-                    (int) calories + " / " + (int) data.maxTotal, MarieColors.resolveColor(NourishedColors.CALORIE_VALUE)));
-        }
-        String balanceKey = BalanceComponent.getBalanceKey(data);
-        int balanceColor = BalanceComponent.balanceColor(balanceKey);
-        today.add(new HubInfoSection.Row(Component.translatable("nourished.screen.diet.balance_label").getString(),
-                Component.translatable("nourished.screen.diet.balance_state." + balanceKey).getString(), balanceColor));
-        today.add(new HubInfoSection.Row(Component.translatable("nourished.screen.diet.home.balance_score").getString(),
-                Math.round(MarieClientCache.getBalanceScore() * 5) + " / 5", balanceColor));
-
-        List<HubInfoSection.Row> intake = new ArrayList<>();
-        for (String key : NourishedClientConfig.get().effectiveDietBarOrder()) {
-            float value = data.values.getOrDefault(key, 0f);
-            intake.add(new HubInfoSection.Row(NutrientRegistry.getLabelComponent(key).getString(),
-                    Math.round(value * 100) + "%", HudDrawHelpers.nutrientColorArgb(key)));
-        }
-
-        List<HubInfoSection.Row> effects = new ArrayList<>();
-        float tickRate = mc.level != null ? mc.level.tickRateManager().tickrate() : 20f;
-        for (MobEffectInstance effect : mc.player.getActiveEffects()) {
-            MobEffect type = effect.getEffect().value();
-            String name = ActiveEffectsComponent.stripIconGlyphs(Component.translatable(type.getDescriptionId()).getString());
-            int amplifier = effect.getAmplifier();
-            effects.add(new HubInfoSection.Row(amplifier > 0 ? name + " " + (amplifier + 1) : name,
-                    MobEffectUtil.formatDuration(effect, 1.0f, tickRate).getString(),
-                    MarieColors.resolveColor(type.isBeneficial() ? NourishedColors.EFFECT_BENEFICIAL : NourishedColors.EFFECT_HARMFUL)));
-        }
-        if (effects.isEmpty()) {
-            effects.add(new HubInfoSection.Row(Component.translatable("nourished.screen.diet.effects_none").getString(), ""));
-        }
-
-        return List.of(
-                new HubInfoSection(todayTitle, today),
-                new HubInfoSection(Component.translatable("nourished.screen.diet.intake").getString(), intake),
-                new HubInfoSection(Component.translatable("nourished.screen.diet.effects_label").getString(), effects));
     }
 
     /**
@@ -262,7 +195,7 @@ public class DietScreen extends Screen {
     private static HubGroupEntry intakeGroupEntry() {
         Map<String, MarieComponent> contentCache = new java.util.HashMap<>();
         return new HubGroupEntry("nourished.diet.intake", Component.translatable("nourished.screen.diet.intake"), () -> {
-            List<String> order = NourishedClientConfig.get().effectiveDietBarOrder();
+            List<String> order = dev.maire.nourished.client.screen.diet.dynamic.persistence.DietSettings.barOrder();
             int slots = NutrientRegistry.getKeys().size();
             List<HubChildEntry> children = new ArrayList<>(slots);
             for (int i = 0; i < slots; i++) {
@@ -316,12 +249,7 @@ public class DietScreen extends Screen {
         if (scaleConfigVisible && scaleConfigPanel.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
-        if (button == 0 && isMouseOverEditModeToggle(DietScreenEditTarget.resolvedPanelLayout(minecraft), mouseX, mouseY)) {
-            if (marieEditModeController != null && marieEditModeController.isActive()) {
-                marieEditModeController.exit();
-            } else {
-                enterEditModeWithScaleConfig();
-            }
+        if (editToggle.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
         if (button == 0 && NourishedClientConfig.get().dietBarDragEnabled()) {
@@ -524,94 +452,14 @@ public class DietScreen extends Screen {
         try {
             panel.render(MarieModuleSettings.withBrightness(context, NourishedClientConfig.get().dietTextBrightness(), NourishedClientConfig.get().dietIconBrightness()), bounds);
 
-            boolean editModeActive = marieEditModeController != null && marieEditModeController.isActive();
-            boolean toggleHovered = isMouseOverEditModeToggle(resolvedLayout, mx, my);
-            drawEditModeToggle(context, resolvedLayout, editModeActive, toggleHovered);
+            editToggle.render(context, mx, my);
         } finally {
             context.resetClip();
         }
     }
 
     // ── Edit-mode toggle (top-right corner) ─────────────────────────────────
-    // Local (pre-scale) geometry, inset from the panel's top-right corner: clear of the
-    // centered title (title occupies the middle of the row; this sits far right) and above
-    // the divider at local y=26 (see DietPanelContainer). Right margin (6) and top position
-    // (8) leave 1-2px of breathing room from the panel's 1px border on both edges.
-    private static final int TOGGLE_RIGHT_MARGIN = 6;
-    private static final int TOGGLE_HOUSING_W = 10;
-    private static final int TOGGLE_HOUSING_H = 16;
-    private static final int TOGGLE_HOUSING_TOP = 8;
-    private static final int TOGGLE_LIGHT_SIZE = 6;
-    private static final int TOGGLE_LIGHT_GAP = 1;
-    private static final int TOGGLE_LEVER_INSET = 2;
-    private static final int TOGGLE_LEVER_H = 6;
-
-    private static int toggleOnColor() {
-        return MarieColors.resolveColor(NourishedColors.TOGGLE_ON);
-    }
-    private static int toggleOffColor() {
-        return MarieColors.resolveColor(NourishedColors.TOGGLE_OFF);
-    }
-    private static int toggleBorderColor() {
-        return MarieColors.resolveColor(NourishedColors.TOGGLE_BORDER);
-    }
-    private static int toggleHousingColor() {
-        return MarieColors.resolveColor(NourishedColors.TOGGLE_HOUSING);
-    }
-    private static int toggleLeverColor() {
-        return MarieColors.resolveColor(NourishedColors.TOGGLE_LEVER);
-    }
-
-    static Bounds editModeToggleHousingBounds(DietLayout.Layout layout) {
-        int x2 = layout.panelX() + layout.panelW() - DietLayout.toScreenDim(layout, TOGGLE_RIGHT_MARGIN);
-        int w = DietLayout.toScreenDim(layout, TOGGLE_HOUSING_W);
-        int h = DietLayout.toScreenDim(layout, TOGGLE_HOUSING_H);
-        return new Bounds(x2 - w, DietLayout.toScreenY(layout, TOGGLE_HOUSING_TOP), w, h);
-    }
-
-    static Bounds editModeToggleLightBounds(DietLayout.Layout layout, Bounds housing) {
-        int size = DietLayout.toScreenDim(layout, TOGGLE_LIGHT_SIZE);
-        int gap = DietLayout.toScreenDim(layout, TOGGLE_LIGHT_GAP);
-        int x = housing.x() + (housing.width() - size) / 2;
-        int y = housing.y() - gap - size;
-        return new Bounds(x, y, size, size);
-    }
-
-    public static boolean isMouseOverEditModeToggle(DietLayout.Layout layout, double mx, double my) {
-        Bounds housing = editModeToggleHousingBounds(layout);
-        return mx >= housing.x() && my >= housing.y()
-                && mx < housing.x() + housing.width() && my < housing.y() + housing.height();
-    }
-
-    /**
-     * Vertical light-switch: lever sits in the housing's upper half when {@code active}, lower
-     * half when not, and the light above it is solid green/red — the primary at-a-glance signal.
-     * Both are read directly from {@code active} every call (never a cached toggle boolean), so
-     * this can never drift from {@link EditModeController#isActive()}'s live truth.
-     */
-    public static void drawEditModeToggle(RenderContext context, DietLayout.Layout layout, boolean active, boolean hovered) {
-        Bounds housing = editModeToggleHousingBounds(layout);
-        Bounds light = editModeToggleLightBounds(layout, housing);
-
-        int lightColor = active ? toggleOnColor() : toggleOffColor();
-        context.fillRect(light.x(), light.y(), light.width(), light.height(), toggleBorderColor());
-        context.fillRect(light.x() + 1, light.y() + 1, Math.max(0, light.width() - 2), Math.max(0, light.height() - 2), lightColor);
-
-        context.fillRect(housing.x(), housing.y(), housing.width(), housing.height(), toggleHousingColor());
-        int borderColor = hovered
-                ? context.theme().color(ThemeKey.BORDER_HOVER)
-                : context.theme().color(ThemeKey.BORDER);
-        context.drawBorder(housing.x(), housing.y(), housing.width(), housing.height(), 1, borderColor);
-
-        int leverInset = DietLayout.toScreenDim(layout, TOGGLE_LEVER_INSET);
-        int leverW = Math.max(1, housing.width() - 2 * leverInset);
-        int leverH = DietLayout.toScreenDim(layout, TOGGLE_LEVER_H);
-        int leverX = housing.x() + leverInset;
-        int upperY = housing.y() + leverInset;
-        int lowerY = housing.y() + housing.height() - leverInset - leverH;
-        int leverY = active ? upperY : lowerY;
-        context.fillRect(leverX, leverY, leverW, leverH, toggleLeverColor());
-    }
+    // Drawing/hit-testing now live in DietEditModeToggle, shared with DietScreenEditTarget.
 
     private void drawDietIconTooltips(GuiGraphics g, DietLayout.Layout layout, int mx, int my) {
         double s = layout.scale();

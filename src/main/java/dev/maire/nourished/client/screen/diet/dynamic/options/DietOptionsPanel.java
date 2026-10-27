@@ -10,6 +10,7 @@ import dev.maire.nourished.client.colors.NourishedColorSlots;
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.marie.framework.ui.api.MarieToolbox;
 import dev.marie.framework.ui.component.MarieComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietSettings;
 import dev.maire.nourished.config.NourishedClientConfig;
 import net.minecraft.network.chat.Component;
 
@@ -27,9 +28,17 @@ public final class DietOptionsPanel {
 
     private DietOptionsPanel() {}
 
+    /** The screen-wide page's name: "Nutritional Panel" when built for that screen, "Diet Screen" for the dynamic one. */
+    public static Component panelLabel() {
+        return Component.translatable(DietScreenPersistence.isNutritionalPanel()
+                ? "nourished.screen.diet.nutritionalhud.editor_label" : "nourished.options.diet.title");
+    }
+
     public static MarieComponent build() {
-        Runnable save = NourishedClientConfig::saveNow;
-        return MarieModuleSettings.standardPanel(text("nourished.options.diet.title"), DietScreenPersistence.get(), DietScreenEditTarget.PANEL_ID)
+        Runnable save = DietSettings::save;
+        // The Nutritional Panel's window draws its own header, so title size and brightness have nothing to act on there.
+        boolean nutritional = DietScreenPersistence.isNutritionalPanel();
+        var builder = MarieModuleSettings.standardPanel(panelLabel().getString(), DietScreenPersistence.get(), DietScreenEditTarget.PANEL_ID)
                 // The whole screen has no text, icons or padding of its own to size or move; those live on its five boxes.
                 .withoutPadding()
                 .withoutMoveAndHide()
@@ -40,23 +49,33 @@ public final class DietOptionsPanel {
                 .withShadow()
                 .withGlow()
                 .withoutBarGlow()
-                .styleRows(p -> p.headerSize(DietScreenPersistence.get(), DietScreenEditTarget.PANEL_ID, "nourished.options.diet.title_size")
-                        .toggle(text("nourished.options.diet.hide_title"),
-                                () -> MarieModuleSettings.isHeaderHidden(DietScreenPersistence.get(), DietScreenEditTarget.PANEL_ID),
-                                v -> MarieModuleSettings.setHeaderHidden(DietScreenPersistence.get(), DietScreenEditTarget.PANEL_ID, v), () -> {})
-                        .defaultValue(false))
-                .opacity(() -> cc().dietBackgroundOpacity(), v -> cc().setDietBackgroundOpacity(v), DEFAULT_OPACITY)
-                .textBrightness(() -> cc().dietTextBrightness(), v -> cc().setDietTextBrightness(v))
-                .iconBrightness(() -> cc().dietIconBrightness(), v -> cc().setDietIconBrightness(v))
+                .styleRows(p -> {
+                    if (nutritional) {
+                        return;
+                    }
+                    p.headerSize(DietScreenPersistence.get(), DietScreenEditTarget.PANEL_ID, "nourished.options.diet.title_size");
+                    p.toggle(text("nourished.options.diet.hide_title"),
+                                    () -> MarieModuleSettings.isHeaderHidden(DietScreenPersistence.get(), DietScreenEditTarget.PANEL_ID),
+                                    v -> MarieModuleSettings.setHeaderHidden(DietScreenPersistence.get(), DietScreenEditTarget.PANEL_ID, v), () -> {})
+                            .defaultValue(false);
+                });
+        if (nutritional) {
+            builder.storedOpacity(DEFAULT_OPACITY);
+        } else {
+            builder.opacity(() -> cc().dietBackgroundOpacity(), v -> cc().setDietBackgroundOpacity(v), DEFAULT_OPACITY)
+                    .textBrightness(() -> cc().dietTextBrightness(), v -> cc().setDietTextBrightness(v))
+                    .iconBrightness(() -> cc().dietIconBrightness(), v -> cc().setDietIconBrightness(v));
+        }
+        return builder
                 .onCommit(save)
                 // No Layout-tab size sliders: the panel and its sub-boxes are all directly drag-resizable
                 // in edit mode, which makes a separate percentage slider per box redundant.
                 .behaviorRows(p -> {
                     p.toggle(text("nourished.options.diet.drag_bars"),
-                                    () -> cc().dietBarDragEnabled(), v -> cc().setDietBarDragEnabled(v), save)
+                                    DietSettings::barDragEnabled, DietSettings::setBarDragEnabled, save)
                             .defaultValue(true);
                     p.button(text("nourished.options.diet.reset_bar_order"), text("nourished.options.diet.reset_caption"),
-                            () -> cc().resetDietBarOrder(), save);
+                            DietSettings::resetBarOrder, save);
                     // Per-row Move/Hide/Reset now lives on each row's own panel again, reached via the
                     // hub's "Intake" group picker (see DietScreen#intakeGroupEntry) — no duplicate
                     // reset-position buttons needed here.
@@ -65,7 +84,7 @@ public final class DietOptionsPanel {
                     // each box's own gear-icon panel (its Behavior tab's Hide Window toggle) instead of here.
                     // Read only when the inventory screen opens (ClientEvents#onScreenInit), so a change applies on the next open.
                     p.toggle(text("nourished.options.diet.show_inventory_button"),
-                                    () -> cc().showDietScreenButton(), v -> cc().setShowDietScreenButton(v), save)
+                                    () -> cc().showDietScreenButton(), v -> cc().setShowDietScreenButton(v), NourishedClientConfig::saveNow)
                             .defaultValue(true);
                     p.endSection();
                     // The consolidated "Reset This Module" button MarieModuleSettings#standardPanel
@@ -77,6 +96,10 @@ public final class DietOptionsPanel {
                     panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
                     NourishedColorSlots.addFixed(panel, NourishedColors.DIET_PANEL, "nourished.options.color.panel");
                     NourishedColorSlots.addFixed(panel, NourishedColors.DIET_TITLE, "nourished.options.color.title");
+                    if (DietScreenPersistence.isNutritionalPanel()) {
+                        // Only the Nutritional Panel's window has sidebar tabs.
+                        NourishedColorSlots.addFixed(panel, NourishedColors.DIET_TABS, "nourished.options.color.tabs");
+                    }
                     // The main panel's own border line (the one its Pulse breathes) — its own slot here
                     // rather than on the Shared tab.
                     NourishedColorSlots.addFixed(panel, NourishedColors.BORDER, "nourished.options.color.border");
