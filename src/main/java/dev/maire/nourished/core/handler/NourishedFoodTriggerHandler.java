@@ -123,7 +123,7 @@ public final class NourishedFoodTriggerHandler {
         }
     }
 
-    private static void fireSourceTriggerAndNotifyFoodEaten(
+    static void fireSourceTriggerAndNotifyFoodEaten(
             ServerPlayer player,
             ItemStack stack,
             FoodProperties food

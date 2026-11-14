@@ -30,6 +30,8 @@ import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPers
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietSettings;
 import dev.maire.nourished.config.NutritionalPanelConfig;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.HomeTabRenderer;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.NutrientsBoxPane;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.NutrientsTabRenderer;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.ScrollableTabPane;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.SoloIntakeBreakdownPane;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.SoloModulePane;
@@ -109,7 +111,8 @@ public final class NutritionalHudScreen extends Screen {
                 tab(RecentMealsComponent.ID, "nourished.screen.diet.recent_label", hosted(RecentMealsComponent.ID, new SoloModulePane(RecentMealsComponent.ID))),
                 tab(EatMoreComponent.ID, "nourished.screen.diet.suggestion_label", hosted(EatMoreComponent.ID, new SoloModulePane(EatMoreComponent.ID))),
                 tab(ActiveEffectsComponent.ID, "nourished.screen.diet.effects_label", hosted(ActiveEffectsComponent.ID, new SoloModulePane(ActiveEffectsComponent.ID))),
-                intakeTab()
+                intakeTab(),
+                nutrientsTab()
         );
     }
 
@@ -122,6 +125,12 @@ public final class NutritionalHudScreen extends Screen {
         SoloIntakeBreakdownPane renderer = new SoloIntakeBreakdownPane();
         MarieComponent scrollable = new ScrollableTabPane(hosted(SoloIntakeBreakdownPane.ID, renderer), renderer.scrollState());
         return tab(SoloIntakeBreakdownPane.ID, "nourished.screen.diet.intake", scrollable);
+    }
+
+    private HubEntry nutrientsTab() {
+        NutrientsTabRenderer renderer = new NutrientsTabRenderer();
+        MarieComponent content = renderer.wrap(hosted(NutrientsBoxPane.ID, renderer), () -> editorOpen);
+        return tab(NutrientsBoxPane.ID, "nourished.screen.diet.nutrients_tab", content);
     }
 
     @Override

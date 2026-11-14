@@ -20,6 +20,7 @@ public class NourishedKubePlugin implements KubeJSPlugin {
     @Override
     public void registerBindings(BindingRegistry registry) {
         registry.add("NourishedAPI", NourishedKubeBindings.class);
+        registry.add("NourishedNutrients", dev.maire.nourished.kubejs.bindings.NourishedNutrientKubeBindings.class);
     }
 
     @Override

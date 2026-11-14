@@ -28,15 +28,25 @@ public final class MicroRegistry {
             Map<String, MicroDef> defs,
             Map<ResourceLocation, Map<String, Float>> itemValues,
             Map<ResourceLocation, Map<String, Float>> tagValues,
+            Map<String, MicroSourceRule> sources,
             Settings settings
     ) {
-        static final Snapshot EMPTY = new Snapshot(Map.of(), Map.of(), Map.of(), new Settings(true, true, 0.75f, 2f));
+        static final Snapshot EMPTY = new Snapshot(Map.of(), Map.of(), Map.of(), Map.of(), new Settings(true, true, 0.75f, 2f));
+
+        public MicroSourceRule sourceRule(String key) {
+            return sources.getOrDefault(key, MicroSourceRule.NONE);
+        }
 
         public void write(FriendlyByteBuf buf) {
             buf.writeVarInt(defs.size());
             defs.values().forEach(d -> d.write(buf));
             writeValues(buf, itemValues);
             writeValues(buf, tagValues);
+            buf.writeVarInt(sources.size());
+            sources.forEach((k, r) -> {
+                buf.writeUtf(k);
+                r.write(buf);
+            });
             buf.writeBoolean(settings.enabled());
             buf.writeBoolean(settings.recipeDerivation());
             buf.writeFloat(settings.recipeScale());
@@ -52,8 +62,13 @@ public final class MicroRegistry {
             }
             var items = readValues(buf);
             var tags = readValues(buf);
+            int ruleCount = MicroCodecs.readSize(buf);
+            Map<String, MicroSourceRule> sources = new LinkedHashMap<>();
+            for (int i = 0; i < ruleCount; i++) {
+                sources.put(buf.readUtf(), MicroSourceRule.read(buf));
+            }
             Settings settings = new Settings(buf.readBoolean(), buf.readBoolean(), buf.readFloat(), buf.readFloat());
-            return new Snapshot(defs, items, tags, settings);
+            return new Snapshot(defs, items, tags, sources, settings);
         }
 
         private static void writeValues(FriendlyByteBuf buf, Map<ResourceLocation, Map<String, Float>> values) {
@@ -78,16 +93,22 @@ public final class MicroRegistry {
     public record Layer(
             Map<String, MicroDef> defs,
             Map<ResourceLocation, Map<String, Float>> itemValues,
-            Map<ResourceLocation, Map<String, Float>> tagValues
+            Map<ResourceLocation, Map<String, Float>> tagValues,
+            Map<String, MicroSourceRule> sources
     ) {
         public static Layer empty() {
-            return new Layer(new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
+            return new Layer(new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
+        }
+
+        public void addSourceRule(String key, MicroSourceRule rule) {
+            sources.merge(key, rule, MicroSourceRule::plus);
         }
     }
 
     private static volatile Snapshot server = Snapshot.EMPTY;
     private static volatile Snapshot client = null;
     private static final Map<String, MicroDef> EXTERNAL = new LinkedHashMap<>();
+    private static final Layer EXTERNAL_VALUES = Layer.empty();
     private static final int CONFIG_LAYER = 1;
     private static volatile List<Layer> lastLayers = List.of();
 
@@ -99,16 +120,21 @@ public final class MicroRegistry {
         Map<String, MicroDef> defs = new LinkedHashMap<>();
         Map<ResourceLocation, Map<String, Float>> items = new LinkedHashMap<>();
         Map<ResourceLocation, Map<String, Float>> tags = new LinkedHashMap<>();
+        Map<String, MicroSourceRule> sources = new LinkedHashMap<>();
         for (Layer layer : layers) {
             defs.putAll(layer.defs());
+            layer.sources().forEach((k, r) -> sources.merge(k, r, MicroSourceRule::plus));
             mergeValues(items, layer.itemValues());
             mergeValues(tags, layer.tagValues());
         }
         synchronized (EXTERNAL) {
             defs.putAll(EXTERNAL);
+            mergeValues(items, EXTERNAL_VALUES.itemValues());
+            mergeValues(tags, EXTERNAL_VALUES.tagValues());
+            EXTERNAL_VALUES.sources().forEach((k, r) -> sources.merge(k, r, MicroSourceRule::plus));
         }
         server = new Snapshot(Collections.unmodifiableMap(defs), Collections.unmodifiableMap(items),
-                Collections.unmodifiableMap(tags), Settings.fromConfig());
+                Collections.unmodifiableMap(tags), Collections.unmodifiableMap(sources), Settings.fromConfig());
         MicroProfileResolver.clearCache();
     }
 
@@ -141,10 +167,30 @@ public final class MicroRegistry {
         }
     }
 
+    /** API hook: nutrient values for an item id or {@code #tag}; takes effect on the next datapack reload. */
+    public static void registerExternalValues(String itemOrTag, Map<String, Float> values) {
+        boolean tag = itemOrTag.startsWith("#");
+        ResourceLocation id = ResourceLocation.tryParse(tag ? itemOrTag.substring(1) : itemOrTag);
+        if (id == null) {
+            throw new IllegalArgumentException("Invalid item or tag id '" + itemOrTag + "'");
+        }
+        synchronized (EXTERNAL) {
+            (tag ? EXTERNAL_VALUES.tagValues() : EXTERNAL_VALUES.itemValues()).put(id, Map.copyOf(values));
+        }
+    }
+
+    /** API hook: pin ({@code hide = false}) or hide an item/{@code #tag} in a nutrient's Best sources; next reload. */
+    public static void registerExternalSource(String key, String itemOrTag, boolean hide) {
+        MicroSourceRule rule = hide ? new MicroSourceRule(List.of(), List.of(itemOrTag)) : new MicroSourceRule(List.of(itemOrTag), List.of());
+        synchronized (EXTERNAL) {
+            EXTERNAL_VALUES.addSourceRule(key, rule);
+        }
+    }
+
     /** Re-reads the TOML-backed settings into the server snapshot, e.g. after a config edit. */
     public static void refreshSettings() {
         Snapshot s = server;
-        server = new Snapshot(s.defs(), s.itemValues(), s.tagValues(), Settings.fromConfig());
+        server = new Snapshot(s.defs(), s.itemValues(), s.tagValues(), s.sources(), Settings.fromConfig());
         MicroProfileResolver.clearCache();
     }
 

@@ -33,13 +33,20 @@ public record MicroDef(
         return new MicroDef(
                 key,
                 obj.has("display_name") ? obj.get("display_name").getAsString() : key,
-                obj.has("color") ? parseColor(obj.get("color").getAsString()) : 0xFFFFFF,
+                obj.has("color") ? color(obj.get("color")) : 0xFFFFFF,
                 obj.has("decay_rate") ? obj.get("decay_rate").getAsFloat() : 0.01f,
                 obj.has("low_threshold") ? obj.get("low_threshold").getAsFloat() : 0.2f,
                 obj.has("high_threshold") ? obj.get("high_threshold").getAsFloat() : 0.9f,
                 obj.has("icon") ? obj.get("icon").getAsString() : "minecraft:apple",
                 groups
         );
+    }
+
+    private static int color(JsonElement el) {
+        if (el.isJsonPrimitive() && el.getAsJsonPrimitive().isNumber()) {
+            return el.getAsInt() & 0xFFFFFF;
+        }
+        return parseColor(el.getAsString());
     }
 
     static int parseColor(String raw) {

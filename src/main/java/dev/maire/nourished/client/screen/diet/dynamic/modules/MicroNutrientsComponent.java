@@ -138,13 +138,14 @@ public final class MicroNutrientsComponent implements MarieComponent, HeaderColl
         }
     }
 
-    /** Nutrient row under the mouse (the header counts as row 0), or -1 when outside the box. */
+    /** -1 outside the box, 0 on the header (Overview), n on the n-th nutrient row. */
     public static int rowAt(double mouseX, double mouseY) {
         Bounds b = lastBounds;
         if (b == null || mouseX < b.x() || mouseX >= b.x() + b.width() || mouseY < b.y() || mouseY >= b.y() + b.height()) {
             return -1;
         }
-        return Math.max(0, (int) Math.floor((mouseY - lastFirstRowY) / lastRowH));
+        if (mouseY < lastFirstRowY) return 0;
+        return (int) Math.floor((mouseY - lastFirstRowY) / lastRowH) + 1;
     }
 
     public static void forgetBounds() {

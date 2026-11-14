@@ -17,6 +17,13 @@ A new "Nutritional HUD" Diet Screen style — a resizable sidebar window with a 
 - Nutrient effects: low Omega-3, Fiber, Vitamins or Minerals bring a mild debuff, high Omega-3 gives Dolphin's Grace, and keeping every nutrient up gives Haste. Off by default (`builtinEffects`); datapacks can add their own.
 - Click the Nutrients box on the Diet Screen for a detail view: level, trend, what you've eaten for it, and the best foods for it
 - `/nourished nutrients` commands and an item editor Nutrients page for setting a food's nutrient values in game
+- Protein and Carbs join the nutrients, and each fish has its own Omega-3 (salmon highest)
+- Nutrient deficiencies get worse the longer they last (stronger debuff after 20 and 60 minutes)
+- Optional nutrient HUD overlay with its own toggle key
+- New Nutrients tab in the Nutritional Panel: an overview of every nutrient plus a page each with trend, recent sources and best foods
+- Modpack authors can pin or hide foods in each nutrient's "Best sources" list (datapack, config, command or KubeJS)
+- Foods with no recipe now get food groups from their name, using other mods' tagged items (a "kiwi smoothie" counts as fruit if any mod has a tagged kiwi)
+- KubeJS: `NourishedNutrients` for adding nutrients, setting food values and reading/setting levels
 - New in-game Settings window with the main feature switches and balance options (opened with its own keybind or from the Command Center)
 - Command Center now has a Config tab that opens Settings, the full config and the Diet Screen editor
 - Nutritional HUD's Home tab: Behavior/Style/Glow/Pulse/Colors, in its own styled box
@@ -39,6 +46,7 @@ A new "Nutritional HUD" Diet Screen style — a resizable sidebar window with a 
 
 ## 🐛 Fixed
 
+- Cake and other foods eaten off a placed block (like modded pies) now give nutrition
 - Nutritional HUD's Home tab showed "Join a world to see your character" instead of the 3D preview even with a player loaded
 - An item excluded only via the item editor's toggle didn't show the "Excluded from nutrition tracking" tooltip line
 - "Diminishing Returns Off" didn't apply correctly in modpacks running more than one MariesLib-based mod

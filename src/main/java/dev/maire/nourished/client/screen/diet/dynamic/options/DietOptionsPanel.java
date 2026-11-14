@@ -1,5 +1,9 @@
 package dev.maire.nourished.client.screen.diet.dynamic.options;
 
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.NutrientsBoxPane;
+import dev.marie.framework.ui.hub.HubEntry;
+import dev.marie.framework.ui.hub.HubSidebarEntry;
+import java.util.List;
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.ui.api.StandardPanelBuilder;
 import dev.maire.nourished.client.screen.diet.DietHomeSections;
@@ -359,6 +363,39 @@ public final class DietOptionsPanel {
                 .extraTabs(panel -> {
                     panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
                     homeColors(panel);
+                })
+                .build();
+    }
+
+    /** Editor entries that only exist on the Nutritional Panel: its Home and Nutrients boxes. */
+    public static List<HubSidebarEntry> nutritionalPanelEntries() {
+        if (!DietScreenPersistence.isNutritionalPanel()) {
+            return List.of();
+        }
+        return List.of(
+                new HubEntry(DietHomeSections.ID, Component.translatable("nourished.screen.diet.home_label"), homePanel()),
+                new HubEntry(NutrientsBoxPane.ID, Component.translatable("nourished.screen.diet.nutrients_tab"), nutrientsPanel()));
+    }
+
+    /** The Nutrients box's entry: same Style/Glow/Pulse/Colors set as Home, since it also draws through the raw graphics. */
+    public static MarieComponent nutrientsPanel() {
+        var store = DietScreenPersistence.get();
+        return MarieModuleSettings.standardPanel(Component.translatable("nourished.screen.diet.nutrients_tab").getString(),
+                        store, NutrientsBoxPane.ID)
+                .withoutPadding()
+                .withoutBars()
+                .withoutIcons()
+                .withoutSizes()
+                .withoutMoveText()
+                .withoutHideText()
+                .withOwnStyle()
+                .withShadow()
+                .withGlow()
+                .withoutBarGlow()
+                .storedOpacity(DEFAULT_OPACITY)
+                .extraTabs(panel -> {
+                    panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
+                    NourishedColorSlots.addFixed(panel, NourishedColors.NUTRIENTS_BORDER, "nourished.options.color.border");
                 })
                 .build();
     }

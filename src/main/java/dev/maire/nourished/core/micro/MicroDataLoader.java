@@ -32,11 +32,13 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
     private static final FileToIdConverter DEFS = FileToIdConverter.json("nourished/micros");
     private static final FileToIdConverter VALUES = FileToIdConverter.json("nourished/micro_values");
     private static final FileToIdConverter EFFECTS = FileToIdConverter.json("nourished/micro_effects");
+    private static final FileToIdConverter SOURCES = FileToIdConverter.json("nourished/micro_sources");
     private static final String CONFIG_TEMPLATE = """
             {
               "micros": {},
               "values": {},
-              "effects": []
+              "effects": [],
+              "sources": {}
             }
             """;
 
@@ -67,6 +69,10 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
             if (values.isJsonObject()) {
                 readValues(values.getAsJsonObject(), layerFor(id, bundled, packs));
             }
+        }
+        for (var e : SOURCES.listMatchingResources(manager).entrySet()) {
+            JsonObject obj = readJson(e.getKey(), e.getValue());
+            if (obj != null) readSources(obj, layerFor(SOURCES.fileToId(e.getKey()), bundled, packs));
         }
         List<MicroEffect> effects = new ArrayList<>();
         for (var e : EFFECTS.listMatchingResources(manager).entrySet()) {
@@ -104,6 +110,25 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
             Nourished.LOGGER.warn("[Nourished] Skipping malformed nutrient file {}: {}", file, ex.getMessage());
             return null;
         }
+    }
+
+    /** {@code {"protein": {"pin": ["minecraft:cooked_beef"], "hide": ["#c:foods/candy"]}}} */
+    static void readSources(JsonObject obj, MicroRegistry.Layer layer) {
+        for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
+            if (!entry.getValue().isJsonObject()) continue;
+            JsonObject rule = entry.getValue().getAsJsonObject();
+            layer.addSourceRule(entry.getKey(), new MicroSourceRule(strings(rule, "pin"), strings(rule, "hide")));
+        }
+    }
+
+    private static List<String> strings(JsonObject obj, String key) {
+        List<String> out = new ArrayList<>();
+        if (obj.has(key) && obj.get(key).isJsonArray()) {
+            for (JsonElement el : obj.getAsJsonArray(key)) {
+                if (el.isJsonPrimitive()) out.add(el.getAsString());
+            }
+        }
+        return out;
     }
 
     static void readValues(JsonObject obj, MicroRegistry.Layer layer) {
@@ -147,6 +172,9 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
             }
             if (obj.has("values") && obj.get("values").isJsonObject()) {
                 readValues(obj.getAsJsonObject("values"), layer);
+            }
+            if (obj.has("sources") && obj.get("sources").isJsonObject()) {
+                readSources(obj.getAsJsonObject("sources"), layer);
             }
             if (obj.has("effects") && obj.get("effects").isJsonArray()) {
                 int i = 0;

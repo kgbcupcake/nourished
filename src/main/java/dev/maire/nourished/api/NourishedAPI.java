@@ -468,6 +468,16 @@ public final class NourishedAPI {
         dev.maire.nourished.core.micro.MicroRegistry.registerExternal(definition);
     }
 
+    /** Nutrient values for an item id or {@code #tag} (e.g. {@code "#c:foods/raw_fish"}); applied on the next datapack reload. */
+    public static void registerMicroNutrientValues(String itemOrTag, Map<String, Float> values) {
+        dev.maire.nourished.core.micro.MicroRegistry.registerExternalValues(itemOrTag, values);
+    }
+
+    /** Pins ({@code hide = false}) or hides an item id or {@code #tag} in a nutrient's Best sources list; next reload. */
+    public static void setMicroNutrientSource(String key, String itemOrTag, boolean hide) {
+        dev.maire.nourished.core.micro.MicroRegistry.registerExternalSource(key, itemOrTag, hide);
+    }
+
     /** The player's level (0..1) of a tracked nutrient such as {@code "omega3"}. */
     public static float getMicroNutrientLevel(net.minecraft.world.entity.player.Player player, String key) {
         return dev.maire.nourished.core.micro.MicroAttachment.level(player, key);

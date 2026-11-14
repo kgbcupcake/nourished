@@ -114,17 +114,14 @@ public class DietScreen extends Screen {
     }
 
     /**
-     * Sidebar rows for the editor hub: on the Nutritional Panel only, the Home page first (it has no
+     * Sidebar rows for the editor hub: on the Nutritional Panel only, Home and Nutrients first (they have no
      * equivalent on the dynamic screen — see {@link DietScreenPersistence#isNutritionalPanel()}),
      * then the five Diet Screen sub-boxes, one "Intake" group for the dynamically-many bar rows, the
      * screen-wide options panel, and the editor window's own style/colors.
      */
     public static List<HubSidebarEntry> scaleConfigEntries() {
         List<HubSidebarEntry> entries = new ArrayList<>();
-        if (DietScreenPersistence.isNutritionalPanel()) {
-            entries.add(new HubEntry(DietHomeSections.ID, Component.translatable("nourished.screen.diet.home_label"),
-                    DietOptionsPanel.homePanel()));
-        }
+        entries.addAll(DietOptionsPanel.nutritionalPanelEntries());
         entries.addAll(List.of(
                 // "Number size" here (not the shared "Text size" label): this box's Text size slider
                 // only ever drives its calorie value, a number — the generic label would say less than

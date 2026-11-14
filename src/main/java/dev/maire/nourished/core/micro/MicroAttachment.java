@@ -25,6 +25,15 @@ public final class MicroAttachment {
                             .build()
             );
 
+    /** Ticks each tiered effect rule's condition has held, by rule id. Server-only. */
+    public static final Supplier<AttachmentType<Map<String, Integer>>> HELD_TICKS =
+            ATTACHMENT_TYPES.register("micro_held_ticks", () ->
+                    AttachmentType.<Map<String, Integer>>builder(() -> Map.of())
+                            .serialize(Codec.unboundedMap(Codec.STRING, Codec.INT))
+                            .copyOnDeath()
+                            .build()
+            );
+
     private MicroAttachment() {}
 
     public static void register(IEventBus modEventBus) {

@@ -67,6 +67,7 @@ import dev.maire.nourished.config.validation.RawFoodValidator;
 import dev.maire.nourished.config.validation.ScannerSpecValidator;
 import dev.maire.nourished.config.validation.SourceClassificationsValidator;
 import dev.maire.nourished.core.handler.NourishedFoodTriggerHandler;
+import dev.maire.nourished.core.handler.PlaceableFoodHandler;
 import dev.maire.nourished.core.tagaudit.NourishedTagAuditContext;
 import dev.maire.nourished.core.tagaudit.rules.NamespaceBiasRule;
 import dev.maire.nourished.core.tagaudit.rules.TagInferenceMismatchRule;
@@ -107,6 +108,7 @@ public class Nourished {
         NourishedClientConfig.register(modContainer);
         NutritionalPanelConfig.register(modContainer);
         MicroConfig.register(modContainer);
+        dev.maire.nourished.config.MicroClientConfig.register(modContainer);
         modEventBus.addListener(MicroConfig::onModConfigReloading);
         modEventBus.addListener(NourishedConfig::onModConfigLoading);
         modEventBus.addListener(NourishedConfig::onModConfigReloading);
@@ -157,6 +159,7 @@ public class Nourished {
         modEventBus.addListener(ModNetworking::register);
         modEventBus.addListener(NourishedDataGenerators::gatherData);
         NourishedFoodTriggerHandler.register(NeoForge.EVENT_BUS);
+        PlaceableFoodHandler.register(NeoForge.EVENT_BUS);
         NeoForge.EVENT_BUS.addListener(NourishedTagsHandler::onTagsUpdated);
         NeoForge.EVENT_BUS.register(new NourishedServerHandler());
         NeoForge.EVENT_BUS.register(new RawFoodPenaltyHandler());

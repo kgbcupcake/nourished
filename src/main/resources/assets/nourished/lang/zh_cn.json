@@ -535,5 +535,11 @@
   "nourished.screen.nutrients.status.high": "偏高",
   "nourished.screen.nutrients.trend.rising": "上升",
   "nourished.screen.nutrients.trend.falling": "下降",
-  "nourished.screen.nutrients.trend.steady": "平稳"
+  "nourished.screen.nutrients.trend.steady": "平稳",
+  "key.nourished.toggleNutrientHud": "切换营养素HUD",
+  "nourished.screen.diet.nutrients_tab": "营养素",
+  "nourished.screen.nutrients.overview": "总览",
+  "nourished.screen.nutrients.hud_on": "营养素HUD：开",
+  "nourished.screen.nutrients.hud_off": "营养素HUD：关",
+  "nourished.screen.nutrients.overview_hint": "点击营养素查看趋势、最近来源和最佳食物。"
 }

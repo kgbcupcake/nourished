@@ -3,6 +3,7 @@ package dev.maire.nourished.client.micro;
 import dev.maire.nourished.client.NourishedKeys;
 import dev.maire.nourished.client.screen.diet.DietScreen;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.MicroNutrientsComponent;
+import dev.maire.nourished.config.MicroClientConfig;
 import dev.maire.nourished.core.micro.MicroAttachment;
 import dev.maire.nourished.core.micro.MicroProfileResolver;
 import dev.maire.nourished.core.micro.MicroRegistry;
@@ -25,12 +26,16 @@ public final class MicroClientEvents {
         NeoForge.EVENT_BUS.addListener(MicroClientEvents::onScreenClosing);
         NeoForge.EVENT_BUS.addListener(MicroClientEvents::onUseItemFinish);
         NeoForge.EVENT_BUS.addListener(MicroClientEvents::onLogout);
+        NeoForge.EVENT_BUS.addListener(MicroHud::onRenderGuiPost);
     }
 
     private static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         while (NourishedKeys.OPEN_NUTRIENTS.consumeClick()) {
             if (mc.screen == null && mc.player != null) mc.setScreen(new NutrientDetailScreen(null, 0));
+        }
+        while (NourishedKeys.TOGGLE_NUTRIENT_HUD.consumeClick()) {
+            MicroClientConfig.get().toggleHud();
         }
     }
 

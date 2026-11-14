@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -108,17 +109,27 @@ public final class MicroProfileResolver {
     private static Map<String, Float> derive(ResourceLocation id, @Nullable Level level, MicroRegistry.Snapshot snap,
                                              RecipeInheritanceResolver recipes, int depth,
                                              Set<ResourceLocation> visiting) {
+        // each recipe is summed on its own, then alternative recipes (furnace/smoker/campfire...) are averaged
         Map<String, Float> sum = new HashMap<>();
-        for (ResourceLocation ingredientId : recipes.getIngredients(id)) {
-            if (visiting.contains(ingredientId)) continue;
-            Item item = BuiltInRegistries.ITEM.get(ingredientId);
-            if (item == Items.AIR) continue;
-            Map<String, Float> part = profileOf(ingredientId, new ItemStack(item), level, snap, recipes, depth + 1, visiting).values();
-            part.forEach((k, v) -> sum.merge(k, v, Float::sum));
+        int counted = 0;
+        for (List<ResourceLocation> recipe : recipes.getRecipes(id)) {
+            Map<String, Float> one = new HashMap<>();
+            for (ResourceLocation ingredientId : recipe) {
+                if (visiting.contains(ingredientId)) continue;
+                Item item = BuiltInRegistries.ITEM.get(ingredientId);
+                if (item == Items.AIR) continue;
+                Map<String, Float> part = profileOf(ingredientId, new ItemStack(item), level, snap, recipes, depth + 1, visiting).values();
+                part.forEach((k, v) -> one.merge(k, v, Float::sum));
+            }
+            if (one.isEmpty()) continue;
+            one.forEach((k, v) -> sum.merge(k, v, Float::sum));
+            counted++;
         }
         if (sum.isEmpty()) {
             return sum;
         }
+        int recipeCount = counted;
+        sum.replaceAll((k, v) -> v / recipeCount);
         float scale = snap.settings().recipeScale();
         float max = snap.settings().recipeMax();
         Map<String, Float> out = new LinkedHashMap<>();

@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,12 +56,27 @@ public final class MicroEffects {
         boolean builtins = MicroConfig.get().builtinEffects();
         Map<String, Float> levels = MicroAttachment.get(player);
         Map<String, MicroDef> defs = MicroRegistry.server().defs();
+        Map<String, Integer> held = player.getData(MicroAttachment.HELD_TICKS.get());
+        Map<String, Integer> nextHeld = new HashMap<>();
         for (MicroEffect e : list) {
             if (e.builtin() && !builtins) continue;
-            if (active(e, levels, defs)) {
-                grant(player, e);
+            if (!active(e, levels, defs)) continue;
+            int amplifier = e.amplifier();
+            if (!e.tiers().isEmpty()) {
+                int ticks = held.getOrDefault(e.id(), 0) + CHECK_INTERVAL_TICKS;
+                nextHeld.put(e.id(), ticks);
+                amplifier = e.amplifierAfter(ticks);
             }
+            grant(player, e, amplifier);
         }
+        if (!nextHeld.equals(held)) {
+            player.setData(MicroAttachment.HELD_TICKS.get(), Map.copyOf(nextHeld));
+        }
+    }
+
+    /** How long each tiered rule has held for this player, by rule id. */
+    public static Map<String, Integer> heldTicks(ServerPlayer player) {
+        return player.getData(MicroAttachment.HELD_TICKS.get());
     }
 
     static boolean active(MicroEffect e, Map<String, Float> levels, Map<String, MicroDef> defs) {
@@ -80,13 +96,14 @@ public final class MicroEffects {
         };
     }
 
-    private static void grant(ServerPlayer player, MicroEffect e) {
+    private static void grant(ServerPlayer player, MicroEffect e, int amplifier) {
         Holder<MobEffect> holder = MarieEffectUtils.resolveEffect(e.effect()).orElse(null);
         if (holder == null) return;
         MobEffectInstance existing = player.getEffect(holder);
-        if (existing != null && (existing.getAmplifier() > e.amplifier() || existing.getDuration() >= REFRESH_BELOW_TICKS)) {
+        if (existing != null && (existing.getAmplifier() > amplifier
+                || (existing.getAmplifier() == amplifier && existing.getDuration() >= REFRESH_BELOW_TICKS))) {
             return;
         }
-        player.addEffect(new MobEffectInstance(holder, e.durationTicks(), e.amplifier(), true, false, true));
+        player.addEffect(new MobEffectInstance(holder, e.durationTicks(), amplifier, true, false, true));
     }
 }

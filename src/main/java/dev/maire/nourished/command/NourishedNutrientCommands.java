@@ -70,6 +70,15 @@ final class NourishedNutrientCommands {
                         .then(Commands.literal("clear")
                                 .then(Commands.argument("item", ItemArgument.item(context))
                                         .executes(NourishedNutrientCommands::clearValue))))
+                .then(Commands.literal("source")
+                        .requires(s -> s.hasPermission(2))
+                        .then(sourceEdit("pin", "pin", true))
+                        .then(sourceEdit("unpin", "pin", false))
+                        .then(sourceEdit("hide", "hide", true))
+                        .then(sourceEdit("unhide", "hide", false))
+                        .then(Commands.literal("list")
+                                .then(Commands.argument("nutrient", StringArgumentType.word()).suggests(NUTRIENTS)
+                                        .executes(NourishedNutrientCommands::listSources))))
                 .then(Commands.literal("reload")
                         .requires(s -> s.hasPermission(2))
                         .executes(ctx -> {
@@ -77,6 +86,43 @@ final class NourishedNutrientCommands {
                             ctx.getSource().sendSuccess(() -> Component.literal("Reloaded micros.json"), true);
                             return 1;
                         }));
+    }
+
+    /** {@code source <verb> <nutrient> <item id or #tag>}: edits the Best sources pin/hide lists in micros.json. */
+    private static LiteralArgumentBuilder<CommandSourceStack> sourceEdit(String verb, String list, boolean add) {
+        return Commands.literal(verb)
+                .then(Commands.argument("nutrient", StringArgumentType.word()).suggests(NUTRIENTS)
+                        .then(Commands.argument("entry", StringArgumentType.greedyString())
+                                .executes(ctx -> {
+                                    String key = nutrient(ctx);
+                                    if (key == null) return 0;
+                                    String entry = StringArgumentType.getString(ctx, "entry").trim();
+                                    String id = entry.startsWith("#") ? entry.substring(1) : entry;
+                                    if (ResourceLocation.tryParse(id) == null) {
+                                        ctx.getSource().sendFailure(Component.literal("Not an item id or #tag: " + entry));
+                                        return 0;
+                                    }
+                                    try {
+                                        boolean changed = MicroConfigFile.editSource(ctx.getSource().getServer(), key, list, entry, add);
+                                        ctx.getSource().sendSuccess(() -> Component.literal(changed
+                                                ? verb + " " + entry + " for " + key
+                                                : "No change: " + entry + (add ? " is already" : " isn't") + " in " + key + "'s " + list + " list"), true);
+                                        return changed ? 1 : 0;
+                                    } catch (IOException ex) {
+                                        ctx.getSource().sendFailure(Component.literal("Could not write micros.json: " + ex.getMessage()));
+                                        return 0;
+                                    }
+                                })));
+    }
+
+    private static int listSources(CommandContext<CommandSourceStack> ctx) {
+        String key = nutrient(ctx);
+        if (key == null) return 0;
+        var rule = MicroRegistry.server().sourceRule(key);
+        ctx.getSource().sendSuccess(() -> Component.literal(key + " best sources\n pinned: "
+                + (rule.pin().isEmpty() ? "-" : String.join(", ", rule.pin()))
+                + "\n hidden: " + (rule.hide().isEmpty() ? "-" : String.join(", ", rule.hide()))), false);
+        return 1;
     }
 
     private static int levels(CommandSourceStack source, ServerPlayer player) {

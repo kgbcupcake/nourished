@@ -91,6 +91,13 @@ public final class NourishedKeys {
             "key.categories.nourished"
     );
 
+    public static final KeyMapping TOGGLE_NUTRIENT_HUD = new KeyMapping(
+            "key.nourished.toggleNutrientHud",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_UNKNOWN,
+            "key.categories.nourished"
+    );
+
     private NourishedKeys() {}
 
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
@@ -106,5 +113,6 @@ public final class NourishedKeys {
         event.register(OPEN_SETTINGS);
         event.register(SHOW_TOOLTIP_DETAILS);
         event.register(OPEN_NUTRIENTS);
+        event.register(TOGGLE_NUTRIENT_HUD);
     }
 }

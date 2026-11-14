@@ -85,6 +85,28 @@ public final class MicroConfigFile {
         reload(server);
     }
 
+    /**
+     * Adds or removes {@code entry} (item id or {@code #tag}) in micros.json's {@code sources.<key>.<list>},
+     * where list is "pin" or "hide"; returns false if nothing changed. Call on the server thread.
+     */
+    public static boolean editSource(MinecraftServer server, String key, String list, String entry, boolean add) throws IOException {
+        JsonObject root = read();
+        JsonObject sources = root.has("sources") && root.get("sources").isJsonObject() ? root.getAsJsonObject("sources") : new JsonObject();
+        JsonObject rule = sources.has(key) && sources.get(key).isJsonObject() ? sources.getAsJsonObject(key) : new JsonObject();
+        com.google.gson.JsonArray arr = rule.has(list) && rule.get(list).isJsonArray() ? rule.getAsJsonArray(list) : new com.google.gson.JsonArray();
+        com.google.gson.JsonPrimitive value = new com.google.gson.JsonPrimitive(entry);
+        boolean changed = add ? !arr.contains(value) && arr.asList().add(value) : arr.remove(value);
+        if (!changed) return false;
+        rule.add(list, arr);
+        sources.add(key, rule);
+        root.add("sources", sources);
+        Path path = NourishedConfigPaths.micros();
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, GSON.toJson(root), StandardCharsets.UTF_8);
+        reload(server);
+        return true;
+    }
+
     /** Re-reads micros.json into the live registry and pushes it to every player. */
     public static void reload(MinecraftServer server) {
         List<MicroEffect> effects = new ArrayList<>();

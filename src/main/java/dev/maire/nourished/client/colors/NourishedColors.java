@@ -73,6 +73,7 @@ public final class NourishedColors {
     public static final ColorKey BALANCE_BORDER = themed("diet.balance.border", ThemeKey.BORDER);
     public static final ColorKey ACTIVE_EFFECTS_BORDER = themed("diet.active_effects.border", ThemeKey.BORDER);
     public static final ColorKey HOME_BORDER = themed("diet.home.border", ThemeKey.BORDER);
+    public static final ColorKey NUTRIENTS_BORDER = themed("diet.nutrients.border", ThemeKey.BORDER);
     public static final ColorKey BORDER = themed("border", ThemeKey.BORDER);
     public static final ColorKey DIVIDER = themed("divider", ThemeKey.BORDER);
 

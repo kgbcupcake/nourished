@@ -1139,5 +1139,11 @@
   "nourished.screen.nutrients.status.high": "High",
   "nourished.screen.nutrients.trend.rising": "Rising",
   "nourished.screen.nutrients.trend.falling": "Falling",
-  "nourished.screen.nutrients.trend.steady": "Steady"
+  "nourished.screen.nutrients.trend.steady": "Steady",
+  "key.nourished.toggleNutrientHud": "Toggle Nutrient HUD",
+  "nourished.screen.diet.nutrients_tab": "Nutrients",
+  "nourished.screen.nutrients.overview": "Overview",
+  "nourished.screen.nutrients.hud_on": "Nutrient HUD: On",
+  "nourished.screen.nutrients.hud_off": "Nutrient HUD: Off",
+  "nourished.screen.nutrients.overview_hint": "Click a nutrient for its trend, recent sources and best foods."
 }

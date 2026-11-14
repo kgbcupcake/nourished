@@ -1,0 +1,9 @@
+{
+  "display_name": "Protein",
+  "color": "#C8553D",
+  "decay_rate": 0.012,
+  "low_threshold": 0.2,
+  "high_threshold": 0.9,
+  "icon": "minecraft:cooked_beef",
+  "group_weights": { "proteins": 1.0, "dairy": 0.5 }
+}
