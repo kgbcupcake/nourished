@@ -22,6 +22,7 @@ A new "Nutritional HUD" Diet Screen style — a resizable sidebar window with a 
 - Optional nutrient HUD overlay with its own toggle key
 - New Nutrients tab in the Nutritional Panel: an overview of every nutrient plus a page each with trend, recent sources and best foods
 - Modpack authors can pin or hide foods in each nutrient's "Best sources" list (datapack, config, command or KubeJS)
+- `/nourished diagnostics` now also lists broken datapack files, nutrient file errors and item ids that don't exist (typos)
 - Foods with no recipe now get food groups from their name, using other mods' tagged items (a "kiwi smoothie" counts as fruit if any mod has a tagged kiwi)
 - KubeJS: `NourishedNutrients` for adding nutrients, setting food values and reading/setting levels
 - New in-game Settings window with the main feature switches and balance options (opened with its own keybind or from the Command Center)

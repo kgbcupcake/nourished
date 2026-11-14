@@ -6,12 +6,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.maire.nourished.config.NourishedConfigPaths;
 import dev.maire.nourished.core.Nourished;
+import dev.marie.framework.data.DatapackDiagnostic;
+import dev.marie.framework.data.DatapackDiagnostics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 
 import java.io.Reader;
@@ -26,7 +30,12 @@ import java.util.Map;
 /** Loads data/&lt;ns&gt;/nourished/micros/*.json and data/&lt;ns&gt;/nourished/micro_values/*.json. */
 public final class MicroDataLoader extends SimplePreparableReloadListener<MicroDataLoader.Loaded> {
 
-    record Loaded(List<MicroRegistry.Layer> layers, List<MicroEffect> packEffects, List<MicroEffect> configEffects) {}
+    record Loaded(List<MicroRegistry.Layer> layers, List<MicroEffect> packEffects, List<MicroEffect> configEffects,
+                  List<DatapackDiagnostic> diagnostics) {}
+
+    // MariesLib clears its diagnostics at the start of its own apply, which may run after ours,
+    // so these are handed over on TagsUpdated, once every loader has finished
+    private static volatile List<DatapackDiagnostic> lastDiagnostics = List.of();
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final FileToIdConverter DEFS = FileToIdConverter.json("nourished/micros");
@@ -50,50 +59,52 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
     protected Loaded prepare(ResourceManager manager, ProfilerFiller profiler) {
         MicroRegistry.Layer bundled = MicroRegistry.Layer.empty();
         MicroRegistry.Layer packs = MicroRegistry.Layer.empty();
+        List<DatapackDiagnostic> diags = new ArrayList<>();
         for (var e : DEFS.listMatchingResources(manager).entrySet()) {
             ResourceLocation id = DEFS.fileToId(e.getKey());
-            JsonObject obj = readJson(e.getKey(), e.getValue());
+            JsonObject obj = readJson(e.getKey(), e.getValue(), diags);
             if (obj == null) continue;
             String key = id.getPath().substring(id.getPath().lastIndexOf('/') + 1);
             try {
                 layerFor(id, bundled, packs).defs().put(key, MicroDef.fromJson(key, obj));
             } catch (RuntimeException ex) {
-                Nourished.LOGGER.warn("[Nourished] Skipping invalid nutrient {}: {}", e.getKey(), ex.getMessage());
+                error(diags, packPath(e.getKey()), key, "Skipping invalid nutrient: " + ex.getMessage());
             }
         }
         for (var e : VALUES.listMatchingResources(manager).entrySet()) {
             ResourceLocation id = VALUES.fileToId(e.getKey());
-            JsonObject obj = readJson(e.getKey(), e.getValue());
+            JsonObject obj = readJson(e.getKey(), e.getValue(), diags);
             if (obj == null) continue;
             JsonElement values = obj.has("values") ? obj.get("values") : obj;
             if (values.isJsonObject()) {
-                readValues(values.getAsJsonObject(), layerFor(id, bundled, packs));
+                readValues(values.getAsJsonObject(), layerFor(id, bundled, packs), packPath(e.getKey()), diags);
             }
         }
         for (var e : SOURCES.listMatchingResources(manager).entrySet()) {
-            JsonObject obj = readJson(e.getKey(), e.getValue());
+            JsonObject obj = readJson(e.getKey(), e.getValue(), diags);
             if (obj != null) readSources(obj, layerFor(SOURCES.fileToId(e.getKey()), bundled, packs));
         }
         List<MicroEffect> effects = new ArrayList<>();
         for (var e : EFFECTS.listMatchingResources(manager).entrySet()) {
             ResourceLocation id = EFFECTS.fileToId(e.getKey());
-            JsonObject obj = readJson(e.getKey(), e.getValue());
+            JsonObject obj = readJson(e.getKey(), e.getValue(), diags);
             if (obj == null) continue;
             try {
                 effects.add(MicroEffect.fromJson(id.toString(), obj, Nourished.MODID.equals(id.getNamespace())));
             } catch (RuntimeException ex) {
-                Nourished.LOGGER.warn("[Nourished] Skipping invalid nutrient effect {}: {}", e.getKey(), ex.getMessage());
+                error(diags, packPath(e.getKey()), "effect", "Skipping invalid nutrient effect: " + ex.getMessage());
             }
         }
         List<MicroEffect> configEffects = new ArrayList<>();
-        MicroRegistry.Layer config = readConfigLayer(configEffects);
-        return new Loaded(List.of(bundled, config, packs), effects, configEffects);
+        MicroRegistry.Layer config = readConfigLayer(configEffects, diags);
+        return new Loaded(List.of(bundled, config, packs), effects, configEffects, List.copyOf(diags));
     }
 
     @Override
     protected void apply(Loaded loaded, ResourceManager manager, ProfilerFiller profiler) {
         MicroRegistry.rebuild(loaded.layers());
         MicroEffects.set(loaded.packEffects(), loaded.configEffects());
+        lastDiagnostics = loaded.diagnostics();
         Nourished.LOGGER.info("[Nourished] Loaded {} nutrients, {} item and {} tag nutrient entries.",
                 MicroRegistry.server().defs().size(), MicroRegistry.server().itemValues().size(),
                 MicroRegistry.server().tagValues().size());
@@ -103,12 +114,41 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
         return Nourished.MODID.equals(id.getNamespace()) ? bundled : packs;
     }
 
-    private static JsonObject readJson(ResourceLocation file, Resource resource) {
+    /** Adds the last reload's nutrient file problems to MariesLib's datapack diagnostics report. */
+    public static void reportDiagnostics() {
+        DatapackDiagnostics report = DatapackDiagnostics.getInstance();
+        lastDiagnostics.forEach(report::record);
+    }
+
+    private static JsonObject readJson(ResourceLocation file, Resource resource, List<DatapackDiagnostic> diags) {
         try (Reader reader = resource.openAsReader()) {
             return GSON.fromJson(reader, JsonObject.class);
         } catch (Exception ex) {
-            Nourished.LOGGER.warn("[Nourished] Skipping malformed nutrient file {}: {}", file, ex.getMessage());
+            error(diags, packPath(file), "file", "Skipping malformed nutrient file: " + ex.getMessage());
             return null;
+        }
+    }
+
+    private static String packPath(ResourceLocation file) {
+        return "data/" + file.getNamespace() + "/" + file.getPath();
+    }
+
+    private static void error(List<DatapackDiagnostic> diags, String path, String field, String message) {
+        Nourished.LOGGER.warn("[Nourished] {} > {}: {}", path, field, message);
+        diags.add(new DatapackDiagnostic(DatapackDiagnostic.Severity.ERROR, path, field, message));
+    }
+
+    private static void warn(List<DatapackDiagnostic> diags, String path, String field, String message) {
+        Nourished.LOGGER.warn("[Nourished] {} > {}: {}", path, field, message);
+        diags.add(new DatapackDiagnostic(DatapackDiagnostic.Severity.WARN, path, field, message));
+    }
+
+    // same rule as MariesLib's loader: only flag ids whose mod is installed (a typo), not optional compat
+    private static void checkItem(ResourceLocation id, String path, List<DatapackDiagnostic> diags) {
+        if (BuiltInRegistries.ITEM.containsKey(id)) return;
+        String ns = id.getNamespace();
+        if ("minecraft".equals(ns) || ModList.get().isLoaded(ns)) {
+            warn(diags, path, id.toString(), "Unknown item '" + id + "' (mod '" + ns + "' is loaded, check the id)");
         }
     }
 
@@ -131,16 +171,17 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
         return out;
     }
 
-    static void readValues(JsonObject obj, MicroRegistry.Layer layer) {
+    static void readValues(JsonObject obj, MicroRegistry.Layer layer, String path, List<DatapackDiagnostic> diags) {
         for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
             if (!entry.getValue().isJsonObject()) continue;
             String raw = entry.getKey();
             boolean tag = raw.startsWith("#");
             ResourceLocation id = ResourceLocation.tryParse(tag ? raw.substring(1) : raw);
             if (id == null) {
-                Nourished.LOGGER.warn("[Nourished] Invalid nutrient value key '{}'", raw);
+                error(diags, path, raw, "Invalid nutrient value key '" + raw + "'");
                 continue;
             }
+            if (!tag) checkItem(id, path, diags);
             Map<String, Float> values = new LinkedHashMap<>();
             for (var v : entry.getValue().getAsJsonObject().entrySet()) {
                 if (v.getValue().isJsonPrimitive() && v.getValue().getAsJsonPrimitive().isNumber()) {
@@ -153,8 +194,13 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
 
     /** Reads config/nourished/nutrition/micros.json (writing the empty template if it's missing). */
     static MicroRegistry.Layer readConfigLayer(List<MicroEffect> effects) {
+        return readConfigLayer(effects, new ArrayList<>());
+    }
+
+    static MicroRegistry.Layer readConfigLayer(List<MicroEffect> effects, List<DatapackDiagnostic> diags) {
         MicroRegistry.Layer layer = MicroRegistry.Layer.empty();
         Path path = NourishedConfigPaths.micros();
+        String shown = "config/nourished/nutrition/" + path.getFileName();
         try {
             if (!Files.exists(path)) {
                 Files.createDirectories(path.getParent());
@@ -171,7 +217,7 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
                 }
             }
             if (obj.has("values") && obj.get("values").isJsonObject()) {
-                readValues(obj.getAsJsonObject("values"), layer);
+                readValues(obj.getAsJsonObject("values"), layer, shown, diags);
             }
             if (obj.has("sources") && obj.get("sources").isJsonObject()) {
                 readSources(obj.getAsJsonObject("sources"), layer);
@@ -186,12 +232,12 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
                     try {
                         effects.add(MicroEffect.fromJson(id, eff, false));
                     } catch (RuntimeException ex) {
-                        Nourished.LOGGER.warn("[Nourished] Skipping invalid nutrient effect '{}' in {}: {}", id, path, ex.getMessage());
+                        error(diags, shown, id, "Skipping invalid nutrient effect: " + ex.getMessage());
                     }
                 }
             }
         } catch (Exception ex) {
-            Nourished.LOGGER.warn("[Nourished] Could not read {}: {}", path, ex.getMessage());
+            error(diags, shown, "file", "Could not read: " + ex.getMessage());
         }
         return layer;
     }
