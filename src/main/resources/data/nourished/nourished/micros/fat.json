@@ -1,0 +1,9 @@
+{
+  "display_name": "Fat",
+  "color": "#F4D35E",
+  "decay_rate": 0.012,
+  "low_threshold": 0.15,
+  "high_threshold": 0.85,
+  "icon": "minecraft:cooked_porkchop",
+  "group_weights": { "proteins": 0.5, "dairy": 0.6 }
+}

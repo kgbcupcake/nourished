@@ -70,6 +70,8 @@ public class ModNetworking {
                 (payload, context) -> {}
         );
 
+        dev.maire.nourished.core.micro.MicroNetworking.register(registrar, (p, c) -> {}, (p, c) -> {});
+
     }
 
     /** Send lightweight client sync. Call on every food eat and decay tick. */

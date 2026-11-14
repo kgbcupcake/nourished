@@ -139,6 +139,19 @@ public final class HotkeysCategory {
                         })
                         .build()
         );
+        category.addEntry(
+                eb.startKeyCodeField(
+                                Component.translatable("config.nourished.settingsHotkey"),
+                                NourishedKeys.OPEN_SETTINGS.getKey()
+                        )
+                        .setDefaultValue(InputConstants.UNKNOWN)
+                        .setKeySaveConsumer(key -> {
+                            NourishedKeys.OPEN_SETTINGS.setKey(key);
+                            KeyMapping.resetMapping();
+                            Minecraft.getInstance().options.save();
+                        })
+                        .build()
+        );
 
         addReloadButton(category, eb, false);
     }

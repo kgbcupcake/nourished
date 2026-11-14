@@ -10,11 +10,11 @@ import dev.marie.framework.ui.api.EditModeCoordinator;
 import dev.marie.framework.ui.itemeditor.ItemEditorScreenProviderRegistry;
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.maire.nourished.client.screen.itemeditor.CaloriesScreenProvider;
+import dev.maire.nourished.client.screen.itemeditor.NutrientsScreenProvider;
 import dev.maire.nourished.client.screen.itemeditor.BrowseItemsScreenProvider;
 import dev.maire.nourished.client.screen.itemeditor.BulkEditScreenProvider;
 import dev.maire.nourished.client.screen.itemeditor.EditedItemsScreenProvider;
 import dev.maire.nourished.client.screen.itemeditor.ExcludeTooltipScreenProvider;
-import dev.maire.nourished.client.screen.itemeditor.NutrientGroupsScreenProvider;
 import dev.maire.nourished.client.screen.itemeditor.OptionsScreenProvider;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.client.hud.NourishedHUD;
@@ -40,11 +40,11 @@ public final class ClientEventRegistrar {
     public static void register(IEventBus modEventBus) {
         DietScreenModules.registerAll();
         registerCommandCenter();
-        NourishedTestCommandCenter.register();
+        NourishedConfigCommandCenter.register();
         MarieNotifications.registerClientListeners();
         ItemEditorScreenProviderRegistry.register(Nourished.MODID, new OptionsScreenProvider());
         ItemEditorScreenProviderRegistry.register(Nourished.MODID, new CaloriesScreenProvider());
-        ItemEditorScreenProviderRegistry.register(Nourished.MODID, new NutrientGroupsScreenProvider());
+        ItemEditorScreenProviderRegistry.register(Nourished.MODID, new NutrientsScreenProvider());
         ItemEditorScreenProviderRegistry.register(Nourished.MODID, new BulkEditScreenProvider());
         ItemEditorScreenProviderRegistry.register(Nourished.MODID, new EditedItemsScreenProvider());
         ItemEditorScreenProviderRegistry.register(Nourished.MODID, new BrowseItemsScreenProvider());
@@ -74,6 +74,7 @@ public final class ClientEventRegistrar {
         NeoForge.EVENT_BUS.addListener(ClientEvents::onScreenInit);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onScreenKeyPressed);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onItemTooltip);
+        dev.maire.nourished.client.micro.MicroClientEvents.register();
         NeoForge.EVENT_BUS.addListener(ClientEvents::onTooltipColor);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onClientTick);
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onRenderGuiPost);
@@ -87,12 +88,7 @@ public final class ClientEventRegistrar {
         NeoForge.EVENT_BUS.addListener(DietModuleResetCommand::register);
     }
 
-    /**
-     * Command Center is a command launcher only now — every card here dispatches a real server
-     * command through {@link #dispatchCommand(String)} (the same network path a typed chat command
-     * takes) instead of driving client-side UI/settings shortcuts directly. The old "Diet Screen"
-     * category (scale-panel toggle) was removed: the scale panel is reached only via edit mode now.
-     */
+    /** Tools and Framework cards dispatch real server commands; screen shortcuts live in NourishedConfigCommandCenter. */
     /** A card accent that resolves the (editable) color each time the card is drawn. */
     private static java.util.function.IntSupplier accent(dev.marie.framework.color.ColorKey key) {
         return () -> dev.marie.framework.color.MarieColors.resolveColor(key);
@@ -102,7 +98,7 @@ public final class ClientEventRegistrar {
         CommandCenterRegistry.registerCategory(new CommandCenterCategory(
                 COMMAND_CENTER_TOOLS_CATEGORY,
                 Component.translatable("config.nourished.category.tools"),
-                0
+                1
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
                 "nourished.tools.export_all",
@@ -176,11 +172,27 @@ public final class ClientEventRegistrar {
                 accent(NourishedColors.CC_TOOLS_MY_PROFILE),
                 () -> dispatchCommand("nourished profile get")
         ));
+        CommandCenterRegistry.registerCard(new CommandCenterCard(
+                "nourished.tools.registrations",
+                COMMAND_CENTER_TOOLS_CATEGORY,
+                Component.translatable("config.nourished.commandCenter.testRegistrations"),
+                Component.translatable("config.nourished.commandCenter.testRegistrations.desc"),
+                accent(NourishedColors.CC_TEST_REGISTRATIONS),
+                () -> dispatchCommand("nourished debug registrations")
+        ));
+        CommandCenterRegistry.registerCard(new CommandCenterCard(
+                "nourished.tools.held_food",
+                COMMAND_CENTER_TOOLS_CATEGORY,
+                Component.translatable("config.nourished.commandCenter.testHeldFood"),
+                Component.translatable("config.nourished.commandCenter.testHeldFood.desc"),
+                accent(NourishedColors.CC_TEST_HELD_FOOD),
+                () -> dispatchCommand("nourished debug food")
+        ));
 
         CommandCenterRegistry.registerCategory(new CommandCenterCategory(
                 COMMAND_CENTER_FRAMEWORK_CATEGORY,
                 Component.translatable("config.nourished.category.framework"),
-                1
+                2
         ));
         CommandCenterRegistry.registerCard(new CommandCenterCard(
                 "nourished.framework.status",

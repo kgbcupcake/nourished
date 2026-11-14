@@ -11,7 +11,6 @@ import dev.marie.framework.data.DatapackSchema;
 import dev.marie.framework.registry.AbstractRegistry;
 import dev.marie.framework.util.MarieResourceLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +21,7 @@ import java.nio.file.Path;
 import java.util.Set;
 
 /**
- * Loads Nourished config locks from {@code config/nourished/locks.json}.
+ * Loads Nourished config locks from {@code config/nourished/gameplay/locks.json}.
  */
 public final class NourishedLockRegistry {
 
@@ -75,11 +74,11 @@ public final class NourishedLockRegistry {
     }
 
     public static void load() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("locks.json");
+        Path configDir = NourishedConfigPaths.root();
+        Path file = NourishedConfigPaths.locks();
 
         try {
-            Files.createDirectories(configDir);
+            Files.createDirectories(file.getParent());
             if (!Files.exists(file)) {
                 writeDefaults(file);
                 Nourished.LOGGER.info("[NourishedLockRegistry] Wrote default locks.json");
@@ -96,7 +95,7 @@ public final class NourishedLockRegistry {
         }
 
         try {
-            Path readmeDir = configDir.resolve("Read_Me");
+            Path readmeDir = NourishedConfigPaths.readme();
             Files.createDirectories(readmeDir);
             writeReadmeIfAbsent(readmeDir);
         } catch (IOException e) {

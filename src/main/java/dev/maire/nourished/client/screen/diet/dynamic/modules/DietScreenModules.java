@@ -78,6 +78,7 @@ public final class DietScreenModules {
         // order.
         ModuleRegistry.register(Nourished.MODID, (ModuleFactory<DietLayout.Layout>) CaloriesComponent::new);
         ModuleRegistry.register(Nourished.MODID, (ModuleFactory<DietLayout.Layout>) BalanceComponent::new);
+        ModuleRegistry.register(Nourished.MODID, (ModuleFactory<DietLayout.Layout>) MicroNutrientsComponent::new);
         ModuleRegistry.register(Nourished.MODID, (ModuleFactory<DietLayout.Layout>) RecentMealsComponent::new);
         ModuleRegistry.register(Nourished.MODID, (ModuleFactory<DietLayout.Layout>) EatMoreComponent::new);
         ModuleRegistry.register(Nourished.MODID, (ModuleFactory<DietLayout.Layout>) ActiveEffectsComponent::new);

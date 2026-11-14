@@ -34,10 +34,13 @@ import java.util.List;
  */
 public final class DietHomeSections {
 
+    /** This page's id, also used as its editor module id (see {@code HomeBoxPane}) and sidebar entry id. */
+    public static final String ID = "nourished.diet.hub.home";
+
     private DietHomeSections() {}
 
     public static MarieComponent homePage() {
-        return new HubInfoPage("nourished.diet.hub.home",
+        return new HubInfoPage(ID,
                 () -> Minecraft.getInstance().player,
                 () -> {
                     var player = Minecraft.getInstance().player;

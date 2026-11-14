@@ -50,7 +50,7 @@ multiplier lookup table over (intensity, confidence):
 ## Which file wins
 
 1. Hardcoded `FLAT` preset for every nutrient (fallback only)
-2. `config/nourished/nutrient_curves.json` on disk — edit this one
+2. `config/nourished/nutrition/nutrient_curves.json` on disk — edit this one
 3. `data/nourished/config/nutrient_curves.json` (datapack override)
 4. KubeJS runtime registration (highest — survives reload cycles)
 

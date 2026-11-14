@@ -73,6 +73,11 @@ public final class TabModuleHosts {
 
     /** A box's untouched size at scale 1.0, the base its resize min/max are measured from (same as the dynamic screen's). */
     public static Size naturalSize(MarieComponent module) {
+        // Not a SelfPositioningModule (no dynamic-screen box of its own to fall back to) — handled
+        // before the cast below, which every other case here relies on.
+        if (module instanceof HomeBoxPane home) {
+            return new Size(home.naturalWidth(), home.naturalHeight());
+        }
         Bounds fallback = ((SelfPositioningModule) module).resolvedBounds();
         int columnWidth = DietLayout.SPLIT - DietLayout.PAD * 2;
         return switch (module) {

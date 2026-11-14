@@ -450,6 +450,12 @@ public final class NourishedConfig {
         return SPEC;
     }
 
+    /** Spec default for a dotted path like "general.decayRate", or null if there's no such value. */
+    public static Object defaultFor(String path) {
+        Object value = SPEC == null ? null : SPEC.getValues().get(path);
+        return value instanceof ModConfigSpec.ConfigValue<?> cv ? cv.getDefault() : null;
+    }
+
     public boolean grantGuideBook() {
         return grantGuideBook.get();
     }
@@ -742,6 +748,10 @@ public final class NourishedConfig {
         return memoryWindowMinutes.get();
     }
 
+    public void setMemoryWindowMinutes(int value) {
+        memoryWindowMinutes.set(value);
+    }
+
     public int memoryWindowCount() {
         return memoryWindowCount.get();
     }
@@ -792,6 +802,10 @@ public final class NourishedConfig {
 
     public double noveltyBonus() {
         return noveltyBonus.get();
+    }
+
+    public void setNoveltyBonus(double value) {
+        noveltyBonus.set(value);
     }
 
     public double noveltyDecayCap() {

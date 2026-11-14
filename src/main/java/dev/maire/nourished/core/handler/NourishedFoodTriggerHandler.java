@@ -1,5 +1,7 @@
 package dev.maire.nourished.core.handler;
 
+import dev.maire.nourished.core.micro.MicroHandler;
+
 import dev.marie.framework.api.value.ValueSourceTrigger;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.api.marieapi.MarieAPI;
@@ -135,6 +137,7 @@ public final class NourishedFoodTriggerHandler {
                 stack);
         Map<String, Float> deltas = computeNutrientDeltas(before, snapshotNutrientLevels(player));
         NourishedKubeIntegration.fireFoodEaten(player, itemId.toString(), deltas);
+        MicroHandler.onFoodEaten(player, stack, food);
 
         float totalDelta = NourishedAPI.getTotal(player) - totalBefore;
         if (NourishedConfig.get().enableCalorieHistory() && totalDelta != 0f) {

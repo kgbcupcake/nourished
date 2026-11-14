@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.nutrition;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -13,7 +14,6 @@ import dev.marie.framework.util.MarieJsonUtils;
 import dev.marie.framework.util.MarieResourceLoader;
 import dev.marie.framework.util.MarieValidation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,14 +29,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 /**
- * Loads per-category food value multipliers from config/nourished/food_values.json.
+ * Loads per-category food value multipliers from config/nourished/nutrition/food_values.json.
  * Each category maps to five multipliers (protein, carbs, fats, vitamins, hydration).
  * Writes a default file on first run. Call {@link #load()} after {@link NutrientRegistry#load()}.
  * <p>
  * <b>Priority / Override Stack (lowest to highest):</b>
  * <ol>
  *   <li>Hardcoded Java defaults (fallback only)</li>
- *   <li>config/nourished/food_values.json</li>
+ *   <li>config/nourished/nutrition/food_values.json</li>
  *   <li>data/nourished/config/food_values.json (datapack override)</li>
  * </ol>
  */
@@ -101,11 +101,11 @@ public class FoodValueRegistry {
     }
 
     public static void load() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("food_values.json");
+        Path configDir = NourishedConfigPaths.root();
+        Path file = NourishedConfigPaths.foodValues();
 
         try {
-            Files.createDirectories(configDir);
+            Files.createDirectories(file.getParent());
             if (!Files.exists(file)) {
                 writeDefaults(file);
                 Nourished.LOGGER.info("[FoodValueRegistry] Wrote default food_values.json");
@@ -118,7 +118,7 @@ public class FoodValueRegistry {
         }
 
         try {
-            Path readmeDir = configDir.resolve("Read_Me");
+            Path readmeDir = NourishedConfigPaths.readme();
             Files.createDirectories(readmeDir);
             writeReadmeIfAbsent(readmeDir);
         } catch (IOException e) {
@@ -206,8 +206,8 @@ public class FoodValueRegistry {
      * Used by the config screen to persist changes.
      */
     public static void save() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("food_values.json");
+        Path configDir = NourishedConfigPaths.root();
+        Path file = NourishedConfigPaths.foodValues();
         try {
             writeRegistry(file);
             Nourished.LOGGER.info("[FoodValueRegistry] Saved food_values.json");
@@ -280,7 +280,7 @@ public class FoodValueRegistry {
         for (FoodValueDef def : loadBundledDefaults()) {
             arr.add(defToJson(def));
         }
-        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "FoodValueRegistry");
+        MarieValidation.assertPathUnder(file, NourishedConfigPaths.root(), "FoodValueRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }
@@ -291,7 +291,7 @@ public class FoodValueRegistry {
         for (FoodValueDef def : INSTANCE.values()) {
             arr.add(defToJson(def));
         }
-        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "FoodValueRegistry");
+        MarieValidation.assertPathUnder(file, NourishedConfigPaths.root(), "FoodValueRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }

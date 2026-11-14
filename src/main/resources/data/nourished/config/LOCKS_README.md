@@ -27,7 +27,7 @@ A JSON object with two arrays of config key strings:
 ## Which file wins
 
 1. Bundled built-in defaults (ships empty by default)
-2. `config/nourished/locks.json` on disk — edit this one
+2. `config/nourished/gameplay/locks.json` on disk — edit this one
 3. A datapack override, if present, replaces the config folder version
    entirely
 

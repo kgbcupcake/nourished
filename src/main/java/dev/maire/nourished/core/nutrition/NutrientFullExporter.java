@@ -1,12 +1,12 @@
 package dev.maire.nourished.core.nutrition;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.framework.export.RegistryExporter;
 import dev.marie.framework.util.MarieValidation;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.loading.FMLPaths;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ public final class NutrientFullExporter {
     private NutrientFullExporter() {}
 
     public static Result run() {
-        Path exportDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("nourished_nutrients_export");
+        Path exportDir = NourishedConfigPaths.nutrientsExport();
 
         Map<ResourceLocation, Map<String, Object>> results =
                 RegistryExporter.run("nourished_nutrients");
@@ -68,7 +68,7 @@ public final class NutrientFullExporter {
         try {
             MarieValidation.assertPathUnder(
                     exportDir.normalize(),
-                    FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).normalize(),
+                    NourishedConfigPaths.root().normalize(),
                     "fullExport");
             Files.createDirectories(exportDir);
 

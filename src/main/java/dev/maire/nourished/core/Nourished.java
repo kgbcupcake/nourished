@@ -25,7 +25,12 @@ import dev.marie.framework.compat.AutoCompatDiscovery;
 import dev.marie.framework.compat.ModCompat;
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
+import dev.maire.nourished.config.NourishedConfigLayoutMigration;
 import dev.maire.nourished.config.NutritionalPanelConfig;
+import dev.maire.nourished.config.MicroConfig;
+import dev.maire.nourished.core.micro.MicroAttachment;
+import dev.maire.nourished.core.micro.MicroDataLoader;
+import dev.maire.nourished.core.micro.MicroHandler;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
 import dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen;
 import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel;
@@ -91,6 +96,7 @@ public class Nourished {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Nourished(IEventBus modEventBus, ModContainer modContainer) {
+        NourishedConfigLayoutMigration.run();
         // Per-nutrient TOML sections are keyed off NutrientRegistry; load before building the spec.
         NutrientRegistry.loadDefinitions();
         NutrientRegistry.syncToValueRegistryUnfrozen();
@@ -100,6 +106,8 @@ public class Nourished {
         NourishedConfig.register(modContainer);
         NourishedClientConfig.register(modContainer);
         NutritionalPanelConfig.register(modContainer);
+        MicroConfig.register(modContainer);
+        modEventBus.addListener(MicroConfig::onModConfigReloading);
         modEventBus.addListener(NourishedConfig::onModConfigLoading);
         modEventBus.addListener(NourishedConfig::onModConfigReloading);
         modEventBus.addListener(NourishedClientConfig::onModConfigLoading);
@@ -140,6 +148,7 @@ public class Nourished {
         TrackingData.setInstanceFactory(NourishedTrackingData::new);
         DietAttachment.register(modEventBus);
         GutHealthAttachment.register(modEventBus);
+        MicroAttachment.register(modEventBus);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modContainer.registerExtensionPoint(IConfigScreenFactory.class,
                     (minecraft, parent) -> NourishedConfigScreen.create(parent));
@@ -153,6 +162,8 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new RawFoodPenaltyHandler());
         NeoForge.EVENT_BUS.register(new GutHealthTickHandler());
         NeoForge.EVENT_BUS.register(new GutHealthRecoveryHandler());
+        NeoForge.EVENT_BUS.register(new MicroHandler());
+        NeoForge.EVENT_BUS.addListener(MicroDataLoader::onAddReloadListeners);
         ActivityModuleRegistry.register(new SprintDecayModule());
         ActivityModuleRegistry.register(new SwimDecayModule());
         ActivityModuleRegistry.register(new MiningModule());

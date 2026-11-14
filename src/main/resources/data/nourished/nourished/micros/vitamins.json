@@ -1,0 +1,9 @@
+{
+  "display_name": "Vitamins",
+  "color": "#FFB300",
+  "decay_rate": 0.01,
+  "low_threshold": 0.2,
+  "high_threshold": 0.9,
+  "icon": "minecraft:carrot",
+  "group_weights": { "fruits": 0.8, "vegetables": 0.7 }
+}

@@ -92,7 +92,7 @@ Top-level fields:
 ## Which file wins
 
 1. Bundled built-in defaults
-2. `config/nourished/raw_food.json` on disk — edit this one
+2. `config/nourished/modules/raw_food/raw_food.json` on disk — edit this one
 3. `data/nourished/config/raw_food.json` (datapack override)
 
 ## Notes

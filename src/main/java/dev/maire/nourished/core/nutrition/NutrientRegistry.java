@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.nutrition;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -25,7 +26,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,7 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Loads nutrient definitions from config/nourished/nutrients.json.
+ * Loads nutrient definitions from config/nourished/nutrition/nutrients.json.
  * Writes a default file on first run. Call {@link #loadDefinitions()} before config spec
  * construction; call {@link #syncAndFreeze()} during common setup to publish into
  * {@link ValueRegistry}. {@link #load()} runs both phases for lifecycle/reload callers.
@@ -53,7 +53,7 @@ import java.util.Set;
  * <b>Priority / Override Stack (lowest to highest):</b>
  * <ol>
  *   <li>Bundled built-in defaults (the five built-in nutrient resources)</li>
- *   <li>config/nourished/nutrients.json (hand-editable; written on first run)</li>
+ *   <li>config/nourished/nutrition/nutrients.json (hand-editable; written on first run)</li>
  *   <li>data/nourished/config/nutrients.json (datapack override, see {@link #loadFromDatapack})</li>
  *   <li>KubeJS runtime registration (highest — see {@link #registerExternal})</li>
  * </ol>
@@ -397,7 +397,7 @@ public class NutrientRegistry {
 
     private static void writeReadme() {
         try {
-            Path readmeDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("Read_Me");
+            Path readmeDir = NourishedConfigPaths.readme();
             Files.createDirectories(readmeDir);
             writeReadmeIfAbsent(readmeDir);
         } catch (IOException e) {
@@ -422,11 +422,11 @@ public class NutrientRegistry {
     }
 
     private static void doLoadDefinitions() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("nutrients.json");
+        Path configDir = NourishedConfigPaths.root();
+        Path file = NourishedConfigPaths.nutrients();
 
         try {
-            Files.createDirectories(configDir);
+            Files.createDirectories(file.getParent());
             if (!Files.exists(file)) {
                 if (writeDefaultsIfPossible(file)) {
                     Nourished.LOGGER.info("[NutrientRegistry] Wrote default nutrients.json");
@@ -476,7 +476,7 @@ public class NutrientRegistry {
     }
 
     /**
-     * Persists the in-memory registry to config/nourished/nutrients.json — excluding
+     * Persists the in-memory registry to config/nourished/nutrition/nutrients.json — excluding
      * {@link #EXTERNALLY_REGISTERED} (KubeJS/addon) entries, which belong at the top of the
      * priority stack precisely so they're re-applied fresh from whichever mods/scripts are
      * actually present each launch, not frozen into this hand-editable file: baking one in here
@@ -485,7 +485,7 @@ public class NutrientRegistry {
      * disk.
      */
     public static void save() {
-        Path file = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("nutrients.json");
+        Path file = NourishedConfigPaths.nutrients();
         try {
             Files.createDirectories(file.getParent());
             List<NutrientDef> toWrite = INSTANCE.values().stream()
@@ -856,7 +856,7 @@ public class NutrientRegistry {
             obj.add("tags", tags);
             arr.add(obj);
         }
-        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "NutrientRegistry");
+        MarieValidation.assertPathUnder(file, NourishedConfigPaths.root(), "NutrientRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }

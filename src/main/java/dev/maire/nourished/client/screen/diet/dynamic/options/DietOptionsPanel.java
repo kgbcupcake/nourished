@@ -2,6 +2,7 @@ package dev.maire.nourished.client.screen.diet.dynamic.options;
 
 import dev.marie.framework.ui.api.MarieModuleSettings;
 import dev.marie.framework.ui.api.StandardPanelBuilder;
+import dev.maire.nourished.client.screen.diet.DietHomeSections;
 import dev.maire.nourished.client.screen.diet.dynamic.edit.DietScreenEditTarget;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
@@ -25,6 +26,8 @@ public final class DietOptionsPanel {
     private static final double PERCENT_STEP = 0.01d;
     /** The config default of {@code dietBackgroundOpacity} (204/255), which "Reset This Tab" restores. */
     private static final double DEFAULT_OPACITY = 204.0d / 255.0d;
+    /** The hub editor window's own module id — its chrome's Style/Glow/Pulse/Colors live under this, independent of the boxes it edits. */
+    public static final String EDITOR_ID = "nourished.diet.hub.editor";
 
     private DietOptionsPanel() {}
 
@@ -329,19 +332,68 @@ public final class DietOptionsPanel {
     }
 
     /**
-     * The hub editor window's own colors — its chrome, independent of the boxes it edits. A
-     * colors-only panel (no Layout/Behavior/Style tabs — there's no position/size/text of its own to
-     * move, just its four chrome colors), reached from the hub's own "Editor" sidebar entry rather
-     * than a per-box one.
+     * The Home page's editor entry: Behavior/Style/Glow/Pulse/Colors over {@link DietHomeSections#ID}
+     * (read by {@code HomeBoxPane}, which draws the box these settings style — {@link
+     * dev.marie.framework.ui.hub.HubInfoPage} itself has none of its own). Built directly rather than
+     * through {@link #forModule}, which always adds Text size and text/icon brightness: {@code
+     * HomeBoxPane} deliberately never wraps the page's own {@code RenderContext} (its 3D player preview
+     * only draws when that context is the real {@code GuiGraphicsRenderContext} — see its class
+     * javadoc), so those sliders, and Move/Hide Text, would silently do nothing. No bars, no icons, no
+     * separate header; Behavior is left with just the standard "Hide Window" toggle.
+     */
+    public static MarieComponent homePanel() {
+        var store = DietScreenPersistence.get();
+        return MarieModuleSettings.standardPanel(Component.translatable("nourished.screen.diet.home_label").getString(),
+                        store, DietHomeSections.ID)
+                .withoutPadding()
+                .withoutBars()
+                .withoutIcons()
+                .withoutSizes()
+                .withoutMoveText()
+                .withoutHideText()
+                .withOwnStyle()
+                .withShadow()
+                .withGlow()
+                .withoutBarGlow()
+                .storedOpacity(DEFAULT_OPACITY)
+                .extraTabs(panel -> {
+                    panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
+                    homeColors(panel);
+                })
+                .build();
+    }
+
+    /** The Home box's own colors: its border (a shared role, as for {@link #caloriesColors}); everything else it draws keeps its existing per-row/role color. */
+    public static void homeColors(MarieToolbox.PanelBuilder panel) {
+        NourishedColorSlots.addFixed(panel, NourishedColors.HOME_BORDER, "nourished.options.color.border");
+    }
+
+    /**
+     * The hub editor window's own entry — its chrome, independent of the boxes it edits. A "whole
+     * window" panel like the Nutritional Panel's own ({@link #build()}): no content of its own to
+     * move/hide/size, just a self-contained Style/Glow/Pulse box (read by {@link
+     * dev.maire.nourished.client.screen.diet.nutritionalhud.NutritionalHudScreen}'s editor window
+     * background/border) plus its four chrome colors.
      */
     public static MarieComponent editorPanel() {
-        MarieToolbox.PanelBuilder panel = MarieToolbox.panel(text("nourished.options.diet.editor_title"))
-                .colorTab(text("config.marieslib.moduleoptions.tab.colors"));
-        NourishedColorSlots.addFixed(panel, NourishedColors.HUB_BACKGROUND, "nourished.options.color.hub_background");
-        NourishedColorSlots.addFixed(panel, NourishedColors.HUB_BORDER, "nourished.options.color.hub_border");
-        NourishedColorSlots.addFixed(panel, NourishedColors.HUB_TITLE, "nourished.options.color.hub_title");
-        NourishedColorSlots.addFixed(panel, NourishedColors.HUB_ACCENT, "nourished.options.color.hub_accent");
-        return panel.build();
+        var store = DietScreenPersistence.get();
+        return MarieModuleSettings.standardPanel(text("nourished.options.diet.editor_title"), store, EDITOR_ID)
+                .withoutPadding()
+                .withoutMoveAndHide()
+                .withoutSizes()
+                .withOwnStyle()
+                .withShadow()
+                .withGlow()
+                .withoutBarGlow()
+                .storedOpacity(DEFAULT_OPACITY)
+                .extraTabs(panel -> {
+                    panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
+                    NourishedColorSlots.addFixed(panel, NourishedColors.HUB_BACKGROUND, "nourished.options.color.hub_background");
+                    NourishedColorSlots.addFixed(panel, NourishedColors.HUB_BORDER, "nourished.options.color.hub_border");
+                    NourishedColorSlots.addFixed(panel, NourishedColors.HUB_TITLE, "nourished.options.color.hub_title");
+                    NourishedColorSlots.addFixed(panel, NourishedColors.HUB_ACCENT, "nourished.options.color.hub_accent");
+                })
+                .build();
     }
 
     private static NourishedClientConfig cc() {

@@ -1,5 +1,6 @@
 package dev.maire.nourished.modules.activity_driven_nutrient.core;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -16,7 +17,6 @@ import dev.maire.nourished.core.Nourished;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -265,7 +265,7 @@ public final class ActivityDrivenNutrientRegistry {
     // ── Load / save / reload / datapack — mirrors ColorRegistry's shape ────────────────────────
 
     public static void load() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
+        Path configDir = NourishedConfigPaths.root();
         Path file = configDir.resolve(CONFIG_RELATIVE_PATH);
         try {
             Files.createDirectories(file.getParent());
@@ -282,7 +282,7 @@ public final class ActivityDrivenNutrientRegistry {
         }
 
         try {
-            writeReadmeIfAbsent(file.getParent().resolve("Read_Me"));
+            writeReadmeIfAbsent(NourishedConfigPaths.readme());
         } catch (IOException e) {
             Nourished.LOGGER.warn("[ActivityDrivenNutrientRegistry] Failed to write ACTIVITY_CONFIG_README.md", e);
         }
@@ -311,7 +311,7 @@ public final class ActivityDrivenNutrientRegistry {
     }
 
     public static void save() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
+        Path configDir = NourishedConfigPaths.root();
         Path file = configDir.resolve(CONFIG_RELATIVE_PATH);
         try {
             Files.createDirectories(file.getParent());
@@ -433,7 +433,7 @@ public final class ActivityDrivenNutrientRegistry {
         // no "colors" block is written here going forward. #parseFromReader still reads one if
         // present, purely to feed #migrateLegacyColorsToColorRegistry on old files.
 
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
+        Path configDir = NourishedConfigPaths.root();
         MarieValidation.assertPathUnder(file, configDir, "ActivityDrivenNutrientRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(root, w);

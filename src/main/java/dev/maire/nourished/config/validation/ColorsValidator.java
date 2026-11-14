@@ -1,5 +1,6 @@
 package dev.maire.nourished.config.validation;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -10,7 +11,6 @@ import dev.marie.framework.config.validation.ValidationResult;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -50,7 +50,7 @@ public final class ColorsValidator implements ConfigValidator {
     public ValidationResult validate() {
         Set<String> validKeys = Set.copyOf(NutrientRegistry.getKeys());
         List<Finding> findings = new ArrayList<>();
-        Path file = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve(FILE);
+        Path file = NourishedConfigPaths.root().resolve(FILE);
 
         if (!Files.isRegularFile(file)) {
             return ValidationResult.pass(validatorId());

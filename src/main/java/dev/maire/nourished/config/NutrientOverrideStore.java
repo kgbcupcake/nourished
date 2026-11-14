@@ -6,7 +6,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.framework.api.ApiStatus;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.io.IOException;
@@ -34,7 +33,7 @@ public final class NutrientOverrideStore {
     private NutrientOverrideStore() {}
 
     public static Path file() {
-        return FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("nutrient_overrides.json");
+        return NourishedConfigPaths.nutrientOverrides();
     }
 
     /** Loads the JSON file and moves any legacy TOML overrides into it. Call once config is loaded. */

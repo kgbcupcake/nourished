@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.config;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -20,7 +21,6 @@ import dev.marie.framework.config.PresetRegistry;
 import dev.marie.framework.util.MarieJsonUtils;
 import dev.marie.framework.util.MarieValidation;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.io.ByteArrayInputStream;
@@ -98,7 +98,7 @@ public final class NourishedImportExport {
     }
 
     public static Path exportsDirectory() {
-        return FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("exports");
+        return NourishedConfigPaths.exports();
     }
 
     public static Path writeExportFile(JsonObject root) throws IOException {

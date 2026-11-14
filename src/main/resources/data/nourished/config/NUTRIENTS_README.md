@@ -43,7 +43,7 @@ A JSON array of nutrient objects. Fields:
 
 1. Hardcoded built-in defaults (used only if the config file is missing or
    invalid)
-2. `config/nourished/nutrients.json` on disk — edit this one
+2. `config/nourished/nutrition/nutrients.json` on disk — edit this one
 
 ## Notes
 

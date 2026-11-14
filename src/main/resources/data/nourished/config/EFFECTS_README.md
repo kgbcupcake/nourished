@@ -45,7 +45,7 @@ A JSON array of effect objects. Fields:
 1. Bundled built-in defaults (`protein_penalty`, `carbs_penalty`,
    `vitamins_penalty`, `hydration_penalty`, `all_high_health`,
    `all_high_regen`)
-2. `config/nourished/effects.json` on disk — edit this one
+2. `config/nourished/gameplay/effects.json` on disk — edit this one
 
 ## Notes
 

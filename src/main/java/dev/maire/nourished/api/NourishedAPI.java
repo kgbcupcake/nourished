@@ -463,4 +463,19 @@ public final class NourishedAPI {
     public static void addReportSection(ReportProvider provider) {
         registerReportProvider(provider);
     }
+    /** Adds or replaces a tracked nutrient (Omega-3, Fiber, ...); applied on the next datapack reload. */
+    public static void registerMicroNutrient(dev.maire.nourished.core.micro.MicroDef definition) {
+        dev.maire.nourished.core.micro.MicroRegistry.registerExternal(definition);
+    }
+
+    /** The player's level (0..1) of a tracked nutrient such as {@code "omega3"}. */
+    public static float getMicroNutrientLevel(net.minecraft.world.entity.player.Player player, String key) {
+        return dev.maire.nourished.core.micro.MicroAttachment.level(player, key);
+    }
+
+    /** Per-serving nutrient values for a food, as shown in its tooltip. */
+    public static Map<String, Float> getMicroNutrientProfile(net.minecraft.world.item.ItemStack stack,
+                                                             @org.jetbrains.annotations.Nullable net.minecraft.world.level.Level level) {
+        return dev.maire.nourished.core.micro.MicroProfileResolver.resolve(stack, level);
+    }
 }

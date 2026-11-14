@@ -38,15 +38,16 @@ import java.util.function.BooleanSupplier;
  * CustomCaloriesOverrideRegistry}, {@link SilentEatOverrideRegistry}, {@link
  * NoRecentMealsOverrideRegistry}, {@link DiminishingReturnsOverrideRegistry}, {@link
  * RawFoodTierOverrideRegistry}, and MariesLib's generic {@link SourceClassificationRegistry} for
- * the Values/Nutrient Groups pages) in one place, each tagged with which setting(s) it has, instead
- * of needing to already remember or re-discover what's been customized. Clicking an entry jumps the
- * editor straight to it — via MariesLib's new {@link ItemEditorPage#attachRetargetHandler}, so this
- * page can switch the editor's target the same way dragging an item in from JEI/EMI would, without
+ * the Values page) in one place, each tagged with which setting(s) it has, instead of needing to
+ * already remember or re-discover what's been customized. Clicking an entry jumps the editor
+ * straight to it — via MariesLib's new {@link ItemEditorPage#attachRetargetHandler}, so this page
+ * can switch the editor's target the same way dragging an item in from JEI/EMI would, without
  * needing a reference to the host panel itself.
  *
  * <p>No Save/Revert of its own — nothing is edited on this page directly — but it's not a dead end
  * either: clicking an entry doesn't just jump to it, it opens the actual page that item's override
- * lives on (Options, Calories, or Nutrient Groups, by priority when it has more than one kind),
+ * lives on (Options or Calories, by priority when it has more than one kind) — or, for an item whose
+ * only override is on the Values page, retargets with no specific page (the editor's own default),
  * ready to change. Rebuilt fresh every time the page is opened so it always reflects whatever every
  * other page has actually saved.
  */
@@ -67,7 +68,7 @@ public final class EditedItemsScreenProvider implements ItemEditorScreenProvider
         return new EditedItemsScreen(modId);
     }
 
-    /** Options wins over Calories wins over Nutrient Groups when an item has more than one kind of override — the single most likely place the player actually wants to land. */
+    /** Options wins over Calories when an item has more than one kind of override — the single most likely place the player actually wants to land. {@code null} (a plain retarget, no specific page) for an item whose only override is on the Values page, since that's the editor's own default landing page already. */
     @Nullable
     private static ItemEditorScreenProvider routeFor(List<String> tags) {
         if (tags.stream().anyMatch(OPTIONS_TAGS::contains)) {
@@ -76,8 +77,8 @@ public final class EditedItemsScreenProvider implements ItemEditorScreenProvider
         if (tags.stream().anyMatch(CALORIES_TAGS::contains)) {
             return new CaloriesScreenProvider();
         }
-        if (tags.contains("Values")) {
-            return new NutrientGroupsScreenProvider();
+        if (tags.contains("Nutrients")) {
+            return new NutrientsScreenProvider();
         }
         return null;
     }
@@ -97,6 +98,7 @@ public final class EditedItemsScreenProvider implements ItemEditorScreenProvider
             addTags(tagsByItem, NoRecentMealsOverrideRegistry.getAll(), "No Recent Meals");
             addTags(tagsByItem, DiminishingReturnsOverrideRegistry.getAll(), "DR Off");
             addTags(tagsByItem, RawFoodTierOverrideRegistry.getAll().keySet(), "Raw Tier");
+            addTags(tagsByItem, dev.maire.nourished.core.micro.MicroConfigFile.itemIds(), "Nutrients");
             MarieContext.runAs(MarieContext.forMod(modId), () ->
                     addTags(tagsByItem, SourceClassificationRegistry.getAll().keySet(), "Values"));
 

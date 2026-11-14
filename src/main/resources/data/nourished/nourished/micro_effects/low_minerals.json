@@ -1,0 +1,1 @@
+{ "nutrient": "minerals", "trigger": "below", "threshold": 0.15, "effect": "minecraft:slowness", "amplifier": 0, "duration_ticks": 200 }

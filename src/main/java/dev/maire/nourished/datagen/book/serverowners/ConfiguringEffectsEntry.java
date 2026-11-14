@@ -34,7 +34,7 @@ public class ConfiguringEffectsEntry extends EntryProvider {
 
         this.pageText("""
                 Nourished exposes every bonus and penalty as a status effect entry in a config file. Server owners can change which potion effect is applied, its amplifier and duration, and the nutrient threshold that triggers it, with no restart required.\s\s
-                The config lives at %sconfig/nourished/effects.json%s.
+                The config lives at %sconfig/nourished/gameplay/effects.json%s.
                 """.formatted(
                 FILE_PATH, RESET
         ));

@@ -70,10 +70,24 @@ public final class NourishedKeys {
             "key.categories.nourished"
     );
 
+    public static final KeyMapping OPEN_SETTINGS = new KeyMapping(
+            "key.nourished.openSettings",
+            InputConstants.Type.KEYSYM,
+            InputConstants.UNKNOWN.getValue(),
+            "key.categories.nourished"
+    );
+
     public static final KeyMapping SHOW_TOOLTIP_DETAILS = new KeyMapping(
             "key.nourished.showTooltipDetails",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_LEFT_SHIFT,
+            "key.categories.nourished"
+    );
+
+    public static final KeyMapping OPEN_NUTRIENTS = new KeyMapping(
+            "key.nourished.openNutrients",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_UNKNOWN,
             "key.categories.nourished"
     );
 
@@ -89,6 +103,8 @@ public final class NourishedKeys {
         event.register(OPEN_SCALE_CONFIG);
         event.register(OPEN_COMMAND_CENTER);
         event.register(OPEN_ITEM_EDITOR);
+        event.register(OPEN_SETTINGS);
         event.register(SHOW_TOOLTIP_DETAILS);
+        event.register(OPEN_NUTRIENTS);
     }
 }
