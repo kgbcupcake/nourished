@@ -1,137 +1,45 @@
-package dev.maire.nourished.datagen.book.tipsandtricks;
+package dev.maire.nourished.datagen.book.gettingstarted;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
-import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
-import com.klikli_dev.modonomicon.api.datagen.EntryProvider;
-import com.klikli_dev.modonomicon.api.datagen.book.BookIconModel;
-import com.klikli_dev.modonomicon.api.datagen.book.page.BookTextPageModel;
-import com.mojang.datafixers.util.Pair;
+import dev.maire.nourished.datagen.book.GuideEntry;
+import dev.maire.nourished.datagen.book.nutrition.WhenHealthyEntry;
+import dev.maire.nourished.datagen.book.activity.MiningCombatEntry;
 import net.minecraft.world.item.Items;
 
-public class DailyRoutineEntry extends EntryProvider {
+import static dev.maire.nourished.datagen.book.GuideColors.*;
+
+public class DailyRoutineEntry extends GuideEntry {
 
     public static final String ID = "daily_routine";
 
-    // Food group colors
-    private static final String FRUITS = "[#](F5A623)";
-    private static final String VEGETABLES = "[#](7BC96F)";
-    private static final String PROTEINS = "[#](E85D75)";
-    private static final String GRAINS = "[#](E6C65C)";
-    private static final String DAIRY = "[#](6FB8E8)";
-
-    // Status colors
-    private static final String CRITICAL = "[#](E85D75)";
-    private static final String WARNING = "[#](E6C65C)";
-
-    // Reset
-    private static final String RESET = "[#]()";
-
     public DailyRoutineEntry(CategoryProvider parent) {
-        super(parent);
+        super(parent, ID, "Daily Routine", "A simple loop that keeps every bar healthy.", Items.CLOCK);
     }
 
     @Override
     protected void generatePages() {
+        text("ideal_loop", "The Ideal Daily Loop",
+                "**Morning:** eat something from your lowest group before leaving base.",
+                "**During the day:** eat for hunger, but rotate what you grab.",
+                "**Evening:** top up anything under half before bed.",
+                "**Sleep:** wake up with the Sleep Bonus.");
 
-        this.page("ideal_loop", () -> BookTextPageModel.create()
-                .withTitle(this.context().pageTitle())
-                .withText(this.context().pageText()));
+        text("hud_is_your_friend", "The HUD is Your Friend",
+                "Bars drop slowly. Glance at the HUD now and then instead of waiting for a debuff.",
+                hl(BAD, "Red") + " means eat from that group now. " + hl(GOLD, "Yellow") + " means before bed.");
 
-        this.pageTitle("The Ideal Daily Loop");
+        text("batch_eating", "Batch Eating",
+                "You don't need all five groups every meal. Two or three per sitting, rotated, is plenty.",
+                "**Morning:** " + hl(FRUITS, "Fruits") + " + " + hl(PROTEINS, "Proteins"),
+                "**Midday:** " + hl(GRAINS, "Grains") + " + " + hl(VEGETABLES, "Vegetables"),
+                "**Evening:** " + hl(DAIRY, "Dairy"));
 
-        this.pageText("""
-                Nourished is designed around a simple daily rhythm. Follow this loop and you will rarely suffer a penalty:\s\s
-                **Morning:** eat one food from any low group before leaving base.
-                **During the day:** eat normally for hunger; rotate food types.
-                **Evening:** top up any bars below 50%% before sleeping.
-                **Sleep:** with all bars healthy to earn the Sleep Bonus.
-                """);
+        text("before_a_fight", "Before a Fight",
+                "Low " + hl(GRAINS, "Grains") + " gives Weakness and low " + hl(VEGETABLES, "Vegetables") + " gives Slowness. Neither belongs in a boss fight.",
+                "Better still, go in with every group above 75% for " + link("Health Boost and Regeneration", NUTRITION, WhenHealthyEntry.ID) + ".");
 
-        this.page("hud_is_your_friend", () -> BookTextPageModel.create()
-                .withTitle(this.context().pageTitle())
-                .withText(this.context().pageText()));
-
-        this.pageTitle("The HUD is Your Friend");
-
-        this.pageText("""
-                Glance at the HUD bar overlay regularly, not just when you feel effects. Bars drop slowly and you want to catch them before they hit the critical threshold, not after.\s\s
-                If a bar is in the %sred range%s, address it immediately. If it is in the %syellow range%s, eat something from that group before your next sleep.
-                """.formatted(
-                CRITICAL, RESET,
-                WARNING, RESET
-        ));
-
-        this.page("batch_eating", () -> BookTextPageModel.create()
-                .withTitle(this.context().pageTitle())
-                .withText(this.context().pageText()));
-
-        this.pageTitle("Batch Eating");
-
-        this.pageText("""
-                You do not need to eat from all five groups at every meal. Instead, eat 2–3 groups per sitting and rotate which groups you cover each time.\s\s
-                Example rotation:
-                **Morning:** %sFruits%s + %sProteins%s
-                **Midday:** %sGrains%s + %sVegetables%s
-                **Evening:** %sDairy%s\s\s
-                This keeps all bars healthy without ever feeling like a chore.
-                """.formatted(
-                FRUITS, RESET, PROTEINS, RESET,
-                GRAINS, RESET, VEGETABLES, RESET,
-                DAIRY, RESET
-        ));
-
-        this.page("before_a_fight", () -> BookTextPageModel.create()
-                .withTitle(this.context().pageTitle())
-                .withText(this.context().pageText()));
-
-        this.pageTitle("Before a Fight");
-
-        this.pageText("""
-                Before entering a dungeon, raid, or boss fight, check that these two groups are above their good threshold:\s\s
-                - %sProteins%s: bonus max health helps survive burst damage.
-                - %sDairy%s: bonus armor toughness reduces effective incoming damage.\s\s
-                If either is low, eat a cooked steak and bucket a cow before you go in. The difference in survivability is significant.
-                """.formatted(
-                PROTEINS, RESET,
-                DAIRY, RESET
-        ));
-
-        this.page("before_an_xp_session", () -> BookTextPageModel.create()
-                .withTitle(this.context().pageTitle())
-                .withText(this.context().pageText()));
-
-        this.pageTitle("Before an XP Session");
-
-        this.pageText("""
-                Planning to enchant gear or grind a mob farm? Make sure your %sGrains%s group is well above the bonus threshold before you start.\s\s
-                The Grains bonus (faster experience gain) passively increases all XP earned while active. A pumpkin pie and a loaf of bread before your session can meaningfully speed up an enchanting or leveling run.
-                """.formatted(
-                GRAINS, RESET
-        ));
-    }
-
-    @Override
-    protected String entryName() {
-        return "Daily Routine";
-    }
-
-    @Override
-    protected String entryDescription() {
-        return "A simple daily rhythm that keeps every bar healthy.";
-    }
-
-    @Override
-    protected Pair<Integer, Integer> entryBackground() {
-        return EntryBackground.DEFAULT;
-    }
-
-    @Override
-    protected BookIconModel entryIcon() {
-        return BookIconModel.create(Items.CLOCK);
-    }
-
-    @Override
-    protected String entryId() {
-        return ID;
+        text("before_mining", "Before a Mining Trip",
+                "Low " + hl(PROTEINS, "Proteins") + " gives Mining Fatigue. Eat some cooked meat before you head down.",
+                "Mining also drains your bars a little per block, so pack food. See " + link("Mining & Combat", ACTIVITY_CAT, MiningCombatEntry.ID) + ".");
     }
 }

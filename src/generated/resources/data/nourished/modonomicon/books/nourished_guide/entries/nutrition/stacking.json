@@ -1,0 +1,47 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "nutrition",
+  "description": "book.nourished.nourished_guide.nutrition.stacking.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:brewing_stand"
+  },
+  "name": "book.nourished.nourished_guide.nutrition.stacking.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.stacking.stacking.text",
+      "title": "book.nourished.nourished_guide.nutrition.stacking.stacking.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.stacking.viewing.text",
+      "title": "book.nourished.nourished_guide.nutrition.stacking.viewing.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "nutrition/balance_score",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 3,
+  "x": 0,
+  "y": -2
+}

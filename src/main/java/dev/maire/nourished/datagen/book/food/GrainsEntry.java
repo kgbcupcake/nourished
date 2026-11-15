@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.foodgroups;
+package dev.maire.nourished.datagen.book.food;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
@@ -33,7 +33,7 @@ public class GrainsEntry extends EntryProvider {
         this.pageTitle("Grains");
 
         this.pageText("""
-                Grains are staple foods that form the backbone of any diet. %sPenalty:%s reduced hunger restoration when depleted. %sBonus:%s faster experience gain when maintained. Bread is your most reliable source.
+                Grains are staple foods that form the backbone of any diet. %sPenalty:%s Weakness while the bar is below 25%%%%. %sMilestone reward:%s Haste. Bread is your most reliable source.
                 """.formatted(
                 PENALTY, RESET,
                 BONUS, RESET
@@ -86,15 +86,15 @@ public class GrainsEntry extends EntryProvider {
                 Cake is a special case: each slice of the same cake is the same item, so eating an entire cake counts as eating the same food repeatedly. Pair cake slices with other grain foods on the same day for best efficiency.
                 """);
 
-        this.page("experience_bonus", () -> BookTextPageModel.create()
+        this.page("weakness_penalty", () -> BookTextPageModel.create()
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
 
-        this.pageTitle("Experience Bonus");
+        this.pageTitle("Weakness Penalty");
 
         this.pageText("""
-                The Grains bonus (faster experience gain) is one of the most impactful in the game for combat and enchanting progression.\s\s
-                Prioritizing Grains early is especially worthwhile if you plan to enchant gear or grind XP. The bonus stacks with other XP sources and applies passively while it is active.
+                Let Grains drop below 25%% and you get **Weakness**, which cuts your melee damage. It's the penalty you notice fastest in a fight.\s\s
+                Bread is cheap and stacks well, so keep a few on you before any trip.
                 """);
     }
 
@@ -105,7 +105,7 @@ public class GrainsEntry extends EntryProvider {
 
     @Override
     protected String entryDescription() {
-        return "Staple foods that speed up experience gain.";
+        return "Staple foods; neglect them and you hit weaker.";
     }
 
     @Override

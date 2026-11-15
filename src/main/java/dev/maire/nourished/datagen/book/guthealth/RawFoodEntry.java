@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.foodsafety;
+package dev.maire.nourished.datagen.book.guthealth;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;

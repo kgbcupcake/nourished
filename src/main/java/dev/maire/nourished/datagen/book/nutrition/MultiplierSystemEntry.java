@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.howitworks;
+package dev.maire.nourished.datagen.book.nutrition;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
@@ -34,7 +34,7 @@ public class MultiplierSystemEntry extends EntryProvider {
 
         this.pageText("""
                 Everything in this chapter feeds into one question: how much nutrition does this specific meal actually give you? Two things can push that number up:\s\s
-                %sCooking:%s eating something cooked avoids the raw food penalty entirely (see the Food Safety chapter).
+                %sCooking:%s eating something cooked avoids the raw food penalty entirely (see the Gut Health chapter).
                 %sNovelty:%s eating a food you haven't touched in a while gives a one-time boost on top of its normal value.
                 """.formatted(
                 BONUS, RESET,
@@ -65,7 +65,7 @@ public class MultiplierSystemEntry extends EntryProvider {
         this.pageTitle("Balance and Gut Health");
 
         this.pageText("""
-                Your **Balance Score** doesn't multiply nutrition directly; instead, a well-balanced diet speeds up passive Gut Health recovery, and Gut Health itself amplifies every raw-food penalty you take when it's low. See the previous entry and the Food Safety chapter for both.
+                Your **Balance Score** doesn't multiply nutrition directly; instead, a well-balanced diet speeds up passive Gut Health recovery, and Gut Health itself amplifies every raw-food penalty you take when it's low. See the previous entry and the Gut Health chapter for both.
                 """);
 
         this.page("putting_it_together", () -> BookTextPageModel.create()

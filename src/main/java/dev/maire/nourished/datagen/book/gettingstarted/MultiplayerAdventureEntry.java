@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.tipsandtricks;
+package dev.maire.nourished.datagen.book.gettingstarted;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
@@ -33,8 +33,8 @@ public class MultiplayerAdventureEntry extends EntryProvider {
         this.pageTitle("Traveling Far from Base");
 
         this.pageText("""
-                When leaving base for extended exploration, pack food from all six groups, not just your usual hunger food. A nutrition emergency two thousand blocks from home is much worse than one in your base.\s\s
-                A good travel kit: cooked beef, carrot, apple, bread, honey bottle, and a milk bucket. That covers all six groups in six inventory slots.
+                When leaving base for extended exploration, pack food from all five groups, not just your usual hunger food. A nutrition emergency two thousand blocks from home is much worse than one in your base.\s\s
+                A good travel kit: cooked beef, carrot, apple, bread and a milk bucket. That covers all five groups in five inventory slots.
                 """);
 
         this.page("shared_farms", () -> BookTextPageModel.create()
@@ -59,7 +59,7 @@ public class MultiplayerAdventureEntry extends EntryProvider {
 
         this.pageText("""
                 For long dungeon or nether runs where you cannot eat freely between fights, prioritize **pre-loading** your bars before entering:\s\s
-                - All six groups above 60%%
+                - All five groups above 60%%%%
                 - %sProteins%s and %sDairy%s at or above bonus threshold
                 - Milk bucket in hotbar for emergency debuff clear\s\s
                 Bars decay slowly enough that a two-hour session rarely causes a problem if you start fully topped up.

@@ -25,8 +25,13 @@ public final class BoxTabRenderer implements EditHostRenderer {
     @Override
     public void render(RenderContext context, Bounds area, ModuleEditHost host) {
         TabModuleHosts.addTabSnap(host, area);
-        Bounds at = TabModuleHosts.track(host, area, box, area.x() + TabModuleHosts.GLOW_ROOM, area.y() + TabModuleHosts.GLOW_ROOM);
-        box.render(context, at);
+        int top = area.y() + TabModuleHosts.GLOW_ROOM;
+        int bottom = area.y() + area.height() - TabModuleHosts.GLOW_ROOM;
+        box.setMaxHeight(bottom - top);
+        Bounds at = TabModuleHosts.track(host, area, box, area.x() + TabModuleHosts.GLOW_ROOM, top);
+        // a box dragged or resized past the tab bottom is drawn cut to it, so its content scrolls
+        int visibleH = Math.max(1, Math.min(at.height(), bottom - at.y()));
+        box.render(context, new Bounds(at.x(), at.y(), at.width(), visibleH));
     }
 
     /** The hosted tab plus input for the box's pages while not editing. */

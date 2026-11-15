@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.compatmods;
+package dev.maire.nourished.datagen.book.advanced.compat;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
@@ -41,8 +41,9 @@ public class OverviewEntry extends EntryProvider {
                 - **Croptopia**: fruits, vegetables, nuts, grains.
                 - **Farmer's Delight**: crops, multi-group cooked meals.
                 - **Pam's HarvestCraft 2**: hundreds of crops across all groups.
-                - **Legendary Survival Overhaul**: effects compatibility notes.
-                - **Spice of Life: Onion**: how it interacts with diminishing returns.\s\s
+                - **Farm & Charm**: vegetables, grains and processed foods.
+                - **Herbs & Harvest**: aged cheeses, cured meats and herbs.
+                - **Butchery**: cuts, organs and exotic meats.\s\s
                 Entries only appear when the relevant mod is installed.
                 """);
 
@@ -54,7 +55,7 @@ public class OverviewEntry extends EntryProvider {
 
         this.pageText("""
                 If you are a server owner or modpack maker and want to ensure specific modded foods are classified correctly, you can override assignments using datapacks.\s\s
-                See the **Server Owners** chapter, specifically **Datapack Overrides**, for full instructions on assigning custom foods to groups and adjusting their nutrition values.
+                See the **Advanced** chapter, specifically **Datapacks** and **Food Value Overrides**, for full instructions on assigning custom foods to groups and adjusting their nutrition values.
                 """);
     }
 

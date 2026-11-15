@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.foodgroups;
+package dev.maire.nourished.datagen.book.food;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
@@ -33,7 +33,7 @@ public class ProteinsEntry extends EntryProvider {
         this.pageTitle("Proteins");
 
         this.pageText("""
-                Proteins are rich, sustaining foods. %sPenalty:%s reduced attack damage when depleted. %sBonus:%s increased max health when maintained. Cooked meats and fish are your primary sources.
+                Proteins are rich, sustaining foods. %sPenalty:%s Mining Fatigue while the bar is below 25%%%%. %sMilestone reward:%s Strength. Cooked meats and fish are your primary sources.
                 """.formatted(
                 PENALTY, RESET,
                 BONUS, RESET
@@ -119,7 +119,7 @@ public class ProteinsEntry extends EntryProvider {
 
     @Override
     protected String entryDescription() {
-        return "Rich, sustaining foods that increase max health.";
+        return "Meat and fish; neglect them and you mine slower.";
     }
 
     @Override

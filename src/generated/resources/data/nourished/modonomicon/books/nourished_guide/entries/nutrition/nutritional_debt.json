@@ -1,0 +1,58 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "nutrition",
+  "description": "book.nourished.nourished_guide.nutrition.nutritional_debt.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:rotten_flesh"
+  },
+  "name": "book.nourished.nourished_guide.nutrition.nutritional_debt.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.nutritional_debt.nutritional_debt.text",
+      "title": "book.nourished.nourished_guide.nutrition.nutritional_debt.nutritional_debt.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.nutritional_debt.who_pays_for_it.text",
+      "title": "book.nourished.nourished_guide.nutrition.nutritional_debt.who_pays_for_it.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.nutritional_debt.avoiding_it.text",
+      "title": "book.nourished.nourished_guide.nutrition.nutritional_debt.avoiding_it.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "nutrition/when_neglected",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 7,
+  "x": 5,
+  "y": 1
+}

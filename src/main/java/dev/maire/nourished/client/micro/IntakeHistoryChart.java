@@ -13,10 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Small bar chart of a saved daily intake tracker: oldest day on the left, today on the right. */
-final class IntakeHistoryChart {
+public final class IntakeHistoryChart {
 
     static final int DAYS = 7;
     static final int HEIGHT = 22;
+    // fixed so resizing the box clips instead of squeezing the chart
+    static final int WIDTH = 140;
     private static final int TRACK = 0xFF2A3038;
 
     private IntakeHistoryChart() {}
@@ -35,9 +37,26 @@ final class IntakeHistoryChart {
         return out;
     }
 
-    /** Draws the bars in {@code w} x {@link #HEIGHT}; {@code percent} labels today as a % of a full bar. */
-    static void draw(GuiGraphics g, Font font, List<Float> days, int x, int y, int w, int color, boolean percent) {
-        int chartW = Math.max(DAYS * 4, w - 60);
+    /**
+     * Days since anything counted toward {@code trackerId}: 0 = today. {@code -1} when history is off
+     * or empty; otherwise {@code -(saved days + 2)} when nothing was eaten in the saved window.
+     */
+    public static int daysSinceEaten(@Nullable ResourceLocation trackerId) {
+        var player = Minecraft.getInstance().player;
+        if (trackerId == null || player == null) return -1;
+        if (MarieTracking.getCurrentTrackerValue(player, trackerId) > 0f) return 0;
+        List<TrackerHistoryEntry> history = MarieTracking.getTrackerHistory(player, trackerId);
+        if (history.isEmpty()) return -1;
+        // history is newest first
+        for (int i = 0; i < history.size(); i++) {
+            if (history.get(i).value() > 0f) return i + 1;
+        }
+        return -(history.size() + 2);
+    }
+
+    /** Draws the bars in {@link #WIDTH} x {@link #HEIGHT}; {@code percent} labels today as a % of a full bar. */
+    static void draw(GuiGraphics g, Font font, List<Float> days, int x, int y, int color, boolean percent) {
+        int chartW = WIDTH;
         g.fill(x, y, x + chartW, y + HEIGHT, TRACK);
         float max = 0f;
         for (float v : days) max = Math.max(max, v);

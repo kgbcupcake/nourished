@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.gettingstarted;
+package dev.maire.nourished.datagen.book.advanced;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;

@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.tipsandtricks;
+package dev.maire.nourished.datagen.book.food;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;

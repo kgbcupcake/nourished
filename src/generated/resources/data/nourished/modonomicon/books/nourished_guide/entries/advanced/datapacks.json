@@ -1,0 +1,58 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "advanced",
+  "description": "book.nourished.nourished_guide.advanced.datapacks.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:chest"
+  },
+  "name": "book.nourished.nourished_guide.advanced.datapacks.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.datapacks.tags.text",
+      "title": "book.nourished.nourished_guide.advanced.datapacks.tags.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.datapacks.data_folders.text",
+      "title": "book.nourished.nourished_guide.advanced.datapacks.data_folders.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.datapacks.config_overrides.text",
+      "title": "book.nourished.nourished_guide.advanced.datapacks.config_overrides.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "advanced/food_overrides",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 7,
+  "x": -5,
+  "y": 1
+}

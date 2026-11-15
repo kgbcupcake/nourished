@@ -13,11 +13,13 @@ A new "Nutritional HUD" Diet Screen style — a resizable sidebar window with a 
 
 ## ➕ Added
 
+- **Guide book redesign.** Seven chapters: Getting Started (a short guided path), then Food, Nutrition, Activity, Gut Health, Progression and Advanced as open reference you can jump into any time. 27 new pages cover activity costs, milestones, calories, nutrients, deficiency, food combos, the item editor, the food scanner, datapacks, KubeJS and commands.
 - **Diet deficiency tiers.** Letting a food group stay low now builds up over play time into three deficiency levels (20 / 60 / 120 min by default) with growing penalties: more nutrient drain from sprinting, mining, swimming and combat, then slower natural healing, less saturation from food, and lower movement, mining and attack speed, shown as a new Malnourished effect. Fixing your diet recovers you gradually. Fully configurable in `gameplay/deficiency.json` or by datapack, and effects.json rules can trigger off a deficiency tier.
 - **Deficiency tab** in the Nutritional Panel: your current level and penalties, a bar per food group showing how close it is to the next level, and how long until it worsens or recovers. You also get a notification when your diet slips into a new level or recovers.
 - **Deficiency commands and scripting:** `/nourished deficiency` shows your status, and ops can `get`/`set`/`clear` a player's deficiency or `reload` the config. KubeJS can read and set deficiency (`NourishedDeficiency`) and can steer or block tier changes and build-up (`NourishedEvents.deficiencyTierChanged`, `deficiencyPressure`). There are also Command Center cards to open the config or check your status.
 - **Malnourished:** each deficiency level shows as Malnourished I-III. The penalties (regen, saturation, movement/mining/attack) can't be cleared with milk, and every one of them, including any attribute, is set per level in `deficiency.json`.
 - **Optional calorie deficiency:** packs can turn on a Calories row in `deficiency.json`, so not eating enough for a day builds deficiency too. Off by default.
+- The Deficiency tab shows when you last ate each food group. Panel tabs scroll when their content doesn't fit, and their bars no longer shrink when you resize a box.
 - **Nutrients alongside the food groups:** Omega-3, Fiber, Vitamins, Minerals and Fat, with their own levels, tooltip line and Diet Screen box. Fish now give Omega-3, and crafted or cooked foods add up the nutrients of their ingredients. Fully datapack/config driven.
 - Nutrient effects: low Omega-3, Fiber, Vitamins or Minerals bring a mild debuff, high Omega-3 gives Dolphin's Grace, and keeping every nutrient up gives Haste. Off by default (`builtinEffects`); datapacks can add their own.
 - Click the Nutrients box on the Diet Screen for a detail view: level, trend, what you've eaten for it, and the best foods for it
@@ -55,6 +57,8 @@ A new "Nutritional HUD" Diet Screen style — a resizable sidebar window with a 
 
 ## 🐛 Fixed
 
+- **The Sleep Bonus didn't work.** Waking up with every food group at least half full now gives Regeneration I for 30 seconds.
+- The guide book described per-group bonuses that don't exist. Effects pages now match what actually happens, and a few pages that showed "Format error" are fixed.
 - Turning off calorie history no longer hides today's calories on the Diet Screen.
 - Cake and other foods eaten off a placed block (like modded pies) now give nutrition
 - Nutritional HUD's Home tab showed "Join a world to see your character" instead of the 3D preview even with a player loaded
@@ -64,6 +68,7 @@ A new "Nutritional HUD" Diet Screen style — a resizable sidebar window with a 
 
 ## 🗑️ Removed
 
+- Guide book pages for Legendary Survival Overhaul, Peak Stamina and Spice of Life: Onion.
 - Item editor's standalone "Nutrient Groups" page (now covered by Bulk Edit's per-group rows and the Values page)
 - Classic Diet Screen — Dynamic is now the only non-Hub option
 - The separate on-screen Calorie History and Activity Log HUD boxes, their C/K edit keys and their HUD config options. They now live as tabs in the Nutritional Panel

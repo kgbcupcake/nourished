@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.foodgroups;
+package dev.maire.nourished.datagen.book.food;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
@@ -34,7 +34,7 @@ public class DairyEntry extends EntryProvider {
         this.pageTitle("Dairy");
 
         this.pageText("""
-                Dairy foods strengthen bones and body. %sPenalty:%s reduced knockback resistance when depleted. %sBonus:%s increased armor toughness when maintained. A single cow pen keeps this group topped up easily.
+                Dairy foods strengthen bones and body. %sPenalty:%s none by default, but it still counts toward balance. %sMilestone reward:%s Resistance. A single cow pen keeps this group topped up easily.
                 """.formatted(
                 PENALTY, RESET,
                 BONUS, RESET
@@ -51,26 +51,26 @@ public class DairyEntry extends EntryProvider {
                 Vanilla has only one dairy item, which means this group has almost no rotation options without a food mod installed. The upside: there is nothing to overthink. Keep a cow, bucket regularly.
                 """);
 
-        this.page("armor_toughness", () -> BookTextPageModel.create()
+        this.page("milestone_reward", () -> BookTextPageModel.create()
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
 
-        this.pageTitle("Armor Toughness Bonus");
+        this.pageTitle("Milestone Reward");
 
         this.pageText("""
-                The Dairy bonus (increased armor toughness) makes incoming damage more predictable and reduces the effectiveness of high-damage hits.\s\s
-                This makes Dairy especially valuable in combat-heavy playthroughs. Players who fight frequently or play on hard difficulty should treat this group as a high priority.
+                Eat enough Dairy over time and you earn the Dairy milestones, which grant **Resistance**. The Master tier gives Resistance III for five minutes.\s\s
+                See the Progression chapter for every milestone.
                 """);
 
-        this.page("knockback_penalty", () -> BookTextPageModel.create()
+        this.page("no_penalty", () -> BookTextPageModel.create()
                 .withTitle(this.context().pageTitle())
                 .withText(this.context().pageText()));
 
-        this.pageTitle("Knockback Resistance Penalty");
+        this.pageTitle("No Default Penalty");
 
         this.pageText("""
-                The Dairy penalty (reduced knockback resistance) means depleted Dairy makes you easier to push around in combat. This is especially dangerous around ledges, lava, or enemies that spam attacks.\s\s
-                Keep this group above zero before entering any dungeon or boss fight.
+                Dairy has no status effect when it runs low, so it's easy to forget. It still counts toward your Balance Score, the Balance Bonus and deficiency.\s\s
+                Let it sit empty for long enough and you'll end up Malnourished anyway.
                 """);
 
         this.page("vanilla_secondary", () -> BookSpotlightPageModel.create()
@@ -93,7 +93,7 @@ public class DairyEntry extends EntryProvider {
         this.pageTitle("Dairy: Herbs & Harvest");
 
         this.pageText("""
-                Herbs & Harvest adds aged cheeses including Swiss, cheddar, and brie. These provide significantly higher dairy nutrition than plain milk and introduce distinct cheese families for rotation. See the **Compat Mods** chapter for more.
+                Herbs & Harvest adds aged cheeses including Swiss, cheddar, and brie. These provide significantly higher dairy nutrition than plain milk and introduce distinct cheese families for rotation. See the **Mod Compatibility** section of the **Advanced** chapter for more.
                 """);
 
         this.page("farming_tips", () -> BookTextPageModel.create()
@@ -115,7 +115,7 @@ public class DairyEntry extends EntryProvider {
 
     @Override
     protected String entryDescription() {
-        return "Bone-strengthening foods that increase armor toughness.";
+        return "Milk and cheese; the backbone of a balanced diet.";
     }
 
     @Override

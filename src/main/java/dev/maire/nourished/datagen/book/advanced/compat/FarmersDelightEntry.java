@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.compatmods;
+package dev.maire.nourished.datagen.book.advanced.compat;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
@@ -26,7 +26,7 @@ public class FarmersDelightEntry extends EntryProvider {
         this.pageTitle("Farmer's Delight");
 
         this.pageText("""
-                Farmer's Delight is a farming and cooking overhaul that adds crops, cooking tools, and a wide variety of prepared meals. Its biggest impact on Nourished is that many of its cooked dishes cover **multiple food groups at once**, making them incredibly efficient for maintaining all six bars.
+                Farmer's Delight is a farming and cooking overhaul that adds crops, cooking tools, and a wide variety of prepared meals. Its biggest impact on Nourished is that many of its cooked dishes cover **multiple food groups at once**, making them incredibly efficient for maintaining all five bars.
                 """);
 
         this.page("new_crops", () -> BookTextPageModel.create()

@@ -1,0 +1,62 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "food",
+  "description": "book.nourished.nourished_guide.food.food_groups.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:bowl"
+  },
+  "name": "book.nourished.nourished_guide.food.food_groups.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:bowl"
+      },
+      "text": "book.nourished.nourished_guide.food.food_groups.overview.text",
+      "title": "book.nourished.nourished_guide.food.food_groups.overview.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food.food_groups.what_counts.text",
+      "title": "book.nourished.nourished_guide.food.food_groups.what_counts.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food.food_groups.when_low.text",
+      "title": "book.nourished.nourished_guide.food.food_groups.when_low.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food.food_groups.need_to_improve.text",
+      "title": "book.nourished.nourished_guide.food.food_groups.need_to_improve.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 0,
+  "x": 0,
+  "y": -3
+}

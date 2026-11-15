@@ -1,0 +1,58 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "advanced",
+  "description": "book.nourished.nourished_guide.advanced.kubejs.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:command_block"
+  },
+  "name": "book.nourished.nourished_guide.advanced.kubejs.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.kubejs.events.text",
+      "title": "book.nourished.nourished_guide.advanced.kubejs.events.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.kubejs.bindings.text",
+      "title": "book.nourished.nourished_guide.advanced.kubejs.bindings.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.kubejs.more.text",
+      "title": "book.nourished.nourished_guide.advanced.kubejs.more.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "advanced/datapacks",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 8,
+  "x": -2,
+  "y": 1
+}

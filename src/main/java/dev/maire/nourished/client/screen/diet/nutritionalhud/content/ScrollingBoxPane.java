@@ -43,6 +43,7 @@ public abstract class ScrollingBoxPane implements MarieComponent {
     private int thumbY;
     private int thumbH;
     private int dragGrab = -1;
+    private int maxHeight = Integer.MAX_VALUE;
 
     protected abstract ColorKey borderColor();
 
@@ -66,9 +67,14 @@ public abstract class ScrollingBoxPane implements MarieComponent {
         return NATURAL_WIDTH;
     }
 
-    /** Follows the open page's content, so an untouched box fits whatever page is showing. */
+    /** Follows the open page's content, capped to the tab so taller content scrolls instead of overflowing. */
     public int naturalHeight() {
-        return contentHeight + PAD * 2;
+        return Math.min(contentHeight + PAD * 2, maxHeight);
+    }
+
+    /** Tallest the box may be in its tab; set every frame by {@link BoxTabRenderer}. */
+    void setMaxHeight(int maxHeight) {
+        this.maxHeight = Math.max(PAD * 2 + 20, maxHeight);
     }
 
     @Override

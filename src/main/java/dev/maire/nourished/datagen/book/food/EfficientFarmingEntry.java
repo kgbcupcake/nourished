@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.tipsandtricks;
+package dev.maire.nourished.datagen.book.food;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
@@ -98,7 +98,7 @@ public class EfficientFarmingEntry extends EntryProvider {
         this.pageTitle("Storing Supplies");
 
         this.pageText("""
-                Keep a dedicated **nutrition chest** near your base: a small chest stocked with one stack each of your six key foods.\s\s
+                Keep a dedicated **nutrition chest** near your base: a small chest stocked with one stack each of your key foods.\s\s
                 Refill it during farm harvests and draw from it when a bar is low. This prevents emergency scrambles and means you always have something from each group on hand when you need it.
                 """);
     }

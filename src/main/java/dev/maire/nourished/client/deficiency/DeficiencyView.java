@@ -6,6 +6,8 @@ import dev.marie.framework.tracking.tracker.MarieTracking;
 import dev.marie.framework.tracking.tracker.definition.TrackerHistoryEntry;
 import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.client.colors.NourishedColors;
+import dev.maire.nourished.client.micro.IntakeHistoryChart;
+import dev.maire.nourished.core.history.IntakeHistory;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.deficiency.DeficiencyCalories;
 import dev.marie.framework.tracking.TrackingData;
@@ -29,6 +31,7 @@ import java.util.List;
 public final class DeficiencyView {
 
     private static final int ROW_H = 20;
+    private static final int BAR_W = 120;
     private static final int TEXT = 0xFFE6E6E6;
     private static final int MUTED = 0xFF9AA4AE;
     private static final int TRACK = 0xFF2A3038;
@@ -54,8 +57,13 @@ public final class DeficiencyView {
         y = drawWrapped(g, font, Component.translatable("nourished.deficiency.tab.hint"), x, y, w, MUTED) + 6;
 
         TrackingData data = MarieClientCache.get();
-        int barX = x + 100;
-        int barW = Math.max(40, w - 100 - 110);
+        // fixed layout: resizing the box clips the rows instead of squeezing the bars
+        int nameW = font.width(Component.translatable("nourished.deficiency.calories"));
+        for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
+            nameW = Math.max(nameW, font.width(def.displayName()));
+        }
+        int barX = x + 20 + nameW + 10;
+        int barW = BAR_W;
         boolean any = false;
         for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
             if (!DeficiencyTracker.tracked(s, def) || DeficiencyCalories.KEY.equals(def.key())) continue;
@@ -63,14 +71,14 @@ public final class DeficiencyView {
             Float value = data == null ? null : data.values.get(def.key());
             Integer state = value == null ? null : DeficiencyTracker.groupState(s, def, value);
             drawRow(g, font, s, def.key(), new ItemStack(NutrientRegistry.getIconItem(def.key())),
-                    def.displayName(), 0xFF000000 | def.color(), state, x, y, barX, barW);
+                    def.displayName(), 0xFF000000 | def.color(), state, lastEaten(def.key()), x, y, barX, barW);
             y += ROW_H;
         }
         if (s.calories().enabled() && NourishedConfig.get().enableCalorieTracking()) {
             any = true;
             drawRow(g, font, s, DeficiencyCalories.KEY, new ItemStack(Items.BREAD),
                     Component.translatable("nourished.deficiency.calories").getString(),
-                    MarieColors.resolveColor(NourishedColors.CALORIE_VALUE), calorieState(s, data), x, y, barX, barW);
+                    MarieColors.resolveColor(NourishedColors.CALORIE_VALUE), calorieState(s, data), null, x, y, barX, barW);
             y += ROW_H;
         }
         if (!any) {
@@ -125,7 +133,7 @@ public final class DeficiencyView {
     }
 
     private void drawRow(GuiGraphics g, Font font, DeficiencySettings s, String key, ItemStack icon, String name,
-                         int nameColor, Integer state, int x, int y, int barX, int barW) {
+                         int nameColor, Integer state, Component lastEaten, int x, int y, int barX, int barW) {
         int pressure = DeficiencyClient.pressure(key);
         int tier = s.tierFor(pressure);
         int max = Math.max(1, s.maxPressure());
@@ -143,7 +151,22 @@ public final class DeficiencyView {
         int labelX = barX + barW + 6;
         String level = tier == 0 ? Component.translatable("nourished.deficiency.tab.ok").getString() : "L" + tier;
         g.drawString(font, level, labelX, y + 4, DeficiencyClient.tierColor(tier));
-        g.drawString(font, status(s, state, pressure, tier), labelX + 22, y + 4, MUTED);
+        Component status = status(s, state, pressure, tier);
+        if (lastEaten != null) {
+            status = status.getString().isEmpty() ? lastEaten
+                    : Component.empty().append(status).append(" · ").append(lastEaten);
+        }
+        g.drawString(font, status, labelX + 22, y + 4, MUTED);
+    }
+
+    /** When the group was last eaten, from the saved daily intake; null when history is off. */
+    private static Component lastEaten(String group) {
+        int days = IntakeHistoryChart.daysSinceEaten(IntakeHistory.groupId(group));
+        if (days == -1) return null;
+        if (days == 0) return Component.translatable("nourished.deficiency.tab.ate_today");
+        if (days == 1) return Component.translatable("nourished.deficiency.tab.ate_yesterday");
+        if (days > 0) return Component.translatable("nourished.deficiency.tab.ate_days", days);
+        return Component.translatable("nourished.deficiency.tab.ate_none", -days - 1);
     }
 
     /** {@code state}: +1 building, -1 recovering, 0 holding, null unknown. */

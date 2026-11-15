@@ -1,157 +1,51 @@
 package dev.maire.nourished.datagen.book.gettingstarted;
 
-import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.SingleBookSubProvider;
-import com.klikli_dev.modonomicon.api.datagen.book.BookCategoryModel;
-import com.klikli_dev.modonomicon.api.datagen.book.BookIconModel;
-import com.klikli_dev.modonomicon.book.BookCategoryBackgroundParallaxLayer;
-import net.minecraft.resources.ResourceLocation;
+import dev.maire.nourished.datagen.book.GuideCategory;
+import dev.maire.nourished.datagen.book.GuideColors;
 import net.minecraft.world.item.Items;
 
-public class GettingStartedCategory extends CategoryProvider {
+public class GettingStartedCategory extends GuideCategory {
 
-    public static final String ID = "getting_started";
+    public static final String ID = GuideColors.GETTING_STARTED;
 
     public GettingStartedCategory(SingleBookSubProvider parent) {
-        super(parent);
+        super(parent, ID, "Getting Started", "A guided introduction. Read these in order.", Items.BOOK);
     }
 
     @Override
     protected String[] generateEntryMap() {
-        /*
-         * Getting Started follows a winding learning path.
-         *
-         * The player starts at the top-left and works through
-         * Nourished's core systems before reaching the final
-         * "Your First Day" entry.
-         */
         return new String[]{
-                "i________",
-                "_________",
-                "____h____",
-                "_________",
-                "________d",
-                "_______u_",
-                "_____s___",
-                "_________",
-                "___e_____",
-                "_________",
-                "_______t_",
-                "_________",
-                "____n____",
-                "_________",
-                "________y"
+                "i_______",
+                "________",
+                "__h___d_",
+                "________",
+                "_____t__",
+                "________",
+                "__v_____",
+                "________",
+                "______n_",
+                "________",
+                "___s____",
+                "________",
+                "_____y__",
+                "________",
+                "_f__r__m"
         };
     }
 
     @Override
     protected void generateEntries() {
-
-        // Introduction
-        var introduction = this.add(
-                new IntroductionEntry(this).generate('i')
-        );
-
-        // HUD
-        var hud = this.add(
-                new HudEntry(this).generate('h')
-        )
-                .withParent(introduction)
-                .withCondition(this.condition().entryRead(introduction));
-
-        // Diet Screen
-        var dietScreen = this.add(
-                new DietScreenEntry(this).generate('d')
-        )
-                .withParent(hud)
-                .withCondition(this.condition().entryRead(hud));
-
-        // Dynamic UI
-        var dynamicUi = this.add(
-                new DynamicUiEntry(this).generate('u')
-        )
-                .withParent(dietScreen)
-                .withCondition(this.condition().entryRead(dietScreen));
-
-        // Sleep Bonus
-        var sleepBonus = this.add(
-                new SleepBonusEntry(this).generate('s')
-        )
-                .withParent(dynamicUi)
-                .withCondition(this.condition().entryRead(dynamicUi));
-
-        // Effects
-        var effects = this.add(
-                new EffectsEntry(this).generate('e')
-        )
-                .withParent(sleepBonus)
-                .withCondition(this.condition().entryRead(sleepBonus));
-
-        // Food Tooltips
-        var foodTooltips = this.add(
-                new FoodTooltipsEntry(this).generate('t')
-        )
-                .withParent(effects)
-                .withCondition(this.condition().entryRead(effects));
-
-        // Notifications
-        var notifications = this.add(
-                new NotificationsEntry(this).generate('n')
-        )
-                .withParent(foodTooltips)
-                .withCondition(this.condition().entryRead(foodTooltips));
-
-        // Your First Day
-        this.add(
-                new FirstDayEntry(this).generate('y')
-        )
-                .withParent(notifications)
-                .withCondition(this.condition().entryRead(notifications));
-    }
-
-    @Override
-    protected BookCategoryModel additionalSetup(BookCategoryModel category) {
-        /*
-         * Layered Modonomicon background with different scroll speeds
-         * to create a subtle parallax effect while navigating the map.
-         */
-        return category.withBackgroundParallaxLayers(
-                new BookCategoryBackgroundParallaxLayer(
-                        ResourceLocation.parse(
-                                "modonomicon:textures/gui/parallax/flow/base.png"
-                        ),
-                        0.7f,
-                        -1
-                ),
-                new BookCategoryBackgroundParallaxLayer(
-                        ResourceLocation.parse(
-                                "modonomicon:textures/gui/parallax/flow/1.png"
-                        ),
-                        1.0f,
-                        -1
-                ),
-                new BookCategoryBackgroundParallaxLayer(
-                        ResourceLocation.parse(
-                                "modonomicon:textures/gui/parallax/flow/2.png"
-                        ),
-                        1.4f,
-                        -1
-                )
-        );
-    }
-
-    @Override
-    protected String categoryName() {
-        return "Getting Started";
-    }
-
-    @Override
-    protected BookIconModel categoryIcon() {
-        return BookIconModel.create(Items.BOOK);
-    }
-
-    @Override
-    public String categoryId() {
-        return ID;
+        var intro = this.add(new IntroductionEntry(this).generate('i'));
+        var hud = this.add(after(intro, new HudEntry(this).generate('h')));
+        var diet = this.add(after(hud, new DietScreenEntry(this).generate('d')));
+        var tooltips = this.add(after(diet, new FoodTooltipsEntry(this).generate('t')));
+        var variety = this.add(after(tooltips, new EatVarietyEntry(this).generate('v')));
+        var notifications = this.add(after(variety, new NotificationsEntry(this).generate('n')));
+        var sleep = this.add(after(notifications, new SleepBonusEntry(this).generate('s')));
+        var firstDay = this.add(after(sleep, new FirstDayEntry(this).generate('y')));
+        this.add(after(firstDay, new FirstFarmEntry(this).generate('f')));
+        this.add(after(firstDay, new DailyRoutineEntry(this).generate('r')));
+        this.add(after(firstDay, new MultiplayerAdventureEntry(this).generate('m')));
     }
 }

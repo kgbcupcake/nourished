@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.serverowners;
+package dev.maire.nourished.datagen.book.advanced;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
@@ -35,7 +35,7 @@ public class FoodOverridesEntry extends EntryProvider {
 
         this.pageText("""
                 Nourished supports per-item %svalue overrides%s for nutrients and calories. This lets server owners and modpack makers correct or reassign how any specific item is classified without touching the mod itself.\s\s
-                Overrides live at %sconfig/nourished/food_overrides.json%s.
+                Overrides live at %sconfig/nourished/overrides/food_overrides.json%s.
                 """.formatted(
                 FILE_PATH, RESET,
                 FILE_PATH, RESET

@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.foodgroups;
+package dev.maire.nourished.datagen.book.food;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
@@ -34,7 +34,7 @@ public class VegetablesEntry extends EntryProvider {
         this.pageTitle("Vegetables");
 
         this.pageText("""
-                Vegetables are hearty, grounding foods. %sPenalty:%s reduced movement speed when depleted. %sBonus:%s improved hunger saturation when maintained. Carrots, potatoes, and beetroot all qualify.
+                Vegetables are hearty, grounding foods. %sPenalty:%s Slowness while the bar is below 25%%%%. %sMilestone reward:%s Health Boost. Carrots, potatoes, and beetroot all qualify.
                 """.formatted(
                 PENALTY, RESET,
                 BONUS, RESET
@@ -96,7 +96,7 @@ public class VegetablesEntry extends EntryProvider {
         this.pageTitle("Vegetables: Farm & Charm");
 
         this.pageText("""
-                Farm & Charm adds tomatoes, onions, peppers, and more. These introduce new vegetable families and significantly expand rotation options. See the **Compat Mods** chapter for the full Farm & Charm food list.
+                Farm & Charm adds tomatoes, onions, peppers, and more. These introduce new vegetable families and significantly expand rotation options. See the **Mod Compatibility** section of the **Advanced** chapter for the full Farm & Charm food list.
                 """);
 
         this.page("rotation_strategy", () -> BookTextPageModel.create()
@@ -118,7 +118,7 @@ public class VegetablesEntry extends EntryProvider {
 
     @Override
     protected String entryDescription() {
-        return "Hearty, grounding foods that improve hunger saturation.";
+        return "Hearty foods; neglect them and you slow down.";
     }
 
     @Override

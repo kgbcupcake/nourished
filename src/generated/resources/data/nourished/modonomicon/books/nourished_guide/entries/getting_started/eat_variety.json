@@ -1,0 +1,62 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "getting_started",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "getting_started/food_tooltips"
+  },
+  "description": "book.nourished.nourished_guide.getting_started.eat_variety.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:apple"
+  },
+  "name": "book.nourished.nourished_guide.getting_started.eat_variety.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.getting_started.eat_variety.food_groups.text",
+      "title": "book.nourished.nourished_guide.getting_started.eat_variety.food_groups.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.getting_started.eat_variety.variety.text",
+      "title": "book.nourished.nourished_guide.getting_started.eat_variety.variety.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.getting_started.eat_variety.balance.text",
+      "title": "book.nourished.nourished_guide.getting_started.eat_variety.balance.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "getting_started/food_tooltips",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 4,
+  "x": -2,
+  "y": -1
+}

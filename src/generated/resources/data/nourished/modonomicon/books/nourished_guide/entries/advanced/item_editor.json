@@ -1,0 +1,59 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "advanced",
+  "description": "book.nourished.nourished_guide.advanced.item_editor.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:anvil"
+  },
+  "name": "book.nourished.nourished_guide.advanced.item_editor.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:anvil"
+      },
+      "text": "book.nourished.nourished_guide.advanced.item_editor.item_editor.text",
+      "title": "book.nourished.nourished_guide.advanced.item_editor.item_editor.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.item_editor.pages.text",
+      "title": "book.nourished.nourished_guide.advanced.item_editor.pages.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.item_editor.tips.text",
+      "title": "book.nourished.nourished_guide.advanced.item_editor.tips.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "advanced/configuration",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 2,
+  "x": -2,
+  "y": -3
+}

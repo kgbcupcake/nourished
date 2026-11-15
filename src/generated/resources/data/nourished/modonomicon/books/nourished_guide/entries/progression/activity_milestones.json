@@ -1,0 +1,47 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "progression",
+  "description": "book.nourished.nourished_guide.progression.activity_milestones.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:diamond_pickaxe"
+  },
+  "name": "book.nourished.nourished_guide.progression.activity_milestones.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.progression.activity_milestones.movement.text",
+      "title": "book.nourished.nourished_guide.progression.activity_milestones.movement.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.progression.activity_milestones.work_and_war.text",
+      "title": "book.nourished.nourished_guide.progression.activity_milestones.work_and_war.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "progression/milestones",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 2,
+  "x": 3,
+  "y": 0
+}

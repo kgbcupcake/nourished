@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.foodsafety;
+package dev.maire.nourished.datagen.book.guthealth;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
@@ -67,7 +67,7 @@ public class GutHealthEntry extends EntryProvider {
 
         this.pageText("""
                 Gut flora recovers two ways. Eating **cooked** food gives an immediate boost proportional to how well-cooked it is: a fully cooked meal helps more than a barely-seared one.\s\s
-                It also regenerates passively over time, and that passive rate gets a **diversity bonus** the more balanced your overall diet is. A well-rounded diet across all six groups isn't just good for your bars; it heals your gut faster too.
+                It also regenerates passively over time, and that passive rate gets a **diversity bonus** the more balanced your overall diet is. A well-rounded diet across all five groups isn't just good for your bars; it heals your gut faster too.
                 """);
 
         this.page("building_resistance", () -> BookTextPageModel.create()

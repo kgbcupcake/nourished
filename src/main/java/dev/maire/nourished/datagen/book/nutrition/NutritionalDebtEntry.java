@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.howitworks;
+package dev.maire.nourished.datagen.book.nutrition;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;

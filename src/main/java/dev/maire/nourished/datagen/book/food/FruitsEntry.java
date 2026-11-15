@@ -1,4 +1,4 @@
-package dev.maire.nourished.datagen.book.foodgroups;
+package dev.maire.nourished.datagen.book.food;
 
 import com.klikli_dev.modonomicon.api.datagen.CategoryProvider;
 import com.klikli_dev.modonomicon.api.datagen.EntryBackground;
@@ -34,7 +34,7 @@ public class FruitsEntry extends EntryProvider {
         this.pageTitle("Fruits");
 
         this.pageText("""
-                Fruits are sweet, vitamin-rich foods. %sPenalty:%s reduced max health when depleted. %sBonus:%s increased regeneration speed when maintained. Apples, melons, and berries all count.
+                Fruits are sweet, vitamin-rich foods. %sPenalty:%s Unluck while the bar is below 25%%%%. %sMilestone reward:%s Luck. Apples, melons, and berries all count.
                 """.formatted(
                 PENALTY, RESET,
                 BONUS, RESET
@@ -96,7 +96,7 @@ public class FruitsEntry extends EntryProvider {
         this.pageTitle("Fruits: Croptopia");
 
         this.pageText("""
-                With Croptopia installed, the Fruits group expands significantly. Strawberries, peaches, mangoes, kiwis, and many more exotic fruits are available. See the **Compat Mods** chapter for the full Croptopia food list.
+                With Croptopia installed, the Fruits group expands significantly. Strawberries, peaches, mangoes, kiwis, and many more exotic fruits are available. See the **Mod Compatibility** section of the **Advanced** chapter for the full Croptopia food list.
                 """);
 
         this.page("rotation_strategy", () -> BookTextPageModel.create()
@@ -118,7 +118,7 @@ public class FruitsEntry extends EntryProvider {
 
     @Override
     protected String entryDescription() {
-        return "Sweet, vitamin-rich foods that speed up regeneration.";
+        return "Sweet foods; neglect them and your luck runs out.";
     }
 
     @Override

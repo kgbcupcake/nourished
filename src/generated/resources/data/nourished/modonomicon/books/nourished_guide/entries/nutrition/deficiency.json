@@ -1,0 +1,70 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "nutrition",
+  "description": "book.nourished.nourished_guide.nutrition.deficiency.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:bone"
+  },
+  "name": "book.nourished.nourished_guide.nutrition.deficiency.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:bone"
+      },
+      "text": "book.nourished.nourished_guide.nutrition.deficiency.deficiency.text",
+      "title": "book.nourished.nourished_guide.nutrition.deficiency.deficiency.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.deficiency.tiers.text",
+      "title": "book.nourished.nourished_guide.nutrition.deficiency.tiers.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.deficiency.recovery.text",
+      "title": "book.nourished.nourished_guide.nutrition.deficiency.recovery.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.deficiency.where_to_look.text",
+      "title": "book.nourished.nourished_guide.nutrition.deficiency.where_to_look.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "nutrition/when_neglected",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 8,
+  "x": 0,
+  "y": 3
+}

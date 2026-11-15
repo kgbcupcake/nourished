@@ -127,6 +127,7 @@ public class Nourished {
                 Registries.ITEM,
                 new NutrientExportResolver()
         );
+        MarieAPI.registerSleepBonusEvaluator(new dev.maire.nourished.core.effect.SleepBonus());
         MarieAPI.registerConfigValidator(new NutrientsValidator());
         MarieAPI.registerConfigValidator(new ColorsValidator());
         MarieAPI.registerConfigValidator(new FoodOverridesValidator());
