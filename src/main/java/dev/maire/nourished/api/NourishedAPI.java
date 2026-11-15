@@ -136,6 +136,15 @@ public final class NourishedAPI {
         return history.isEmpty() ? -1.0f : history.get(0).value();
     }
 
+    /** Calories eaten so far in the current game day, or 0 when calorie tracking is off. */
+    @ApiStatus.Stable
+    public static float getTodayCalories(Player player) {
+        if (player == null || !NourishedConfig.get().enableCalorieTracking()) {
+            return 0f;
+        }
+        return dev.marie.framework.tracking.tracker.MarieTracking.getCurrentTrackerValue(player, CALORIES_TRACKER_ID);
+    }
+
     /**
      * Returns the player's completed-period calorie history, most recent first, bounded by
      * {@code calorieHistoryRetentionDays}.

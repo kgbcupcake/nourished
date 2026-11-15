@@ -48,24 +48,10 @@ public final class NourishedClientConfig {
     private final ModConfigSpec.DoubleValue hudBorderShade;
     private final ModConfigSpec.DoubleValue hudTextBrightness;
     private final ModConfigSpec.DoubleValue hudIconBrightness;
-    private final ModConfigSpec.DoubleValue calorieHudTextBrightness;
-    private final ModConfigSpec.DoubleValue calorieHudIconBrightness;
-    private final ModConfigSpec.DoubleValue activityLogHudTextBrightness;
-    private final ModConfigSpec.DoubleValue activityLogHudIconBrightness;
     private final ModConfigSpec.DoubleValue dietTextBrightness;
     private final ModConfigSpec.DoubleValue dietIconBrightness;
     private final ModConfigSpec.BooleanValue hudVerticalLayout;
     private final ModConfigSpec.BooleanValue hudClassicMode;
-    private final ModConfigSpec.BooleanValue enableActivityLogHud;
-    private final ModConfigSpec.BooleanValue enableCalorieHistoryHud;
-    private final ModConfigSpec.DoubleValue calorieHudBackgroundOpacity;
-    private final ModConfigSpec.DoubleValue calorieHudBorderOpacity;
-    private final ModConfigSpec.DoubleValue calorieHudBackgroundShade;
-    private final ModConfigSpec.DoubleValue calorieHudBorderShade;
-    private final ModConfigSpec.DoubleValue activityLogHudBackgroundOpacity;
-    private final ModConfigSpec.DoubleValue activityLogHudBorderOpacity;
-    private final ModConfigSpec.DoubleValue activityLogHudBackgroundShade;
-    private final ModConfigSpec.DoubleValue activityLogHudBorderShade;
     private final ModConfigSpec.ConfigValue<List<? extends String>> dietBarOrder;
     private final ModConfigSpec.DoubleValue dietScale;
     private final ModConfigSpec.IntValue dietOffsetX;
@@ -162,30 +148,6 @@ public final class NourishedClientConfig {
                 0.2d,
                 2.0d
         );
-        calorieHudTextBrightness = builder.defineInRange(
-                "calorieHudTextBrightness",
-                ConfigDefaultsLoader.getDouble(defaults, "calorieHudTextBrightness", 1.0d),
-                0.2d,
-                2.0d
-        );
-        calorieHudIconBrightness = builder.defineInRange(
-                "calorieHudIconBrightness",
-                ConfigDefaultsLoader.getDouble(defaults, "calorieHudIconBrightness", 1.0d),
-                0.2d,
-                2.0d
-        );
-        activityLogHudTextBrightness = builder.defineInRange(
-                "activityLogHudTextBrightness",
-                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudTextBrightness", 1.0d),
-                0.2d,
-                2.0d
-        );
-        activityLogHudIconBrightness = builder.defineInRange(
-                "activityLogHudIconBrightness",
-                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudIconBrightness", 1.0d),
-                0.2d,
-                2.0d
-        );
         dietTextBrightness = builder.defineInRange(
                 "dietTextBrightness",
                 ConfigDefaultsLoader.getDouble(defaults, "dietTextBrightness", 1.0d),
@@ -205,62 +167,6 @@ public final class NourishedClientConfig {
         hudClassicMode = builder.define(
                 "hudClassicMode",
                 ConfigDefaultsLoader.getBoolean(defaults, "hudClassicMode", false)
-        );
-        enableActivityLogHud = builder.define(
-                "enableActivityLogHud",
-                ConfigDefaultsLoader.getBoolean(defaults, "enableActivityLogHud", true)
-        );
-        enableCalorieHistoryHud = builder.define(
-                "enableCalorieHistoryHud",
-                ConfigDefaultsLoader.getBoolean(defaults, "enableCalorieHistoryHud", true)
-        );
-        calorieHudBackgroundOpacity = builder.defineInRange(
-                "calorieHudBackgroundOpacity",
-                ConfigDefaultsLoader.getDouble(defaults, "calorieHudBackgroundOpacity", DEFAULT_HUD_BACKGROUND_OPACITY),
-                0.0d,
-                1.0d
-        );
-        calorieHudBorderOpacity = builder.defineInRange(
-                "calorieHudBorderOpacity",
-                ConfigDefaultsLoader.getDouble(defaults, "calorieHudBorderOpacity", 1.0d),
-                0.0d,
-                1.0d
-        );
-        calorieHudBackgroundShade = builder.defineInRange(
-                "calorieHudBackgroundShade",
-                ConfigDefaultsLoader.getDouble(defaults, "calorieHudBackgroundShade", 0.0d),
-                -1.0d,
-                1.0d
-        );
-        calorieHudBorderShade = builder.defineInRange(
-                "calorieHudBorderShade",
-                ConfigDefaultsLoader.getDouble(defaults, "calorieHudBorderShade", 0.0d),
-                -1.0d,
-                1.0d
-        );
-        activityLogHudBackgroundOpacity = builder.defineInRange(
-                "activityLogHudBackgroundOpacity",
-                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudBackgroundOpacity", DEFAULT_HUD_BACKGROUND_OPACITY),
-                0.0d,
-                1.0d
-        );
-        activityLogHudBorderOpacity = builder.defineInRange(
-                "activityLogHudBorderOpacity",
-                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudBorderOpacity", 1.0d),
-                0.0d,
-                1.0d
-        );
-        activityLogHudBackgroundShade = builder.defineInRange(
-                "activityLogHudBackgroundShade",
-                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudBackgroundShade", 0.0d),
-                -1.0d,
-                1.0d
-        );
-        activityLogHudBorderShade = builder.defineInRange(
-                "activityLogHudBorderShade",
-                ConfigDefaultsLoader.getDouble(defaults, "activityLogHudBorderShade", 0.0d),
-                -1.0d,
-                1.0d
         );
         dietBarOrder = builder.defineListAllowEmpty(
                 "dietBarOrder",
@@ -418,7 +324,12 @@ public final class NourishedClientConfig {
                         || trimmed.startsWith("hudContentBrightness")
                         || trimmed.startsWith("calorieHudContentBrightness")
                         || trimmed.startsWith("activityLogHudContentBrightness")
-                        || trimmed.startsWith("dietContentBrightness")) {
+                        || trimmed.startsWith("dietContentBrightness")
+                        // The standalone Calorie History and Activity Log HUDs became Nutritional Panel tabs.
+                        || trimmed.startsWith("calorieHud")
+                        || trimmed.startsWith("activityLogHud")
+                        || trimmed.startsWith("enableCalorieHistoryHud")
+                        || trimmed.startsWith("enableActivityLogHud")) {
                     changed = true;
                     continue;
                 }
@@ -619,42 +530,6 @@ public final class NourishedClientConfig {
         hudIconBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
     }
 
-    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Calorie History HUD's text. */
-    public double calorieHudTextBrightness() {
-        return calorieHudTextBrightness.get();
-    }
-
-    public void setCalorieHudTextBrightness(double value) {
-        calorieHudTextBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
-    }
-
-    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Calorie History HUD's icons. */
-    public double calorieHudIconBrightness() {
-        return calorieHudIconBrightness.get();
-    }
-
-    public void setCalorieHudIconBrightness(double value) {
-        calorieHudIconBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
-    }
-
-    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Activity Log HUD's text. */
-    public double activityLogHudTextBrightness() {
-        return activityLogHudTextBrightness.get();
-    }
-
-    public void setActivityLogHudTextBrightness(double value) {
-        activityLogHudTextBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
-    }
-
-    /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Activity Log HUD's icons. */
-    public double activityLogHudIconBrightness() {
-        return activityLogHudIconBrightness.get();
-    }
-
-    public void setActivityLogHudIconBrightness(double value) {
-        activityLogHudIconBrightness.set(Math.max(0.2d, Math.min(2.0d, value)));
-    }
-
     /** Brightness multiplier (0.2-2.0, 1.0 = unchanged, above 1.0 brightens toward white) for the Diet screen dynamic panel's text. */
     public double dietTextBrightness() {
         return dietTextBrightness.get();
@@ -693,88 +568,6 @@ public final class NourishedClientConfig {
 
     public void setHudClassicMode(boolean value) {
         hudClassicMode.set(value);
-    }
-
-    /** When false, {@link dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel} never renders/ticks. */
-    public boolean enableActivityLogHud() {
-        return enableActivityLogHud.get();
-    }
-
-    public void setEnableActivityLogHud(boolean value) {
-        enableActivityLogHud.set(value);
-    }
-
-    /** When false, {@link dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen} never renders/ticks. */
-    public boolean enableCalorieHistoryHud() {
-        return enableCalorieHistoryHud.get();
-    }
-
-    public void setEnableCalorieHistoryHud(boolean value) {
-        enableCalorieHistoryHud.set(value);
-    }
-
-    public double calorieHudBackgroundOpacity() {
-        return calorieHudBackgroundOpacity.get();
-    }
-
-    public void setCalorieHudBackgroundOpacity(double value) {
-        calorieHudBackgroundOpacity.set(value);
-    }
-
-    public double calorieHudBorderOpacity() {
-        return calorieHudBorderOpacity.get();
-    }
-
-    public void setCalorieHudBorderOpacity(double value) {
-        calorieHudBorderOpacity.set(value);
-    }
-
-    public double calorieHudBackgroundShade() {
-        return calorieHudBackgroundShade.get();
-    }
-
-    public void setCalorieHudBackgroundShade(double value) {
-        calorieHudBackgroundShade.set(value);
-    }
-
-    public double calorieHudBorderShade() {
-        return calorieHudBorderShade.get();
-    }
-
-    public void setCalorieHudBorderShade(double value) {
-        calorieHudBorderShade.set(value);
-    }
-
-    public double activityLogHudBackgroundOpacity() {
-        return activityLogHudBackgroundOpacity.get();
-    }
-
-    public void setActivityLogHudBackgroundOpacity(double value) {
-        activityLogHudBackgroundOpacity.set(value);
-    }
-
-    public double activityLogHudBorderOpacity() {
-        return activityLogHudBorderOpacity.get();
-    }
-
-    public void setActivityLogHudBorderOpacity(double value) {
-        activityLogHudBorderOpacity.set(value);
-    }
-
-    public double activityLogHudBackgroundShade() {
-        return activityLogHudBackgroundShade.get();
-    }
-
-    public void setActivityLogHudBackgroundShade(double value) {
-        activityLogHudBackgroundShade.set(value);
-    }
-
-    public double activityLogHudBorderShade() {
-        return activityLogHudBorderShade.get();
-    }
-
-    public void setActivityLogHudBorderShade(double value) {
-        activityLogHudBorderShade.set(value);
     }
 
     /**

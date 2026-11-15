@@ -54,14 +54,17 @@ public final class SyntheticRecipeStage implements ResolutionStageHandler {
     private ResolutionResult resolveSynthetic(ResourceLocation itemId, StageContext ctx) {
         Map<String, Float> total = new HashMap<>();
         List<String> usedTokens = new ArrayList<>();
+        Map<String, Map<String, Float>> byToken = new LinkedHashMap<>();
 
         for (String token : candidateTokens(itemId.getPath())) {
             Map<String, Float> tokenValues = classifyToken(token, itemId);
-            emitTrace(ctx, token, tokenValues);
+            byToken.put(token, tokenValues);
             if (tokenValues.isEmpty()) continue;
             tokenValues.forEach((k, v) -> total.merge(k, v, Float::sum));
             usedTokens.add(token);
         }
+        byToken.forEach((token, values) -> emitTrace(ctx, token, values,
+                IngredientShares.share(values, usedTokens.size(), ctx.validKeys())));
         if (usedTokens.isEmpty()) return null;
 
         Map<String, Float> averaged = new HashMap<>();
@@ -159,18 +162,19 @@ public final class SyntheticRecipeStage implements ResolutionStageHandler {
         }
     }
 
-    private static void emitTrace(StageContext ctx, String token, Map<String, Float> values) {
+    private static void emitTrace(StageContext ctx, String token, Map<String, Float> values, Map<String, Float> share) {
         if (ctx.traceOut() == null) return;
         Map<String, Object> detail = new LinkedHashMap<>();
         detail.put("ingredientId", "synthetic:" + token);
         detail.put("source", "SYNTHETIC");
         if (!values.isEmpty()) detail.put("values", new LinkedHashMap<>(values));
+        if (!share.isEmpty()) detail.put("share", new LinkedHashMap<>(share));
         boolean hit = !values.isEmpty();
         ctx.addTraceStep(new ClassificationTraceStep(
                 TraceStepId.INGREDIENT_RESOLUTION,
                 hit ? TraceStepStatus.SUCCESS : TraceStepStatus.FAILURE,
-                hit ? "Synthetic ingredient '" + token + "' classified via TAG"
-                        : "Synthetic ingredient '" + token + "' unclassified",
+                hit ? "synthetic:" + token + " via TAG" + IngredientShares.describe(share)
+                        : "synthetic:" + token + " unclassified: no tagged item named '" + token + "'",
                 detail));
     }
 }

@@ -2,6 +2,7 @@ package dev.maire.nourished.core.reload;
 
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.deficiency.DeficiencyConfig;
 import dev.maire.nourished.core.network.sync.NourishedSyncHandler;
 import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.core.nutrition.FoodFamilyResolver;
@@ -32,6 +33,7 @@ public final class NourishedReloadHelper {
                 SyncNourishedConfigSnapshot.fromConfig(NourishedConfig.get()));
         NourishedSyncHandler.broadcastConfigReload(server);
         MarieResourcesAPI.broadcastConfigSyncReload(server, ActivityDrivenNutrientRegistry.SYNC_ID);
+        MarieResourcesAPI.broadcastConfigSyncReload(server, DeficiencyConfig.SYNC_ID);
     }
 
     /**

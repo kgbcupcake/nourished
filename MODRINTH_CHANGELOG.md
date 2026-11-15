@@ -13,6 +13,11 @@ A new "Nutritional HUD" Diet Screen style — a resizable sidebar window with a 
 
 ## ➕ Added
 
+- **Diet deficiency tiers.** Letting a food group stay low now builds up over play time into three deficiency levels (20 / 60 / 120 min by default) with growing penalties: more nutrient drain from sprinting, mining, swimming and combat, then slower natural healing, less saturation from food, and lower movement, mining and attack speed, shown as a new Malnourished effect. Fixing your diet recovers you gradually. Fully configurable in `gameplay/deficiency.json` or by datapack, and effects.json rules can trigger off a deficiency tier.
+- **Deficiency tab** in the Nutritional Panel: your current level and penalties, a bar per food group showing how close it is to the next level, and how long until it worsens or recovers. You also get a notification when your diet slips into a new level or recovers.
+- **Deficiency commands and scripting:** `/nourished deficiency` shows your status, and ops can `get`/`set`/`clear` a player's deficiency or `reload` the config. KubeJS can read and set deficiency (`NourishedDeficiency`) and can steer or block tier changes and build-up (`NourishedEvents.deficiencyTierChanged`, `deficiencyPressure`). There are also Command Center cards to open the config or check your status.
+- **Malnourished:** each deficiency level shows as Malnourished I-III. The penalties (regen, saturation, movement/mining/attack) can't be cleared with milk, and every one of them, including any attribute, is set per level in `deficiency.json`.
+- **Optional calorie deficiency:** packs can turn on a Calories row in `deficiency.json`, so not eating enough for a day builds deficiency too. Off by default.
 - **Nutrients alongside the food groups:** Omega-3, Fiber, Vitamins, Minerals and Fat, with their own levels, tooltip line and Diet Screen box. Fish now give Omega-3, and crafted or cooked foods add up the nutrients of their ingredients. Fully datapack/config driven.
 - Nutrient effects: low Omega-3, Fiber, Vitamins or Minerals bring a mild debuff, high Omega-3 gives Dolphin's Grace, and keeping every nutrient up gives Haste. Off by default (`builtinEffects`); datapacks can add their own.
 - Click the Nutrients box on the Diet Screen for a detail view: level, trend, what you've eaten for it, and the best foods for it
@@ -22,6 +27,8 @@ A new "Nutritional HUD" Diet Screen style — a resizable sidebar window with a 
 - Optional nutrient HUD overlay with its own toggle key
 - New Nutrients tab in the Nutritional Panel: an overview of every nutrient plus a page each with trend, recent sources and best foods
 - Modpack authors can pin or hide foods in each nutrient's "Best sources" list (datapack, config, command or KubeJS)
+- Saved daily intake history: 7-day charts for each nutrient and a new Food groups tab in the Nutrients screen/tab (follows the Calorie History setting)
+- Item editor Info tab shows each ingredient and how much it added to the food's groups
 - `/nourished diagnostics` now also lists broken datapack files, nutrient file errors and item ids that don't exist (typos)
 - Foods with no recipe now get food groups from their name, using other mods' tagged items (a "kiwi smoothie" counts as fruit if any mod has a tagged kiwi)
 - KubeJS: `NourishedNutrients` for adding nutrients, setting food values and reading/setting levels
@@ -35,6 +42,7 @@ A new "Nutritional HUD" Diet Screen style — a resizable sidebar window with a 
 - Item editor: per-item Silent Eat, Exclude from Recent Meals, Raw Food Tier override, and Diminishing Returns Off toggles
 - Item editor: mod-wide "Diminishing Returns (All Food)" toggle
 - New keybind to open the item editor directly, for dragging any item from JEI/EMI onto it
+- **Calorie History and Activity Log tabs** in the Nutritional Panel, styled, moved and resized like every other tab
 
 ## 🔧 Changed
 
@@ -47,6 +55,7 @@ A new "Nutritional HUD" Diet Screen style — a resizable sidebar window with a 
 
 ## 🐛 Fixed
 
+- Turning off calorie history no longer hides today's calories on the Diet Screen.
 - Cake and other foods eaten off a placed block (like modded pies) now give nutrition
 - Nutritional HUD's Home tab showed "Join a world to see your character" instead of the 3D preview even with a player loaded
 - An item excluded only via the item editor's toggle didn't show the "Excluded from nutrition tracking" tooltip line
@@ -57,6 +66,7 @@ A new "Nutritional HUD" Diet Screen style — a resizable sidebar window with a 
 
 - Item editor's standalone "Nutrient Groups" page (now covered by Bulk Edit's per-group rows and the Values page)
 - Classic Diet Screen — Dynamic is now the only non-Hub option
+- The separate on-screen Calorie History and Activity Log HUD boxes, their C/K edit keys and their HUD config options. They now live as tabs in the Nutritional Panel
 
 > ⚠️ **Beta:** Some of your old layout and color settings may reset. Please report anything odd on the issue tracker or Discord!
 

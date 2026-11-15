@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Client-side buffer of the local player's activity log, feeding {@link ActivityLogHudPanel}.
+ * Client-side buffer of the local player's activity log events (the Activity Log tab reads the daily trackers instead).
  * One fixed row per module id (see {@code ActivityDrivenNutrientRegistry}'s known module ids)
  * that updates its running count in place, rather than a scrolling feed of past entries.
  */

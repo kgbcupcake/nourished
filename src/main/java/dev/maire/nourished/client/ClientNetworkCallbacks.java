@@ -76,6 +76,8 @@ public final class ClientNetworkCallbacks {
         );
 
         MicroNetworking.register(registrar, ClientNetworkCallbacks::onMicroLevels, ClientNetworkCallbacks::onMicroData);
+        dev.maire.nourished.core.deficiency.DeficiencyNetworking.register(registrar,
+                (p, c) -> c.enqueueWork(() -> dev.maire.nourished.client.deficiency.DeficiencyClient.accept(p.pressure(), p.announce())));
     }
 
     public static void onMicroLevels(MicroNetworking.SyncMicroLevels payload, IPayloadContext context) {

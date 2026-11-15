@@ -216,11 +216,9 @@ Everything is backed by real per-player tracking:
 
 Activity data is recorded day-by-day rather than simply estimated.
 
-### Activity Log HUD
+### Activity Log
 
-![Activity-Hud](https://cdn.modrinth.com/data/cached_images/fe5705ea8c5a59612c19bbad105f11cc64cf7ab3.png)
-
-The **Activity Log HUD** is optional and can be repositioned, resized, or hidden entirely. Each statistic includes a live bar relative to your own personal best.
+The **Activity Log** is a tab in the Nutritional Panel. It shows today's total for each activity, with a bar measured against your own best day.
 
 Milestones can also be set on activity trackers through datapacks or KubeJS, allowing modpack authors to reward goals such as the following:
 

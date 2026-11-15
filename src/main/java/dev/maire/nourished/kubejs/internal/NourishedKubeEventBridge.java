@@ -7,6 +7,8 @@ import dev.marie.framework.api.value.ValueModifierContext;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.kubejs.NourishedKubeEvents;
+import dev.maire.nourished.kubejs.events.NourishedDeficiencyPressureEvent;
+import dev.maire.nourished.kubejs.events.NourishedDeficiencyTierChangedEvent;
 import dev.maire.nourished.kubejs.events.NourishedFoodEatenEvent;
 import dev.maire.nourished.kubejs.events.NourishedGutHealthChangedEvent;
 import dev.maire.nourished.kubejs.events.NourishedNutrientChangedEvent;
@@ -88,6 +90,24 @@ public final class NourishedKubeEventBridge {
         }
         NourishedKubeEvents.FOOD_EATEN.post(
                 new NourishedFoodEatenEvent(player, parsedItemId, deltas));
+    }
+
+    public static int fireDeficiencyTierChanged(ServerPlayer player, String group, int oldTier, int newTier) {
+        if (!NourishedKubeGuard.hasListeners(NourishedKubeEvents.DEFICIENCY_TIER_CHANGED_ID)) {
+            return newTier;
+        }
+        NourishedDeficiencyTierChangedEvent event = new NourishedDeficiencyTierChangedEvent(player, group, oldTier, newTier);
+        NourishedKubeEvents.DEFICIENCY_TIER_CHANGED.post(event);
+        return event.newTier;
+    }
+
+    public static int fireDeficiencyPressure(ServerPlayer player, String group, float value, int pressure, int delta) {
+        if (!NourishedKubeGuard.hasListeners(NourishedKubeEvents.DEFICIENCY_PRESSURE_ID)) {
+            return delta;
+        }
+        NourishedDeficiencyPressureEvent event = new NourishedDeficiencyPressureEvent(player, group, value, pressure, delta);
+        NourishedKubeEvents.DEFICIENCY_PRESSURE.post(event);
+        return event.delta;
     }
 
     public static boolean fireRawFoodPenalty(String playerId, String itemId, String tier) {

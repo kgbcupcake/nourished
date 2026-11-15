@@ -4,6 +4,7 @@ import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.config.NourishedLockRegistry;
 import dev.maire.nourished.config.NourishedPresetRegistry;
 import dev.marie.framework.registry.RegistryLifecycleManager;
+import dev.maire.nourished.core.deficiency.DeficiencyConfig;
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.nutrition.DiminishingReturnsOverrideRegistry;
 import dev.maire.nourished.core.nutrition.ExcludedFoodOverrideRegistry;
@@ -77,6 +78,8 @@ public final class NourishedLifecycle {
         RegistryLifecycleManager.registerRegistry(
                 "ActivityDrivenNutrientRegistry", ActivityDrivenNutrientRegistry::load,
                 ActivityDrivenNutrientRegistry::reload, ActivityDrivenNutrientRegistry::loadFromDatapack);
+        RegistryLifecycleManager.registerRegistry(
+                "DeficiencyConfig", DeficiencyConfig::load, DeficiencyConfig::reload, DeficiencyConfig::loadFromDatapack);
 
         // NutrientRegistry.loadDefinitions() already ran in the mod constructor, so real
         // nutrient colors are available here for seeding tooltip_colors.json's defaults.

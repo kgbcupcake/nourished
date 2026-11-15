@@ -31,7 +31,11 @@ import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietSettings;
 import dev.maire.nourished.config.NutritionalPanelConfig;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.HomeTabRenderer;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.NutrientsBoxPane;
-import dev.maire.nourished.client.screen.diet.nutritionalhud.content.NutrientsTabRenderer;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.BoxTabRenderer;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.DeficiencyBoxPane;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.CalorieHistoryBoxPane;
+import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogBoxPane;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.ScrollingBoxPane;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.ScrollableTabPane;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.SoloIntakeBreakdownPane;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.SoloModulePane;
@@ -112,7 +116,10 @@ public final class NutritionalHudScreen extends Screen {
                 tab(EatMoreComponent.ID, "nourished.screen.diet.suggestion_label", hosted(EatMoreComponent.ID, new SoloModulePane(EatMoreComponent.ID))),
                 tab(ActiveEffectsComponent.ID, "nourished.screen.diet.effects_label", hosted(ActiveEffectsComponent.ID, new SoloModulePane(ActiveEffectsComponent.ID))),
                 intakeTab(),
-                nutrientsTab()
+                boxTab(new NutrientsBoxPane(), "nourished.screen.diet.nutrients_tab"),
+                boxTab(new DeficiencyBoxPane(), "nourished.screen.diet.deficiency_tab"),
+                boxTab(new CalorieHistoryBoxPane(), "nourished.screen.diet.calorie_history_tab"),
+                boxTab(new ActivityLogBoxPane(), "nourished.screen.diet.activity_log_tab")
         );
     }
 
@@ -127,10 +134,10 @@ public final class NutritionalHudScreen extends Screen {
         return tab(SoloIntakeBreakdownPane.ID, "nourished.screen.diet.intake", scrollable);
     }
 
-    private HubEntry nutrientsTab() {
-        NutrientsTabRenderer renderer = new NutrientsTabRenderer();
-        MarieComponent content = renderer.wrap(hosted(NutrientsBoxPane.ID, renderer), () -> editorOpen);
-        return tab(NutrientsBoxPane.ID, "nourished.screen.diet.nutrients_tab", content);
+    private HubEntry boxTab(ScrollingBoxPane box, String labelKey) {
+        BoxTabRenderer renderer = new BoxTabRenderer(box);
+        MarieComponent content = renderer.wrap(hosted(box.id(), renderer), () -> editorOpen);
+        return tab(box.id(), labelKey, content);
     }
 
     @Override

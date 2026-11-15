@@ -7,12 +7,11 @@ import dev.maire.nourished.config.NourishedClientConfig;
 import dev.marie.framework.tracking.TrackingData;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.edit.EditModeController;
-import dev.marie.framework.ui.RenderContext;
 import dev.marie.framework.ui.Theme;
 import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
 import dev.maire.nourished.client.hud.classic.ClassicHudPanelRenderer;
-import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.hud.dynamic.edit.HudEditTarget;
+import dev.maire.nourished.client.hud.dynamic.edit.HudRowScroll;
 import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
 import dev.maire.nourished.client.hud.dynamic.modules.NutrientPanelContainer;
 import dev.maire.nourished.client.hud.dynamic.visibility.HudVisibility;
@@ -68,7 +67,7 @@ public final class NourishedHUD {
         }
         HudLayout.Layout layout = HudEditTarget.resolvedLayout(mc, visibleKeys);
         // Only the rows that fit the box (all of them unless it was shrunk) — see HudEditTarget#scrolledKeys.
-        visibleKeys = HudEditTarget.scrolledKeys(visibleKeys, layout);
+        visibleKeys = HudRowScroll.scrolledKeys(visibleKeys, layout);
         if (cc.hudClassicMode()) {
             ClassicHudPanelRenderer.drawPanel(
                     event.getGuiGraphics(), mc, data, visibleKeys, layout, layout.panelX(), layout.panelY(), displayValues
@@ -93,8 +92,7 @@ public final class NourishedHUD {
 
     /**
      * H ({@link NourishedKeys#EDIT_HUD}) enters edit mode through here so {@link HudEditTarget}'s
-     * own {@code ScaleConfigPanel} always appears alongside it — same pattern as {@code
-     * CalorieHudScreen#enterEditModeWithScaleConfig}/{@code ActivityLogHudPanel}'s equivalent.
+     * own {@code ScaleConfigPanel} always appears alongside it.
      */
     private static void enterEditModeWithScaleConfig() {
         editTarget().setScaleConfigVisible(true);
@@ -106,8 +104,7 @@ public final class NourishedHUD {
      * panel visible without itself entering edit mode, since the group path (unlike the H keybind's
      * individual path above) already opens the shared overlay via {@code
      * EditModeCoordinator.enterAll()}. Passed as the {@code onGroupEnter} callback to {@code
-     * EditModeCoordinator.registerGroupCapable} in {@code ClientEventRegistrar}, matching {@code
-     * CalorieHudScreen}/{@code ActivityLogHudPanel}'s own {@code showScaleConfigOnGroupEntry}.
+     * EditModeCoordinator.registerGroupCapable} in {@code ClientEventRegistrar}.
      */
     public static void showScaleConfigOnGroupEntry() {
         editTarget().setScaleConfigVisible(true);
@@ -134,8 +131,7 @@ public final class NourishedHUD {
 
     /**
      * Public so {@code ClientEventRegistrar} can register this same singleton as this HUD's
-     * {@code EditModeCoordinator} group-capable target — mirrors how {@code CalorieHudScreen}/
-     * {@code ActivityLogHudPanel} expose their own {@code instance()}. Delegates to {@link
+     * {@code EditModeCoordinator} group-capable target. Delegates to {@link
      * #marieEditModeController()}'s existing lazy-init instead of building a second {@link
      * HudEditTarget} independently, so both entry points (the H keybind and the coordinator's
      * group) always share the exact same target instance.

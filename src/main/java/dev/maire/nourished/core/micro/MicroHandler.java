@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.micro;
 
+import dev.maire.nourished.core.history.IntakeHistory;
 import dev.maire.nourished.config.MicroConfig;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodProperties;
@@ -23,8 +24,15 @@ public final class MicroHandler {
         if (profile.isEmpty()) return;
         float bite = MicroProfileResolver.biteGain(food) * MicroConfig.get().gainScale();
         Map<String, Float> levels = new HashMap<>(MicroAttachment.get(player));
-        profile.forEach((k, v) -> levels.put(k, Math.min(1f, levels.getOrDefault(k, 0f) + v * bite)));
+        Map<String, Float> gained = new HashMap<>();
+        profile.forEach((k, v) -> {
+            float before = levels.getOrDefault(k, 0f);
+            float after = Math.min(1f, before + v * bite);
+            levels.put(k, after);
+            gained.put(k, after - before);
+        });
         MicroAttachment.set(player, levels);
+        IntakeHistory.recordMicros(player, gained);
         MicroNetworking.syncLevels(player);
     }
 

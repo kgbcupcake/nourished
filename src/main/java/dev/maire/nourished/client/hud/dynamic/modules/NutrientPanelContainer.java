@@ -16,6 +16,7 @@ import dev.marie.framework.ui.layout.HorizontalLayout;
 import dev.marie.framework.ui.layout.VerticalLayout;
 import dev.maire.nourished.client.hud.dynamic.HudDrawHelpers;
 import dev.maire.nourished.client.hud.dynamic.edit.HudEditTarget;
+import dev.maire.nourished.client.hud.dynamic.edit.HudRowScroll;
 import dev.maire.nourished.client.hud.dynamic.edit.HudDrawnExtents;
 import dev.maire.nourished.client.hud.dynamic.edit.HudRowMove;
 import dev.maire.nourished.client.hud.dynamic.layout.HudLayout;
@@ -34,7 +35,7 @@ import java.util.Map;
  */
 public final class NutrientPanelContainer implements Container {
 
-    /** Reference local padding value the user's persisted paddingScale multiplies, analogous to {@code CalorieHudScreen}'s own {@code PADDING} constant — reuses {@link HudDrawHelpers#PANEL_PAD}, the same base value {@link HudLayout#compute} derives its own (box-geometry-only) {@code scaledPad} from. */
+    /** Reference local padding value the user's persisted paddingScale multiplies — reuses {@link HudDrawHelpers#PANEL_PAD}, the same base value {@link HudLayout#compute} derives its own (box-geometry-only) {@code scaledPad} from. */
     private static final int BASE_PAD = HudDrawHelpers.PANEL_PAD;
 
     /** The HUD panel's persisted UI-state key (same string {@code HudEditTarget} keys its scale/position under). */
@@ -139,19 +140,17 @@ public final class NutrientPanelContainer implements Container {
         int availableW = Math.max(0, bounds.width() - 2 * pad - leftMargin);
         int availableH = Math.max(0, bounds.height() - 2 * pad);
 
-        // Content is pinned to the box's top-left plus padding, so it moves with the box on resize,
-        // like the Calorie History and Activity Log boxes.
+        // Content is pinned to the box's top-left plus padding, so it moves with the box on resize.
         Bounds content = new Bounds(bounds.x() + pad + leftMargin, bounds.y() + pad, availableW, availableH);
         // Clipped to the panel's own bounds — a defensive backstop against contentOffsetX/Y (the
         // "Move Text and Icons" toggle) pushing content outside the panel: HudEditTarget clamps that
         // offset already, but without this, any drift (e.g. from a stale offset the clamp hasn't
         // re-run against yet) would render content fully detached from the panel background rather
-        // than simply getting cut off at its edge, same as CalorieHudScreen/ActivityLogHudPanel's
-        // own pushClip/popClip around their row drawing.
+        // than simply getting cut off at its edge.
         context.pushClip(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         try {
             Container.super.render(MarieModuleSettings.withTextEffects(context, UiStatePersistence.get(), PANEL_ID), content);
-            HudEditTarget.drawScrollIndicator(context, bounds);
+            HudRowScroll.drawScrollIndicator(context, bounds);
         } finally {
             context.popClip();
         }

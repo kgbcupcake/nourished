@@ -340,23 +340,42 @@ public final class EffectBuilderWidget extends TooltipListEntry<Object> {
 
     static final class ThresholdSlider extends AbstractSliderButton {
 
+        // deficiency rules use the slider as a minimum tier (1-3) instead of a bar level
+        private boolean tierMode;
+
         ThresholdSlider(int x, int y, int w, int h, double initial) {
             super(x, y, w, h, Component.empty(), Mth.clamp(initial, 0d, 1d));
             updateMessage();
         }
 
         double thresholdValue() {
-            return value;
+            return tierMode ? 1 + Math.round(value * 2) : value;
+        }
+
+        void setTierMode(boolean on) {
+            tierMode = on;
+            applyValue();
+        }
+
+        void setTier(int tier) {
+            tierMode = true;
+            value = Mth.clamp((tier - 1) / 2d, 0d, 1d);
+            applyValue();
         }
 
         @Override
         protected void updateMessage() {
-            setMessage(Component.translatable("config.nourished.effects.threshold.value", String.format(Locale.ROOT, "%.3f", value)));
+            if (tierMode) {
+                setMessage(Component.translatable("config.nourished.effects.threshold.tier", (int) thresholdValue()));
+            } else {
+                setMessage(Component.translatable("config.nourished.effects.threshold.value", String.format(Locale.ROOT, "%.3f", value)));
+            }
         }
 
         @Override
         protected void applyValue() {
             this.value = Mth.clamp(this.value, 0d, 1d);
+            if (tierMode) this.value = Math.round(this.value * 2) / 2d;
             updateMessage();
         }
     }

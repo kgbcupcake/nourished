@@ -78,8 +78,8 @@ public final class TabModuleHosts {
         if (module instanceof HomeBoxPane home) {
             return new Size(home.naturalWidth(), home.naturalHeight());
         }
-        if (module instanceof NutrientsBoxPane nutrients) {
-            return new Size(nutrients.naturalWidth(), nutrients.naturalHeight());
+        if (module instanceof ScrollingBoxPane box) {
+            return new Size(box.naturalWidth(), box.naturalHeight());
         }
         Bounds fallback = ((SelfPositioningModule) module).resolvedBounds();
         int columnWidth = DietLayout.SPLIT - DietLayout.PAD * 2;

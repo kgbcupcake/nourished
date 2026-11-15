@@ -1,10 +1,12 @@
 package dev.maire.nourished.client.micro;
 
 import dev.maire.nourished.config.MicroClientConfig;
+import dev.maire.nourished.core.history.IntakeHistory;
 import dev.maire.nourished.core.micro.MicroAttachment;
 import dev.maire.nourished.core.micro.MicroDef;
 import dev.maire.nourished.core.micro.MicroProfileResolver;
 import dev.maire.nourished.core.micro.MicroRegistry;
+import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -35,7 +37,7 @@ public final class NutrientDetailView {
     private static final int TRACK = 0xFF2A3038;
 
     private List<MicroDef> defs = List.of();
-    /** 0 = Overview, i + 1 = defs.get(i). */
+    /** 0 = Overview, i + 1 = defs.get(i), defs.size() + 1 = Food groups. */
     private int selected;
     private final List<int[]> tabs = new ArrayList<>();
     private final List<int[]> rows = new ArrayList<>();
@@ -49,7 +51,7 @@ public final class NutrientDetailView {
     /** Draws at (x, y) within width {@code w}; returns the height used. */
     public int render(GuiGraphics g, Font font, int x, int y, int w, int mouseX, int mouseY) {
         defs = List.copyOf(MicroRegistry.defs(true));
-        selected = Math.min(selected, defs.size());
+        selected = Math.min(selected, defs.size() + 1);
         hovered = ItemStack.EMPTY;
         rows.clear();
         hudButton = null;
@@ -63,6 +65,8 @@ public final class NutrientDetailView {
         y = drawTabs(g, font, x, y, w) + 6;
         if (selected == 0) {
             y = drawOverview(g, font, levels, x, y, w, mouseX, mouseY);
+        } else if (selected == defs.size() + 1) {
+            y = drawGroups(g, font, x, y, w);
         } else {
             y = drawDetail(g, font, defs.get(selected - 1), levels, x, y, w, mouseX, mouseY);
         }
@@ -78,10 +82,12 @@ public final class NutrientDetailView {
         tabs.clear();
         int x = x0;
         int y = y0;
-        for (int i = 0; i <= defs.size(); i++) {
+        for (int i = 0; i <= defs.size() + 1; i++) {
+            boolean fixed = i == 0 || i == defs.size() + 1;
             String label = i == 0 ? Component.translatable("nourished.screen.nutrients.overview").getString()
+                    : i == defs.size() + 1 ? Component.translatable("nourished.screen.nutrients.groups").getString()
                     : defs.get(i - 1).displayName();
-            int color = i == 0 ? 0xFFE0C060 : 0xFF000000 | defs.get(i - 1).color();
+            int color = fixed ? 0xFFE0C060 : 0xFF000000 | defs.get(i - 1).color();
             int tw = font.width(label) + 8;
             if (x + tw > x0 + w && x > x0) {
                 x = x0;
@@ -152,7 +158,16 @@ public final class NutrientDetailView {
         }
         g.drawString(font, trend(samples), x + gw + 8, y + 10, TEXT);
 
-        y += 36;
+        y += 34;
+        g.drawString(font, Component.translatable("nourished.screen.nutrients.history"), x, y, MUTED);
+        List<Float> days = IntakeHistoryChart.days(IntakeHistory.microId(def.key()));
+        if (days.isEmpty()) {
+            g.drawString(font, Component.translatable("nourished.screen.nutrients.history.none"), x, y + 12, MUTED);
+        } else {
+            IntakeHistoryChart.draw(g, font, days, x, y + 10, w, color, true);
+        }
+
+        y += 38;
         g.drawString(font, Component.translatable("nourished.screen.nutrients.recent"), x, y, MUTED);
         List<MicroClientHistory.Meal> meals = MicroClientHistory.mealsWith(def.key());
         int perRow = Math.max(1, w / ICON_STEP);
@@ -181,6 +196,30 @@ public final class NutrientDetailView {
         return y + 10;
     }
 
+    private int drawGroups(GuiGraphics g, Font font, int x, int y, int w) {
+        g.drawString(font, Component.translatable("nourished.screen.nutrients.groups.hint"), x, y, MUTED);
+        y += 14;
+        boolean any = false;
+        for (NutrientRegistry.NutrientDef def : NutrientRegistry.getAll()) {
+            int color = 0xFF000000 | def.color();
+            g.renderItem(new ItemStack(NutrientRegistry.getIconItem(def.key())), x, y + 2);
+            g.drawString(font, def.displayName(), x + 20, y + 6, color);
+            List<Float> days = IntakeHistoryChart.days(IntakeHistory.groupId(def.key()));
+            if (days.isEmpty()) {
+                g.drawString(font, Component.translatable("nourished.screen.nutrients.history.none"), x + 96, y + 6, MUTED);
+            } else {
+                any = true;
+                IntakeHistoryChart.draw(g, font, days, x + 96, y, w - 96, color, false);
+            }
+            y += IntakeHistoryChart.HEIGHT + 6;
+        }
+        if (!any) {
+            g.drawString(font, Component.translatable("nourished.screen.nutrients.history.off_hint"), x, y + 2, MUTED);
+            y += 12;
+        }
+        return y;
+    }
+
     public boolean mouseClicked(double mouseX, double mouseY) {
         for (int i = 0; i < tabs.size(); i++) {
             if (inside(tabs.get(i), mouseX, mouseY, TAB_H)) {
@@ -202,7 +241,7 @@ public final class NutrientDetailView {
     }
 
     public boolean keyPressed(int keyCode) {
-        int count = defs.size() + 1;
+        int count = defs.size() + 2;
         if (keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_TAB) {
             selected = (selected + 1) % count;
             return true;

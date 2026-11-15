@@ -2,6 +2,7 @@ package dev.maire.nourished.modules.activity_driven_nutrient.handler;
 
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.marie.framework.tracking.TrackingData;
+import dev.maire.nourished.core.deficiency.DeficiencyTracker;
 import dev.maire.nourished.core.effect.NutritionEffectApplier;
 import dev.maire.nourished.core.network.ModNetworking;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
@@ -24,6 +25,9 @@ public final class ActivityNutrientEffects {
     public static void applyUniformDelta(ServerPlayer player, float amount) {
         if (amount == 0f || !TrackingAttachment.isRegistered()) {
             return;
+        }
+        if (amount < 0f) {
+            amount *= DeficiencyTracker.activityMultiplier(player);
         }
         TrackingData diet = TrackingAttachment.getData(player);
         for (String key : NutrientRegistry.getKeys()) {

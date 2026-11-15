@@ -8,6 +8,8 @@ import dev.marie.framework.ui.commandcenter.CommandCenterRegistry;
 import dev.maire.nourished.client.colors.NourishedColors;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
 import dev.maire.nourished.client.screen.settings.NourishedSettingsScreen;
+import dev.maire.nourished.core.deficiency.DeficiencyConfig;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
@@ -28,6 +30,12 @@ final class NourishedConfigCommandCenter {
                 () -> Minecraft.getInstance().setScreen(NourishedConfigScreen.create(Minecraft.getInstance().screen)));
         card("diet_editor", "dietEditor", NourishedColors.CC_CONFIG_DIET_EDITOR,
                 ClientEvents::openOrToggleScaleConfig);
+        card("deficiency", "deficiency", NourishedColors.CC_CONFIG_DEFICIENCY,
+                () -> Util.getPlatform().openPath(DeficiencyConfig.file()));
+        card("deficiency_status", "deficiencyStatus", NourishedColors.CC_CONFIG_DEFICIENCY_STATUS, () -> {
+            var player = Minecraft.getInstance().player;
+            if (player != null) player.connection.sendCommand("nourished deficiency");
+        });
     }
 
     private static void card(String id, String langKey, ColorKey accent, Runnable action) {

@@ -303,7 +303,7 @@ public final class ActiveEffectsComponent implements MarieComponent, HeaderColla
     // the Bounds handed to render() (bounds.x()/bounds.y()), and local-to-screen scaling uses
     // `contentScale` (bounds.width() / this box's own reference width, `bw`), not the panel's
     // layout.scale() — so text sizing tracks this box's own independent size, and the drawn
-    // rectangle exactly matches the Bounds DraggableResizable's resize handle/hit-testing use.
+    // rectangle exactly matches the Bounds the edit host's resize handles and hit-testing use.
 
     private int sx(int localX) {
         return anchorBounds.x() + (int) Math.round((localX + paddingLocal) * contentScale);

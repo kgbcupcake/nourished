@@ -33,8 +33,7 @@ public final class HudLayout {
             int leftMargin,
             /** Plain translation applied to content (icon/bar/label) on top of everything else above
              * — set by the "Move Text and Icons" toggle in this panel's {@code ScaleConfigPanel}
-             * editor, same {@code contentOffsetX}/{@code contentOffsetY} pattern {@code
-             * CalorieHudScreen}/{@code ActivityLogHudPanel} use. Zero here; only {@code
+             * editor. Zero here; only {@code
              * HudEditTarget#resolvedLayout}/{@code #matchedLayoutFor} ever set it non-zero. */
             int contentOffsetX, int contentOffsetY
     ) {}

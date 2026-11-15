@@ -28,20 +28,6 @@ public final class NourishedKeys {
             "key.categories.nourished"
     );
 
-    public static final KeyMapping EDIT_ACTIVITY_LOG_HUD = new KeyMapping(
-            "key.nourished.editActivityLogHud",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_K,
-            "key.categories.nourished"
-    );
-
-    public static final KeyMapping EDIT_CALORIE_HUD = new KeyMapping(
-            "key.nourished.editCalorieHud",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_C,
-            "key.categories.nourished"
-    );
-
     public static final KeyMapping EDIT_ALL_HUDS = new KeyMapping(
             "key.nourished.editAllHuds",
             InputConstants.Type.KEYSYM,
@@ -104,8 +90,6 @@ public final class NourishedKeys {
         event.register(EDIT_HUD);
         event.register(OPEN_DIET_SCREEN);
         event.register(EDIT_DIET_SCREEN);
-        event.register(EDIT_ACTIVITY_LOG_HUD);
-        event.register(EDIT_CALORIE_HUD);
         event.register(EDIT_ALL_HUDS);
         event.register(OPEN_SCALE_CONFIG);
         event.register(OPEN_COMMAND_CENTER);

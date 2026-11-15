@@ -44,32 +44,6 @@ public final class HotkeysCategory {
                         })
                         .build()
         );
-        category.addEntry(
-                eb.startKeyCodeField(
-                                Component.translatable("config.nourished.activityLogHudEditHotkey"),
-                                NourishedKeys.EDIT_ACTIVITY_LOG_HUD.getKey()
-                        )
-                        .setDefaultValue(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_K))
-                        .setKeySaveConsumer(key -> {
-                            NourishedKeys.EDIT_ACTIVITY_LOG_HUD.setKey(key);
-                            KeyMapping.resetMapping();
-                            Minecraft.getInstance().options.save();
-                        })
-                        .build()
-        );
-        category.addEntry(
-                eb.startKeyCodeField(
-                                Component.translatable("config.nourished.calorieHudEditHotkey"),
-                                NourishedKeys.EDIT_CALORIE_HUD.getKey()
-                        )
-                        .setDefaultValue(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_C))
-                        .setKeySaveConsumer(key -> {
-                            NourishedKeys.EDIT_CALORIE_HUD.setKey(key);
-                            KeyMapping.resetMapping();
-                            Minecraft.getInstance().options.save();
-                        })
-                        .build()
-        );
 
         category.addEntry(eb.startTextDescription(Component.translatable("config.nourished.hotkeys.group.screens")).build());
         category.addEntry(

@@ -3,6 +3,8 @@ package dev.maire.nourished.kubejs;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
 import dev.marie.framework.api.ApiStatus;
+import dev.maire.nourished.kubejs.events.NourishedDeficiencyPressureEvent;
+import dev.maire.nourished.kubejs.events.NourishedDeficiencyTierChangedEvent;
 import dev.maire.nourished.kubejs.events.NourishedFoodEatenEvent;
 import dev.maire.nourished.kubejs.events.NourishedGutHealthChangedEvent;
 import dev.maire.nourished.kubejs.events.NourishedNutrientChangedEvent;
@@ -25,6 +27,8 @@ public final class NourishedKubeEvents {
     public static final String RAW_FOOD_PENALTY_ID = "NourishedEvents.rawFoodPenalty";
     public static final String NUTRIENT_MODIFIER_ID = "NourishedEvents.nutrientModifier";
     public static final String FOOD_EATEN_ID = "NourishedEvents.foodEaten";
+    public static final String DEFICIENCY_TIER_CHANGED_ID = "NourishedEvents.deficiencyTierChanged";
+    public static final String DEFICIENCY_PRESSURE_ID = "NourishedEvents.deficiencyPressure";
 
     public static final EventGroup GROUP = EventGroup.of("NourishedEvents");
 
@@ -44,6 +48,10 @@ public final class NourishedKubeEvents {
             GROUP.server("nutrientModifier", () -> NourishedNutrientModifierEvent.class);
     public static final EventHandler FOOD_EATEN =
             GROUP.server("foodEaten", () -> NourishedFoodEatenEvent.class);
+    public static final EventHandler DEFICIENCY_TIER_CHANGED =
+            GROUP.server("deficiencyTierChanged", () -> NourishedDeficiencyTierChangedEvent.class);
+    public static final EventHandler DEFICIENCY_PRESSURE =
+            GROUP.server("deficiencyPressure", () -> NourishedDeficiencyPressureEvent.class);
 
     private NourishedKubeEvents() {}
 
@@ -58,6 +66,8 @@ public final class NourishedKubeEvents {
             case RAW_FOOD_PENALTY_ID -> RAW_FOOD_PENALTY;
             case NUTRIENT_MODIFIER_ID -> NUTRIENT_MODIFIER;
             case FOOD_EATEN_ID -> FOOD_EATEN;
+            case DEFICIENCY_TIER_CHANGED_ID -> DEFICIENCY_TIER_CHANGED;
+            case DEFICIENCY_PRESSURE_ID -> DEFICIENCY_PRESSURE;
             default -> null;
         };
     }

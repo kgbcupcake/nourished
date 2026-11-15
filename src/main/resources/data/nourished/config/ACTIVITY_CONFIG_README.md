@@ -34,7 +34,7 @@ the real one, and it's synced down to connecting clients for display in Cloth Co
 - `<module>Enabled`: per-module toggle (sprint/swim/mining/combat/starvation)
 - `miningCostPerBlock` / `combatCostPerKill` / `sprintDecayBoost` / `swimDecayBoost` /
   `starvationPenalty`: nutrient cost (per bar) each module applies
-- `colors`: ARGB hex color (`0xAARRGGBB` or `#RRGGBB`) used by the Activity Log HUD
+- `colors`: ARGB hex color (`0xAARRGGBB` or `#RRGGBB`) used by the Activity Log tab
   panel for each module's log lines
 
 ## Which file wins

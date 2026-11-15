@@ -1,5 +1,8 @@
 package dev.maire.nourished.client.screen.diet.dynamic.options;
 
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.DeficiencyBoxPane;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.CalorieHistoryBoxPane;
+import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogBoxPane;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.NutrientsBoxPane;
 import dev.marie.framework.ui.hub.HubEntry;
 import dev.marie.framework.ui.hub.HubSidebarEntry;
@@ -367,21 +370,37 @@ public final class DietOptionsPanel {
                 .build();
     }
 
-    /** Editor entries that only exist on the Nutritional Panel: its Home and Nutrients boxes. */
+    /** Editor entries that only exist on the Nutritional Panel: its Home box and its scrolling tab boxes. */
     public static List<HubSidebarEntry> nutritionalPanelEntries() {
         if (!DietScreenPersistence.isNutritionalPanel()) {
             return List.of();
         }
         return List.of(
                 new HubEntry(DietHomeSections.ID, Component.translatable("nourished.screen.diet.home_label"), homePanel()),
-                new HubEntry(NutrientsBoxPane.ID, Component.translatable("nourished.screen.diet.nutrients_tab"), nutrientsPanel()));
+                new HubEntry(NutrientsBoxPane.ID, Component.translatable("nourished.screen.diet.nutrients_tab"), nutrientsPanel()),
+                new HubEntry(DeficiencyBoxPane.ID, Component.translatable("nourished.screen.diet.deficiency_tab"),
+                        boxPanel("nourished.screen.diet.deficiency_tab", DeficiencyBoxPane.ID, NourishedColors.DEFICIENCY_BORDER)),
+                new HubEntry(CalorieHistoryBoxPane.ID, Component.translatable("nourished.screen.diet.calorie_history_tab"),
+                        boxPanel("nourished.screen.diet.calorie_history_tab", CalorieHistoryBoxPane.ID, NourishedColors.CALORIE_HUD_BORDER,
+                                panel -> NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_OVER_GOAL, "nourished.options.color.over_goal"))),
+                new HubEntry(ActivityLogBoxPane.ID, Component.translatable("nourished.screen.diet.activity_log_tab"),
+                        boxPanel("nourished.screen.diet.activity_log_tab", ActivityLogBoxPane.ID, NourishedColors.ACTIVITY_LOG_BORDER,
+                                NourishedColorSlots::addActivities)));
     }
 
-    /** The Nutrients box's entry: same Style/Glow/Pulse/Colors set as Home, since it also draws through the raw graphics. */
     public static MarieComponent nutrientsPanel() {
+        return boxPanel("nourished.screen.diet.nutrients_tab", NutrientsBoxPane.ID, NourishedColors.NUTRIENTS_BORDER);
+    }
+
+    /** A scrolling tab box's entry: same Style/Glow/Pulse/Colors set as Home, since it also draws through the raw graphics. */
+    private static MarieComponent boxPanel(String titleKey, String id, dev.marie.framework.color.ColorKey border) {
+        return boxPanel(titleKey, id, border, panel -> {});
+    }
+
+    private static MarieComponent boxPanel(String titleKey, String id, dev.marie.framework.color.ColorKey border,
+                                           java.util.function.Consumer<MarieToolbox.PanelBuilder> extraColors) {
         var store = DietScreenPersistence.get();
-        return MarieModuleSettings.standardPanel(Component.translatable("nourished.screen.diet.nutrients_tab").getString(),
-                        store, NutrientsBoxPane.ID)
+        return MarieModuleSettings.standardPanel(Component.translatable(titleKey).getString(), store, id)
                 .withoutPadding()
                 .withoutBars()
                 .withoutIcons()
@@ -395,7 +414,8 @@ public final class DietOptionsPanel {
                 .storedOpacity(DEFAULT_OPACITY)
                 .extraTabs(panel -> {
                     panel.colorTab(text("config.marieslib.moduleoptions.tab.colors"));
-                    NourishedColorSlots.addFixed(panel, NourishedColors.NUTRIENTS_BORDER, "nourished.options.color.border");
+                    NourishedColorSlots.addFixed(panel, border, "nourished.options.color.border");
+                    extraColors.accept(panel);
                 })
                 .build();
     }

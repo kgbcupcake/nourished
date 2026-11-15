@@ -5,6 +5,7 @@ import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.handler.ReloadGuardListener;
 import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.deficiency.DeficiencyTracker;
 import dev.maire.nourished.core.micro.MicroAttachment;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.framework.util.MarieEffectUtils;
@@ -68,6 +69,7 @@ public final class NutritionEffectApplier {
                     float v = level(player, data, def.nutrient());
                     yield v >= def.threshold() && v <= def.thresholdMax();
                 }
+                case "deficiency" -> DeficiencyTracker.tier(player, def.nutrient()) >= Math.max(1, (int) def.threshold());
                 default -> false;
             };
 

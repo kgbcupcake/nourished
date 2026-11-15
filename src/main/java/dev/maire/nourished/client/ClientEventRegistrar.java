@@ -18,12 +18,10 @@ import dev.maire.nourished.client.screen.itemeditor.ExcludeTooltipScreenProvider
 import dev.maire.nourished.client.screen.itemeditor.OptionsScreenProvider;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.client.hud.NourishedHUD;
-import dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen;
 import dev.maire.nourished.client.NourishedClientMemoryConfig;
 import dev.maire.nourished.client.screen.diet.dynamic.edit.DietModuleResetCommand;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.DietScreenModules;
 import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogClientBuffer;
-import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.neoforged.bus.api.IEventBus;
@@ -56,20 +54,6 @@ public final class ClientEventRegistrar {
                 NourishedKeys.EDIT_HUD.getKey().getValue(),
                 NourishedHUD::showScaleConfigOnGroupEntry
         );
-        EditModeCoordinator.registerGroupCapable(
-                "nourished.calorieHud",
-                CalorieHudScreen::instance,
-                "Drag the Calorie History HUD to reposition, drag the corner handle to resize. C or Esc to exit.",
-                NourishedKeys.EDIT_CALORIE_HUD.getKey().getValue(),
-                CalorieHudScreen::showScaleConfigOnGroupEntry
-        );
-        EditModeCoordinator.registerGroupCapable(
-                "nourished.activityLogHud",
-                ActivityLogHudPanel::instance,
-                "Drag the Activity Log HUD to reposition, drag the corner handle to resize. K or Esc to exit.",
-                NourishedKeys.EDIT_ACTIVITY_LOG_HUD.getKey().getValue(),
-                ActivityLogHudPanel::showScaleConfigOnGroupEntry
-        );
         modEventBus.addListener(NourishedKeys::onRegisterKeyMappings);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onScreenInit);
         NeoForge.EVENT_BUS.addListener(ClientEvents::onScreenKeyPressed);
@@ -79,10 +63,6 @@ public final class ClientEventRegistrar {
         NeoForge.EVENT_BUS.addListener(ClientEvents::onClientTick);
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onRenderGuiPost);
         NeoForge.EVENT_BUS.addListener(NourishedHUD::onClientTick);
-        NeoForge.EVENT_BUS.addListener(ActivityLogHudPanel::onRenderGuiPost);
-        NeoForge.EVENT_BUS.addListener(ActivityLogHudPanel::onClientTick);
-        NeoForge.EVENT_BUS.addListener(CalorieHudScreen::onRenderGuiPost);
-        NeoForge.EVENT_BUS.addListener(CalorieHudScreen::onClientTick);
         NeoForge.EVENT_BUS.addListener(ClientEventRegistrar::onLogout);
         // TEMPORARY dev-only command — see DietModuleResetCommand's own javadoc for removal instructions.
         NeoForge.EVENT_BUS.addListener(DietModuleResetCommand::register);

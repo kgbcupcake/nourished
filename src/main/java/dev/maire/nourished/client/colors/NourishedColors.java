@@ -48,12 +48,10 @@ public final class NourishedColors {
     /** The Nutritional Panel's sidebar tab text; starts as the title color it used to share. */
     public static final ColorKey DIET_TABS = themed("diet.tabs", ThemeKey.TEXT_PRIMARY);
 
-    // Calories and the accents of the Calorie History / Activity Log panels
+    // Calories, and the borders of the Calorie History / Activity Log tabs (keys kept from the old HUD boxes so saved colors carry over)
     public static final ColorKey CALORIE_VALUE = themed("calorie.value", ThemeKey.TEXT_PRIMARY);
     public static final ColorKey CALORIE_OVER_GOAL = themed("calorie_hud.over_goal", ThemeKey.TEXT_SECONDARY);
-    public static final ColorKey CALORIE_ACCENT = themed("calorie_hud.accent", ThemeKey.TEXT_PRIMARY);
     public static final ColorKey CALORIE_HUD_BORDER = themed("calorie_hud.border", ThemeKey.BORDER);
-    public static final ColorKey ACTIVITY_ACCENT = themed("activity_log_hud.accent", ThemeKey.TEXT_PRIMARY);
     public static final ColorKey ACTIVITY_LOG_BORDER = themed("activity_log_hud.border", ThemeKey.BORDER);
 
     // Shared roles
@@ -74,6 +72,11 @@ public final class NourishedColors {
     public static final ColorKey ACTIVE_EFFECTS_BORDER = themed("diet.active_effects.border", ThemeKey.BORDER);
     public static final ColorKey HOME_BORDER = themed("diet.home.border", ThemeKey.BORDER);
     public static final ColorKey NUTRIENTS_BORDER = themed("diet.nutrients.border", ThemeKey.BORDER);
+    public static final ColorKey DEFICIENCY_BORDER = themed("diet.deficiency.border", ThemeKey.BORDER);
+    public static final ColorKey DEFICIENCY_OK = def("deficiency.ok", 0x70D070);
+    public static final ColorKey DEFICIENCY_L1 = def("deficiency.level1", 0xE0C040);
+    public static final ColorKey DEFICIENCY_L2 = def("deficiency.level2", 0xE08030);
+    public static final ColorKey DEFICIENCY_L3 = def("deficiency.level3", 0xE04040);
     public static final ColorKey BORDER = themed("border", ThemeKey.BORDER);
     public static final ColorKey DIVIDER = themed("divider", ThemeKey.BORDER);
 
@@ -117,6 +120,8 @@ public final class NourishedColors {
     public static final ColorKey CC_CONFIG_SETTINGS = themed("command_center.config.settings", ThemeKey.TEXT_PRIMARY);
     public static final ColorKey CC_CONFIG_FULL = themed("command_center.config.full", ThemeKey.TEXT_PRIMARY);
     public static final ColorKey CC_CONFIG_DIET_EDITOR = themed("command_center.config.diet_editor", ThemeKey.TEXT_PRIMARY);
+    public static final ColorKey CC_CONFIG_DEFICIENCY = themed("command_center.config.deficiency", ThemeKey.TEXT_PRIMARY);
+    public static final ColorKey CC_CONFIG_DEFICIENCY_STATUS = themed("command_center.config.deficiency_status", ThemeKey.TEXT_PRIMARY);
 
     private NourishedColors() {}
 

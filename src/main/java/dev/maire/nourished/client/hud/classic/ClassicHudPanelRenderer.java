@@ -82,8 +82,7 @@ public final class ClassicHudPanelRenderer {
         // Clipped to the panel's own bounds — a defensive backstop against contentOffsetX/Y (the
         // "Move Text and Icons" toggle) pushing content outside the panel: HudEditTarget clamps that
         // offset already, but without this, any drift would render content fully detached from the
-        // panel background rather than simply getting cut off at its edge, same as
-        // CalorieHudScreen/ActivityLogHudPanel's own pushClip/popClip around their row drawing.
+        // panel background rather than simply getting cut off at its edge.
         g.enableScissor(panelX, panelY, panelX + layout.panelW(), panelY + layout.panelH());
         try {
             if (layout.verticalLayout()) {

@@ -10,13 +10,17 @@ import dev.marie.framework.ui.geometry.Bounds;
 import java.util.function.BooleanSupplier;
 
 /**
- * Hosts {@link NutrientsBoxPane} in its tab like {@link HomeTabRenderer} hosts the Home box (drag,
+ * Hosts a {@link ScrollingBoxPane} in its tab like {@link HomeTabRenderer} hosts the Home box (drag,
  * resize, snap in edit mode). Outside edit mode the host ignores input, so {@link #wrap} passes
- * clicks, scrollbar drags, the wheel and keys to the box's pages instead.
+ * clicks, scrollbar drags, the wheel and keys to the box's content instead.
  */
-public final class NutrientsTabRenderer implements EditHostRenderer {
+public final class BoxTabRenderer implements EditHostRenderer {
 
-    private final NutrientsBoxPane box = new NutrientsBoxPane();
+    private final ScrollingBoxPane box;
+
+    public BoxTabRenderer(ScrollingBoxPane box) {
+        this.box = box;
+    }
 
     @Override
     public void render(RenderContext context, Bounds area, ModuleEditHost host) {

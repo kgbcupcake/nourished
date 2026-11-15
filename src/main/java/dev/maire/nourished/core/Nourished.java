@@ -32,8 +32,6 @@ import dev.maire.nourished.core.micro.MicroAttachment;
 import dev.maire.nourished.core.micro.MicroDataLoader;
 import dev.maire.nourished.core.micro.MicroHandler;
 import dev.maire.nourished.client.config.NourishedConfigScreen;
-import dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen;
-import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogHudPanel;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientRegistry;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityTrackerIds;
 import dev.maire.nourished.modules.activity_driven_nutrient.handler.ActivityDistanceTickListener;
@@ -68,6 +66,7 @@ import dev.maire.nourished.config.validation.ScannerSpecValidator;
 import dev.maire.nourished.config.validation.SourceClassificationsValidator;
 import dev.maire.nourished.core.handler.NourishedFoodTriggerHandler;
 import dev.maire.nourished.core.handler.PlaceableFoodHandler;
+import dev.maire.nourished.core.history.IntakeHistory;
 import dev.maire.nourished.core.tagaudit.NourishedTagAuditContext;
 import dev.maire.nourished.core.tagaudit.rules.NamespaceBiasRule;
 import dev.maire.nourished.core.tagaudit.rules.TagInferenceMismatchRule;
@@ -117,6 +116,7 @@ public class Nourished {
         modEventBus.addListener(NutritionalPanelConfig::onModConfigLoading);
         modEventBus.addListener(NutritionalPanelConfig::onModConfigReloading);
         ActivityDrivenNutrientRegistry.registerSync();
+        dev.maire.nourished.core.deficiency.DeficiencyConfig.registerSync();
         registerColorDefinitions();
         NourishedBookItems.register(modEventBus);
 
@@ -151,6 +151,8 @@ public class Nourished {
         DietAttachment.register(modEventBus);
         GutHealthAttachment.register(modEventBus);
         MicroAttachment.register(modEventBus);
+        dev.maire.nourished.core.deficiency.DeficiencyAttachment.register(modEventBus);
+        dev.maire.nourished.core.deficiency.MalnourishedEffect.register(modEventBus);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modContainer.registerExtensionPoint(IConfigScreenFactory.class,
                     (minecraft, parent) -> NourishedConfigScreen.create(parent));
@@ -166,6 +168,8 @@ public class Nourished {
         NeoForge.EVENT_BUS.register(new GutHealthTickHandler());
         NeoForge.EVENT_BUS.register(new GutHealthRecoveryHandler());
         NeoForge.EVENT_BUS.register(new MicroHandler());
+        NeoForge.EVENT_BUS.register(new dev.maire.nourished.core.deficiency.DeficiencyTracker());
+        dev.maire.nourished.core.deficiency.DeficiencyPenalties.register(NeoForge.EVENT_BUS);
         NeoForge.EVENT_BUS.addListener(MicroDataLoader::onAddReloadListeners);
         ActivityModuleRegistry.register(new SprintDecayModule());
         ActivityModuleRegistry.register(new SwimDecayModule());
@@ -190,6 +194,7 @@ public class Nourished {
                 ModCompat.discoverUnknownMods();
                 registerCalorieTracker();
                 ActivityTrackerIds.registerAll();
+                IntakeHistory.registerAll();
                 LOGGER.info("[Nourished] Starting AutoCompatDiscovery...");
                 try (var scope = MarieAPIState.openForDatapackReload()) {
                     AutoCompatDiscovery.discover();
@@ -226,6 +231,7 @@ public class Nourished {
         registerColorDefinitions();
         registerCalorieTracker();
         ActivityTrackerIds.registerAll();
+        IntakeHistory.registerAll();
     }
 
     /**
@@ -234,16 +240,18 @@ public class Nourished {
      * {@link #reregisterReloadableDefinitions()} on every reload.
      */
     private static void registerCalorieTracker() {
-        if (NourishedConfig.get().enableCalorieHistory()) {
+        // today's total lives on this tracker too, so it stays registered with history off (1 day kept, never shown)
+        NourishedConfig c = NourishedConfig.get();
+        if (c.enableCalorieTracking()) {
             MarieTracking.registerTracker(dev.marie.framework.tracking.tracker.definition.TrackerDefinition.daily(
                     dev.maire.nourished.api.NourishedAPI.CALORIES_TRACKER_ID,
-                    NourishedConfig.get().calorieHistoryRetentionDays()));
+                    c.enableCalorieHistory() ? c.calorieHistoryRetentionDays() : 1));
         }
     }
 
     /**
      * Reconciles the calorie tracker's registration with the current config, so toggling
-     * {@code enableCalorieHistory} from the config screen takes effect without a {@code /reload}.
+     * {@code enableCalorieTracking}/{@code enableCalorieHistory} from the config screen takes effect without a {@code /reload}.
      * Called from {@link NourishedConfig#syncModuleCache()}. MarieLib's registration window is
      * normally closed outside mod init/reload, so this briefly reopens it for the call.
      */
@@ -287,22 +295,8 @@ public class Nourished {
         }
     }
 
-    /**
-     * Client-only HUD panel color pairs, split out from {@link #registerColorDefinitions()}.
-     * Referencing {@link CalorieHudScreen}/{@link ActivityLogHudPanel}'s static fields loads those
-     * classes, and both are client-only (they import {@code net.minecraft.client.player.LocalPlayer}
-     * etc.), which trips NeoForge's RuntimeDistCleaner on a dedicated server.
-     */
+    /** Client-only color keys, kept out of {@link #registerColorDefinitions()} so a dedicated server never loads client classes. */
     private static void registerClientPanelColorDefinitions() {
-        // Matches ThemeKey.PANEL_BACKGROUND's RGB (0x101010) — the flat color both panels drew
-        // before this feature existed; alpha here is nominal since draw time composes the real
-        // alpha from each panel's own opacity config value.
-        int defaultPanelArgb = 0xFF101010;
-        // Matches ThemeKey.TEXT_PRIMARY (0xFFE0E0E0) — the flat text color both panels drew before
-        // this feature existed.
-        int defaultTextArgb = 0xFFE0E0E0;
-        CalorieHudScreen.COLORS = MarieColors.registerColorPair(MODID, "calorie_hud", defaultPanelArgb, defaultTextArgb);
-        ActivityLogHudPanel.COLORS = MarieColors.registerColorPair(MODID, "activity_log_hud", defaultPanelArgb, defaultTextArgb);
         dev.maire.nourished.client.colors.NourishedColors.register();
         dev.maire.nourished.client.colors.NourishedColors.registerIntakeBarColors();
     }

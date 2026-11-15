@@ -23,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -114,6 +115,9 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             Nourished.LOGGER.debug("[RecipeInheritance] Resolving: {}", itemId);
         }
 
+        // ingredient steps are held until the average is known, so each can show its share
+        List<PendingStep> steps = ctx.traceOut() != null ? new ArrayList<>() : null;
+        int shareDivisor = 0;
         try {
             List<ResourceLocation> directIngredients = recipeResolver.getIngredients(itemId);
 
@@ -131,7 +135,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             int confirmed = 0;
 
             List<RecipeInheritanceResolver.NodeContribution<Map<String, Float>>> nodes =
-                    recipeResolver.collectContributions(itemId, nodeId -> classifyRecipeNode(nodeId, ctx));
+                    recipeResolver.collectContributions(itemId, nodeId -> classifyRecipeNode(nodeId, ctx, steps));
 
             for (RecipeInheritanceResolver.NodeContribution<Map<String, Float>> node : nodes) {
                 for (Map.Entry<String, Float> e : node.value().entrySet()) {
@@ -182,6 +186,7 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
 
             float totalScore = 0f;
             for (float v : filtered.values()) totalScore += v;
+            shareDivisor = confirmed;
             return new ResolutionResult(
                     qualifying, Map.copyOf(averaged),
                     List.of(), Map.of(), rejectedSignals,
@@ -192,6 +197,8 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             Nourished.LOGGER.warn("[RuntimeResolver] Recipe exception for {}: {}", itemId, e.getMessage());
             ctx.setRecipeFailureReason("RECIPE_EXCEPTION");
             return null;
+        } finally {
+            flushSteps(ctx, steps, shareDivisor);
         }
     }
 
@@ -228,19 +235,20 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
      * still walks through a null node to reach deeper ones.
      */
     @Nullable
-    private Map<String, Float> classifyRecipeNode(ResourceLocation ingredientId, StageContext ctx) {
+    private Map<String, Float> classifyRecipeNode(ResourceLocation ingredientId, StageContext ctx,
+                                                  @Nullable List<PendingStep> steps) {
         if (shouldSkipRecipeIngredient(ingredientId)) {
             if (Nourished.LOGGER.isDebugEnabled()) {
                 Nourished.LOGGER.debug("[RecipeInheritance]   ingredient {} → SKIPPED", ingredientId);
             }
-            emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.SKIPPED,
+            hold(steps, ingredientId, TraceStepStatus.SKIPPED,
                     "INGREDIENT_SKIPPED", null, false, "tool/non-food ingredient");
             return null;
         }
 
         Item ingredientItem = BuiltInRegistries.ITEM.get(ingredientId);
         if (ingredientItem == null) {
-            emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.FAILURE,
+            hold(steps, ingredientId, TraceStepStatus.FAILURE,
                     "NONE", null, false, "item not found");
             return null;
         }
@@ -250,11 +258,11 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
             Nourished.LOGGER.debug("[RecipeInheritance]   ingredient {} → tags: {}", ingredientId, tagMatches);
         }
         if (tagMatches.isEmpty()) {
-            emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.FAILURE,
+            hold(steps, ingredientId, TraceStepStatus.FAILURE,
                     "NONE", null, false, "INGREDIENT_UNCLASSIFIED");
             return null;
         }
-        emitIngredientResolutionStep(ctx, ingredientId, TraceStepStatus.SUCCESS,
+        hold(steps, ingredientId, TraceStepStatus.SUCCESS,
                 "TAG", tagMatches, false, null);
         return tagMatches;
     }
@@ -311,47 +319,61 @@ public final class RecipeInheritanceStage implements ResolutionStageHandler {
         return matches;
     }
 
-    private static void emitIngredientResolutionStep(
-            StageContext ctx,
-            ResourceLocation ingredientId,
-            TraceStepStatus status,
-            String source,
-            @Nullable Map<String, Float> nutrients,
-            boolean uncertain,
-            @Nullable String reason
-    ) {
-        if (ctx.traceOut() == null) {
-            return;
+    private record PendingStep(ResourceLocation ingredientId, TraceStepStatus status, String source,
+                               @Nullable Map<String, Float> nutrients, boolean uncertain, @Nullable String reason) {}
+
+    private static void hold(@Nullable List<PendingStep> steps, ResourceLocation ingredientId, TraceStepStatus status,
+                             String source, @Nullable Map<String, Float> nutrients, boolean uncertain,
+                             @Nullable String reason) {
+        if (steps != null) steps.add(new PendingStep(ingredientId, status, source, nutrients, uncertain, reason));
+    }
+
+    // shareDivisor is the confirmed-ingredient count the result was averaged over, or 0 if the stage failed
+    private static void flushSteps(StageContext ctx, @Nullable List<PendingStep> steps, int shareDivisor) {
+        if (steps == null) return;
+        for (PendingStep step : steps) {
+            Map<String, Float> share = shareDivisor > 0 && step.status() == TraceStepStatus.SUCCESS
+                    ? IngredientShares.share(step.nutrients(), shareDivisor, ctx.validKeys())
+                    : Map.of();
+            emitIngredientResolutionStep(ctx, step, share);
         }
+    }
+
+    private static void emitIngredientResolutionStep(StageContext ctx, PendingStep step, Map<String, Float> share) {
         Map<String, Object> detail = new LinkedHashMap<>();
-        detail.put("ingredientId", ingredientId.toString());
-        detail.put("source", source);
-        if (nutrients != null && !nutrients.isEmpty()) {
-            detail.put("values", new LinkedHashMap<>(nutrients));
+        detail.put("ingredientId", step.ingredientId().toString());
+        detail.put("source", step.source());
+        if (step.nutrients() != null && !step.nutrients().isEmpty()) {
+            detail.put("values", new LinkedHashMap<>(step.nutrients()));
         }
-        if (uncertain) {
+        if (!share.isEmpty()) {
+            detail.put("share", new LinkedHashMap<>(share));
+        }
+        if (step.uncertain()) {
             detail.put("uncertain", true);
         }
-        if (status == TraceStepStatus.SKIPPED) {
+        String reason = step.reason();
+        if (step.status() == TraceStepStatus.SKIPPED) {
             detail.put("skipped", true);
             if (reason != null) {
                 detail.put("skipReason", reason);
             }
         }
-        if (reason != null && status == TraceStepStatus.FAILURE) {
+        if (reason != null && step.status() == TraceStepStatus.FAILURE) {
             detail.put("warningCode", "INGREDIENT_UNCLASSIFIED");
         }
 
-        String message = switch (status) {
-            case SUCCESS -> "Ingredient classified via " + source;
-            case SKIPPED -> "Ingredient skipped: " + (reason != null ? reason : "unknown");
-            case FAILURE -> "Ingredient unclassified: " + (reason != null ? reason : "unknown");
-            default -> "Ingredient resolution";
+        String id = step.ingredientId().toString();
+        String message = switch (step.status()) {
+            case SUCCESS -> id + " via " + step.source() + IngredientShares.describe(share);
+            case SKIPPED -> id + " skipped: " + (reason != null ? reason : "unknown");
+            case FAILURE -> id + " unclassified: " + (reason != null ? reason : "unknown");
+            default -> id;
         };
 
         ctx.addTraceStep(new ClassificationTraceStep(
                 TraceStepId.INGREDIENT_RESOLUTION,
-                status,
+                step.status(),
                 message,
                 detail));
     }

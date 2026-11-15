@@ -88,6 +88,9 @@ class EffectCard {
 
         this.thresholdSlider = new EffectBuilderWidget.ThresholdSlider(0, 0, 100, EffectBuilderWidget.BTN_H, def.threshold());
         this.thresholdMaxSlider = new EffectBuilderWidget.ThresholdSlider(0, 0, 100, EffectBuilderWidget.BTN_H, def.thresholdMax());
+        if ("deficiency".equals(def.trigger())) {
+            thresholdSlider.setTier((int) Math.round(def.threshold()));
+        }
 
         this.amplifierEdit = new EditBox(mc.font, 0, 0, 48, EffectBuilderWidget.EDIT_H, Component.translatable("config.nourished.effects.amplifier"));
         amplifierEdit.setFilter(EffectCard::unsignedIntFilter);
@@ -139,9 +142,10 @@ class EffectCard {
     }
 
     private void cycleTrigger() {
-        List<String> opts = List.of("below", "above", "all_above", "any_below", "between");
+        List<String> opts = List.of("below", "above", "all_above", "any_below", "between", "deficiency");
         int i = Math.max(0, opts.indexOf(triggerValue));
         triggerValue = opts.get((i + 1) % opts.size());
+        thresholdSlider.setTierMode("deficiency".equals(triggerValue));
         updateTriggerLabel();
     }
 
