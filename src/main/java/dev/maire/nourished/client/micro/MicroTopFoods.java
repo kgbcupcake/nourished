@@ -51,7 +51,7 @@ public final class MicroTopFoods {
             ItemStack stack = new ItemStack(item);
             FoodProperties food = stack.getFoodProperties(null);
             if (food == null) continue;
-            float bite = MicroProfileResolver.biteGain(food);
+            float bite = MicroProfileResolver.biteGain(food, true);
             MicroProfileResolver.resolve(stack, mc.level).forEach((k, v) ->
                     amounts.computeIfAbsent(k, x -> new HashMap<>()).put(item, v * bite));
         }

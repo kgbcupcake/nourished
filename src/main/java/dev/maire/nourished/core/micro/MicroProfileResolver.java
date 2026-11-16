@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.micro;
 
+import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import dev.marie.framework.scanner.RecipeInheritanceResolver;
 import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -58,7 +59,8 @@ public final class MicroProfileResolver {
 
     /** Like {@link #resolve} but also says which step supplied the values. */
     public static Profile resolveProfile(ItemStack stack, @Nullable Level level) {
-        if (stack.isEmpty() || stack.getFoodProperties(null) == null) {
+        // milk has no vanilla food properties, so ask the nutrition registry instead
+        if (stack.isEmpty() || FoodNutritionRegistry.foodPropertiesForNutrition(stack, null) == null) {
             return Profile.EMPTY;
         }
         boolean clientSide = level != null && level.isClientSide();
@@ -84,16 +86,18 @@ public final class MicroProfileResolver {
     }
 
     /** How much one serving fills a nutrient whose profile value is 1.0; mirrors the group bars' per-bite burst. */
-    public static float biteGain(FoodProperties food) {
-        return food.nutrition() * 0.008f + food.saturation() * 0.010f + 0.004f;
+    public static float biteGain(FoodProperties food, boolean clientSide) {
+        float base = food.nutrition() * 0.008f + food.saturation() * 0.010f + 0.004f;
+        return base * MicroRegistry.forSide(clientSide).settings().gainScale();
     }
 
     private static Profile profileOf(ResourceLocation id, ItemStack stack, @Nullable Level level,
                                      MicroRegistry.Snapshot snap,
                                      @Nullable RecipeInheritanceResolver recipes,
                                      int depth, Set<ResourceLocation> visiting) {
+        // an entry that zeroes every nutrient still counts, so derivation doesn't refill it
         Map<String, Float> explicit = explicitValues(id, stack.getItem(), snap);
-        if (!explicit.isEmpty()) {
+        if (explicit != null) {
             return new Profile(explicit, Source.EXPLICIT);
         }
         if (recipes != null && depth < MAX_DEPTH && visiting.add(id)) {
@@ -142,18 +146,21 @@ public final class MicroProfileResolver {
         return out;
     }
 
+    @Nullable
     private static Map<String, Float> explicitValues(ResourceLocation id, Item item, MicroRegistry.Snapshot snap) {
         Map<String, Float> direct = snap.itemValues().get(id);
         if (direct != null) {
             return known(direct, snap);
         }
         Map<String, Float> merged = new HashMap<>();
+        boolean matched = false;
         for (var e : snap.tagValues().entrySet()) {
             if (item.builtInRegistryHolder().is(TagKey.create(Registries.ITEM, e.getKey()))) {
+                matched = true;
                 e.getValue().forEach((k, v) -> merged.merge(k, v, Math::max));
             }
         }
-        return known(merged, snap);
+        return matched ? known(merged, snap) : null;
     }
 
     private static Map<String, Float> groupFallback(ItemStack stack, @Nullable Level level, MicroRegistry.Snapshot snap) {

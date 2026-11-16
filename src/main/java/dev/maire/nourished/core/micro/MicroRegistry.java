@@ -17,10 +17,10 @@ import java.util.Map;
  */
 public final class MicroRegistry {
 
-    public record Settings(boolean enabled, boolean recipeDerivation, float recipeScale, float recipeMax) {
+    public record Settings(boolean enabled, boolean recipeDerivation, float recipeScale, float recipeMax, float gainScale) {
         public static Settings fromConfig() {
             MicroConfig c = MicroConfig.get();
-            return new Settings(c.enabled(), c.recipeDerivation(), c.recipeScale(), c.recipeMax());
+            return new Settings(c.enabled(), c.recipeDerivation(), c.recipeScale(), c.recipeMax(), c.gainScale());
         }
     }
 
@@ -31,7 +31,7 @@ public final class MicroRegistry {
             Map<String, MicroSourceRule> sources,
             Settings settings
     ) {
-        static final Snapshot EMPTY = new Snapshot(Map.of(), Map.of(), Map.of(), Map.of(), new Settings(true, true, 0.75f, 2f));
+        static final Snapshot EMPTY = new Snapshot(Map.of(), Map.of(), Map.of(), Map.of(), new Settings(true, true, 0.75f, 2f, 1f));
 
         public MicroSourceRule sourceRule(String key) {
             return sources.getOrDefault(key, MicroSourceRule.NONE);
@@ -51,6 +51,7 @@ public final class MicroRegistry {
             buf.writeBoolean(settings.recipeDerivation());
             buf.writeFloat(settings.recipeScale());
             buf.writeFloat(settings.recipeMax());
+            buf.writeFloat(settings.gainScale());
         }
 
         public static Snapshot read(FriendlyByteBuf buf) {
@@ -67,7 +68,7 @@ public final class MicroRegistry {
             for (int i = 0; i < ruleCount; i++) {
                 sources.put(buf.readUtf(), MicroSourceRule.read(buf));
             }
-            Settings settings = new Settings(buf.readBoolean(), buf.readBoolean(), buf.readFloat(), buf.readFloat());
+            Settings settings = new Settings(buf.readBoolean(), buf.readBoolean(), buf.readFloat(), buf.readFloat(), buf.readFloat());
             return new Snapshot(defs, items, tags, sources, settings);
         }
 

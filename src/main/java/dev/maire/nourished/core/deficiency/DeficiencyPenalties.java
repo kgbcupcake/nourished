@@ -28,10 +28,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class DeficiencyPenalties {
 
     private static final Map<UUID, Map<String, DeficiencySettings.AttributePenalty>> APPLIED = new ConcurrentHashMap<>();
+    private static final Map<UUID, Float> SATURATION_BEFORE = new ConcurrentHashMap<>();
 
     private DeficiencyPenalties() {}
 
     public static void register(IEventBus bus) {
+        bus.addListener(DeficiencyPenalties::onUseTick);
         bus.addListener(EventPriority.LOW, DeficiencyPenalties::onFoodEaten);
         bus.addListener(DeficiencyPenalties::onLogout);
     }
@@ -121,8 +123,15 @@ public final class DeficiencyPenalties {
         };
     }
 
+    // last use tick runs right before Finish, so this is the saturation the meal started from
+    private static void onUseTick(LivingEntityUseItemEvent.Tick event) {
+        if (event.getDuration() > 1 || !(event.getEntity() instanceof ServerPlayer player)) return;
+        SATURATION_BEFORE.put(player.getUUID(), player.getFoodData().getSaturationLevel());
+    }
+
     private static void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        Float before = SATURATION_BEFORE.remove(player.getUUID());
         DeficiencySettings.Tier t = currentTier(player);
         if (t == null || t.saturationMultiplier() >= 1f) return;
         ItemStack stack = event.getItem();
@@ -130,11 +139,15 @@ public final class DeficiencyPenalties {
         FoodProperties food = stack.getFoodProperties(player);
         if (food == null) return;
         FoodData data = player.getFoodData();
-        float cut = food.saturation() * (1f - t.saturationMultiplier());
-        data.setSaturation(Math.max(0f, data.getSaturationLevel() - cut));
+        float now = data.getSaturationLevel();
+        // vanilla already capped the gain, so only take a share of what was actually added
+        float gained = before == null ? food.saturation() : Math.max(0f, now - before);
+        float cut = Math.min(food.saturation(), gained) * (1f - t.saturationMultiplier());
+        data.setSaturation(Math.max(before == null ? 0f : before, now - cut));
     }
 
     private static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         APPLIED.remove(event.getEntity().getUUID());
+        SATURATION_BEFORE.remove(event.getEntity().getUUID());
     }
 }

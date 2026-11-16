@@ -1,7 +1,10 @@
 package dev.maire.nourished.config;
 
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.micro.MicroNetworking;
 import dev.maire.nourished.core.micro.MicroRegistry;
+import net.minecraft.server.MinecraftServer;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -58,6 +61,11 @@ public final class MicroConfig {
     public static void onModConfigReloading(ModConfigEvent.Reloading event) {
         if (event.getConfig().getSpec() == SPEC) {
             MicroRegistry.refreshSettings();
+            // clients show gains with the synced gainScale, so push the new settings out
+            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+            if (server != null) {
+                server.execute(() -> server.getPlayerList().getPlayers().forEach(MicroNetworking::syncData));
+            }
         }
     }
 

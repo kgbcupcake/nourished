@@ -74,7 +74,8 @@ public final class MicroConfigFile {
         } else {
             JsonObject entry = new JsonObject();
             values.forEach((k, v) -> {
-                if (v > 0f) entry.addProperty(k, Math.round(v * 100f) / 100f);
+                // zeros stay so they override bundled amounts
+                if (v >= 0f) entry.addProperty(k, Math.round(v * 100f) / 100f);
             });
             all.add(id.toString(), entry);
         }

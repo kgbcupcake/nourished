@@ -287,7 +287,7 @@ public final class NutrientDetailView {
 
     private static float gain(ItemStack stack, float value) {
         FoodProperties food = stack.getFoodProperties(null);
-        return food == null ? 0f : value * MicroProfileResolver.biteGain(food);
+        return food == null ? 0f : value * MicroProfileResolver.biteGain(food, true);
     }
 
     private static ItemStack icon(MicroDef def) {

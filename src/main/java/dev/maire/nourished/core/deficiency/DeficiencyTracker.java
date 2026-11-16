@@ -207,7 +207,9 @@ public final class DeficiencyTracker {
     }
 
     public static float activityMultiplier(ServerPlayer player) {
-        return DeficiencyConfig.get().activityMultiplier(overallTier(player));
+        DeficiencySettings s = DeficiencyConfig.get();
+        if (!DeficiencyPenalties.active(player, s)) return 1f;
+        return s.activityMultiplier(overallTier(player));
     }
 
     public static Map<String, Integer> pressures(ServerPlayer player) {

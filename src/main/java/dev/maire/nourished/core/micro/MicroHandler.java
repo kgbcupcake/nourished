@@ -22,7 +22,7 @@ public final class MicroHandler {
         if (!MicroRegistry.server().settings().enabled()) return;
         Map<String, Float> profile = MicroProfileResolver.resolve(stack, player.level());
         if (profile.isEmpty()) return;
-        float bite = MicroProfileResolver.biteGain(food) * MicroConfig.get().gainScale();
+        float bite = MicroProfileResolver.biteGain(food, false);
         Map<String, Float> levels = new HashMap<>(MicroAttachment.get(player));
         Map<String, Float> gained = new HashMap<>();
         profile.forEach((k, v) -> {

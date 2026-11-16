@@ -2,7 +2,6 @@ package dev.maire.nourished.client.config;
 
 import dev.maire.nourished.core.effect.EffectRegistry;
 import dev.maire.nourished.core.Nourished;
-import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -58,7 +57,7 @@ class EffectCard {
         this.enabledValue = def.enabled();
         this.ambientValue = def.ambient();
         this.showParticlesValue = def.showParticles();
-        if (!nutrientOptions().contains(this.nutrientValue)) {
+        if (this.nutrientValue == null || this.nutrientValue.isBlank()) {
             this.nutrientValue = "all";
         }
         Minecraft mc = Minecraft.getInstance();
@@ -135,7 +134,7 @@ class EffectCard {
     }
 
     private void cycleNutrient() {
-        List<String> opts = nutrientOptions();
+        List<String> opts = EffectNutrientOptions.forValue(nutrientValue);
         int i = Math.max(0, opts.indexOf(nutrientValue));
         nutrientValue = opts.get((i + 1) % opts.size());
         updateNutrientLabel();
@@ -147,13 +146,6 @@ class EffectCard {
         triggerValue = opts.get((i + 1) % opts.size());
         thresholdSlider.setTierMode("deficiency".equals(triggerValue));
         updateTriggerLabel();
-    }
-
-    private List<String> nutrientOptions() {
-        List<String> opts = new ArrayList<>();
-        opts.add("all");
-        opts.addAll(NutrientRegistry.getKeys());
-        return opts;
     }
 
     private void updateNutrientLabel() {
