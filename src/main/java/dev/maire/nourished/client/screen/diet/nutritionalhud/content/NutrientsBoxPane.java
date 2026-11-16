@@ -25,7 +25,7 @@ public final class NutrientsBoxPane extends ScrollingBoxPane {
 
     @Override
     protected int renderContent(GuiGraphics g, Font font, int x, int y, int w, int mouseX, int mouseY) {
-        return view.render(g, font, x, y, w, mouseX, mouseY);
+        return view.render(g, font, x, y, w, mouseX, mouseY, style());
     }
 
     @Override

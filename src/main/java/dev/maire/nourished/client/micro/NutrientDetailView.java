@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.micro;
 
+import dev.maire.nourished.client.edit.BoxContentStyle;
 import dev.maire.nourished.config.MicroClientConfig;
 import dev.maire.nourished.core.history.IntakeHistory;
 import dev.maire.nourished.core.micro.MicroAttachment;
@@ -44,6 +45,7 @@ public final class NutrientDetailView {
     private final List<int[]> rows = new ArrayList<>();
     private int[] hudButton;
     private ItemStack hovered = ItemStack.EMPTY;
+    private BoxContentStyle st = BoxContentStyle.NONE;
 
     public NutrientDetailView(int selected) {
         this.selected = Math.max(0, selected);
@@ -51,6 +53,12 @@ public final class NutrientDetailView {
 
     /** Draws at (x, y) within width {@code w}; returns the height used. */
     public int render(GuiGraphics g, Font font, int x, int y, int w, int mouseX, int mouseY) {
+        return render(g, font, x, y, w, mouseX, mouseY, BoxContentStyle.NONE);
+    }
+
+    /** Same, honoring the box's Move Text/Icons/Bars and Hide settings (tabs and buttons stay put). */
+    public int render(GuiGraphics g, Font font, int x, int y, int w, int mouseX, int mouseY, BoxContentStyle style) {
+        st = style;
         defs = List.copyOf(MicroRegistry.defs(true));
         selected = Math.min(selected, defs.size());
         hovered = ItemStack.EMPTY;
@@ -110,10 +118,10 @@ public final class NutrientDetailView {
             int color = 0xFF000000 | def.color();
             boolean over = mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + ROW_H - 2;
             if (over) g.fill(x - 2, y - 1, x + w, y + ROW_H - 3, 0x30FFFFFF);
-            g.renderItem(icon(def), x, y);
-            g.drawString(font, def.displayName(), x + 20, y + 4, color);
+            st.item(g, icon(def), x, y);
+            st.text(g, font, def.displayName(), x + 20, y + 4, color);
             bar(g, def, level, barX, y + 4, barW, color);
-            g.drawString(font, Component.literal(Math.round(level * 100) + "% ").append(status(def, level)),
+            st.text(g, font, Component.literal(Math.round(level * 100) + "% ").append(status(def, level)),
                     barX + barW + 6, y + 4, TEXT);
             rows.add(new int[]{x, y, w, ROW_H - 2});
             y += ROW_H;
@@ -127,7 +135,7 @@ public final class NutrientDetailView {
         g.drawString(font, label, x + 5, y + 3, hud ? 0xFF70D070 : MUTED);
         hudButton = new int[]{x, y, bw, TAB_H};
         y += TAB_H + 4;
-        g.drawString(font, Component.translatable("nourished.screen.nutrients.overview_hint"), x, y, MUTED);
+        st.text(g, font, Component.translatable("nourished.screen.nutrients.overview_hint"), x, y, MUTED);
         return y + 10;
     }
 
@@ -135,9 +143,9 @@ public final class NutrientDetailView {
                            int mouseX, int mouseY) {
         int color = 0xFF000000 | def.color();
         float level = clamp(levels.getOrDefault(def.key(), 0f));
-        g.renderItem(icon(def), x, y);
-        g.drawString(font, def.displayName(), x + 22, y, color);
-        g.drawString(font, Component.literal(Math.round(level * 100) + "%  ").append(status(def, level)), x + 22, y + 10, TEXT);
+        st.item(g, icon(def), x, y);
+        st.text(g, font, def.displayName(), x + 22, y, color);
+        st.text(g, font, Component.literal(Math.round(level * 100) + "%  ").append(status(def, level)), x + 22, y + 10, TEXT);
         int barX = x + 124;
         bar(g, def, level, barX, y + 3, BAR_W, color);
 
@@ -145,28 +153,28 @@ public final class NutrientDetailView {
         List<Float> samples = MicroClientHistory.samples(def.key());
         int gw = Math.min(160, w - 70);
         int gh = 28;
-        g.fill(x, y, x + gw, y + gh, TRACK);
+        st.fill(g, x, y, x + gw, y + gh, TRACK);
         if (samples.size() >= 2) {
             float step = (float) gw / (samples.size() - 1);
             for (int i = 0; i < samples.size(); i++) {
                 int px = x + Math.round(i * step);
                 int py = y + gh - 1 - Math.round((gh - 2) * clamp(samples.get(i)));
-                g.fill(px, py, Math.min(px + 2, x + gw), py + 2, color);
+                st.fill(g, px, py, Math.min(px + 2, x + gw), py + 2, color);
             }
         }
-        g.drawString(font, trend(samples), x + gw + 8, y + 10, TEXT);
+        st.text(g, font, trend(samples), x + gw + 8, y + 10, TEXT);
 
         y += 34;
-        g.drawString(font, Component.translatable("nourished.screen.nutrients.history"), x, y, MUTED);
+        st.text(g, font, Component.translatable("nourished.screen.nutrients.history"), x, y, MUTED);
         List<Float> days = IntakeHistoryChart.days(IntakeHistory.microId(def.key()));
         if (days.isEmpty()) {
-            g.drawString(font, Component.translatable("nourished.screen.nutrients.history.none"), x, y + 12, MUTED);
+            st.text(g, font, Component.translatable("nourished.screen.nutrients.history.none"), x, y + 12, MUTED);
         } else {
-            IntakeHistoryChart.draw(g, font, days, x, y + 10, color, true);
+            IntakeHistoryChart.draw(g, font, days, x, y + 10, color, true, st);
         }
 
         y += 38;
-        g.drawString(font, Component.translatable("nourished.screen.nutrients.recent"), x, y, MUTED);
+        st.text(g, font, Component.translatable("nourished.screen.nutrients.recent"), x, y, MUTED);
         List<MicroClientHistory.Meal> meals = MicroClientHistory.mealsWith(def.key());
         int perRow = Math.max(1, w / ICON_STEP);
         int fx = x;
@@ -176,11 +184,11 @@ public final class NutrientDetailView {
             fx += ICON_STEP;
         }
         if (meals.isEmpty()) {
-            g.drawString(font, Component.translatable("nourished.screen.nutrients.nothing_yet"), x, y + 14, MUTED);
+            st.text(g, font, Component.translatable("nourished.screen.nutrients.nothing_yet"), x, y + 14, MUTED);
         }
 
         y += 42;
-        g.drawString(font, Component.translatable("nourished.screen.nutrients.best"), x, y, MUTED);
+        st.text(g, font, Component.translatable("nourished.screen.nutrients.best"), x, y, MUTED);
         fx = x;
         List<MicroTopFoods.Entry> best = MicroTopFoods.top(def.key());
         for (int i = 0; i < Math.min(best.size(), perRow); i++) {
@@ -189,7 +197,7 @@ public final class NutrientDetailView {
         }
         y += 40;
         if (!hovered.isEmpty()) {
-            g.drawString(font, hovered.getHoverName(), x, y, TEXT);
+            st.text(g, font, hovered.getHoverName(), x, y, TEXT);
         }
         return y + 10;
     }
@@ -232,24 +240,26 @@ public final class NutrientDetailView {
     }
 
     private void food(GuiGraphics g, Font font, ItemStack stack, float gain, int x, int y, int mouseX, int mouseY) {
-        g.renderItem(stack, x, y);
-        if (mouseX >= x && mouseX < x + 16 && mouseY >= y && mouseY < y + 16) hovered = stack;
+        st.item(g, stack, x, y);
+        int ix = st.iconX(x);
+        int iy = st.iconY(y);
+        if (mouseX >= ix && mouseX < ix + 16 && mouseY >= iy && mouseY < iy + 16) hovered = stack;
         // a pinned item with none of this nutrient shows without a number
         if (gain <= 0f) return;
         g.pose().pushPose();
-        g.pose().translate(x, y + 18, 0);
+        g.pose().translate(ix, iy + 18, 0);
         g.pose().scale(0.75f, 0.75f, 1f);
         g.drawString(font, "+" + Math.max(1, Math.round(gain * 100)) + "%", 0, 0, TEXT);
         g.pose().popPose();
     }
 
-    private static void bar(GuiGraphics g, MicroDef def, float level, int x, int y, int w, int color) {
-        g.fill(x, y, x + w, y + 8, TRACK);
-        g.fill(x, y, x + Math.round(w * level), y + 8, color);
+    private void bar(GuiGraphics g, MicroDef def, float level, int x, int y, int w, int color) {
+        st.fill(g, x, y, x + w, y + 8, TRACK);
+        st.fill(g, x, y, x + Math.round(w * level), y + 8, color);
         int lo = x + Math.round(w * def.lowThreshold());
         int hi = x + Math.round(w * def.highThreshold());
-        g.fill(lo, y - 2, lo + 1, y + 10, 0xAAFFFFFF);
-        g.fill(hi, y - 2, hi + 1, y + 10, 0xAAFFFFFF);
+        st.fill(g, lo, y - 2, lo + 1, y + 10, 0xAAFFFFFF);
+        st.fill(g, hi, y - 2, hi + 1, y + 10, 0xAAFFFFFF);
     }
 
     private static float clamp(float v) {

@@ -25,6 +25,6 @@ public final class DeficiencyBoxPane extends ScrollingBoxPane {
 
     @Override
     protected int renderContent(GuiGraphics g, Font font, int x, int y, int w, int mouseX, int mouseY) {
-        return view.render(g, font, x, y, w);
+        return view.render(g, font, x, y, w, style());
     }
 }

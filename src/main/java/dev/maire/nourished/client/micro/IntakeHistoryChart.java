@@ -2,6 +2,7 @@ package dev.maire.nourished.client.micro;
 
 import dev.marie.framework.tracking.tracker.MarieTracking;
 import dev.marie.framework.tracking.tracker.definition.TrackerHistoryEntry;
+import dev.maire.nourished.client.edit.BoxContentStyle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -55,9 +56,10 @@ public final class IntakeHistoryChart {
     }
 
     /** Draws the bars in {@link #WIDTH} x {@link #HEIGHT}; {@code percent} labels today as a % of a full bar. */
-    static void draw(GuiGraphics g, Font font, List<Float> days, int x, int y, int color, boolean percent) {
+    static void draw(GuiGraphics g, Font font, List<Float> days, int x, int y, int color, boolean percent,
+                     BoxContentStyle st) {
         int chartW = WIDTH;
-        g.fill(x, y, x + chartW, y + HEIGHT, TRACK);
+        st.fill(g, x, y, x + chartW, y + HEIGHT, TRACK);
         float max = 0f;
         for (float v : days) max = Math.max(max, v);
         int slot = chartW / DAYS;
@@ -69,13 +71,13 @@ public final class IntakeHistoryChart {
             int h = Math.max(1, Math.round((HEIGHT - 2) * v / max));
             int bx = start + i * slot + 1;
             int barColor = i == days.size() - 1 ? color : (color & 0x00FFFFFF) | 0x99000000;
-            g.fill(bx, y + HEIGHT - 1 - h, bx + Math.max(1, slot - 2), y + HEIGHT - 1, barColor);
+            st.fill(g, bx, y + HEIGHT - 1 - h, bx + Math.max(1, slot - 2), y + HEIGHT - 1, barColor);
         }
         float today = days.isEmpty() ? 0f : days.get(days.size() - 1);
         String value = percent ? Math.round(today * 100) + "%" : String.valueOf(Math.round(today * 10) / 10f);
-        g.drawString(font, Component.translatable("nourished.screen.nutrients.history.today", value),
+        st.text(g, font, Component.translatable("nourished.screen.nutrients.history.today", value),
                 x + chartW + 6, y + 3, NutrientDetailView.TEXT);
-        g.drawString(font, Component.translatable("nourished.screen.nutrients.history.days", days.size()),
+        st.text(g, font, Component.translatable("nourished.screen.nutrients.history.days", days.size()),
                 x + chartW + 6, y + 13, NutrientDetailView.MUTED);
     }
 }

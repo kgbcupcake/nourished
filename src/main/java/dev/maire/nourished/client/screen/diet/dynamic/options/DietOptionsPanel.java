@@ -379,7 +379,7 @@ public final class DietOptionsPanel {
                 new HubEntry(DietHomeSections.ID, Component.translatable("nourished.screen.diet.home_label"), homePanel()),
                 new HubEntry(NutrientsBoxPane.ID, Component.translatable("nourished.screen.diet.nutrients_tab"), nutrientsPanel()),
                 new HubEntry(DeficiencyBoxPane.ID, Component.translatable("nourished.screen.diet.deficiency_tab"),
-                        boxPanel("nourished.screen.diet.deficiency_tab", DeficiencyBoxPane.ID, NourishedColors.DEFICIENCY_BORDER)),
+                        boxPanel("nourished.screen.diet.deficiency_tab", DeficiencyBoxPane.ID, NourishedColors.DEFICIENCY_BORDER, panel -> {}, true)),
                 new HubEntry(CalorieHistoryBoxPane.ID, Component.translatable("nourished.screen.diet.calorie_history_tab"),
                         boxPanel("nourished.screen.diet.calorie_history_tab", CalorieHistoryBoxPane.ID, NourishedColors.CALORIE_HUD_BORDER,
                                 panel -> NourishedColorSlots.addFixed(panel, NourishedColors.CALORIE_OVER_GOAL, "nourished.options.color.over_goal"))),
@@ -389,7 +389,7 @@ public final class DietOptionsPanel {
     }
 
     public static MarieComponent nutrientsPanel() {
-        return boxPanel("nourished.screen.diet.nutrients_tab", NutrientsBoxPane.ID, NourishedColors.NUTRIENTS_BORDER);
+        return boxPanel("nourished.screen.diet.nutrients_tab", NutrientsBoxPane.ID, NourishedColors.NUTRIENTS_BORDER, panel -> {}, true);
     }
 
     /** A scrolling tab box's entry: same Style/Glow/Pulse/Colors set as Home, since it also draws through the raw graphics. */
@@ -399,14 +399,23 @@ public final class DietOptionsPanel {
 
     private static MarieComponent boxPanel(String titleKey, String id, dev.marie.framework.color.ColorKey border,
                                            java.util.function.Consumer<MarieToolbox.PanelBuilder> extraColors) {
+        return boxPanel(titleKey, id, border, extraColors, false);
+    }
+
+    /** {@code movable}: the box's content honors Move Text/Icons/Bars/All and Hide (see {@code BoxContentStyle}). */
+    private static MarieComponent boxPanel(String titleKey, String id, dev.marie.framework.color.ColorKey border,
+                                           java.util.function.Consumer<MarieToolbox.PanelBuilder> extraColors, boolean movable) {
         var store = DietScreenPersistence.get();
-        return MarieModuleSettings.standardPanel(Component.translatable(titleKey).getString(), store, id)
+        StandardPanelBuilder builder = MarieModuleSettings.standardPanel(Component.translatable(titleKey).getString(), store, id)
                 .withoutPadding()
-                .withoutBars()
-                .withoutIcons()
-                .withoutSizes()
-                .withoutMoveText()
-                .withoutHideText()
+                .withoutSizes();
+        if (!movable) {
+            builder.withoutBars()
+                    .withoutIcons()
+                    .withoutMoveText()
+                    .withoutHideText();
+        }
+        return builder
                 .withOwnStyle()
                 .withShadow()
                 .withGlow()

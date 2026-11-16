@@ -11,6 +11,7 @@ import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.render.GuiGraphicsRenderContext;
 import dev.marie.framework.color.ColorKey;
 import dev.maire.nourished.client.colors.NourishedColors;
+import dev.maire.nourished.client.edit.BoxContentStyle;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -44,8 +45,14 @@ public abstract class ScrollingBoxPane implements MarieComponent {
     private int thumbH;
     private int dragGrab = -1;
     private int maxHeight = Integer.MAX_VALUE;
+    private BoxContentStyle style = BoxContentStyle.NONE;
 
     protected abstract ColorKey borderColor();
+
+    /** This frame's Move/Hide settings, for subclasses whose content honors them. */
+    protected BoxContentStyle style() {
+        return style;
+    }
 
     /** Draws the content at {@code (x, y)} and returns its height. */
     protected abstract int renderContent(GuiGraphics g, Font font, int x, int y, int w, int mouseX, int mouseY);
@@ -101,6 +108,9 @@ public abstract class ScrollingBoxPane implements MarieComponent {
         scroll = Math.max(0, Math.min(scroll, maxScroll));
         int innerW = Math.max(0, bounds.width() - PAD * 2);
         int viewW = maxScroll > 0 ? innerW - BAR_W - BAR_GAP : innerW;
+        // resets this box's recorded extents for the editor's Move outlines
+        MarieModuleSettings.withDisplaySettings(context, store, id());
+        style = BoxContentStyle.of(store, id());
         context.pushClip(bounds.x() + PAD, bounds.y() + PAD, innerW, innerH);
         try {
             contentHeight = renderContent(gc.graphics(), mc.font, bounds.x() + PAD, bounds.y() + PAD - scroll,

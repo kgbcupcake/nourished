@@ -6,6 +6,7 @@ import dev.marie.framework.tracking.tracker.MarieTracking;
 import dev.marie.framework.tracking.tracker.definition.TrackerHistoryEntry;
 import dev.maire.nourished.api.NourishedAPI;
 import dev.maire.nourished.client.colors.NourishedColors;
+import dev.maire.nourished.client.edit.BoxContentStyle;
 import dev.maire.nourished.client.micro.IntakeHistoryChart;
 import dev.maire.nourished.core.history.IntakeHistory;
 import dev.maire.nourished.config.NourishedConfig;
@@ -37,17 +38,25 @@ public final class DeficiencyView {
     private static final int TRACK = 0xFF2A3038;
     private static final int TICK = 0xAAFFFFFF;
 
+    private BoxContentStyle st = BoxContentStyle.NONE;
+
     /** Draws at {@code (x, y)} and returns the height used. */
     public int render(GuiGraphics g, Font font, int x, int y, int w) {
+        return render(g, font, x, y, w, BoxContentStyle.NONE);
+    }
+
+    /** Same, honoring the box's Move Text/Icons/Bars and Hide settings. */
+    public int render(GuiGraphics g, Font font, int x, int y, int w, BoxContentStyle style) {
+        st = style;
         int top = y;
         DeficiencySettings s = DeficiencyConfig.get();
         if (!s.enabled() || s.tiers().isEmpty()) {
-            g.drawString(font, Component.translatable("nourished.deficiency.tab.disabled"), x, y, MUTED);
+            st.text(g, font, Component.translatable("nourished.deficiency.tab.disabled"), x, y, MUTED);
             return 12;
         }
         int overall = DeficiencyClient.overallTier();
-        g.drawString(font, Component.translatable("nourished.deficiency.tab.status"), x, y, MUTED);
-        g.drawString(font, tierName(overall), x + font.width(Component.translatable("nourished.deficiency.tab.status")) + 4,
+        st.text(g, font, Component.translatable("nourished.deficiency.tab.status"), x, y, MUTED);
+        st.text(g, font, tierName(overall), x + font.width(Component.translatable("nourished.deficiency.tab.status")) + 4,
                 y, DeficiencyClient.tierColor(overall));
         y += 12;
         if (overall > 0) {
@@ -82,7 +91,7 @@ public final class DeficiencyView {
             y += ROW_H;
         }
         if (!any) {
-            g.drawString(font, Component.translatable("nourished.deficiency.tab.none"), x, y, MUTED);
+            st.text(g, font, Component.translatable("nourished.deficiency.tab.none"), x, y, MUTED);
             y += 12;
         }
         return y - top;
@@ -137,26 +146,26 @@ public final class DeficiencyView {
         int pressure = DeficiencyClient.pressure(key);
         int tier = s.tierFor(pressure);
         int max = Math.max(1, s.maxPressure());
-        g.renderItem(icon, x, y);
-        g.drawString(font, name, x + 20, y + 4, nameColor);
+        st.item(g, icon, x, y);
+        st.text(g, font, name, x + 20, y + 4, nameColor);
 
-        g.fill(barX, y + 4, barX + barW, y + 12, TRACK);
-        g.fill(barX, y + 4, barX + Math.round(barW * Math.min(1f, pressure / (float) max)), y + 12,
+        st.fill(g, barX, y + 4, barX + barW, y + 12, TRACK);
+        st.fill(g, barX, y + 4, barX + Math.round(barW * Math.min(1f, pressure / (float) max)), y + 12,
                 DeficiencyClient.tierColor(Math.max(1, tier)));
         for (DeficiencySettings.Tier t : s.tiers()) {
             int tx = barX + Math.round(barW * t.afterTicks() / (float) max);
-            g.fill(tx, y + 2, tx + 1, y + 14, TICK);
+            st.fill(g, tx, y + 2, tx + 1, y + 14, TICK);
         }
 
         int labelX = barX + barW + 6;
         String level = tier == 0 ? Component.translatable("nourished.deficiency.tab.ok").getString() : "L" + tier;
-        g.drawString(font, level, labelX, y + 4, DeficiencyClient.tierColor(tier));
+        st.text(g, font, level, labelX, y + 4, DeficiencyClient.tierColor(tier));
         Component status = status(s, state, pressure, tier);
         if (lastEaten != null) {
             status = status.getString().isEmpty() ? lastEaten
                     : Component.empty().append(status).append(" · ").append(lastEaten);
         }
-        g.drawString(font, status, labelX + 22, y + 4, MUTED);
+        st.text(g, font, status, labelX + 22, y + 4, MUTED);
     }
 
     /** When the group was last eaten, from the saved daily intake; null when history is off. */
@@ -201,9 +210,9 @@ public final class DeficiencyView {
         return Component.translatable("nourished.deficiency.tier." + Math.min(3, tier));
     }
 
-    private static int drawWrapped(GuiGraphics g, Font font, Component text, int x, int y, int w, int color) {
+    private int drawWrapped(GuiGraphics g, Font font, Component text, int x, int y, int w, int color) {
         for (var line : font.split(text, Math.max(40, w))) {
-            g.drawString(font, line, x, y, color);
+            st.text(g, font, line, x, y, color);
             y += 10;
         }
         return y;
