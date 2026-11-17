@@ -47,6 +47,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
+import org.lwjgl.glfw.GLFW;
+
 import java.util.List;
 
 /**
@@ -273,6 +275,11 @@ public final class NutritionalHudScreen extends Screen {
             while (NourishedKeys.OPEN_DIET_SCREEN.consumeClick()) {
                 // drain the queued click so ClientEvents.onClientTick doesn't reopen next tick
             }
+            return true;
+        }
+        // arrows/Tab page through the selected tab's box; Escape still closes the screen
+        if (keyCode != GLFW.GLFW_KEY_ESCAPE
+                && ((editorOpen && editor.keyPressed(keyCode, scanCode, modifiers)) || hub.keyPressed(keyCode, scanCode, modifiers))) {
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

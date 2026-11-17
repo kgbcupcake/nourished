@@ -259,6 +259,7 @@ public class Nourished {
     public static void ensureCalorieTrackerRegistered() {
         if (MarieAPIState.isRegistrationAllowed()) {
             registerCalorieTracker();
+            IntakeHistory.registerAll();
             return;
         }
         // TrackerRegistry is frozen outside mod init/reload, same as the API phase — reopening the phase alone isn't enough.
@@ -268,6 +269,8 @@ public class Nourished {
         }
         try (var scope = MarieAPIState.openForDatapackReload()) {
             registerCalorieTracker();
+            // intake trackers follow the same history toggle
+            IntakeHistory.registerAll();
         } finally {
             if (wasFrozen) {
                 TrackerRegistry.freezeInternal();

@@ -5,6 +5,7 @@ import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingAttachment;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.food.FoodProperties;
@@ -49,7 +50,8 @@ public final class PlaceableFoodHandler {
         Snapshot snapshot = new Snapshot(blockItem, base, food.getFoodLevel(), food.getSaturationLevel());
         // the offhand retry is a second event; only the latest snapshot gets to fire
         PENDING.put(player.getUUID(), snapshot);
-        server.execute(() -> resolve(player, snapshot));
+        // tell() always queues; execute() would run inline if this fired outside a packet task (fake players)
+        server.tell(new TickTask(server.getTickCount(), () -> resolve(player, snapshot)));
     }
 
     private static void resolve(ServerPlayer player, Snapshot snapshot) {

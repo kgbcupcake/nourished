@@ -59,6 +59,8 @@ public final class IntakeHistory {
     private static void add(ServerPlayer player, @Nullable ResourceLocation id, float amount) {
         // only gains count; decay isn't intake. Unregistered means history is off or the key is new since the last reload
         if (id == null || amount <= 0f || TrackerRegistry.get(id) == null) return;
+        // trackers stay registered after history is switched off live, so check the toggle too
+        if (!NourishedConfig.get().enableCalorieHistory()) return;
         MarieTracking.incrementTracker(player, id, amount);
     }
 

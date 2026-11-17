@@ -50,6 +50,9 @@ public final class MicroProfileResolver {
     public static void clearCache() {
         SERVER_CACHE.clear();
         CLIENT_CACHE.clear();
+        // /reload keeps the same RecipeManager, so the identity check in recipesFor won't catch it
+        serverRecipes = null;
+        clientRecipes = null;
     }
 
     /** Nutrient values per serving of {@code stack}; empty for non-food, excluded, or untracked items. */
@@ -81,7 +84,10 @@ public final class MicroProfileResolver {
                 ? recipesFor(level.getRecipeManager(), clientSide) : null;
         Profile found = profileOf(id, stack, level, snap, recipes, 0, new HashSet<>());
         Profile profile = new Profile(Map.copyOf(found.values()), found.values().isEmpty() ? Source.NONE : found.source());
-        cache.put(id, profile);
+        // without a level recipes were skipped, so don't let that partial answer stick
+        if (recipes != null || !snap.settings().recipeDerivation()) {
+            cache.put(id, profile);
+        }
         return profile;
     }
 

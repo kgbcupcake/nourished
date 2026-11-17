@@ -37,6 +37,7 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
     // so these are handed over on TagsUpdated, once every loader has finished
     private static volatile List<DatapackDiagnostic> lastDiagnostics = List.of();
 
+    private static final String BUNDLED_PACK_ID = "mod/" + Nourished.MODID;
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final FileToIdConverter DEFS = FileToIdConverter.json("nourished/micros");
     private static final FileToIdConverter VALUES = FileToIdConverter.json("nourished/micro_values");
@@ -66,23 +67,22 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
             if (obj == null) continue;
             String key = id.getPath().substring(id.getPath().lastIndexOf('/') + 1);
             try {
-                layerFor(id, bundled, packs).defs().put(key, MicroDef.fromJson(key, obj));
+                layerFor(e.getValue(), bundled, packs).defs().put(key, MicroDef.fromJson(key, obj));
             } catch (RuntimeException ex) {
                 error(diags, packPath(e.getKey()), key, "Skipping invalid nutrient: " + ex.getMessage());
             }
         }
         for (var e : VALUES.listMatchingResources(manager).entrySet()) {
-            ResourceLocation id = VALUES.fileToId(e.getKey());
             JsonObject obj = readJson(e.getKey(), e.getValue(), diags);
             if (obj == null) continue;
             JsonElement values = obj.has("values") ? obj.get("values") : obj;
             if (values.isJsonObject()) {
-                readValues(values.getAsJsonObject(), layerFor(id, bundled, packs), packPath(e.getKey()), diags);
+                readValues(values.getAsJsonObject(), layerFor(e.getValue(), bundled, packs), packPath(e.getKey()), diags);
             }
         }
         for (var e : SOURCES.listMatchingResources(manager).entrySet()) {
             JsonObject obj = readJson(e.getKey(), e.getValue(), diags);
-            if (obj != null) readSources(obj, layerFor(SOURCES.fileToId(e.getKey()), bundled, packs));
+            if (obj != null) readSources(obj, layerFor(e.getValue(), bundled, packs));
         }
         List<MicroEffect> effects = new ArrayList<>();
         for (var e : EFFECTS.listMatchingResources(manager).entrySet()) {
@@ -90,7 +90,7 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
             JsonObject obj = readJson(e.getKey(), e.getValue(), diags);
             if (obj == null) continue;
             try {
-                effects.add(MicroEffect.fromJson(id.toString(), obj, Nourished.MODID.equals(id.getNamespace())));
+                effects.add(MicroEffect.fromJson(id.toString(), obj, isBundled(e.getValue())));
             } catch (RuntimeException ex) {
                 error(diags, packPath(e.getKey()), "effect", "Skipping invalid nutrient effect: " + ex.getMessage());
             }
@@ -110,8 +110,13 @@ public final class MicroDataLoader extends SimplePreparableReloadListener<MicroD
                 MicroRegistry.server().tagValues().size());
     }
 
-    private static MicroRegistry.Layer layerFor(ResourceLocation id, MicroRegistry.Layer bundled, MicroRegistry.Layer packs) {
-        return Nourished.MODID.equals(id.getNamespace()) ? bundled : packs;
+    private static MicroRegistry.Layer layerFor(Resource resource, MicroRegistry.Layer bundled, MicroRegistry.Layer packs) {
+        return isBundled(resource) ? bundled : packs;
+    }
+
+    // go by the pack the file came from, not its namespace: a datapack overriding data/nourished/... is still a pack
+    private static boolean isBundled(Resource resource) {
+        return BUNDLED_PACK_ID.equals(resource.sourcePackId());
     }
 
     /** Adds the last reload's nutrient file problems to MariesLib's datapack diagnostics report. */

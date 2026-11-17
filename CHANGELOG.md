@@ -58,6 +58,13 @@
 - Milk buckets never gave nutrients because `MicroProfileResolver` checked vanilla food properties. It now uses `FoodNutritionRegistry#foodPropertiesForNutrition`, so the bundled milk entry applies.
 - With `affect_peaceful` off, deficiency's activity drain multiplier still applied on Peaceful. `DeficiencyTracker#activityMultiplier` now returns 1 whenever `DeficiencyPenalties#active` is false (also covers creative/spectator).
 - Nutrient gain labels (Nutrients tab top foods and recent meals) ignored the server's `gainScale`. `gainScale` is now part of the synced `MicroRegistry.Settings`, `MicroProfileResolver#biteGain` applies it for either side, and a config reload resyncs it to players.
+- The Diet Screen reserved space for the Nutrients box but never drew it, so the bars and their click-through to the Nutrients tab were missing. `DietLeftColumnComponent#render` now renders `MicroNutrientsComponent`.
+- Recipe-derived nutrients kept the old ingredients after `/reload`: the server reuses its `RecipeManager`, so `MicroProfileResolver#recipesFor` never rebuilt its index. `clearCache` now drops both recipe indexes.
+- `MicroProfileResolver#resolveProfile` with no level cached a recipe-free profile that later world-aware lookups (including eating) returned. Profiles are only cached when recipes were considered or derivation is off.
+- Toggling `enableCalorieHistory` live didn't affect the per-group and per-nutrient intake history: it kept recording after being switched off and dropped intake after being switched on, until a reload. `Nourished#ensureCalorieTrackerRegistered` now registers the intake trackers too, and `IntakeHistory` checks the toggle before recording.
+- Datapacks using the `nourished` namespace were treated as bundled nutrient data, so `micros.json` overrode them and their `micro_effects` counted as builtins (off unless `builtinEffects`). `MicroDataLoader` now decides by the source pack (`mod/nourished`), not the namespace.
+- Arrow keys and Tab never reached the Nutritional Panel's tab boxes (nutrient paging). `NutritionalHudScreen#keyPressed` now forwards keys to the hub and the open editor; Escape still closes.
+- `PlaceableFoodHandler` queues its hunger check with `MinecraftServer#tell` instead of `execute`, so it always runs after the block interaction finishes, even when the click didn't come from a packet (fake players).
 
 ### Changed
 
