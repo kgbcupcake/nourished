@@ -1,5 +1,6 @@
 package dev.maire.nourished.client.config;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.reload.NourishedReloadHelper;
@@ -15,7 +16,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelResource;
-import net.neoforged.fml.loading.FMLPaths;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -103,8 +103,7 @@ public final class NourishedConfigSharedWidgets {
             targetFolder = server.getWorldPath(LevelResource.DATAPACK_DIR)
                     .resolve("nourished-generated");
         } else {
-            targetFolder = FMLPaths.CONFIGDIR.get()
-                    .resolve(Nourished.MODID)
+            targetFolder = NourishedConfigPaths.root()
                     .resolve("auto_compat");
         }
         try {

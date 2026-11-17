@@ -4,7 +4,7 @@
   "category": "getting_started",
   "condition": {
     "type": "modonomicon:entry_read",
-    "entry_id": "getting_started/notifications"
+    "entry_id": "getting_started/sleep_bonus"
   },
   "description": "book.nourished.nourished_guide.getting_started.first_day.description",
   "hide_while_locked": false,
@@ -53,39 +53,6 @@
         "type": "modonomicon:none"
       },
       "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.first_day.setting_up_a_farm.text",
-      "title": "book.nourished.nourished_guide.getting_started.first_day.setting_up_a_farm.title",
-      "use_markdown_in_title": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.first_day.cooking_matters.text",
-      "title": "book.nourished.nourished_guide.getting_started.first_day.cooking_matters.title",
-      "use_markdown_in_title": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
-      "text": "book.nourished.nourished_guide.getting_started.first_day.diminishing_returns.text",
-      "title": "book.nourished.nourished_guide.getting_started.first_day.diminishing_returns.title",
-      "use_markdown_in_title": false
-    },
-    {
-      "type": "modonomicon:text",
-      "anchor": "",
-      "condition": {
-        "type": "modonomicon:none"
-      },
-      "show_title_separator": true,
       "text": "book.nourished.nourished_guide.getting_started.first_day.end_of_day_one.text",
       "title": "book.nourished.nourished_guide.getting_started.first_day.end_of_day_one.title",
       "use_markdown_in_title": false
@@ -105,13 +72,13 @@
   "parents": [
     {
       "draw_arrow": true,
-      "entry": "getting_started/notifications",
+      "entry": "getting_started/sleep_bonus",
       "line_enabled": true,
       "line_reversed": false
     }
   ],
   "show_when_any_parent_unlocked": false,
-  "sort_number": 8,
-  "x": 4,
-  "y": 7
+  "sort_number": 7,
+  "x": 1,
+  "y": 5
 }

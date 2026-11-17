@@ -21,10 +21,8 @@ public final class NutritionalPanelConfig {
     private static ModConfigSpec SPEC;
     private static volatile ModConfig boundConfig;
 
-    // Opacity/brightness now live in the panel's stored style; these are only read once to carry old values over.
+    // Opacity now lives in the panel's stored style; this is only read once to carry the old value over.
     private final ModConfigSpec.DoubleValue backgroundOpacity;
-    private final ModConfigSpec.DoubleValue textBrightness;
-    private final ModConfigSpec.DoubleValue iconBrightness;
     private final ModConfigSpec.BooleanValue styleMigrated;
     private final ModConfigSpec.BooleanValue barDragEnabled;
     private final ModConfigSpec.ConfigValue<List<? extends String>> barOrder;
@@ -32,8 +30,6 @@ public final class NutritionalPanelConfig {
     private NutritionalPanelConfig(ModConfigSpec.Builder builder) {
         builder.push("nutritionalPanel");
         backgroundOpacity = builder.defineInRange("backgroundOpacity", DEFAULT_BACKGROUND_OPACITY, 0.0d, 1.0d);
-        textBrightness = builder.defineInRange("textBrightness", 1.0d, 0.2d, 2.0d);
-        iconBrightness = builder.defineInRange("iconBrightness", 1.0d, 0.2d, 2.0d);
         styleMigrated = builder.define("styleMigrated", false);
         barDragEnabled = builder.define("barDragEnabled", true);
         barOrder = builder.defineListAllowEmpty("barOrder", List.of(), () -> "", o -> o instanceof String);
@@ -78,14 +74,12 @@ public final class NutritionalPanelConfig {
         }
     }
 
-    /** Copies this file's old opacity/brightness into the panel's stored style once, so earlier tweaks survive the move. */
+    /** Copies this file's old opacity into the panel's stored style once, so earlier tweaks survive the move. */
     public void migrateStyleInto(PersistenceProvider store, String panelId) {
         if (styleMigrated.get()) {
             return;
         }
         MarieStoredStyle.setBackgroundOpacity(store, panelId, backgroundOpacity.get());
-        MarieStoredStyle.setTextBrightness(store, panelId, textBrightness.get());
-        MarieStoredStyle.setIconBrightness(store, panelId, iconBrightness.get());
         styleMigrated.set(true);
         saveNow();
     }

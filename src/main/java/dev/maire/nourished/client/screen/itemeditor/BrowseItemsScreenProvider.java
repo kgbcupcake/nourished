@@ -13,6 +13,7 @@ import dev.marie.framework.ui.toolbox.CycleOption;
 import dev.marie.framework.ui.toolbox.OptionLayout;
 import dev.marie.framework.ui.toolbox.OptionRow;
 import dev.marie.framework.ui.toolbox.OptionStyle;
+import dev.marie.framework.ui.toolbox.TextFieldOption;
 import dev.maire.nourished.core.context.NourishedItems;
 import dev.maire.nourished.core.nutrition.CustomCaloriesOverrideRegistry;
 import dev.maire.nourished.core.nutrition.DiminishingReturnsOverrideRegistry;
@@ -33,6 +34,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
@@ -99,46 +101,75 @@ public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider
         private final String modId;
         private int showIndex;
         private int pageIndex;
+        private String search = "";
         private OptionLayout layout;
         @Nullable
         private BiConsumer<ItemStack, ItemEditorScreenProvider> retargetHandler;
 
+        /** Rows {@link #layout} always starts with, ahead of whatever {@link #refreshResults} puts after them — see that method's own doc for why they're never rebuilt. */
+        private static final int FIXED_ROW_COUNT = 2;
+
         BrowseItemsScreen(String modId) {
             this.modId = modId;
-            rebuild();
+            buildLayout();
+            refreshResults();
         }
 
-        private void rebuild() {
-            Show show = Show.values()[showIndex];
-            List<ItemStack> results = candidatesFor(modId, show);
-
+        /**
+         * Builds {@link #layout} with just its two fixed header rows (Show, Search) and never again
+         * — unlike every other page here, Browse Items can't just throw its whole {@link OptionLayout}
+         * away and rebuild it on every filter change: the Search row is a real {@link TextFieldOption}
+         * holding keystroke-to-keystroke focus/cursor state internally, and discarding that instance
+         * mid-typing (the same way the "Show"/"Page" cycles safely discard and recreate themselves
+         * every change, since a {@link CycleOption} has no focus state to lose) would silently drop
+         * focus after every single typed character. {@link #refreshResults} mutates {@link
+         * #layout}'s live row list in place instead, past these two, leaving both header rows'
+         * identity untouched.
+         */
+        private void buildLayout() {
             OptionLayout next = new OptionLayout("nourished-browse-items");
             next.addTab("");
             next.addRow(new CycleOption("Show", Show.labels(), () -> showIndex, i -> {
                 showIndex = i;
                 pageIndex = 0;
-                rebuild();
+                refreshResults();
             }, () -> {}));
-            next.addRow(new CountRow(results.size()));
+            next.addRow(new TextFieldOption("Search", () -> search, v -> {
+                search = v;
+                pageIndex = 0;
+            }, this::refreshResults).hint("Item name..."));
+            this.layout = next;
+        }
+
+        /** Replaces every row after the fixed header ({@link #FIXED_ROW_COUNT}) with the current match count, page cycle (if more than one page), and this page's rows — called on every filter/page change instead of {@link #buildLayout}. */
+        private void refreshResults() {
+            Show show = Show.values()[showIndex];
+            List<ItemStack> results = candidatesFor(modId, show, search);
+
+            List<OptionRow> rows = layout.currentTabRows();
+            while (rows.size() > FIXED_ROW_COUNT) {
+                rows.remove(rows.size() - 1);
+            }
+
+            rows.add(new CountRow(results.size()));
             int pageCount = Math.max(1, (results.size() + PAGE_SIZE - 1) / PAGE_SIZE);
             pageIndex = Math.min(pageIndex, pageCount - 1);
             if (pageCount > 1) {
-                next.addRow(new CycleOption("Page", pageLabels(pageCount), () -> pageIndex, i -> {
+                rows.add(new CycleOption("Page", pageLabels(pageCount), () -> pageIndex, i -> {
                     pageIndex = i;
-                    rebuild();
+                    refreshResults();
                 }, () -> {}));
             }
             int start = pageIndex * PAGE_SIZE;
             int end = Math.min(results.size(), start + PAGE_SIZE);
             for (int i = start; i < end; i++) {
                 ItemStack stack = results.get(i);
-                next.addRow(new BrowseItemRow(stack, () -> {
+                rows.add(new BrowseItemRow(stack, () -> {
                     if (retargetHandler != null) {
                         retargetHandler.accept(stack, null);
                     }
                 }));
             }
-            this.layout = next;
         }
 
         private static String[] pageLabels(int pageCount) {
@@ -149,12 +180,13 @@ public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider
             return labels;
         }
 
-        private static List<ItemStack> candidatesFor(String modId, Show show) {
+        private static List<ItemStack> candidatesFor(String modId, Show show, String search) {
             RecipeManager recipeManager = Minecraft.getInstance().level != null
                     ? Minecraft.getInstance().level.getRecipeManager() : null;
             AtomicReference<Set<String>> box = new AtomicReference<>();
             MarieContext.runAs(MarieContext.forMod(modId), () -> box.set(SourceClassificationRegistry.getAll().keySet()));
             Set<String> valuesOverridden = box.get();
+            String needle = search == null ? "" : search.toLowerCase(Locale.ROOT).trim();
 
             List<ItemStack> results = new ArrayList<>();
             for (Item item : BuiltInRegistries.ITEM) {
@@ -164,6 +196,9 @@ public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider
                 }
                 String itemId = id.toString();
                 ItemStack stack = new ItemStack(item);
+                if (!needle.isEmpty() && !matchesSearch(stack, itemId, needle)) {
+                    continue;
+                }
                 boolean isFood = NourishedItems.isNutritiousFood(stack);
                 boolean modified = isModified(itemId, valuesOverridden);
                 if (!isFood && !modified) {
@@ -185,6 +220,12 @@ public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider
             }
             results.sort(Comparator.comparing(s -> s.getHoverName().getString()));
             return results;
+        }
+
+        /** Matches {@code needle} (already lowercased/trimmed) against the item's display name or its registry id (e.g. typing "createfood" finds everything from that mod, not just items whose in-game name happens to contain it). */
+        private static boolean matchesSearch(ItemStack stack, String itemId, String needle) {
+            return stack.getHoverName().getString().toLowerCase(Locale.ROOT).contains(needle)
+                    || itemId.contains(needle);
         }
 
         private static boolean isModified(String itemId, Set<String> valuesOverridden) {
@@ -243,6 +284,16 @@ public final class BrowseItemsScreenProvider implements ItemEditorScreenProvider
         @Override
         public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
             return layout.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        }
+
+        @Override
+        public boolean charTyped(char codePoint, int modifiers) {
+            return layout.charTyped(codePoint, modifiers);
+        }
+
+        @Override
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            return layout.keyPressed(keyCode, scanCode, modifiers);
         }
     }
 

@@ -1,5 +1,6 @@
 package dev.maire.nourished.modules.RawFood.core;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -19,7 +20,6 @@ import dev.maire.nourished.modules.RawFood.rawInfo.RawFoodResistanceConfig;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -200,14 +200,14 @@ public class RawFoodConfig {
     }
 
     public static void load() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("raw_food.json");
+        Path configDir = NourishedConfigPaths.root();
+        Path file = NourishedConfigPaths.rawFood();
 
         resetToEmpty();
         CookednessResolver.invalidate();
         try {
             parseBundledDefaults();
-            Files.createDirectories(configDir);
+            Files.createDirectories(file.getParent());
             if (!Files.exists(file)) {
                 writeDefaults(file);
                 Nourished.LOGGER.info("[RawFoodConfig] Wrote default raw_food.json");
@@ -222,7 +222,7 @@ public class RawFoodConfig {
         }
 
         try {
-            Path readmeDir = configDir.resolve("Read_Me");
+            Path readmeDir = NourishedConfigPaths.readme();
             Files.createDirectories(readmeDir);
             writeReadmeIfAbsent(readmeDir);
         } catch (IOException e) {
@@ -269,11 +269,11 @@ public class RawFoodConfig {
     }
 
     public static void save() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("raw_food.json");
+        Path configDir = NourishedConfigPaths.root();
+        Path file = NourishedConfigPaths.rawFood();
         ensureAllTiers();
         try {
-            Files.createDirectories(configDir);
+            Files.createDirectories(file.getParent());
             writeCurrent(file);
             Nourished.LOGGER.info("[RawFoodConfig] Saved raw_food.json");
         } catch (IOException e) {
@@ -495,7 +495,7 @@ public class RawFoodConfig {
         root.add("tokens", tokensToJson());
         root.add("tiers", tiersToJson());
         root.add("gut", gutToJson());
-        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "RawFoodConfig");
+        MarieValidation.assertPathUnder(file, NourishedConfigPaths.root(), "RawFoodConfig");
         try (Writer writer = Files.newBufferedWriter(file)) {
             GSON.toJson(root, writer);
         }

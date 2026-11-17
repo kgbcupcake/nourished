@@ -34,7 +34,7 @@ values.
 ## Which file wins
 
 1. Hardcoded Java defaults (used only as a last-resort fallback)
-2. `config/nourished/food_values.json` on disk — edit this one
+2. `config/nourished/nutrition/food_values.json` on disk — edit this one
 3. `data/nourished/config/food_values.json` (datapack override)
 
 ## Notes

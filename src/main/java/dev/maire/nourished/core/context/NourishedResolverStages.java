@@ -8,6 +8,7 @@ import dev.maire.nourished.core.nutrition.stages.HardFallbackStage;
 import dev.maire.nourished.core.nutrition.stages.KeywordSuffixStage;
 import dev.maire.nourished.core.nutrition.stages.NamespacePeerStage;
 import dev.maire.nourished.core.nutrition.stages.RecipeInheritanceStage;
+import dev.maire.nourished.core.nutrition.stages.SyntheticRecipeStage;
 
 @ApiStatus.Internal
 public final class NourishedResolverStages {
@@ -21,6 +22,7 @@ public final class NourishedResolverStages {
             new RecipeInheritanceStage(RuntimeResolver.getInstance().recipeInheritanceResolver(), COMMUNITY_TAG_STAGE, KEYWORD_SUFFIX_STAGE),
             new NamespacePeerStage(),
             new HardFallbackStage(),
+            new SyntheticRecipeStage(),
     };
 
     private NourishedResolverStages() {}

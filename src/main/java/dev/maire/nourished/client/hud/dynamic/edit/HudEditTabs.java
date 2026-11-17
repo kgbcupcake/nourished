@@ -9,21 +9,9 @@ import dev.marie.framework.ui.geometry.Bounds;
 import java.util.List;
 
 /**
- * Collapsed-tab chrome for the Nutrient HUD, Activity Log and Calorie History boxes' own edit
- * mode — mirrors {@code ScaleConfigPanel}'s "tabs first, click one to open its window" pattern (see
- * the same three settings tabs stacked at the top-right), but stacked at the top-left instead, for
- * these three panels' actual draggable/resizable boxes rather than their settings windows. All three
- * start collapsed so a freshly reset or first-installed box is never dropped straight on top of its
- * siblings (see {@code HudEditTarget}/{@code ActivityLogHudPanel}/{@code CalorieHudScreen}).
- *
- * <p>Only one of the three may be expanded at a time: opening one's tab via {@link #open}
- * collapses the other two first, the same single-open-window rule {@code ScaleConfigPanel} enforces
- * for its own tab stack. Unlike that panel's windows (which can be dragged anywhere on screen and
- * so only ever collide with each other, not with a tab), these three boxes default to the same
- * top-left corner the tab stack itself occupies — with each one individually collapsible instead,
- * an expanded box's natural size (which grows with content, e.g. Activity Log's row count) could
- * reach down over a sibling's still-collapsed tab beneath it. Enforcing a single expanded box at a
- * time removes that overlap by construction rather than by measuring and dodging it.
+ * Collapsed-tab chrome for the Nutrient HUD's edit mode: the box starts as a small tab at the top-left
+ * so a fresh or reset box never lands on top of anything, and a click opens it. {@link #open} also
+ * collapses any other panel listed in {@link #ORDER}, should another HUD box ever join it.
  */
 public final class HudEditTabs {
 
@@ -33,17 +21,8 @@ public final class HudEditTabs {
     static final int TAB_WIDTH = 150;
     private static final int COLLAPSE_BUTTON_SIZE = 9;
 
-    /**
-     * Fixed top-to-bottom order for the left-side tab stack, independent of which panel's {@code
-     * render()} happens to run first in a given frame (unlike {@code AnchorStack}'s claim-order
-     * approach, not worth reusing for just these three known panels). Matches the top-right settings
-     * tabs' own order.
-     */
-    private static final List<String> ORDER = List.of(
-            "nourished.hud.panel",
-            "nourished.calorieHud.panel",
-            "nourished.activityLogHud.panel"
-    );
+    /** Fixed top-to-bottom order of the left-side tab stack. */
+    private static final List<String> ORDER = List.of("nourished.hud.panel");
 
     private static final String SUFFIX = "#editTabCollapsed";
 

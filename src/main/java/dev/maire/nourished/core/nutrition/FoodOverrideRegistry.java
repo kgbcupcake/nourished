@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.nutrition;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -12,7 +13,6 @@ import dev.marie.framework.registry.AbstractRegistry;
 import dev.marie.framework.util.MarieResourceLoader;
 import dev.marie.framework.util.MarieValidation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -148,19 +148,12 @@ public class FoodOverrideRegistry {
     }
 
     public static void load() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path overridesDir = configDir.resolve("overrides");
-        Path dataDir = overridesDir.resolve("Overrides");
-        Path readmeDir = overridesDir.resolve("Read_Me");
-        Path file = dataDir.resolve("food_overrides.json");
-        Path oldFile = overridesDir.resolve("food_overrides.json");
+        Path file = NourishedConfigPaths.foodOverrides();
+        // Sits beside MariesLib's excluded_items.json and its README in overrides/
+        Path readmeDir = NourishedConfigPaths.overrides().resolve("Read_Me");
 
         try {
-            Files.createDirectories(dataDir);
-            Files.createDirectories(readmeDir);
-            if (Files.exists(oldFile) && !Files.exists(file)) {
-                Files.move(oldFile, file);
-            }
+            Files.createDirectories(file.getParent());
             if (!Files.exists(file)) {
                 writeDefaults(file);
                 Nourished.LOGGER.info("[FoodOverrideRegistry] Wrote default food_overrides.json");
@@ -174,10 +167,7 @@ public class FoodOverrideRegistry {
         }
 
         try {
-            Path oldReadme = overridesDir.resolve("OVERRIDES_README.md");
-            if (Files.exists(oldReadme)) {
-                Files.deleteIfExists(oldReadme);
-            }
+            Files.createDirectories(readmeDir);
             writeReadmeIfAbsent(readmeDir);
         } catch (IOException e) {
             Nourished.LOGGER.warn("[FoodOverrideRegistry] Failed to write OVERRIDES_README.md", e);
@@ -256,8 +246,7 @@ public class FoodOverrideRegistry {
      * silently overwrite the modpack author's hand-edited file with a single player's local changes.
      */
     public static void save() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("overrides").resolve("Overrides").resolve("food_overrides.json");
+        Path file = NourishedConfigPaths.foodOverrides();
         try {
             writeRegistry(file);
             Nourished.LOGGER.info("[FoodOverrideRegistry] Saved food_overrides.json");
@@ -303,7 +292,7 @@ public class FoodOverrideRegistry {
 
     private static void writeDefaults(Path file) throws IOException {
         JsonArray arr = new JsonArray();
-        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "FoodOverrideRegistry");
+        MarieValidation.assertPathUnder(file, NourishedConfigPaths.root(), "FoodOverrideRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }
@@ -341,7 +330,7 @@ public class FoodOverrideRegistry {
             obj.addProperty("enabled", override.enabled());
             arr.add(obj);
         }
-        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "FoodOverrideRegistry");
+        MarieValidation.assertPathUnder(file, NourishedConfigPaths.root(), "FoodOverrideRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }

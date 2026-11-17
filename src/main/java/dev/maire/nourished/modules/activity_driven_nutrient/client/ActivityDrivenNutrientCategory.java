@@ -5,7 +5,6 @@ import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.modules.activity_driven_nutrient.core.ActivityDrivenNutrientConfig;
 import dev.marie.framework.client.config.cloth.ColorHexRowWidget;
-import dev.marie.framework.client.config.cloth.ColorPairRowGroup;
 import dev.marie.framework.color.ColorKey;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
@@ -21,7 +20,6 @@ import java.util.function.DoubleConsumer;
 
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.addReloadButtonEntries;
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.buildDoubleSlider;
-import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.buildFloatSlider;
 
 public final class ActivityDrivenNutrientCategory {
     private ActivityDrivenNutrientCategory() {}
@@ -42,64 +40,6 @@ public final class ActivityDrivenNutrientCategory {
                 Component.translatable("config.nourished.category.modules"));
         List<AbstractConfigListEntry> entries = new ArrayList<>();
 
-        List<AbstractConfigListEntry> hudEntries = new ArrayList<>();
-        hudEntries.add(
-                eb.startBooleanToggle(Component.translatable("config.nourished.enableActivityLogHud"), client.enableActivityLogHud())
-                        .setDefaultValue(true)
-                        .setSaveConsumer(client::setEnableActivityLogHud)
-                        .build()
-        );
-        hudEntries.add(
-                buildFloatSlider(
-                        eb,
-                        Component.translatable("config.nourished.activityLogHudBackgroundOpacity"),
-                        (float) client.activityLogHudBackgroundOpacity(),
-                        0.0f,
-                        1.0f,
-                        204f / 255f,
-                        client::setActivityLogHudBackgroundOpacity
-                )
-        );
-        hudEntries.add(
-                buildFloatSlider(
-                        eb,
-                        Component.translatable("config.nourished.activityLogHudBorderOpacity"),
-                        (float) client.activityLogHudBorderOpacity(),
-                        0.0f,
-                        1.0f,
-                        1.0f,
-                        client::setActivityLogHudBorderOpacity
-                )
-        );
-        hudEntries.add(
-                buildDoubleSlider(
-                        eb,
-                        Component.translatable("config.nourished.activityLogHudBackgroundShade"),
-                        client.activityLogHudBackgroundShade(),
-                        -1.0d,
-                        1.0d,
-                        0.0d,
-                        client::setActivityLogHudBackgroundShade
-                )
-        );
-        hudEntries.add(
-                buildDoubleSlider(
-                        eb,
-                        Component.translatable("config.nourished.activityLogHudBorderShade"),
-                        client.activityLogHudBorderShade(),
-                        -1.0d,
-                        1.0d,
-                        0.0d,
-                        client::setActivityLogHudBorderShade
-                )
-        );
-        for (ColorHexRowWidget row : ColorPairRowGroup.buildRows(
-                ActivityLogHudPanel.COLORS,
-                Component.translatable("config.nourished.activityLogHudBackgroundColor"),
-                Component.translatable("config.nourished.activityLogHudTextColor"))) {
-            hudEntries.add(row);
-        }
-        entries.add(eb.startSubCategory(Component.literal("HUD"), hudEntries).setExpanded(false).build());
 
         boolean synced = ActivityDrivenNutrientConfig.isSynced();
         if (!synced) {

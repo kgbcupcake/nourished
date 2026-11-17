@@ -1,0 +1,47 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "progression",
+  "description": "book.nourished.nourished_guide.progression.food_group_milestones.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:golden_carrot"
+  },
+  "name": "book.nourished.nourished_guide.progression.food_group_milestones.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.progression.food_group_milestones.tiers.text",
+      "title": "book.nourished.nourished_guide.progression.food_group_milestones.tiers.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.progression.food_group_milestones.rewards.text",
+      "title": "book.nourished.nourished_guide.progression.food_group_milestones.rewards.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "progression/milestones",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 1,
+  "x": -3,
+  "y": 0
+}

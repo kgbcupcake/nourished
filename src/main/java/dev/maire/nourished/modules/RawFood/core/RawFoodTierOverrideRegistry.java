@@ -1,5 +1,6 @@
 package dev.maire.nourished.modules.RawFood.core;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -9,7 +10,6 @@ import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.framework.registry.AbstractRegistry;
 import dev.marie.framework.util.MarieValidation;
-import net.neoforged.fml.loading.FMLPaths;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -82,7 +82,7 @@ public final class RawFoodTierOverrideRegistry {
     }
 
     private static Path itemEditorDir() {
-        return FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("item_editor");
+        return NourishedConfigPaths.itemEditor();
     }
 
     private static Path file() {
@@ -166,7 +166,7 @@ public final class RawFoodTierOverrideRegistry {
         for (Map.Entry<String, RawSeverity> e : INSTANCE.entries().entrySet()) {
             obj.addProperty(e.getKey(), e.getValue().name());
         }
-        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "RawFoodTierOverrideRegistry");
+        MarieValidation.assertPathUnder(file, NourishedConfigPaths.root(), "RawFoodTierOverrideRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(obj, w);
         }

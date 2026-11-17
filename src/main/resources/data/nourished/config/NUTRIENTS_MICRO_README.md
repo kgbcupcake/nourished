@@ -1,0 +1,122 @@
+# Nutrients (Omega-3, Fiber, ...)
+
+Nourished ships seven: Protein, Carbs, Fat, Fiber, Vitamins, Minerals and Omega-3. Fish differ: salmon has the most Omega-3, then cod, tropical fish and pufferfish; cooking loses a little.
+
+Nutrients are tracked separately from the five food-group bars. They never change the bars, food overrides or the balance score.
+
+## Defining a nutrient
+
+Add `data/<namespace>/nourished/micros/<key>.json`. The file name is the key.
+
+```json
+{
+  "display_name": "Omega-3",
+  "color": "#4FA3D9",
+  "decay_rate": 0.01,
+  "low_threshold": 0.2,
+  "high_threshold": 0.9,
+  "icon": "minecraft:cod",
+  "group_weights": { "proteins": 0.2 }
+}
+```
+
+- `decay_rate`: how much is lost every `decayIntervalTicks` (see `nourished-nutrients.toml`). Levels run from 0 to 1.
+- `group_weights` (optional): used for foods with no explicit value and no recipe. It gives each food-group share of the food this much of the nutrient.
+
+## Giving foods nutrients
+
+Add `data/<namespace>/nourished/micro_values/<anything>.json`. Keys are item ids or `#tags`. Item ids win over tags.
+
+```json
+{
+  "#c:foods/cooked_fish": { "omega3": 1.0, "fat": 0.3 },
+  "mymod:salmon_sushi": { "omega3": 1.2, "fiber": 0.2 }
+}
+```
+
+Values are per serving: 1.0 is a "full" serving. Each bite adds `value × bite size × gainScale`, where bite size grows with the food's nutrition and saturation.
+
+## How a food's nutrients are found
+
+1. An explicit item or tag entry.
+2. Otherwise, the sum of its recipe ingredients' nutrients, times `recipeScale`, capped at `recipeMax` (`recipeDerivation` turns this off).
+3. Otherwise, its food-group classification through each nutrient's `group_weights`.
+
+## Best sources list
+
+The detail screen and Nutrients tab rank foods by how much one serving gives. To control that list directly, add `data/<namespace>/nourished/micro_sources/<anything>.json`:
+
+```json
+{
+  "protein": { "pin": ["minecraft:cooked_beef", "#c:foods/cooked_fish"], "hide": ["mymod:mystery_stew"] },
+  "carbs": { "hide": ["#c:foods/candy"] }
+}
+```
+
+- `pin`: shown first, in this order (a tag's items are sorted by amount). Pinned items show even if they don't carry the nutrient.
+- `hide`: never shown. Hiding beats pinning.
+- Only the list changes; eating still gives the same nutrients.
+- Files from every datapack add together.
+
+## Server config file
+
+`config/nourished/nutrition/micros.json` takes the same data in one file, `{ "micros": { "<key>": { ... } }, "values": { ... }, "sources": { ... }, "effects": [ ... ] }`. It overrides Nourished's bundled data. Other datapacks override it.
+
+## Effects
+
+Add `data/<namespace>/nourished/micro_effects/<name>.json`:
+
+```json
+{ "nutrient": "omega3", "trigger": "below", "threshold": 0.15,
+  "effect": "minecraft:mining_fatigue", "amplifier": 0, "duration_ticks": 200 }
+```
+
+- `trigger`: `below`, `above`, or `all_above` with `"nutrient": "all"` (every nutrient above the threshold).
+- `tiers` (optional, `below` only) raise the amplifier the longer the nutrient stays low: `"tiers": [{"after_minutes": 0, "amplifier": 0}, {"after_minutes": 20, "amplifier": 1}, {"after_minutes": 60, "amplifier": 2}]`. The clock resets once the nutrient recovers and survives death.
+- Checked every 4 seconds. Effects are short and refreshed while the condition holds, then run out on their own.
+- `below` never fires for a nutrient the player hasn't eaten yet.
+- The same objects can go in the `effects` array of `micros.json`.
+
+Nourished ships eight of these: low Omega-3/Fiber/Vitamins/Minerals/Protein/Carbs (tiered, getting worse after 20 and 60 minutes), high Omega-3 (Dolphin's Grace) and all above 50% (Haste). They are off until `builtinEffects = true` in `nourished-nutrients.toml`. Effects from other datapacks or `micros.json` always run. The main `enableEffects` switch turns all of them off.
+
+The regular effect rules in `effects.json` can also target a nutrient with `"nutrient": "micro:omega3"`.
+
+## Commands
+
+- `/nourished nutrients`: your own levels.
+- `/nourished nutrients item [item]`: a food's nutrients and where they came from (explicit, recipe or group).
+- `/nourished nutrients levels <player>`, `set <player> <nutrient> <0-1>`, `reset <player>` (op).
+- `/nourished nutrients value set <item> <nutrient> <amount>` / `value clear <item>` (op): edits `micros.json` and applies it right away.
+- `/nourished nutrients source pin|unpin|hide|unhide <nutrient> <item or #tag>` (op): edits the Best sources lists in `micros.json`; `source list <nutrient>` shows them.
+- `/nourished nutrients reload` (op): re-reads `micros.json`.
+
+## Editing in game
+
+The item editor has a **Nutrients** page. Turn on "Custom Nutrient Values" to save that item's values to `micros.json`. Singleplayer or LAN host only, like the other editor pages.
+
+## Detail screen
+
+Click the Nutrients box in the Diet Screen (or bind "Open Nutrients") to see each nutrient's level, trend, what you've recently eaten for it, and the best foods for it.
+
+## HUD
+
+An optional overlay with one mini-bar per nutrient. Turn it on with the "Toggle Nutrient HUD" key or in `nourished-nutrients-client.toml` (`enabled`, `onlyWhenLow`, `corner`, `offsetX`, `offsetY`, `scale`).
+
+## KubeJS
+
+```js
+// startup or server script; applies on the next reload
+NourishedNutrients.register({ id: 'iron', display_name: 'Iron', color: '#A0522D', group_weights: { proteins: 0.4 } })
+NourishedNutrients.setValues('#c:foods/raw_meat', { iron: 0.8, protein: 1.0 })
+NourishedNutrients.setValues('mymod:salmon_sushi', { omega3: 1.2, carbs: 0.6 })
+
+// at runtime
+NourishedNutrients.getLevel(player, 'omega3')
+NourishedNutrients.setLevel(player, 'omega3', 0.5)
+NourishedNutrients.getProfile(player, item)
+NourishedNutrients.getKeys()
+
+// Best sources list
+NourishedNutrients.pinSource('protein', 'minecraft:cooked_beef')
+NourishedNutrients.hideSource('protein', 'mymod:mystery_stew')
+```

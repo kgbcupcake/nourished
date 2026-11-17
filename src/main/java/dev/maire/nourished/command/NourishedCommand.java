@@ -31,6 +31,8 @@ public final class NourishedCommand {
                 .then(Commands.literal("export_all")
                     .requires(s -> s.hasPermission(2))
                     .executes(NourishedExportCommands::exportAll))
+                .then(NourishedNutrientCommands.build(event.getBuildContext()))
+                .then(NourishedDeficiencyCommands.build())
                 .then(Commands.literal("audit_tags")
                     .requires(s -> s.hasPermission(2))
                     .executes(NourishedTagAuditCommand::run))

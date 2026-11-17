@@ -34,10 +34,13 @@ import java.util.List;
  */
 public final class DietHomeSections {
 
+    /** This page's id, also used as its editor module id (see {@code HomeBoxPane}) and sidebar entry id. */
+    public static final String ID = "nourished.diet.hub.home";
+
     private DietHomeSections() {}
 
     public static MarieComponent homePage() {
-        return new HubInfoPage("nourished.diet.hub.home",
+        return new HubInfoPage(ID,
                 () -> Minecraft.getInstance().player,
                 () -> {
                     var player = Minecraft.getInstance().player;
@@ -59,7 +62,7 @@ public final class DietHomeSections {
 
         List<HubInfoSection.Row> today = new ArrayList<>();
         // Same gate CaloriesComponent uses — no calorie row when that box can't show either.
-        if (FeatureFlagCache.enableTotalTracking() && FeatureFlagCache.enableCalorieHistory()) {
+        if (FeatureFlagCache.enableTotalTracking()) {
             float calories = MarieTracking.getCurrentTrackerValue(mc.player, NourishedAPI.CALORIES_TRACKER_ID);
             today.add(new HubInfoSection.Row(Component.translatable("nourished.screen.diet.calories_label").getString(),
                     (int) calories + " / " + (int) data.maxTotal, MarieColors.resolveColor(NourishedColors.CALORIE_VALUE)));

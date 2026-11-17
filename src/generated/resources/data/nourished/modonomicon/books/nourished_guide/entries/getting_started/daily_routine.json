@@ -1,0 +1,84 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "getting_started",
+  "condition": {
+    "type": "modonomicon:entry_read",
+    "entry_id": "getting_started/first_day"
+  },
+  "description": "book.nourished.nourished_guide.getting_started.daily_routine.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:clock"
+  },
+  "name": "book.nourished.nourished_guide.getting_started.daily_routine.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.getting_started.daily_routine.ideal_loop.text",
+      "title": "book.nourished.nourished_guide.getting_started.daily_routine.ideal_loop.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.getting_started.daily_routine.hud_is_your_friend.text",
+      "title": "book.nourished.nourished_guide.getting_started.daily_routine.hud_is_your_friend.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.getting_started.daily_routine.batch_eating.text",
+      "title": "book.nourished.nourished_guide.getting_started.daily_routine.batch_eating.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.getting_started.daily_routine.before_a_fight.text",
+      "title": "book.nourished.nourished_guide.getting_started.daily_routine.before_a_fight.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.getting_started.daily_routine.before_mining.text",
+      "title": "book.nourished.nourished_guide.getting_started.daily_routine.before_mining.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "getting_started/first_day",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 9,
+  "x": 0,
+  "y": 7
+}

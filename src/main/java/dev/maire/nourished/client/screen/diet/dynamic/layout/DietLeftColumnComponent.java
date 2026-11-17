@@ -14,6 +14,7 @@ import dev.maire.nourished.client.screen.diet.dynamic.modules.BalanceComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.DietScreenModules;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.modules.MicroNutrientsComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 
@@ -187,5 +188,8 @@ public final class DietLeftColumnComponent implements Container {
         if (activeEffects.visibilityRule().isVisible()) {
             activeEffects.render(context, activeEffectsBounds);
         }
+        // hides itself when it has no room or is turned off
+        MicroNutrientsComponent micros = DietScreenModules.find(children, MicroNutrientsComponent.class);
+        micros.render(context, micros.resolvedBounds());
     }
 }

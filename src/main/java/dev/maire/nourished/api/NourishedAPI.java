@@ -136,6 +136,15 @@ public final class NourishedAPI {
         return history.isEmpty() ? -1.0f : history.get(0).value();
     }
 
+    /** Calories eaten so far in the current game day, or 0 when calorie tracking is off. */
+    @ApiStatus.Stable
+    public static float getTodayCalories(Player player) {
+        if (player == null || !NourishedConfig.get().enableCalorieTracking()) {
+            return 0f;
+        }
+        return dev.marie.framework.tracking.tracker.MarieTracking.getCurrentTrackerValue(player, CALORIES_TRACKER_ID);
+    }
+
     /**
      * Returns the player's completed-period calorie history, most recent first, bounded by
      * {@code calorieHistoryRetentionDays}.
@@ -462,5 +471,30 @@ public final class NourishedAPI {
     @ApiStatus.Stable
     public static void addReportSection(ReportProvider provider) {
         registerReportProvider(provider);
+    }
+    /** Adds or replaces a tracked nutrient (Omega-3, Fiber, ...); applied on the next datapack reload. */
+    public static void registerMicroNutrient(dev.maire.nourished.core.micro.MicroDef definition) {
+        dev.maire.nourished.core.micro.MicroRegistry.registerExternal(definition);
+    }
+
+    /** Nutrient values for an item id or {@code #tag} (e.g. {@code "#c:foods/raw_fish"}); applied on the next datapack reload. */
+    public static void registerMicroNutrientValues(String itemOrTag, Map<String, Float> values) {
+        dev.maire.nourished.core.micro.MicroRegistry.registerExternalValues(itemOrTag, values);
+    }
+
+    /** Pins ({@code hide = false}) or hides an item id or {@code #tag} in a nutrient's Best sources list; next reload. */
+    public static void setMicroNutrientSource(String key, String itemOrTag, boolean hide) {
+        dev.maire.nourished.core.micro.MicroRegistry.registerExternalSource(key, itemOrTag, hide);
+    }
+
+    /** The player's level (0..1) of a tracked nutrient such as {@code "omega3"}. */
+    public static float getMicroNutrientLevel(net.minecraft.world.entity.player.Player player, String key) {
+        return dev.maire.nourished.core.micro.MicroAttachment.level(player, key);
+    }
+
+    /** Per-serving nutrient values for a food, as shown in its tooltip. */
+    public static Map<String, Float> getMicroNutrientProfile(net.minecraft.world.item.ItemStack stack,
+                                                             @org.jetbrains.annotations.Nullable net.minecraft.world.level.Level level) {
+        return dev.maire.nourished.core.micro.MicroProfileResolver.resolve(stack, level);
     }
 }

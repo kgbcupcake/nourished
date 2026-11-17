@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.nutrition.curve;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -15,7 +16,6 @@ import dev.marie.framework.util.MarieValidation;
 import dev.maire.nourished.core.Nourished;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.fml.loading.FMLPaths;
 
 import javax.annotation.Nullable;
 
@@ -41,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <b>Priority / Override Stack (lowest to highest):</b>
  * <ol>
  *   <li>Hardcoded Java preset defaults (NutrientCurvePreset.FLAT for every nutrient)</li>
- *   <li>config/nourished/nutrient_curves.json (Cloth Config writes here; hand-editable)</li>
+ *   <li>config/nourished/nutrition/nutrient_curves.json (Cloth Config writes here; hand-editable)</li>
  *   <li>data/nourished/config/nutrient_curves.json (datapack override)</li>
  *   <li>KubeJS runtime registration (highest — see NutrientCurveRegistry.registerExternal,
  *       applied after datapack load in the same timing slot as custom nutrient registration)</li>
@@ -175,10 +175,10 @@ public final class NutrientCurveRegistry {
     }
 
     public static void load() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("nutrient_curves.json");
+        Path configDir = NourishedConfigPaths.root();
+        Path file = NourishedConfigPaths.nutrientCurves();
         try {
-            Files.createDirectories(configDir);
+            Files.createDirectories(file.getParent());
             if (!Files.exists(file)) {
                 writeDefaults(file);
                 Nourished.LOGGER.info("[NutrientCurveRegistry] Wrote default nutrient_curves.json");
@@ -193,7 +193,7 @@ public final class NutrientCurveRegistry {
         reapplyExternals();
 
         try {
-            Path readmeDir = configDir.resolve("Read_Me");
+            Path readmeDir = NourishedConfigPaths.readme();
             Files.createDirectories(readmeDir);
             writeReadmeIfAbsent(readmeDir);
         } catch (IOException e) {
@@ -240,10 +240,10 @@ public final class NutrientCurveRegistry {
      * Used by the config screen to persist preset selections.
      */
     public static void save() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("nutrient_curves.json");
+        Path configDir = NourishedConfigPaths.root();
+        Path file = NourishedConfigPaths.nutrientCurves();
         try {
-            Files.createDirectories(configDir);
+            Files.createDirectories(file.getParent());
             writeCurrent(file);
             Nourished.LOGGER.info("[NutrientCurveRegistry] Saved nutrient_curves.json");
         } catch (IOException e) {
@@ -375,7 +375,7 @@ public final class NutrientCurveRegistry {
             obj.addProperty("preset", NutrientCurvePreset.FLAT.name());
             arr.add(obj);
         }
-        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "NutrientCurveRegistry");
+        MarieValidation.assertPathUnder(file, NourishedConfigPaths.root(), "NutrientCurveRegistry");
         try (Writer writer = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, writer);
         }
@@ -386,7 +386,7 @@ public final class NutrientCurveRegistry {
         for (NutrientCurveDef def : INSTANCE.values()) {
             arr.add(defToJson(def));
         }
-        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "NutrientCurveRegistry");
+        MarieValidation.assertPathUnder(file, NourishedConfigPaths.root(), "NutrientCurveRegistry");
         try (Writer writer = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, writer);
         }

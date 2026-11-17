@@ -18,10 +18,13 @@ import dev.maire.nourished.core.nutrition.DiminishingReturnsOverrideRegistry;
 import dev.maire.nourished.core.nutrition.ExcludedFoodOverrideRegistry;
 import dev.maire.nourished.core.nutrition.NoCaloriesOverrideRegistry;
 import dev.maire.nourished.core.nutrition.NoRecentMealsOverrideRegistry;
+import dev.maire.nourished.core.nutrition.NutrientClassificationLookup;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.maire.nourished.core.nutrition.SilentEatOverrideRegistry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeManager;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -38,11 +41,11 @@ import java.util.function.BooleanSupplier;
  * open, so switching back to Values (or any other page) still shows whatever was targeted before
  * Bulk Edit started.
  * <p>
- * Each togglable property is a 3-way "No Change / On / Off" cycle rather than a single toggle, so
- * leaving a row at "No Change" genuinely skips that field for every selected item instead of
- * forcing one value onto all of them. "Nutrient Group" is the exception — add or remove one nutrient
- * across the whole selection, writing straight to {@code SourceClassificationRegistry} the same way
- * {@code NutrientGroupsScreenProvider} does for a single item.
+ * Every togglable property, including each nutrient group, is its own 3-way "No Change / On / Off"
+ * cycle rather than a single toggle, so leaving a row at "No Change" genuinely skips that field for
+ * every selected item instead of forcing one value onto all of them — and leaving every nutrient row
+ * untouched but one still lets that one apply. Nutrient rows write straight to {@code
+ * SourceClassificationRegistry}, the same registry the built-in Values page's sliders read/write.
  *
  * <p>Has no header Save/Revert behavior of its own (nothing here is edited-then-committed the way
  * other pages are) — "Apply to Selected" does the writing (and the registry saves) immediately when
@@ -65,6 +68,7 @@ public final class BulkEditScreenProvider implements ItemEditorScreenProvider {
     private static final class BulkEditScreen implements ItemEditorPage {
 
         private static final String[] TRI_STATE_LABELS = {"No Change", "On", "Off"};
+        private static final float DEFAULT_WEIGHT = 1.0f;
 
         private final String modId;
         private final List<ItemStack> selected = new ArrayList<>();
@@ -74,11 +78,10 @@ public final class BulkEditScreenProvider implements ItemEditorScreenProvider {
         private int silentEatIndex;
         private int excludeRecentMealsIndex;
         private int diminishingReturnsOffIndex;
-        private int nutrientGroupIndex;
-        private int groupActionIndex;
+        /** One tri-state index per nutrient key, so any number of groups can be added/removed in one Apply. */
+        private final Map<String, Integer> nutrientGroupIndices = new LinkedHashMap<>();
 
         private OptionLayout layout;
-        private String[] nutrientGroupLabels;
 
         BulkEditScreen(String modId) {
             this.modId = modId;
@@ -104,16 +107,6 @@ public final class BulkEditScreenProvider implements ItemEditorScreenProvider {
         }
 
         private void rebuildLayout() {
-            List<NutrientRegistry.NutrientDef> nutrients = NutrientRegistry.getAll();
-            nutrientGroupLabels = new String[nutrients.size() + 1];
-            nutrientGroupLabels[0] = "No Change";
-            for (int i = 0; i < nutrients.size(); i++) {
-                nutrientGroupLabels[i + 1] = nutrients.get(i).displayName();
-            }
-            if (nutrientGroupIndex >= nutrientGroupLabels.length) {
-                nutrientGroupIndex = 0;
-            }
-
             OptionLayout next = new OptionLayout("nourished-bulk-edit");
             next.addTab("");
             if (ItemEditorRemoteGuard.isRemoteServer()) {
@@ -135,11 +128,12 @@ public final class BulkEditScreenProvider implements ItemEditorScreenProvider {
                     () -> excludeRecentMealsIndex, i -> excludeRecentMealsIndex = i, () -> {}));
             next.addRow(new CycleOption("Diminishing Returns Off", TRI_STATE_LABELS,
                     () -> diminishingReturnsOffIndex, i -> diminishingReturnsOffIndex = i, () -> {}));
-            next.addRow(new CycleOption("Nutrient Group", nutrientGroupLabels,
-                    () -> nutrientGroupIndex, i -> nutrientGroupIndex = i, () -> {}));
-            next.addRow(new CycleOption("Group Action", new String[]{"Add", "Remove"},
-                    () -> groupActionIndex, i -> groupActionIndex = i, () -> {}));
-            next.enabledWhenLast(() -> nutrientGroupIndex > 0);
+            for (NutrientRegistry.NutrientDef nutrient : NutrientRegistry.getAll()) {
+                String key = nutrient.key();
+                next.addRow(new CycleOption(nutrient.displayName(), TRI_STATE_LABELS,
+                        () -> nutrientGroupIndices.getOrDefault(key, 0),
+                        i -> nutrientGroupIndices.put(key, i), () -> {}));
+            }
             next.addRow(new ButtonOption("Apply to Selected",
                     () -> "APPLY (" + selected.size() + ")", this::applyBulkEdit, () -> {}));
             ItemEditorRemoteGuard.disableIfRemote(next);
@@ -178,9 +172,13 @@ public final class BulkEditScreenProvider implements ItemEditorScreenProvider {
                     DiminishingReturnsOverrideRegistry::removeDiminishingReturnsOff,
                     DiminishingReturnsOverrideRegistry::save);
 
-            if (nutrientGroupIndex > 0) {
-                String nutrientKey = NutrientRegistry.getAll().get(nutrientGroupIndex - 1).key();
-                boolean add = groupActionIndex == 0;
+            Map<String, Integer> changedNutrients = new LinkedHashMap<>();
+            for (Map.Entry<String, Integer> e : nutrientGroupIndices.entrySet()) {
+                if (e.getValue() != null && e.getValue() > 0) {
+                    changedNutrients.put(e.getKey(), e.getValue());
+                }
+            }
+            if (!changedNutrients.isEmpty()) {
                 // An item with no editor entry yet gets one seeded from its effective classification
                 // (tags / resolved weights), since the new entry replaces those sources outright.
                 Map<String, Map<String, Float>> baselines = new LinkedHashMap<>();
@@ -191,8 +189,7 @@ public final class BulkEditScreenProvider implements ItemEditorScreenProvider {
                         }
                     }
                 });
-                baselines.replaceAll((itemId, ignored) ->
-                        NutrientGroupsScreenProvider.effectiveWeights(stacksById.get(itemId)));
+                baselines.replaceAll((itemId, ignored) -> effectiveWeights(stacksById.get(itemId)));
                 MarieContext.runAs(MarieContext.forMod(modId), () -> {
                     for (String itemId : itemIds) {
                         SourceClassificationRegistry.SourceClassification existing =
@@ -202,16 +199,35 @@ public final class BulkEditScreenProvider implements ItemEditorScreenProvider {
                                 : new LinkedHashMap<>(baselines.getOrDefault(itemId, Map.of()));
                         int calories = existing != null ? existing.calories() : 0;
                         boolean enabled = existing == null || existing.enabled();
-                        if (add) {
-                            values.putIfAbsent(nutrientKey, 1.0f);
-                        } else {
-                            values.remove(nutrientKey);
+                        for (Map.Entry<String, Integer> e : changedNutrients.entrySet()) {
+                            if (e.getValue() == 1) {
+                                values.putIfAbsent(e.getKey(), DEFAULT_WEIGHT);
+                            } else {
+                                values.remove(e.getKey());
+                            }
                         }
                         SourceClassificationRegistry.setOverride(itemId, values, calories, enabled);
                     }
                     SourceClassificationRegistry.save();
                 });
             }
+        }
+
+        /** The positive per-nutrient weights {@code stack} currently counts toward, from every classification source — the seed for an item with no editor entry yet. */
+        private static Map<String, Float> effectiveWeights(ItemStack stack) {
+            Map<String, Float> out = new LinkedHashMap<>();
+            if (stack == null || stack.isEmpty()) {
+                return out;
+            }
+            Minecraft mc = Minecraft.getInstance();
+            RecipeManager recipeManager = mc.level != null ? mc.level.getRecipeManager() : null;
+            for (Map.Entry<String, Float> e : NutrientClassificationLookup
+                    .resolveNutrientBarsIgnoringExclusion(stack, recipeManager).entrySet()) {
+                if (e.getValue() != null && e.getValue() > 0f) {
+                    out.put(e.getKey(), e.getValue());
+                }
+            }
+            return out;
         }
 
         /** 0 = No Change (skip), 1 = On (add to every item), 2 = Off (remove from every item). */

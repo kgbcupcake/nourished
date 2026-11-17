@@ -113,9 +113,16 @@ public class DietScreen extends Screen {
         fadeClockStarted = false;
     }
 
-    /** Sidebar rows for the editor hub: the five Diet Screen sub-boxes, one "Intake" group for the dynamically-many bar rows, the screen-wide options panel, and the editor window's own colors. */
+    /**
+     * Sidebar rows for the editor hub: on the Nutritional Panel only, Home and Nutrients first (they have no
+     * equivalent on the dynamic screen — see {@link DietScreenPersistence#isNutritionalPanel()}),
+     * then the five Diet Screen sub-boxes, one "Intake" group for the dynamically-many bar rows, the
+     * screen-wide options panel, and the editor window's own style/colors.
+     */
     public static List<HubSidebarEntry> scaleConfigEntries() {
-        return List.of(
+        List<HubSidebarEntry> entries = new ArrayList<>();
+        entries.addAll(DietOptionsPanel.nutritionalPanelEntries());
+        entries.addAll(List.of(
                 // "Number size" here (not the shared "Text size" label): this box's Text size slider
                 // only ever drives its calorie value, a number — the generic label would say less than
                 // this specific one does.
@@ -152,11 +159,12 @@ public class DietScreen extends Screen {
                                 "nourished.options.diet.effects_bars_size", DietOptionsPanel::effectsColors)),
                 intakeGroupEntry(),
                 new HubEntry(DietScreenEditTarget.PANEL_ID, DietOptionsPanel.panelLabel(), DietOptionsPanel.build()),
-                // The hub window's own chrome colors — separate from every box above, which customize
-                // what's being edited, not the editor doing the editing.
-                new HubEntry("nourished.diet.hub.editor", Component.translatable("nourished.options.diet.editor_title"),
+                // The hub window's own chrome — separate from every box above, which customize what's
+                // being edited, not the editor doing the editing.
+                new HubEntry(DietOptionsPanel.EDITOR_ID, Component.translatable("nourished.options.diet.editor_title"),
                         DietOptionsPanel.editorPanel())
-        );
+        ));
+        return entries;
     }
 
     /**

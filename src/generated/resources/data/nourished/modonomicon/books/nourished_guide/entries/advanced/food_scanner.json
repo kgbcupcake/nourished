@@ -1,0 +1,59 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "advanced",
+  "description": "book.nourished.nourished_guide.advanced.food_scanner.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:spyglass"
+  },
+  "name": "book.nourished.nourished_guide.advanced.food_scanner.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:spyglass"
+      },
+      "text": "book.nourished.nourished_guide.advanced.food_scanner.food_scanner.text",
+      "title": "book.nourished.nourished_guide.advanced.food_scanner.food_scanner.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.food_scanner.running_it.text",
+      "title": "book.nourished.nourished_guide.advanced.food_scanner.running_it.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.food_scanner.fixing.text",
+      "title": "book.nourished.nourished_guide.advanced.food_scanner.fixing.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "advanced/item_editor",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 5,
+  "x": -2,
+  "y": -1
+}

@@ -28,20 +28,6 @@ public final class NourishedKeys {
             "key.categories.nourished"
     );
 
-    public static final KeyMapping EDIT_ACTIVITY_LOG_HUD = new KeyMapping(
-            "key.nourished.editActivityLogHud",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_K,
-            "key.categories.nourished"
-    );
-
-    public static final KeyMapping EDIT_CALORIE_HUD = new KeyMapping(
-            "key.nourished.editCalorieHud",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_C,
-            "key.categories.nourished"
-    );
-
     public static final KeyMapping EDIT_ALL_HUDS = new KeyMapping(
             "key.nourished.editAllHuds",
             InputConstants.Type.KEYSYM,
@@ -70,10 +56,31 @@ public final class NourishedKeys {
             "key.categories.nourished"
     );
 
+    public static final KeyMapping OPEN_SETTINGS = new KeyMapping(
+            "key.nourished.openSettings",
+            InputConstants.Type.KEYSYM,
+            InputConstants.UNKNOWN.getValue(),
+            "key.categories.nourished"
+    );
+
     public static final KeyMapping SHOW_TOOLTIP_DETAILS = new KeyMapping(
             "key.nourished.showTooltipDetails",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_LEFT_SHIFT,
+            "key.categories.nourished"
+    );
+
+    public static final KeyMapping OPEN_NUTRIENTS = new KeyMapping(
+            "key.nourished.openNutrients",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_UNKNOWN,
+            "key.categories.nourished"
+    );
+
+    public static final KeyMapping TOGGLE_NUTRIENT_HUD = new KeyMapping(
+            "key.nourished.toggleNutrientHud",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_UNKNOWN,
             "key.categories.nourished"
     );
 
@@ -83,12 +90,13 @@ public final class NourishedKeys {
         event.register(EDIT_HUD);
         event.register(OPEN_DIET_SCREEN);
         event.register(EDIT_DIET_SCREEN);
-        event.register(EDIT_ACTIVITY_LOG_HUD);
-        event.register(EDIT_CALORIE_HUD);
         event.register(EDIT_ALL_HUDS);
         event.register(OPEN_SCALE_CONFIG);
         event.register(OPEN_COMMAND_CENTER);
         event.register(OPEN_ITEM_EDITOR);
+        event.register(OPEN_SETTINGS);
         event.register(SHOW_TOOLTIP_DETAILS);
+        event.register(OPEN_NUTRIENTS);
+        event.register(TOGGLE_NUTRIENT_HUD);
     }
 }

@@ -231,9 +231,8 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
     // ── Coordinate + drawing helpers ─────────────────────────────────────────
     //
     // The box's own screen origin now comes from the Bounds handed to render() (bounds.x()/
-    // bounds.y()) instead of being independently recomputed via DietLayout.toScreenX/Y — a
-    // prerequisite for drag/resize, where DraggableResizable will hand this component a live
-    // preview Bounds that must actually be honored. bounds.x() lines up with local X 0 (the
+    // bounds.y()) instead of being independently recomputed via DietLayout.toScreenX/Y, so the
+    // edit host's live drag/resize preview is honored. bounds.x() lines up with local X 0 (the
     // column's own left edge, unpadded — see DietLeftColumnComponent's childArea), so local X
     // offsets (still PAD-inclusive, e.g. "x - 2") pass straight through unchanged. bounds.y()
     // lines up with local Y == startLocalY (VerticalLayout stacks this component starting there),
@@ -270,8 +269,7 @@ public final class EatMoreComponent implements MarieComponent, HeaderCollapsible
      * panel no longer also resizes this box. Position is the literal {@code anchorBounds.x()/y()}
      * corner (not routed through {@link #sx}/{@link #sy}, which are local-coordinate-relative and
      * offset from the box's own top-left by a few padding pixels) so the drawn rectangle exactly
-     * matches the {@link Bounds} that {@link dev.marie.framework.ui.DraggableResizable}'s resize
-     * handle and hit-testing are computed against.
+     * matches the {@link Bounds} the edit host's resize handles and hit-testing use.
      */
     private void drawOuterBox(RenderContext context, int screenW, int screenH, NourishedClientConfig cc) {
         var store = DietScreenPersistence.get();

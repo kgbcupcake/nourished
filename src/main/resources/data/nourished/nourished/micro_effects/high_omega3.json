@@ -1,0 +1,1 @@
+{ "nutrient": "omega3", "trigger": "above", "threshold": 0.8, "effect": "minecraft:dolphins_grace", "amplifier": 0, "duration_ticks": 200 }

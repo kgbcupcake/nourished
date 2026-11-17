@@ -3,7 +3,9 @@
   "minVersion": "0.8",
   "package": "dev.maire.nourished.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [],
+  "mixins": [
+    "FoodDataMixin"
+  ],
   "client": [],
   "injectors": {
     "defaultRequire": 1

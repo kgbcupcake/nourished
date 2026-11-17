@@ -1,0 +1,1 @@
+{"nutrient": "vitamins", "trigger": "below", "threshold": 0.15, "effect": "minecraft:weakness", "amplifier": 0, "duration_ticks": 200, "tiers": [{"after_minutes": 0, "amplifier": 0}, {"after_minutes": 20, "amplifier": 1}, {"after_minutes": 60, "amplifier": 2}]}

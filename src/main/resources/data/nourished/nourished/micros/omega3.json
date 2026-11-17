@@ -1,0 +1,8 @@
+{
+  "display_name": "Omega-3",
+  "color": "#4FA3D9",
+  "decay_rate": 0.01,
+  "low_threshold": 0.2,
+  "high_threshold": 0.9,
+  "icon": "minecraft:cod"
+}

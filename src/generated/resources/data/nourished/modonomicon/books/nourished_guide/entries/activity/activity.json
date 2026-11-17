@@ -1,0 +1,51 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "activity",
+  "description": "book.nourished.nourished_guide.activity.activity.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:leather_boots"
+  },
+  "name": "book.nourished.nourished_guide.activity.activity.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:leather_boots"
+      },
+      "text": "book.nourished.nourished_guide.activity.activity.activity.text",
+      "title": "book.nourished.nourished_guide.activity.activity.activity.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.activity.activity.why.text",
+      "title": "book.nourished.nourished_guide.activity.activity.why.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.activity.activity.tracking.text",
+      "title": "book.nourished.nourished_guide.activity.activity.tracking.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 0,
+  "x": 0,
+  "y": -2
+}

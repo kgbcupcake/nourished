@@ -32,7 +32,8 @@ public final class EffectsValidator implements ConfigValidator {
 
         for (EffectRegistry.EffectDef def : EffectRegistry.getAll()) {
             String nutrient = def.nutrient();
-            if (!ValidationResults.isKnownNutrientKey(nutrient, validKeys)) {
+            if (!nutrient.startsWith(dev.maire.nourished.core.effect.NutritionEffectApplier.MICRO_PREFIX)
+                    && !ValidationResults.isKnownNutrientKey(nutrient, validKeys)) {
                 findings.add(new Finding(
                         ValidationResult.Status.WARN,
                         FILE,

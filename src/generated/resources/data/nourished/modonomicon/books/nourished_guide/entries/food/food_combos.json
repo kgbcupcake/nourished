@@ -1,0 +1,59 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "food",
+  "description": "book.nourished.nourished_guide.food.food_combos.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:cooked_chicken"
+  },
+  "name": "book.nourished.nourished_guide.food.food_combos.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:cooked_chicken"
+      },
+      "text": "book.nourished.nourished_guide.food.food_combos.food_combos.text",
+      "title": "book.nourished.nourished_guide.food.food_combos.food_combos.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food.food_combos.default_combos.text",
+      "title": "book.nourished.nourished_guide.food.food_combos.default_combos.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food.food_combos.custom_combos.text",
+      "title": "book.nourished.nourished_guide.food.food_combos.custom_combos.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "food/food_families",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 10,
+  "x": 5,
+  "y": 3
+}

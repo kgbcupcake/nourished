@@ -1,0 +1,59 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "food",
+  "description": "book.nourished.nourished_guide.food.eating_when_full.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:sweet_berries"
+  },
+  "name": "book.nourished.nourished_guide.food.eating_when_full.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:sweet_berries"
+      },
+      "text": "book.nourished.nourished_guide.food.eating_when_full.eating_when_full.text",
+      "title": "book.nourished.nourished_guide.food.eating_when_full.eating_when_full.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food.eating_when_full.light_and_heavy.text",
+      "title": "book.nourished.nourished_guide.food.eating_when_full.light_and_heavy.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.food.eating_when_full.placed_food.text",
+      "title": "book.nourished.nourished_guide.food.eating_when_full.placed_food.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "food/food_families",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 9,
+  "x": 0,
+  "y": 3
+}

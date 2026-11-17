@@ -18,6 +18,9 @@ import dev.maire.nourished.core.network.sync.SyncNourishedConfigSnapshot;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthAttachment;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthData;
 import dev.maire.nourished.modules.RawFood.Gut.GutHealthSyncPayload;
+import dev.maire.nourished.core.micro.MicroAttachment;
+import dev.maire.nourished.core.micro.MicroNetworking;
+import dev.maire.nourished.core.micro.MicroRegistry;
 import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogClientBuffer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -71,6 +74,24 @@ public final class ClientNetworkCallbacks {
                 ModNetworking.SyncActivityLogEntryPayload.STREAM_CODEC,
                 ClientNetworkCallbacks::onActivityLogEntry
         );
+
+        MicroNetworking.register(registrar, ClientNetworkCallbacks::onMicroLevels, ClientNetworkCallbacks::onMicroData);
+        dev.maire.nourished.core.deficiency.DeficiencyNetworking.register(registrar,
+                (p, c) -> c.enqueueWork(() -> dev.maire.nourished.client.deficiency.DeficiencyClient.accept(p.pressure(), p.announce())));
+    }
+
+    public static void onMicroLevels(MicroNetworking.SyncMicroLevels payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            LocalPlayer player = Minecraft.getInstance().player;
+            if (player != null) {
+                MicroAttachment.set(player, payload.levels());
+                dev.maire.nourished.client.micro.MicroClientEvents.onLevels(player);
+            }
+        });
+    }
+
+    public static void onMicroData(MicroNetworking.SyncMicroData payload, IPayloadContext context) {
+        context.enqueueWork(() -> MicroRegistry.acceptClientSnapshot(payload.snapshot()));
     }
 
     public static void onConfigSnapshot(SyncNourishedConfigSnapshot payload, IPayloadContext context) {

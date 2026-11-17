@@ -76,6 +76,36 @@ public final class NourishedKubeIntegration {
         return result instanceof Boolean cancelled && cancelled;
     }
 
+    public static boolean isPresent() {
+        return PRESENT;
+    }
+
+    public static int fireDeficiencyTierChanged(ServerPlayer player, String group, int oldTier, int newTier) {
+        if (!PRESENT) {
+            return newTier;
+        }
+        Object result = invokeStatic(
+                EVENT_BRIDGE,
+                "fireDeficiencyTierChanged",
+                new Class<?>[] {ServerPlayer.class, String.class, int.class, int.class},
+                player, group, oldTier, newTier
+        );
+        return result instanceof Integer tier ? tier : newTier;
+    }
+
+    public static int fireDeficiencyPressure(ServerPlayer player, String group, float value, int pressure, int delta) {
+        if (!PRESENT) {
+            return delta;
+        }
+        Object result = invokeStatic(
+                EVENT_BRIDGE,
+                "fireDeficiencyPressure",
+                new Class<?>[] {ServerPlayer.class, String.class, float.class, int.class, int.class},
+                player, group, value, pressure, delta
+        );
+        return result instanceof Integer d ? d : delta;
+    }
+
     public static float fireNutrientModifier(ValueModifierContext ctx, float amount) {
         if (!PRESENT) {
             return amount;

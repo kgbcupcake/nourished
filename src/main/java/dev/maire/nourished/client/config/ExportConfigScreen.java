@@ -81,7 +81,7 @@ public final class ExportConfigScreen extends Screen {
             JsonObject root = NourishedImportExport.buildExportRoot(sel);
             Path file = NourishedImportExport.writeExportFile(root);
             String share = NourishedImportExport.buildShareCode(root);
-            String rel = "config/nourished/exports/" + file.getFileName();
+            String rel = "config/nourished/generated/exports/" + file.getFileName();
             ImportExportToast.show(Component.translatable("config.nourished.importExport.exportedFileToast", rel));
             mc.setScreen(new ExportResultScreen(reopenParent, rel, share));
         } catch (Exception e) {

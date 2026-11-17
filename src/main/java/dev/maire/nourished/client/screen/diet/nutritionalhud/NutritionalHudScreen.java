@@ -6,6 +6,7 @@ import dev.marie.framework.ui.Theme;
 import dev.marie.framework.ui.component.MarieComponent;
 import dev.marie.framework.ui.api.EditModeToggle;
 import dev.marie.framework.ui.api.MarieModuleSettings;
+import dev.marie.framework.ui.api.MarieStoredStyle;
 import dev.marie.framework.ui.geometry.Anchor;
 import dev.marie.framework.ui.geometry.Bounds;
 import dev.marie.framework.ui.hub.HubEntry;
@@ -24,9 +25,18 @@ import dev.maire.nourished.client.screen.diet.dynamic.modules.BalanceComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.CaloriesComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.EatMoreComponent;
 import dev.maire.nourished.client.screen.diet.dynamic.modules.RecentMealsComponent;
+import dev.maire.nourished.client.screen.diet.dynamic.options.DietOptionsPanel;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietScreenPersistence;
 import dev.maire.nourished.client.screen.diet.dynamic.persistence.DietSettings;
 import dev.maire.nourished.config.NutritionalPanelConfig;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.HomeTabRenderer;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.NutrientsBoxPane;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.BoxTabRenderer;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.DeficiencyBoxPane;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.CalorieHistoryBoxPane;
+import dev.maire.nourished.modules.activity_driven_nutrient.client.ActivityLogBoxPane;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.ScrollingBoxPane;
+import dev.maire.nourished.client.screen.diet.nutritionalhud.content.ScrollableTabPane;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.SoloIntakeBreakdownPane;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.SoloModulePane;
 import dev.maire.nourished.client.screen.diet.nutritionalhud.content.TabModuleHosts;
@@ -36,6 +46,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+
+import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
@@ -49,6 +61,8 @@ public final class NutritionalHudScreen extends Screen {
     private static final float FADE_DURATION_SEC = 0.15f;
     // HubPanel's collapsed strip is 20px tall and its window can't shrink below 140px.
     private static final int COLLAPSED_MAX_HEIGHT = 40;
+    /** Matches {@link DietOptionsPanel}'s default background opacity (204/255). */
+    private static final double EDITOR_DEFAULT_OPACITY = 204.0d / 255.0d;
 
     private final HubPanel hub = new HubPanel(
             Component.translatable("nourished.screen.diet.nutritionalhud.title"), "nourished.diet.nutritionalhud",
@@ -63,11 +77,13 @@ public final class NutritionalHudScreen extends Screen {
             .tabTextColor(() -> MarieColors.resolveColor(NourishedColors.DIET_TABS));
 
     // The dynamic screen's editor, built in the Nutritional Panel's scope so its options change this panel's boxes.
+    // Background/border go through its own "Editor" entry's Style settings (see #editorBackground/#editorBorder),
+    // same as the outer hub window below, instead of the plain theme colors every other hub used to get.
     private final HubPanel editor = DietScreenPersistence.inNutritionalPanel(() -> new HubPanel(
             Component.translatable("nourished.screen.diet.options_label"), "nourished.diet.hub",
             DietScreenPersistence.get(), DietScreen.scaleConfigEntries(),
-            () -> MarieColors.resolveColor(NourishedColors.HUB_BACKGROUND),
-            () -> MarieColors.resolveColor(NourishedColors.HUB_BORDER),
+            NutritionalHudScreen::editorBackground,
+            NutritionalHudScreen::editorBorder,
             () -> MarieColors.resolveColor(NourishedColors.HUB_TITLE),
             () -> MarieColors.resolveColor(NourishedColors.HUB_ACCENT)));
     private boolean editorOpen;
@@ -95,19 +111,35 @@ public final class NutritionalHudScreen extends Screen {
 
     private List<HubSidebarEntry> viewEntries() {
         return List.of(
-                new HubEntry("nourished.diet.hub.home", Component.translatable("nourished.screen.diet.home_label"),
-                        new ToggleGutterPane(DietHomeSections.homePage())),
+                tab(DietHomeSections.ID, "nourished.screen.diet.home_label", hosted(DietHomeSections.ID, new HomeTabRenderer())),
                 tab(CaloriesComponent.ID, "nourished.screen.diet.calories_label", hosted(CaloriesComponent.ID, new SoloModulePane(CaloriesComponent.ID))),
                 tab(BalanceComponent.ID, "nourished.screen.diet.balance_label", hosted(BalanceComponent.ID, new SoloModulePane(BalanceComponent.ID))),
                 tab(RecentMealsComponent.ID, "nourished.screen.diet.recent_label", hosted(RecentMealsComponent.ID, new SoloModulePane(RecentMealsComponent.ID))),
                 tab(EatMoreComponent.ID, "nourished.screen.diet.suggestion_label", hosted(EatMoreComponent.ID, new SoloModulePane(EatMoreComponent.ID))),
                 tab(ActiveEffectsComponent.ID, "nourished.screen.diet.effects_label", hosted(ActiveEffectsComponent.ID, new SoloModulePane(ActiveEffectsComponent.ID))),
-                tab(SoloIntakeBreakdownPane.ID, "nourished.screen.diet.intake", hosted(SoloIntakeBreakdownPane.ID, new SoloIntakeBreakdownPane()))
+                intakeTab(),
+                boxTab(new NutrientsBoxPane(), "nourished.screen.diet.nutrients_tab"),
+                boxTab(new DeficiencyBoxPane(), "nourished.screen.diet.deficiency_tab"),
+                boxTab(new CalorieHistoryBoxPane(), "nourished.screen.diet.calorie_history_tab"),
+                boxTab(new ActivityLogBoxPane(), "nourished.screen.diet.activity_log_tab")
         );
     }
 
     private static HubEntry tab(String id, String labelKey, MarieComponent content) {
         return new HubEntry(id, Component.translatable(labelKey), new ToggleGutterPane(content));
+    }
+
+    /** The Intake Breakdown tab, wrapped so its rows scroll with the mouse wheel when they overflow a short window. */
+    private HubEntry intakeTab() {
+        SoloIntakeBreakdownPane renderer = new SoloIntakeBreakdownPane();
+        MarieComponent scrollable = new ScrollableTabPane(hosted(SoloIntakeBreakdownPane.ID, renderer), renderer.scrollState());
+        return tab(SoloIntakeBreakdownPane.ID, "nourished.screen.diet.intake", scrollable);
+    }
+
+    private HubEntry boxTab(ScrollingBoxPane box, String labelKey) {
+        BoxTabRenderer renderer = new BoxTabRenderer(box);
+        MarieComponent content = renderer.wrap(hosted(box.id(), renderer), () -> editorOpen);
+        return tab(box.id(), labelKey, content);
     }
 
     @Override
@@ -161,6 +193,19 @@ public final class NutritionalHudScreen extends Screen {
         return MarieModuleSettings.styledBorder(MarieColors.resolveColor(NourishedColors.BORDER), DietScreenPersistence.get(), DietSettings.PANEL_ID);
     }
 
+    // Same pattern as #windowBackground/#windowBorder, over the "Editor" entry's own Style settings
+    // (see DietOptionsPanel#editorPanel) instead of the Nutritional Panel's — this window is the popup
+    // editor itself, not the panel it edits.
+    private static int editorBackground() {
+        int baseFill = MarieStoredStyle.applyOpacity(NourishedColors.rgb(NourishedColors.HUB_BACKGROUND),
+                DietScreenPersistence.get(), DietOptionsPanel.EDITOR_ID, EDITOR_DEFAULT_OPACITY);
+        return MarieModuleSettings.styledBackground(baseFill, DietScreenPersistence.get(), DietOptionsPanel.EDITOR_ID);
+    }
+
+    private static int editorBorder() {
+        return MarieModuleSettings.styledBorder(MarieColors.resolveColor(NourishedColors.HUB_BORDER), DietScreenPersistence.get(), DietOptionsPanel.EDITOR_ID);
+    }
+
     private void renderWindows(GuiGraphicsRenderContext context, Bounds screen, int mx, int my) {
         Bounds window = hub.panelBounds();
         if (window.height() > COLLAPSED_MAX_HEIGHT) {
@@ -169,6 +214,9 @@ public final class NutritionalHudScreen extends Screen {
         }
         hub.render(context, screen);
         if (editorOpen) {
+            Bounds editorWindow = editor.panelBounds();
+            MarieModuleSettings.drawBoxGlow(context, DietScreenPersistence.get(), DietOptionsPanel.EDITOR_ID,
+                    editorWindow.x(), editorWindow.y(), editorWindow.width(), editorWindow.height());
             editor.render(context, screen);
         }
         // Drawn last so the editor window can never cover the switch that closes it.
@@ -227,6 +275,11 @@ public final class NutritionalHudScreen extends Screen {
             while (NourishedKeys.OPEN_DIET_SCREEN.consumeClick()) {
                 // drain the queued click so ClientEvents.onClientTick doesn't reopen next tick
             }
+            return true;
+        }
+        // arrows/Tab page through the selected tab's box; Escape still closes the screen
+        if (keyCode != GLFW.GLFW_KEY_ESCAPE
+                && ((editorOpen && editor.keyPressed(keyCode, scanCode, modifiers)) || hub.keyPressed(keyCode, scanCode, modifiers))) {
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

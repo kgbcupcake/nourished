@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.effect;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -14,7 +15,6 @@ import dev.marie.framework.util.MarieJsonUtils;
 import dev.marie.framework.util.MarieResourceLoader;
 import dev.marie.framework.util.MarieValidation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Loads effect definitions from config/nourished/effects.json.
+ * Loads effect definitions from config/nourished/gameplay/effects.json.
  * Writes a default file on first run. Call {@link #load()} after
  * {@link dev.maire.nourished.core.nutrition.NutrientRegistry#load()}.
  */
@@ -164,11 +164,11 @@ public class EffectRegistry {
     }
 
     public static void load() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("effects.json");
+        Path configDir = NourishedConfigPaths.root();
+        Path file = NourishedConfigPaths.effects();
 
         try {
-            Files.createDirectories(configDir);
+            Files.createDirectories(file.getParent());
             if (!Files.exists(file)) {
                 writeDefaults(file);
                 Nourished.LOGGER.info("[EffectRegistry] Wrote default effects.json");
@@ -181,7 +181,7 @@ public class EffectRegistry {
         }
 
         try {
-            Path readmeDir = configDir.resolve("Read_Me");
+            Path readmeDir = NourishedConfigPaths.readme();
             Files.createDirectories(readmeDir);
             writeReadmeIfAbsent(readmeDir);
         } catch (IOException e) {
@@ -213,14 +213,14 @@ public class EffectRegistry {
     }
 
     /**
-     * Saves the current registry state back to config/nourished/effects.json.
+     * Saves the current registry state back to config/nourished/gameplay/effects.json.
      * Uses the same object-array shape expected by the config file.
      */
     public static void save() {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("effects.json");
+        Path configDir = NourishedConfigPaths.root();
+        Path file = NourishedConfigPaths.effects();
         try {
-            Files.createDirectories(configDir);
+            Files.createDirectories(file.getParent());
             JsonArray arr = new JsonArray();
             for (EffectDef def : INSTANCE.values()) {
                 JsonObject obj = new JsonObject();
@@ -363,12 +363,12 @@ public class EffectRegistry {
     }
 
     /**
-     * Writes the given definitions to {@code config/nourished/effects.json} and replaces the in-memory registry.
+     * Writes the given definitions to {@code config/nourished/gameplay/effects.json} and replaces the in-memory registry.
      */
     public static void saveAll(List<EffectDef> definitions) throws IOException {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("effects.json");
-        Files.createDirectories(configDir);
+        Path configDir = NourishedConfigPaths.root();
+        Path file = NourishedConfigPaths.effects();
+        Files.createDirectories(file.getParent());
         writeDefinitionsToPath(file, definitions);
         INSTANCE.runWrite(() -> {
             INSTANCE.resetUnlocked();
@@ -396,7 +396,7 @@ public class EffectRegistry {
             obj.addProperty("show_particles", def.showParticles());
             arr.add(obj);
         }
-        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "EffectRegistry");
+        MarieValidation.assertPathUnder(file, NourishedConfigPaths.root(), "EffectRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }

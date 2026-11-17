@@ -98,6 +98,7 @@ public final class ClientEvents {
         lines.add(Component.empty());
         if (isKeyHeld(NourishedKeys.SHOW_TOOLTIP_DETAILS)) {
             lines.addAll(nourishedLines);
+            lines.addAll(dev.maire.nourished.client.micro.MicroTooltip.lines(stack));
         } else {
             lines.add(Component.translatable("nourished.tooltip.holdForDetails",
                     NourishedKeys.SHOW_TOOLTIP_DETAILS.getTranslatedKeyMessage()));
@@ -193,6 +194,9 @@ public final class ClientEvents {
                 continue;
             }
             openOrToggleScaleConfig();
+        }
+        while (NourishedKeys.OPEN_SETTINGS.consumeClick()) {
+            mc.setScreen(new dev.maire.nourished.client.screen.settings.NourishedSettingsScreen());
         }
         while (NourishedKeys.OPEN_COMMAND_CENTER.consumeClick()) {
             MarieCommandCenter.openScreen();

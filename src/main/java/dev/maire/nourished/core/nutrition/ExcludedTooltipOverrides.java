@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.nutrition;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -9,7 +10,6 @@ import dev.marie.framework.tooltips.TooltipColorRegistry;
 import dev.marie.framework.tooltips.TooltipMessageRegistry;
 import dev.marie.framework.util.MarieValidation;
 import dev.maire.nourished.core.Nourished;
-import net.neoforged.fml.loading.FMLPaths;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -60,7 +60,7 @@ public final class ExcludedTooltipOverrides {
     }
 
     private static Path tooltipsDir() {
-        return FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("tooltips");
+        return NourishedConfigPaths.tooltips();
     }
 
     private static Path messagesFile() {
@@ -120,7 +120,7 @@ public final class ExcludedTooltipOverrides {
             } else {
                 byItem.remove(itemId);
             }
-            MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "ExcludedTooltipOverrides");
+            MarieValidation.assertPathUnder(file, NourishedConfigPaths.root(), "ExcludedTooltipOverrides");
             try (Writer w = Files.newBufferedWriter(file)) {
                 GSON.toJson(root, w);
             }

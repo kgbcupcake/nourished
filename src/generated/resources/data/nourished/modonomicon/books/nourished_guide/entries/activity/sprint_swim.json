@@ -1,0 +1,58 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "activity",
+  "description": "book.nourished.nourished_guide.activity.sprint_swim.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:feather"
+  },
+  "name": "book.nourished.nourished_guide.activity.sprint_swim.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.activity.sprint_swim.sprinting.text",
+      "title": "book.nourished.nourished_guide.activity.sprint_swim.sprinting.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.activity.sprint_swim.swimming.text",
+      "title": "book.nourished.nourished_guide.activity.sprint_swim.swimming.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.activity.sprint_swim.what_to_do.text",
+      "title": "book.nourished.nourished_guide.activity.sprint_swim.what_to_do.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "activity/activity",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 1,
+  "x": -3,
+  "y": 0
+}

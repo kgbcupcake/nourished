@@ -70,6 +70,9 @@ public class ModNetworking {
                 (payload, context) -> {}
         );
 
+        dev.maire.nourished.core.micro.MicroNetworking.register(registrar, (p, c) -> {}, (p, c) -> {});
+        dev.maire.nourished.core.deficiency.DeficiencyNetworking.register(registrar, (p, c) -> {});
+
     }
 
     /** Send lightweight client sync. Call on every food eat and decay tick. */
@@ -104,7 +107,7 @@ public class ModNetworking {
         PacketDistributor.sendToPlayer(player, new GutHealthSyncPayload(gut.getGutHealth(), gut.getSensitivity()));
     }
 
-    /** Send one activity effect log entry to the owning player's Activity Log HUD. */
+    /** Send one activity effect log entry to the owning player's client activity buffer. */
     public static void sendActivityLogEntry(ServerPlayer player, ActivityEffectLog.Entry entry) {
         PacketDistributor.sendToPlayer(player, new SyncActivityLogEntryPayload(
                 entry.moduleId(), entry.description(), entry.timestamp().toEpochMilli()));

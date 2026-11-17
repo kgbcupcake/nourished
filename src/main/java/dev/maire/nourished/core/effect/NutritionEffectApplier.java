@@ -5,6 +5,8 @@ import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.handler.ReloadGuardListener;
 import dev.marie.framework.tracking.TrackingData;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.deficiency.DeficiencyTracker;
+import dev.maire.nourished.core.micro.MicroAttachment;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import dev.marie.framework.util.MarieEffectUtils;
 import net.minecraft.core.Holder;
@@ -24,6 +26,8 @@ import java.util.UUID;
 public final class NutritionEffectApplier {
     private static final Set<String> warnedPlayers = new HashSet<>();
     private static final Map<UUID, Set<ResourceLocation>> NOURISHED_APPLIED_EFFECTS = new HashMap<>();
+
+    public static final String MICRO_PREFIX = "micro:";
 
     private NutritionEffectApplier() {}
 
@@ -49,22 +53,23 @@ public final class NutritionEffectApplier {
             }
 
             boolean shouldApply = switch (def.trigger()) {
-                case "below" -> data.values.getOrDefault(def.nutrient(), 0f) < def.threshold();
-                case "above" -> data.values.getOrDefault(def.nutrient(), 0f) > def.threshold();
+                case "below" -> level(player, data, def.nutrient()) < def.threshold();
+                case "above" -> level(player, data, def.nutrient()) > def.threshold();
                 case "all_above" -> {
                     if (def.nutrient().equals("all")) {
                         yield NutrientRegistry.getKeys().stream()
                                 .allMatch(k -> data.values.getOrDefault(k, 0f) > def.threshold());
                     } else {
-                        yield data.values.getOrDefault(def.nutrient(), 0f) > def.threshold();
+                        yield level(player, data, def.nutrient()) > def.threshold();
                     }
                 }
                 case "any_below" -> NutrientRegistry.getKeys().stream()
                         .anyMatch(k -> data.values.getOrDefault(k, 0f) < def.threshold());
                 case "between" -> {
-                    float v = data.values.getOrDefault(def.nutrient(), 0f);
+                    float v = level(player, data, def.nutrient());
                     yield v >= def.threshold() && v <= def.thresholdMax();
                 }
+                case "deficiency" -> DeficiencyTracker.tier(player, def.nutrient()) >= Math.max(1, (int) def.threshold());
                 default -> false;
             };
 
@@ -91,6 +96,14 @@ public final class NutritionEffectApplier {
                         effectId, first.id(), second.id());
             }
         }
+    }
+
+    /** {@code micro:<key>} reads the separate nutrient levels; anything else is a food group bar. */
+    private static float level(ServerPlayer player, TrackingData data, String key) {
+        if (key.startsWith(MICRO_PREFIX)) {
+            return MicroAttachment.level(player, key.substring(MICRO_PREFIX.length()));
+        }
+        return data.values.getOrDefault(key, 0f);
     }
 
     /** Removes every mob effect id referenced by {@link EffectRegistry} (module off or reload cleanup). */

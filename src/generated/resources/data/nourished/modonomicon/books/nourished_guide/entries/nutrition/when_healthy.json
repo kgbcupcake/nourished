@@ -1,0 +1,59 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "nutrition",
+  "description": "book.nourished.nourished_guide.nutrition.when_healthy.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:golden_apple"
+  },
+  "name": "book.nourished.nourished_guide.nutrition.when_healthy.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:golden_apple"
+      },
+      "text": "book.nourished.nourished_guide.nutrition.when_healthy.balance_bonus.text",
+      "title": "book.nourished.nourished_guide.nutrition.when_healthy.balance_bonus.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.when_healthy.why.text",
+      "title": "book.nourished.nourished_guide.nutrition.when_healthy.why.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.when_healthy.more_rewards.text",
+      "title": "book.nourished.nourished_guide.nutrition.when_healthy.more_rewards.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "nutrition/balance_score",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 1,
+  "x": -4,
+  "y": -2
+}

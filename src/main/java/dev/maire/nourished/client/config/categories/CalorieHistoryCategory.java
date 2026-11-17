@@ -4,9 +4,6 @@ import dev.maire.nourished.client.config.categories.widgets.ModuleToggleListEntr
 import dev.maire.nourished.config.NourishedClientConfig;
 import dev.maire.nourished.config.NourishedConfig;
 import dev.maire.nourished.config.NourishedLockRegistry;
-import dev.maire.nourished.client.hud.caloriehistory.CalorieHudScreen;
-import dev.marie.framework.client.config.cloth.ColorHexRowWidget;
-import dev.marie.framework.client.config.cloth.ColorPairRowGroup;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -19,8 +16,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.addReloadButtonEntries;
-import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.buildDoubleSlider;
-import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.buildFloatSlider;
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.isMultiplayer;
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.moduleToggleDescription;
 import static dev.maire.nourished.client.config.NourishedConfigSharedWidgets.moduleToggleTitle;
@@ -63,64 +58,6 @@ public final class CalorieHistoryCategory {
             );
         }
 
-        List<AbstractConfigListEntry> hudEntries = new ArrayList<>();
-        hudEntries.add(
-                eb.startBooleanToggle(Component.translatable("config.nourished.enableCalorieHistoryHud"), client.enableCalorieHistoryHud())
-                        .setDefaultValue(true)
-                        .setSaveConsumer(client::setEnableCalorieHistoryHud)
-                        .build()
-        );
-        hudEntries.add(
-                buildFloatSlider(
-                        eb,
-                        Component.translatable("config.nourished.calorieHudBackgroundOpacity"),
-                        (float) client.calorieHudBackgroundOpacity(),
-                        0.0f,
-                        1.0f,
-                        204f / 255f,
-                        client::setCalorieHudBackgroundOpacity
-                )
-        );
-        hudEntries.add(
-                buildFloatSlider(
-                        eb,
-                        Component.translatable("config.nourished.calorieHudBorderOpacity"),
-                        (float) client.calorieHudBorderOpacity(),
-                        0.0f,
-                        1.0f,
-                        1.0f,
-                        client::setCalorieHudBorderOpacity
-                )
-        );
-        hudEntries.add(
-                buildDoubleSlider(
-                        eb,
-                        Component.translatable("config.nourished.calorieHudBackgroundShade"),
-                        client.calorieHudBackgroundShade(),
-                        -1.0d,
-                        1.0d,
-                        0.0d,
-                        client::setCalorieHudBackgroundShade
-                )
-        );
-        hudEntries.add(
-                buildDoubleSlider(
-                        eb,
-                        Component.translatable("config.nourished.calorieHudBorderShade"),
-                        client.calorieHudBorderShade(),
-                        -1.0d,
-                        1.0d,
-                        0.0d,
-                        client::setCalorieHudBorderShade
-                )
-        );
-        for (ColorHexRowWidget row : ColorPairRowGroup.buildRows(
-                CalorieHudScreen.COLORS,
-                Component.translatable("config.nourished.calorieHudBackgroundColor"),
-                Component.translatable("config.nourished.calorieHudTextColor"))) {
-            hudEntries.add(row);
-        }
-        entries.add(eb.startSubCategory(Component.literal("HUD"), hudEntries).setExpanded(false).build());
 
         addReloadButtonEntries(entries, eb, false);
 

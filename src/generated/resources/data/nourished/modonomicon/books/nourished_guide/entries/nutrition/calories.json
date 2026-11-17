@@ -1,0 +1,70 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "nutrition",
+  "description": "book.nourished.nourished_guide.nutrition.calories.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:cake"
+  },
+  "name": "book.nourished.nourished_guide.nutrition.calories.name",
+  "pages": [
+    {
+      "type": "modonomicon:spotlight",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "item": {
+        "item": "minecraft:cake"
+      },
+      "text": "book.nourished.nourished_guide.nutrition.calories.calories.text",
+      "title": "book.nourished.nourished_guide.nutrition.calories.calories.title"
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.calories.daily_goal.text",
+      "title": "book.nourished.nourished_guide.nutrition.calories.daily_goal.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.calories.where_to_look.text",
+      "title": "book.nourished.nourished_guide.nutrition.calories.where_to_look.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.calories.too_few.text",
+      "title": "book.nourished.nourished_guide.nutrition.calories.too_few.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "nutrition/when_healthy",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 10,
+  "x": -5,
+  "y": 1
+}

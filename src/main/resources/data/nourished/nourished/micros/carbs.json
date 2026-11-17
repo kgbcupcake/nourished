@@ -1,0 +1,9 @@
+{
+  "display_name": "Carbs",
+  "color": "#E0B04A",
+  "decay_rate": 0.012,
+  "low_threshold": 0.2,
+  "high_threshold": 0.9,
+  "icon": "minecraft:bread",
+  "group_weights": { "grains": 1.0, "fruits": 0.5, "vegetables": 0.2 }
+}

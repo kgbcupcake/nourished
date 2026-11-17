@@ -1,0 +1,84 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "advanced",
+  "condition": {
+    "type": "modonomicon:mod_loaded",
+    "mod_id": "croptopia"
+  },
+  "description": "book.nourished.nourished_guide.advanced.croptopia.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:apple"
+  },
+  "name": "book.nourished.nourished_guide.advanced.croptopia.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.croptopia.croptopia.text",
+      "title": "book.nourished.nourished_guide.advanced.croptopia.croptopia.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.croptopia.fruits.text",
+      "title": "book.nourished.nourished_guide.advanced.croptopia.fruits.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.croptopia.vegetables.text",
+      "title": "book.nourished.nourished_guide.advanced.croptopia.vegetables.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.croptopia.proteins_and_grains.text",
+      "title": "book.nourished.nourished_guide.advanced.croptopia.proteins_and_grains.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.advanced.croptopia.rotation_advice.text",
+      "title": "book.nourished.nourished_guide.advanced.croptopia.rotation_advice.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "advanced/overview",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 10,
+  "x": -5,
+  "y": 5
+}

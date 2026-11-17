@@ -18,8 +18,8 @@ public class NourishedBookItem extends ModonomiconItem {
 
     // Order mirrors the in-book category order (NourishedGuideBook#generateCategories).
     private static final String[] CONTENTS_KEYS = {
-            "getting_started", "food_groups", "how_it_works",
-            "food_safety", "tips_and_tricks", "compat_mods", "server_owners"
+            "getting_started", "food", "nutrition", "activity",
+            "gut_health", "progression", "advanced"
     };
 
     public NourishedBookItem(Properties properties) {

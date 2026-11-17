@@ -1,0 +1,9 @@
+{
+  "display_name": "Minerals",
+  "color": "#B0BEC5",
+  "decay_rate": 0.008,
+  "low_threshold": 0.2,
+  "high_threshold": 0.9,
+  "icon": "minecraft:dried_kelp",
+  "group_weights": { "dairy": 0.6, "vegetables": 0.3, "proteins": 0.3 }
+}

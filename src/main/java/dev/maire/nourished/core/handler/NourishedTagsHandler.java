@@ -4,6 +4,7 @@ import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.api.marieapi.MarieAPIState;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.maire.nourished.core.Nourished;
+import dev.maire.nourished.core.micro.MicroDataLoader;
 import dev.maire.nourished.core.nutrition.NutrientRegistry;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 
@@ -25,6 +26,9 @@ public final class NourishedTagsHandler {
         }
         if (FeatureFlagCache.enableDebugLogging()) {
             Nourished.LOGGER.debug("Classifications registered");
+        }
+        if (event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) {
+            MicroDataLoader.reportDiagnostics();
         }
     }
 }

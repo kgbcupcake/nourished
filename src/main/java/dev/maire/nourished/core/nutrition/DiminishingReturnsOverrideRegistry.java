@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.nutrition;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -9,7 +10,6 @@ import dev.marie.framework.api.ApiStatus;
 import dev.maire.nourished.core.Nourished;
 import dev.marie.framework.registry.AbstractRegistry;
 import dev.marie.framework.util.MarieValidation;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -82,7 +82,7 @@ public final class DiminishingReturnsOverrideRegistry {
     }
 
     private static Path itemEditorDir() {
-        return FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID).resolve("item_editor");
+        return NourishedConfigPaths.itemEditor();
     }
 
     private static Path file() {
@@ -153,7 +153,7 @@ public final class DiminishingReturnsOverrideRegistry {
         for (String item : INSTANCE.keys()) {
             arr.add(item);
         }
-        MarieValidation.assertPathUnder(file, FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID), "DiminishingReturnsOverrideRegistry");
+        MarieValidation.assertPathUnder(file, NourishedConfigPaths.root(), "DiminishingReturnsOverrideRegistry");
         try (Writer w = Files.newBufferedWriter(file)) {
             GSON.toJson(arr, w);
         }

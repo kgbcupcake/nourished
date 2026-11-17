@@ -1,0 +1,69 @@
+{
+  "background_u_index": 0,
+  "background_v_index": 0,
+  "category": "nutrition",
+  "description": "book.nourished.nourished_guide.nutrition.emergency_recovery.description",
+  "hide_while_locked": false,
+  "icon": {
+    "item": "minecraft:golden_carrot"
+  },
+  "name": "book.nourished.nourished_guide.nutrition.emergency_recovery.name",
+  "pages": [
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.emergency_recovery.when_things_go_wrong.text",
+      "title": "book.nourished.nourished_guide.nutrition.emergency_recovery.when_things_go_wrong.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.emergency_recovery.quick_fix_foods.text",
+      "title": "book.nourished.nourished_guide.nutrition.emergency_recovery.quick_fix_foods.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.emergency_recovery.the_milk_trick.text",
+      "title": "book.nourished.nourished_guide.nutrition.emergency_recovery.the_milk_trick.title",
+      "use_markdown_in_title": false
+    },
+    {
+      "type": "modonomicon:text",
+      "anchor": "",
+      "condition": {
+        "type": "modonomicon:none"
+      },
+      "show_title_separator": true,
+      "text": "book.nourished.nourished_guide.nutrition.emergency_recovery.long_term.text",
+      "title": "book.nourished.nourished_guide.nutrition.emergency_recovery.long_term.title",
+      "use_markdown_in_title": false
+    }
+  ],
+  "parents": [
+    {
+      "draw_arrow": true,
+      "entry": "nutrition/deficiency",
+      "line_enabled": true,
+      "line_reversed": false
+    }
+  ],
+  "show_when_any_parent_unlocked": false,
+  "sort_number": 9,
+  "x": 5,
+  "y": 3
+}

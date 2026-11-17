@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.tagaudit;
 
+import dev.maire.nourished.config.NourishedConfigPaths;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -10,7 +11,6 @@ import dev.marie.framework.tagaudit.model.TagFixSuggestion;
 import dev.marie.framework.tagaudit.model.TagIssue;
 import dev.marie.framework.tagaudit.model.TagReport;
 import dev.marie.framework.util.MarieValidation;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -18,7 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Writes Nourished tag audit output to {@code config/nourished/tag_audit_report.json}.
+ * Writes Nourished tag audit output to {@code config/nourished/generated/tag_audit_report.json}.
  * Lives in Nourished (not MarieLib) so the command works against published MarieLib jars
  * that predate {@code TagAuditReportWriter}.
  */
@@ -30,10 +30,10 @@ public final class NourishedTagAuditReportWriter {
     private NourishedTagAuditReportWriter() {}
 
     public static Path write(TagReport report) {
-        Path configDir = FMLPaths.CONFIGDIR.get().resolve(Nourished.MODID);
-        Path file = configDir.resolve("tag_audit_report.json");
+        Path configDir = NourishedConfigPaths.root();
+        Path file = NourishedConfigPaths.tagAuditReport();
         try {
-            Files.createDirectories(configDir);
+            Files.createDirectories(file.getParent());
             MarieValidation.assertPathUnder(file, configDir, "NourishedTagAuditReportWriter.write");
 
             JsonObject root = new JsonObject();
