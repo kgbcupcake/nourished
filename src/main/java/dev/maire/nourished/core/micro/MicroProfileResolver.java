@@ -44,6 +44,7 @@ public final class MicroProfileResolver {
     private static final Map<ResourceLocation, Profile> CLIENT_CACHE = new ConcurrentHashMap<>();
     private static volatile RecipeSlot serverRecipes;
     private static volatile RecipeSlot clientRecipes;
+    private static volatile int generation;
 
     private MicroProfileResolver() {}
 
@@ -53,12 +54,19 @@ public final class MicroProfileResolver {
         // /reload keeps the same RecipeManager, so the identity check in recipesFor won't catch it
         serverRecipes = null;
         clientRecipes = null;
+        generation++;
     }
 
     /** Drops resolved profiles but keeps the recipe index; for food-group/tag edits that don't touch recipes. */
     public static void clearProfiles() {
         SERVER_CACHE.clear();
         CLIENT_CACHE.clear();
+        generation++;
+    }
+
+    /** Bumped whenever cached profiles are dropped, so anything built from them knows to rebuild. */
+    public static int generation() {
+        return generation;
     }
 
     /** Nutrient values per serving of {@code stack}; empty for non-food, excluded, or untracked items. */
@@ -214,6 +222,7 @@ public final class MicroProfileResolver {
                 serverRecipes = slot;
                 SERVER_CACHE.clear();
             }
+            generation++;
         }
         return slot.resolver();
     }
