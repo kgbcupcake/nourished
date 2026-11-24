@@ -55,6 +55,12 @@ public final class MicroProfileResolver {
         clientRecipes = null;
     }
 
+    /** Drops resolved profiles but keeps the recipe index; for food-group/tag edits that don't touch recipes. */
+    public static void clearProfiles() {
+        SERVER_CACHE.clear();
+        CLIENT_CACHE.clear();
+    }
+
     /** Nutrient values per serving of {@code stack}; empty for non-food, excluded, or untracked items. */
     public static Map<String, Float> resolve(ItemStack stack, @Nullable Level level) {
         return resolveProfile(stack, level).values();

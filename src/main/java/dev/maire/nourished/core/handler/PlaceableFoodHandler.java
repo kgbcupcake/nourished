@@ -3,6 +3,7 @@ package dev.maire.nourished.core.handler;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingAttachment;
+import dev.maire.nourished.core.deficiency.DeficiencyPenalties;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
@@ -62,8 +63,10 @@ public final class PlaceableFoodHandler {
         float saturationGain = food.getSaturationLevel() - snapshot.saturation;
         if (hungerGain <= 0 && saturationGain <= 0f) return;
 
-        NourishedFoodTriggerHandler.fireSourceTriggerAndNotifyFoodEaten(
-                player, snapshot.stack, propertiesFor(snapshot.base, hungerGain, saturationGain));
+        FoodProperties props = propertiesFor(snapshot.base, hungerGain, saturationGain);
+        NourishedFoodTriggerHandler.fireSourceTriggerAndNotifyFoodEaten(player, snapshot.stack, props);
+        // same order as item eating: nutrition sees the full bite, then the deficiency cut lands
+        DeficiencyPenalties.cutSaturation(player, saturationGain, snapshot.saturation);
     }
 
     // cake-style items have no food component, so build one from what the bite actually gave
