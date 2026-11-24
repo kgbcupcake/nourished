@@ -30,15 +30,18 @@ public final class MicroTopFoods {
 
     private static final int LIMIT = 8;
     private static MicroRegistry.Snapshot cachedFor;
+    private static int cachedGeneration = -1;
     private static Map<String, List<Entry>> cached = Map.of();
 
     private MicroTopFoods() {}
 
     public static synchronized List<Entry> top(String key) {
         MicroRegistry.Snapshot snap = MicroRegistry.forSide(true);
-        if (snap != cachedFor) {
+        if (snap != cachedFor || MicroProfileResolver.generation() != cachedGeneration) {
             cached = compute(snap);
             cachedFor = snap;
+            // read after computing so a recipe-index rebuild during compute doesn't force a second pass
+            cachedGeneration = MicroProfileResolver.generation();
         }
         return cached.getOrDefault(key, List.of());
     }

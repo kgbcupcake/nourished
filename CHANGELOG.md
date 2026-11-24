@@ -45,6 +45,8 @@
 
 ### Fixed
 
+- Food-group and tag-compatibility edits now update nutrient profiles. `MicroProfileResolver` gains `clearProfiles()` (drops resolved profiles, keeps the recipe index), called from `NourishedReloadHelper` and the context's `onCacheInvalidated` hook; before, foods kept their old group-derived nutrients until a nutrient-registry or datapack reload. Each cache drop bumps a new `MicroProfileResolver#generation()`, and `MicroTopFoods` rebuilds its Best Sources lists when it changes.
+- Placed foods (cake bites, modded pies) now take the deficiency saturation cut. `DeficiencyPenalties#cutSaturation` is split out of the item-use `Finish` handler and `PlaceableFoodHandler` calls it after firing the food trigger, using the saturation snapshot from before the bite. The cut also runs with Value-Only Application off or tracking unregistered; only the food trigger is gated on those now.
 - The Sleep Bonus never did anything: `enableSleepBonus` was checked by MariesLib's `RestCycleListener`, but Nourished never registered a `SleepBonusEvaluator`. New `core/effect/SleepBonus` grants Regeneration I for 30 s on waking when every beneficial group is at or above 50%, as the config comment describes.
 - Guide book effects were wrong: the old Effects entry, the food group entries and Tips pages described per-group bonuses (armor toughness, XP gain, max health, etc.) that don't exist. They now match the bundled defaults: Health Boost I + Regeneration I with all groups above 75%, and Weakness / Slowness / Mining Fatigue / Unluck below 25% (Dairy has none), plus each group's milestone reward. Emergency Recovery no longer claims sleeping clears debt.
 - Guide pages with a lone `%` (Multiplayer Adventure's dungeon checklist, the food group intros) rendered as "Format error"; they're escaped properly now.
@@ -77,8 +79,6 @@
 - Standalone Calorie History HUD (`CalorieHudScreen`) and Activity Log HUD (`ActivityLogHudPanel`), their C/K edit keybinds (`key.nourished.editCalorieHud`/`editActivityLogHud`), Hotkeys entries, edit-all-HUDs registrations, `calorie_hud`/`activity_log_hud` color pairs and `calorie_hud.accent`/`activity_log_hud.accent` color keys. Their 14 client config options (`enableCalorieHistoryHud`, `enableActivityLogHud`, `calorieHud*`, `activityLogHud*`) and Cloth "HUD" sub-categories are gone; old values are stripped from `nourished-client.toml` on load. Dead lang keys removed from `en_us`/`zh_cn`.
 
 ## [0.2.7-beta.4] - 2026-11-15
-
-
 ## [ 0.2.7-beta.3 ] - 2026-11-07
 
 ### Added

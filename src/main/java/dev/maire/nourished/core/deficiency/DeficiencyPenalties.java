@@ -132,17 +132,26 @@ public final class DeficiencyPenalties {
     private static void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         Float before = SATURATION_BEFORE.remove(player.getUUID());
-        DeficiencySettings.Tier t = currentTier(player);
-        if (t == null || t.saturationMultiplier() >= 1f) return;
         ItemStack stack = event.getItem();
         if (stack == null || stack.isEmpty()) return;
         FoodProperties food = stack.getFoodProperties(player);
         if (food == null) return;
+        cutSaturation(player, food.saturation(), before);
+    }
+
+    /**
+     * Takes the tier's share back out of a meal's saturation gain. {@code before} is the saturation
+     * the meal started from, or null when unknown. Placed foods (cake bites) call this directly
+     * since they never fire an item-use finish.
+     */
+    public static void cutSaturation(ServerPlayer player, float foodSaturation, Float before) {
+        DeficiencySettings.Tier t = currentTier(player);
+        if (t == null || t.saturationMultiplier() >= 1f) return;
         FoodData data = player.getFoodData();
         float now = data.getSaturationLevel();
         // vanilla already capped the gain, so only take a share of what was actually added
-        float gained = before == null ? food.saturation() : Math.max(0f, now - before);
-        float cut = Math.min(food.saturation(), gained) * (1f - t.saturationMultiplier());
+        float gained = before == null ? foodSaturation : Math.max(0f, now - before);
+        float cut = Math.min(foodSaturation, gained) * (1f - t.saturationMultiplier());
         data.setSaturation(Math.max(before == null ? 0f : before, now - cut));
     }
 

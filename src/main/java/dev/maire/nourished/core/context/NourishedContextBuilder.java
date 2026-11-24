@@ -1,5 +1,6 @@
 package dev.maire.nourished.core.context;
 
+import dev.maire.nourished.core.micro.MicroProfileResolver;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.client.config.state.MarieClientCache;
 import dev.marie.framework.config.FeatureFlagCache;
@@ -134,6 +135,7 @@ public final class NourishedContextBuilder {
                     FoodFamilyResolver.clearCache();
                     RuntimeResolver.getInstance().invalidateCache();
                     RawFoodClassifier.invalidate();
+                    MicroProfileResolver.clearProfiles();
                 })
                 .build());
     }

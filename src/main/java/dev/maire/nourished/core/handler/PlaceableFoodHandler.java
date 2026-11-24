@@ -3,6 +3,7 @@ package dev.maire.nourished.core.handler;
 import dev.marie.framework.api.ApiStatus;
 import dev.marie.framework.config.FeatureFlagCache;
 import dev.marie.framework.tracking.TrackingAttachment;
+import dev.maire.nourished.core.deficiency.DeficiencyPenalties;
 import dev.maire.nourished.core.nutrition.FoodNutritionRegistry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
@@ -20,7 +21,8 @@ import java.util.UUID;
 
 /**
  * Gives nutrition for foods eaten straight off a placed block (vanilla cake, modded pies).
- * There's no item-use event for these, so we compare hunger before and after the click.
+ * There's no item-use event for these, so we compare hunger before and after the click. Also
+ * applies the deficiency saturation cut, which item eating gets from its finish event.
  */
 @ApiStatus.Internal
 public final class PlaceableFoodHandler {
@@ -36,8 +38,6 @@ public final class PlaceableFoodHandler {
     private static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (event.getUseBlock() == TriState.FALSE) return;
-        if (!FeatureFlagCache.enableSourceApplication()) return;
-        if (!TrackingAttachment.isRegistered()) return;
 
         ItemStack blockItem = new ItemStack(event.getLevel().getBlockState(event.getPos()).getBlock().asItem());
         if (blockItem.isEmpty()) return;
@@ -62,8 +62,12 @@ public final class PlaceableFoodHandler {
         float saturationGain = food.getSaturationLevel() - snapshot.saturation;
         if (hungerGain <= 0 && saturationGain <= 0f) return;
 
-        NourishedFoodTriggerHandler.fireSourceTriggerAndNotifyFoodEaten(
-                player, snapshot.stack, propertiesFor(snapshot.base, hungerGain, saturationGain));
+        if (FeatureFlagCache.enableSourceApplication() && TrackingAttachment.isRegistered()) {
+            NourishedFoodTriggerHandler.fireSourceTriggerAndNotifyFoodEaten(
+                    player, snapshot.stack, propertiesFor(snapshot.base, hungerGain, saturationGain));
+        }
+        // runs even with tracking off, like item eating; nutrition above saw the full bite first
+        DeficiencyPenalties.cutSaturation(player, saturationGain, snapshot.saturation);
     }
 
     // cake-style items have no food component, so build one from what the bite actually gave
